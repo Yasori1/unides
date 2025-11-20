@@ -1,0 +1,179 @@
+.app-download-area {
+    background: {
+        position: center center;
+        repeat: no-repeat;
+        color: #f4f5fe;
+        size: cover;
+    };
+}
+.app-download-image {
+    text-align: center;
+}
+.app-download-content {
+    .sub-title {
+        display: inline-block;
+        background-color: var(--primaryColor1);
+        color: var(--whiteColor);
+        padding: 5px 25px 6px;
+        border-radius: 35px;
+        margin-bottom: 20px;
+        font: {
+            size: 14px;
+            weight: 600;
+            style: italic;
+        };
+    }
+    h2 {
+        margin-bottom: 14px;
+        font: {
+            size: 40px;
+            weight: 700;
+        };
+    }
+    .btn-box {
+        margin-top: 25px;
+
+        .play-store-btn {
+            display: inline-block;
+            background-color: var(--whiteColor);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+            padding: 12px 25px 12px 74px;
+            border-radius: 5px;
+            position: relative;
+            z-index: 1;
+            color: #666786;
+            font: {
+                size: 13px;
+                weight: 400;
+            };
+            span {
+                display: block;
+                color: var(--blackColor);
+                font: {
+                    size: 20px;
+                    weight: 700;
+                };
+            }
+            img {
+                position: absolute;
+                left: 25px;
+                top: 50%;
+                transform: translateY(-50%);
+            }
+            &:hover, &:focus {
+                transform: translateY(-5px);
+            }
+        }
+        .apple-store-btn {
+            margin-right: 10px;
+            display: inline-block;
+            background-color: var(--whiteColor);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+            padding: 12px 25px 12px 74px;
+            border-radius: 5px;
+            position: relative;
+            z-index: 1;
+            color: #666786;
+            font: {
+                size: 13px;
+                weight: 400;
+            };
+            span {
+                display: block;
+                color: var(--blackColor);
+                font: {
+                    size: 20px;
+                    weight: 700;
+                };
+            }
+            img {
+                position: absolute;
+                left: 25px;
+                top: 50%;
+                transform: translateY(-50%);
+            }
+            &:hover, &:focus {
+                transform: translateY(-5px);
+            }
+        }
+    }
+}
+
+/* Max width 767px */
+@media only screen and (max-width : 767px) {
+
+    .app-download-image {
+        margin-bottom: 30px;
+    }
+    .app-download-content {
+        text-align: center;
+
+        .sub-title {
+            padding: 5px 20px;
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+        h2 {
+            font-size: 28px;
+        }
+        .btn-box {
+            .apple-store-btn {
+                margin-right: 0;
+                text-align: start;
+                display: block;
+            }
+            .play-store-btn {
+                text-align: start;
+                display: block;
+                margin-top: 12px;
+            }
+        }
+    }
+
+}
+
+/* Min width 576px to Max width 767px */
+@media only screen and (min-width : 576px) and (max-width : 767px) {
+
+    .app-download-content {
+        .btn-box {
+            margin-top: 20px;
+
+            .apple-store-btn {
+                display: inline-block;
+                margin-right: 5px;
+            }
+            .play-store-btn {
+                display: inline-block;
+                margin-left: 5px;
+            }
+        }
+    }
+
+}
+
+/* Min width 768px to Max width 991px */
+@media only screen and (min-width : 768px) and (max-width : 991px) {
+
+    .app-download-content {
+        text-align: center;
+        margin-top: 30px;
+
+        .sub-title {
+            margin-bottom: 15px;
+        }
+        h2 {
+            font-size: 35px;
+        }
+    }
+
+}
+
+/* Min width 992px to Max width 1199px */
+@media only screen and (min-width : 992px) and (max-width : 1199px) {}
+
+/* Min width 1200px to Max width 1399px */
+@media only screen and (min-width: 1200px) and (max-width: 1399px) {}
+
+/* Min width 1600px */
+@media only screen and (min-width: 1600px) {}

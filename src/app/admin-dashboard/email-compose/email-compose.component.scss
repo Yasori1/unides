@@ -1,0 +1,311 @@
+.db-email-compose-content-area {
+    margin-bottom: 25px;
+    overflow: hidden;
+
+    .sidebar-left {
+        float: left;
+
+        .sidebar {
+            .sidebar-content {
+                background-color: var(--whiteColor);
+                box-shadow: 1px 5px 24px 0 rgba(68, 102, 242, 0.05);
+                padding: 25px;
+                width: 260px;
+
+                .email-compose-menu {
+                    .list-group-messages {
+                        .list-group-item {
+                            text-decoration: none;
+                            padding: {
+                                top: 0;
+                                right: 0;
+                                bottom: 0;
+                                left: 29px;
+                            };
+                            margin-bottom: 16px;
+                            background-color: var(--whiteColor);
+                            border: none !important;
+                            color: var(--blackColor);
+                            border-radius: 0 !important;
+                            font: {
+                                size: 16px;
+                                weight: 600;
+                            };
+                            i {
+                                position: absolute;
+                                left: 0;
+                                transition: var(--transition);
+                                top: 0;
+                                font-size: 22px;
+                            }
+                            &:last-child {
+                                margin-bottom: 0;
+                            }
+                            &.active {
+                                background-color: var(--whiteColor);
+                                color: var(--primaryColor1);
+                            }
+                            .badge {
+                                transition: var(--transition);
+                                margin-left: 4px;
+                                position: relative;
+                                top: -1px;
+                                padding: 4px 6px 4px 6px;
+                            }
+                            &:hover {
+                                color: var(--primaryColor1);
+
+                                i {
+                                    transform: rotateY(-180deg);
+                                    color: var(--primaryColor1);
+                                }
+                            }
+                        }
+                    }
+                    .list-group-label {
+                        letter-spacing: 1px;
+                        color: #828D99;
+                        margin: {
+                            top: 25px;
+                            bottom: 15px;
+                        };
+                        font: {
+                            size: 14px;
+                            weight: 600;
+                        };
+                    }
+                    .list-group-labels {
+                        .list-group-item {
+                            text-decoration: none;
+                            padding: {
+                                top: 0;
+                                right: 0;
+                                bottom: 0;
+                                left: 18px;
+                            };
+                            margin-bottom: 12px;
+                            background-color: var(--whiteColor);
+                            border: none !important;
+                            color: var(--blackColor);
+                            border-radius: 0 !important;
+                            font: {
+                                size: 16px;
+                                weight: 600;
+                            };
+                            &::before {
+                                width: 10px;
+                                height: 10px;
+                                border-radius: 50%;
+                                content: '';
+                                position: absolute;
+                                left: 0;
+                                top: 6px;
+                                border: 2px solid var(--primaryColor1);
+                            }
+                            &:last-child {
+                                margin-bottom: 0;
+                            }
+                            &.active {
+                                background-color: var(--whiteColor);
+                                color: var(--primaryColor1);
+                            }
+                            &:hover {
+                                color: var(--primaryColor1);
+                            }
+                            &:nth-child(2) {
+                                &::before {
+                                    border-color: #f79921;
+                                }
+                            }
+                            &:nth-child(3) {
+                                &::before {
+                                    border-color: #1ebe40;
+                                }
+                            }
+                            &:nth-child(4) {
+                                &::before {
+                                    border-color: #40fefe;
+                                }
+                            }
+                            &:nth-child(5) {
+                                &::before {
+                                    border-color: #707070;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    .content-right {
+        float: right;
+        width: calc(100% - 290px);
+
+        .email-compose-list-wrapper {
+            background-color: var(--whiteColor);
+            box-shadow: 1px 5px 24px 0 rgba(68, 102, 242, 0.05);
+            border: none;
+            border-radius: 5px;
+            padding: 25px;
+
+            h3 {
+                margin-bottom: 20px;
+                font: {
+                    size: 18px;
+                    weight: 700;
+                };
+            }
+            form {
+                .card {
+                    background-color: transparent;
+                    box-shadow: unset;
+                    border-radius: 5px;
+                    padding: 0;
+
+                    .card-header {
+                        background-color: transparent;
+                        margin-bottom: 0;
+                    }
+                }
+                .form-control {
+                    height: 42px;
+
+                    &:focus {
+                        border-color: #b1bbc4;
+                    }
+                }
+                .note-editor.note-airframe, .note-editor.note-frame {
+                    border-color: #ced4da;
+                }
+                .note-popover .popover-content>.note-btn-group, .note-toolbar>.note-btn-group {
+                    margin-top: -1px;
+                }
+                .form-group {
+                    .btn {
+                        transition: var(--transition);
+                        border-radius: 2px;
+                        box-shadow: unset !important;
+                        padding: 10px 25px 9.5px;
+                        font: {
+                            size: var(--fontSize);
+                            weight: 700;
+                        };
+                        i {
+                            position: relative;
+                            top: 1px;
+                        }
+                        &.btn-success {
+                            background-color: #3578e5;
+                            color: var(--whiteColor);
+                            border-color: #3578e5;
+    
+                            &:hover, &:focus {
+                                background-color: #3578e5;
+                                color: var(--whiteColor);
+                                border-color: #3578e5;
+                                box-shadow: 1px 5px 24px 0 rgba(102, 88, 221, 0.25) !important;
+                            }
+                        }
+                        &.btn-primary {
+                            background-color: var(--primaryColor1);
+                            color: var(--whiteColor);
+                            border-color: var(--primaryColor1);
+    
+                            &:hover, &:focus {
+                                background-color: #e33e45;
+                                color: var(--whiteColor);
+                                border-color: #e33e45;
+                                box-shadow: 1px 5px 24px 0 rgba(255, 0, 10, 0.25) !important;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/* Max width 767px */
+@media only screen and (max-width : 767px) {
+
+    .db-email-compose-content-area {
+        margin-bottom: 15px;
+
+        .sidebar-left {
+            float: unset;
+            margin-bottom: 25px;
+
+            .sidebar {
+                .sidebar-content {
+                    padding: 20px;
+                    width: auto;
+                    height: auto;
+                }
+            }
+        }
+        .content-right {
+            float: unset;
+            width: auto;
+
+            .email-compose-list-wrapper {
+                padding: 20px;
+
+                h3 {
+                    font-size: 16px;
+                }
+                form {
+                    .form-group {
+                        margin-bottom: 13px;
+
+                        .btn {
+                            padding: 9px 20px 8.5px;
+                            font-size: 14px;
+                            margin-top: 5px;
+                        }
+                    }
+                    .form-control {
+                        height: 40px;
+                        font-size: 14px;
+                    }
+                }
+            }
+        }
+    }
+
+}
+
+/* Min width 576px to Max width 767px */
+@media only screen and (min-width : 576px) and (max-width : 767px) {}
+
+/* Min width 768px to Max width 991px */
+@media only screen and (min-width : 768px) and (max-width : 991px) {
+
+    .db-email-compose-content-area {
+        .sidebar-left {
+            margin-bottom: 30px;
+            float: unset;
+
+            .sidebar {
+                .sidebar-content {
+                    width: auto;
+                    height: auto;
+                }
+            }
+        }
+        .content-right {
+            float: unset;
+            width: auto;
+        }
+    }
+
+}
+
+/* Min width 992px to Max width 1199px */
+@media only screen and (min-width : 992px) and (max-width : 1199px) {}
+
+/* Min width 1200px to Max width 1399px */
+@media only screen and (min-width: 1200px) and (max-width: 1399px) {}
+
+/* Min width 1600px */
+@media only screen and (min-width: 1600px) {}

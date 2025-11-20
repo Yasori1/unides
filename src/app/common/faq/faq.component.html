@@ -1,0 +1,277 @@
+<div class="faq-area ptb-100">
+    <div class="container">
+        <div class="tab faq-accordion-tab">
+            <ul class="tabs d-flex flex-wrap justify-content-center">
+                <li (click)="switchTab($event, 'tab1')" [ngClass]="{'active': currentTab === 'tab1'}">
+                    <i class='bx bx-flag'></i>
+                    <span>Getting Started</span>
+                </li>
+                <li (click)="switchTab($event, 'tab2')" [ngClass]="{'active': currentTab === 'tab2'}">
+                    <i class='bx bxs-badge-dollar'></i>
+                    <span>Pricing & Plans</span>
+                </li>
+                <li (click)="switchTab($event, 'tab3')" [ngClass]="{'active': currentTab === 'tab3'}">
+                    <i class='bx bx-shopping-bag'></i>
+                    <span>Sales Questions</span>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <div class="tabs-item" id="tab1" *ngIf="currentTab === 'tab1'">
+                    <div class="faq-accordion accordion">
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <button class="accordion-button" type="button" (click)="toggleSection(0)" [ngClass]="{ 'open': isSectionOpen(0) }">
+                                    What shipping methods are available? <i class='bx bx-chevron-down'></i>
+                                </button>
+                            </div>
+                            <div class="accordion-collapse" [ngClass]="{ 'open': isSectionOpen(0) }">
+                                <div class="accordion-body">
+                                    <p>
+                                        Lorem ipsum dolor sit amet conse ctetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <button class="accordion-button" type="button" (click)="toggleSection(1)" [ngClass]="{ 'open': isSectionOpen(1) }">
+                                    What are shipping times and costs? <i class='bx bx-chevron-down'></i>
+                                </button>
+                            </div>
+                            <div class="accordion-collapse" [ngClass]="{ 'open': isSectionOpen(1) }">
+                                <div class="accordion-body">
+                                    <p>
+                                        Lorem ipsum dolor sit amet conse ctetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip. Lorem ipsum dolor sit amet conse ctetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <button class="accordion-button" type="button" (click)="toggleSection(2)" [ngClass]="{ 'open': isSectionOpen(2) }">
+                                    What payment methods can I use? <i class='bx bx-chevron-down'></i>
+                                </button>
+                            </div>
+                            <div class="accordion-collapse" [ngClass]="{ 'open': isSectionOpen(2) }">
+                                <div class="accordion-body">
+                                    <ul>
+                                        <li>
+                                            Credit Card: Visa, MasterCard, Discover, American Express, JCB, Visa Electron. The total will be charged to your card when the order is shipped.
+                                        </li>
+                                        <li>
+                                            Louise features a Fast Checkout option, allowing you to securely save your credit card details so that you don't have to re-enter them for future purchases.
+                                        </li>
+                                        <li>
+                                            PayPal: Shop easily online without having to enter your credit card details on the website. Your account will be charged once the order is completed. To register for a PayPal account, visit the website paypal.com.
+                                        </li>
+                                        <li>
+                                            Credit Card: Visa, MasterCard, Discover, American Express, JCB, Visa Electron. The total will be charged to your card when the order is shipped.
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <button class="accordion-button" type="button" (click)="toggleSection(3)" [ngClass]="{ 'open': isSectionOpen(3) }">
+                                    Can I use my own domain name? <i class='bx bx-chevron-down'></i>
+                                </button>
+                            </div>
+                            <div class="accordion-collapse" [ngClass]="{ 'open': isSectionOpen(3) }">
+                                <div class="accordion-body">
+                                    <p>
+                                        Absolutely! Simply point your domain directly to your new Evel. You do not need to use a subdomain or any other temporary domain name placeholder.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <button class="accordion-button" type="button" (click)="toggleSection(4)" [ngClass]="{ 'open': isSectionOpen(4) }">
+                                    What kind of customer service do you offer? <i class='bx bx-chevron-down'></i>
+                                </button>
+                            </div>
+                            <div class="accordion-collapse" [ngClass]="{ 'open': isSectionOpen(4) }">
+                                <div class="accordion-body">
+                                    <p>
+                                        Our ecommerce consultants are here to answer your questions. In addition to FREE phone support, you can contact our consultants via email or live chat.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tabs-item" id="tab2" *ngIf="currentTab === 'tab2'">
+                    <div class="faq-accordion accordion">
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <button class="accordion-button" type="button" (click)="toggleSection(0)" [ngClass]="{ 'open': isSectionOpen(0) }">
+                                    What are shipping times and costs? <i class='bx bx-chevron-down'></i>
+                                </button>
+                            </div>
+                            <div class="accordion-collapse" [ngClass]="{ 'open': isSectionOpen(0) }">
+                                <div class="accordion-body">
+                                    <p>
+                                        Lorem ipsum dolor sit amet conse ctetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip. Lorem ipsum dolor sit amet conse ctetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <button class="accordion-button" type="button" (click)="toggleSection(1)" [ngClass]="{ 'open': isSectionOpen(1) }">
+                                    What shipping methods are available? <i class='bx bx-chevron-down'></i>
+                                </button>
+                            </div>
+                            <div class="accordion-collapse" [ngClass]="{ 'open': isSectionOpen(1) }">
+                                <div class="accordion-body">
+                                    <p>
+                                        Lorem ipsum dolor sit amet conse ctetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <button class="accordion-button" type="button" (click)="toggleSection(2)" [ngClass]="{ 'open': isSectionOpen(2) }">
+                                    What payment methods can I use? <i class='bx bx-chevron-down'></i>
+                                </button>
+                            </div>
+                            <div class="accordion-collapse" [ngClass]="{ 'open': isSectionOpen(2) }">
+                                <div class="accordion-body">
+                                    <ul>
+                                        <li>
+                                            Credit Card: Visa, MasterCard, Discover, American Express, JCB, Visa Electron. The total will be charged to your card when the order is shipped.
+                                        </li>
+                                        <li>
+                                            Louise features a Fast Checkout option, allowing you to securely save your credit card details so that you don't have to re-enter them for future purchases.
+                                        </li>
+                                        <li>
+                                            PayPal: Shop easily online without having to enter your credit card details on the website. Your account will be charged once the order is completed. To register for a PayPal account, visit the website paypal.com.
+                                        </li>
+                                        <li>
+                                            Credit Card: Visa, MasterCard, Discover, American Express, JCB, Visa Electron. The total will be charged to your card when the order is shipped.
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <button class="accordion-button" type="button" (click)="toggleSection(3)" [ngClass]="{ 'open': isSectionOpen(3) }">
+                                    What kind of customer service do you offer? <i class='bx bx-chevron-down'></i>
+                                </button>
+                            </div>
+                            <div class="accordion-collapse" [ngClass]="{ 'open': isSectionOpen(3) }">
+                                <div class="accordion-body">
+                                    <p>
+                                        Our ecommerce consultants are here to answer your questions. In addition to FREE phone support, you can contact our consultants via email or live chat.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <button class="accordion-button" type="button" (click)="toggleSection(4)" [ngClass]="{ 'open': isSectionOpen(4) }">
+                                    Can I use my own domain name? <i class='bx bx-chevron-down'></i>
+                                </button>
+                            </div>
+                            <div class="accordion-collapse" [ngClass]="{ 'open': isSectionOpen(4) }">
+                                <div class="accordion-body">
+                                    <p>
+                                        Absolutely! Simply point your domain directly to your new Evel. You do not need to use a subdomain or any other temporary domain name placeholder.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tabs-item" id="tab3" *ngIf="currentTab === 'tab3'">
+                    <div class="faq-accordion accordion">
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <button class="accordion-button" type="button" (click)="toggleSection(0)" [ngClass]="{ 'open': isSectionOpen(0) }">
+                                    Can I use my own domain name? <i class='bx bx-chevron-down'></i>
+                                </button>
+                            </div>
+                            <div class="accordion-collapse" [ngClass]="{ 'open': isSectionOpen(0) }">
+                                <div class="accordion-body">
+                                    <p>
+                                        Absolutely! Simply point your domain directly to your new Evel. You do not need to use a subdomain or any other temporary domain name placeholder.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <button class="accordion-button" type="button" (click)="toggleSection(1)" [ngClass]="{ 'open': isSectionOpen(1) }">
+                                    What kind of customer service do you offer? <i class='bx bx-chevron-down'></i>
+                                </button>
+                            </div>
+                            <div class="accordion-collapse" [ngClass]="{ 'open': isSectionOpen(1) }">
+                                <div class="accordion-body">
+                                    <p>
+                                        Our ecommerce consultants are here to answer your questions. In addition to FREE phone support, you can contact our consultants via email or live chat.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <button class="accordion-button" type="button" (click)="toggleSection(2)" [ngClass]="{ 'open': isSectionOpen(2) }">
+                                    What shipping methods are available? <i class='bx bx-chevron-down'></i>
+                                </button>
+                            </div>
+                            <div class="accordion-collapse" [ngClass]="{ 'open': isSectionOpen(2) }">
+                                <div class="accordion-body">
+                                    <p>
+                                        Lorem ipsum dolor sit amet conse ctetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <button class="accordion-button" type="button" (click)="toggleSection(3)" [ngClass]="{ 'open': isSectionOpen(3) }">
+                                    What are shipping times and costs? <i class='bx bx-chevron-down'></i>
+                                </button>
+                            </div>
+                            <div class="accordion-collapse" [ngClass]="{ 'open': isSectionOpen(3) }">
+                                <div class="accordion-body">
+                                    <p>
+                                        Lorem ipsum dolor sit amet conse ctetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip. Lorem ipsum dolor sit amet conse ctetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <button class="accordion-button" type="button" (click)="toggleSection(4)" [ngClass]="{ 'open': isSectionOpen(4) }">
+                                    What payment methods can I use? <i class='bx bx-chevron-down'></i>
+                                </button>
+                            </div>
+                            <div class="accordion-collapse" [ngClass]="{ 'open': isSectionOpen(4) }">
+                                <div class="accordion-body">
+                                    <ul>
+                                        <li>
+                                            Credit Card: Visa, MasterCard, Discover, American Express, JCB, Visa Electron. The total will be charged to your card when the order is shipped.
+                                        </li>
+                                        <li>
+                                            Louise features a Fast Checkout option, allowing you to securely save your credit card details so that you don't have to re-enter them for future purchases.
+                                        </li>
+                                        <li>
+                                            PayPal: Shop easily online without having to enter your credit card details on the website. Your account will be charged once the order is completed. To register for a PayPal account, visit the website paypal.com.
+                                        </li>
+                                        <li>
+                                            Credit Card: Visa, MasterCard, Discover, American Express, JCB, Visa Electron. The total will be charged to your card when the order is shipped.
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

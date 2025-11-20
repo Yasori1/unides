@@ -1,0 +1,14 @@
+import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { HeaderComponent } from '../../common/header/header.component';
+import { PageBannerComponent } from '../../common/page-banner/page-banner.component';
+import { FooterComponent } from '../../common/footer/footer.component';
+import { BlogSidebarComponent } from '../../common/blog-sidebar/blog-sidebar.component';
+
+@Component({
+    selector: 'app-blog-details-page2',
+    imports: [RouterLink, HeaderComponent, PageBannerComponent, BlogSidebarComponent, FooterComponent],
+    templateUrl: './blog-details-page2.component.html',
+    styleUrl: './blog-details-page2.component.scss'
+})
+export class BlogDetailsPage2Component {}

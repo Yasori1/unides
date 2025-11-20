@@ -1,0 +1,161 @@
+<div class="db-sidemenu-area" [ngClass]="{'active': isToggled}">
+    <div class="sidemenu-header">
+        <a routerLink="/dashboard" class="navbar-brand d-flex align-items-center">
+            <img src="images/dashboard/small-logo.png" alt="image">
+            <span>
+                Louise
+            </span>
+        </a>
+        <div class="burger-menu" (click)="toggle()" [ngClass]="{'active': isToggled}">
+            <span class="top-bar"></span>
+            <span class="middle-bar"></span>
+            <span class="bottom-bar"></span>
+        </div>
+    </div>
+    <div class="sidemenu-body">
+        <ng-scrollbar visibility="hover">
+            <ul class="sidemenu-nav metisMenu h-100">
+                <li class="nav-item-title">
+                    Main
+                </li>
+                <li class="nav-item">
+                    <a routerLink="/dashboard" class="nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+                        <span class="icon">
+                            <i class='bx bx-home-circle'></i>
+                        </span>
+                        <span class="menu-title">
+                            Dashboard
+                        </span>
+                    </a>
+                </li>
+                <li class="nav-item-title">
+                    Listings
+                </li>
+                <li class="nav-item">
+                    <a routerLink="/dashboard/my-listings" class="nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+                        <span class="icon">
+                            <i class='bx bx-map-alt'></i>
+                        </span>
+                        <span class="menu-title">
+                            My Listings
+                        </span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a routerLink="/dashboard/bookings" class="nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+                        <span class="icon">
+                            <i class='bx bx-calendar'></i>
+                        </span>
+                        <span class="menu-title">
+                            Bookings
+                        </span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a routerLink="/dashboard/reviews" class="nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+                        <span class="icon">
+                            <i class='bx bx-star'></i>
+                        </span>
+                        <span class="menu-title">
+                            Reviews
+                        </span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a routerLink="/dashboard/bookmarks" class="nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+                        <span class="icon">
+                            <i class='bx bxs-bookmark-star'></i>
+                        </span>
+                        <span class="menu-title">
+                            Bookmarks
+                        </span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a routerLink="/dashboard/invoices" class="nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+                        <span class="icon">
+                            <i class='bx bx-paper-plane'></i>
+                        </span>
+                        <span class="menu-title">
+                            Invoices
+                        </span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a routerLink="/dashboard/add-listing" class="nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+                        <span class="icon">
+                            <i class='bx bx-location-plus'></i>
+                        </span>
+                        <span class="menu-title">
+                            Add Listing
+                        </span>
+                    </a>
+                </li>
+                <li class="nav-item-title">
+                    Apps
+                </li>
+                <li class="nav-item">
+                    <a routerLink="/dashboard/emails" class="nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+                        <span class="icon">
+                            <i class='bx bx-envelope'></i>
+                        </span>
+                        <span class="menu-title">
+                            Emails
+                        </span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a routerLink="/dashboard/messages" class="nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+                        <span class="icon">
+                            <i class='bx bx-message'></i>
+                        </span>
+                        <span class="menu-title">
+                            Messages
+                        </span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a routerLink="/dashboard/to-do-list" class="nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+                        <span class="icon">
+                            <i class='bx bx-badge-check'></i>
+                        </span>
+                        <span class="menu-title">
+                            To Do List
+                        </span>
+                    </a>
+                </li>
+                <li class="nav-item-title">
+                    Account
+                </li>
+                <li class="nav-item">
+                    <a routerLink="/dashboard/my-profile" class="nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+                        <span class="icon">
+                            <i class='bx bx-user-pin'></i>
+                        </span>
+                        <span class="menu-title">
+                            My Profile
+                        </span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a routerLink="/" class="nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+                        <span class="icon">
+                            <i class='bx bx-log-out'></i>
+                        </span>
+                        <span class="menu-title">Logout</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a routerLink="." class="nav-link disabled" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+                        <span class="icon">
+                            <i class='bx bx-unlink'></i>
+                        </span>
+                        <span class="menu-title">
+                            Disable Menu
+                        </span>
+                    </a>
+                </li>
+            </ul>
+        </ng-scrollbar>
+    </div>
+</div>

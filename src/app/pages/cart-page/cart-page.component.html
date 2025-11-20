@@ -1,0 +1,129 @@
+<app-header />
+
+<app-page-banner
+    [pageTitle]="'Cart'"
+    [backgroundImage]="'images/page-title1.jpg'"
+/>
+
+<!-- Cart -->
+<div class="cart-area ptb-100">
+    <div class="container">
+        <div class="cart-table table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th scope="col">Product</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Unit Price</th>
+                        <th scope="col">Quantity</th>
+                        <th scope="col">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="product-thumbnail">
+                            <a routerLink="/product-details">
+                                <img src="images/products/img1.jpg" alt="item">
+                            </a>
+                        </td>
+                        <td class="product-name">
+                            <a routerLink="/product-details">Ham Salad</a>
+                        </td>
+                        <td class="product-price">
+                            <span class="unit-amount">$20.00</span>
+                        </td>
+                        <td class="product-quantity">
+                            <app-quantity-counter [initialValue]="1" />
+                        </td>
+                        <td class="product-subtotal">
+                            <span class="subtotal-amount">$20.00</span>
+                            <a routerLink="/cart" class="remove"><i class='bx bx-trash'></i></a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="product-thumbnail">
+                            <a routerLink="/product-details">
+                                <img src="images/products/img2.jpg" alt="item">
+                            </a>
+                        </td>
+                        <td class="product-name">
+                            <a routerLink="/product-details">Fresh Cappuccino</a>
+                        </td>
+                        <td class="product-price">
+                            <span class="unit-amount">$25.00</span>
+                        </td>
+                        <td class="product-quantity">
+                            <app-quantity-counter [initialValue]="7" />
+                        </td>
+                        <td class="product-subtotal">
+                            <span class="subtotal-amount">$25.00</span>
+                            <a routerLink="/cart" class="remove"><i class='bx bx-trash'></i></a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="product-thumbnail">
+                            <a routerLink="/product-details">
+                                <img src="images/products/img3.jpg" alt="item">
+                            </a>
+                        </td>
+                        <td class="product-name">
+                            <a routerLink="/product-details">Honey Cake</a>
+                        </td>
+                        <td class="product-price">
+                            <span class="unit-amount">$11.00</span>
+                        </td>
+                        <td class="product-quantity">
+                            <app-quantity-counter [initialValue]="3" />
+                        </td>
+                        <td class="product-subtotal">
+                            <span class="subtotal-amount">$11.00</span>
+                            <a routerLink="/cart" class="remove"><i class='bx bx-trash'></i></a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="product-thumbnail">
+                            <a routerLink="/product-details">
+                                <img src="images/products/img4.jpg" alt="item">
+                            </a>
+                        </td>
+                        <td class="product-name">
+                            <a routerLink="/product-details">Delicious Dish</a>
+                        </td>
+                        <td class="product-price">
+                            <span class="unit-amount">$50.00</span>
+                        </td>
+                        <td class="product-quantity">
+                            <app-quantity-counter [initialValue]="2" />
+                        </td>
+                        <td class="product-subtotal">
+                            <span class="subtotal-amount">$50.00</span>
+                            <a routerLink="/cart" class="remove"><i class='bx bx-trash'></i></a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="cart-buttons">
+            <div class="row align-items-center">
+                <div class="col-lg-7 col-sm-7 col-md-7">
+                    <a routerLink="/shop" class="optional-btn">Continue Shopping</a>
+                </div>
+                <div class="col-lg-5 col-sm-5 col-md-5 text-end">
+                    <a routerLink="/cart" class="default-btn">Update Cart</a>
+                </div>
+            </div>
+        </div>
+        <div class="cart-totals">
+            <h3>Cart Totals</h3>
+            <ul>
+                <li>Subtotal <span>$106.00</span></li>
+                <li>Shipping <span>$4.00</span></li>
+                <li>Total <span>$110.00</span></li>
+            </ul>
+            <a routerLink="/checkout" class="default-btn">Proceed to Checkout</a>
+        </div>
+    </div>
+</div>
+<!-- End Cart -->
+
+<app-footer />

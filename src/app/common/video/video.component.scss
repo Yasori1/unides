@@ -1,0 +1,126 @@
+.video-area {
+    z-index: 1;
+    position: relative;
+    background: {
+        position: center center;
+        attachment: fixed;
+        repeat: no-repeat;
+        size: cover;
+    };
+    padding: {
+        top: 150px;
+        bottom: 150px;
+    };
+}
+.video-content {
+    text-align: center;
+
+    .sub-title {
+        display: block;
+        color: var(--whiteColor);
+        text-transform: uppercase;
+        margin-bottom: 13px;
+        font: {
+            style: italic;
+            weight: 600;
+            size: 14px;
+        };
+    }
+    h2 {
+        color: var(--whiteColor);
+        margin: {
+            left: auto;
+            right: auto;
+            bottom: 0;
+        };
+        font: {
+            size: 40px;
+            weight: 700;
+        };
+    }
+    .video-btn {
+        display: inline-block;
+        width: 80px;
+        height: 80px;
+        font-size: 50px;
+        line-height: 85px;
+        background-color: var(--primaryColor1);
+        border-radius: 50%;
+        color: var(--whiteColor);
+        margin-top: 50px;
+        position: relative;
+        z-index: 1;
+        transition: var(--transition);
+
+        &::after, &::before {
+            content: '';
+            display: block;
+            position: absolute;
+            top: 0;
+            right: 0;
+            z-index: -1;
+            bottom: 0;
+            left: 0;
+            transition: var(--transition);
+            border-radius: 50%;
+            border: 1px solid var(--primaryColor1);
+        }
+        &::before {
+            animation: ripple 2s linear infinite;
+        }
+        &::after {
+            animation: ripple 2s linear 1s infinite;
+        }
+        &:hover {
+            color: var(--primaryColor1);
+            background-color: var(--whiteColor);
+
+            &::before, &::after {
+                border-color: var(--whiteColor);
+            }
+        }
+    }
+}
+
+/* Max width 767px */
+@media only screen and (max-width : 767px) {
+
+    .video-content {
+        .sub-title {
+            font-size: 13.5px;
+        }
+        h2 {
+            font-size: 30px;
+        }
+        .video-btn {
+            width: 65px;
+            height: 65px;
+            font-size: 50px;
+            line-height: 71px;
+        }
+    }
+
+}
+
+/* Min width 576px to Max width 767px */
+@media only screen and (min-width : 576px) and (max-width : 767px) {}
+
+/* Min width 768px to Max width 991px */
+@media only screen and (min-width : 768px) and (max-width : 991px) {
+
+    .video-content {
+        h2 {
+            font-size: 35px;
+        }
+    }
+
+}
+
+/* Min width 992px to Max width 1199px */
+@media only screen and (min-width : 992px) and (max-width : 1199px) {}
+
+/* Min width 1200px to Max width 1399px */
+@media only screen and (min-width: 1200px) and (max-width: 1399px) {}
+
+/* Min width 1600px */
+@media only screen and (min-width: 1600px) {}

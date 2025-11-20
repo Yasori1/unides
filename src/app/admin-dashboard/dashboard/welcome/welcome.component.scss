@@ -1,0 +1,71 @@
+.db-welcome-area {
+    background-color: var(--whiteColor);
+    margin-bottom: 25px;
+    border-radius: 5px;
+    padding-left: 25px;
+    
+    .welcome-content {
+        h1 {
+            font: {
+                size: 30px;
+                weight: 700;
+            };
+        }
+    }
+    .welcome-img {
+        text-align: end;
+        padding-top: 20px;
+    }
+}
+
+/* Max width 767px */
+@media only screen and (max-width : 767px) {
+
+    .db-welcome-area {
+        margin-bottom: 15px;
+        padding: {
+            left: 20px;
+            top: 20px;
+        };
+        .welcome-content {
+            h1 {
+                font-size: 18px;
+            }
+        }
+        .welcome-img {
+            padding-top: 15px;
+        }
+    }
+
+}
+
+/* Min width 576px to Max width 767px */
+@media only screen and (min-width : 576px) and (max-width : 767px) {}
+
+/* Min width 768px to Max width 991px */
+@media only screen and (min-width : 768px) and (max-width : 991px) {
+
+    .db-welcome-area {
+        padding-top: 25px;
+    }
+
+}
+
+/* Min width 992px to Max width 1199px */
+@media only screen and (min-width : 992px) and (max-width : 1199px) {}
+
+/* Min width 1200px to Max width 1399px */
+@media only screen and (min-width: 1200px) and (max-width: 1399px) {
+
+    .db-welcome-area {
+        .welcome-content {
+            h1 {
+                font-size: 28px;
+            }
+        }
+    }
+
+}
+
+/* Min width 1600px */
+@media only screen and (min-width: 1600px) {}

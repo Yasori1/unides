@@ -1,0 +1,111 @@
+<header class="db-header-area">
+    <div class="d-md-flex align-items-center justify-content-between">
+        <ul class="left-side d-flex align-items-center m-0 list-unstyled">
+            <li class="d-inline-block d-xl-none">
+                <div class="burger-menu" (click)="toggle()" [ngClass]="{'active': isToggled}">
+                    <span class="top-bar"></span>
+                    <span class="middle-bar"></span>
+                    <span class="bottom-bar"></span>
+                </div>
+            </li>
+            <li class="d-inline-block">
+                <a routerLink="/dashboard/emails" title="Emails">
+                    <i class="bx bx-envelope"></i>
+                </a>
+            </li>
+            <li class="d-inline-block">
+                <a routerLink="/dashboard/message" title="Messages">
+                    <i class='bx bx-message'></i>
+                </a>
+            </li>
+            <li class="d-inline-block">
+                <a routerLink="." title="Calendar">
+                    <i class='bx bx-calendar'></i>
+                </a>
+            </li>
+            <li class="d-inline-block">
+                <a routerLink="/dashboard/to-do-list" title="Todo List">
+                    <i class='bx bx-edit'></i>
+                </a>
+            </li>
+        </ul>
+        <ul class="right-side d-flex align-items-center justify-content-end mb-0 list-unstyled p-0">
+            <li>
+                <form class="search-box">
+                    <label><i class='bx bx-search'></i></label>
+                    <input type="text" class="form-control" placeholder="Search here...">
+                </form>
+            </li>
+            <li>
+                <button class="message-btn p-0 border-0 bg-transparent position-relative" type="button">
+                    <i class='bx bx-envelope'></i>
+                    <span class="db-badge">4</span>
+                </button>
+            </li>
+            <li>
+                <button class="notifications-btn p-0 border-0 bg-transparent position-relative" type="button">
+                    <i class='bx bx-bell'></i>
+                    <span class="db-badge">5</span>
+                </button>
+            </li>
+            <li class="position-relative profile-menu-dropdown">
+                <button
+                    class="profile-btn border-0 bg-transparent"
+                    (click)="toggleProfileMenu()"
+                    type="button"
+                >
+                    <span class="name">
+                        Hi! Andro
+                    </span>
+                    <img src="images/dashboard/user1.jpg" class="rounded-circle" alt="image">
+                </button>
+                <div
+                    class="profile-menu"
+                    *ngIf="isProfileMenuOpen"
+                >
+                    <div class="pm-header text-center">
+                        <img src="images/dashboard/user1.jpg" class="rounded-circle" alt="image">
+                        <span class="name">
+                            Andro Smith
+                        </span>
+                        <p class="mb-3 email">
+                            hello&#64;androsmith.com
+                        </p>
+                    </div>
+                    <ul class="pm-body mb-0 p-0 list-unstyled">
+                        <li>
+                            <a routerLink="/dashboard/my-profile">
+                                <i class='bx bx-user'></i>
+                                <span>Profile</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a routerLink="/dashboard/messages">
+                                <i class='bx bx-envelope'></i>
+                                <span>My Inbox</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a routerLink="/dashboard/my-profile">
+                                <i class='bx bx-edit-alt'></i>
+                                <span>Edit Profile</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a routerLink="/dashboard/my-profile">
+                                <i class='bx bx-cog'></i>
+                                <span>Settings</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a routerLink="/">
+                                <i class='bx bx-log-out'></i>
+                                <span>Logout</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+        </ul>
+    </div>
+</header>

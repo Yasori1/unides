@@ -1,0 +1,76 @@
+<div class="home-area position-relative">
+    <div class="home-slides">
+        <owl-carousel-o [options]="homeSlides">
+            <ng-template carouselSlide>
+                <div
+                    class="hero-banner"
+                    style="background-image: url(images/main-banner2.jpg);"
+                >
+                </div>
+            </ng-template>
+            <ng-template carouselSlide>
+                <div
+                    class="hero-banner"
+                    style="background-image: url(images/main-banner3.jpg);"
+                >
+                </div>
+            </ng-template>
+            <ng-template carouselSlide>
+                <div
+                    class="hero-banner"
+                    style="background-image: url(images/main-banner4.jpg);"
+                >
+                </div>
+            </ng-template>
+        </owl-carousel-o>
+    </div>
+    <div class="d-table">
+        <div class="d-table-cell">
+            <div class="container">
+                <div class="main-banner-content">
+                    <h1>
+                        <span>Discover</span> Your Amazing City
+                    </h1>
+                    <div class="main-search-wrap">
+                        <form>
+                            <div class="row">
+                                <div class="col-lg-4 col-md-12">
+                                    <div class="form-group">
+                                        <label><i class='bx bxs-keyboard'></i></label>
+                                        <input type="text" placeholder="Whar are you looking for?">
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-md-6">
+                                    <div class="form-group">
+                                        <label><a routerLink="."><i class='bx bx-current-location'></i></a></label>
+                                        <input type="text" placeholder="Location">
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-md-6">
+                                    <div class="form-group">
+                                        <label><i class='bx bx-slider'></i></label>
+                                        <select class="form-select shadow-none border-0">
+                                            <option>All Categories</option>
+                                            <option>Shops</option>
+                                            <option>Hotels</option>
+                                            <option>Restaurants</option>
+                                            <option>Fitness</option>
+                                            <option>Events</option>
+                                            <option>Services</option>
+                                            <option>Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="main-search-btn">
+                                <button type="submit">
+                                    Search <i class='bx bx-search-alt'></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

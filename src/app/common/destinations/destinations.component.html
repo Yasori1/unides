@@ -1,0 +1,173 @@
+<!-- Default -->
+<div
+    class="destinations-area pb-100"
+    [ngClass]="{'d-none': router.url === '/index-2'}"
+>
+    <div class="container">
+        <div class="section-title">
+            <span class="sub-title">Browse</span>
+            <h2>Popular Destinations</h2>
+        </div>
+        <div class="row align-items-center">
+            <div class="col-lg-4 col-sm-12 col-md-12">
+                <div class="single-destinations-box">
+                    <img src="images/destinations/img1.jpg" alt="image">
+                    <div class="content">
+                        <h3>New York</h3>
+                        <div class="rating">
+                            <i class='bx bxs-star'></i>
+                            <i class='bx bxs-star'></i>
+                            <i class='bx bxs-star'></i>
+                            <i class='bx bxs-star'></i>
+                            <i class='bx bxs-star'></i>
+                        </div>
+                    </div>
+                    <span class="listing-count">125 Listings</span>
+                    <a routerLink="/listings" class="link-btn"></a>
+                </div>
+            </div>
+            <div class="col-lg-8 col-sm-12 col-md-12">
+                <div class="single-destinations-box">
+                    <img src="images/destinations/img2.jpg" alt="image">
+                    <div class="content">
+                        <h3>Paris</h3>
+                        <div class="rating">
+                            <i class='bx bxs-star'></i>
+                            <i class='bx bxs-star'></i>
+                            <i class='bx bxs-star'></i>
+                            <i class='bx bxs-star'></i>
+                            <i class='bx bxs-star'></i>
+                        </div>
+                    </div>
+                    <span class="listing-count">50 Listings</span>
+                    <a routerLink="/listings" class="link-btn"></a>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6 col-sm-12 col-md-6">
+                        <div class="single-destinations-box">
+                            <img src="images/destinations/img3.jpg" alt="image">
+                            <div class="content">
+                                <h3>Moscow</h3>
+                                <div class="rating">
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                </div>
+                            </div>
+                            <span class="listing-count">15 Listings</span>
+                            <a routerLink="/listings" class="link-btn"></a>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-sm-12 col-md-6">
+                        <div class="single-destinations-box">
+                            <img src="images/destinations/img4.jpg" alt="image">
+                            <div class="content">
+                                <h3>London</h3>
+                                <div class="rating">
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                </div>
+                            </div>
+                            <span class="listing-count">78 Listings</span>
+                            <a routerLink="/listings" class="link-btn"></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="destinations-btn-box">
+            <a routerLink="/listings" class="default-btn">View All Destinations</a>
+        </div>
+    </div>
+</div>
+
+<!-- Only for Home Demo - 2 -->
+<div
+    class="destinations-area pb-70"
+    *ngIf="router.url === '/index-2'"
+>
+    <div class="container">
+        <div class="section-title text-start">
+            <span class="sub-title">Browse</span>
+            <h2>Popular Destinations</h2>
+            <a routerLink="/listings-2" class="section-title-btn">See All <i class='bx bx-chevrons-right'></i></a>
+        </div>
+        <div class="row align-items-center">
+            <div class="col-lg-4 col-sm-12 col-md-12">
+                <div class="single-destinations-box">
+                    <img src="images/destinations/img1.jpg" alt="image">
+                    <div class="content">
+                        <h3>New York</h3>
+                        <div class="rating">
+                            <i class='bx bxs-star'></i>
+                            <i class='bx bxs-star'></i>
+                            <i class='bx bxs-star'></i>
+                            <i class='bx bxs-star'></i>
+                            <i class='bx bxs-star'></i>
+                        </div>
+                    </div>
+                    <span class="listing-count">125 Listings</span>
+                    <a routerLink="/listings-2" class="link-btn"></a>
+                </div>
+            </div>
+            <div class="col-lg-8 col-sm-12 col-md-12">
+                <div class="single-destinations-box">
+                    <img src="images/destinations/img2.jpg" alt="image">
+                    <div class="content">
+                        <h3>Paris</h3>
+                        <div class="rating">
+                            <i class='bx bxs-star'></i>
+                            <i class='bx bxs-star'></i>
+                            <i class='bx bxs-star'></i>
+                            <i class='bx bxs-star'></i>
+                            <i class='bx bxs-star'></i>
+                        </div>
+                    </div>
+                    <span class="listing-count">50 Listings</span>
+                    <a routerLink="/listings-2" class="link-btn"></a>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6 col-sm-12 col-md-6">
+                        <div class="single-destinations-box">
+                            <img src="images/destinations/img3.jpg" alt="image">
+                            <div class="content">
+                                <h3>Moscow</h3>
+                                <div class="rating">
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                </div>
+                            </div>
+                            <span class="listing-count">15 Listings</span>
+                            <a routerLink="/listings-2" class="link-btn"></a>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-sm-12 col-md-6">
+                        <div class="single-destinations-box">
+                            <img src="images/destinations/img4.jpg" alt="image">
+                            <div class="content">
+                                <h3>London</h3>
+                                <div class="rating">
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                </div>
+                            </div>
+                            <span class="listing-count">78 Listings</span>
+                            <a routerLink="/listings-2" class="link-btn"></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

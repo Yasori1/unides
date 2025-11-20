@@ -1,0 +1,49 @@
+.partner-area {
+    background-color: #f4f4f4;
+}
+.partner-item {
+    background-color: var(--whiteColor);
+    border-right: 1px solid #eeeeee;
+    text-align: center;
+    display: block;
+    padding: 20px;
+
+    img {
+        opacity: 0.5;
+        width: auto !important;
+        transition: var(--transition);
+        display: inline-block !important;
+    }
+    &:hover {
+        img {
+            opacity: 1;
+        }
+    }
+    &:nth-child(2) {
+        display: none;
+    }
+}
+
+/* Max width 767px */
+@media only screen and (max-width : 767px) {
+
+    .partner-item {
+        padding: 15px;
+    }
+
+}
+
+/* Min width 576px to Max width 767px */
+@media only screen and (min-width : 576px) and (max-width : 767px) {}
+
+/* Min width 768px to Max width 991px */
+@media only screen and (min-width : 768px) and (max-width : 991px) {}
+
+/* Min width 992px to Max width 1199px */
+@media only screen and (min-width : 992px) and (max-width : 1199px) {}
+
+/* Min width 1200px to Max width 1399px */
+@media only screen and (min-width: 1200px) and (max-width: 1399px) {}
+
+/* Min width 1600px */
+@media only screen and (min-width: 1600px) {}

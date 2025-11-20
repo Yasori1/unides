@@ -1,0 +1,183 @@
+.contact-info {
+    h3 {
+        margin-bottom: 15px;
+        font: {
+            size: 23px;
+            weight: 700;
+        };
+    }
+    p {
+        a {
+            display: inline;
+            font-weight: 500;
+        }
+    }
+    .contact-list {
+        padding-left: 0;
+        margin-bottom: 25px;
+        list-style-type: none;
+
+        li {
+            margin-bottom: 12px;
+            position: relative;
+            padding-left: 25px;
+
+            i {
+                position: absolute;
+                left: 0;
+                top: 2px;
+                color: var(--primaryColor1);
+                font-size: 20px;
+            }
+            a {
+                display: inline-block;
+                font-weight: 600;
+                position: relative;
+                
+                &:hover {
+                    &::before {
+                        width: 100%;
+                    }
+                }
+                &::before {
+                    content: '';
+                    position: absolute;
+                    left: 0;
+                    bottom: 0;
+                    width: 0;
+                    height: 1px;
+                    transition: var(--transition);
+                    background-color: var(--primaryColor1);
+                }
+            }
+            &:last-child {
+                margin-bottom: 0;
+            }
+        }
+    }
+    .opening-hours {
+        padding-left: 0;
+        margin-bottom: 25px;
+        list-style-type: none;
+
+        li {
+            margin-bottom: 10px;
+            
+            &:last-child {
+                margin-bottom: 0;
+            }
+        }
+    }
+    .social {
+        padding-left: 0;
+        list-style-type: none;
+        margin: {
+            bottom: 0;
+        };
+        li {
+            display: inline-block;
+            margin-right: 5px;
+
+            &:last-child {
+                margin-right: 0;
+            }
+            a {
+                width: 30px;
+                height: 30px;
+                text-align: center;
+                display: block;
+                color: var(--primaryColor1);
+                background-color: #f4f4f4;
+                font-size: 18px;
+                position: relative;
+                border-radius: 2px;
+
+                i {
+                    position: absolute;
+                    left: 0;
+                    top: 50%;
+                    right: 0;
+                    transform: translateY(-49%);
+                }
+                &:hover {
+                    background-color: var(--primaryColor1);
+                    color: var(--whiteColor);
+                }
+            }
+        }
+    }
+}
+.contact-form {
+    h3 {
+        margin-bottom: 15px;
+        font: {
+            size: 23px;
+            weight: 700;
+        };
+    }
+    form {
+        .form-group {
+            label {
+                display: block;
+                margin-bottom: 10px;
+                text-transform: uppercase;
+                font: {
+                    size: 14px;
+                    weight: 600;
+                };
+                span {
+                    color: red;
+                }
+            }
+        }
+    }
+}
+#map {
+    iframe {
+        width: 100%;
+        border: none;
+        height: 500px;
+        margin-bottom: -8px;
+    }
+}
+
+/* Max width 767px */
+@media only screen and (max-width : 767px) {
+
+    .contact-info {
+        h3 {
+            margin-bottom: 13px;
+            font-size: 19px;
+        }
+    }
+    .contact-form {
+        margin-top: 30px;
+
+        h3 {
+            margin-bottom: 13px;
+            font-size: 19px;
+        }
+    }
+
+}
+
+/* Min width 576px to Max width 767px */
+@media only screen and (min-width : 576px) and (max-width : 767px) {}
+
+/* Min width 768px to Max width 991px */
+@media only screen and (min-width : 768px) and (max-width : 991px) {
+
+    .contact-info {
+        margin-bottom: 30px;
+    }
+
+}
+
+/* Min width 992px to Max width 1199px */
+@media only screen and (min-width : 992px) and (max-width : 1199px) {}
+
+/* Min width 1200px to Max width 1399px */
+@media only screen and (min-width: 1200px) and (max-width: 1399px) {}
+
+/* Min width 1600px */
+@media only screen and (min-width: 1600px) {}

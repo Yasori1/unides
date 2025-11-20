@@ -1,0 +1,213 @@
+.my-profile-box {
+    background-color: var(--whiteColor);
+    box-shadow: 1px 5px 24px 0 rgba(68, 102, 242, 0.05);
+    border-radius: 5px;
+    padding: 30px 30px 15px;
+    margin-bottom: 25px;
+
+    h3 {
+        margin-bottom: 25px;
+        border-bottom: 1px solid #eeeeee;
+        padding-bottom: 5px;
+        position: relative;
+        font: {
+            size: 20px;
+            weight: 700;
+        };
+        &::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -1px;
+            width: 50px;
+            height: 1px;
+            background-color: var(--primaryColor1);
+        }
+    }
+    form {
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+
+            label {
+                display: block;
+                margin-bottom: 8px;
+                color: var(--blackColor);
+            }
+            .form-control {
+                height: 46px;
+                background: #f9f9f9;
+                transition: var(--transition);
+                border-radius: 5px;
+                border: 1px solid #e5e7f2;
+                color: #7d93b2;
+                font: {
+                    weight: 400;
+                    size: var(--fontSize);
+                };
+                padding: {
+                    top: 0;
+                    bottom: 0;
+                    right: 15px;
+                    left: 15px;
+                };
+                &::placeholder {
+                    transition: var(--transition);
+                    color: #7d93b2;
+                }
+                &:focus {
+                    border-color: var(--primaryColor1);
+
+                    &::placeholder {
+                        color: transparent;
+                    }
+                }
+            }
+            textarea.form-control {
+                padding-top: 15px;
+                height: auto;
+            }
+        }
+        button {
+            display: block;
+            width: 100%;
+            background-color: var(--primaryColor1);
+            color: var(--whiteColor);
+            padding: 12.5px 30px;
+            box-shadow: 0 4px 6px rgba(50,50,93,.11), 0 1px 3px rgba(0,0,0,.08);
+            border-radius: 5px;
+            transition: var(--transition);
+            border: none;
+            font: {
+                size: var(--fontSize);
+                weight: 700;
+            };
+            &:hover {
+                background-color: #3b99ca;
+                color: var(--whiteColor);
+            }
+        }
+        h3 {
+            margin-top: 15px;
+        }
+    }
+    .profile-box {
+        img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+        }
+        .btn-box {
+            margin-left: 20px;
+
+            .delete-btn {
+                display: inline-block;
+                background-color: #fbe7e7;
+                color: var(--blackColor);
+                padding: 10px 25px 9px;
+                border-radius: 5px;
+                text-decoration: none;
+                transition: var(--transition);
+                font: {
+                    size: var(--fontSize);
+                    weight: 600;
+                };
+                &:hover {
+                    background-color: red;
+                    color: var(--whiteColor);
+                }
+            }
+            .file-upload {
+                display: inline-block;
+                margin-right: 15px;
+
+                .inputfile {
+                    width: 0.1px;
+                    height: 0.1px;
+                    opacity: 0;
+                    overflow: hidden;
+                    position: absolute;
+                    z-index: -1;
+                }
+                .inputfile + label {
+                    color: var(--whiteColor);
+                    background-color: var(--primaryColor1);
+                    display: inline-block;
+                    margin-bottom: 0;
+                    transition: var(--transition);
+                    padding: 10px 25px 9px;
+                    border-radius: 5px;
+                    font: {
+                        size: var(--fontSize);
+                        weight: 600;
+                    };
+                }
+                .inputfile:focus + label, .inputfile + label:hover {
+                    background-color: #3b99ca;
+                    color: var(--whiteColor);
+                }
+                .inputfile + label {
+                    cursor: pointer;
+                }
+            }
+        }
+    }
+}
+
+
+/* Max width 767px */
+@media only screen and (max-width : 767px) {
+
+    .my-profile-box {
+        padding: 20px 20px 0;
+        margin-bottom: 15px;
+
+        h3 {
+            font-size: 18px;
+        }
+        .profile-box {
+            .btn-box {
+                .file-upload {
+                    display: block;
+                    margin-right: 0;
+                    text-align: center;
+
+                    .inputfile + label {
+                        padding: 10px 15px;
+                        font-size: 14px;
+                    }
+                }
+                .delete-btn {
+                    display: block;
+                    padding: 10px 20px;
+                    text-align: center;
+                    font-size: 14px;
+                    margin-top: 15px;
+                }
+            }
+        }
+        form {
+            .form-group {
+                .form-control {
+                    font-size: 13.5px;
+                }
+            }
+        }
+    }
+
+}
+
+/* Min width 576px to Max width 767px */
+@media only screen and (min-width : 576px) and (max-width : 767px) {}
+
+/* Min width 768px to Max width 991px */
+@media only screen and (min-width : 768px) and (max-width : 991px) {}
+
+/* Min width 992px to Max width 1199px */
+@media only screen and (min-width : 992px) and (max-width : 1199px) {}
+
+/* Min width 1200px to Max width 1399px */
+@media only screen and (min-width: 1200px) and (max-width: 1399px) {}
+
+/* Min width 1600px */
+@media only screen and (min-width: 1600px) {}

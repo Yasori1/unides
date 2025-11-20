@@ -1,0 +1,38 @@
+<div
+    class="video-area ptb-100"
+    style="background-image: url(images/video-bg.jpg);"
+>
+    <div class="container">
+        <div class="video-content">
+            <span class="sub-title">Watch Video</span>
+            <h2>Get Ready To Start Your Exciting Journey</h2>
+            <button class="video-btn popup-youtube border-0 p-0" (click)="openPopup()">
+                <i class='bx bx-play'></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Video Popup -->
+<div
+    class="mfp-wrap mfp-close-btn-in mfp-auto-cursor mfp-fade mfp-ready"
+    *ngIf="isOpen"
+    tabindex="-1"
+>
+    <div class="mfp-container mfp-iframe-holder">
+        <div class="mfp-content">
+            <div class="mfp-iframe-scaler">
+                <button
+                    (click)="closePopup()"
+                    title="Close (Esc)"
+                    type="button"
+                    class="mfp-close"
+                >
+                    ×
+                </button>
+                <iframe src="https://www.youtube.com/embed/u31qwQUeGuM" title="Placeholder video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="mfp-bg mfp-fade mfp-ready" *ngIf="isOpen"></div>

@@ -1,0 +1,117 @@
+<!-- Breadcrumb -->
+<div class="db-breadcrumb-area">
+    <h1>
+        Email Compose
+    </h1>
+    <ol class="breadcrumb">
+        <li class="item">
+            <a routerLink="/dashboard">
+                <i class='bx bx-home-alt'></i>
+            </a>
+        </li>
+        <li class="item">
+            Dashboard
+        </li>
+        <li class="item">
+            Emails
+        </li>
+        <li class="item">
+            Email Compose
+        </li>
+    </ol>
+</div>
+
+<!-- Email Compose -->
+<div class="db-email-compose-content-area">
+    <div class="sidebar-left">
+        <div class="sidebar">
+            <div class="sidebar-content d-flex email-compose-sidebar">
+                <div class="email-compose-menu">
+                    <div class="list-group list-group-messages">
+                        <a routerLink="." class="list-group-item active">
+                            <i class='bx bx-envelope'></i>
+                            Inbox
+                            <span class="badge badge-success d-inline-block">5</span>
+                        </a>
+                        <a routerLink="." class="list-group-item">
+                            <i class='bx bx-paper-plane'></i>
+                            Sent
+                        </a>
+                        <a routerLink="." class="list-group-item">
+                            <i class='bx bx-edit'></i>
+                            Drafts
+                        </a>
+                        <a routerLink="." class="list-group-item">
+                            <i class='bx bx-star'></i>
+                            Starred
+                            <span class="badge badge-primary d-inline-block">3</span>
+                        </a>
+                        <a routerLink="." class="list-group-item">
+                            <i class='bx bxs-time-five'></i>
+                            Snoozed
+                        </a>
+                        <a routerLink="." class="list-group-item">
+                            <i class='bx bx-info-square'></i>
+                            Spam
+                        </a>
+                        <a routerLink="." class="list-group-item">
+                            <i class='bx bx-trash'></i>
+                            Trash
+                            <span class="badge badge-danger d-inline-block">8</span>
+                        </a>
+                    </div>
+                    <label class="d-block list-group-label text-uppercase">Labels</label>
+                    <div class="list-group list-group-labels">
+                        <a routerLink="." class="list-group-item">
+                            Categories
+                        </a>
+                        <a routerLink="." class="list-group-item">
+                            Social
+                        </a>
+                        <a routerLink="." class="list-group-item">
+                            Updates
+                        </a>
+                        <a routerLink="." class="list-group-item">
+                            Forums
+                        </a>
+                        <a routerLink="." class="list-group-item">
+                            Promotions
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="content-right">
+        <div class="email-compose-area">
+            <div class="email-compose-list-wrapper">
+                <h3>New Message</h3>
+                <form>
+                    <div class="form-group mb-3">
+                        <input type="email" class="form-control" placeholder="To">
+                    </div>
+                    <div class="form-group mb-3">
+                        <input type="text" class="form-control" placeholder="Subject">
+                    </div>
+                    <div class="form-group mb-3">
+                        <input type="email" class="form-control" placeholder="CC">
+                    </div>
+                    <div class="form-group mb-3">
+                        <input type="email" class="form-control" placeholder="BCC">
+                    </div>
+                    <div class="NgxEditor__Wrapper mb-3">
+                        <ng-container *ngIf="editor">
+                            <ngx-editor-menu [editor]="editor" [toolbar]="toolbar"></ngx-editor-menu>
+                            <ngx-editor [editor]="editor"></ngx-editor>
+                        </ng-container>
+                    </div>
+                    <div class="form-group mb-0 text-end mt-4">
+                        <button type="button" class="btn btn-success me-1">Save <i class='bx bx-save'></i></button>
+                        <button type="button" class="btn btn-success me-1">Trash <i class='bx bx-trash'></i></button>
+                        <button type="submit" class="btn btn-primary">Send <i class='bx bx-send'></i></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

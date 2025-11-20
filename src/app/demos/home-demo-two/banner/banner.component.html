@@ -1,0 +1,28 @@
+<div
+    class="main-banner-wrapper"
+    style="background-image: url(images/banner-bg1.jpg);"
+>
+    <div class="container">
+        <div class="banner-wrapper-content">
+            <h1>
+                Search local directories and 
+                <ngx-typed-writer
+                    [strings]="['Restaurants', 'Hotels', 'Shops', 'Fitness', 'Shopping']"
+                    [cursorChar]="'|'"
+                    [showCursor]="true"
+                    [backSpeed]="30"
+                    [typeSpeed]="30"
+                /> here
+            </h1>
+            <p>
+                Find directories around the country. Add your business to Braike and make sure customers always find the right information about your business.
+            </p>
+            <form>
+                <input type="text" class="input-search" placeholder="What are you looking for?">
+                <button type="button">
+                    Search
+                </button>
+            </form>
+        </div>
+    </div>
+</div>

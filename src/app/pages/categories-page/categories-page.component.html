@@ -1,0 +1,59 @@
+<app-header />
+
+<app-page-banner
+    [pageTitle]="'Categories'"
+    [backgroundImage]="'images/page-title1.jpg'"
+/>
+
+<!-- Categories -->
+<div class="listing-categories-area pt-100 pb-70">
+    <div class="container">
+        <div class="row justify-content-center">
+            @for (content of categoryItem; track content) {
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    <div
+                        class="single-categories-listing-item"
+                        style="background-image: url({{content.image}});"
+                    >
+                        <div class="icon">
+                            <i class='bx {{content.icon}}'></i>
+                        </div>
+                        <h3>
+                            {{content.title}}
+                        </h3>
+                        <span>
+                            {{content.listingItem}} Listings
+                        </span>
+                        <a routerLink="/{{content.detailsLinkURL}}" class="learn-more-btn">
+                            Learn More <i class='bx bx-chevron-right'></i>
+                        </a>
+                        <a routerLink="/{{content.detailsLinkURL}}" class="link-btn"></a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+<div class="listing-categories-area bg-f7f9fb pt-100 pb-70">
+    <div class="container">
+        <div class="section-title">
+            <span class="sub-title">Listing Categories</span>
+            <h2>Browse Trending Categories</h2>
+        </div>
+        <div class="row justify-content-center">
+            @for (content of categoryItem; track content) {
+                <div class="col-lg-3 col-sm-6 col-md-4">
+                    <div class="single-listing-category">
+                        <a routerLink="/{{content.detailsLinkURL}}">
+                            <i class='bx {{content.icon}}'></i>
+                            {{content.title}}
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+<!-- End Categories -->
+
+<app-footer />

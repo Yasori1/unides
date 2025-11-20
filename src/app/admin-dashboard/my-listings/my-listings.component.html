@@ -1,0 +1,1391 @@
+<!-- Breadcrumb -->
+<div class="db-breadcrumb-area">
+    <h1>
+        All Listings
+    </h1>
+    <ol class="breadcrumb">
+        <li class="item">
+            <a routerLink="/dashboard">
+                <i class='bx bx-home-alt'></i>
+            </a>
+        </li>
+        <li class="item">
+            Dashboard
+        </li>
+        <li class="item">
+            My Listings
+        </li>
+    </ol>
+</div>
+
+<!-- Listings -->
+<div class="db-listing-area">
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <button class="nav-link" type="button" (click)="switchTab($event, 'tab1')" [ngClass]="{'active': currentTab === 'tab1'}">
+                All Listings (20)
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" type="button" (click)="switchTab($event, 'tab2')" [ngClass]="{'active': currentTab === 'tab2'}">
+                Active Listings (15)
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" type="button" (click)="switchTab($event, 'tab3')" [ngClass]="{'active': currentTab === 'tab3'}">
+                Pending Listings (2)
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" type="button" (click)="switchTab($event, 'tab4')" [ngClass]="{'active': currentTab === 'tab4'}">
+                Expired Listings (3)
+            </button>
+        </li>
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane" id="tab1" *ngIf="currentTab === 'tab1'">
+            <div class="row">
+                <div class="col-lg-4 col-sm-12 col-md-6">
+                    <div class="single-listing-item">
+                        <div class="listing-image">
+                            <a routerLink="/listing-details" class="d-block">
+                                <img src="images/dashboard/listing/img5.jpg" alt="image">
+                            </a>
+                            <div class="listing-tag">
+                                <a routerLink="." class="d-block">Restaurant</a>
+                            </div>
+                            <div class="listing-rating">
+                                <div class="review-stars-rated">
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                </div>
+                                <div class="rating-total">
+                                    5.0 (1 reviews)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-content">
+                            <div class="listing-author d-flex align-items-center">
+                                <img src="images/dashboard/user1.jpg" class="rounded-circle me-2" alt="image">
+                                <span>Andro Smith</span>
+                            </div>
+                            <h3><a routerLink="/listing-details" class="d-inline-block">Farmis Garden Hotel & Restaurant</a></h3>
+                            <span class="location"><i class="bx bx-map"></i> 40 Journal Square, NG USA</span>
+                        </div>
+                        <div class="listing-box-footer">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="price">
+                                    <span title="Ultra Hight">
+                                        $1500 - $2000
+                                    </span>
+                                </div>
+                                <div class="listing-option-list">
+                                    <a routerLink="." title="Find Directions"><i class='bx bx-directions'></i></a>
+                                    <a routerLink="." title="Save"><i class='bx bx-heart'></i></a>
+                                    <a routerLink="." title="On the Map"><i class='bx bx-map'></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-badge">Open!</div>
+                        <div class="listing-edit-delete-option">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a routerLink="." class="btn btn-md btn-primary">Edit Listing</a>
+                                <a routerLink="." class="btn btn-md btn-danger ms-3">Delete Listing</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-12 col-md-6">
+                    <div class="single-listing-item">
+                        <div class="listing-image">
+                            <a routerLink="/listing-details" class="d-block">
+                                <img src="images/dashboard/listing/img6.jpg" alt="image">
+                            </a>
+                            <div class="listing-tag">
+                                <a routerLink="." class="d-block">Shopping</a>
+                            </div>
+                            <div class="listing-rating">
+                                <div class="review-stars-rated">
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                </div>
+                                <div class="rating-total">
+                                    5.0 (1 reviews)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-content">
+                            <div class="listing-author d-flex align-items-center">
+                                <img src="images/dashboard/user1.jpg" class="rounded-circle me-2" alt="image">
+                                <span>Andro Smith</span>
+                            </div>
+                            <h3><a routerLink="/listing-details" class="d-inline-block">Skyview Shopping Complex Center</a></h3>
+                            <span class="location"><i class="bx bx-map"></i> 55 County Laois, Ireland</span>
+                        </div>
+                        <div class="listing-box-footer">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="price">
+                                    <span title="Pricey">
+                                        $100 - $200
+                                    </span>
+                                </div>
+                                <div class="listing-option-list">
+                                    <a routerLink="." title="Find Directions"><i class='bx bx-directions'></i></a>
+                                    <a routerLink="." title="Save"><i class='bx bx-heart'></i></a>
+                                    <a routerLink="." title="On the Map"><i class='bx bx-map'></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-badge">Open!</div>
+                        <div class="listing-edit-delete-option">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a routerLink="." class="btn btn-md btn-primary">Edit Listing</a>
+                                <a routerLink="." class="btn btn-md btn-danger ms-3">Delete Listing</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-12 col-md-6">
+                    <div class="single-listing-item">
+                        <div class="listing-image">
+                            <a routerLink="/listing-details" class="d-block">
+                                <img src="images/dashboard/listing/img7.jpg" alt="image">
+                            </a>
+                            <div class="listing-tag">
+                                <a routerLink="." class="d-block">Gym</a>
+                            </div>
+                            <div class="listing-rating">
+                                <div class="review-stars-rated">
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                </div>
+                                <div class="rating-total">
+                                    4.5 (2 reviews)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-content">
+                            <div class="listing-author d-flex align-items-center">
+                                <img src="images/dashboard/user1.jpg" class="rounded-circle me-2" alt="image">
+                                <span>Andro Smith</span>
+                            </div>
+                            <h3><a routerLink="/listing-details" class="d-inline-block">Power House Gym Training Center</a></h3>
+                            <span class="location"><i class="bx bx-map"></i> Tilt Tilbury, United Kingdom</span>
+                        </div>
+                        <div class="listing-box-footer">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="price">
+                                    <span title="Moderate">
+                                        $240 - $250
+                                    </span>
+                                </div>
+                                <div class="listing-option-list">
+                                    <a routerLink="." title="Find Directions"><i class='bx bx-directions'></i></a>
+                                    <a routerLink="." title="Save"><i class='bx bx-heart'></i></a>
+                                    <a routerLink="." title="On the Map"><i class='bx bx-map'></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-badge">Open!</div>
+                        <div class="listing-edit-delete-option">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a routerLink="." class="btn btn-md btn-primary">Edit Listing</a>
+                                <a routerLink="." class="btn btn-md btn-danger ms-3">Delete Listing</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-12 col-md-6">
+                    <div class="single-listing-item">
+                        <div class="listing-image">
+                            <a routerLink="/listing-details" class="d-block">
+                                <img src="images/dashboard/listing/img8.jpg" alt="image">
+                            </a>
+                            <div class="listing-tag">
+                                <a routerLink="." class="d-block">Restaurant</a>
+                            </div>
+                            <div class="listing-rating">
+                                <div class="review-stars-rated">
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                </div>
+                                <div class="rating-total">
+                                    5.0 (1 reviews)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-content">
+                            <div class="listing-author d-flex align-items-center">
+                                <img src="images/dashboard/user1.jpg" class="rounded-circle me-2" alt="image">
+                                <span>Andro Smith</span>
+                            </div>
+                            <h3><a routerLink="/listing-details" class="d-inline-block">The Magician Restaurant in USA</a></h3>
+                            <span class="location"><i class="bx bx-map"></i> 40 Journal Square, NG USA</span>
+                        </div>
+                        <div class="listing-box-footer">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="price">
+                                    <span title="Ultra Hight">
+                                        $1500 - $2000
+                                    </span>
+                                </div>
+                                <div class="listing-option-list">
+                                    <a routerLink="." title="Find Directions"><i class='bx bx-directions'></i></a>
+                                    <a routerLink="." title="Save"><i class='bx bx-heart'></i></a>
+                                    <a routerLink="." title="On the Map"><i class='bx bx-map'></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-badge">Open!</div>
+                        <div class="listing-edit-delete-option">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a routerLink="." class="btn btn-md btn-primary">Edit Listing</a>
+                                <a routerLink="." class="btn btn-md btn-danger ms-3">Delete Listing</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-12 col-md-6">
+                    <div class="single-listing-item">
+                        <div class="listing-image">
+                            <a routerLink="/listing-details" class="d-block">
+                                <img src="images/dashboard/listing/img9.jpg" alt="image">
+                            </a>
+                            <div class="listing-tag">
+                                <a routerLink="." class="d-block">Shopping</a>
+                            </div>
+                            <div class="listing-rating">
+                                <div class="review-stars-rated">
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                </div>
+                                <div class="rating-total">
+                                    5.0 (1 reviews)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-content">
+                            <div class="listing-author d-flex align-items-center">
+                                <img src="images/dashboard/user1.jpg" class="rounded-circle me-2" alt="image">
+                                <span>Andro Smith</span>
+                            </div>
+                            <h3><a routerLink="/listing-details" class="d-inline-block">New Oriental Shopping Center</a></h3>
+                            <span class="location"><i class="bx bx-map"></i> 55 County Laois, Ireland</span>
+                        </div>
+                        <div class="listing-box-footer">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="price">
+                                    <span title="Pricey">
+                                        $100 - $200
+                                    </span>
+                                </div>
+                                <div class="listing-option-list">
+                                    <a routerLink="." title="Find Directions"><i class='bx bx-directions'></i></a>
+                                    <a routerLink="." title="Save"><i class='bx bx-heart'></i></a>
+                                    <a routerLink="." title="On the Map"><i class='bx bx-map'></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-badge closed">Closed!</div>
+                        <div class="listing-edit-delete-option">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a routerLink="." class="btn btn-md btn-primary">Edit Listing</a>
+                                <a routerLink="." class="btn btn-md btn-danger ms-3">Delete Listing</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-12 col-md-6">
+                    <div class="single-listing-item">
+                        <div class="listing-image">
+                            <a routerLink="/listing-details" class="d-block">
+                                <img src="images/dashboard/listing/img10.jpg" alt="image">
+                            </a>
+                            <div class="listing-tag">
+                                <a routerLink="." class="d-block">Gym</a>
+                            </div>
+                            <div class="listing-rating">
+                                <div class="review-stars-rated">
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                </div>
+                                <div class="rating-total">
+                                    4.5 (2 reviews)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-content">
+                            <div class="listing-author d-flex align-items-center">
+                                <img src="images/dashboard/user1.jpg" class="rounded-circle me-2" alt="image">
+                                <span>Andro Smith</span>
+                            </div>
+                            <h3><a routerLink="/listing-details" class="d-inline-block">Looks Women's Fitness Center</a></h3>
+                            <span class="location"><i class="bx bx-map"></i> Tilt Tilbury, United Kingdom</span>
+                        </div>
+                        <div class="listing-box-footer">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="price">
+                                    <span title="Moderate">
+                                        $240 - $250
+                                    </span>
+                                </div>
+                                <div class="listing-option-list">
+                                    <a routerLink="." title="Find Directions"><i class='bx bx-directions'></i></a>
+                                    <a routerLink="." title="Save"><i class='bx bx-heart'></i></a>
+                                    <a routerLink="." title="On the Map"><i class='bx bx-map'></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-badge">Open!</div>
+                        <span class="listing-discount">
+                            <span>-15% OFF</span>
+                        </span>
+                        <div class="listing-edit-delete-option">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a routerLink="." class="btn btn-md btn-primary">Edit Listing</a>
+                                <a routerLink="." class="btn btn-md btn-danger ms-3">Delete Listing</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12 col-sm-12">
+                    <div class="pagination-area text-center mt-0">
+                        <a routerLink="." class="prev page-numbers"><i class='bx bx-chevrons-left'></i></a>
+                        <span class="page-numbers current" aria-current="page">1</span>
+                        <a routerLink="." class="page-numbers">2</a>
+                        <a routerLink="." class="page-numbers">3</a>
+                        <a routerLink="." class="page-numbers">...</a>
+                        <a routerLink="." class="page-numbers">5</a>
+                        <a routerLink="." class="next page-numbers"><i class='bx bx-chevrons-right'></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane" id="tab2" *ngIf="currentTab === 'tab2'">
+            <div class="row">
+                <div class="col-lg-4 col-sm-12 col-md-6">
+                    <div class="single-listing-item">
+                        <div class="listing-image">
+                            <a routerLink="/listing-details" class="d-block">
+                                <img src="images/dashboard/listing/img10.jpg" alt="image">
+                            </a>
+                            <div class="listing-tag">
+                                <a routerLink="." class="d-block">Gym</a>
+                            </div>
+                            <div class="listing-rating">
+                                <div class="review-stars-rated">
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                </div>
+                                <div class="rating-total">
+                                    4.5 (2 reviews)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-content">
+                            <div class="listing-author d-flex align-items-center">
+                                <img src="images/dashboard/user1.jpg" class="rounded-circle me-2" alt="image">
+                                <span>Andro Smith</span>
+                            </div>
+                            <h3><a routerLink="/listing-details" class="d-inline-block">Looks Women's Fitness Center</a></h3>
+                            <span class="location"><i class="bx bx-map"></i> Tilt Tilbury, United Kingdom</span>
+                        </div>
+                        <div class="listing-box-footer">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="price">
+                                    <span title="Moderate">
+                                        $240 - $250
+                                    </span>
+                                </div>
+                                <div class="listing-option-list">
+                                    <a routerLink="." title="Find Directions"><i class='bx bx-directions'></i></a>
+                                    <a routerLink="." title="Save"><i class='bx bx-heart'></i></a>
+                                    <a routerLink="." title="On the Map"><i class='bx bx-map'></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-badge">Open!</div>
+                        <span class="listing-discount">
+                            <span>-15% OFF</span>
+                        </span>
+                        <div class="listing-edit-delete-option">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a routerLink="." class="btn btn-md btn-primary">Edit Listing</a>
+                                <a routerLink="." class="btn btn-md btn-danger ms-3">Delete Listing</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-12 col-md-6">
+                    <div class="single-listing-item">
+                        <div class="listing-image">
+                            <a routerLink="/listing-details" class="d-block">
+                                <img src="images/dashboard/listing/img5.jpg" alt="image">
+                            </a>
+                            <div class="listing-tag">
+                                <a routerLink="." class="d-block">Restaurant</a>
+                            </div>
+                            <div class="listing-rating">
+                                <div class="review-stars-rated">
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                </div>
+                                <div class="rating-total">
+                                    5.0 (1 reviews)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-content">
+                            <div class="listing-author d-flex align-items-center">
+                                <img src="images/dashboard/user1.jpg" class="rounded-circle me-2" alt="image">
+                                <span>Andro Smith</span>
+                            </div>
+                            <h3><a routerLink="/listing-details" class="d-inline-block">Farmis Garden Hotel & Restaurant</a></h3>
+                            <span class="location"><i class="bx bx-map"></i> 40 Journal Square, NG USA</span>
+                        </div>
+                        <div class="listing-box-footer">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="price">
+                                    <span title="Ultra Hight">
+                                        $1500 - $2000
+                                    </span>
+                                </div>
+                                <div class="listing-option-list">
+                                    <a routerLink="." title="Find Directions"><i class='bx bx-directions'></i></a>
+                                    <a routerLink="." title="Save"><i class='bx bx-heart'></i></a>
+                                    <a routerLink="." title="On the Map"><i class='bx bx-map'></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-badge">Open!</div>
+                        <div class="listing-edit-delete-option">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a routerLink="." class="btn btn-md btn-primary">Edit Listing</a>
+                                <a routerLink="." class="btn btn-md btn-danger ms-3">Delete Listing</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-12 col-md-6">
+                    <div class="single-listing-item">
+                        <div class="listing-image">
+                            <a routerLink="/listing-details" class="d-block">
+                                <img src="images/dashboard/listing/img8.jpg" alt="image">
+                            </a>
+                            <div class="listing-tag">
+                                <a routerLink="." class="d-block">Restaurant</a>
+                            </div>
+                            <div class="listing-rating">
+                                <div class="review-stars-rated">
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                </div>
+                                <div class="rating-total">
+                                    5.0 (1 reviews)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-content">
+                            <div class="listing-author d-flex align-items-center">
+                                <img src="images/dashboard/user1.jpg" class="rounded-circle me-2" alt="image">
+                                <span>Andro Smith</span>
+                            </div>
+                            <h3><a routerLink="/listing-details" class="d-inline-block">The Magician Restaurant in USA</a></h3>
+                            <span class="location"><i class="bx bx-map"></i> 40 Journal Square, NG USA</span>
+                        </div>
+                        <div class="listing-box-footer">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="price">
+                                    <span title="Ultra Hight">
+                                        $1500 - $2000
+                                    </span>
+                                </div>
+                                <div class="listing-option-list">
+                                    <a routerLink="." title="Find Directions"><i class='bx bx-directions'></i></a>
+                                    <a routerLink="." title="Save"><i class='bx bx-heart'></i></a>
+                                    <a routerLink="." title="On the Map"><i class='bx bx-map'></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-badge">Open!</div>
+                        <div class="listing-edit-delete-option">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a routerLink="." class="btn btn-md btn-primary">Edit Listing</a>
+                                <a routerLink="." class="btn btn-md btn-danger ms-3">Delete Listing</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-12 col-md-6">
+                    <div class="single-listing-item">
+                        <div class="listing-image">
+                            <a routerLink="/listing-details" class="d-block">
+                                <img src="images/dashboard/listing/img6.jpg" alt="image">
+                            </a>
+                            <div class="listing-tag">
+                                <a routerLink="." class="d-block">Shopping</a>
+                            </div>
+                            <div class="listing-rating">
+                                <div class="review-stars-rated">
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                </div>
+                                <div class="rating-total">
+                                    5.0 (1 reviews)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-content">
+                            <div class="listing-author d-flex align-items-center">
+                                <img src="images/dashboard/user1.jpg" class="rounded-circle me-2" alt="image">
+                                <span>Andro Smith</span>
+                            </div>
+                            <h3><a routerLink="/listing-details" class="d-inline-block">Skyview Shopping Complex Center</a></h3>
+                            <span class="location"><i class="bx bx-map"></i> 55 County Laois, Ireland</span>
+                        </div>
+                        <div class="listing-box-footer">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="price">
+                                    <span title="Pricey">
+                                        $100 - $200
+                                    </span>
+                                </div>
+                                <div class="listing-option-list">
+                                    <a routerLink="." title="Find Directions"><i class='bx bx-directions'></i></a>
+                                    <a routerLink="." title="Save"><i class='bx bx-heart'></i></a>
+                                    <a routerLink="." title="On the Map"><i class='bx bx-map'></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-badge">Open!</div>
+                        <div class="listing-edit-delete-option">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a routerLink="." class="btn btn-md btn-primary">Edit Listing</a>
+                                <a routerLink="." class="btn btn-md btn-danger ms-3">Delete Listing</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-12 col-md-6">
+                    <div class="single-listing-item">
+                        <div class="listing-image">
+                            <a routerLink="/listing-details" class="d-block">
+                                <img src="images/dashboard/listing/img9.jpg" alt="image">
+                            </a>
+                            <div class="listing-tag">
+                                <a routerLink="." class="d-block">Shopping</a>
+                            </div>
+                            <div class="listing-rating">
+                                <div class="review-stars-rated">
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                </div>
+                                <div class="rating-total">
+                                    5.0 (1 reviews)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-content">
+                            <div class="listing-author d-flex align-items-center">
+                                <img src="images/dashboard/user1.jpg" class="rounded-circle me-2" alt="image">
+                                <span>Andro Smith</span>
+                            </div>
+                            <h3><a routerLink="/listing-details" class="d-inline-block">New Oriental Shopping Center</a></h3>
+                            <span class="location"><i class="bx bx-map"></i> 55 County Laois, Ireland</span>
+                        </div>
+                        <div class="listing-box-footer">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="price">
+                                    <span title="Pricey">
+                                        $100 - $200
+                                    </span>
+                                </div>
+                                <div class="listing-option-list">
+                                    <a routerLink="." title="Find Directions"><i class='bx bx-directions'></i></a>
+                                    <a routerLink="." title="Save"><i class='bx bx-heart'></i></a>
+                                    <a routerLink="." title="On the Map"><i class='bx bx-map'></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-badge closed">Closed!</div>
+                        <div class="listing-edit-delete-option">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a routerLink="." class="btn btn-md btn-primary">Edit Listing</a>
+                                <a routerLink="." class="btn btn-md btn-danger ms-3">Delete Listing</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-12 col-md-6">
+                    <div class="single-listing-item">
+                        <div class="listing-image">
+                            <a routerLink="/listing-details" class="d-block">
+                                <img src="images/dashboard/listing/img7.jpg" alt="image">
+                            </a>
+                            <div class="listing-tag">
+                                <a routerLink="." class="d-block">Gym</a>
+                            </div>
+                            <div class="listing-rating">
+                                <div class="review-stars-rated">
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                </div>
+                                <div class="rating-total">
+                                    4.5 (2 reviews)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-content">
+                            <div class="listing-author d-flex align-items-center">
+                                <img src="images/dashboard/user1.jpg" class="rounded-circle me-2" alt="image">
+                                <span>Andro Smith</span>
+                            </div>
+                            <h3><a routerLink="/listing-details" class="d-inline-block">Power House Gym Training Center</a></h3>
+                            <span class="location"><i class="bx bx-map"></i> Tilt Tilbury, United Kingdom</span>
+                        </div>
+                        <div class="listing-box-footer">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="price">
+                                    <span title="Moderate">
+                                        $240 - $250
+                                    </span>
+                                </div>
+                                <div class="listing-option-list">
+                                    <a routerLink="." title="Find Directions"><i class='bx bx-directions'></i></a>
+                                    <a routerLink="." title="Save"><i class='bx bx-heart'></i></a>
+                                    <a routerLink="." title="On the Map"><i class='bx bx-map'></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-badge">Open!</div>
+                        <div class="listing-edit-delete-option">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a routerLink="." class="btn btn-md btn-primary">Edit Listing</a>
+                                <a routerLink="." class="btn btn-md btn-danger ms-3">Delete Listing</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12 col-sm-12">
+                    <div class="pagination-area text-center mt-0">
+                        <a routerLink="." class="prev page-numbers"><i class='bx bx-chevrons-left'></i></a>
+                        <span class="page-numbers current" aria-current="page">1</span>
+                        <a routerLink="." class="page-numbers">2</a>
+                        <a routerLink="." class="page-numbers">3</a>
+                        <a routerLink="." class="page-numbers">...</a>
+                        <a routerLink="." class="page-numbers">5</a>
+                        <a routerLink="." class="next page-numbers"><i class='bx bx-chevrons-right'></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane" id="tab3" *ngIf="currentTab === 'tab3'">
+            <div class="row">
+                <div class="col-lg-4 col-sm-12 col-md-6">
+                    <div class="single-listing-item">
+                        <div class="listing-image">
+                            <a routerLink="/listing-details" class="d-block">
+                                <img src="images/dashboard/listing/img7.jpg" alt="image">
+                            </a>
+                            <div class="listing-tag">
+                                <a routerLink="." class="d-block">Gym</a>
+                            </div>
+                            <div class="listing-rating">
+                                <div class="review-stars-rated">
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                </div>
+                                <div class="rating-total">
+                                    4.5 (2 reviews)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-content">
+                            <div class="listing-author d-flex align-items-center">
+                                <img src="images/dashboard/user1.jpg" class="rounded-circle me-2" alt="image">
+                                <span>Andro Smith</span>
+                            </div>
+                            <h3><a routerLink="/listing-details" class="d-inline-block">Power House Gym Training Center</a></h3>
+                            <span class="location"><i class="bx bx-map"></i> Tilt Tilbury, United Kingdom</span>
+                        </div>
+                        <div class="listing-box-footer">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="price">
+                                    <span title="Moderate">
+                                        $240 - $250
+                                    </span>
+                                </div>
+                                <div class="listing-option-list">
+                                    <a routerLink="." title="Find Directions"><i class='bx bx-directions'></i></a>
+                                    <a routerLink="." title="Save"><i class='bx bx-heart'></i></a>
+                                    <a routerLink="." title="On the Map"><i class='bx bx-map'></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-badge">Open!</div>
+                        <div class="listing-edit-delete-option">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a routerLink="." class="btn btn-md btn-primary">Edit Listing</a>
+                                <a routerLink="." class="btn btn-md btn-danger ms-3">Delete Listing</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-12 col-md-6">
+                    <div class="single-listing-item">
+                        <div class="listing-image">
+                            <a routerLink="/listing-details" class="d-block">
+                                <img src="images/dashboard/listing/img8.jpg" alt="image">
+                            </a>
+                            <div class="listing-tag">
+                                <a routerLink="." class="d-block">Restaurant</a>
+                            </div>
+                            <div class="listing-rating">
+                                <div class="review-stars-rated">
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                </div>
+                                <div class="rating-total">
+                                    5.0 (1 reviews)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-content">
+                            <div class="listing-author d-flex align-items-center">
+                                <img src="images/dashboard/user1.jpg" class="rounded-circle me-2" alt="image">
+                                <span>Andro Smith</span>
+                            </div>
+                            <h3><a routerLink="/listing-details" class="d-inline-block">The Magician Restaurant in USA</a></h3>
+                            <span class="location"><i class="bx bx-map"></i> 40 Journal Square, NG USA</span>
+                        </div>
+                        <div class="listing-box-footer">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="price">
+                                    <span title="Ultra Hight">
+                                        $1500 - $2000
+                                    </span>
+                                </div>
+                                <div class="listing-option-list">
+                                    <a routerLink="." title="Find Directions"><i class='bx bx-directions'></i></a>
+                                    <a routerLink="." title="Save"><i class='bx bx-heart'></i></a>
+                                    <a routerLink="." title="On the Map"><i class='bx bx-map'></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-badge">Open!</div>
+                        <div class="listing-edit-delete-option">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a routerLink="." class="btn btn-md btn-primary">Edit Listing</a>
+                                <a routerLink="." class="btn btn-md btn-danger ms-3">Delete Listing</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-12 col-md-6">
+                    <div class="single-listing-item">
+                        <div class="listing-image">
+                            <a routerLink="/listing-details" class="d-block">
+                                <img src="images/dashboard/listing/img6.jpg" alt="image">
+                            </a>
+                            <div class="listing-tag">
+                                <a routerLink="." class="d-block">Shopping</a>
+                            </div>
+                            <div class="listing-rating">
+                                <div class="review-stars-rated">
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                </div>
+                                <div class="rating-total">
+                                    5.0 (1 reviews)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-content">
+                            <div class="listing-author d-flex align-items-center">
+                                <img src="images/dashboard/user1.jpg" class="rounded-circle me-2" alt="image">
+                                <span>Andro Smith</span>
+                            </div>
+                            <h3><a routerLink="/listing-details" class="d-inline-block">Skyview Shopping Complex Center</a></h3>
+                            <span class="location"><i class="bx bx-map"></i> 55 County Laois, Ireland</span>
+                        </div>
+                        <div class="listing-box-footer">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="price">
+                                    <span title="Pricey">
+                                        $100 - $200
+                                    </span>
+                                </div>
+                                <div class="listing-option-list">
+                                    <a routerLink="." title="Find Directions"><i class='bx bx-directions'></i></a>
+                                    <a routerLink="." title="Save"><i class='bx bx-heart'></i></a>
+                                    <a routerLink="." title="On the Map"><i class='bx bx-map'></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-badge">Open!</div>
+                        <div class="listing-edit-delete-option">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a routerLink="." class="btn btn-md btn-primary">Edit Listing</a>
+                                <a routerLink="." class="btn btn-md btn-danger ms-3">Delete Listing</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-12 col-md-6">
+                    <div class="single-listing-item">
+                        <div class="listing-image">
+                            <a routerLink="/listing-details" class="d-block">
+                                <img src="images/dashboard/listing/img5.jpg" alt="image">
+                            </a>
+                            <div class="listing-tag">
+                                <a routerLink="." class="d-block">Restaurant</a>
+                            </div>
+                            <div class="listing-rating">
+                                <div class="review-stars-rated">
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                </div>
+                                <div class="rating-total">
+                                    5.0 (1 reviews)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-content">
+                            <div class="listing-author d-flex align-items-center">
+                                <img src="images/dashboard/user1.jpg" class="rounded-circle me-2" alt="image">
+                                <span>Andro Smith</span>
+                            </div>
+                            <h3><a routerLink="/listing-details" class="d-inline-block">Farmis Garden Hotel & Restaurant</a></h3>
+                            <span class="location"><i class="bx bx-map"></i> 40 Journal Square, NG USA</span>
+                        </div>
+                        <div class="listing-box-footer">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="price">
+                                    <span title="Ultra Hight">
+                                        $1500 - $2000
+                                    </span>
+                                </div>
+                                <div class="listing-option-list">
+                                    <a routerLink="." title="Find Directions"><i class='bx bx-directions'></i></a>
+                                    <a routerLink="." title="Save"><i class='bx bx-heart'></i></a>
+                                    <a routerLink="." title="On the Map"><i class='bx bx-map'></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-badge">Open!</div>
+                        <div class="listing-edit-delete-option">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a routerLink="." class="btn btn-md btn-primary">Edit Listing</a>
+                                <a routerLink="." class="btn btn-md btn-danger ms-3">Delete Listing</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-12 col-md-6">
+                    <div class="single-listing-item">
+                        <div class="listing-image">
+                            <a routerLink="/listing-details" class="d-block">
+                                <img src="images/dashboard/listing/img9.jpg" alt="image">
+                            </a>
+                            <div class="listing-tag">
+                                <a routerLink="." class="d-block">Shopping</a>
+                            </div>
+                            <div class="listing-rating">
+                                <div class="review-stars-rated">
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                </div>
+                                <div class="rating-total">
+                                    5.0 (1 reviews)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-content">
+                            <div class="listing-author d-flex align-items-center">
+                                <img src="images/dashboard/user1.jpg" class="rounded-circle me-2" alt="image">
+                                <span>Andro Smith</span>
+                            </div>
+                            <h3><a routerLink="/listing-details" class="d-inline-block">New Oriental Shopping Center</a></h3>
+                            <span class="location"><i class="bx bx-map"></i> 55 County Laois, Ireland</span>
+                        </div>
+                        <div class="listing-box-footer">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="price">
+                                    <span title="Pricey">
+                                        $100 - $200
+                                    </span>
+                                </div>
+                                <div class="listing-option-list">
+                                    <a routerLink="." title="Find Directions"><i class='bx bx-directions'></i></a>
+                                    <a routerLink="." title="Save"><i class='bx bx-heart'></i></a>
+                                    <a routerLink="." title="On the Map"><i class='bx bx-map'></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-badge closed">Closed!</div>
+                        <div class="listing-edit-delete-option">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a routerLink="." class="btn btn-md btn-primary">Edit Listing</a>
+                                <a routerLink="." class="btn btn-md btn-danger ms-3">Delete Listing</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-12 col-md-6">
+                    <div class="single-listing-item">
+                        <div class="listing-image">
+                            <a routerLink="/listing-details" class="d-block">
+                                <img src="images/dashboard/listing/img10.jpg" alt="image">
+                            </a>
+                            <div class="listing-tag">
+                                <a routerLink="." class="d-block">Gym</a>
+                            </div>
+                            <div class="listing-rating">
+                                <div class="review-stars-rated">
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                </div>
+                                <div class="rating-total">
+                                    4.5 (2 reviews)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-content">
+                            <div class="listing-author d-flex align-items-center">
+                                <img src="images/dashboard/user1.jpg" class="rounded-circle me-2" alt="image">
+                                <span>Andro Smith</span>
+                            </div>
+                            <h3><a routerLink="/listing-details" class="d-inline-block">Looks Women's Fitness Center</a></h3>
+                            <span class="location"><i class="bx bx-map"></i> Tilt Tilbury, United Kingdom</span>
+                        </div>
+                        <div class="listing-box-footer">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="price">
+                                    <span title="Moderate">
+                                        $240 - $250
+                                    </span>
+                                </div>
+                                <div class="listing-option-list">
+                                    <a routerLink="." title="Find Directions"><i class='bx bx-directions'></i></a>
+                                    <a routerLink="." title="Save"><i class='bx bx-heart'></i></a>
+                                    <a routerLink="." title="On the Map"><i class='bx bx-map'></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-badge">Open!</div>
+                        <span class="listing-discount">
+                            <span>-15% OFF</span>
+                        </span>
+                        <div class="listing-edit-delete-option">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a routerLink="." class="btn btn-md btn-primary">Edit Listing</a>
+                                <a routerLink="." class="btn btn-md btn-danger ms-3">Delete Listing</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12 col-sm-12">
+                    <div class="pagination-area text-center mt-0">
+                        <a routerLink="." class="prev page-numbers"><i class='bx bx-chevrons-left'></i></a>
+                        <span class="page-numbers current" aria-current="page">1</span>
+                        <a routerLink="." class="page-numbers">2</a>
+                        <a routerLink="." class="page-numbers">3</a>
+                        <a routerLink="." class="page-numbers">...</a>
+                        <a routerLink="." class="page-numbers">5</a>
+                        <a routerLink="." class="next page-numbers"><i class='bx bx-chevrons-right'></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane" id="tab4" *ngIf="currentTab === 'tab4'">
+            <div class="row">
+                <div class="col-lg-4 col-sm-12 col-md-6">
+                    <div class="single-listing-item">
+                        <div class="listing-image">
+                            <a routerLink="/listing-details" class="d-block">
+                                <img src="images/dashboard/listing/img9.jpg" alt="image">
+                            </a>
+                            <div class="listing-tag">
+                                <a routerLink="." class="d-block">Shopping</a>
+                            </div>
+                            <div class="listing-rating">
+                                <div class="review-stars-rated">
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                </div>
+                                <div class="rating-total">
+                                    5.0 (1 reviews)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-content">
+                            <div class="listing-author d-flex align-items-center">
+                                <img src="images/dashboard/user1.jpg" class="rounded-circle me-2" alt="image">
+                                <span>Andro Smith</span>
+                            </div>
+                            <h3><a routerLink="/listing-details" class="d-inline-block">New Oriental Shopping Center</a></h3>
+                            <span class="location"><i class="bx bx-map"></i> 55 County Laois, Ireland</span>
+                        </div>
+                        <div class="listing-box-footer">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="price">
+                                    <span title="Pricey">
+                                        $100 - $200
+                                    </span>
+                                </div>
+                                <div class="listing-option-list">
+                                    <a routerLink="." title="Find Directions"><i class='bx bx-directions'></i></a>
+                                    <a routerLink="." title="Save"><i class='bx bx-heart'></i></a>
+                                    <a routerLink="." title="On the Map"><i class='bx bx-map'></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-badge closed">Closed!</div>
+                        <div class="listing-edit-delete-option">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a routerLink="." class="btn btn-md btn-primary">Edit Listing</a>
+                                <a routerLink="." class="btn btn-md btn-danger ms-3">Delete Listing</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-12 col-md-6">
+                    <div class="single-listing-item">
+                        <div class="listing-image">
+                            <a routerLink="/listing-details" class="d-block">
+                                <img src="images/dashboard/listing/img10.jpg" alt="image">
+                            </a>
+                            <div class="listing-tag">
+                                <a routerLink="." class="d-block">Gym</a>
+                            </div>
+                            <div class="listing-rating">
+                                <div class="review-stars-rated">
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                </div>
+                                <div class="rating-total">
+                                    4.5 (2 reviews)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-content">
+                            <div class="listing-author d-flex align-items-center">
+                                <img src="images/dashboard/user1.jpg" class="rounded-circle me-2" alt="image">
+                                <span>Andro Smith</span>
+                            </div>
+                            <h3><a routerLink="/listing-details" class="d-inline-block">Looks Women's Fitness Center</a></h3>
+                            <span class="location"><i class="bx bx-map"></i> Tilt Tilbury, United Kingdom</span>
+                        </div>
+                        <div class="listing-box-footer">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="price">
+                                    <span title="Moderate">
+                                        $240 - $250
+                                    </span>
+                                </div>
+                                <div class="listing-option-list">
+                                    <a routerLink="." title="Find Directions"><i class='bx bx-directions'></i></a>
+                                    <a routerLink="." title="Save"><i class='bx bx-heart'></i></a>
+                                    <a routerLink="." title="On the Map"><i class='bx bx-map'></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-badge">Open!</div>
+                        <span class="listing-discount">
+                            <span>-15% OFF</span>
+                        </span>
+                        <div class="listing-edit-delete-option">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a routerLink="." class="btn btn-md btn-primary">Edit Listing</a>
+                                <a routerLink="." class="btn btn-md btn-danger ms-3">Delete Listing</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-12 col-md-6">
+                    <div class="single-listing-item">
+                        <div class="listing-image">
+                            <a routerLink="/listing-details" class="d-block">
+                                <img src="images/dashboard/listing/img5.jpg" alt="image">
+                            </a>
+                            <div class="listing-tag">
+                                <a routerLink="." class="d-block">Restaurant</a>
+                            </div>
+                            <div class="listing-rating">
+                                <div class="review-stars-rated">
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                </div>
+                                <div class="rating-total">
+                                    5.0 (1 reviews)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-content">
+                            <div class="listing-author d-flex align-items-center">
+                                <img src="images/dashboard/user1.jpg" class="rounded-circle me-2" alt="image">
+                                <span>Andro Smith</span>
+                            </div>
+                            <h3><a routerLink="/listing-details" class="d-inline-block">Farmis Garden Hotel & Restaurant</a></h3>
+                            <span class="location"><i class="bx bx-map"></i> 40 Journal Square, NG USA</span>
+                        </div>
+                        <div class="listing-box-footer">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="price">
+                                    <span title="Ultra Hight">
+                                        $1500 - $2000
+                                    </span>
+                                </div>
+                                <div class="listing-option-list">
+                                    <a routerLink="." title="Find Directions"><i class='bx bx-directions'></i></a>
+                                    <a routerLink="." title="Save"><i class='bx bx-heart'></i></a>
+                                    <a routerLink="." title="On the Map"><i class='bx bx-map'></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-badge">Open!</div>
+                        <div class="listing-edit-delete-option">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a routerLink="." class="btn btn-md btn-primary">Edit Listing</a>
+                                <a routerLink="." class="btn btn-md btn-danger ms-3">Delete Listing</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-12 col-md-6">
+                    <div class="single-listing-item">
+                        <div class="listing-image">
+                            <a routerLink="/listing-details" class="d-block">
+                                <img src="images/dashboard/listing/img6.jpg" alt="image">
+                            </a>
+                            <div class="listing-tag">
+                                <a routerLink="." class="d-block">Shopping</a>
+                            </div>
+                            <div class="listing-rating">
+                                <div class="review-stars-rated">
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                </div>
+                                <div class="rating-total">
+                                    5.0 (1 reviews)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-content">
+                            <div class="listing-author d-flex align-items-center">
+                                <img src="images/dashboard/user1.jpg" class="rounded-circle me-2" alt="image">
+                                <span>Andro Smith</span>
+                            </div>
+                            <h3><a routerLink="/listing-details" class="d-inline-block">Skyview Shopping Complex Center</a></h3>
+                            <span class="location"><i class="bx bx-map"></i> 55 County Laois, Ireland</span>
+                        </div>
+                        <div class="listing-box-footer">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="price">
+                                    <span title="Pricey">
+                                        $100 - $200
+                                    </span>
+                                </div>
+                                <div class="listing-option-list">
+                                    <a routerLink="." title="Find Directions"><i class='bx bx-directions'></i></a>
+                                    <a routerLink="." title="Save"><i class='bx bx-heart'></i></a>
+                                    <a routerLink="." title="On the Map"><i class='bx bx-map'></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-badge">Open!</div>
+                        <div class="listing-edit-delete-option">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a routerLink="." class="btn btn-md btn-primary">Edit Listing</a>
+                                <a routerLink="." class="btn btn-md btn-danger ms-3">Delete Listing</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-12 col-md-6">
+                    <div class="single-listing-item">
+                        <div class="listing-image">
+                            <a routerLink="/listing-details" class="d-block">
+                                <img src="images/dashboard/listing/img7.jpg" alt="image">
+                            </a>
+                            <div class="listing-tag">
+                                <a routerLink="." class="d-block">Gym</a>
+                            </div>
+                            <div class="listing-rating">
+                                <div class="review-stars-rated">
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                </div>
+                                <div class="rating-total">
+                                    4.5 (2 reviews)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-content">
+                            <div class="listing-author d-flex align-items-center">
+                                <img src="images/dashboard/user1.jpg" class="rounded-circle me-2" alt="image">
+                                <span>Andro Smith</span>
+                            </div>
+                            <h3><a routerLink="/listing-details" class="d-inline-block">Power House Gym Training Center</a></h3>
+                            <span class="location"><i class="bx bx-map"></i> Tilt Tilbury, United Kingdom</span>
+                        </div>
+                        <div class="listing-box-footer">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="price">
+                                    <span title="Moderate">
+                                        $240 - $250
+                                    </span>
+                                </div>
+                                <div class="listing-option-list">
+                                    <a routerLink="." title="Find Directions"><i class='bx bx-directions'></i></a>
+                                    <a routerLink="." title="Save"><i class='bx bx-heart'></i></a>
+                                    <a routerLink="." title="On the Map"><i class='bx bx-map'></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-badge">Open!</div>
+                        <div class="listing-edit-delete-option">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a routerLink="." class="btn btn-md btn-primary">Edit Listing</a>
+                                <a routerLink="." class="btn btn-md btn-danger ms-3">Delete Listing</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-12 col-md-6">
+                    <div class="single-listing-item">
+                        <div class="listing-image">
+                            <a routerLink="/listing-details" class="d-block">
+                                <img src="images/dashboard/listing/img8.jpg" alt="image">
+                            </a>
+                            <div class="listing-tag">
+                                <a routerLink="." class="d-block">Restaurant</a>
+                            </div>
+                            <div class="listing-rating">
+                                <div class="review-stars-rated">
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                    <i class='bx bxs-star'></i>
+                                </div>
+                                <div class="rating-total">
+                                    5.0 (1 reviews)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-content">
+                            <div class="listing-author d-flex align-items-center">
+                                <img src="images/dashboard/user1.jpg" class="rounded-circle me-2" alt="image">
+                                <span>Andro Smith</span>
+                            </div>
+                            <h3><a routerLink="/listing-details" class="d-inline-block">The Magician Restaurant in USA</a></h3>
+                            <span class="location"><i class="bx bx-map"></i> 40 Journal Square, NG USA</span>
+                        </div>
+                        <div class="listing-box-footer">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="price">
+                                    <span title="Ultra Hight">
+                                        $1500 - $2000
+                                    </span>
+                                </div>
+                                <div class="listing-option-list">
+                                    <a routerLink="." title="Find Directions"><i class='bx bx-directions'></i></a>
+                                    <a routerLink="." title="Save"><i class='bx bx-heart'></i></a>
+                                    <a routerLink="." title="On the Map"><i class='bx bx-map'></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="listing-badge">Open!</div>
+                        <div class="listing-edit-delete-option">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a routerLink="." class="btn btn-md btn-primary">Edit Listing</a>
+                                <a routerLink="." class="btn btn-md btn-danger ms-3">Delete Listing</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12 col-sm-12">
+                    <div class="pagination-area text-center mt-0">
+                        <a routerLink="." class="prev page-numbers"><i class='bx bx-chevrons-left'></i></a>
+                        <span class="page-numbers current" aria-current="page">1</span>
+                        <a routerLink="." class="page-numbers">2</a>
+                        <a routerLink="." class="page-numbers">3</a>
+                        <a routerLink="." class="page-numbers">...</a>
+                        <a routerLink="." class="page-numbers">5</a>
+                        <a routerLink="." class="next page-numbers"><i class='bx bx-chevrons-right'></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

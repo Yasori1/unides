@@ -1,0 +1,389 @@
+<!-- Breadcrumb -->
+<div class="db-breadcrumb-area">
+    <h1>
+        To Do List
+    </h1>
+    <ol class="breadcrumb">
+        <li class="item">
+            <a routerLink="/dashboard">
+                <i class='bx bx-home-alt'></i>
+            </a>
+        </li>
+        <li class="item">
+            Dashboard
+        </li>
+        <li class="item">
+            To Do List
+        </li>
+    </ol>
+</div>
+
+<!-- To Do List -->
+<div class="db-todo-content-area">
+    <div class="sidebar-left">
+        <div class="sidebar">
+            <div class="sidebar-content email-sidebar">
+                <ng-scrollbar visibility="hover">
+                    <div class="todo-menu">
+                        <a routerLink="." class="btn btn-primary btn-block compose-btn mb-4"><i class='bx bx-plus'></i> New Task</a>
+                        <div class="list-group list-group-messages">
+                            <a routerLink="." class="list-group-item active">
+                                <i class='bx bx-list-check'></i>
+                                All
+                            </a>
+                            <a routerLink="." class="list-group-item">
+                                <i class='bx bx-list-ol'></i>
+                                New
+                                <span class="badge badge-success d-inline-block">5</span>
+                            </a>
+                        </div>
+                        <label class="d-block list-group-label text-uppercase">Labels</label>
+                        <div class="list-group list-group-messages">
+                            <a routerLink="." class="list-group-item">
+                                <i class='bx bx-star'></i>
+                                Favorite
+                            </a>
+                            <a routerLink="." class="list-group-item">
+                                <i class='bx bx-check-double'></i>
+                                Done
+                            </a>
+                            <a routerLink="." class="list-group-item">
+                                <i class='bx bx-trash'></i>
+                                Trashed
+                            </a>
+                        </div>
+                        <label class="d-block list-group-label text-uppercase">Labels</label>
+                        <div class="list-group list-group-labels">
+                            <a routerLink="." class="list-group-item">
+                                Categories
+                            </a>
+                            <a routerLink="." class="list-group-item">
+                                Social
+                            </a>
+                            <a routerLink="." class="list-group-item">
+                                Updates
+                            </a>
+                            <a routerLink="." class="list-group-item">
+                                Forums
+                            </a>
+                            <a routerLink="." class="list-group-item">
+                                Promotions
+                            </a>
+                        </div>
+                    </div>
+                </ng-scrollbar>
+            </div>
+        </div>
+    </div>
+    <div class="content-right">
+        <div class="todo-area">
+            <div class="todo-list-wrapper">
+                <div class="todo-list">
+                    <div class="todo-list-header d-flex align-items-center">
+                        <div class="header-left d-flex align-items-center me-3">
+                            <div class="checkbox me-3">
+                                <input class="inp-cbx" id="cbx-all" type="checkbox" style="display: none;"/>
+                                <label class="cbx" for="cbx-all">
+                                    <span>
+                                        <svg width="12px" height="10px" viewbox="0 0 12 10">
+                                            <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                                        </svg>
+                                    </span>
+                                </label>
+                            </div>
+                            <ul class="list-inline m-0 d-flex">
+                                <li class="list-inline-item email-delete">
+                                    <button type="button" class="btn-icon">
+                                        <i class='bx bx-trash'></i>
+                                    </button>
+                                </li>
+                                <li class="list-inline-item email-unread">
+                                    <button type="button" class="btn-icon">
+                                        <i class='bx bx-envelope'></i>
+                                    </button>
+                                </li>
+                                <li class="list-inline-item email-unread">
+                                    <button class="dropdown-toggle btn-icon" type="button">
+                                        <i class='bx bx-info-square'></i>
+                                    </button>
+                                </li>
+                                <li class="list-inline-item email-unread">
+                                    <button class="dropdown-toggle btn-icon" type="button">
+                                        <i class='bx bx-purchase-tag-alt'></i>
+                                    </button>
+                                </li>
+                                <li class="list-inline-item email-unread">
+                                    <button class="dropdown-toggle btn-icon" type="button">
+                                        <i class='bx bx-filter-alt'></i>
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="header-right w-100">
+                            <form>
+                                <label><i class="bx bx-search"></i></label>
+                                <input type="text" class="form-control" placeholder="Search email...">
+                            </form>
+                        </div>
+                    </div>
+                    <ul class="list-wrapper">
+                        <ng-scrollbar visibility="hover">
+                            <li class="todo-list-item">
+                                <div class="checkbox">
+                                    <input class="inp-cbx" id="cbx" type="checkbox" style="display: none;"/>
+                                    <label class="cbx" for="cbx">
+                                        <span>
+                                            <svg width="12px" height="10px" viewbox="0 0 12 10">
+                                                <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                                            </svg>
+                                        </span>
+                                    </label>
+                                </div>
+                                <div class="todo-item-title">
+                                    <img src="images/dashboard/user1.jpg" data-toggle="tooltip" data-placement="top" title="Sarah Taylor" alt="image">
+                                    <h3>Print bills</h3>
+                                    <p>There are many variations of...</p>
+                                </div>
+                                <div class="todo-item-action">
+                                    <a routerLink="." class="edit"><i class='bx bx-edit-alt'></i></a>
+                                    <a routerLink="." class="delete"><i class='bx bx-trash'></i></a>
+                                </div>
+                            </li>
+                            <li class="todo-list-item">
+                                <div class="checkbox">
+                                    <input class="inp-cbx" id="cbx2" type="checkbox" style="display: none;"/>
+                                    <label class="cbx" for="cbx2">
+                                        <span>
+                                            <svg width="12px" height="10px" viewbox="0 0 12 10">
+                                                <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                                            </svg>
+                                        </span>
+                                    </label>
+                                </div>
+                                <div class="todo-item-title">
+                                    <img src="images/dashboard/user2.jpg" data-toggle="tooltip" data-placement="top" title="Lucy Eva" alt="image">
+                                    <h3>Call Rampbo</h3>
+                                    <p>There are many variations of...</p>
+                                </div>
+                                <div class="todo-item-action">
+                                    <a routerLink="." class="edit"><i class='bx bx-edit-alt'></i></a>
+                                    <a routerLink="." class="delete"><i class='bx bx-trash'></i></a>
+                                </div>
+                            </li>
+                            <li class="todo-list-item">
+                                <div class="checkbox">
+                                    <input class="inp-cbx" id="cbx3" type="checkbox" style="display: none;"/>
+                                    <label class="cbx" for="cbx3">
+                                        <span>
+                                            <svg width="12px" height="10px" viewbox="0 0 12 10">
+                                                <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                                            </svg>
+                                        </span>
+                                    </label>
+                                </div>
+                                <div class="todo-item-title">
+                                    <img src="images/dashboard/user3.jpg" data-toggle="tooltip" data-placement="top" title="John Smith" alt="image">
+                                    <h3>Print Statements all</h3>
+                                    <p>There are many variations of...</p>
+                                </div>
+                                <div class="todo-item-action">
+                                    <a routerLink="." class="edit"><i class='bx bx-edit-alt'></i></a>
+                                    <a routerLink="." class="delete"><i class='bx bx-trash'></i></a>
+                                </div>
+                            </li>
+                            <li class="todo-list-item">
+                                <div class="checkbox">
+                                    <input class="inp-cbx" id="cbx4" type="checkbox" style="display: none;"/>
+                                    <label class="cbx" for="cbx4">
+                                        <span>
+                                            <svg width="12px" height="10px" viewbox="0 0 12 10">
+                                                <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                                            </svg>
+                                        </span>
+                                    </label>
+                                </div>
+                                <div class="todo-item-title">
+                                    <img src="images/dashboard/user4.jpg" data-toggle="tooltip" data-placement="top" title="Steven Smith" alt="image">
+                                    <h3>What reason think</h3>
+                                    <p>There are many variations of...</p>
+                                </div>
+                                <div class="todo-item-action">
+                                    <a routerLink="." class="edit"><i class='bx bx-edit-alt'></i></a>
+                                    <a routerLink="." class="delete"><i class='bx bx-trash'></i></a>
+                                </div>
+                            </li>
+                            <li class="todo-list-item">
+                                <div class="checkbox">
+                                    <input class="inp-cbx" id="cbx5" type="checkbox" style="display: none;"/>
+                                    <label class="cbx" for="cbx5">
+                                        <span>
+                                            <svg width="12px" height="10px" viewbox="0 0 12 10">
+                                                <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                                            </svg>
+                                        </span>
+                                    </label>
+                                </div>
+                                <div class="todo-item-title">
+                                    <img src="images/dashboard/user5.jpg" data-toggle="tooltip" data-placement="top" title="Lucy Smith" alt="image">
+                                    <h3>Think about business content?</h3>
+                                    <p>There are many variations of...</p>
+                                </div>
+                                <div class="todo-item-action">
+                                    <a routerLink="." class="edit"><i class='bx bx-edit-alt'></i></a>
+                                    <a routerLink="." class="delete"><i class='bx bx-trash'></i></a>
+                                </div>
+                            </li>
+                            <li class="todo-list-item">
+                                <div class="checkbox">
+                                    <input class="inp-cbx" id="cbx6" type="checkbox" style="display: none;"/>
+                                    <label class="cbx" for="cbx6">
+                                        <span>
+                                            <svg width="12px" height="10px" viewbox="0 0 12 10">
+                                                <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                                            </svg>
+                                        </span>
+                                    </label>
+                                </div>
+                                <div class="todo-item-title">
+                                    <img src="images/dashboard/user6.jpg" data-toggle="tooltip" data-placement="top" title="James Anderson" alt="image">
+                                    <h3>Reason would it be advisable</h3>
+                                    <p>There are many variations of...</p>
+                                </div>
+                                <div class="todo-item-action">
+                                    <a routerLink="." class="edit"><i class='bx bx-edit-alt'></i></a>
+                                    <a routerLink="." class="delete"><i class='bx bx-trash'></i></a>
+                                </div>
+                            </li>
+                            <li class="todo-list-item">
+                                <div class="checkbox">
+                                    <input class="inp-cbx" id="cbx7" type="checkbox" style="display: none;"/>
+                                    <label class="cbx" for="cbx7">
+                                        <span>
+                                            <svg width="12px" height="10px" viewbox="0 0 12 10">
+                                                <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                                            </svg>
+                                        </span>
+                                    </label>
+                                </div>
+                                <div class="todo-item-title">
+                                    <img src="images/dashboard/user1.jpg" data-toggle="tooltip" data-placement="top" title="Sarah Taylor" alt="image">
+                                    <h3>Print bills</h3>
+                                    <p>There are many variations of...</p>
+                                </div>
+                                <div class="todo-item-action">
+                                    <a routerLink="." class="edit"><i class='bx bx-edit-alt'></i></a>
+                                    <a routerLink="." class="delete"><i class='bx bx-trash'></i></a>
+                                </div>
+                            </li>
+                            <li class="todo-list-item">
+                                <div class="checkbox">
+                                    <input class="inp-cbx" id="cbx8" type="checkbox" style="display: none;"/>
+                                    <label class="cbx" for="cbx8">
+                                        <span>
+                                            <svg width="12px" height="10px" viewbox="0 0 12 10">
+                                                <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                                            </svg>
+                                        </span>
+                                    </label>
+                                </div>
+                                <div class="todo-item-title">
+                                    <img src="images/dashboard/user2.jpg" data-toggle="tooltip" data-placement="top" title="Lucy Eva" alt="image">
+                                    <h3>Call Rampbo</h3>
+                                    <p>There are many variations of...</p>
+                                </div>
+                                <div class="todo-item-action">
+                                    <a routerLink="." class="edit"><i class='bx bx-edit-alt'></i></a>
+                                    <a routerLink="." class="delete"><i class='bx bx-trash'></i></a>
+                                </div>
+                            </li>
+                            <li class="todo-list-item">
+                                <div class="checkbox">
+                                    <input class="inp-cbx" id="cbx9" type="checkbox" style="display: none;"/>
+                                    <label class="cbx" for="cbx9">
+                                        <span>
+                                            <svg width="12px" height="10px" viewbox="0 0 12 10">
+                                                <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                                            </svg>
+                                        </span>
+                                    </label>
+                                </div>
+                                <div class="todo-item-title">
+                                    <img src="images/dashboard/user3.jpg" data-toggle="tooltip" data-placement="top" title="John Smith" alt="image">
+                                    <h3>Print Statements all</h3>
+                                    <p>There are many variations of...</p>
+                                </div>
+                                <div class="todo-item-action">
+                                    <a routerLink="." class="edit"><i class='bx bx-edit-alt'></i></a>
+                                    <a routerLink="." class="delete"><i class='bx bx-trash'></i></a>
+                                </div>
+                            </li>
+                            <li class="todo-list-item">
+                                <div class="checkbox">
+                                    <input class="inp-cbx" id="cbx10" type="checkbox" style="display: none;"/>
+                                    <label class="cbx" for="cbx10">
+                                        <span>
+                                            <svg width="12px" height="10px" viewbox="0 0 12 10">
+                                                <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                                            </svg>
+                                        </span>
+                                    </label>
+                                </div>
+                                <div class="todo-item-title">
+                                    <img src="images/dashboard/user4.jpg" data-toggle="tooltip" data-placement="top" title="Steven Smith" alt="image">
+                                    <h3>What reason think</h3>
+                                    <p>There are many variations of...</p>
+                                </div>
+                                <div class="todo-item-action">
+                                    <a routerLink="." class="edit"><i class='bx bx-edit-alt'></i></a>
+                                    <a routerLink="." class="delete"><i class='bx bx-trash'></i></a>
+                                </div>
+                            </li>
+                            <li class="todo-list-item">
+                                <div class="checkbox">
+                                    <input class="inp-cbx" id="cbx11" type="checkbox" style="display: none;"/>
+                                    <label class="cbx" for="cbx11">
+                                        <span>
+                                            <svg width="12px" height="10px" viewbox="0 0 12 10">
+                                                <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                                            </svg>
+                                        </span>
+                                    </label>
+                                </div>
+                                <div class="todo-item-title">
+                                    <img src="images/dashboard/user5.jpg" data-toggle="tooltip" data-placement="top" title="Lucy Smith" alt="image">
+                                    <h3>Think about business content?</h3>
+                                    <p>There are many variations of...</p>
+                                </div>
+                                <div class="todo-item-action">
+                                    <a routerLink="." class="edit"><i class='bx bx-edit-alt'></i></a>
+                                    <a routerLink="." class="delete"><i class='bx bx-trash'></i></a>
+                                </div>
+                            </li>
+                            <li class="todo-list-item">
+                                <div class="checkbox">
+                                    <input class="inp-cbx" id="cbx12" type="checkbox" style="display: none;"/>
+                                    <label class="cbx" for="cbx12">
+                                        <span>
+                                            <svg width="12px" height="10px" viewbox="0 0 12 10">
+                                                <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                                            </svg>
+                                        </span>
+                                    </label>
+                                </div>
+                                <div class="todo-item-title">
+                                    <img src="images/dashboard/user6.jpg" data-toggle="tooltip" data-placement="top" title="James Anderson" alt="image">
+                                    <h3>Reason would it be advisable</h3>
+                                    <p>There are many variations of...</p>
+                                </div>
+                                <div class="todo-item-action">
+                                    <a routerLink="." class="edit"><i class='bx bx-edit-alt'></i></a>
+                                    <a routerLink="." class="delete"><i class='bx bx-trash'></i></a>
+                                </div>
+                            </li>
+                        </ng-scrollbar>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

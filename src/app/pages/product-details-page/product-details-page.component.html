@@ -1,0 +1,299 @@
+<app-header />
+
+<app-page-banner
+    [pageTitle]="'Ham Salad'"
+    [backgroundImage]="'images/page-title4.jpg'"
+/>
+
+<!-- Product Details -->
+<div class="product-details-area ptb-100">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-5 col-md-12">
+                <div class="products-details-image">
+                    <img src="images/products/img1.jpg" alt="product-image">
+                </div>
+            </div>
+            <div class="col-lg-7 col-md-12">
+                <div class="products-details-desc">
+                    <h3>Ham Salad</h3>
+                    <div class="price">
+                        <span class="new-price">$20.00</span>
+                        <span class="old-price">$25.00</span>
+                    </div>
+                    <div class="products-review">
+                        <div class="rating">
+                            <i class='bx bx-star'></i>
+                            <i class='bx bx-star'></i>
+                            <i class='bx bx-star'></i>
+                            <i class='bx bx-star'></i>
+                            <i class='bx bx-star'></i>
+                        </div>
+                        <a routerLink="." class="rating-count">3 reviews</a>
+                    </div>
+                    <ul class="products-info">
+                        <li><span>Availability:</span> <a routerLink=".">In stock (7 items)</a></li>
+                        <li><span>Products Type:</span> <a routerLink=".">Salad</a></li>
+                    </ul>
+                    <div class="products-info-btn">
+                        <a routerLink="/contact"><i class='bx bx-envelope'></i> Ask about this products</a>
+                    </div>
+                    <div class="products-add-to-cart">
+                        <app-quantity-counter [initialValue]="1" />
+                        <button type="submit" class="default-btn">Add to Cart</button>
+                    </div>
+                    <div class="buy-checkbox-btn">
+                        <div class="item">
+                            <input class="inp-cbx" id="cbx" type="checkbox">
+                            <label class="cbx" for="cbx">
+                                <span>
+                                    <svg width="12px" height="10px" viewbox="0 0 12 10">
+                                        <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                                    </svg>
+                                </span>
+                                <span>I agree with the terms and conditions</span>
+                            </label>
+                        </div>
+                        <div class="item">
+                            <a routerLink="." class="default-btn">Buy it now!</a>
+                        </div>
+                    </div>
+                    <div class="products-details-accordion accordion">
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <button class="accordion-button" type="button" (click)="toggleSection(0)" [ngClass]="{ 'open': isSectionOpen(0) }">
+                                    Description <i class='bx bx-chevron-down'></i>
+                                </button>
+                            </div>
+                            <div class="accordion-collapse" [ngClass]="{ 'open': isSectionOpen(0) }">
+                                <div class="accordion-body">
+                                    <p>Design inspiration lorem ipsum dolor sit amet, consectetuer adipiscing elit. Morbi commodo, ipsum sed pharetra gravida, orci magna rhoncus neque, id pulvinar odio lorem non turpis.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <button class="accordion-button" type="button" (click)="toggleSection(1)" [ngClass]="{ 'open': isSectionOpen(1) }">
+                                    Additional information <i class='bx bx-chevron-down'></i>
+                                </button>
+                            </div>
+                            <div class="accordion-collapse" [ngClass]="{ 'open': isSectionOpen(1) }">
+                                <div class="accordion-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <tbody>
+                                                <tr>
+                                                    <td>Brand:</td>
+                                                    <td>EnvyTheme</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Color:</td>
+                                                    <td>Brown</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Size:</td>
+                                                    <td>Large, Medium</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Weight:</td>
+                                                    <td>1 kg</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Dimensions:</td>
+                                                    <td>16 x 22 x 123 cm</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <button class="accordion-button" type="button" (click)="toggleSection(2)" [ngClass]="{ 'open': isSectionOpen(2) }">
+                                    Reviews <i class='bx bx-chevron-down'></i>
+                                </button>
+                            </div>
+                            <div class="accordion-collapse" [ngClass]="{ 'open': isSectionOpen(2) }">
+                                <div class="accordion-body">
+                                    <div class="products-review-form">
+                                        <h3>Customer Reviews</h3>
+                                        <div class="review-title">
+                                            <div class="rating">
+                                                <i class='bx bxs-star'></i>
+                                                <i class='bx bxs-star'></i>
+                                                <i class='bx bxs-star'></i>
+                                                <i class='bx bxs-star'></i>
+                                                <i class='bx bx-star'></i>
+                                            </div>
+                                            <p>Based on 3 reviews</p>
+                                            <a routerLink="." class="default-btn">Write a Review</a>
+                                        </div>
+                                        <div class="review-comments">
+                                            <div class="review-item">
+                                                <div class="rating">
+                                                    <i class='bx bxs-star'></i>
+                                                    <i class='bx bxs-star'></i>
+                                                    <i class='bx bxs-star'></i>
+                                                    <i class='bx bxs-star'></i>
+                                                    <i class='bx bx-star'></i>
+                                                </div>
+                                                <h3>Good</h3>
+                                                <span><strong>Admin</strong> on <strong>Sep 21, 2019</strong></span>
+                                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.</p>
+                                            </div>
+                                            <div class="review-item">
+                                                <div class="rating">
+                                                    <i class='bx bxs-star'></i>
+                                                    <i class='bx bxs-star'></i>
+                                                    <i class='bx bxs-star'></i>
+                                                    <i class='bx bxs-star'></i>
+                                                    <i class='bx bx-star'></i>
+                                                </div>
+                                                <h3>Good</h3>
+                                                <span><strong>Admin</strong> on <strong>Sep 21, 2019</strong></span>
+                                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.</p>
+                                            </div>
+                                            <div class="review-item">
+                                                <div class="rating">
+                                                    <i class='bx bxs-star'></i>
+                                                    <i class='bx bxs-star'></i>
+                                                    <i class='bx bxs-star'></i>
+                                                    <i class='bx bxs-star'></i>
+                                                    <i class='bx bx-star'></i>
+                                                </div>
+                                                <h3>Good</h3>
+                                                <span><strong>Admin</strong> on <strong>Sep 21, 2019</strong></span>
+                                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.</p>
+                                            </div>
+                                        </div>
+                                        <div class="review-form">
+                                            <h3>Write a Review</h3>
+                                            <form>
+                                                <div class="row">
+                                                    <div class="col-lg-6 col-md-6">
+                                                        <div class="form-group">
+                                                            <input type="text" id="name" name="name" placeholder="Enter your name" class="form-control">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6 col-md-6">
+                                                        <div class="form-group">
+                                                            <input type="email" id="email" name="email" placeholder="Enter your email" class="form-control">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-12 col-md-12">
+                                                        <div class="form-group">
+                                                            <input type="text" id="review-title" name="review-title" placeholder="Enter your review a title" class="form-control">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-12 col-md-12">
+                                                        <div class="form-group">
+                                                            <textarea name="review-body" id="review-body" cols="30" rows="6" placeholder="Write your comments here" class="form-control"></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-12 col-md-12">
+                                                        <button type="submit" class="default-btn">Submit Review</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Product Details -->
+
+<!-- Related Products -->
+<div class="related-products pb-70">
+    <div class="container">
+        <div class="section-title">
+            <span class="sub-title">Our Shop</span>
+            <h2>Related Products</h2>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-4 col-md-6 col-sm-6">
+                <div class="single-products-box">
+                    <div class="products-image">
+                        <a routerLink="/product-details">
+                            <img src="images/products/img2.jpg" class="main-image" alt="image">
+                            <img src="images/products/img-hover2.jpg" class="hover-image" alt="image">
+                        </a>
+                        <div class="sale-tag">Sale!</div>
+                    </div>
+                    <div class="products-content">
+                        <h3><a routerLink="/product-details">Fresh Cappuccino</a></h3>
+                        <div class="price">
+                            <span class="new-price">$25</span>
+                        </div>
+                        <div class="star-rating">
+                            <i class='bx bxs-star'></i>
+                            <i class='bx bxs-star'></i>
+                            <i class='bx bxs-star'></i>
+                            <i class='bx bxs-star'></i>
+                            <i class='bx bxs-star'></i>
+                        </div>
+                        <a routerLink="/cart" class="add-to-cart">Add to Cart</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 col-sm-6">
+                <div class="single-products-box">
+                    <div class="products-image">
+                        <a routerLink="/product-details">
+                            <img src="images/products/img3.jpg" class="main-image" alt="image">
+                            <img src="images/products/img-hover3.jpg" class="hover-image" alt="image">
+                        </a>
+                    </div>
+                    <div class="products-content">
+                        <h3><a routerLink="/product-details">Honey Cake</a></h3>
+                        <div class="price">
+                            <span class="old-price">$15</span>
+                            <span class="new-price">$11</span>
+                        </div>
+                        <div class="star-rating">
+                            <i class='bx bxs-star'></i>
+                            <i class='bx bxs-star'></i>
+                            <i class='bx bxs-star'></i>
+                            <i class='bx bxs-star'></i>
+                            <i class='bx bxs-star'></i>
+                        </div>
+                        <a routerLink="/cart" class="add-to-cart">Add to Cart</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 col-sm-6">
+                <div class="single-products-box">
+                    <div class="products-image">
+                        <a routerLink="/product-details">
+                            <img src="images/products/img4.jpg" class="main-image" alt="image">
+                            <img src="images/products/img-hover4.jpg" class="hover-image" alt="image">
+                        </a>
+                    </div>
+                    <div class="products-content">
+                        <h3><a routerLink="/product-details">Delicious Dish</a></h3>
+                        <div class="price">
+                            <span class="new-price">$50</span>
+                        </div>
+                        <div class="star-rating">
+                            <i class='bx bxs-star'></i>
+                            <i class='bx bxs-star'></i>
+                            <i class='bx bxs-star'></i>
+                            <i class='bx bxs-star'></i>
+                            <i class='bx bxs-star'></i>
+                        </div>
+                        <a routerLink="/cart" class="add-to-cart">Add to Cart</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Related Products -->
+
+<app-footer />

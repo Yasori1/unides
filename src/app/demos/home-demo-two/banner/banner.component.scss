@@ -1,0 +1,181 @@
+.main-banner-wrapper {
+    background-color: var(--whiteColor);
+    position: relative;
+    z-index: 1;
+    padding: {
+        top: 200px;
+        bottom: 400px;
+    };
+    background: {
+        position: bottom center;
+        repeat: no-repeat;
+        size: cover;
+    };
+}
+.banner-wrapper-content {
+    max-width: 620px;
+    
+    h1 {
+        margin-bottom: 20px;
+        font: {
+            size: 50px;
+            weight: 700;
+        };
+        ngx-typed-writer {
+            color: var(--primaryColor1);
+        }
+    }
+    p {
+        line-height: 1.8;
+        max-width: 600px;
+        color: #635d5d;
+        margin: {
+            bottom: 0;
+        };
+    }
+    form {
+        position: relative;
+        margin-top: 30px;
+        max-width: 550px;
+
+        .input-search {
+            display: block;
+            width: 100%;
+            background-color: var(--whiteColor);
+            border: none;
+            height: 60px;
+            padding-left: 20px;
+            border-radius: 70px;
+            outline: 0;
+            color: var(--blackColor);
+            box-shadow: 0px 5px 28.5px 1.5px rgba(149, 152, 200, 0.2) !important;
+
+            &::placeholder {
+                transition: var(--transition);
+                color: var(--bodyColor);
+            }
+            &:focus {
+                &::placeholder {
+                    color: transparent;
+                }
+            }
+        }
+        button {
+            position: absolute;
+            right: 5px;
+            top: 5px;
+            background-color: var(--primaryColor1);
+            color: var(--whiteColor);
+            border: none;
+            height: 50px;
+            padding: 0 30px;
+            border-radius: 70px;
+            transition: var(--transition);
+            text-transform: uppercase;
+            font: {
+                size: var(--fontSize);
+                weight: 600;
+            };
+            &:hover, &:focus {
+                background-color: var(--primaryColor2);
+                color: var(--whiteColor);
+            }
+        }
+    }
+}
+
+/* Max width 767px */
+@media only screen and (max-width : 767px) {
+
+    .main-banner-wrapper {
+        padding-top: 130px;
+    }
+    .banner-wrapper-content {
+        max-width: 100%;
+        text-align: center;
+
+        h1 {
+            font-size: 35px;
+            margin-bottom: 15px;
+        }
+        p {
+            line-height: 1.9;
+            max-width: 100%;
+        }
+        form {
+            margin-top: 25px;
+            max-width: 100%;
+
+            button {
+                font-size: 14px;
+                position: relative;
+                display: block;
+                top: 0;
+                right: 0;
+                width: 100%;
+                margin-top: 12px;
+                box-shadow: 0px 5px 28.5px 1.5px rgba(149, 152, 200, 0.2) !important;
+            }
+        }
+    }
+
+}
+
+/* Min width 576px to Max width 767px */
+@media only screen and (min-width : 576px) and (max-width : 767px) {
+
+    .banner-wrapper-content {
+        form {
+            button {
+                position: absolute;
+                display: inline-block;
+                top: 5px;
+                right: 5px;
+                width: auto;
+                margin-top: 0;
+                box-shadow: unset !important;
+            }
+        }
+    }
+
+}
+
+/* Min width 768px to Max width 991px */
+@media only screen and (min-width : 768px) and (max-width : 991px) {
+
+    .main-banner-wrapper {
+        padding-top: 160px;
+    }
+    .banner-wrapper-content {
+        text-align: center;
+        margin: {
+            left: auto;
+            right: auto;
+        };
+        h1 {
+            font-size: 47px;
+        }
+        p {
+            margin: {
+                left: auto;
+                right: auto;
+            };
+        }
+        form {
+            margin: {
+                left: auto;
+                right: auto;
+            };
+        }
+    }
+
+}
+
+/* Min width 992px to Max width 1199px */
+@media only screen and (min-width : 992px) and (max-width : 1199px) {}
+
+/* Min width 1200px to Max width 1399px */
+@media only screen and (min-width: 1200px) and (max-width: 1399px) {}
+
+/* Min width 1600px */
+@media only screen and (min-width: 1600px) {}
