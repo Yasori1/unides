@@ -1,8 +1,8 @@
 <app-header />
 
 <app-page-banner
-    [pageTitle]="'Contact Us'"
-    [backgroundImage]="'images/page-title1.jpg'"
+    [pageTitle]="'Bize Ulaşın'"
+    [backgroundImage]="'images/titles/uni-2.png'"
 />
 
 <!-- Contact -->
@@ -11,23 +11,24 @@
         <div class="row">
             <div class="col-lg-5 col-md-12">
                 <div class="contact-info">
-                    <h3>Here to Help</h3>
-                    <p>Have a question? You may find an answer in our <a routerLink="/faq">faq</a>. But you can also contact us.</p>
+                    <h3>Yardım için buradayız</h3>
+                    <p>Sormak istediğin, hâli hazırda bir sorun varsa <a routerLink="/faq">sss</a> sayfasına gidebilirsin, ya da bizimle iletişime geçebilirsin.</p>
                     <ul class="contact-list">
-                        <li><i class='bx bx-map'></i> Location: <a href="#">Wonder Street, USA, New York</a></li>
-                        <li><i class='bx bx-phone-call'></i> Call Us: <a href="tel:+01321654214">+01 321 654 214</a></li>
-                        <li><i class='bx bx-envelope'></i> Email Us: <a href="mailto:hello&#64;louise.com">hello&#64;louise.com</a></li>
-                        <li><i class='bx bx-microphone'></i> Fax: <a href="tel:+123456789">+123456789</a></li>
+                        <li><i class='bx bx-map'></i> Location: <a href="#">Ön Cebeci, Kıbrıs Caddesi No:4 Kurtuluş, Kıbrıs Cd., Çankaya/Ankara</a></li>
+                        <li><i class='bx bx-phone-call'></i> Call Us: <a href="tel:+903125517000">(0312) 551 70 00</a></li>
+                        <li><i class='bx bx-envelope'></i> Email Us: <a href="mailto:info&#64;unides.com">info&#64;unides.com</a></li>
                     </ul>
-                    <h3>Opening Hours:</h3>
+                    <h3>Çalışma Saatleri:</h3>
                     <ul class="opening-hours">
-                        <li><span>Monday:</span> 8AM - 6AM</li>
-                        <li><span>Tuesday:</span> 8AM - 6AM</li>
-                        <li><span>Wednesday:</span> 8AM - 6AM</li>
-                        <li><span>Thursday - Friday:</span> 8AM - 6AM</li>
-                        <li><span>Sunday:</span> Closed</li>
+                        <li><span>Pazartesi:</span> 08:00 - 18:00</li>
+                        <li><span>Salı:</span> 08:00 - 18:00</li>
+                        <li><span>Çarşamba:</span> 08:00 - 18:00</li>
+                        <li><span>Perşembe:</span> 08:00 - 18:00</li>
+                        <li><span>Cuma:</span> 08:00 - 18:00</li>
+                        <li><span>Cumartesi:</span> 08:00 - 18:00</li>
+                        <li><span>Pazar:</span> Kapalı</li>
                     </ul>
-                    <h3>Follow Us:</h3>
+                    <h3>Takipte Kalın:</h3>
                     <ul class="social">
                         <li><a href="#" target="_blank"><i class='bx bxl-facebook'></i></a></li>
                         <li><a href="#" target="_blank"><i class='bx bxl-twitter'></i></a></li>
@@ -41,36 +42,36 @@
             </div>
             <div class="col-lg-7 col-md-12">
                 <div class="contact-form">
-                    <h3>Drop Us A Line</h3>
-                    <p>We're happy to answer any questions you have or provide you with an estimate. Just send us a message in the form below with any questions you may have.</p>
+                    <h3>Bize Ulaşın</h3>
+                    <p>Herhangi bir sorunuz varsa veya bir tahmin almak istiyorsanız, aşağıdaki form aracılığıyla bize mesaj gönderebilirsiniz.</p>
                     <form id="contactForm">
                         <div class="row">
                             <div class="col-lg-12 col-md-6">
                                 <div class="form-group mb-3">
-                                    <label>Name <span>*</span></label>
-                                    <input type="text" name="name" id="name" class="form-control" placeholder="Your name">
+                                    <label>İsim <span>*</span></label>
+                                    <input type="text" name="name" id="name" class="form-control" placeholder="İsminiz">
                                 </div>
                             </div>
                             <div class="col-lg-12 col-md-6">
                                 <div class="form-group mb-3">
-                                    <label>Email <span>*</span></label>
-                                    <input type="email" name="email" id="email" class="form-control" placeholder="Your email address">
+                                    <label>E-Posta <span>*</span></label>
+                                    <input type="email" name="email" id="email" class="form-control" placeholder="E-Posta Adresiniz">
                                 </div>
                             </div>
                             <div class="col-lg-12 col-md-12">
                                 <div class="form-group mb-3">
-                                    <label>Phone Number <span>*</span></label>
-                                    <input type="text" name="phone_number" id="phone_number" class="form-control" placeholder="Your phone number">
+                                    <label>Telefon Numarası <span>*</span></label>
+                                    <input type="text" name="phone_number" id="phone_number" class="form-control" placeholder="Telefon Numaranız">
                                 </div>
                             </div>
                             <div class="col-lg-12 col-md-12">
                                 <div class="form-group mb-3">
-                                    <label>Your Message <span>*</span></label>
-                                    <textarea name="message" id="message" cols="30" rows="5" class="form-control" placeholder="Write your message..."></textarea>
+                                    <label>Mesajınız <span>*</span></label>
+                                    <textarea name="message" id="message" cols="30" rows="5" class="form-control" placeholder="Mesajınızı yazın..."></textarea>
                                 </div>
                             </div>
                             <div class="col-lg-12 col-md-12">
-                                <button type="submit" class="default-btn">Send Message</button>
+                                <button type="submit" class="default-btn">Mesaj Gönder</button>
                             </div>
                         </div>
                     </form>
@@ -83,8 +84,7 @@
 
 <!-- Maps -->
 <div id="map">
-    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2987.759347356707!2d-73.78797548425361!3d41.50948959637902!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89dd490255c9bfa7%3A0xfe099945f43b6e47!2sWonderland%20Dr%2C%20East%20Fishkill%2C%20NY%2012533%2C%20USA!5e0!3m2!1sen!2sbd!4v1587654262668!5m2!1sen!2sbd"></iframe>
-</div>
+   <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3059.670372161656!2d32.86502977684548!3d39.92639227152271!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14d34ef3ebdc293f%3A0x2fef5e90977de345!2zQW5rYXJhIEdlbsOnbGlrIFZlIFNwb3IgxLBsIE3DvGTDvHJsw7zEn8O8!5e0!3m2!1str!2str!4v1763646860440!5m2!1str!2str" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
 <!-- End Maps -->
 
 <app-footer />
