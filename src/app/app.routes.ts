@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { ErrorPageComponent } from './pages/error-page/error-page.component';
-import { HomeDemoOneComponent } from './demos/home-demo-one/home-demo-one.component';
+import { HomeComponent } from './pages/home/home.component';
 import { HomeDemoTwoComponent } from './demos/home-demo-two/home-demo-two.component';
 import { HomeDemoThreeComponent } from './demos/home-demo-three/home-demo-three.component';
 import { HomeDemoFourComponent } from './demos/home-demo-four/home-demo-four.component';
@@ -44,35 +44,37 @@ import { MessagesComponent } from './admin-dashboard/messages/messages.component
 import { ToDoListComponent } from './admin-dashboard/to-do-list/to-do-list.component';
 import { EmailReadComponent } from './admin-dashboard/email-read/email-read.component';
 import { EmailComposeComponent } from './admin-dashboard/email-compose/email-compose.component';
+import { CommunitiesPageComponent } from './pages/communities-page/communities-page.component';
 
 export const routes: Routes = [
-    {path: '', component: HomeDemoOneComponent},
-    {path: 'index-2', component: HomeDemoTwoComponent},
-    {path: 'index-3', component: HomeDemoThreeComponent},
-    {path: 'index-4', component: HomeDemoFourComponent},
+    {path: '', component: HomeComponent},
+    // {path: 'index-2', component: HomeDemoTwoComponent},
+    // {path: 'index-3', component: HomeDemoThreeComponent},
+    // {path: 'index-4', component: HomeDemoFourComponent},
     {path: 'about', component: AboutPageComponent},
     {path: 'team', component: TeamPageComponent},
-    {path: 'how-it-works', component: HowItWorksPageComponent},
-    {path: 'categories', component: CategoriesPageComponent},
-    {path: 'listings', component: ListingsPage1Component},
-    {path: 'listings-2', component: ListingsPage2Component},
-    {path: 'listings-3', component: ListingsPage3Component},
-    {path: 'listings-4', component: ListingsPage4Component},
-    {path: 'listings-5', component: ListingsPage5Component},
-    {path: 'listing-details', component: ListingDetailsComponent},
+    {path: 'communities', component: CommunitiesPageComponent},
+    // {path: 'how-it-works', component: HowItWorksPageComponent},
+    // {path: 'categories', component: CategoriesPageComponent},
+    // {path: 'listings', component: ListingsPage1Component},
+    // {path: 'listings-2', component: ListingsPage2Component},
+    // {path: 'listings-3', component: ListingsPage3Component},
+    // {path: 'listings-4', component: ListingsPage4Component},
+    // {path: 'listings-5', component: ListingsPage5Component},
+    // {path: 'listing-details', component: ListingDetailsComponent},
     {path: 'faq', component: FaqPageComponent},
     {path: 'login', component: LoginPageComponent},
     {path: 'register', component: RegisterPageComponent},
-    {path: 'shop', component: ShopPageComponent},
-    {path: 'cart', component: CartPageComponent},
-    {path: 'checkout', component: CheckoutPageComponent},
-    {path: 'product-details', component: ProductDetailsPageComponent},
-    {path: 'blog-grid', component: BlogGridPageComponent},
-    {path: 'blog-right-sidebar', component: BlogRightSidebarPageComponent},
-    {path: 'blog-left-sidebar', component: BlogLeftSidebarPageComponent},
-    {path: 'blog-details', component: BlogDetailsPageComponent},
-    {path: 'blog-details-2', component: BlogDetailsPage2Component},
-    {path: 'blog-details-3', component: BlogDetailsPage3Component},
+    // {path: 'shop', component: ShopPageComponent},
+    // {path: 'cart', component: CartPageComponent},
+    // {path: 'checkout', component: CheckoutPageComponent},
+    // {path: 'product-details', component: ProductDetailsPageComponent},
+    // {path: 'blog-grid', component: BlogGridPageComponent},
+    // {path: 'blog-right-sidebar', component: BlogRightSidebarPageComponent},
+    // {path: 'blog-left-sidebar', component: BlogLeftSidebarPageComponent},
+    // {path: 'blog-details', component: BlogDetailsPageComponent},
+    // {path: 'blog-details-2', component: BlogDetailsPage2Component},
+    // {path: 'blog-details-3', component: BlogDetailsPage3Component},
     {path: 'privacy-policy', component: PrivacyPolicyPageComponent},
     {path: 'terms-conditions', component: TermsConditionsPageComponent},
     {path: 'contact', component: ContactPageComponent},

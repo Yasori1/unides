@@ -9,11 +9,12 @@ import { FeedbackComponent } from '../../common/feedback/feedback.component';
 import { DownloadAppComponent } from '../../common/download-app/download-app.component';
 import { FooterComponent } from '../../common/footer/footer.component';
 import { HeaderComponent } from '../../common/header/header.component';
+import { LatestCommunitiesComponent } from '../../common/latest-communities/latest-communities.component';
 
 @Component({
-    selector: 'app-home-demo-one',
-    imports: [HeaderComponent, BannerComponent, ListingsComponent, DestinationsComponent, HowItWorksComponent, PlacesComponent, VideoComponent, FeedbackComponent, DownloadAppComponent, FooterComponent],
-    templateUrl: './home-demo-one.component.html',
-    styleUrl: './home-demo-one.component.scss'
+    selector: 'app-home',
+    imports: [HeaderComponent, BannerComponent, LatestCommunitiesComponent, DestinationsComponent, HowItWorksComponent, PlacesComponent, VideoComponent, FeedbackComponent, DownloadAppComponent, FooterComponent],
+    templateUrl: './home.component.html',
+    styleUrl: './home.component.scss'
 })
-export class HomeDemoOneComponent {}
+export class HomeComponent {}
