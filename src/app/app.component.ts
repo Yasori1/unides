@@ -11,7 +11,7 @@ import { RouterOutlet, Router, Event, NavigationEnd } from '@angular/router';
 })
 export class AppComponent {
 
-    title = 'Louise - Directory Listing Angular 19 Template + Admin Panel';
+    title = 'Ünides Topluluk ve Destek Sistemi';
 
     constructor (
         private router: Router,
