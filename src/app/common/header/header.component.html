@@ -30,80 +30,6 @@
                 <a href="/about" class="nav-link">
                   Hakkımızda
                 </a>
-                <!-- <ul class="dropdown-menu">
-                                    <li class="nav-item">
-                                        <a routerLink="/listings" class="nav-link" routerLinkActive="active"[routerLinkActiveOptions]="{exact: true}">
-                                            Listings Layout 1
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a routerLink="/listings-2" class="nav-link" routerLinkActive="active"[routerLinkActiveOptions]="{exact: true}">
-                                            Listings Layout 2
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a routerLink="/listings-3" class="nav-link" routerLinkActive="active"[routerLinkActiveOptions]="{exact: true}">
-                                            Listings Layout 3
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a routerLink="/listings-4" class="nav-link" routerLinkActive="active"[routerLinkActiveOptions]="{exact: true}">
-                                            Listings Layout 4
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a routerLink="/listings-5" class="nav-link" routerLinkActive="active"[routerLinkActiveOptions]="{exact: true}">
-                                            Listings Layout 5
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a routerLink="/listing-details" class="nav-link" routerLinkActive="active"[routerLinkActiveOptions]="{exact: true}">
-                                            Listing Details
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a href="javascript:void(0)" class="nav-link">
-                                            User Panel <i class='bx bx-chevron-right'></i>
-                                        </a>
-                                        <ul class="dropdown-menu">
-                                            <li class="nav-item">
-                                                <a routerLink="/dashboard" class="nav-link">
-                                                    Dashboard
-                                                </a>
-                                            </li>
-                                            <li class="nav-item">
-                                                <a routerLink="/dashboard/messages" class="nav-link">
-                                                    Messages
-                                                </a>
-                                            </li>
-                                            <li class="nav-item">
-                                                <a routerLink="/dashboard/bookings" class="nav-link">
-                                                    Bookings
-                                                </a>
-                                            </li>
-                                            <li class="nav-item">
-                                                <a routerLink="/dashboard/reviews" class="nav-link">
-                                                    Reviews
-                                                </a>
-                                            </li>
-                                            <li class="nav-item">
-                                                <a routerLink="/dashboard/bookmarks" class="nav-link">
-                                                    Bookmarks
-                                                </a>
-                                            </li>
-                                            <li class="nav-item">
-                                                <a routerLink="/dashboard/my-listings" class="nav-link">
-                                                    My Listing
-                                                </a>
-                                            </li>
-                                            <li class="nav-item">
-                                                <a routerLink="/dashboard/my-profile" class="nav-link">
-                                                    My Profile
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                </ul> -->
               </li>
               <li class="nav-item">
                 <a routerLink="/contact" class="nav-link" routerLinkActive="active"
@@ -111,6 +37,8 @@
                   İletişim
                 </a>
               </li>
+              
+              <!-- Sayfalar Dropdown (Masaüstü) -->
               <li class="nav-item megamenu">
                 <a href="javascript:void(0)" class="nav-link">
                   Sayfalar <i class='bx bx-chevron-down'></i>
@@ -136,6 +64,8 @@
                                 Duyurular
                               </a>
                             </li>
+                            
+                            <!-- BURASI ZATEN DOĞRUYDU, KORUNDU -->
                             <li>
                               <a routerLink="/events" routerLinkActive="active"
                                 [routerLinkActiveOptions]="{exact: true}">
@@ -209,7 +139,7 @@
 
 </header>
 
-<!-- Responsive Navbar -->
+<!-- Responsive Navbar (Mobil Menü) -->
 <div class="responsive-navbar offcanvas offcanvas-end border-0 transition" [class.show]="classApplied"
   [ngClass]="{'style-two': router.url === '/index-2'}">
   <div class="offcanvas-header">
@@ -238,6 +168,8 @@
           Hakkımızda
         </a>
       </div>
+      
+      <!-- Mobil Sayfalar Menüsü -->
       <div class="accordion-item rounded-0 border-0">
         <button type="button" (click)="toggleSection(2)" [ngClass]="{ 'open': isSectionOpen(2) }"
           class="accordion-button d-block text-start shadow-none fw-semibold border-0 transition border-radius">
@@ -252,6 +184,28 @@
                   Topluluklar
                 </a>
               </li>
+              
+              <!-- YENİ EKLENEN MOBİL LİNKLER (Masaüstü ile eşitledim) -->
+              <li class="sidemenu-item">
+                <a routerLink="/announcements" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
+                  class="sidemenu-link border-radius d-block position-relative transition fw-semibold">
+                  Duyurular
+                </a>
+              </li>
+              <li class="sidemenu-item">
+                <a routerLink="/events" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
+                  class="sidemenu-link border-radius d-block position-relative transition fw-semibold">
+                  Etkinlikler
+                </a>
+              </li>
+              <li class="sidemenu-item">
+                <a routerLink="/opportunities" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
+                  class="sidemenu-link border-radius d-block position-relative transition fw-semibold">
+                  Fırsatlar
+                </a>
+              </li>
+              <!-- -------------------------------------------------- -->
+
               <li class="sidemenu-item">
                 <a routerLink="/faq" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
                   class="sidemenu-link border-radius d-block position-relative transition fw-semibold">
@@ -286,6 +240,7 @@
           </div>
         </div>
       </div>
+      
       <div class="accordion-item rounded-0 border-0">
         <button type="button" (click)="toggleSection(4)" [ngClass]="{ 'open': isSectionOpen(4) }"
           class="accordion-button d-block text-start shadow-none fw-semibold border-0 transition border-radius">

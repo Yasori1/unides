@@ -45,6 +45,9 @@ import { ToDoListComponent } from './admin-dashboard/to-do-list/to-do-list.compo
 import { EmailReadComponent } from './admin-dashboard/email-read/email-read.component';
 import { EmailComposeComponent } from './admin-dashboard/email-compose/email-compose.component';
 import { CommunitiesPageComponent } from './pages/communities-page/communities-page.component';
+// Etkinlikler Component Importu
+import { EventsComponent } from './pages/events-page/events.component';
+
 
 export const routes: Routes = [
     {path: '', component: HomeComponent},
@@ -54,6 +57,11 @@ export const routes: Routes = [
     {path: 'about', component: AboutPageComponent},
     {path: 'team', component: TeamPageComponent},
     {path: 'communities', component: CommunitiesPageComponent},
+    
+    // --- DÜZELTİLEN KISIM: Events rotası burada olmalı ---
+    {path: 'events', component: EventsComponent },
+    // -----------------------------------------------------
+
     // {path: 'how-it-works', component: HowItWorksPageComponent},
     // {path: 'categories', component: CategoriesPageComponent},
     // {path: 'listings', component: ListingsPage1Component},
@@ -94,10 +102,10 @@ export const routes: Routes = [
             {path: 'email-compose', component: EmailComposeComponent},
             {path: 'messages', component: MessagesComponent},
             {path: 'to-do-list', component: ToDoListComponent},
-            {path: 'my-profile', component: MyProfileComponent}
+            {path: 'my-profile', component: MyProfileComponent},
+            // Events buradan kaldırıldı
         ]
     },
-    // Here add new pages component
-
-    {path: '**', component: ErrorPageComponent} // This line will remain down from the whole pages component list
+    
+    {path: '**', component: ErrorPageComponent} 
 ];

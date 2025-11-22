@@ -1,0 +1,152 @@
+// Varsayılan renkler (projenin global stillerine göre ayarlanabilir)
+$primary-color: #fd1616; // Ünides kırmızısı/turuncusu
+$text-dark: #212529;
+$text-light: #666;
+$bg-gray: #f9f9f9;
+
+.events-filter-menu {
+    margin-bottom: 40px;
+
+    .filter-btn {
+        background: transparent;
+        border: 1px solid #ddd;
+        padding: 8px 20px;
+        margin: 0 5px;
+        border-radius: 25px;
+        font-weight: 600;
+        color: $text-light;
+        transition: 0.3s;
+        cursor: pointer;
+
+        &:hover, &.active {
+            background-color: $primary-color;
+            color: #fff;
+            border-color: $primary-color;
+            box-shadow: 0 5px 15px rgba($primary-color, 0.3);
+        }
+    }
+}
+
+.single-events-box {
+    background-color: #fff;
+    margin-bottom: 30px;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+    &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+
+        .image img {
+            transform: scale(1.05);
+        }
+    }
+
+    .image {
+        position: relative;
+        overflow: hidden;
+        height: 200px;
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .date {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            background-color: $primary-color;
+            color: #fff;
+            padding: 5px 15px;
+            font-size: 13px;
+            font-weight: 600;
+            border-top-right-radius: 10px;
+        }
+    }
+
+    .content {
+        padding: 20px;
+        position: relative;
+
+        .status-badge {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 3px 8px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+
+            &.active {
+                background-color: #e6f9e6;
+                color: #28a745; // Yeşil
+            }
+
+            &.upcoming {
+                background-color: #fff8e1;
+                color: #ffc107; // Sarı/Turuncu
+            }
+        }
+
+        h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            font-weight: 700;
+            color: $text-dark;
+            line-height: 1.4;
+        }
+
+        .location {
+            display: block;
+            color: $text-light;
+            font-size: 13px;
+            margin-bottom: 10px;
+
+            i {
+                color: $primary-color;
+                margin-right: 3px;
+            }
+        }
+
+        p {
+            font-size: 14px;
+            color: $text-light;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .default-btn {
+            display: inline-block;
+            padding: 8px 20px;
+            background-color: $primary-color;
+            color: #fff;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 13px;
+            transition: 0.3s;
+
+            i {
+                vertical-align: middle;
+            }
+
+            &:hover {
+                background-color: darken($primary-color, 10%);
+            }
+        }
+    }
+}
+
+// Mobil uyumluluk
+@media only screen and (max-width: 767px) {
+    .events-filter-menu .filter-btn {
+        display: block;
+        width: 100%;
+        margin: 5px 0;
+    }
+}
