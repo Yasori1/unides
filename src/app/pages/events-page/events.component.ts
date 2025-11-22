@@ -1,20 +1,21 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common'; // *ngFor, *ngIf, ngClass için
-import { RouterModule } from '@angular/router'; // routerLink için
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 
+// --- ÖNEMLİ: Bu yollar senin projendeki klasör yapısına göre değişebilir ---
 import { HeaderComponent } from '../../common/header/header.component';
 import { FooterComponent } from '../../common/footer/footer.component';
 import { PageBannerComponent } from '../../common/page-banner/page-banner.component';
 
+// Proje veri tipi
 interface Project {
   id: number;
   title: string;
-  category: string;
-  date: string;
+  status: 'active' | 'upcoming';
+  startDate: string;          // <-- EKLENMİŞ OLMALI
   description: string;
-  image: string;
-  status: 'active' | 'upcoming'; // active: Devam Eden, upcoming: Yakında
   location?: string;
+  image: string;
 }
 
 @Component({
@@ -31,64 +32,77 @@ interface Project {
   styleUrls: ['./events.component.scss']
 })
 export class EventsComponent implements OnInit {
+
   currentFilter: 'all' | 'active' | 'upcoming' = 'all';
 
-  // Örnek veriler (görselleri assets/images/events içine eklemeyi unutma)
+  // 🔥 DETAY MODALINI AÇMAK İÇİN GEREKEN STATE
+  selectedProject: Project | null = null;  // <-- EKLENDİ
+
   projects: Project[] = [
     {
       id: 1,
       title: 'Kampüs Kodluyor Hackathonu',
-      category: 'Yazılım & Teknoloji',
-      date: '25 Kasım 2025 - 27 Kasım 2025',
-      description: '48 saat sürecek maratonda takımlar en iyi dijital çözümü üretmek için yarışıyor.',
-      image: 'assets/images/events/event1.jpg',
       status: 'active',
-      location: 'İstanbul Kampüs'
+      startDate: '25 Kasım 2025 - 27 Kasım 2025',
+      description: '48 saat sürecek maratonda takımlar en iyi dijital çözümü üretmek için yarışıyor.',
+      location: 'İstanbul Kampüs',
+      image: 'assets/images/events/event1.jpg'
     },
     {
       id: 2,
       title: 'Sürdürülebilir Kampüs Zirvesi',
-      category: 'Sosyal Sorumluluk',
-      date: '10 Aralık 2025',
-      description: 'Yeşil bir gelecek için üniversiteler arası işbirliği projeleri konuşuluyor.',
-      image: 'assets/images/events/event2.jpg',
       status: 'upcoming',
-      location: 'Ankara'
+      startDate: '10 Aralık 2025',
+      description: 'Yeşil bir gelecek için üniversiteler arası işbirliği projeleri konuşuluyor.',
+      location: 'Ankara',
+      image: 'assets/images/events/event2.jpg'
     },
     {
       id: 3,
       title: 'Dijital Girişimcilik Akademisi',
-      category: 'Kariyer & Eğitim',
-      date: 'Her Cumartesi',
-      description: 'Fikrini girişime dönüştürmek isteyenler için 8 haftalık eğitim programı devam ediyor.',
-      image: 'assets/images/events/event3.jpg',
       status: 'active',
-      location: 'Online'
+      startDate: 'Her Cumartesi',
+      description: 'Fikrini girişime dönüştürmek isteyenler için 8 haftalık eğitim programı devam ediyor.',
+      location: 'Online',
+      image: 'assets/images/events/event3.jpg'
     },
     {
       id: 4,
       title: 'Yapay Zeka ve Sanat Sergisi',
-      category: 'Kültür & Sanat',
-      date: 'Ocak 2026',
-      description: 'Yapay zeka araçlarıyla üretilen eserlerin sergileneceği büyük buluşma.',
-      image: 'assets/images/events/event4.jpg',
       status: 'upcoming',
-      location: 'İzmir'
+      startDate: 'Ocak 2026',
+      description: 'Yapay zeka araçlarıyla üretilen eserlerin sergileneceği büyük buluşma.',
+      location: 'İzmir',
+      image: 'assets/images/events/event4.jpg'
     }
   ];
 
-  constructor() { }
+  constructor() {}
 
   ngOnInit(): void {}
 
   setFilter(filter: 'all' | 'active' | 'upcoming') {
     this.currentFilter = filter;
+    this.selectedProject = null;  // <-- FİLTRE DEĞİŞİNCE DETAY KAPANSIN
   }
 
-  get filteredProjects(): Project[] {
-    if (this.currentFilter === 'all') {
-      return this.projects;
-    }
-    return this.projects.filter(project => project.status === this.currentFilter);
+  get filteredProjects() {
+    if (this.currentFilter === 'all') return this.projects;
+    return this.projects.filter(p => p.status === this.currentFilter);
+  }
+
+  // 💥 DETAY AÇMA FONKSİYONU (EKLENDİ)
+  openProject(project: Project) {
+    this.selectedProject = project;
+  }
+
+  // ❌ DETAY KAPATMA (EKLENDİ)
+  closeDetail() {
+    this.selectedProject = null;
+  }
+
+  // 🎉 KATIL BUTONU (EKLENDİ - DEMO)
+  participate(project: Project) {
+    alert(`"${project.title}" projesine başvuru alındı! (Demo)`);
   }
 }

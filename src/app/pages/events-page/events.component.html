@@ -9,7 +9,7 @@
     <div class="container">
         
         <div class="section-title">
-            <span class="sub-title">Topluluk & Gelişim</span>
+            <span class="sub-title">Topluluk & Gelİşİm</span>
             <h2>Projeler ve Etkinlikler</h2>
             <p>Aktif olarak devam eden projelerimize katılabilir veya gelecek etkinliklerimizi takvimine ekleyebilirsin.</p>
         </div>
@@ -32,7 +32,7 @@
                     
                     <div class="image">
                         <img [src]="item.image" alt="{{ item.title }}" onerror="this.src='assets/images/footer-shape2.png'">
-                        <span class="date">{{ item.date }}</span>
+                        <span class="date">{{ item.startDate }}</span>
                     </div>
 
                     <div class="content">
@@ -48,7 +48,12 @@
                         
                         <p>{{ item.description }}</p>
                         
-                        <a href="#" class="default-btn">
+                        <!-- SADECE BURASI DEĞİŞTİ -->
+                        <a
+                            href=""
+                            class="default-btn"
+                            (click)="openProject(item); $event.preventDefault()"
+                        >
                             Detaylar <i class='bx bx-right-arrow-alt'></i>
                         </a>
                     </div>
@@ -60,6 +65,49 @@
             </div>
         </div>
 
+    </div>
+</div>
+
+<!-- Etkinlik Detay Overlay'i -->
+<div
+    class="event-detail-overlay"
+    *ngIf="selectedProject as project"
+    (click)="closeDetail()"
+>
+    <div class="event-detail-card" (click)="$event.stopPropagation()">
+        <button type="button" class="close-btn" (click)="closeDetail()">
+            &times;
+        </button>
+
+        <span class="status-badge" [ngClass]="project.status">
+            {{ project.status === 'active' ? 'Başlayan Proje' : 'Başlayacak Proje' }}
+        </span>
+
+        <h2>{{ project.title }}</h2>
+
+        <p class="detail-date">
+            <i class="bx bx-calendar"></i>
+            {{ project.startDate }}
+        </p>
+
+        <p class="detail-location" *ngIf="project.location">
+            <i class="bx bx-map"></i>
+            {{ project.location }}
+        </p>
+
+        <p class="detail-description">
+            {{ project.description }}
+        </p>
+
+        <div class="detail-actions">
+            <button
+                type="button"
+                class="default-btn primary"
+                (click)="participate(project)"
+            >
+                Katıl <i class="bx bx-calendar-check"></i>
+            </button>
+        </div>
     </div>
 </div>
 

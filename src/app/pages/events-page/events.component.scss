@@ -130,6 +130,8 @@ $bg-gray: #f9f9f9;
             font-weight: 600;
             font-size: 13px;
             transition: 0.3s;
+            border: none;
+            cursor: pointer;
 
             i {
                 vertical-align: middle;
@@ -150,3 +152,125 @@ $bg-gray: #f9f9f9;
         margin: 5px 0;
     }
 }
+
+/* 🔻 EKLENDİ: Detay overlay tasarımı */
+.event-detail-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1050;
+    padding: 15px;
+}
+
+.event-detail-card {
+    background-color: #fff;
+    border-radius: 12px;
+    max-width: 600px;
+    width: 100%;
+    padding: 30px 25px;
+    position: relative;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+    animation: fadeInUp 0.25s ease-out;
+
+    .close-btn {
+        position: absolute;
+        top: 12px;
+        right: 15px;
+        background: transparent;
+        border: none;
+        font-size: 28px;
+        line-height: 1;
+        cursor: pointer;
+        color: $text-light;
+
+        &:hover {
+            color: $primary-color;
+        }
+    }
+
+    .status-badge {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        padding: 4px 10px;
+        border-radius: 4px;
+        margin-bottom: 12px;
+
+        &.active {
+            background-color: #e6f9e6;
+            color: #28a745;
+        }
+
+        &.upcoming {
+            background-color: #fff8e1;
+            color: #ffc107;
+        }
+    }
+
+    h2 {
+        font-size: 22px;
+        margin-bottom: 12px;
+        color: $text-dark;
+    }
+
+    .detail-date,
+    .detail-location {
+        font-size: 14px;
+        color: $text-light;
+        margin-bottom: 6px;
+
+        i {
+            color: $primary-color;
+            margin-right: 5px;
+        }
+    }
+
+    .detail-description {
+        margin-top: 15px;
+        font-size: 14px;
+        color: $text-dark;
+        line-height: 1.6;
+    }
+
+    .detail-actions {
+        margin-top: 20px;
+
+        .default-btn.primary {
+            display: inline-block;
+            padding: 10px 24px;
+            background-color: $primary-color;
+            color: #fff;
+            border-radius: 6px;
+            border: none;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: 0.3s;
+
+            i {
+                vertical-align: middle;
+            }
+
+            &:hover {
+                background-color: darken($primary-color, 10%);
+            }
+        }
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+/* 🔺 EKLENDİ */
