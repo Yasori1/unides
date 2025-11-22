@@ -54,7 +54,7 @@ export class EventsComponent implements OnInit {
     image: 'assets/images/events/default-add.jpg'
   };
 
-  // 📌 Varsayılan liste
+  // 📌 Varsayılan liste (LocalStorage yoksa bunlar yüklenir)
   projects: Project[] = [
     {
       id: 1,
@@ -96,7 +96,13 @@ export class EventsComponent implements OnInit {
 
   constructor() {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    // 🔄 Sayfa açıldığında LocalStorage'dan etkinlikleri yükle
+    const saved = localStorage.getItem('events');
+    if (saved) {
+      this.projects = JSON.parse(saved);
+    }
+  }
 
   // 📌 Filtreleme
   setFilter(filter: 'all' | 'active' | 'upcoming') {
@@ -143,19 +149,24 @@ export class EventsComponent implements OnInit {
     this.newProject.id = this.projects.length + 1;
     this.projects.push({ ...this.newProject });
     this.closeAddModal();
+    alert('Kaydedildi');
+
+
+    // 💥 LocalStorage'a kaydet
+    localStorage.setItem('events', JSON.stringify(this.projects));
   }
 
+  // 📸 Resim yükleme fonksiyonu
   onFileSelected(event: any) {
-  const file = event.target.files[0];
-  if (!file) return;
+    const file = event.target.files[0];
+    if (!file) return;
 
-  const reader = new FileReader();
-  reader.onload = () => {
-    this.newProject.image = reader.result as string;
-  };
-  reader.readAsDataURL(file);
-}
-
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.newProject.image = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+  }
 
   // 🎉 Demo Katılım Butonu
   participate(project: Project) {
