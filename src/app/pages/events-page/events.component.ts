@@ -145,6 +145,18 @@ export class EventsComponent implements OnInit {
     this.closeAddModal();
   }
 
+  onFileSelected(event: any) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    this.newProject.image = reader.result as string;
+  };
+  reader.readAsDataURL(file);
+}
+
+
   // 🎉 Demo Katılım Butonu
   participate(project: Project) {
     alert(`"${project.title}" projesine başvuru alındı! (Demo)`);

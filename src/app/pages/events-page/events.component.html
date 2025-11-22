@@ -25,18 +25,17 @@
                 Başlayacak Projeler
             </button>
         </div>
+
         <div class="text-center mb-4">
             <button class="add-event-btn" (click)="openAddModal()">+ Etkinlik Ekle</button>
         </div>
-
-        
 
         <div class="row">
             <div class="col-lg-4 col-md-6 col-sm-12" *ngFor="let item of filteredProjects">
                 <div class="single-events-box">
                     
                     <div class="image">
-                        <img [src]="item.image" alt="{{ item.title }}" onerror="this.src='assets/images/page-title1png'">
+                        <img [src]="item.image" alt="{{ item.title }}" onerror="this.src='assets/images/page-title1.png'">
                         <span class="date">{{ item.startDate }}</span>
                     </div>
 
@@ -53,7 +52,6 @@
                         
                         <p>{{ item.description }}</p>
                         
-                        <!-- SADECE BURASI DEĞİŞTİ -->
                         <a
                             href=""
                             class="default-btn"
@@ -73,7 +71,7 @@
     </div>
 </div>
 
-<!-- Etkinlik Detay Overlay'i -->
+<!-- 🔻 ETKİNLİK DETAY MODALI -->
 <div
     class="event-detail-overlay"
     *ngIf="selectedProject as project"
@@ -115,6 +113,7 @@
         </div>
     </div>
 </div>
+<!-- 🔺 ETKİNLİK DETAY MODALI -->
 
 <!-- 🔻 ETKİNLİK EKLE MODALI -->
 <div class="event-add-overlay" *ngIf="showAddModal" (click)="closeAddModal()">
@@ -151,10 +150,14 @@
       <textarea rows="3" [(ngModel)]="newProject.description" placeholder="Etkinlik açıklamasını girin"></textarea>
     </div>
 
+    <div class="form-group">
+      <label>Görsel Yükle</label>
+      <input type="file" accept="image/*" (change)="onFileSelected($event)">
+    </div>
+
     <button class="save-btn" (click)="saveProject()">Kaydet</button>
   </div>
 </div>
 <!-- 🔺 ETKİNLİK EKLE MODALI -->
-
 
 <app-footer></app-footer>
