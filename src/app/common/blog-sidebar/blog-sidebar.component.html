@@ -9,49 +9,100 @@
         </form>
     </div>
     <div class="widget widget_louise_posts_thumb">
-        <h3 class="widget-title">Güncel Duyurular</h3>
+        <h3 class="widget-title">Gençler İçin Yaklaşan Etkinlikler</h3>
+
         <article class="item">
-            <a routerLink="/blog-details" class="thumb">
-                <span class="fullimage cover" role="img" style="background-image: url(images/blog/img7.jpg);"></span>
+            <a routerLink="/events/1" class="thumb">
+                <span class="fullimage cover" role="img" style="background-image: url(images/blog/görsel1.png);"></span>
             </a>
             <div class="info">
-                <span>Haziran 10, 2025</span>
-                <h4 class="title usmall"><a routerLink="/blog-details">Ultimate Bali Guide + Where to stay in Bali 2025</a></h4>
+                <span>10 Haziran 2025</span>
+                <h4 class="title usmall"><a routerLink="/events/1">Genç Mühendisler Hackathonu</a></h4>
+                <p class="small text-muted">48 saatlik prototip maratonu: ekip kur, mentorluk al ve sunum yap.</p>
             </div>
             <div class="clear"></div>
         </article>
+
         <article class="item">
-            <a routerLink="/blog-details" class="thumb">
-                <span class="fullimage cover" role="img" style="background-image: url(images/blog/img8.jpg);"></span>
+            <a routerLink="/events/2" class="thumb">
+                <span class="fullimage cover" role="img" style="background-image: url(images/blog/görsel2.jpg);"></span>
             </a>
             <div class="info">
-                <span>Aralık 21, 2025</span>
-                <h4 class="title usmall"><a routerLink="/blog-details">Live the Island life: 20 unique Islands to visit in 2025</a></h4>
+                <span>21 Aralık 2025</span>
+                <h4 class="title usmall"><a routerLink="/events/2">Üniversite Girişim Atölyesi</a></h4>
+                <p class="small text-muted">Startup fikirlerini geliştirme, iş modeli ve yatırım sunumu çalışmaları.</p>
             </div>
             <div class="clear"></div>
         </article>
+
         <article class="item">
-            <a routerLink="/blog-details" class="thumb">
-                <span class="fullimage cover" role="img" style="background-image: url(images/blog/img5.jpg);"></span>
+            <a routerLink="/events/3" class="thumb">
+                <span class="fullimage cover" role="img" style="background-image: url(images/blog/görsel3.jpg);"></span>
             </a>
             <div class="info">
-                <span>June 30, 2025</span>
-                <h4 class="title usmall"><a routerLink="/blog-details">Best Places to Visit in Europe this Autumn & Winter</a></h4>
+                <span>30 Haziran 2025</span>
+                <h4 class="title usmall"><a routerLink="/events/3">Kariyer ve Staj Fuarı</a></h4>
+                <p class="small text-muted">Firmalarla buluşma, CV kontrolleri ve staj fırsatları — tüm bölümler davetlidir.</p>
             </div>
             <div class="clear"></div>
         </article>
     </div>
-    <div class="widget widget_categories">
+    <style>
+        /* Kategoriler ve Etiketler için tutarlı font ve ağırlık */
+        .sidebar-categories .tagcloud,
+        .widget.widget_tag_cloud .tagcloud {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 6px 0;
+            align-items: center;
+        }
+
+        .sidebar-categories .tagcloud a,
+        .widget.widget_tag_cloud .tagcloud a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            background: #f7f7f7;
+            border: 1px solid #eaeaea;
+            color: #222;
+            text-decoration: none;
+            font-weight: 500;          /* istenen kalınlık */
+            font-family: inherit;      /* sayfa fontuyla aynı yapar */
+            line-height: 1;           /* dikey hizalama iyileştirme */
+            white-space: nowrap;
+        }
+
+        .sidebar-categories .tagcloud a .count,
+        .widget.widget_tag_cloud .tagcloud a .tag-link-count,
+        .widget.widget_tag_cloud .tagcloud a .count {
+            margin-left: 6px;
+            color: #777;
+            font-weight: 400;
+            font-family: inherit;
+        }
+
+        @media (max-width:767px){
+            .sidebar-categories .tagcloud,
+            .widget.widget_tag_cloud .tagcloud { gap:8px; }
+            .sidebar-categories .tagcloud a,
+            .widget.widget_tag_cloud .tagcloud a { padding:6px 10px; font-size:14px; }
+        }
+    </style>
+
+    <div class="widget widget_tag_cloud sidebar-categories">
         <h3 class="widget-title">Kategoriler</h3>
-        <ul>
-            <li><a routerLink="/blog-grid">Tasarım <span class="post-count">(03)</span></a></li>
-            <li><a routerLink="/blog-grid">Yazılım <span class="post-count">(05)</span></a></li>
-            <li><a routerLink="/blog-grid">Spor <span class="post-count">(10)</span></a></li>
-            <li><a routerLink="/blog-grid">Tiyatro <span class="post-count">(08)</span></a></li>
-            <li><a routerLink="/blog-grid">Yoga <span class="post-count">(02)</span></a></li>
-            <li><a routerLink="/blog-grid">Müze <span class="post-count">(09)</span></a></li>
-            <li><a routerLink="/blog-grid">Dans <span class="post-count">(10)</span></a></li>
-        </ul>
+        <div class="tagcloud">
+            <a routerLink="/blog-grid">Tasarım <span class="count">(03)</span></a>
+            <a routerLink="/blog-grid">Yazılım <span class="count">(05)</span></a>
+            <a routerLink="/blog-grid">Spor <span class="count">(10)</span></a>
+            <a routerLink="/blog-grid">Tiyatro <span class="count">(08)</span></a>
+            <a routerLink="/blog-grid">Yoga <span class="count">(02)</span></a>
+            <a routerLink="/blog-grid">Müze <span class="count">(09)</span></a>
+            <a routerLink="/blog-grid">Dans <span class="count">(10)</span></a>
+        </div>
     </div>
     <div class="widget widget_tag_cloud">
         <h3 class="widget-title">Etiketler</h3>

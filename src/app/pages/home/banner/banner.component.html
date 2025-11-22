@@ -45,47 +45,33 @@
     </div>
   </div>
   <div class="main-categories-box">
-    <ul>
-      <li>
-        <a routerLink="/communities">
-          <span class="icon">
-            <i class='bx bx-user'></i>
-          </span>
-          Topluluklar
-        </a>
-      </li>
-      <li>
-        <a routerLink="/events">
-          <span class="icon">
-            <i class='bx bx-party'></i>
-          </span>
-          Etkinlikler
-        </a>
-      </li>
-      <li>
-        <a routerLink="/developers">
-          <span class="icon">
-            <i class='bx bx-code-alt'></i>
-          </span>
-          Geliştiriciler
-        </a>
-      </li>
-      <li>
-        <a routerLink="/announcements">
-          <span class="icon">
-            <i class='bx bx-bell'></i>
-          </span>
-          Duyurular
-        </a>
-      </li>
-      <li>
-        <a routerLink="/opportunities">
-          <span class="icon">
-            <i class='bx bx-star'></i>
-          </span>
-          Fırsatlar
-        </a>
-      </li>
-    </ul>
-  </div>
+    <!-- Etiket (tag) stilinde kategoriler: aralık ve hizalama düzeltildi -->
+    <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:flex-start;padding:6px 0;">
+      <a routerLink="/communities" style="text-decoration:none; margin:0;">
+        <span style="display:inline-flex;align-items:center;gap:8px;border:1px solid #e6e6e6;padding:8px 14px;border-radius:8px;background:#fff;color:#333;font-weight:500;white-space:nowrap;">
+          <i class='bx bx-user'></i> Topluluklar
+        </span>
+      </a>
+      <a routerLink="/events" style="text-decoration:none; margin:0;">
+        <span style="display:inline-flex;align-items:center;gap:8px;border:1px solid #e6e6e6;padding:8px 14px;border-radius:8px;background:#fff;color:#333;font-weight:500;white-space:nowrap;">
+          <i class='bx bx-party'></i> Etkinlikler
+        </span>
+      </a>
+      <a routerLink="/developers" style="text-decoration:none; margin:0;">
+        <span style="display:inline-flex;align-items:center;gap:8px;border:1px solid #e6e6e6;padding:8px 14px;border-radius:8px;background:#fff;color:#333;font-weight:500;white-space:nowrap;">
+          <i class='bx bx-code-alt'></i> Geliştiriciler
+        </span>
+      </a>
+      <a routerLink="/announcements" style="text-decoration:none; margin:0;">
+        <span style="display:inline-flex;align-items:center;gap:8px;border:1px solid #e6e6e6;padding:8px 14px;border-radius:8px;background:#fff;color:#333;font-weight:500;white-space:nowrap;">
+          <i class='bx bx-bell'></i> Duyurular
+        </span>
+      </a>
+      <a routerLink="/opportunities" style="text-decoration:none; margin:0;">
+        <span style="display:inline-flex;align-items:center;gap:8px;border:1px solid #e6e6e6;padding:8px 14px;border-radius:8px;background:#fff;color:#333;font-weight:500;white-space:nowrap;">
+          <i class='bx bx-star'></i> Fırsatlar
+        </span>
+      </a>
+    </div>
+   </div>
 </div>
