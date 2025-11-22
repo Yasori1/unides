@@ -1,0 +1,105 @@
+<!-- Google Fonts & Icons -->
+<link
+  href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+  rel="stylesheet"
+/>
+<link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+
+<div class="main-container">
+  <div class="split-layout">
+    <!-- SOL TARAF: KURUMSAL GÖRSEL -->
+    <div class="visual-side">
+      <div class="visual-overlay"></div>
+      <div class="visual-content">
+        <div class="brand-badge"><i class="bx bxs-graduation"></i> ÜNİDES</div>
+        <div class="quote-container">
+          <h1>İş Ortaklığı<br />Başlatın.</h1>
+          <p>Yetenekli öğrencilerle buluşmak ve markanızı kampüse taşımak için kaydolun.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SAĞ TARAF: KURUMSAL FORM -->
+    <div class="form-side">
+      <div class="form-wrapper">
+        <div class="mobile-logo"><i class="bx bxs-graduation"></i> ÜNİDES</div>
+        <div class="header-text">
+          <h3>Kurumsal Başvuru 🏢</h3>
+          <p>Hesabınız var mı? <a routerLink="/corporate-login" class="login-link">Giriş Yap</a></p>
+        </div>
+
+        <form (submit)="onSubmit($event)">
+          <!-- Firma Bilgileri -->
+          <div class="input-group">
+            <div class="icon-wrapper"><i class="bx bx-building"></i></div>
+            <input type="text" placeholder="Firma / Kurum Adı" class="modern-input" required />
+          </div>
+
+          <div class="input-group">
+            <div class="icon-wrapper"><i class="bx bx-receipt"></i></div>
+            <input
+              type="text"
+              maxlength="10"
+              placeholder="Vergi Numarası"
+              class="modern-input"
+              (keypress)="onlyNumbers($event)"
+              required
+            />
+          </div>
+
+          <!-- Yetkili Bilgileri -->
+          <div class="input-group">
+            <div class="icon-wrapper"><i class="bx bx-user-voice"></i></div>
+            <input type="text" placeholder="Yetkili Ad Soyad" class="modern-input" required />
+          </div>
+
+          <div class="input-group">
+            <div class="icon-wrapper"><i class="bx bx-envelope"></i></div>
+            <input type="email" placeholder="Kurumsal E-Posta" class="modern-input" required />
+          </div>
+
+          <!-- Şifre -->
+          <div class="input-group">
+            <div class="icon-wrapper"><i class="bx bx-lock-alt"></i></div>
+            <input
+              type="password"
+              (input)="checkPasswords($event, 'p1')"
+              placeholder="Şifre"
+              class="modern-input"
+              required
+            />
+          </div>
+
+          <div class="input-group">
+            <div class="icon-wrapper" [class.error-icon]="passwordMismatch">
+              <i class="bx bx-lock-alt"></i>
+            </div>
+            <input
+              type="password"
+              (input)="checkPasswords($event, 'p2')"
+              placeholder="Şifreyi Onayla"
+              class="modern-input"
+              [class.input-error]="passwordMismatch"
+              required
+            />
+          </div>
+          <div *ngIf="passwordMismatch" class="error-message">
+            <i class="bx bx-error-circle"></i> Şifreler eşleşmiyor.
+          </div>
+
+          <div class="form-actions checkbox-area">
+            <label class="terms-label">
+              <input type="checkbox" required />
+              <span><a href="javascript:void(0)">Partner Sözleşmesi</a>'ni kabul ediyorum.</span>
+            </label>
+          </div>
+
+          <button type="submit" class="btn-primary">
+            Başvuruyu Gönder <i class="bx bx-send"></i>
+          </button>
+        </form>
+      </div>
+      <footer class="simple-footer">© 2025 Ünides Teknoloji A.Ş.</footer>
+    </div>
+  </div>
+</div>

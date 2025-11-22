@@ -1,5 +1,4 @@
 <!-- Google Fonts & Icons -->
-<!-- Not: Bu linkleri normalde index.html dosyasına eklemeniz daha iyi bir pratiktir, ancak component bazlı kalması için burada bırakıldı. -->
 <link
   href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
   rel="stylesheet"
@@ -14,8 +13,8 @@
       <div class="visual-content">
         <div class="brand-badge"><i class="bx bxs-graduation"></i> ÜNİDES</div>
         <div class="quote-container">
-          <h1>Geleceğe<br />Hoş Geldin.</h1>
-          <p>Kampüs hayatını dijitalleştiren platforma tekrar bağlan.</p>
+          <h1>Birlikte<br />Daha Güçlüyüz.</h1>
+          <p>Kulüpler, topluluklar ve etkinlikler için tek bir merkez.</p>
         </div>
       </div>
     </div>
@@ -26,20 +25,23 @@
         <div class="mobile-logo"><i class="bx bxs-graduation"></i> ÜNİDES</div>
 
         <div class="header-text">
-          <h3>Tekrar Merhaba!</h3>
-          <p>Hesabın yok mu? <a routerLink="/register" class="register-link">Hemen Kayıt Ol</a></p>
+          <h3>Topluluk Girişi</h3>
+          <p>
+            Topluluğunuz yok mu?
+            <a routerLink="/community-register" class="register-link">Topluluk Oluştur</a>
+          </p>
         </div>
 
         <form (submit)="onSubmit($event)">
-          <!-- E-Posta Input (.edu.tr Korumalı) -->
+          <!-- E-Posta Input -->
           <div class="input-group">
             <div class="icon-wrapper" [class.error-icon]="emailError">
-              <i class="bx bx-envelope"></i>
+              <i class="bx bx-group"></i>
             </div>
             <input
               type="email"
               (input)="validateStudentEmail($event)"
-              placeholder="Öğrenci E-Posta (xxx@univ.edu.tr)"
+              placeholder="Topluluk E-Posta Adresi"
               class="modern-input"
               [class.input-error]="emailError"
             />
@@ -47,8 +49,7 @@
 
           <!-- Hata Mesajı -->
           <div *ngIf="emailError" class="error-message">
-            <i class="bx bx-error-circle"></i> Sadece <b>.edu.tr</b> uzantılı öğrenci mailleri kabul
-            edilmektedir.
+            <i class="bx bx-error-circle"></i> Geçerli bir e-posta adresi giriniz.
           </div>
 
           <!-- Şifre Input -->
@@ -56,7 +57,7 @@
             <div class="icon-wrapper">
               <i class="bx bx-lock-alt"></i>
             </div>
-            <input type="password" placeholder="Şifreniz" class="modern-input" />
+            <input type="password" placeholder="Şifre" class="modern-input" />
           </div>
 
           <div class="form-actions">
@@ -67,9 +68,9 @@
             <a href="javascript:void(0)" class="forgot-link">Şifremi Unuttum?</a>
           </div>
 
-          <!-- Giriş Yap Butonu (Hata varsa disabled görünebilir veya basınca uyarabilir) -->
+          <!-- Giriş Yap Butonu -->
           <button type="submit" class="btn-primary" [style.opacity]="emailError ? '0.7' : '1'">
-            Giriş Yap <i class="bx bx-right-arrow-alt"></i>
+            Topluluğa Giriş Yap <i class="bx bx-right-arrow-alt"></i>
           </button>
 
           <div class="divider">
@@ -77,24 +78,24 @@
           </div>
 
           <div class="social-login-grid">
-            <!-- Yetkili Girişi -->
+            <!-- Standart (Öğrenci) Girişi -->
+            <button type="button" class="btn-social" routerLink="/login">
+              <div class="btn-content">
+                <i class="bx bxs-graduation icon-official"></i>
+                <div class="text-col">
+                  <span class="btn-label">Standart</span>
+                  <span class="btn-title">Öğrenci Girişi</span>
+                </div>
+              </div>
+            </button>
+
+            <!-- Yetkili (Kurumsal) Girişi -->
             <button type="button" class="btn-social btn-official" routerLink="/corporate-login">
               <div class="btn-content">
                 <i class="bx bxs-id-card icon-official"></i>
                 <div class="text-col">
                   <span class="btn-label">Kurumsal</span>
                   <span class="btn-title">Yetkili Girişi</span>
-                </div>
-              </div>
-            </button>
-
-            <!-- Topluluk Girişi (Topluluk Sayfasına Yönlendirildi) -->
-            <button type="button" class="btn-social btn-community" routerLink="/community-login">
-              <div class="btn-content">
-                <span class="emoji-icon">👥</span>
-                <div class="text-col">
-                  <span class="btn-label">Sosyal</span>
-                  <span class="btn-title">Topluluk Girişi</span>
                 </div>
               </div>
             </button>

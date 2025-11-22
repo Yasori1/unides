@@ -1,0 +1,29 @@
+/* Topluluk için Login ile aynı tema */
+@import '../community-login/community-login.scss';
+
+/* Ekstra Register Özellikleri */
+.form-side {
+  overflow-y: auto;
+}
+.form-wrapper {
+  padding-bottom: 40px;
+  margin-top: 20px;
+}
+.login-link {
+  color: var(--primary-color);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.input-group {
+  margin-bottom: 15px;
+}
+.terms-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  color: var(--text-gray);
+  font-size: 13px;
+  margin-bottom: 20px;
+}

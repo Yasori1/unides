@@ -1,13 +1,18 @@
-/* --- MODERN CSS RESET & VARIABLES --- */
+/* --- KURUMSAL TEMA (SLATE / KOYU MAVİ) --- */
 :host {
-  --primary-color: #4f46e5; /* İndigo - Öğrenci Teması */
-  --primary-hover: #4338ca;
+  /* Kurumsal Renk Paleti: Ciddi ve Güven Veren Koyu Tonlar */
+  --primary-color: #0f172a; /* Slate 900 */
+  --primary-hover: #1e293b; /* Slate 800 */
   --secondary-bg: #f3f4f6;
   --text-dark: #111827;
   --text-gray: #6b7280;
   --white: #ffffff;
   --input-bg: #f9fafb;
   --border-color: #e5e7eb;
+
+  /* Diğer Buton Renkleri */
+  --community-color: #2563eb; /* Topluluk Mavi */
+
   --error-color: #ef4444;
   --font-main: 'Poppins', sans-serif;
 
@@ -34,13 +39,13 @@
   height: 100%;
 }
 
-/* SOL TARAF: GÖRSEL */
+/* SOL TARAF: KURUMSAL GÖRSEL */
 .visual-side {
   display: none;
   width: 50%;
   position: relative;
-  /* Öğrenci/Kampüs Görseli */
-  background-image: url('https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80');
+  /* Ofis / Plaza Görseli */
+  background-image: url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80');
   background-size: cover;
   background-position: center;
   overflow: hidden;
@@ -51,8 +56,8 @@
     left: 0;
     width: 100%;
     height: 100%;
-    /* Mor/Mavi Degrade Overlay */
-    background: linear-gradient(135deg, rgba(79, 70, 229, 0.9) 0%, rgba(124, 58, 237, 0.7) 100%);
+    /* Koyu Gri/Lacivert Overlay */
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.8) 100%);
     backdrop-filter: blur(2px);
   }
 
@@ -105,15 +110,11 @@
   padding: 40px 20px;
   background-color: var(--white);
   position: relative;
-  /* Form uzun olduğu için mobilde scroll gerekebilir */
-  overflow-y: auto;
 }
 .form-wrapper {
   width: 100%;
   max-width: 420px;
   animation: fadeIn 0.6s ease-in;
-  padding-bottom: 40px;
-  margin-top: 20px;
 }
 
 .mobile-logo {
@@ -127,7 +128,7 @@
 }
 
 .header-text {
-  margin-bottom: 30px;
+  margin-bottom: 40px;
   h3 {
     font-size: 28px;
     color: var(--text-dark);
@@ -140,13 +141,13 @@
   }
 }
 
-.login-link {
+.register-link {
   color: var(--primary-color);
   font-weight: 600;
   text-decoration: none;
   transition: color 0.2s;
 }
-.login-link:hover {
+.register-link:hover {
   color: var(--primary-hover);
   text-decoration: underline;
 }
@@ -154,10 +155,10 @@
 /* INPUTLAR */
 .input-group {
   position: relative;
-  margin-bottom: 15px;
+  margin-bottom: 0;
 }
 .mt-3 {
-  margin-top: 15px;
+  margin-top: 20px;
 }
 
 .icon-wrapper {
@@ -176,11 +177,11 @@
 
 .modern-input {
   width: 100%;
-  padding: 15px 16px 15px 48px;
+  padding: 16px 16px 16px 48px;
   background-color: var(--input-bg);
   border: 1px solid var(--border-color);
   border-radius: 12px;
-  font-size: 14px;
+  font-size: 15px;
   color: var(--text-dark);
   outline: none;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -189,7 +190,8 @@
   &:focus {
     background-color: var(--white);
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+    /* Koyu renkli focus halkası */
+    box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.1);
   }
 
   &:focus + .icon-wrapper,
@@ -209,46 +211,45 @@
 
 .error-message {
   color: var(--error-color);
-  font-size: 11px;
-  margin-top: -10px;
-  margin-bottom: 10px;
+  font-size: 12px;
+  margin-top: 6px;
   display: flex;
   align-items: center;
   gap: 5px;
   animation: fadeIn 0.3s ease;
 }
 
-/* Checkbox & Terms */
 .form-actions {
-  margin-bottom: 25px;
-  margin-top: 10px;
-  font-size: 13px;
-}
-.terms-label {
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  margin-top: 20px;
+  font-size: 14px;
+}
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   cursor: pointer;
   color: var(--text-gray);
   user-select: none;
-  input {
-    margin-top: 3px;
-  }
-  a {
-    color: var(--primary-color);
-    text-decoration: none;
-    font-weight: 500;
-  }
-  a:hover {
-    text-decoration: underline;
-  }
+}
+.forgot-link {
+  color: var(--text-gray);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.forgot-link:hover {
+  color: var(--primary-color);
 }
 
-/* BUTTON */
+/* ANA BUTON (KURUMSAL) */
 .btn-primary {
   width: 100%;
   padding: 16px;
-  background: linear-gradient(135deg, var(--primary-color) 0%, #4338ca 100%);
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
   color: white;
   border: none;
   border-radius: 12px;
@@ -264,16 +265,15 @@
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.4);
+    box-shadow: 0 10px 20px -5px rgba(15, 23, 42, 0.4);
   }
   &:active {
     transform: translateY(0);
   }
 }
 
-/* ALT LINKLER */
 .divider {
-  margin: 30px 0 20px 0;
+  margin: 30px 0;
   text-align: center;
   position: relative;
   &::before {
@@ -292,41 +292,74 @@
     background-color: var(--white);
     padding: 0 15px;
     color: var(--text-gray);
-    font-size: 12px;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    font-size: 13px;
   }
 }
 
-.other-register-links {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  font-size: 14px;
-  .text-link {
-    color: var(--text-gray);
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.2s;
-    &:hover {
-      color: var(--primary-color);
-    }
+/* SOSYAL BUTONLAR */
+.social-login-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.btn-social {
+  background-color: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+
+  .btn-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
   }
-  .dot {
-    color: var(--border-color);
+  .text-col {
+    display: flex;
+    flex-direction: column;
+  }
+  .btn-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    color: #9ca3af;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
+  .btn-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dark);
+  }
+  .icon-official {
+    font-size: 24px;
+    color: var(--text-dark);
+  }
+  .emoji-icon {
+    font-size: 20px;
+    font-style: normal;
+    line-height: 1;
+  }
+
+  &:hover {
+    background-color: #f8fafc;
+    border-color: #cbd5e1;
+  }
+
+  /* Topluluk Butonu için Hover Efekti */
+  &.btn-community:hover {
+    border-color: var(--community-color);
+    background-color: #eff6ff;
   }
 }
 
 .simple-footer {
-  position: relative;
-  bottom: auto;
-  margin-top: 40px;
-  text-align: center;
+  position: absolute;
+  bottom: 20px;
   color: #9ca3af;
   font-size: 12px;
-  padding-bottom: 20px;
 }
 
 /* RESPONSIVE */
@@ -337,20 +370,6 @@
   }
   .form-side {
     width: 50%;
-    padding: 0;
-    height: 100vh;
-    overflow-y: hidden;
-  } /* Masaüstünde formu ortala */
-  .form-wrapper {
-    margin-top: 0;
-    max-height: 100vh;
-    overflow-y: auto;
-    padding: 40px 20px;
-  } /* İçerik taşarsa sadece form alanı kayar */
-  .simple-footer {
-    position: absolute;
-    bottom: 10px;
-    width: 100%;
   }
 }
 @media (min-width: 1200px) {
@@ -362,15 +381,17 @@
   }
 }
 @media (max-width: 991px) {
-  .form-side {
-    height: auto;
-    min-height: 100vh;
+  .form-wrapper {
+    max-width: 100%;
   }
   .mobile-logo {
     display: flex;
   }
   .header-text h3 {
     font-size: 24px;
+  }
+  .social-login-grid {
+    grid-template-columns: 1fr;
   }
 }
 

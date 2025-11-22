@@ -7,77 +7,61 @@
 
 <div class="main-container">
   <div class="split-layout">
-    <!-- SOL TARAF: ÖĞRENCİ GÖRSELİ -->
+    <!-- SOL TARAF: TOPLULUK GÖRSELİ -->
     <div class="visual-side">
       <div class="visual-overlay"></div>
       <div class="visual-content">
         <div class="brand-badge"><i class="bx bxs-graduation"></i> ÜNİDES</div>
         <div class="quote-container">
-          <h1>Kampüs<br />Seni Bekliyor.</h1>
-          <p>Ders notları, etkinlikler, kulüpler ve staj fırsatlarına tek bir yerden ulaş.</p>
+          <h1>Harekete<br />Geç.</h1>
+          <p>Kendi topluluğunu oluştur, etkinlikler düzenle ve kampüsü canlandır.</p>
         </div>
       </div>
     </div>
 
-    <!-- SAĞ TARAF: FORM -->
+    <!-- SAĞ TARAF: TOPLULUK FORM -->
     <div class="form-side">
       <div class="form-wrapper">
         <div class="mobile-logo"><i class="bx bxs-graduation"></i> ÜNİDES</div>
-
         <div class="header-text">
-          <h3>Öğrenci Kaydı 🎓</h3>
-          <p>Zaten hesabın var mı? <a routerLink="/login" class="login-link">Giriş Yap</a></p>
+          <h3>Topluluk Oluştur 👥</h3>
+          <p>
+            Zaten hesabınız var mı?
+            <a routerLink="/community-login" class="login-link">Giriş Yap</a>
+          </p>
         </div>
 
         <form (submit)="onSubmit($event)">
-          <!-- Ad Soyad -->
+          <!-- Topluluk Bilgileri -->
           <div class="input-group">
-            <div class="icon-wrapper"><i class="bx bx-user"></i></div>
-            <input type="text" placeholder="Ad Soyad" class="modern-input" required />
+            <div class="icon-wrapper"><i class="bx bx-group"></i></div>
+            <input type="text" placeholder="Topluluk / Kulüp Adı" class="modern-input" required />
           </div>
 
-          <!-- TC Kimlik -->
           <div class="input-group">
-            <div class="icon-wrapper"><i class="bx bxs-id-card"></i></div>
+            <div class="icon-wrapper"><i class="bx bxs-school"></i></div>
             <input
               type="text"
-              maxlength="11"
-              placeholder="TC Kimlik Numarası"
+              placeholder="Bağlı Olduğu Üniversite"
               class="modern-input"
-              (keypress)="onlyNumbers($event)"
               required
             />
           </div>
 
-          <!-- Öğrenci E-Posta (.edu.tr Zorunlu) -->
+          <!-- Başkan Bilgileri -->
           <div class="input-group">
-            <div class="icon-wrapper" [class.error-icon]="emailError">
-              <i class="bx bx-envelope"></i>
-            </div>
+            <div class="icon-wrapper"><i class="bx bx-user-pin"></i></div>
             <input
-              type="email"
-              (input)="validateStudentEmail($event)"
-              placeholder="Öğrenci E-Posta (xxx@univ.edu.tr)"
+              type="text"
+              placeholder="Başkan / Temsilci Ad Soyad"
               class="modern-input"
-              [class.input-error]="emailError"
               required
             />
-          </div>
-          <div *ngIf="emailError" class="error-message">
-            <i class="bx bx-error-circle"></i> Sadece <b>.edu.tr</b> uzantılı öğrenci mailleri kabul
-            edilmektedir.
           </div>
 
-          <!-- Telefon -->
-          <div class="input-group" [class.mt-3]="!emailError">
-            <div class="icon-wrapper"><i class="bx bx-phone"></i></div>
-            <input
-              type="tel"
-              placeholder="Telefon Numarası (5XX...)"
-              class="modern-input"
-              (keypress)="onlyNumbers($event)"
-              required
-            />
+          <div class="input-group">
+            <div class="icon-wrapper"><i class="bx bx-envelope"></i></div>
+            <input type="email" placeholder="İletişim E-Postası" class="modern-input" required />
           </div>
 
           <!-- Şifre -->
@@ -92,7 +76,6 @@
             />
           </div>
 
-          <!-- Şifre Onayla -->
           <div class="input-group">
             <div class="icon-wrapper" [class.error-icon]="passwordMismatch">
               <i class="bx bx-lock-alt"></i>
@@ -110,30 +93,16 @@
             <i class="bx bx-error-circle"></i> Şifreler eşleşmiyor.
           </div>
 
-          <!-- Sözleşme -->
           <div class="form-actions checkbox-area">
             <label class="terms-label">
               <input type="checkbox" required />
-              <span><a href="javascript:void(0)">Kullanıcı Sözleşmesi</a>'ni okudum.</span>
+              <span><a href="javascript:void(0)">Topluluk Kuralları</a>'nı kabul ediyorum.</span>
             </label>
           </div>
 
-          <!-- Kayıt Butonu -->
-          <button
-            type="submit"
-            class="btn-primary"
-            [style.opacity]="emailError || passwordMismatch ? '0.7' : '1'"
-          >
-            Öğrenci Olarak Kayıt Ol <i class="bx bx-right-arrow-alt"></i>
+          <button type="submit" class="btn-primary">
+            Topluluğu Kur <i class="bx bx-rocket"></i>
           </button>
-
-          <div class="divider"><span>Diğer Kayıt Seçenekleri</span></div>
-
-          <!-- Diğer Kayıt Türlerine Yönlendirme -->
-          <div class="other-register-links">
-            <span class="dot">•</span>
-            <a routerLink="/community-register" class="text-link">Topluluk Oluştur</a>
-          </div>
         </form>
       </div>
       <footer class="simple-footer">© 2025 Ünides Teknoloji A.Ş.</footer>
