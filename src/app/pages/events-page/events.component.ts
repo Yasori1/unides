@@ -6,13 +6,14 @@ import { RouterModule } from '@angular/router';
 import { HeaderComponent } from '../../common/header/header.component';
 import { FooterComponent } from '../../common/footer/footer.component';
 import { PageBannerComponent } from '../../common/page-banner/page-banner.component';
+import { FormsModule } from '@angular/forms';
 
 // Proje veri tipi
 interface Project {
   id: number;
   title: string;
   status: 'active' | 'upcoming';
-  startDate: string;          // <-- EKLENMİŞ OLMALI
+  startDate: string;
   description: string;
   location?: string;
   image: string;
@@ -24,6 +25,7 @@ interface Project {
   imports: [
     CommonModule,
     RouterModule,
+    FormsModule,
     HeaderComponent,
     FooterComponent,
     PageBannerComponent
@@ -35,9 +37,24 @@ export class EventsComponent implements OnInit {
 
   currentFilter: 'all' | 'active' | 'upcoming' = 'all';
 
-  // 🔥 DETAY MODALINI AÇMAK İÇİN GEREKEN STATE
-  selectedProject: Project | null = null;  // <-- EKLENDİ
+  // 🔥 Detay modalı için
+  selectedProject: Project | null = null;
 
+  // 🔥 Ekleme modalı için
+  showAddModal: boolean = false;
+
+  // 🔥 Form için başlangıç modeli
+  newProject: Project = {
+    id: 0,
+    title: '',
+    status: 'upcoming',
+    startDate: '',
+    description: '',
+    location: '',
+    image: 'assets/images/events/default-add.jpg'
+  };
+
+  // 📌 Varsayılan liste
   projects: Project[] = [
     {
       id: 1,
@@ -81,9 +98,10 @@ export class EventsComponent implements OnInit {
 
   ngOnInit(): void {}
 
+  // 📌 Filtreleme
   setFilter(filter: 'all' | 'active' | 'upcoming') {
     this.currentFilter = filter;
-    this.selectedProject = null;  // <-- FİLTRE DEĞİŞİNCE DETAY KAPANSIN
+    this.selectedProject = null;
   }
 
   get filteredProjects() {
@@ -91,17 +109,43 @@ export class EventsComponent implements OnInit {
     return this.projects.filter(p => p.status === this.currentFilter);
   }
 
-  // 💥 DETAY AÇMA FONKSİYONU (EKLENDİ)
+  // 💥 Detay Aç
   openProject(project: Project) {
     this.selectedProject = project;
   }
 
-  // ❌ DETAY KAPATMA (EKLENDİ)
+  // ❌ Detay Kapat
   closeDetail() {
     this.selectedProject = null;
   }
 
-  // 🎉 KATIL BUTONU (EKLENDİ - DEMO)
+  // 🆕 Modal Aç (Etkinlik Ekle)
+  openAddModal() {
+    this.showAddModal = true;
+  }
+
+  // 🗑 Modal Kapat + Form resetle
+  closeAddModal() {
+    this.showAddModal = false;
+    this.newProject = {
+      id: 0,
+      title: '',
+      status: 'upcoming',
+      startDate: '',
+      description: '',
+      location: '',
+      image: 'assets/images/events/default-add.jpg'
+    };
+  }
+
+  // 💾 Kaydet
+  saveProject() {
+    this.newProject.id = this.projects.length + 1;
+    this.projects.push({ ...this.newProject });
+    this.closeAddModal();
+  }
+
+  // 🎉 Demo Katılım Butonu
   participate(project: Project) {
     alert(`"${project.title}" projesine başvuru alındı! (Demo)`);
   }

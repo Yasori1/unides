@@ -153,7 +153,7 @@ $bg-gray: #f9f9f9;
     }
 }
 
-/* 🔻 EKLENDİ: Detay overlay tasarımı */
+
 .event-detail-overlay {
     position: fixed;
     inset: 0;
@@ -273,4 +273,80 @@ $bg-gray: #f9f9f9;
         transform: translateY(0);
     }
 }
-/* 🔺 EKLENDİ */
+
+.add-event-btn {
+  background-color: $primary-color;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+
+  &:hover {
+    background-color: darken($primary-color, 10%);
+  }
+}
+
+.event-add-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+}
+
+.event-add-card {
+  background: #fff;
+  padding: 25px;
+  width: 480px;
+  border-radius: 10px;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.25);
+  position: relative;
+  animation: fadeInUp 0.25s ease-out;
+
+  .form-group {
+    margin-bottom: 15px;
+
+    label {
+      font-size: 14px;
+      font-weight: 600;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 8px;
+      font-size: 14px;
+      outline: none;
+
+      &:focus {
+        border-color: $primary-color;
+      }
+    }
+  }
+
+  .save-btn {
+    width: 100%;
+    background-color: $primary-color;
+    color: #fff;
+    padding: 10px;
+    border-radius: 6px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
+
+    &:hover {
+      background-color: darken($primary-color, 10%);
+    }
+  }
+}
+
+
