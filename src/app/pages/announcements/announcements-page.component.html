@@ -1,0 +1,61 @@
+<app-header></app-header>
+
+<app-page-banner
+  title="Duyurular"
+  subtitle="Üniversite Toplulukları"
+  image="assets/images/banner-announcements.jpg">
+</app-page-banner>
+
+<section class="blog-details-area ptb-100">
+  <div class="container">
+    <div class="row">
+      <!-- Ana İçerik (Duyurular Listesi) -->
+      <div class="col-lg-8">
+        <div class="blog-details-content">
+          <div class="announcements-list">
+            <div class="announcement-card" *ngFor="let ann of announcements">
+              <div class="announcement-header">
+                <h3 class="announcement-title">
+                  <a [routerLink]="['/duyuru', ann.id]">{{ ann.title }}</a>
+                </h3>
+                <span class="badge bg-primary ms-2" *ngIf="isNew(ann.date)">Yeni</span>
+              </div>
+              <div class="announcement-meta text-muted small">
+                {{ ann.community }} • {{ ann.date }}
+              </div>
+              <p class="mt-2">{{ ann.excerpt }}</p>
+              <a [routerLink]="['/duyuru', ann.id]" class="read-more-link">
+                Devamını Oku →
+              </a>
+            </div>
+          </div>
+
+          <!-- Sayfalama (Basit) -->
+          <nav aria-label="Duyuru Sayfaları" class="mt-4">
+            <ul class="pagination justify-content-center">
+              <li class="page-item disabled">
+                <span class="page-link">Önceki</span>
+              </li>
+              <li class="page-item active">
+                <span class="page-link">1</span>
+              </li>
+              <li class="page-item">
+                <a class="page-link" [routerLink]="['/duyurular']" [queryParams]="{page: 2}">2</a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" [routerLink]="['/duyurular']" [queryParams]="{page: 2}">Sonraki</a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="col-lg-4">
+        <app-blog-sidebar></app-blog-sidebar>
+      </div>
+    </div>
+  </div>
+</section>
+
+<app-footer></app-footer>
