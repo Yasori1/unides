@@ -1,84 +1,44 @@
-<<<<<<< Updated upstream
-import { Component } from '@angular/core';
-<<<<<<< Updated upstream
+import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-
-@Component({
-  selector: 'app-login-page', // Component selector'ı projenize göre güncelleyebilirsiniz
-  standalone: true,
-  imports: [CommonModule, RouterModule],
-  templateUrl: './login-page.component.html',
-  styleUrls: ['./login-page.component.scss'],
-})
-export class LoginPageComponent {
-  emailError: boolean = false;
-
-  validateStudentEmail(event: any) {
-    const email = event.target.value;
-
-    // Eğer input boşsa hatayı temizle
-=======
 import { RouterLink } from '@angular/router';
-=======
-import {
-  Component,
-  CUSTOM_ELEMENTS_SCHEMA,
-  Inject,
-  PLATFORM_ID,
-  AfterViewInit,
-} from '@angular/core';
-import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { RouterModule } from '@angular/router';
->>>>>>> Stashed changes
-
-// DİKKAT: Statik import kaldırıldı çünkü SSR hatasına yol açıyor.
-// import '@splinetool/viewer';
 
 @Component({
-<<<<<<< Updated upstream
-    selector: 'app-login-page',
-    imports: [RouterLink],
-    templateUrl: './login-page.component.html',
-    styleUrl: './login-page.component.scss'
-})
-export class LoginPageComponent {}
-=======
   selector: 'app-login-page',
   standalone: true,
-  imports: [CommonModule, RouterModule],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  imports: [CommonModule, RouterLink], // *ngIf ve routerLink kullanımı için gerekli
   templateUrl: './login-page.component.html',
-  styleUrls: ['./login-page.component.scss'],
+  styleUrl: './login-page.component.scss',
+  schemas: [CUSTOM_ELEMENTS_SCHEMA], // Spline viewer etiketini tanıması için
 })
-export class LoginPageComponent implements AfterViewInit {
+export class LoginPageComponent implements OnInit {
   emailError: boolean = false;
 
-  // Platform ID'sini inject ediyoruz ki nerede çalıştığımızı (Server mı Browser mı) anlayabilelim
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
+  ngOnInit(): void {
+    // Spline Viewer scriptini buraya da ekliyoruz ki login sayfasında da 3D model çalışsın
+    // Eğer script daha önce yüklendiyse tekrar yüklemeye çalışmaz
+    const scriptCheck = document.querySelector(
+      'script[src="https://unpkg.com/@splinetool/viewer@1.9.59/build/spline-viewer.js"]'
+    );
 
-  ngAfterViewInit(): void {
-    // Eğer kod Tarayıcıda (Browser) çalışıyorsa kütüphaneyi yükle
-    if (isPlatformBrowser(this.platformId)) {
-      import('@splinetool/viewer');
+    if (!scriptCheck) {
+      const script = document.createElement('script');
+      script.type = 'module';
+      script.src = 'https://unpkg.com/@splinetool/viewer@1.9.59/build/spline-viewer.js';
+      document.head.appendChild(script);
     }
   }
 
   validateStudentEmail(event: any) {
     const email = event.target.value;
 
->>>>>>> Stashed changes
     if (!email) {
       this.emailError = false;
       return;
     }
 
-<<<<<<< Updated upstream
     // E-posta format kontrolü:
     // 1. İçinde @ işareti olmalı
     // 2. Sonu .edu.tr ile bitmeli
-=======
->>>>>>> Stashed changes
     if (email.includes('@') && !email.endsWith('.edu.tr')) {
       this.emailError = true;
     } else {
@@ -89,20 +49,11 @@ export class LoginPageComponent implements AfterViewInit {
   onSubmit(event: Event) {
     event.preventDefault();
     if (this.emailError) {
-<<<<<<< Updated upstream
-      // Eğer hata varsa formu gönderme veya uyarı ver
-      alert('Lütfen geçerli bir öğrenci e-postası giriniz.');
+      // Eğer hata varsa uyarı ver
+      alert('Lütfen geçerli bir öğrenci e-postası giriniz (.edu.tr).');
     } else {
-      // Başarılı form gönderimi
-=======
-      alert('Lütfen geçerli bir öğrenci e-postası giriniz.');
-    } else {
->>>>>>> Stashed changes
+      // Başarılı form gönderimi simülasyonu
       console.log('Form başarıyla gönderildi.');
     }
   }
 }
-<<<<<<< Updated upstream
-=======
->>>>>>> Stashed changes
->>>>>>> Stashed changes
