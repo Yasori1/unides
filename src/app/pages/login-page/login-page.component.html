@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 <!-- Google Fonts & Icons -->
 <!-- Not: Bu linkleri normalde index.html dosyasına eklemeniz daha iyi bir pratiktir, ancak component bazlı kalması için burada bırakıldı. -->
 <link
@@ -16,8 +17,164 @@
         <div class="quote-container">
           <h1>Geleceğe<br />Hoş Geldin.</h1>
           <p>Kampüs hayatını dijitalleştiren platforma tekrar bağlan.</p>
+=======
+<<<<<<< Updated upstream
+<div class="login-area">
+  <div class="row m-0">
+    <div class="col-lg-6 col-md-12 p-0">
+      <div class="login-image" style="background-image: url(images/titles/uni-2.png);">
+        <img src="images/titles/uni-2.png" alt="image">
+      </div>
+    </div>
+    <div class="col-lg-6 col-md-12 p-0">
+      <div class="login-content">
+        <div class="d-table">
+          <div class="d-table-cell">
+            <div class="login-form">
+              <div class="logo">
+                <a routerLink="/">
+                  <img width="128px" height="64px" src="images/logo.png" alt="image">
+                </a>
+              </div>
+              <h3>Geri Gelmişsin!</h3>
+              <p>Ünides'e <a routerLink="/register">Kayıt Ol</a></p>
+              <form>
+                <div class="form-group mb-3">
+                  <input type="email" placeholder="E-Posta" class="form-control">
+                </div>
+                <div class="form-group mb-3">
+                  <input type="password" placeholder="Şifre" class="form-control">
+                </div>
+                <button type="submit">Giriş Yap</button>
+                <div class="forgot-password">
+                  <a routerLink=".">Şifremi Unuttum?</a>
+                </div>
+                <div class="connect-with-social">
+                  <button type="submit" class="e-devlet">
+                    E-Devlet ile Bağlan
+                  </button>
+                  <button type="submit" class="facebook">
+                    <i class='bx bxl-facebook'></i> Facebook ile Bağlan
+                  </button>
+                  <button type="submit" class="twitter">
+                    <i class='bx bxl-twitter'></i> Twitter ile Bağlan
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+>>>>>>> Stashed changes
         </div>
       </div>
+=======
+<!-- Google Fonts & Icons -->
+<link
+  href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+  rel="stylesheet"
+/>
+<link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+
+<div class="main-container">
+  <div class="split-layout">
+    <!-- SOL TARAF: SPLINE 3D SAHNESİ -->
+    <div class="visual-side">
+      <!-- Spline Viewer Buraya Eklendi -->
+      <spline-viewer
+        url="https://prod.spline.design/gWnX-vzrht9nTCAi/scene.splinecode"
+      ></spline-viewer>
+
+      <div class="visual-overlay"></div>
+
+      <div class="visual-content">
+        <div class="brand-badge"><i class="bx bxs-graduation"></i> ÜNİDES</div>
+        <div class="quote-container">
+          <h1>Geleceğe<br />Hoş Geldin.</h1>
+          <p>Kampüs hayatını dijitalleştiren platforma tekrar bağlan.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SAĞ TARAF: FORM -->
+    <div class="form-side">
+      <div class="form-wrapper">
+        <div class="mobile-logo"><i class="bx bxs-graduation"></i> ÜNİDES</div>
+
+        <div class="header-text">
+          <h3>Tekrar Merhaba! 👋</h3>
+          <p>Hesabın yok mu? <a routerLink="/register" class="register-link">Hemen Kayıt Ol</a></p>
+        </div>
+
+        <form (submit)="onSubmit($event)">
+          <!-- E-Posta Input (.edu.tr Korumalı) -->
+          <div class="input-group">
+            <div class="icon-wrapper" [class.error-icon]="emailError">
+              <i class="bx bx-envelope"></i>
+            </div>
+            <input
+              type="email"
+              (input)="validateStudentEmail($event)"
+              placeholder="Öğrenci E-Posta (xxx@univ.edu.tr)"
+              class="modern-input"
+              [class.input-error]="emailError"
+            />
+          </div>
+
+          <!-- Hata Mesajı -->
+          <div *ngIf="emailError" class="error-message">
+            <i class="bx bx-error-circle"></i> Sadece <b>.edu.tr</b> uzantılı öğrenci mailleri kabul
+            edilmektedir.
+          </div>
+
+          <!-- Şifre Input -->
+          <div class="input-group mt-3">
+            <div class="icon-wrapper">
+              <i class="bx bx-lock-alt"></i>
+            </div>
+            <input type="password" placeholder="Şifreniz" class="modern-input" />
+          </div>
+
+          <div class="form-actions">
+            <label class="remember-me">
+              <input type="checkbox" />
+              <span>Beni Hatırla</span>
+            </label>
+            <a href="javascript:void(0)" class="forgot-link">Şifremi Unuttum?</a>
+          </div>
+
+          <button type="submit" class="btn-primary" [style.opacity]="emailError ? '0.7' : '1'">
+            Giriş Yap <i class="bx bx-right-arrow-alt"></i>
+          </button>
+
+          <div class="divider">
+            <span>veya</span>
+          </div>
+
+          <div class="social-login-grid">
+            <button type="button" class="btn-social btn-official" routerLink="/corporate-login">
+              <div class="btn-content">
+                <i class="bx bxs-id-card icon-official"></i>
+                <div class="text-col">
+                  <span class="btn-label">Kurumsal</span>
+                  <span class="btn-title">Yetkili Girişi</span>
+                </div>
+              </div>
+            </button>
+
+            <button type="button" class="btn-social btn-community" routerLink="/community-login">
+              <div class="btn-content">
+                <span class="emoji-icon">👥</span>
+                <div class="text-col">
+                  <span class="btn-label">Sosyal</span>
+                  <span class="btn-title">Topluluk Girişi</span>
+                </div>
+              </div>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <footer class="simple-footer">© 2025 Ünides Teknoloji A.Ş.</footer>
+>>>>>>> Stashed changes
     </div>
 
     <!-- SAĞ TARAF: MODERN FORM -->
