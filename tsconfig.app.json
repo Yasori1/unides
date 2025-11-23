@@ -10,7 +10,7 @@
   },
   "include": [
     "src/**/*.ts"
-, "server.ts"  ],
+, "server.ts", "src/app/common/header/header.component.tsx", "src/app/pages/home/banner/react-banner.ts"  ],
   "exclude": [
     "src/**/*.spec.ts"
   ]
