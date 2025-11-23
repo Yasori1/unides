@@ -1,107 +1,93 @@
-<div class="listing-area pt-100 pb-70">
-    <div class="container">
-        <div class="section-title">
-            <span class="sub-title">Keşfet</span>
-            <h2>Son Topluluklar</h2>
-        </div>
+<section class="communities-section">
+  <div class="container">
+    <!-- Başlık Kısmı -->
+    <div class="section-header">
+      <div class="badge">Keşfet</div>
+      <h2>Favori Topluluklar</h2>
+      <p>Kampüsün en popüler ve aktif öğrenci topluluklarına göz atın.</p>
     </div>
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-xl-4 col-lg-6">
-                <div class="single-listing-box">
-                    <a routerLink="/communities/demo-1" class="listing-image">
-                        <img src="images/listing/img1.jpg" alt="image">
-                    </a>
-                    <div class="listing-badge">Açık</div>
-                    <div class="listing-content">
-                        <div class="content">
-                            <div class="author">
-                                <img src="images/user1.jpg" alt="image">
-                                <span>Fitness</span>
-                            </div>
-                            <span class="location"><i class='bx bx-map'></i> Kafkas Üniversitesi / Kars</span>
-                            <div class="rating">
-                                <i class='bx bxs-star'></i>
-                                <i class='bx bxs-star'></i>
-                                <i class='bx bxs-star'></i>
-                                <i class='bx bxs-star'></i>
-                                <i class='bx bxs-star'></i>
-                                <span class="rating-count">5 inceleme</span>
-                            </div>
-                        </div>
-                        <div class="footer-content">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <div class="listing-option-list">
-                                    <a routerLink="." title="Find Directions"><i class='bx bx-directions'></i></a>
-                                    <a routerLink="." title="Save"><i class='bx bx-heart'></i></a>
-                                    <a routerLink="." title="On the Map"><i class='bx bx-map'></i></a>
-                                </div>
-                                <div class="price-level">
-                                    <span title="Ultra Hight">
-                                        <strong>$</strong>
-                                        <strong>$</strong>
-                                        <strong>$</strong>
-                                        <strong>$</strong>
-                                    </span>
-                                </div>
-                                <div class="listing-category">
-                                    <a routerLink="." title="Category">
-                                        Kulüp
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+
+    <!-- Kolonlar Wrapper -->
+    <div class="columns-wrapper">
+      <!-- 1. Sütun -->
+      <div class="community-column">
+        <div class="scrolling-content speed-slow">
+          <!-- Sonsuz döngü hissi için concat kullanıyoruz -->
+          <ng-container *ngFor="let item of firstColumn.concat(firstColumn)">
+            <!-- Topluluk Kartı -->
+            <a [routerLink]="['/communities', item.id]" class="community-card">
+              <div class="card-header">
+                <img
+                  [src]="item.logo"
+                  [alt]="item.name"
+                  onerror="this.src='assets/img/placeholder.png'"
+                />
+                <div class="meta">
+                  <span class="category">{{ item.category }}</span>
+                  <h3 class="name">{{ item.name }}</h3>
                 </div>
-            </div>
-            <div class="col-xl-4 col-lg-6">
-                <div class="single-listing-box">
-                    <a routerLink="#" class="listing-image">
-                        <img src="images/listing/img3.jpg" alt="image">
-                    </a>
-                    <div class="listing-badge closed">Dolu</div>
-                    <div class="listing-content">
-                        <div class="content">
-                            <div class="author">
-                                <img src="images/user3.jpg" alt="image">
-                                <span>Tiyatro</span>
-                            </div>
-                            <h3><a routerLink="#">Kafkas Tiyatro</a></h3>
-                            <span class="location"><i class='bx bx-map'></i> Kafkas Üniversitesi / Kars</span>
-                            <div class="rating">
-                                <i class='bx bxs-star'></i>
-                                <i class='bx bxs-star'></i>
-                                <i class='bx bxs-star'></i>
-                                <i class='bx bxs-star'></i>
-                                <i class='bx bxs-star'></i>
-                                <span class="rating-count">2 inceleme</span>
-                            </div>
-                        </div>
-                        <!-- <div class="footer-content">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <div class="listing-option-list">
-                                    <a routerLink="." title="Find Directions"><i class='bx bx-directions'></i></a>
-                                    <a routerLink="." title="Save"><i class='bx bx-heart'></i></a>
-                                    <a routerLink="." title="On the Map"><i class='bx bx-map'></i></a>
-                                </div>
-                                <div class="price-level">
-                                    <span title="Moderate">
-                                        <strong>$</strong>
-                                        <strong>$</strong>
-                                        <strong>$</strong>
-                                    </span>
-                                </div>
-                                <div class="listing-category">
-                                    <a routerLink="." title="Category">
-                                        <i class='bx bx-blanket'></i>
-                                        Fitness
-                                    </a>
-                                </div>
-                            </div>
-                        </div> -->
-                    </div>
-                </div>
-            </div>
+              </div>
+              <p class="description">{{ item.description }}</p>
+              <div class="card-footer">
+                <span class="members"> <i class="bx bx-user"></i> {{ item.memberCount }} Üye </span>
+                <span class="arrow">→</span>
+              </div>
+            </a>
+          </ng-container>
         </div>
+      </div>
+
+      <!-- 2. Sütun (Mobilde gizle) -->
+      <div class="community-column hidden-mobile">
+        <div class="scrolling-content speed-medium">
+          <ng-container *ngFor="let item of secondColumn.concat(secondColumn)">
+            <a [routerLink]="['/communities', item.id]" class="community-card">
+              <div class="card-header">
+                <img
+                  [src]="item.logo"
+                  [alt]="item.name"
+                  onerror="this.src='assets/img/placeholder.png'"
+                />
+                <div class="meta">
+                  <span class="category">{{ item.category }}</span>
+                  <h3 class="name">{{ item.name }}</h3>
+                </div>
+              </div>
+              <p class="description">{{ item.description }}</p>
+              <div class="card-footer">
+                <span class="members"> <i class="bx bx-user"></i> {{ item.memberCount }} Üye </span>
+                <span class="arrow">→</span>
+              </div>
+            </a>
+          </ng-container>
+        </div>
+      </div>
+
+      <!-- 3. Sütun (Tablette gizle) -->
+      <div class="community-column hidden-tablet">
+        <div class="scrolling-content speed-fast">
+          <ng-container *ngFor="let item of thirdColumn.concat(thirdColumn)">
+            <a [routerLink]="['/communities', item.id]" class="community-card">
+              <div class="card-header">
+                <img
+                  [src]="item.logo"
+                  [alt]="item.name"
+                  onerror="this.src='assets/img/placeholder.png'"
+                />
+                <div class="meta">
+                  <span class="category">{{ item.category }}</span>
+                  <h3 class="name">{{ item.name }}</h3>
+                </div>
+              </div>
+              <p class="description">{{ item.description }}</p>
+              <div class="card-footer">
+                <span class="members"> <i class="bx bx-user"></i> {{ item.memberCount }} Üye </span>
+                <span class="arrow">→</span>
+              </div>
+            </a>
+          </ng-container>
+        </div>
+      </div>
     </div>
-</div>
+  </div>
+</section>

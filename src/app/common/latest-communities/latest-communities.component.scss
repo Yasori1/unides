@@ -1,1 +1,209 @@
-@use "../listings/listings.component" as listings;
+// Eski importlar SİLİNDİ. Tamamen bu bileşene özel stiller:
+
+:host {
+  --bg-color: #f9f9f9; // Hafif gri arka plan
+  --primary-color: #5ecfb1; // Sitenizin ana rengi (tahmini)
+  --text-dark: #1a1a1a;
+  --text-light: #666666;
+  --card-bg: #ffffff;
+}
+
+.communities-section {
+  padding: 100px 0;
+  background-color: var(--bg-color);
+  overflow: hidden;
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+    position: relative;
+  }
+}
+
+.section-header {
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto 50px;
+
+  .badge {
+    display: inline-block;
+    padding: 6px 16px;
+    background: rgba(94, 207, 177, 0.1); // Primary color'ın transparan hali
+    color: var(--primary-color);
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+  }
+
+  h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+    color: var(--text-dark);
+  }
+
+  p {
+    color: var(--text-light);
+    font-size: 1rem;
+  }
+}
+
+.columns-wrapper {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  // Maskeleme efekti
+  mask-image: linear-gradient(to bottom, transparent, black 5%, black 95%, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 5%, black 95%, transparent);
+  max-height: 600px; // Yükseklik sınırı
+  overflow: hidden;
+}
+
+.community-column {
+  flex: 1;
+  min-width: 280px;
+  max-width: 350px;
+}
+
+// KART TASARIMI (En önemli kısım)
+.community-card {
+  display: block; // Link olduğu için
+  background: var(--card-bg);
+  border: 1px solid #eeeeee;
+  border-radius: 16px;
+  padding: 25px;
+  margin-bottom: 24px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s ease;
+  text-decoration: none; // Link alt çizgisini kaldır
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    border-color: var(--primary-color);
+
+    .arrow {
+      transform: translateX(5px);
+      color: var(--primary-color);
+    }
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+
+    img {
+      width: 50px;
+      height: 50px;
+      border-radius: 10px; // Karemsi, hafif yuvarlak
+      object-fit: cover;
+      background-color: #f0f0f0;
+    }
+
+    .meta {
+      .category {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--primary-color);
+        font-weight: 600;
+        display: block;
+        margin-bottom: 3px;
+      }
+      .name {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin: 0;
+      }
+    }
+  }
+
+  .description {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; // 2 satırdan fazlasını "..." yap
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #f0f0f0;
+    padding-top: 15px;
+
+    .members {
+      font-size: 0.85rem;
+      color: var(--text-light);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+
+      i {
+        font-size: 1.1em;
+      }
+    }
+
+    .arrow {
+      font-size: 1.2rem;
+      color: #cccccc;
+      transition: all 0.3s ease;
+    }
+  }
+}
+
+// Animasyonlar
+.scrolling-content {
+  animation: scrollUp linear infinite;
+  &:hover {
+    animation-play-state: paused;
+  }
+
+  &.speed-slow {
+    animation-duration: 40s;
+  }
+  &.speed-medium {
+    animation-duration: 35s;
+  }
+  &.speed-fast {
+    animation-duration: 45s;
+  }
+}
+
+@keyframes scrollUp {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
+// Responsive
+@media (max-width: 991px) {
+  .hidden-tablet {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .hidden-mobile {
+    display: none;
+  }
+  .columns-wrapper {
+    max-height: 500px;
+  }
+  .community-column {
+    max-width: 100%;
+  }
+}
