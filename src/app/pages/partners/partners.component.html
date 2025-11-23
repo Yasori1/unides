@@ -1,0 +1,36 @@
+<section class="partners-section">
+  <!-- Arka plan blurlu gradient efekti -->
+  <div class="background-glow"></div>
+
+  <div class="container">
+    <!-- Başlık Alanı -->
+    <div class="header-content">
+      <h2>
+        <span class="muted">Sektörün Öncüleri</span>
+        <br />
+        <span class="highlight">Bize Güveniyor</span>
+      </h2>
+    </div>
+
+    <!-- Üst Çizgi -->
+    <div class="divider"></div>
+
+    <!-- Kayan Logo Alanı (Slider) -->
+    <div class="slider-mask">
+      <div class="slider-track">
+        <!-- 1. Grup Logolar -->
+        <div class="slide" *ngFor="let logo of logos">
+          <img [src]="logo.src" [alt]="logo.alt" loading="lazy" />
+        </div>
+
+        <!-- 2. Grup Logolar (Sonsuz döngü için tekrar) -->
+        <div class="slide" *ngFor="let logo of logos">
+          <img [src]="logo.src" [alt]="logo.alt" loading="lazy" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Alt Çizgi -->
+    <div class="divider"></div>
+  </div>
+</section>

@@ -10,11 +10,25 @@ import { DownloadAppComponent } from '../../common/download-app/download-app.com
 import { FooterComponent } from '../../common/footer/footer.component';
 import { HeaderComponent } from '../../common/header/header.component';
 import { LatestCommunitiesComponent } from '../../common/latest-communities/latest-communities.component';
+import { PartnersComponent } from '../../pages/partners/partners.component'; // Dosya yolu proje yapınıza göre değişebilir
 
 @Component({
-    selector: 'app-home',
-    imports: [HeaderComponent, BannerComponent, LatestCommunitiesComponent, DestinationsComponent, HowItWorksComponent, PlacesComponent, VideoComponent, FeedbackComponent, DownloadAppComponent, FooterComponent],
-    templateUrl: './home.component.html',
-    styleUrl: './home.component.scss'
+  selector: 'app-home',
+  standalone: true, // Standalone modunu açıkça belirtiyoruz
+  imports: [
+    HeaderComponent,
+    BannerComponent,
+    LatestCommunitiesComponent,
+    PartnersComponent, // <--- YENİ EKLENEN BİLEŞEN
+    DestinationsComponent,
+    HowItWorksComponent,
+    PlacesComponent,
+    VideoComponent,
+    FeedbackComponent,
+    DownloadAppComponent,
+    FooterComponent,
+  ],
+  templateUrl: './home.component.html',
+  styleUrl: './home.component.scss',
 })
 export class HomeComponent {}

@@ -1,0 +1,139 @@
+:host {
+  display: block;
+  --bg-color: #ffffff; // Sitenin arka plan rengi
+  --text-color: #1a1a1a;
+  --muted-color: #666666;
+  --divider-color: #e5e5e5;
+}
+
+.partners-section {
+  position: relative;
+  padding: 80px 0;
+  overflow: hidden;
+  background-color: var(--bg-color);
+
+  // Arka plandaki o "Blur" efekti
+  .background-glow {
+    position: absolute;
+    top: -50%;
+    left: 50%;
+    transform: translate(-50%, 0);
+    width: 120vmin;
+    height: 120vmin;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.03), transparent 70%);
+    filter: blur(60px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+}
+
+.header-content {
+  text-align: center;
+  margin-bottom: 40px;
+
+  h2 {
+    font-size: 2rem;
+    line-height: 1.3;
+
+    .muted {
+      color: var(--muted-color);
+      font-weight: 500;
+    }
+
+    .highlight {
+      color: var(--text-color);
+      font-weight: 700;
+    }
+  }
+}
+
+// İnce Çizgiler (Kenarları silik)
+.divider {
+  height: 1px;
+  background: var(--divider-color);
+  width: 100%;
+  max-width: 400px;
+  margin: 30px auto;
+  // Çizginin uçlarını yumuşatmak için maske
+  mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);
+}
+
+// Slider Alanı
+.slider-mask {
+  overflow: hidden;
+  padding: 20px 0;
+  // Kenarlardan logoların silinerek kaybolması için maske
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+.slider-track {
+  display: flex;
+  align-items: center;
+  gap: 60px; // Logolar arası boşluk
+  width: max-content; // İçerik kadar genişle
+
+  // Animasyon Tanımı
+  animation: scroll 40s linear infinite;
+
+  &:hover {
+    animation-play-state: paused; // Mouse üzerine gelince dursun
+  }
+}
+
+.slide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    height: 32px; // Logo yüksekliği
+    width: auto;
+    object-fit: contain;
+    opacity: 0.7;
+    transition: opacity 0.3s;
+    filter: grayscale(100%); // İsterseniz siyah beyaz yapabilirsiniz
+
+    &:hover {
+      opacity: 1;
+      filter: grayscale(0%);
+    }
+  }
+}
+
+// Sonsuz Kaydırma Animasyonu
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    // İçeriğin yarısı kadar sola kaydır (çünkü içeriği 2 kez bastık)
+    transform: translateX(-50%);
+  }
+}
+
+// Responsive Ayarlar
+@media (max-width: 768px) {
+  .header-content h2 {
+    font-size: 1.5rem;
+  }
+
+  .slider-track {
+    gap: 40px;
+    animation-duration: 20s; // Mobilde biraz daha hızlı dönebilir
+  }
+
+  .slide img {
+    height: 24px;
+  }
+}
