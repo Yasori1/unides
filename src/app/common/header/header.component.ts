@@ -1,115 +1,74 @@
-import { NgClass, NgIf } from '@angular/common';
 import { Component, HostListener } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, Router } from '@angular/router';
-import { CarouselModule, OwlOptions } from 'ngx-owl-carousel-o';
 import { HeadroomModule } from '@ctrl/ngx-headroom';
+import { trigger, transition, style, animate } from '@angular/animations';
 
 @Component({
-    selector: 'app-header',
-    imports: [RouterLink, RouterLinkActive, NgClass, CarouselModule, HeadroomModule, NgIf],
-    templateUrl: './header.component.html',
-    styleUrl: './header.component.scss'
+  selector: 'app-header',
+  standalone: true,
+  imports: [CommonModule, RouterLink, RouterLink, HeadroomModule],
+  templateUrl: './header.component.html',
+  styleUrl: './header.component.scss',
+  animations: [
+    // Framer Motion 'Spring' efektinin Angular karşılığı
+    trigger('dropdownAnim', [
+      // Başlangıçta biraz aşağıda ve şeffaf
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translate(-50%, 10px) scale(0.95)' }),
+        animate(
+          '400ms cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+          style({ opacity: 1, transform: 'translate(-50%, 0) scale(1)' })
+        ),
+      ]),
+      // Kapanırken hafifçe aşağı kaybolur
+      transition(':leave', [
+        animate(
+          '150ms ease-in',
+          style({ opacity: 0, transform: 'translate(-50%, 10px) scale(0.95)' })
+        ),
+      ]),
+    ]),
+    // Hover Pill (Gri Yuvarlak) Efekti
+    trigger('pillAnim', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'scale(0.9)' }),
+        animate('200ms ease-out', style({ opacity: 1, transform: 'scale(1)' })),
+      ]),
+      transition(':leave', [
+        animate('150ms ease-in', style({ opacity: 0, transform: 'scale(0.9)' })),
+      ]),
+    ]),
+  ],
 })
 export class HeaderComponent {
+  activeItem: string | null = null;
+  classApplied = false; // Mobil menü için
+  isSticky: boolean = false;
 
-    constructor (
-        public router: Router
-    ) {}
+  constructor(public router: Router) {}
 
-    // Language Dropdown Menu
-    languageClassApplied = false;
-    languageToggleClass() {
-        this.languageClassApplied = !this.languageClassApplied;
-    }
+  // Menü üzerine gelince aktifleştir
+  setActive(item: string | null) {
+    this.activeItem = item;
+  }
 
-	// Responsive Menu Trigger
-    classApplied = false;
-    toggleClass() {
-        this.classApplied = !this.classApplied;
-    }
+  // Mobil Menü Aç/Kapa
+  toggleClass() {
+    this.classApplied = !this.classApplied;
+  }
 
-	// Search Overlay
-    searchClassApplied = false;
-    searchToggleClass() {
-        this.searchClassApplied = !this.searchClassApplied;
-    }
+  // Mobil Accordion Kontrolü
+  openSectionIndex: number = -1;
+  toggleSection(index: number): void {
+    this.openSectionIndex = this.openSectionIndex === index ? -1 : index;
+  }
+  isSectionOpen(index: number): boolean {
+    return this.openSectionIndex === index;
+  }
 
-    // Owl Carousel
-    partnersSlides: OwlOptions = {
-		nav: false,
-		loop: true,
-		dots: false,
-		autoplay: true,
-		smartSpeed: 500,
-		autoplayHoverPause: true,
-		navText: [
-			"<i class='flaticon-left'></i>",
-			"<i class='flaticon-right-arrow'></i>"
-		],
-        responsive: {
-			0: {
-				items: 2
-			},
-			515: {
-				items: 3
-			},
-			695: {
-				items: 4
-			},
-			935: {
-				items: 5
-			},
-			1115: {
-				items: 7
-			}
-		}
-    }
-
-	// Responsive Navbar Accordion
-    openSectionIndex: number = -1;
-    openSectionIndex2: number = -1;
-    openSectionIndex3: number = -1;
-    toggleSection(index: number): void {
-        if (this.openSectionIndex === index) {
-            this.openSectionIndex = -1;
-        } else {
-            this.openSectionIndex = index;
-        }
-    }
-    toggleSection2(index: number): void {
-        if (this.openSectionIndex2 === index) {
-            this.openSectionIndex2 = -1;
-        } else {
-            this.openSectionIndex2 = index;
-        }
-    }
-    toggleSection3(index: number): void {
-        if (this.openSectionIndex3 === index) {
-            this.openSectionIndex3 = -1;
-        } else {
-            this.openSectionIndex3 = index;
-        }
-    }
-    isSectionOpen(index: number): boolean {
-        return this.openSectionIndex === index;
-    }
-    isSectionOpen2(index: number): boolean {
-        return this.openSectionIndex2 === index;
-    }
-    isSectionOpen3(index: number): boolean {
-        return this.openSectionIndex3 === index;
-    }
-
-    // Navbar Sticky
-    isSticky: boolean = false;
-    @HostListener('window:scroll', [])
-    checkScroll() {
-        const scrollPosition = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
-        if (scrollPosition >= 50) {
-            this.isSticky = true;
-        } else {
-            this.isSticky = false;
-        }
-    }
-
+  @HostListener('window:scroll', [])
+  checkScroll() {
+    this.isSticky = window.scrollY >= 50;
+  }
 }
