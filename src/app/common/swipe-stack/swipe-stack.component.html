@@ -1,0 +1,62 @@
+<div class="stack-wrapper">
+  <!-- Başlık -->
+  <div class="stack-header">
+    <h3>Kararsız mı kaldın?</h3>
+    <p>Kaydır ve keşfet! Sağa kaydırarak katıl, sola kaydırarak geç.</p>
+  </div>
+
+  <div class="cards-container">
+    <!-- Kart Yoksa -->
+    <div class="no-cards" *ngIf="cards.length === 0">
+      <i class="bx bx-layer"></i>
+      <p>Bu gruptaki öneriler bitti.</p>
+      <!-- Yenile butonuna tıklanınca parent componente sinyal gönderir -->
+      <button (click)="onRefreshClick()" class="refresh-btn">
+        Diğer Etkinlikleri Getir <i class="bx bx-refresh"></i>
+      </button>
+    </div>
+
+    <!-- Kartlar -->
+    <div
+      class="swipe-card"
+      *ngFor="let card of cards; let i = index"
+      [ngStyle]="getCardStyle(i)"
+      (mousedown)="i === 0 ? startDrag($event) : null"
+      (touchstart)="i === 0 ? startDrag($event) : null"
+      (mousemove)="i === 0 ? onDrag($event) : null"
+      (touchmove)="i === 0 ? onDrag($event) : null"
+      (mouseup)="i === 0 ? endDrag() : null"
+      (mouseleave)="i === 0 ? endDrag() : null"
+      (touchend)="i === 0 ? endDrag() : null"
+    >
+      <img [src]="card.image" [alt]="card.title" class="card-bg" />
+      <div class="overlay"></div>
+
+      <!-- İndikatörler -->
+      <div
+        class="action-indicator like"
+        [style.opacity]="currentX > 50 && i === 0 ? currentX / 200 : 0"
+      >
+        KATIL
+      </div>
+      <div
+        class="action-indicator nope"
+        [style.opacity]="currentX < -50 && i === 0 ? -currentX / 200 : 0"
+      >
+        GEÇ
+      </div>
+
+      <div class="card-info">
+        <span class="badge">{{ card.category }}</span>
+        <h3>{{ card.title }}</h3>
+        <p><i class="bx bx-calendar"></i> {{ card.date }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kontrol Butonları -->
+  <div class="controls" *ngIf="cards.length > 0">
+    <button class="btn-circle nope" (click)="swipeLeft()"><i class="bx bx-x"></i></button>
+    <button class="btn-circle like" (click)="swipeRight()"><i class="bx bx-check"></i></button>
+  </div>
+</div>

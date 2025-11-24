@@ -1,21 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common'; // *ngFor, *ngIf, ngClass için
-import { RouterModule } from '@angular/router'; // routerLink için
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 
 import { HeaderComponent } from '../../common/header/header.component';
 import { FooterComponent } from '../../common/footer/footer.component';
 import { PageBannerComponent } from '../../common/page-banner/page-banner.component';
-
-interface Project {
-  id: number;
-  title: string;
-  category: string;
-  date: string;
-  description: string;
-  image: string;
-  status: 'active' | 'upcoming'; // active: Devam Eden, upcoming: Yakında
-  location?: string;
-}
+import { MagicCardComponent } from '../../common/magic-card/magic-card.component';
+import { SwipeStackComponent } from '../../common/swipe-stack/swipe-stack.component';
+import { EventService, Project } from '../../services/event.services';
 
 @Component({
   selector: 'app-events',
@@ -25,70 +17,94 @@ interface Project {
     RouterModule,
     HeaderComponent,
     FooterComponent,
-    PageBannerComponent
+    PageBannerComponent,
+    MagicCardComponent,
+    SwipeStackComponent,
   ],
   templateUrl: './events.component.html',
-  styleUrls: ['./events.component.scss']
+  styleUrls: ['./events.component.scss'],
 })
 export class EventsComponent implements OnInit {
   currentFilter: 'all' | 'active' | 'upcoming' = 'all';
 
-  // Örnek veriler (görselleri assets/images/events içine eklemeyi unutma)
-  projects: Project[] = [
-    {
-      id: 1,
-      title: 'Kampüs Kodluyor Hackathonu',
-      category: 'Yazılım & Teknoloji',
-      date: '25 Kasım 2025 - 27 Kasım 2025',
-      description: '48 saat sürecek maratonda takımlar en iyi dijital çözümü üretmek için yarışıyor.',
-      image: 'assets/images/events/event1.jpg',
-      status: 'active',
-      location: 'İstanbul Kampüs'
-    },
-    {
-      id: 2,
-      title: 'Sürdürülebilir Kampüs Zirvesi',
-      category: 'Sosyal Sorumluluk',
-      date: '10 Aralık 2025',
-      description: 'Yeşil bir gelecek için üniversiteler arası işbirliği projeleri konuşuluyor.',
-      image: 'assets/images/events/event2.jpg',
-      status: 'upcoming',
-      location: 'Ankara'
-    },
-    {
-      id: 3,
-      title: 'Dijital Girişimcilik Akademisi',
-      category: 'Kariyer & Eğitim',
-      date: 'Her Cumartesi',
-      description: 'Fikrini girişime dönüştürmek isteyenler için 8 haftalık eğitim programı devam ediyor.',
-      image: 'assets/images/events/event3.jpg',
-      status: 'active',
-      location: 'Online'
-    },
-    {
-      id: 4,
-      title: 'Yapay Zeka ve Sanat Sergisi',
-      category: 'Kültür & Sanat',
-      date: 'Ocak 2026',
-      description: 'Yapay zeka araçlarıyla üretilen eserlerin sergileneceği büyük buluşma.',
-      image: 'assets/images/events/event4.jpg',
-      status: 'upcoming',
-      location: 'İzmir'
-    }
-  ];
+  // Veri Listeleri
+  allProjects: Project[] = [];
+  paginatedProjects: Project[] = [];
+  swipeProjects: Project[] = [];
 
-  constructor() { }
+  // Sayfalama
+  currentPage: number = 1;
+  itemsPerPage: number = 15;
+  totalPages: number = 0;
+  pages: number[] = [];
 
-  ngOnInit(): void {}
+  // Swipe Hafızası
+  seenSwipeIds: number[] = [];
+
+  isLoading = true;
+
+  constructor(private eventService: EventService) {}
+
+  ngOnInit(): void {
+    // Listeyi Çek
+    this.eventService.getEvents().subscribe((data) => {
+      this.allProjects = data;
+      this.applyFilterAndPagination();
+      this.isLoading = false;
+    });
+
+    // Swipe Kartlarını Çek
+    this.loadMoreSwipeCards();
+  }
 
   setFilter(filter: 'all' | 'active' | 'upcoming') {
     this.currentFilter = filter;
+    this.currentPage = 1;
+    this.applyFilterAndPagination();
   }
 
-  get filteredProjects(): Project[] {
-    if (this.currentFilter === 'all') {
-      return this.projects;
+  applyFilterAndPagination() {
+    // Filtrele
+    let filtered = this.allProjects;
+    if (this.currentFilter !== 'all') {
+      filtered = this.allProjects.filter((p) => p.status === this.currentFilter);
     }
-    return this.projects.filter(project => project.status === this.currentFilter);
+
+    // Sayfala
+    this.totalPages = Math.ceil(filtered.length / this.itemsPerPage);
+    this.pages = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.paginatedProjects = filtered.slice(startIndex, endIndex);
+  }
+
+  changePage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.applyFilterAndPagination();
+
+      // Sayfa başına scroll
+      const gridElement = document.querySelector('.events-filter-menu');
+      if (gridElement) gridElement.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
+  loadMoreSwipeCards() {
+    this.eventService.getRandomSwipeEvents(20, this.seenSwipeIds).subscribe((data) => {
+      if (data.length === 0) {
+        // Veri bittiyse başa sar
+        alert('Tüm etkinlikleri incelediniz! Liste başa sarılıyor...');
+        this.seenSwipeIds = [];
+        this.loadMoreSwipeCards();
+        return;
+      }
+
+      this.swipeProjects = data;
+
+      // Gelenleri hafızaya at
+      const newIds = data.map((p: Project) => p.id);
+      this.seenSwipeIds = [...this.seenSwipeIds, ...newIds];
+    });
   }
 }

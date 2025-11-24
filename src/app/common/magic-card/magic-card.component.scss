@@ -1,0 +1,201 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.magic-card-wrapper {
+  --mouse-x: 50%;
+  --mouse-y: 50%;
+  --rotate-x: 0deg;
+  --rotate-y: 0deg;
+  --card-bg: #1c1c22; // Koyu tema (Bento stili genelde koyu olur)
+  --border-color: rgba(255, 255, 255, 0.1);
+  --glow-color: rgba(253, 22, 22, 0.15); // Kırmızı glow
+
+  position: relative;
+  height: 100%;
+  background-color: var(--card-bg);
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  transform: perspective(1000px) rotateX(var(--rotate-x)) rotateY(var(--rotate-y));
+  transition: transform 0.1s ease;
+
+  // SPOTLIGHT GLOW
+  .card-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(
+      800px circle at var(--mouse-x) var(--mouse-y),
+      var(--glow-color),
+      transparent 40%
+    );
+    opacity: 0;
+    transition: opacity 0.5s;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  // BORDER GLOW
+  .card-border {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(
+      400px circle at var(--mouse-x) var(--mouse-y),
+      rgba(255, 255, 255, 0.3),
+      transparent 40%
+    );
+    z-index: 2;
+    opacity: 0;
+    transition: opacity 0.5s;
+    pointer-events: none;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    padding: 1px; // Border kalınlığı
+  }
+
+  &:hover {
+    .card-glow,
+    .card-border {
+      opacity: 1;
+    }
+  }
+
+  // İÇERİK
+  .card-content {
+    position: relative;
+    z-index: 3;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: var(--card-bg); // İçerik arka planı
+    border-radius: 19px; // Wrapper'dan 1px küçük
+
+    .image-container {
+      height: 200px;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+      border-radius: 19px 19px 0 0;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+      }
+
+      .status-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        backdrop-filter: blur(10px);
+
+        &.active {
+          background: rgba(40, 167, 69, 0.8);
+          color: white;
+        }
+        &.upcoming {
+          background: rgba(255, 193, 7, 0.8);
+          color: black;
+        }
+      }
+    }
+
+    &:hover .image-container img {
+      transform: scale(1.05);
+    }
+
+    .text-content {
+      padding: 20px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+
+      .meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.8rem;
+        color: #a1a1aa;
+        margin-bottom: 10px;
+
+        .category {
+          color: #5ecfb1;
+          font-weight: 600;
+          text-transform: uppercase;
+        }
+        .date i {
+          margin-right: 4px;
+        }
+      }
+
+      h3 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 10px;
+        line-height: 1.4;
+      }
+
+      p {
+        font-size: 0.9rem;
+        color: #d4d4d8;
+        line-height: 1.6;
+        margin-bottom: 20px;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        flex-grow: 1;
+      }
+
+      .card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 15px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+        .location {
+          font-size: 0.85rem;
+          color: #a1a1aa;
+          display: flex;
+          align-items: center;
+          gap: 5px;
+        }
+
+        .action-btn {
+          color: white;
+          font-size: 0.9rem;
+          font-weight: 600;
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          transition: color 0.3s;
+
+          &:hover {
+            color: #5ecfb1;
+            i {
+              transform: translateX(3px);
+            }
+          }
+        }
+      }
+    }
+  }
+}

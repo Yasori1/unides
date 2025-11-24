@@ -1,0 +1,186 @@
+.stack-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60px 20px;
+  background: linear-gradient(180deg, #f9f9f9 0%, #f0f0f0 100%);
+  border-radius: 30px;
+  margin-top: 50px;
+  overflow: hidden;
+  position: relative;
+}
+
+.stack-header {
+  text-align: center;
+  margin-bottom: 40px;
+
+  h3 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 10px;
+  }
+  p {
+    color: #666;
+  }
+}
+
+.cards-container {
+  position: relative;
+  width: 320px;
+  height: 480px;
+  perspective: 1000px;
+}
+
+.swipe-card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  cursor: grab;
+  user-select: none;
+  transform-origin: 50% 100%; // Alt ortadan dönmesi için
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  .card-bg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+  }
+
+  .overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 0.8) 100%);
+    pointer-events: none;
+  }
+
+  .card-info {
+    position: absolute;
+    bottom: 30px;
+    left: 20px;
+    right: 20px;
+    color: white;
+    pointer-events: none;
+
+    .badge {
+      background: #fd1616;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      display: inline-block;
+    }
+
+    h3 {
+      font-size: 1.5rem;
+      margin-bottom: 5px;
+      line-height: 1.2;
+      color: white;
+    }
+
+    p {
+      font-size: 0.9rem;
+      opacity: 0.9;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+  }
+
+  .action-indicator {
+    position: absolute;
+    top: 30px;
+    border: 4px solid;
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 2rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    transform: rotate(-15deg);
+    opacity: 0; // JS ile kontrol edilecek
+
+    &.like {
+      left: 30px;
+      color: #4caf50;
+      border-color: #4caf50;
+      transform: rotate(-15deg);
+    }
+
+    &.nope {
+      right: 30px;
+      color: #f44336;
+      border-color: #f44336;
+      transform: rotate(15deg);
+    }
+  }
+}
+
+.no-cards {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #999;
+
+  i {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    color: #ccc;
+  }
+  .refresh-btn {
+    margin-top: 20px;
+    padding: 10px 25px;
+    border: none;
+    background: #333;
+    color: white;
+    border-radius: 20px;
+    cursor: pointer;
+  }
+}
+
+.controls {
+  margin-top: 30px;
+  display: flex;
+  gap: 20px;
+
+  .btn-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: none;
+    background: white;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    font-size: 2rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &.nope {
+      color: #f44336;
+    }
+    &.like {
+      color: #4caf50;
+    }
+
+    &:hover {
+      transform: scale(1.1);
+    }
+    &:active {
+      transform: scale(0.9);
+    }
+  }
+}

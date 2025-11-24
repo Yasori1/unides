@@ -1,66 +1,98 @@
 <app-header></app-header>
 
 <app-page-banner
-    [pageTitle]="'Ünides Projeleri'"
-    [backgroundImage]="'assets/images/page-title1.jpg'"
+  [pageTitle]="'Ünides Projeleri'"
+  [backgroundImage]="'assets/images/page-title1.jpg'"
 ></app-page-banner>
 
 <div class="events-area ptb-100">
-    <div class="container">
-        
-        <div class="section-title">
-            <span class="sub-title">Topluluk & Gelişim</span>
-            <h2>Projeler ve Etkinlikler</h2>
-            <p>Aktif olarak devam eden projelerimize katılabilir veya gelecek etkinliklerimizi takvimine ekleyebilirsin.</p>
-        </div>
-
-        <div class="events-filter-menu text-center mb-5">
-            <button class="filter-btn" [class.active]="currentFilter === 'all'" (click)="setFilter('all')">
-                Tümü
-            </button>
-            <button class="filter-btn" [class.active]="currentFilter === 'active'" (click)="setFilter('active')">
-                Başlayan Projeler
-            </button>
-            <button class="filter-btn" [class.active]="currentFilter === 'upcoming'" (click)="setFilter('upcoming')">
-                Başlayacak Projeler
-            </button>
-        </div>
-
-        <div class="row">
-            <div class="col-lg-4 col-md-6 col-sm-12" *ngFor="let item of filteredProjects">
-                <div class="single-events-box">
-                    
-                    <div class="image">
-                        <img [src]="item.image" alt="{{ item.title }}" onerror="this.src='assets/images/footer-shape2.png'">
-                        <span class="date">{{ item.date }}</span>
-                    </div>
-
-                    <div class="content">
-                        <span class="status-badge" [ngClass]="item.status">
-                            {{ item.status === 'active' ? 'Başlayan' : 'Başlayacak' }}
-                        </span>
-
-                        <h3>{{ item.title }}</h3>
-                        
-                        <span class="location" *ngIf="item.location">
-                            <i class='bx bx-map'></i> {{ item.location }}
-                        </span>
-                        
-                        <p>{{ item.description }}</p>
-                        
-                        <a href="#" class="default-btn">
-                            Detaylar <i class='bx bx-right-arrow-alt'></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-12 text-center" *ngIf="filteredProjects.length === 0">
-                <p class="alert alert-warning">Bu kategoride henüz bir proje bulunmuyor.</p>
-            </div>
-        </div>
-
+  <div class="container">
+    <!-- Başlık -->
+    <div class="section-title">
+      <span class="sub-title">Topluluk & Gelişim</span>
+      <h2>Projeler ve Etkinlikler</h2>
+      <p>
+        Aktif olarak devam eden projelerimize katılabilir veya gelecek etkinliklerimizi takvimine
+        ekleyebilirsin.
+      </p>
     </div>
+
+    <!-- Filtre Butonları -->
+    <div class="events-filter-menu text-center mb-5">
+      <button
+        class="filter-btn"
+        [class.active]="currentFilter === 'all'"
+        (click)="setFilter('all')"
+      >
+        Tümü
+      </button>
+      <button
+        class="filter-btn"
+        [class.active]="currentFilter === 'active'"
+        (click)="setFilter('active')"
+      >
+        Başlayan Projeler
+      </button>
+      <button
+        class="filter-btn"
+        [class.active]="currentFilter === 'upcoming'"
+        (click)="setFilter('upcoming')"
+      >
+        Başlayacak Projeler
+      </button>
+    </div>
+
+    <!-- ETKİNLİK LİSTESİ (PAGINATED GRID) -->
+    <!-- DÜZELTME: filteredProjects yerine paginatedProjects kullanıldı -->
+    <div class="magic-grid" *ngIf="!isLoading && paginatedProjects.length > 0">
+      <ng-container *ngFor="let item of paginatedProjects">
+        <div class="grid-item">
+          <app-magic-card [project]="item"></app-magic-card>
+        </div>
+      </ng-container>
+    </div>
+
+    <!-- Boş Durum -->
+    <div class="col-12 text-center" *ngIf="!isLoading && paginatedProjects.length === 0">
+      <p class="alert alert-warning">Bu kategoride görüntülenecek proje bulunmuyor.</p>
+    </div>
+
+    <!-- SAYFALAMA (PAGINATION) -->
+    <div class="pagination-area" *ngIf="!isLoading && totalPages > 1">
+      <button
+        class="page-btn prev"
+        [disabled]="currentPage === 1"
+        (click)="changePage(currentPage - 1)"
+      >
+        <i class="bx bx-chevron-left"></i>
+      </button>
+
+      <ng-container *ngFor="let page of pages">
+        <button
+          class="page-btn number"
+          [class.active]="page === currentPage"
+          (click)="changePage(page)"
+        >
+          {{ page }}
+        </button>
+      </ng-container>
+
+      <button
+        class="page-btn next"
+        [disabled]="currentPage === totalPages"
+        (click)="changePage(currentPage + 1)"
+      >
+        <i class="bx bx-chevron-right"></i>
+      </button>
+    </div>
+
+    <!-- SWIPE STACK (TINDER ALANI) -->
+    <!-- Liste bittiğinde (requestMore) tetiklenirse yeni veri yükle -->
+    <div class="swipe-section-container">
+      <app-swipe-stack [cards]="swipeProjects" (requestMore)="loadMoreSwipeCards()">
+      </app-swipe-stack>
+    </div>
+  </div>
 </div>
 
 <app-footer></app-footer>
