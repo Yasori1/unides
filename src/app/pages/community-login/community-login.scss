@@ -353,9 +353,13 @@
   }
 }
 
+/* FOOTER ORTALAMA DÜZELTMESİ */
 .simple-footer {
   position: absolute;
   bottom: 20px;
+  width: 100%; /* Tüm genişliği kapla */
+  text-align: center; /* Yazıyı ortala */
+  left: 0; /* Sol tarafa yasla */
   color: #9ca3af;
   font-size: 12px;
 }

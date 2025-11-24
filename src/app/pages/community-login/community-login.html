@@ -26,84 +26,88 @@
 
         <div class="header-text">
           <h3>Topluluk Girişi</h3>
+          <!--
           <p>
             Topluluğunuz yok mu?
             <a routerLink="/community-register" class="register-link">Topluluk Oluştur</a>
           </p>
         </div>
+-->
 
-        <form (submit)="onSubmit($event)">
-          <!-- E-Posta Input -->
-          <div class="input-group">
-            <div class="icon-wrapper" [class.error-icon]="emailError">
-              <i class="bx bx-group"></i>
-            </div>
-            <input
-              type="email"
-              (input)="validateStudentEmail($event)"
-              placeholder="Topluluk E-Posta Adresi"
-              class="modern-input"
-              [class.input-error]="emailError"
-            />
-          </div>
-
-          <!-- Hata Mesajı -->
-          <div *ngIf="emailError" class="error-message">
-            <i class="bx bx-error-circle"></i> Geçerli bir e-posta adresi giriniz.
-          </div>
-
-          <!-- Şifre Input -->
-          <div class="input-group mt-3">
-            <div class="icon-wrapper">
-              <i class="bx bx-lock-alt"></i>
-            </div>
-            <input type="password" placeholder="Şifre" class="modern-input" />
-          </div>
-
-          <div class="form-actions">
-            <label class="remember-me">
-              <input type="checkbox" />
-              <span>Beni Hatırla</span>
-            </label>
-            <a href="javascript:void(0)" class="forgot-link">Şifremi Unuttum?</a>
-          </div>
-
-          <!-- Giriş Yap Butonu -->
-          <button type="submit" class="btn-primary" [style.opacity]="emailError ? '0.7' : '1'">
-            Topluluğa Giriş Yap <i class="bx bx-right-arrow-alt"></i>
-          </button>
-
-          <div class="divider">
-            <span>veya</span>
-          </div>
-
-          <div class="social-login-grid">
-            <!-- Standart (Öğrenci) Girişi -->
-            <button type="button" class="btn-social" routerLink="/login">
-              <div class="btn-content">
-                <i class="bx bxs-graduation icon-official"></i>
-                <div class="text-col">
-                  <span class="btn-label">Standart</span>
-                  <span class="btn-title">Öğrenci Girişi</span>
-                </div>
+          <br />
+          <form (submit)="onSubmit($event)">
+            <!-- E-Posta Input -->
+            <div class="input-group">
+              <div class="icon-wrapper" [class.error-icon]="emailError">
+                <i class="bx bx-group"></i>
               </div>
+              <input
+                type="email"
+                (input)="validateStudentEmail($event)"
+                placeholder="Topluluk E-Posta Adresi"
+                class="modern-input"
+                [class.input-error]="emailError"
+              />
+            </div>
+
+            <!-- Hata Mesajı -->
+            <div *ngIf="emailError" class="error-message">
+              <i class="bx bx-error-circle"></i> Geçerli bir e-posta adresi giriniz.
+            </div>
+
+            <!-- Şifre Input -->
+            <div class="input-group mt-3">
+              <div class="icon-wrapper">
+                <i class="bx bx-lock-alt"></i>
+              </div>
+              <input type="password" placeholder="Şifre" class="modern-input" />
+            </div>
+
+            <div class="form-actions">
+              <label class="remember-me">
+                <input type="checkbox" />
+                <span>Beni Hatırla</span>
+              </label>
+              <a href="javascript:void(0)" class="forgot-link">Şifremi Unuttum?</a>
+            </div>
+
+            <!-- Giriş Yap Butonu -->
+            <button type="submit" class="btn-primary" [style.opacity]="emailError ? '0.7' : '1'">
+              Topluluğa Giriş Yap <i class="bx bx-right-arrow-alt"></i>
             </button>
 
-            <!-- Yetkili (Kurumsal) Girişi -->
-            <button type="button" class="btn-social btn-official" routerLink="/corporate-login">
-              <div class="btn-content">
-                <i class="bx bxs-id-card icon-official"></i>
-                <div class="text-col">
-                  <span class="btn-label">Kurumsal</span>
-                  <span class="btn-title">Yetkili Girişi</span>
+            <div class="divider">
+              <span>veya</span>
+            </div>
+
+            <div class="social-login-grid">
+              <!-- Standart (Öğrenci) Girişi -->
+              <button type="button" class="btn-social" routerLink="/login">
+                <div class="btn-content">
+                  <i class="bx bxs-graduation icon-official"></i>
+                  <div class="text-col">
+                    <span class="btn-label">Standart</span>
+                    <span class="btn-title">Öğrenci Girişi</span>
+                  </div>
                 </div>
-              </div>
-            </button>
-          </div>
-        </form>
+              </button>
+
+              <!-- Yetkili (Kurumsal) Girişi -->
+              <button type="button" class="btn-social btn-official" routerLink="/corporate-login">
+                <div class="btn-content">
+                  <i class="bx bxs-id-card icon-official"></i>
+                  <div class="text-col">
+                    <span class="btn-label">Kurumsal</span>
+                    <span class="btn-title">Yetkili Girişi</span>
+                  </div>
+                </div>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <footer class="simple-footer">© T.C Gençlik ve Spor Bakanlığı</footer>
       </div>
-
-      <footer class="simple-footer">© T.C Gençlik ve Spor Bakanlığı</footer>
     </div>
   </div>
 </div>
