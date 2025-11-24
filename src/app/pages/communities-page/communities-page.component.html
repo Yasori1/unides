@@ -1,9 +1,97 @@
 <app-header />
 
-<div style="height: 80px; width: 100%; background-color: gray;">
-
+<div class="page-spacer">
+  <div class="container">
+    <h1 class="page-title">Topluluklar</h1>
+    <p class="page-subtitle">
+      İlgi alanına uygun topluluğu bul, aramıza katıl ve üniversite hayatını renklendir.
+    </p>
+  </div>
 </div>
 
-<app-latest-communities />
+<section class="communities-grid-section">
+  <div class="container">
+    <!-- Yükleniyor Göstergesi -->
+    <div *ngIf="isLoading" class="loading-state">
+      <p>Topluluklar yükleniyor...</p>
+    </div>
+
+    <!-- GRID YAPISI -->
+    <!-- Sadece yükleme bittiğinde ve veri varsa göster -->
+    <div class="grid-container" *ngIf="!isLoading && displayedCommunities.length > 0">
+      <a
+        *ngFor="let item of displayedCommunities"
+        [routerLink]="['/communities', item.id]"
+        class="community-card"
+      >
+        <div class="cover-area">
+          <img [src]="item.coverImage" [alt]="item.name" class="cover-img" />
+          <span class="category-badge">{{ item.category }}</span>
+        </div>
+
+        <div class="card-content">
+          <div class="header-row">
+            <div class="logo-wrapper">
+              <img
+                [src]="item.logo"
+                [alt]="item.name"
+                class="logo-img"
+                onerror="this.src='assets/img/placeholder-logo.png'"
+              />
+            </div>
+            <div class="title-wrapper">
+              <h3 class="community-name">{{ item.name }}</h3>
+              <span class="university-name">{{ item.university }}</span>
+            </div>
+          </div>
+
+          <p class="description">{{ item.description }}</p>
+
+          <div class="card-footer">
+            <div class="stat">
+              <i class="bx bx-group"></i>
+              <span>{{ item.memberCount }} Üye</span>
+            </div>
+            <span class="action-text">İncele <i class="bx bx-right-arrow-alt"></i></span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Veri Yoksa -->
+    <div class="no-data" *ngIf="!isLoading && displayedCommunities.length === 0">
+      <p>Aradığınız kriterlere uygun topluluk bulunamadı.</p>
+    </div>
+
+    <!-- SAYFALAMA (PAGINATION) -->
+    <div class="pagination-area" *ngIf="!isLoading && totalPages > 1">
+      <button
+        class="page-btn prev"
+        [disabled]="currentPage === 1"
+        (click)="changePage(currentPage - 1)"
+      >
+        <i class="bx bx-chevron-left"></i>
+      </button>
+
+      <ng-container *ngFor="let page of pages">
+        <button
+          class="page-btn number"
+          [class.active]="page === currentPage"
+          (click)="changePage(page)"
+        >
+          {{ page }}
+        </button>
+      </ng-container>
+
+      <button
+        class="page-btn next"
+        [disabled]="currentPage === totalPages"
+        (click)="changePage(currentPage + 1)"
+      >
+        <i class="bx bx-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+</section>
 
 <app-footer />
