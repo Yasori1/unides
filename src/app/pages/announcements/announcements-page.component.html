@@ -1,9 +1,8 @@
 <app-header />
 
-<app-page-banner
-    [pageTitle]="'Duyurular'"
-    [backgroundImage]="'images/tag.png'"
-/>
+<app-page-banner [pageTitle]="'Duyurular'" [backgroundImage]="'images/tag.png'" />
+
+<span>Sayfa: {{ this.page }}</span>
 
 <section class="blog-details-area ptb-100">
   <div class="container">
@@ -22,10 +21,8 @@
               <div class="announcement-meta text-muted small">
                 {{ ann.community }} • {{ ann.date }}
               </div>
-              <p class="mt-2">{{ ann.excerpt }}</p>
-              <a [routerLink]="['/duyuru', ann.id]" class="read-more-link">
-                Devamını Oku →
-              </a>
+              <p class="mt-2">{{ ann.except }}</p>
+              <a [routerLink]="['/duyuru', ann.id]" class="read-more-link"> Devamını Oku → </a>
             </div>
           </div>
 
@@ -35,14 +32,21 @@
               <li class="page-item disabled">
                 <span class="page-link">Önceki</span>
               </li>
-              <li class="page-item active">
-                <span class="page-link">1</span>
+              <li
+                class="page-item {{ i == page ? 'active' : '' }}"
+                *ngFor="let _ of [].constructor(maxPage); let i = index"
+              >
+                <a
+                  class="page-link"
+                  [routerLink]="['/announcements']"
+                  [queryParams]="{ page: i }"
+                  >{{ i + 1 }}</a
+                >
               </li>
               <li class="page-item">
-                <a class="page-link" [routerLink]="['/duyurular']" [queryParams]="{page: 2}">2</a>
-              </li>
-              <li class="page-item">
-                <a class="page-link" [routerLink]="['/duyurular']" [queryParams]="{page: 2}">Sonraki</a>
+                <a class="page-link" [routerLink]="['/announcements']" [queryParams]="{ page: page + 1 }"
+                  >Sonraki</a
+                >
               </li>
             </ul>
           </nav>

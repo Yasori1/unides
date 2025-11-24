@@ -46,24 +46,25 @@ import { EmailReadComponent } from './admin-dashboard/email-read/email-read.comp
 import { EmailComposeComponent } from './admin-dashboard/email-compose/email-compose.component';
 import { CommunitiesPageComponent } from './pages/communities-page/communities-page.component';
 import { AnnouncementsPageComponent } from './pages/announcements/announcements-page.component';
-import { AnnouncementsPage2Component } from './pages/announcements-page2/announcements-page2.component';
-
+// import { AnnouncementsPage2Component } from './pages/announcements-page2/announcements-page2.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
-  {path: 'index-2', component: HomeDemoTwoComponent},
-  {path: 'index-3', component: HomeDemoThreeComponent},
-  {path: 'index-4', component: HomeDemoFourComponent},
   { path: 'about', component: AboutPageComponent },
   { path: 'team', component: TeamPageComponent },
   { path: 'communities', component: CommunitiesPageComponent },
-  { path: 'announcements', component: AnnouncementsPageComponent },
-  { path: 'duyurular', component: AnnouncementsPage2Component },
-  { path: 'announcements-2', component: AnnouncementsPage2Component },
+  {
+    path: 'announcements',
+    component: AnnouncementsPageComponent,
+    data: {
+      page: 0
+    }
+  },
+  // { path: 'announcements-page2', component: AnnouncementsPage2Component },
   // {path: 'how-it-works', component: HowItWorksPageComponent},
   // {path: 'categories', component: CategoriesPageComponent},
-  {path: 'listings', component: ListingsPage1Component},
-   {path: 'listings-2', component: ListingsPage2Component},
+  // {path: 'listings', component: ListingsPage1Component},
+  //  {path: 'listings-2', component: ListingsPage2Component},
   // {path: 'listings-3', component: ListingsPage3Component},
   // {path: 'listings-4', component: ListingsPage4Component},
   // {path: 'listings-5', component: ListingsPage5Component},
@@ -78,9 +79,9 @@ export const routes: Routes = [
   { path: 'blog-grid', component: BlogGridPageComponent },
   { path: 'blog-right-sidebar', component: BlogRightSidebarPageComponent },
   { path: 'blog-left-sidebar', component: BlogLeftSidebarPageComponent },
-  {path: 'blog-details', component: BlogDetailsPageComponent},
-  {path: 'blog-details-2', component: BlogDetailsPage2Component},
-  {path: 'blog-details-3', component: BlogDetailsPage3Component},
+  { path: 'blog-details', component: BlogDetailsPageComponent },
+  { path: 'blog-details-2', component: BlogDetailsPage2Component },
+  { path: 'blog-details-3', component: BlogDetailsPage3Component },
   { path: 'privacy-policy', component: PrivacyPolicyPageComponent },
   { path: 'terms-conditions', component: TermsConditionsPageComponent },
   { path: 'contact', component: ContactPageComponent },
@@ -103,7 +104,5 @@ export const routes: Routes = [
       { path: 'my-profile', component: MyProfileComponent },
     ],
   },
-  // Here add new pages component
-  { path: 'duyuru/:id', component: AnnouncementsPageComponent },
   { path: '**', component: ErrorPageComponent }, // This line will remain down from the whole pages component list
 ];
