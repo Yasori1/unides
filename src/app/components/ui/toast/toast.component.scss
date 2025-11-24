@@ -1,0 +1,93 @@
+.toast-container {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none; // Tıklamalar arkadaki elemanlara geçsin (boşluklarda)
+}
+
+.toast-card {
+  pointer-events: auto; // Kartlara tıklanabilsin
+  min-width: 300px;
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e4e4e7;
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+
+  // SUCCESS TEMA
+  &.success {
+    border-left: 4px solid #22c55e;
+    .icon i {
+      color: #22c55e;
+    }
+  }
+
+  // ERROR TEMA
+  &.error {
+    border-left: 4px solid #ef4444;
+    .icon i {
+      color: #ef4444;
+    }
+  }
+
+  .icon {
+    display: flex;
+    align-items: center;
+    font-size: 24px;
+  }
+
+  .content {
+    flex: 1;
+    .title {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 2px;
+    }
+    .message {
+      font-size: 13px;
+      color: #71717a;
+      margin: 0;
+      line-height: 1.4;
+    }
+  }
+
+  .close-btn {
+    background: transparent;
+    border: none;
+    color: #a1a1aa;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s;
+
+    &:hover {
+      color: #18181b;
+    }
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

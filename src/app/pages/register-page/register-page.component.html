@@ -25,7 +25,7 @@
         <div class="mobile-logo"><i class="bx bxs-graduation"></i> ÜNİDES</div>
 
         <div class="header-text">
-          <h3>Öğrenci Kaydı 🎓</h3>
+          <h3>Öğrenci Kaydı</h3>
           <p>Zaten hesabın var mı? <a routerLink="/login" class="login-link">Giriş Yap</a></p>
         </div>
 
@@ -36,7 +36,7 @@
             <input type="text" placeholder="Ad Soyad" class="modern-input" required />
           </div>
 
-          <!-- TC Kimlik -->
+          <!-- TC Kimlik 
           <div class="input-group">
             <div class="icon-wrapper"><i class="bx bxs-id-card"></i></div>
             <input
@@ -48,6 +48,7 @@
               required
             />
           </div>
+          -->
 
           <!-- Öğrenci E-Posta (.edu.tr Zorunlu) -->
           <div class="input-group">
@@ -68,7 +69,7 @@
             edilmektedir.
           </div>
 
-          <!-- Telefon -->
+          <!-- Telefon 
           <div class="input-group" [class.mt-3]="!emailError">
             <div class="icon-wrapper"><i class="bx bx-phone"></i></div>
             <input
@@ -79,6 +80,7 @@
               required
             />
           </div>
+          -->
 
           <!-- Şifre -->
           <div class="input-group">
@@ -140,3 +142,5 @@
     </div>
   </div>
 </div>
+
+<app-toast></app-toast>

@@ -1,11 +1,14 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+// Toast Servis ve Component'i Import Ediyoruz
+import { ToastService } from '../../services/toast.services';
+import { ToastComponent } from '../../components/ui/toast/toast.component';
 
 @Component({
   selector: 'app-register-page',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, ToastComponent], // ToastComponent'i eklemeyi unutmayın
   templateUrl: './register-page.component.html',
   styleUrls: ['./register-page.component.scss'],
 })
@@ -16,7 +19,10 @@ export class RegisterPageComponent {
   private password = '';
   private confirmPassword = '';
 
-  // Sadece numara girilmesine izin verir (TC ve Tel için)
+  // Toast Servisini Enjekte Ediyoruz
+  constructor(private toastService: ToastService) {}
+
+  // Sadece numara girilmesine izin verir
   onlyNumbers(event: any) {
     const pattern = /[0-9]/;
     const inputChar = String.fromCharCode(event.charCode);
@@ -25,7 +31,7 @@ export class RegisterPageComponent {
     }
   }
 
-  // Öğrenci E-posta Doğrulama (.edu.tr)
+  // Öğrenci E-posta Doğrulama
   validateStudentEmail(event: any) {
     const email = event.target.value;
     if (!email) {
@@ -60,17 +66,27 @@ export class RegisterPageComponent {
     event.preventDefault();
 
     if (this.emailError) {
-      alert('Lütfen geçerli bir öğrenci e-postası giriniz.');
+      // Hata Mesajı
+      this.toastService.show('Lütfen geçerli bir öğrenci e-postası (.edu.tr) giriniz.', 'error');
       return;
     }
 
     if (this.passwordMismatch) {
-      alert('Şifreler eşleşmiyor!');
+      // Hata Mesajı
+      this.toastService.show('Şifreler eşleşmiyor! Lütfen kontrol edin.', 'error');
       return;
     }
 
-    // Buraya kayıt işlemleri gelecek (API call vb.)
+    // --- BAŞARILI KAYIT SENARYOSU ---
     console.log('Öğrenci Kayıt formu başarıyla gönderildi.');
-    alert('Öğrenci Kaydı Başarılı! (Simülasyon)');
+
+    // Başarı Mesajı
+    this.toastService.show(
+      'Kayıt işleminiz başarıyla tamamlandı! Yönlendiriliyorsunuz...',
+      'success'
+    );
+
+    // İsteğe bağlı: Yönlendirme vb.
+    // setTimeout(() => this.router.navigate(['/login']), 2000);
   }
 }

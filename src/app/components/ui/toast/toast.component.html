@@ -1,0 +1,24 @@
+<div class="toast-container bottom-center">
+    <div *ngFor="let toast of toasts$ | async" 
+         class="toast-card" 
+         [ngClass]="toast.type"
+         (click)="toastService.remove(toast.id)">
+        
+        <!-- İKONLAR -->
+        <div class="icon">
+            <i class='bx bx-check-circle' *ngIf="toast.type === 'success'"></i>
+            <i class='bx bx-error-circle' *ngIf="toast.type === 'error'"></i>
+        </div>
+
+        <!-- MESAJ -->
+        <div class="content">
+            <span class="title">{{ toast.type === 'success' ? 'Başarılı' : 'Hata' }}</span>
+            <p class="message">{{ toast.message }}</p>
+        </div>
+
+        <!-- KAPAT BUTONU -->
+        <button class="close-btn">
+            <i class='bx bx-x'></i>
+        </button>
+    </div>
+</div>

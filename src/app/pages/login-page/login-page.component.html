@@ -1,5 +1,4 @@
 <!-- Google Fonts & Icons -->
-<!-- Bu fontlar normalde index.html'de olmalı ama isteğin üzerine buraya ekliyoruz -->
 <link
   href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
   rel="stylesheet"
@@ -10,7 +9,6 @@
   <div class="split-layout">
     <!-- SOL TARAF: SPLINE 3D SAHNESİ -->
     <div class="visual-side">
-      <!-- Spline Viewer Buraya Eklendi -->
       <spline-viewer
         url="https://prod.spline.design/gWnX-vzrht9nTCAi/scene.splinecode"
       ></spline-viewer>
@@ -37,7 +35,7 @@
         </div>
 
         <form (submit)="onSubmit($event)">
-          <!-- E-Posta Input (.edu.tr Korumalı) -->
+          <!-- E-Posta Input -->
           <div class="input-group">
             <div class="icon-wrapper" [class.error-icon]="emailError">
               <i class="bx bx-envelope"></i>
@@ -51,7 +49,6 @@
             />
           </div>
 
-          <!-- Hata Mesajı -->
           <div *ngIf="emailError" class="error-message">
             <i class="bx bx-error-circle"></i> Sadece <b>.edu.tr</b> uzantılı öğrenci mailleri kabul
             edilmektedir.
@@ -112,3 +109,6 @@
     </div>
   </div>
 </div>
+
+<!-- TOAST BİLEŞENİ BURADA -->
+<app-toast></app-toast>

@@ -1,21 +1,25 @@
 import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+// Toast için gerekli importlar
+import { ToastService } from '../../services/toast.services';
+import { ToastComponent } from '../../components/ui/toast/toast.component';
 
 @Component({
   selector: 'app-login-page',
   standalone: true,
-  imports: [CommonModule, RouterLink], // *ngIf ve routerLink kullanımı için gerekli
+  imports: [CommonModule, RouterLink, ToastComponent], // ToastComponent EKLENDİ
   templateUrl: './login-page.component.html',
-  styleUrl: './login-page.component.scss',
-  schemas: [CUSTOM_ELEMENTS_SCHEMA], // Spline viewer etiketini tanıması için
+  styleUrls: ['./login-page.component.scss'],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class LoginPageComponent implements OnInit {
   emailError: boolean = false;
 
+  // Servisi constructor'a ekledik
+  constructor(private toastService: ToastService) {}
+
   ngOnInit(): void {
-    // Spline Viewer scriptini buraya da ekliyoruz ki login sayfasında da 3D model çalışsın
-    // Eğer script daha önce yüklendiyse tekrar yüklemeye çalışmaz
     const scriptCheck = document.querySelector(
       'script[src="https://unpkg.com/@splinetool/viewer@1.9.59/build/spline-viewer.js"]'
     );
@@ -36,9 +40,6 @@ export class LoginPageComponent implements OnInit {
       return;
     }
 
-    // E-posta format kontrolü:
-    // 1. İçinde @ işareti olmalı
-    // 2. Sonu .edu.tr ile bitmeli
     if (email.includes('@') && !email.endsWith('.edu.tr')) {
       this.emailError = true;
     } else {
@@ -48,12 +49,14 @@ export class LoginPageComponent implements OnInit {
 
   onSubmit(event: Event) {
     event.preventDefault();
+
     if (this.emailError) {
-      // Eğer hata varsa uyarı ver
-      alert('Lütfen geçerli bir öğrenci e-postası giriniz (.edu.tr).');
+      // Hata Bildirimi
+      this.toastService.show('Lütfen geçerli bir öğrenci e-postası (.edu.tr) giriniz.', 'error');
     } else {
-      // Başarılı form gönderimi simülasyonu
+      // Başarılı Giriş Bildirimi
       console.log('Form başarıyla gönderildi.');
+      this.toastService.show('Giriş başarılı! Yönlendiriliyorsunuz...', 'success');
     }
   }
 }
