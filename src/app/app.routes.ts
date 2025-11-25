@@ -51,7 +51,6 @@ import { CommunityLoginComponent } from './pages/community-login/community-login
 import { CorporateRegisterComponent } from './pages/corporate-register/corporate-register';
 import { CommunityRegisterComponent } from './pages/community-register/community-register';
 import { DevelopersPageComponent } from './pages/developers-page/developers-page.component';
-// DÜZELTİLDİ: Dosya yapınıza göre çift klasör içine yönlendirildi
 import { CorporateDashboardComponent } from './pages/corporate-dashboard/corporate-dashboard';
 
 export const routes: Routes = [

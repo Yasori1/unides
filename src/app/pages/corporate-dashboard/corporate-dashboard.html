@@ -98,10 +98,11 @@
             <thead>
               <tr>
                 <th>ID</th>
+                <th>Logo</th>
                 <th>Topluluk Adı</th>
                 <th>Üniversite</th>
+                <th>Kategori</th>
                 <th>Üye Sayısı</th>
-                <th>Durum</th>
                 <th>İşlemler</th>
               </tr>
             </thead>
@@ -109,15 +110,21 @@
               <tr *ngFor="let c of communities">
                 <td>#{{ c.id }}</td>
                 <td>
+                  <img
+                    [src]="c.logo"
+                    alt="logo"
+                    class="table-thumb"
+                    onerror="this.src='assets/img/placeholder-logo.png'"
+                  />
+                </td>
+                <td>
                   <strong>{{ c.name }}</strong>
                 </td>
                 <td>{{ c.university }}</td>
-                <td>{{ c.members }}</td>
                 <td>
-                  <span class="status-pill" [class.active]="c.status === 'Aktif'">{{
-                    c.status
-                  }}</span>
+                  <span class="category-tag">{{ c.category }}</span>
                 </td>
+                <td>{{ c.memberCount }}</td>
                 <td class="actions">
                   <button class="edit" (click)="openModal('community', c)">
                     <i class="bx bx-edit"></i>
@@ -242,7 +249,7 @@
     </div>
   </main>
 
-  <!-- MODAL (Ortak Kullanım) -->
+  <!-- MODAL (GÜNCELLENDİ: Resim Yükleme Bileşeni Dahil) -->
   <div class="modal-overlay" *ngIf="isModalOpen" (click)="closeModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
@@ -250,22 +257,83 @@
         <button class="close-btn" (click)="closeModal()"><i class="bx bx-x"></i></button>
       </div>
       <div class="modal-body">
-        <!-- Form Alanları Dinamik Olarak Gelecek -->
         <form (submit)="saveItem()">
           <!-- Topluluk Formu -->
           <ng-container *ngIf="modalType === 'community'">
-            <div class="form-group">
-              <label>Topluluk Adı</label>
-              <input type="text" [(ngModel)]="formData.name" name="name" class="admin-input" />
+            <div class="form-row">
+              <div class="form-group half">
+                <label>Topluluk Adı</label>
+                <input
+                  type="text"
+                  [(ngModel)]="formData.name"
+                  name="name"
+                  class="admin-input"
+                  required
+                />
+              </div>
+              <div class="form-group half">
+                <label>Üniversite</label>
+                <input
+                  type="text"
+                  [(ngModel)]="formData.university"
+                  name="university"
+                  class="admin-input"
+                  required
+                />
+              </div>
             </div>
+
+            <div class="form-row">
+              <div class="form-group half">
+                <label>Kategori</label>
+                <select [(ngModel)]="formData.category" name="category" class="admin-input">
+                  <option value="Teknoloji">Teknoloji</option>
+                  <option value="Sanat">Sanat</option>
+                  <option value="Spor">Spor</option>
+                  <option value="Kariyer">Kariyer</option>
+                  <option value="Mühendislik">Mühendislik</option>
+                  <option value="Oyun">Oyun</option>
+                  <option value="Yaşam">Yaşam</option>
+                </select>
+              </div>
+              <div class="form-group half">
+                <label>Üye Sayısı</label>
+                <input
+                  type="number"
+                  [(ngModel)]="formData.memberCount"
+                  name="memberCount"
+                  class="admin-input"
+                />
+              </div>
+            </div>
+
+            <!-- RESİM YÜKLEME BİLEŞENLERİ -->
             <div class="form-group">
-              <label>Üniversite</label>
-              <input
-                type="text"
-                [(ngModel)]="formData.university"
-                name="university"
+              <app-image-upload
+                [label]="'Kapak Resmi (Banner)'"
+                [previewUrl]="formData.coverImage"
+                (onImageSelected)="updateImage('coverImage', $event)"
+              >
+              </app-image-upload>
+            </div>
+
+            <div class="form-group">
+              <app-image-upload
+                [label]="'Topluluk Logosu'"
+                [previewUrl]="formData.logo"
+                (onImageSelected)="updateImage('logo', $event)"
+              >
+              </app-image-upload>
+            </div>
+
+            <div class="form-group">
+              <label>Hakkında (Kısa Açıklama)</label>
+              <textarea
+                [(ngModel)]="formData.description"
+                name="description"
                 class="admin-input"
-              />
+                rows="4"
+              ></textarea>
             </div>
           </ng-container>
 
@@ -286,7 +354,7 @@
             </div>
           </ng-container>
 
-          <!-- Etkinlik Formu (Örnek) -->
+          <!-- Etkinlik Formu -->
           <ng-container *ngIf="modalType === 'event'">
             <div class="form-group">
               <label>Etkinlik Adı</label>
@@ -300,6 +368,10 @@
                 name="location"
                 class="admin-input"
               />
+            </div>
+            <div class="form-group">
+              <label>Tarih</label>
+              <input type="text" [(ngModel)]="formData.date" name="date" class="admin-input" />
             </div>
           </ng-container>
 

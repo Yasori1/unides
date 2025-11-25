@@ -1,15 +1,28 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms'; // Form işlemleri için
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ToastService } from '../../services/toast.services';
+// Image Upload Bileşeni Eklendi
+import { ImageUploadComponent } from '../../components/ui/image-upload/image-upload';
 
-// Veri Tipleri (Basitçe burada tanımladım, normalde models klasöründe olur)
+// ... (Interface'ler aynı kalacak)
 interface StatCard {
   title: string;
   value: string;
   icon: string;
   color: string;
+}
+
+interface Community {
+  id: number;
+  name: string;
+  university: string;
+  category: string;
+  description: string;
+  coverImage: string;
+  logo: string;
+  memberCount: number;
 }
 
 interface Announcement {
@@ -31,15 +44,13 @@ interface ForumPost {
 @Component({
   selector: 'app-corporate-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ImageUploadComponent], // Component Eklendi
   templateUrl: './corporate-dashboard.html',
   styleUrls: ['./corporate-dashboard.scss'],
 })
 export class CorporateDashboardComponent implements OnInit {
-  activeTab: 'dashboard' | 'communities' | 'events' | 'announcements' | 'forum' | 'settings' =
-    'dashboard';
+  activeTab: 'dashboard' | 'communities' | 'events' | 'announcements' | 'forum' = 'dashboard';
 
-  // --- İSTATİSTİKLER ---
   stats: StatCard[] = [
     { title: 'Toplam Topluluk', value: '142', icon: 'bx bxs-group', color: 'blue' },
     { title: 'Aktif Etkinlik', value: '28', icon: 'bx bx-calendar-event', color: 'green' },
@@ -47,11 +58,20 @@ export class CorporateDashboardComponent implements OnInit {
     { title: 'Forum Soruları', value: '1,250', icon: 'bx bx-message-square-dots', color: 'purple' },
   ];
 
-  // --- MOCK VERİLER (Veritabanı Simülasyonu) ---
-  communities = [
-    { id: 1, name: 'ODTÜ Yazılım', university: 'ODTÜ', members: 450, status: 'Aktif' },
-    { id: 2, name: 'İTÜ Robotik', university: 'İTÜ', members: 320, status: 'Aktif' },
-    { id: 3, name: 'Ege Su Altı', university: 'Ege Üni.', members: 120, status: 'Pasif' },
+  // ... (Mock veriler aynı kalacak)
+  communities: Community[] = [
+    {
+      id: 1,
+      name: 'ODTÜ Yazılım Topluluğu',
+      university: 'Orta Doğu Teknik Üniversitesi',
+      category: 'Teknoloji',
+      description: 'Yazılım dünyasındaki yenilikleri takip eden, hackathonlar düzenleyen topluluk.',
+      coverImage:
+        'https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=2070&auto=format&fit=crop',
+      logo: 'https://upload.wikimedia.org/wikipedia/tr/6/62/ODT%C3%9C_logo.jpg',
+      memberCount: 450,
+    },
+    // ... diğerleri
   ];
 
   events = [
@@ -98,43 +118,32 @@ export class CorporateDashboardComponent implements OnInit {
     },
   ];
 
-  // --- FORM MODAL KONTROLLERİ ---
   isModalOpen = false;
   modalType: 'community' | 'event' | 'announcement' | 'forum' = 'community';
-  editingItem: any = null; // Düzenlenen öğe
-
-  // Form Modelleri
+  editingItem: any = null;
   formData: any = {};
 
   constructor(private toast: ToastService, private router: Router) {}
 
   ngOnInit(): void {}
 
-  // Sekme Değiştir
   switchTab(tab: any) {
     this.activeTab = tab;
   }
 
-  // Çıkış Yap
   logout() {
-    // Token silme vb. işlemleri
     this.toast.show('Güvenli çıkış yapıldı.', 'success');
     this.router.navigate(['/login']);
   }
 
-  // --- CRUD İŞLEMLERİ ---
-
-  // Ekleme/Düzenleme Modalını Aç
   openModal(type: 'community' | 'event' | 'announcement' | 'forum', item: any = null) {
     this.modalType = type;
     this.editingItem = item;
     this.isModalOpen = true;
 
     if (item) {
-      // Düzenleme modunda formu doldur
       this.formData = { ...item };
     } else {
-      // Yeni ekleme modunda formu temizle
       this.formData = {};
     }
   }
@@ -145,31 +154,49 @@ export class CorporateDashboardComponent implements OnInit {
     this.formData = {};
   }
 
+  // --- RESİM YÜKLEME EVENT HANDLER ---
+  // ImageUploadComponent'ten gelen veriyi yakalar
+  updateImage(field: string, value: string) {
+    this.formData[field] = value;
+  }
+
   saveItem() {
-    // Backend'e kaydetme simülasyonu
     if (this.editingItem) {
-      // Güncelleme
+      // GÜNCELLEME
+      if (this.modalType === 'community') {
+        const index = this.communities.findIndex((c) => c.id === this.editingItem.id);
+        if (index !== -1) {
+          this.communities[index] = { ...this.formData };
+        }
+      } else if (this.modalType === 'event') {
+        const index = this.events.findIndex((e) => e.id === this.editingItem.id);
+        if (index !== -1) {
+          this.events[index] = { ...this.formData };
+        }
+      }
       this.toast.show(`${this.getModalTitle()} başarıyla güncellendi.`, 'success');
     } else {
-      // Yeni Ekleme
-      // Listeye ekleme mantığı (Demo için push)
-      if (this.modalType === 'announcement') {
-        this.announcements.push({
-          ...this.formData,
-          id: Date.now(),
-          date: 'Bugün',
-          status: 'Yayında',
-        });
+      // YENİ EKLEME
+      const newItem = { ...this.formData, id: Date.now() };
+
+      if (this.modalType === 'community') {
+        // Varsayılan resimler (eğer yüklenmediyse)
+        if (!newItem.coverImage) newItem.coverImage = 'assets/img/placeholder.png';
+        if (!newItem.logo) newItem.logo = 'assets/img/placeholder-logo.png';
+        this.communities.push(newItem);
+      } else if (this.modalType === 'announcement') {
+        this.announcements.push({ ...newItem, date: 'Bugün', status: 'Yayında' });
+      } else if (this.modalType === 'event') {
+        this.events.push({ ...newItem, status: 'Yayında' });
       }
-      // Diğerleri için de benzer mantık kurulabilir
+
       this.toast.show(`Yeni ${this.getModalTitle()} başarıyla oluşturuldu.`, 'success');
     }
     this.closeModal();
   }
 
   deleteItem(type: string, id: number) {
-    if (confirm('Bu öğeyi silmek istediğinize emin misiniz? Bu işlem geri alınamaz.')) {
-      // Silme simülasyonu
+    if (confirm('Bu öğeyi silmek istediğinize emin misiniz?')) {
       if (type === 'community') this.communities = this.communities.filter((c) => c.id !== id);
       if (type === 'event') this.events = this.events.filter((e) => e.id !== id);
       if (type === 'announcement')
@@ -180,7 +207,6 @@ export class CorporateDashboardComponent implements OnInit {
     }
   }
 
-  // Helper
   getModalTitle(): string {
     switch (this.modalType) {
       case 'community':
