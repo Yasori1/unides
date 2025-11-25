@@ -1,88 +1,161 @@
-<app-header />
+<div class="about-page-wrapper">
 
-<app-page-banner
-    [pageTitle]="'Hakkımızda'"
-    [backgroundImage]="'images/titles/uni-1.png'"
-/>
+  <div style="position: absolute; top: 40px; width: 100%; text-align: center; z-index: 20; pointer-events: none;">
+    <span style="font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 3px; color: #1e293b; opacity: 0.5;">Hakkımızda</span>
+  </div>
 
-<!-- About -->
-<div class="about-area ptb-100">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-6 col-md-12">
-                <div class="about-content">
-                    <span class="sub-title">Hakkımızda</span>
-                    <h2>asad</h2>
-                    <h6>Louise.com offers you flexible and responsive listing experience.</h6>
-                    <p>With a <strong>Louise</strong> account, you get more than a business listing. Your free Business Profile lets you easily connect with customers across <strong>Louise</strong> Search and Maps.</p>
-                    <p>Your customers are ready to connect – by calling, messaging, or leaving reviews. You can do more business.</p>
-                    <div class="features-text">
-                        <h5><i class='bx bx-planet'></i>Start managing your business profile on Louise today</h5>
-                        <p>More than just a local listing, your free Business Profile lets you manage how your business appears on <strong>Louise</strong> Search.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-6 col-md-12">
-                <div class="about-image">
-                    <img src="images/about/img1.jpg" class="shadow" alt="image">
-                    <img src="images/about/img2.jpg" class="shadow" alt="image">
-                </div>
-            </div>
-        </div>
-        <div class="about-inner-area">
-            <div class="row justify-content-center">
-                <div class="col-lg-4 col-md-6 col-sm-6">
-                    <div class="about-text">
-                        <h3>Our Story</h3>
-                        <p>When you make it easy to do business, your business grows.</p>
-                        <ul class="features-list">
-                            <li><i class='bx bx-check'></i> Connect and get results</li>
-                            <li><i class='bx bx-check'></i> Keep customers up-to-date</li>
-                            <li><i class='bx bx-check'></i> Get to know your followers</li>
-                            <li><i class='bx bx-check'></i> We trust Louise</li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6 col-sm-6">
-                    <div class="about-text">
-                        <h3>Our Values</h3>
-                        <p>When you make it easy to do business, your business grows.</p>
-                        <ul class="features-list">
-                            <li><i class='bx bx-check'></i> Learning & Support</li>
-                            <li><i class='bx bx-check'></i> Claim your listing</li>
-                            <li><i class='bx bx-check'></i> Find yourself</li>
-                            <li><i class='bx bx-check'></i> Complete your listing profile</li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6 col-sm-6">
-                    <div class="about-text">
-                        <h3>Our Promise</h3>
-                        <p>When you make it easy to do business, your business grows.</p>
-                        <ul class="features-list">
-                            <li><i class='bx bx-check'></i> Verify your listing</li>
-                            <li><i class='bx bx-check'></i> Love listing again</li>
-                            <li><i class='bx bx-check'></i> Online listing.</li>
-                            <li><i class='bx bx-check'></i> Listing for all seasons</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
+  <section class="hero-section" (mousemove)="onHeroMouseMove($event)">
+    <div class="hero-bg">
+      <div class="blob" [style.transform]="'translate(' + (-heroMoveX) + 'px, ' + (-heroMoveY) + 'px)'"></div>
+      <div class="noise"></div>
     </div>
+
+    <div class="container hero-container">
+      <div class="hero-text-side" #animItem>
+        <h1>ÜNİDES <br><span class="highlight">Dijital Portal</span> Nedir?</h1>
+        <p class="lead">
+          Gençliğin enerjisi dijital dünyayla buluşuyor. Portal, ÜNİDES kapsamında geliştirilen projeleri, 
+          topluluk iş birliklerini ve sponsorluk süreçlerini tek bir merkezi yapı altında sunan bütünleşik bir platformdur.
+        </p>
+        <p class="sub-text">
+          Projelerini sergile, diğer öğrencilerle iletişime geç ve sesini duyur. Burası senin alanın.
+        </p>
+      </div>
+      
+      <div class="hero-visual-side" #animItem>
+        <div class="glass-card card-1" [style.transform]="'translate(' + (heroMoveX*0.5) + 'px, ' + (heroMoveY*0.5) + 'px)'">
+          <span class="material-symbols-outlined icon">hub</span>
+          <span>Topluluk İş Birlikleri</span>
+        </div>
+        <div class="glass-card card-2" [style.transform]="'translate(' + (heroMoveX*-0.5) + 'px, ' + (heroMoveY*-0.5) + 'px)'">
+          <span class="material-symbols-outlined icon">rocket_launch</span>
+          <span>Proje Yönetimi</span>
+        </div>
+        <div class="glass-card card-3" [style.transform]="'translate(' + (heroMoveX*0.3) + 'px, ' + (heroMoveY*0.3) + 'px)'">
+          <span class="material-symbols-outlined icon">handshake</span>
+          <span>Sponsorluk Süreçleri</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="mission-section">
+    <div class="container">
+      <div class="mission-header" #animItem>
+        <h2>ÜNİDES <span class="light-text">Nedir?</span></h2>
+        <p>
+          Üniversite Öğrenci Toplulukları İş Birliği ve Destek Programı (ÜNİDES), öğrenci topluluklarının 
+          projelerini hayata geçirmelerine kolaylık sağlayan, genç ofislerin etkin kullanımını amaçlayan 
+          kapsayıcı ve sürdürülebilir bir destek programıdır.
+        </p>
+      </div>
+
+      <div class="tags-wrapper" #animItem>
+        <h3 class="tags-title">11 Temel Odak Alanı</h3>
+        <div class="tags-grid">
+          <span class="focus-tag" *ngFor="let area of focusAreas">{{ area }}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="process-section">
+    <div class="container">
+      <div class="section-header-dark" #animItem>
+        <span class="section-label">ADIM ADIM BAŞARI</span>
+        <h2>Başvuru Süreci</h2>
+        <p>Projeni hayata geçirmek için izlemen gereken 4 basit adım.</p>
+      </div>
+
+      <div class="steps-grid">
+        <div class="step-card" *ngFor="let step of applicationSteps" #animItem>
+          <div class="step-icon-bg">
+            <span class="step-number">{{ step.id }}</span>
+          </div>
+          <h3>{{ step.title }}</h3>
+          <p>{{ step.desc }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="innovative-guide-section">
+    <div class="container">
+      <div class="guide-grid">
+        
+        <div class="holo-card project-theme" 
+             #animItem 
+             (mousemove)="cardTilt($event, card1)" 
+             (mouseleave)="cardReset(card1)" 
+             #card1>
+          <div class="card-content">
+            <div class="icon-glow"><span class="material-symbols-outlined">architecture</span></div>
+            <h3>Projeler</h3>
+            <p class="subtitle">ÜNİDES'in Yapı Taşları</p>
+            <div class="list-wrapper">
+              <div class="list-item" *ngFor="let item of projectItems">
+                <span class="dot"></span> {{ item }}
+              </div>
+            </div>
+          </div>
+          <div class="holo-bg"></div>
+        </div>
+
+        <div class="holo-card report-theme" 
+             #animItem 
+             (mousemove)="cardTilt($event, card2)" 
+             (mouseleave)="cardReset(card2)" 
+             #card2>
+          <div class="card-content">
+            <div class="icon-glow"><span class="material-symbols-outlined">analytics</span></div>
+            <h3>Sonuç Raporu</h3>
+            <p class="subtitle">Geleceğe İz Bırak</p>
+            <div class="list-wrapper">
+              <div class="list-item" *ngFor="let item of reportItems">
+                <span class="dot"></span> {{ item }}
+              </div>
+            </div>
+          </div>
+          <div class="holo-bg"></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="marquee-section">
+    <p class="marquee-header">Partner Üniversitelerimiz</p>
+    <div class="marquee-wrapper">
+      <div class="marquee-content">
+        <div class="logo-item" *ngFor="let item of marqueeItems">
+          <img [src]="item.img" [alt]="item.name" title="{{ item.name }}">
+        </div>
+        <div class="logo-item" *ngFor="let item of marqueeItems">
+          <img [src]="item.img" [alt]="item.name" title="{{ item.name }}">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="corporate-footer" #animItem>
+    <div class="container">
+      <div class="official-seal-box">
+        <div class="seal-icon-wrapper">
+          <img [src]="gsbLogoUrl" alt="GSB Logo" class="gsb-logo">
+        </div>
+        <div class="seal-content">
+          <h4>T.C. GENÇLİK VE SPOR BAKANLIĞI</h4>
+          <h5>GENÇLİK HİZMETLERİ GENEL MÜDÜRLÜĞÜ</h5>
+          <div class="divider"></div>
+          <p>
+            Bu dijital platform, <strong>ÜNİDES (Üniversite Öğrenci Toplulukları İş Birliği ve Destek Programı)</strong> 
+            kapsamında desteklenmektedir ve gençliğin hizmetine sunulmuştur.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
 </div>
-<!-- End About -->
 
-<app-video />
-
-<!-- <app-team /> -->
-
-<!-- <app-funfacts /> -->
-
-<!-- <app-partners /> -->
-
-<!-- <app-feedback /> -->
-
-<!-- <app-instagram /> -->
-
-<app-footer />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
