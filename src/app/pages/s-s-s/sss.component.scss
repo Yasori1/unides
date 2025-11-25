@@ -1,0 +1,166 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+// --- RENK PALETİ ---
+$primary: #14d2cc;
+$dark: #1e293b;
+$bg-gradient: linear-gradient(180deg, #ffffff 0%, #e0f7fa 100%);
+$surface: #ffffff;
+$text-dark: #1e293b;
+$text-light: #64748b;
+
+:host { display: block; width: 100%; }
+
+.faq-page-wrapper {
+  width: 100%; min-height: 100vh; overflow-x: hidden;
+  font-family: 'Space Grotesk', sans-serif; color: $text-dark; background: $bg-gradient;
+}
+
+.container { max-width: 1100px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 2; }
+
+// --- 1. HERO SECTION ---
+.hero-section {
+  position: relative; padding: 120px 0 80px; text-align: center; overflow: hidden;
+  
+  .hero-bg {
+    position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    .blob {
+      position: absolute; width: 60vw; height: 60vw; top: -30%; left: 50%; transform: translateX(-50%);
+      background: radial-gradient(circle, rgba($primary, 0.2) 0%, rgba(99, 102, 241, 0.1) 50%, transparent 70%);
+      filter: blur(80px);
+    }
+    .noise { position: absolute; inset: 0; opacity: 0.03; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E"); }
+  }
+
+  .hero-content {
+    position: relative; z-index: 2;
+    .badge { display: inline-block; background: rgba($primary, 0.1); color: $primary; padding: 8px 16px; border-radius: 30px; font-weight: 700; margin-bottom: 20px; }
+    h1 { font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 800; line-height: 1.1; margin-bottom: 40px; .highlight { color: $primary; } }
+    
+    .search-wrapper {
+      max-width: 600px; margin: 0 auto; position: relative; display: flex; align-items: center;
+      background: rgba(255,255,255,0.8); backdrop-filter: blur(10px);
+      border: 1px solid rgba(0,0,0,0.1); border-radius: 50px; padding: 8px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.05); transition: box-shadow 0.3s;
+      &:focus-within { box-shadow: 0 15px 50px rgba($primary, 0.2); border-color: $primary; }
+      
+      .search-icon { font-size: 1.5rem; color: $text-light; margin-left: 15px; }
+      input {
+        flex: 1; border: none; background: transparent; padding: 15px; font-size: 1rem; outline: none; font-family: inherit;
+        &::placeholder { color: #94a3b8; }
+      }
+      .search-btn {
+        background: $primary; color: white; border: none; padding: 12px 30px; border-radius: 30px; font-weight: 700; cursor: pointer; transition: transform 0.2s;
+        &:hover { transform: scale(1.05); }
+      }
+    }
+  }
+
+  .floating-q {
+    position: absolute; font-size: 8rem; font-weight: 900; color: $primary; opacity: 0.1; z-index: 1; pointer-events: none;
+    &.q1 { top: 10%; left: 10%; animation: float 6s infinite ease-in-out; }
+    &.q2 { bottom: 20%; right: 15%; animation: float 8s infinite ease-in-out reverse; font-size: 6rem; }
+  }
+}
+
+// --- 2. CONTENT LAYOUT ---
+.layout-grid {
+  display: grid; grid-template-columns: 280px 1fr; gap: 60px; padding-bottom: 100px;
+  align-items: start;
+}
+
+// Sidebar
+.sidebar {
+  position: sticky; top: 40px;
+  .sidebar-inner {
+    background: rgba(255,255,255,0.8); backdrop-filter: blur(10px);
+    border: 1px solid rgba(0,0,0,0.05); border-radius: 24px; padding: 30px 20px;
+    h3 { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; color: $text-light; margin-bottom: 20px; padding-left: 10px; }
+  }
+  
+  nav button {
+    display: flex; align-items: center; gap: 12px; width: 100%; padding: 15px;
+    background: transparent; border: none; border-radius: 12px;
+    color: $text-dark; font-family: inherit; font-size: 1rem; font-weight: 500;
+    cursor: pointer; transition: all 0.2s; text-align: left;
+    &:hover { background: rgba($primary, 0.05); color: $primary; }
+    &.active { background: $primary; color: white; font-weight: 700; box-shadow: 0 10px 20px rgba($primary, 0.2); }
+  }
+
+  .support-card {
+    margin-top: 40px; padding: 20px; background: #f0f9ff; border-radius: 16px; border: 1px solid rgba($primary, 0.1); text-align: center;
+    .icon { font-size: 2rem; color: $primary; margin-bottom: 10px; }
+    h4 { margin: 0 0 5px; font-size: 1rem; font-weight: 700; }
+    p { font-size: 0.85rem; color: $text-light; margin-bottom: 10px; }
+    .link { color: $primary; font-weight: 600; text-decoration: none; font-size: 0.85rem; word-break: break-all; &:hover { text-decoration: underline; } }
+  }
+}
+
+// FAQ Content
+.faq-content {
+  .category-block { margin-bottom: 60px; scroll-margin-top: 40px; } // Scroll yapınca üstte boşluk kalsın
+  
+  .cat-title {
+    display: flex; align-items: center; gap: 15px; font-size: 2rem; font-weight: 800; margin-bottom: 30px;
+    .title-icon { width: 50px; height: 50px; background: $text-dark; color: white; border-radius: 14px; display: flex; align-items: center; justify-content: center; span { font-size: 1.8rem; } }
+  }
+
+  .accordion-list { display: flex; flex-direction: column; gap: 20px; }
+  
+  .accordion-item {
+    background: white; border-radius: 16px; overflow: hidden;
+    border: 1px solid transparent; box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: all 0.3s;
+    
+    &:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,0,0,0.08); border-color: rgba($primary, 0.3); }
+    
+    &.open {
+      border-color: $primary; box-shadow: 0 10px 30px rgba($primary, 0.1);
+      .accordion-header { color: $primary; .toggle-icon { transform: rotate(45deg); background: $primary; color: white; } }
+      .accordion-body { max-height: 500px; opacity: 1; padding-bottom: 25px; }
+    }
+
+    .accordion-header {
+      padding: 25px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 1.1rem; transition: color 0.3s;
+      .toggle-icon {
+        width: 32px; height: 32px; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center; transition: all 0.3s; flex-shrink: 0;
+        span { font-size: 1.2rem; }
+      }
+    }
+
+    .accordion-body {
+      padding: 0 25px; max-height: 0; opacity: 0; overflow: hidden; transition: all 0.4s ease-in-out;
+      .answer-content { color: $text-light; line-height: 1.7; font-size: 1rem; }
+    }
+  }
+}
+
+// --- 3. DOCUMENTS SECTION ---
+.docs-section {
+  padding: 80px 0 100px; background: $text-dark; color: white;
+  .docs-header { text-align: center; margin-bottom: 50px; h2 { font-size: 2.5rem; font-weight: 800; margin-bottom: 10px; } p { opacity: 0.7; font-size: 1.1rem; } }
+  
+  .docs-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;
+    
+    .doc-card {
+      background: rgba(255,255,255,0.1); padding: 30px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);
+      display: flex; align-items: center; gap: 20px; transition: all 0.3s;
+      &:hover { background: rgba(255,255,255,0.15); transform: translateY(-5px); }
+
+      .doc-icon-box { width: 60px; height: 60px; background: $primary; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; span { font-size: 2rem; } }
+      .doc-info { flex: 1; h4 { margin: 0 0 5px; font-size: 1.1rem; } .file-type { font-size: 0.8rem; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 4px; } }
+      .download-btn { background: white; color: $text-dark; border: none; padding: 10px 20px; border-radius: 30px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.2s; span { font-size: 1.2rem; } &:hover { background: $primary; color: white; } }
+    }
+  }
+}
+
+// Animasyonlar
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+.reveal-active { animation: fadeInUp 0.8s forwards; }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+// Responsive
+@media (max-width: 992px) {
+  .layout-grid { grid-template-columns: 1fr; }
+  .sidebar { display: none; } // Mobilde yan menü gizlenebilir veya üste alınabilir
+  .hero-content h1 { font-size: 2.5rem; }
+}
