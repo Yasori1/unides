@@ -1,4 +1,3 @@
-<!-- Google Fonts & Icons -->
 <link
   href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
   rel="stylesheet"
@@ -7,7 +6,6 @@
 
 <div class="main-container">
   <div class="split-layout">
-    <!-- SOL TARAF: ÖĞRENCİ GÖRSELİ -->
     <div class="visual-side">
       <div class="visual-overlay"></div>
       <div class="visual-content">
@@ -19,7 +17,6 @@
       </div>
     </div>
 
-    <!-- SAĞ TARAF: FORM -->
     <div class="form-side">
       <div class="form-wrapper">
         <div class="mobile-logo"><i class="bx bxs-graduation"></i> ÜNİDES</div>
@@ -30,27 +27,11 @@
         </div>
 
         <form (submit)="onSubmit($event)">
-          <!-- Ad Soyad -->
           <div class="input-group">
             <div class="icon-wrapper"><i class="bx bx-user"></i></div>
             <input type="text" placeholder="Ad Soyad" class="modern-input" required />
           </div>
 
-          <!-- TC Kimlik 
-          <div class="input-group">
-            <div class="icon-wrapper"><i class="bx bxs-id-card"></i></div>
-            <input
-              type="text"
-              maxlength="11"
-              placeholder="TC Kimlik Numarası"
-              class="modern-input"
-              (keypress)="onlyNumbers($event)"
-              required
-            />
-          </div>
-          -->
-
-          <!-- Öğrenci E-Posta (.edu.tr Zorunlu) -->
           <div class="input-group">
             <div class="icon-wrapper" [class.error-icon]="emailError">
               <i class="bx bx-envelope"></i>
@@ -69,20 +50,6 @@
             edilmektedir.
           </div>
 
-          <!-- Telefon 
-          <div class="input-group" [class.mt-3]="!emailError">
-            <div class="icon-wrapper"><i class="bx bx-phone"></i></div>
-            <input
-              type="tel"
-              placeholder="Telefon Numarası (5XX...)"
-              class="modern-input"
-              (keypress)="onlyNumbers($event)"
-              required
-            />
-          </div>
-          -->
-
-          <!-- Şifre -->
           <div class="input-group">
             <div class="icon-wrapper"><i class="bx bx-lock-alt"></i></div>
             <input
@@ -94,7 +61,6 @@
             />
           </div>
 
-          <!-- Şifre Onayla -->
           <div class="input-group">
             <div class="icon-wrapper" [class.error-icon]="passwordMismatch">
               <i class="bx bx-lock-alt"></i>
@@ -112,7 +78,6 @@
             <i class="bx bx-error-circle"></i> Şifreler eşleşmiyor.
           </div>
 
-          <!-- Sözleşme -->
           <div class="form-actions checkbox-area">
             <label class="terms-label">
               <input type="checkbox" required />
@@ -120,7 +85,6 @@
             </label>
           </div>
 
-          <!-- Kayıt Butonu -->
           <button
             type="submit"
             class="btn-primary"
@@ -128,17 +92,10 @@
           >
             Öğrenci Olarak Kayıt Ol <i class="bx bx-right-arrow-alt"></i>
           </button>
-
-          <div class="divider"><span>Diğer Kayıt Seçenekleri</span></div>
-
-          <!-- Diğer Kayıt Türlerine Yönlendirme -->
-          <div class="other-register-links">
-            <span class="dot">•</span>
-            <a routerLink="/community-register" class="text-link">Topluluk Oluştur</a>
-          </div>
         </form>
       </div>
-      <footer class="simple-footer">© 2025 Ünides Teknoloji A.Ş.</footer>
+
+      <footer class="simple-footer">© T.C Gençlik ve Spor Bakanlığı</footer>
     </div>
   </div>
 </div>

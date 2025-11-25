@@ -1,0 +1,18 @@
+<div class="avatar-group-container" [ngStyle]="containerStyle">
+  <div
+    class="avatar-wrapper"
+    *ngFor="let user of users; let i = index"
+    [ngStyle]="getAvatarStyle(i)"
+    (mouseenter)="hoveredIndex = i"
+    (mouseleave)="hoveredIndex = null"
+  >
+    <!-- Avatar Resmi -->
+    <img [src]="user.image" [alt]="user.name" class="avatar-img" />
+
+    <!-- Tooltip (Üzerine gelince çıkan baloncuk) -->
+    <div class="custom-tooltip" [class.visible]="hoveredIndex === i">
+      <span class="name">{{ user.name }}</span>
+      <span class="role">{{ user.role }}</span>
+    </div>
+  </div>
+</div>

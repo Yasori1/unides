@@ -1,0 +1,21 @@
+<div #wrapper class="pc-card-wrapper" [ngStyle]="cardStyle">
+  <!-- Arkadaki Hafif Glow Efekti -->
+  <div class="pc-behind"></div>
+
+  <div #shell class="pc-card-shell">
+    <section class="pc-card">
+      <div class="pc-inside">
+        <!-- Çok Hafif Parlama Efekti -->
+        <div class="pc-shine"></div>
+
+        <!-- İsim ve Başlık (Tam Ortalanmış) -->
+        <div class="pc-content">
+          <div class="pc-details">
+            <h3>{{ name }}</h3>
+            <p>{{ title }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>

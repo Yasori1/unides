@@ -1,0 +1,58 @@
+<app-header></app-header>
+
+<div class="developers-page">
+  <!-- HERO ALANI (3D Model Geri Geldi) -->
+  <div class="hero-section">
+    <!-- 3D MODEL ALANI -->
+    <div class="spline-background">
+      <spline-viewer url="https://prod.spline.design/ZtxTo143JkmaQE4C/scene.splinecode">
+      </spline-viewer>
+    </div>
+
+    <!-- İçerik -->
+    <div class="container text-center content-wrapper">
+      <span class="badge">Takımımız</span>
+      <h1 class="hero-title">Geleceği Kodlayanlar</h1>
+      <p class="hero-subtitle">
+        Ünides'i hayata geçiren, her satır kodda emeği olan tutkulu geliştirici ekibimizle tanışın.
+      </p>
+
+      <div class="mt-5">
+        <app-avatar-group [users]="leadDevelopers" variant="centered" [size]="70" [overlap]="-20">
+        </app-avatar-group>
+      </div>
+    </div>
+  </div>
+
+  <!-- GELİŞTİRİCİ KARTLARI GRID (Waves Arka Planı Burada) -->
+  <div class="team-grid-section">
+    <!-- WAVES BACKGROUND (BEYAZ ZEMİN, SİYAH ÇİZGİLER) -->
+    <div class="waves-wrapper">
+      <app-waves
+        [backgroundColor]="'#ffffff'"
+        [strokeColor]="'rgba(0,0,0,0.1)'"
+        [pointerSize]="0.5"
+      >
+      </app-waves>
+    </div>
+
+    <div class="container">
+      <div class="grid-layout">
+        <!-- Kartlar -->
+        <div
+          class="card-wrapper fade-in-up"
+          *ngFor="let dev of developers; let i = index"
+          [style.animation-delay]="i * 0.05 + 's'"
+        >
+          <app-profile-card
+            [name]="dev.name"
+            [title]="dev.title"
+            [enableTilt]="true"
+          ></app-profile-card>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-footer></app-footer>

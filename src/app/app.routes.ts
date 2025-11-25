@@ -50,6 +50,7 @@ import { CorporateLoginComponent } from './pages/corporate-login/corporate-login
 import { CommunityLoginComponent } from './pages/community-login/community-login';
 import { CorporateRegisterComponent } from './pages/corporate-register/corporate-register';
 import { CommunityRegisterComponent } from './pages/community-register/community-register';
+import { DevelopersPageComponent } from './pages/developers-page/developers-page.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -58,6 +59,8 @@ export const routes: Routes = [
   // {path: 'index-4', component: HomeDemoFourComponent},
   { path: 'about', component: AboutPageComponent },
   { path: 'team', component: TeamPageComponent },
+
+  // Topluluklar ve Etkinlikler
   { path: 'communities', component: CommunitiesPageComponent },
   { path: 'events', component: EventsComponent },
 
@@ -69,17 +72,24 @@ export const routes: Routes = [
   // {path: 'listings-4', component: ListingsPage4Component},
   // {path: 'listings-5', component: ListingsPage5Component},
   // {path: 'listing-details', component: ListingDetailsComponent},
+
   { path: 'faq', component: FaqPageComponent },
 
+  // Geliştirici Sayfası Rotası
+  { path: 'developers', component: DevelopersPageComponent },
+
   // --- LOGIN ROTALARI ---
-  { path: 'login', component: LoginPageComponent },
+  { path: 'login', component: LoginPageComponent }, // Ortak Giriş (Öğrenci & Topluluk)
   { path: 'corporate-login', component: CorporateLoginComponent }, // Kurumsal Giriş
-  { path: 'community-login', component: CommunityLoginComponent }, // Topluluk Girişi
+  { path: 'community-login', component: CommunityLoginComponent }, // Topluluk Girişi (Eski/Yedek)
   // ----------------------
 
+  // --- REGISTER ROTALARI ---
   { path: 'register', component: RegisterPageComponent }, // Öğrenci Kayıt (Varsayılan)
   { path: 'corporate-register', component: CorporateRegisterComponent }, // Kurumsal Kayıt
   { path: 'community-register', component: CommunityRegisterComponent }, // Topluluk Kayıt
+  // -------------------------
+
   // {path: 'shop', component: ShopPageComponent},
   // {path: 'cart', component: CartPageComponent},
   // {path: 'checkout', component: CheckoutPageComponent},
@@ -90,9 +100,12 @@ export const routes: Routes = [
   // {path: 'blog-details', component: BlogDetailsPageComponent},
   // {path: 'blog-details-2', component: BlogDetailsPage2Component},
   // {path: 'blog-details-3', component: BlogDetailsPage3Component},
+
   { path: 'privacy-policy', component: PrivacyPolicyPageComponent },
   { path: 'terms-conditions', component: TermsConditionsPageComponent },
   { path: 'contact', component: ContactPageComponent },
+
+  // Admin Dashboard Rotaları
   {
     path: 'dashboard',
     component: AdminDashboardComponent,
@@ -113,5 +126,6 @@ export const routes: Routes = [
     ],
   },
 
+  // Hata Sayfası (En sonda olmalı)
   { path: '**', component: ErrorPageComponent },
 ];

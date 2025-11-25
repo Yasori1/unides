@@ -1,0 +1,136 @@
+:host {
+  display: block;
+  background-color: #ffffff;
+  min-height: 100vh;
+}
+
+.developers-page {
+  padding-top: 0;
+}
+
+/* --- HERO SECTION --- */
+.hero-section {
+  position: relative;
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: #1e1e1e; // 3D model için koyu zemin
+
+  // 3D Model Arka Planı
+  .spline-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+  }
+
+  // İçerik (Yazılar)
+  .content-wrapper {
+    position: relative;
+    z-index: 2;
+    padding: 40px 20px;
+    margin-top: -50px;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 6px 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 30px;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-bottom: 25px;
+    backdrop-filter: blur(8px);
+  }
+
+  .hero-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 20px;
+    letter-spacing: -1px;
+    line-height: 1.1;
+    text-shadow: 0 4px 30px rgba(0, 0, 0, 0.6);
+  }
+
+  .hero-subtitle {
+    font-size: 1.2rem;
+    color: #e2e8f0;
+    max-width: 600px;
+    margin: 0 auto 80px;
+    font-weight: 500;
+    line-height: 1.6;
+    text-shadow: 0 2px 15px rgba(0, 0, 0, 0.6);
+  }
+}
+
+/* --- GRID SECTION --- */
+.team-grid-section {
+  position: relative; // Waves için gerekli
+  padding: 100px 0;
+  background-color: #ffffff; // Beyaz zemin
+  overflow: hidden;
+
+  // Waves Efekti Konumu
+  .waves-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0; // En altta
+    opacity: 0.6; // Çizgileri biraz daha soft yap
+  }
+
+  .container {
+    position: relative;
+    z-index: 1; // Waves'in üstünde
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+}
+
+.grid-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 30px;
+}
+
+.card-wrapper {
+  height: 200px;
+  width: 100%;
+  opacity: 0;
+}
+
+// --- KART GİRİŞ ANİMASYONU ---
+.fade-in-up {
+  animation: fadeInUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    min-height: auto;
+    padding: 120px 0 80px;
+    .hero-title {
+      font-size: 2.5rem;
+    }
+  }
+}
