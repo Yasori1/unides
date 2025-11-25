@@ -26,10 +26,6 @@
 
         <div class="header-text">
           <h3>Kurumsal Giriş</h3>
-          <!-- <p>
-            Partnerimiz değil misiniz?
-            <a routerLink="/corporate-register" class="register-link">Başvuru Yap</a>
-          </p> -->
         </div>
 
         <form (submit)="onSubmit($event)">
@@ -78,7 +74,7 @@
           </div>
 
           <div class="social-login-grid">
-            <!-- Standart (Öğrenci) Girişi - Bağlantı Yapıldı -->
+            <!-- Standart (Öğrenci) Girişi -->
             <button type="button" class="btn-social" routerLink="/login">
               <div class="btn-content">
                 <i class="bx bxs-graduation icon-official"></i>
@@ -89,7 +85,7 @@
               </div>
             </button>
 
-            <!-- Topluluk Girişi - Bağlantı Yapıldı -->
+            <!-- Topluluk Girişi -->
             <button type="button" class="btn-social btn-community" routerLink="/community-login">
               <div class="btn-content">
                 <span class="emoji-icon">👥</span>
@@ -107,3 +103,6 @@
     </div>
   </div>
 </div>
+
+<!-- TOAST BİLEŞENİ -->
+<app-toast></app-toast>

@@ -51,61 +51,37 @@ import { CommunityLoginComponent } from './pages/community-login/community-login
 import { CorporateRegisterComponent } from './pages/corporate-register/corporate-register';
 import { CommunityRegisterComponent } from './pages/community-register/community-register';
 import { DevelopersPageComponent } from './pages/developers-page/developers-page.component';
+// DÜZELTİLDİ: Dosya yapınıza göre çift klasör içine yönlendirildi
+import { CorporateDashboardComponent } from './pages/corporate-dashboard/corporate-dashboard';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
-  // {path: 'index-2', component: HomeDemoTwoComponent},
-  // {path: 'index-3', component: HomeDemoThreeComponent},
-  // {path: 'index-4', component: HomeDemoFourComponent},
-  { path: 'about', component: AboutPageComponent },
-  { path: 'team', component: TeamPageComponent },
 
-  // Topluluklar ve Etkinlikler
+  // Ana Sayfalar
+  { path: 'developers', component: DevelopersPageComponent },
   { path: 'communities', component: CommunitiesPageComponent },
   { path: 'events', component: EventsComponent },
 
-  // {path: 'how-it-works', component: HowItWorksPageComponent},
-  // {path: 'categories', component: CategoriesPageComponent},
-  // {path: 'listings', component: ListingsPage1Component},
-  // {path: 'listings-2', component: ListingsPage2Component},
-  // {path: 'listings-3', component: ListingsPage3Component},
-  // {path: 'listings-4', component: ListingsPage4Component},
-  // {path: 'listings-5', component: ListingsPage5Component},
-  // {path: 'listing-details', component: ListingDetailsComponent},
-
+  { path: 'about', component: AboutPageComponent },
+  { path: 'team', component: TeamPageComponent },
   { path: 'faq', component: FaqPageComponent },
-
-  // Geliştirici Sayfası Rotası
-  { path: 'developers', component: DevelopersPageComponent },
-
-  // --- LOGIN ROTALARI ---
-  { path: 'login', component: LoginPageComponent }, // Ortak Giriş (Öğrenci & Topluluk)
-  { path: 'corporate-login', component: CorporateLoginComponent }, // Kurumsal Giriş
-  { path: 'community-login', component: CommunityLoginComponent }, // Topluluk Girişi (Eski/Yedek)
-  // ----------------------
-
-  // --- REGISTER ROTALARI ---
-  { path: 'register', component: RegisterPageComponent }, // Öğrenci Kayıt (Varsayılan)
-  { path: 'corporate-register', component: CorporateRegisterComponent }, // Kurumsal Kayıt
-  { path: 'community-register', component: CommunityRegisterComponent }, // Topluluk Kayıt
-  // -------------------------
-
-  // {path: 'shop', component: ShopPageComponent},
-  // {path: 'cart', component: CartPageComponent},
-  // {path: 'checkout', component: CheckoutPageComponent},
-  // {path: 'product-details', component: ProductDetailsPageComponent},
-  // {path: 'blog-grid', component: BlogGridPageComponent},
-  // {path: 'blog-right-sidebar', component: BlogRightSidebarPageComponent},
-  // {path: 'blog-left-sidebar', component: BlogLeftSidebarPageComponent},
-  // {path: 'blog-details', component: BlogDetailsPageComponent},
-  // {path: 'blog-details-2', component: BlogDetailsPage2Component},
-  // {path: 'blog-details-3', component: BlogDetailsPage3Component},
-
+  { path: 'contact', component: ContactPageComponent },
   { path: 'privacy-policy', component: PrivacyPolicyPageComponent },
   { path: 'terms-conditions', component: TermsConditionsPageComponent },
-  { path: 'contact', component: ContactPageComponent },
 
-  // Admin Dashboard Rotaları
+  // --- LOGIN & REGISTER ROTALARI ---
+  { path: 'login', component: LoginPageComponent },
+  { path: 'corporate-login', component: CorporateLoginComponent },
+  { path: 'community-login', component: CommunityLoginComponent },
+
+  { path: 'register', component: RegisterPageComponent },
+  { path: 'corporate-register', component: CorporateRegisterComponent },
+  { path: 'community-register', component: CommunityRegisterComponent },
+
+  // KURUMSAL DASHBOARD (ÖNEMLİ: Yönlendirme yapılacak rota)
+  { path: 'corporate-dashboard', component: CorporateDashboardComponent },
+
+  // Admin Dashboard (Eski/Mevcut)
   {
     path: 'dashboard',
     component: AdminDashboardComponent,
@@ -126,6 +102,5 @@ export const routes: Routes = [
     ],
   },
 
-  // Hata Sayfası (En sonda olmalı)
   { path: '**', component: ErrorPageComponent },
 ];

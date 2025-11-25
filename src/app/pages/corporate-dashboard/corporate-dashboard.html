@@ -1,0 +1,314 @@
+<div class="dashboard-layout">
+  <!-- SIDEBAR (SOL MENÜ) -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <i class="bx bxs-bank"></i>
+        <span>Kurumsal Panel</span>
+      </div>
+      <p class="role-badge">Gençlik ve Spor Bakanlığı</p>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button [class.active]="activeTab === 'dashboard'" (click)="switchTab('dashboard')">
+        <i class="bx bxs-dashboard"></i> Genel Bakış
+      </button>
+      <button [class.active]="activeTab === 'communities'" (click)="switchTab('communities')">
+        <i class="bx bxs-group"></i> Topluluk Yönetimi
+      </button>
+      <button [class.active]="activeTab === 'events'" (click)="switchTab('events')">
+        <i class="bx bxs-calendar-event"></i> Etkinlikler
+      </button>
+      <button [class.active]="activeTab === 'announcements'" (click)="switchTab('announcements')">
+        <i class="bx bxs-megaphone"></i> Duyurular
+      </button>
+      <button [class.active]="activeTab === 'forum'" (click)="switchTab('forum')">
+        <i class="bx bxs-chat"></i> Forum & Destek
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="logout-btn" (click)="logout()"><i class="bx bx-log-out"></i> Çıkış Yap</button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT (SAĞ TARAF) -->
+  <main class="main-content">
+    <!-- HEADER -->
+    <header class="dashboard-header">
+      <h2>
+        {{
+          activeTab === 'dashboard'
+            ? 'Genel Bakış'
+            : activeTab === 'communities'
+            ? 'Toplulukları Yönet'
+            : activeTab === 'events'
+            ? 'Etkinlik Takvimi'
+            : activeTab === 'announcements'
+            ? 'Duyuru Paneli'
+            : 'Forum Moderasyonu'
+        }}
+      </h2>
+      <div class="user-profile">
+        <img
+          src="assets/images/official-avatar.png"
+          onerror="this.src='https://ui-avatars.com/api/?name=GSB&background=1e293b&color=fff'"
+          alt="Admin"
+        />
+        <span>Sistem Yetkilisi</span>
+      </div>
+    </header>
+
+    <!-- CONTENT AREA -->
+    <div class="content-body">
+      <!-- 1. DASHBOARD (GENEL BAKIŞ) -->
+      <div *ngIf="activeTab === 'dashboard'" class="dashboard-view fade-in">
+        <div class="stats-grid">
+          <div class="stat-card" *ngFor="let stat of stats" [ngClass]="stat.color">
+            <div class="icon"><i [class]="stat.icon"></i></div>
+            <div class="info">
+              <h3>{{ stat.value }}</h3>
+              <p>{{ stat.title }}</p>
+            </div>
+          </div>
+        </div>
+        <!-- Hızlı Erişim -->
+        <div class="quick-actions mt-4">
+          <h3>Hızlı İşlemler</h3>
+          <div class="actions-row">
+            <button (click)="switchTab('announcements'); openModal('announcement')">
+              + Yeni Duyuru Ekle
+            </button>
+            <button (click)="switchTab('events'); openModal('event')">+ Etkinlik Oluştur</button>
+            <button (click)="switchTab('communities')">Topluluk Başvurularını İncele</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. TOPLULUK YÖNETİMİ -->
+      <div *ngIf="activeTab === 'communities'" class="table-view fade-in">
+        <div class="table-header">
+          <input type="text" placeholder="Topluluk ara..." class="search-input" />
+          <button class="add-btn" (click)="openModal('community')">
+            <i class="bx bx-plus"></i> Yeni Topluluk
+          </button>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Topluluk Adı</th>
+                <th>Üniversite</th>
+                <th>Üye Sayısı</th>
+                <th>Durum</th>
+                <th>İşlemler</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let c of communities">
+                <td>#{{ c.id }}</td>
+                <td>
+                  <strong>{{ c.name }}</strong>
+                </td>
+                <td>{{ c.university }}</td>
+                <td>{{ c.members }}</td>
+                <td>
+                  <span class="status-pill" [class.active]="c.status === 'Aktif'">{{
+                    c.status
+                  }}</span>
+                </td>
+                <td class="actions">
+                  <button class="edit" (click)="openModal('community', c)">
+                    <i class="bx bx-edit"></i>
+                  </button>
+                  <button class="delete" (click)="deleteItem('community', c.id)">
+                    <i class="bx bx-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 3. ETKİNLİK YÖNETİMİ -->
+      <div *ngIf="activeTab === 'events'" class="table-view fade-in">
+        <div class="table-header">
+          <input type="text" placeholder="Etkinlik ara..." class="search-input" />
+          <button class="add-btn" (click)="openModal('event')">
+            <i class="bx bx-plus"></i> Yeni Etkinlik
+          </button>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Etkinlik Başlığı</th>
+                <th>Tarih</th>
+                <th>Konum</th>
+                <th>Durum</th>
+                <th>İşlemler</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let e of events">
+                <td>#{{ e.id }}</td>
+                <td>{{ e.title }}</td>
+                <td>{{ e.date }}</td>
+                <td>{{ e.location }}</td>
+                <td>
+                  <span class="status-pill" [class.active]="e.status === 'Yayında'">{{
+                    e.status
+                  }}</span>
+                </td>
+                <td class="actions">
+                  <button class="edit" (click)="openModal('event', e)">
+                    <i class="bx bx-edit"></i>
+                  </button>
+                  <button class="delete" (click)="deleteItem('event', e.id)">
+                    <i class="bx bx-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 4. DUYURULAR -->
+      <div *ngIf="activeTab === 'announcements'" class="table-view fade-in">
+        <div class="table-header">
+          <h3>Tüm Duyurular</h3>
+          <button class="add-btn" (click)="openModal('announcement')">
+            <i class="bx bx-plus"></i> Duyuru Ekle
+          </button>
+        </div>
+        <div class="cards-grid">
+          <div class="admin-card" *ngFor="let a of announcements">
+            <div class="card-head">
+              <h4>{{ a.title }}</h4>
+              <span class="date">{{ a.date }}</span>
+            </div>
+            <p>{{ a.content }}</p>
+            <div class="card-actions">
+              <button (click)="openModal('announcement', a)">Düzenle</button>
+              <button class="text-danger" (click)="deleteItem('announcement', a.id)">Sil</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. FORUM -->
+      <div *ngIf="activeTab === 'forum'" class="table-view fade-in">
+        <div class="table-header">
+          <h3>Gelen Sorular</h3>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Kullanıcı</th>
+                <th>Soru</th>
+                <th>Tarih</th>
+                <th>Durum</th>
+                <th>İşlemler</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let f of forumPosts">
+                <td>{{ f.user }}</td>
+                <td class="text-truncate" style="max-width: 300px">{{ f.question }}</td>
+                <td>{{ f.date }}</td>
+                <td>
+                  <span class="status-pill" [class.warning]="f.status === 'Beklemede'">{{
+                    f.status
+                  }}</span>
+                </td>
+                <td class="actions">
+                  <button class="edit" title="Onayla/Cevapla">
+                    <i class="bx bx-check-circle"></i>
+                  </button>
+                  <button class="delete" (click)="deleteItem('forum', f.id)">
+                    <i class="bx bx-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL (Ortak Kullanım) -->
+  <div class="modal-overlay" *ngIf="isModalOpen" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ editingItem ? 'Düzenle' : 'Yeni Ekle' }}: {{ getModalTitle() }}</h3>
+        <button class="close-btn" (click)="closeModal()"><i class="bx bx-x"></i></button>
+      </div>
+      <div class="modal-body">
+        <!-- Form Alanları Dinamik Olarak Gelecek -->
+        <form (submit)="saveItem()">
+          <!-- Topluluk Formu -->
+          <ng-container *ngIf="modalType === 'community'">
+            <div class="form-group">
+              <label>Topluluk Adı</label>
+              <input type="text" [(ngModel)]="formData.name" name="name" class="admin-input" />
+            </div>
+            <div class="form-group">
+              <label>Üniversite</label>
+              <input
+                type="text"
+                [(ngModel)]="formData.university"
+                name="university"
+                class="admin-input"
+              />
+            </div>
+          </ng-container>
+
+          <!-- Duyuru Formu -->
+          <ng-container *ngIf="modalType === 'announcement'">
+            <div class="form-group">
+              <label>Başlık</label>
+              <input type="text" [(ngModel)]="formData.title" name="title" class="admin-input" />
+            </div>
+            <div class="form-group">
+              <label>İçerik</label>
+              <textarea
+                [(ngModel)]="formData.content"
+                name="content"
+                class="admin-input"
+                rows="4"
+              ></textarea>
+            </div>
+          </ng-container>
+
+          <!-- Etkinlik Formu (Örnek) -->
+          <ng-container *ngIf="modalType === 'event'">
+            <div class="form-group">
+              <label>Etkinlik Adı</label>
+              <input type="text" [(ngModel)]="formData.title" name="title" class="admin-input" />
+            </div>
+            <div class="form-group">
+              <label>Konum</label>
+              <input
+                type="text"
+                [(ngModel)]="formData.location"
+                name="location"
+                class="admin-input"
+              />
+            </div>
+          </ng-container>
+
+          <div class="modal-actions">
+            <button type="button" class="cancel-btn" (click)="closeModal()">İptal</button>
+            <button type="submit" class="save-btn">Kaydet</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

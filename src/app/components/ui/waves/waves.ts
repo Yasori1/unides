@@ -97,7 +97,6 @@ export class WavesComponent implements AfterViewInit, OnDestroy {
   constructor(private ngZone: NgZone) {}
 
   ngAfterViewInit() {
-    // Angular change detection'ı tetiklememesi için animasyonu zone dışında çalıştırıyoruz
     this.ngZone.runOutsideAngular(() => {
       this.initWaves();
       this.addEventListeners();
@@ -127,13 +126,12 @@ export class WavesComponent implements AfterViewInit, OnDestroy {
     this.lines = [];
     this.paths = [];
 
-    // SVG içeriğini temizle
     while (this.svgRef.nativeElement.firstChild) {
       this.svgRef.nativeElement.removeChild(this.svgRef.nativeElement.firstChild);
     }
 
     const xGap = 10;
-    const yGap = 30; // Çizgiler arası boşluk
+    const yGap = 30;
     const oWidth = width + 200;
     const oHeight = height + 30;
     const totalLines = Math.ceil(oWidth / xGap);
@@ -156,7 +154,6 @@ export class WavesComponent implements AfterViewInit, OnDestroy {
       path.setAttribute('fill', 'none');
       path.setAttribute('stroke', this.strokeColor);
       path.setAttribute('stroke-width', '1');
-      // Opaklık ayarını kaldırdım, böylece rengi direkt inputtan (%100 opak) alır.
 
       this.svgRef.nativeElement.appendChild(path);
       this.paths.push(path);
@@ -172,11 +169,9 @@ export class WavesComponent implements AfterViewInit, OnDestroy {
   };
 
   private updateMouse() {
-    // Smooth mouse movement
     this.mouse.sx += (this.mouse.x - this.mouse.sx) * 0.1;
     this.mouse.sy += (this.mouse.y - this.mouse.sy) * 0.1;
 
-    // Velocity calculation
     const dx = this.mouse.x - this.mouse.lx;
     const dy = this.mouse.y - this.mouse.ly;
     const d = Math.hypot(dx, dy);
@@ -198,12 +193,10 @@ export class WavesComponent implements AfterViewInit, OnDestroy {
   private updatePoints(time: number) {
     this.lines.forEach((points) => {
       points.forEach((p) => {
-        // Noise effect
-        const move = this.noise((p.x + time * 0.008) * 0.003, (p.y + time * 0.003) * 0.002) * 8; // Amplitude reduced
+        const move = this.noise((p.x + time * 0.008) * 0.003, (p.y + time * 0.003) * 0.002) * 8;
         p.wave.x = Math.cos(move) * 12;
         p.wave.y = Math.sin(move) * 6;
 
-        // Mouse interaction
         const dx = p.x - this.mouse.sx;
         const dy = p.y - this.mouse.sy;
         const d = Math.hypot(dx, dy);
@@ -216,9 +209,9 @@ export class WavesComponent implements AfterViewInit, OnDestroy {
           p.cursor.vy += Math.sin(this.mouse.a) * f * l * this.mouse.vs * 0.00035;
         }
 
-        p.cursor.vx += (0 - p.cursor.x) * 0.01; // Restore force
+        p.cursor.vx += (0 - p.cursor.x) * 0.01;
         p.cursor.vy += (0 - p.cursor.y) * 0.01;
-        p.cursor.vx *= 0.95; // Friction
+        p.cursor.vx *= 0.95;
         p.cursor.vy *= 0.95;
 
         p.cursor.x += p.cursor.vx;
@@ -245,9 +238,13 @@ export class WavesComponent implements AfterViewInit, OnDestroy {
   };
 
   private onMouseMove = (e: MouseEvent) => {
-    if (!this.bounding) return;
-    this.mouse.x = e.clientX - this.bounding.left;
-    this.mouse.y = e.clientY - this.bounding.top;
+    // DÜZELTME: Scroll yapıldığında farenin doğru konumunu almak için her harekette rect hesaplıyoruz.
+    if (!this.containerRef) return;
+    const rect = this.containerRef.nativeElement.getBoundingClientRect();
+
+    this.mouse.x = e.clientX - rect.left;
+    this.mouse.y = e.clientY - rect.top;
+
     if (!this.mouse.set) {
       this.mouse.sx = this.mouse.x;
       this.mouse.sy = this.mouse.y;
