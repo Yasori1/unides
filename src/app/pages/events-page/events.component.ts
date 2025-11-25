@@ -10,232 +10,286 @@ import {
   OnInit,
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router'; // Router Eklendi
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate, query, stagger, group } from '@angular/animations';
 
-// ÖNEMLİ NOT:
-// Header, Footer ve Banner componentleriniz "Standalone" değilse (bir NgModule içindelerse),
-// onları burada doğrudan "imports" dizisine ekleyemezsiniz.
-// Bunun yerine, bu componentlerin tanımlı olduğu modülü (Örn: SharedModule) import etmelisiniz.
+import { HeaderComponent } from '../../common/header/header.component';
+import { FooterComponent } from '../../common/footer/footer.component';
 
-// import { SharedModule } from 'src/app/common/shared/shared.module'; // <-- Örnek path
-
-// Hata vermemesi için arayüz tanımları
 interface EventCard {
   id: number;
   title: string;
-  status: 'active' | 'upcoming';
-  startDate: string;
   description: string;
-  location?: string;
-  image: string;
   category: string;
+  date: string;
   dateObj: Date;
-  quota: number;
+  time: string;
+  location: string;
   university: string;
   club: string;
   semester: string;
+  quota: number;
+  imageUrl: string;
+  color: string;
+  status: 'active' | 'upcoming';
 }
 
 @Component({
   selector: 'app-events',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule,
-    FormsModule,
-    // SharedModule // <--- BURASI ÖNEMLİ: HeaderComponent, FooterComponent vb. Standalone değilse buraya SharedModule'ü ekleyin ve yukarıdan import edin.
-    // Eğer SharedModule eklemezseniz <app-header> html tarafında hata verebilir.
-    // Şimdilik hata veren componentleri buradan kaldırdım.
-  ],
+  imports: [CommonModule, RouterModule, FormsModule, HeaderComponent, FooterComponent],
   templateUrl: './events.component.html',
   styleUrls: ['./events.component.scss'],
   animations: [
     trigger('listAnimation', [
       transition('* <=> *', [
-        query(
-          ':enter',
-          [
-            style({ opacity: 0, transform: 'translateY(20px)' }),
-            stagger('50ms', [animate('400ms ease-out', style({ opacity: 1, transform: 'none' }))]),
-          ],
-          { optional: true }
-        ),
+        group([
+          query(
+            ':leave',
+            [animate('300ms ease-out', style({ opacity: 0, transform: 'scale(0.95)' }))],
+            { optional: true }
+          ),
+          query(
+            ':enter',
+            [
+              style({ opacity: 0, transform: 'translateY(20px)' }),
+              stagger('40ms', [
+                animate(
+                  '400ms cubic-bezier(0.16, 1, 0.3, 1)',
+                  style({ opacity: 1, transform: 'none' })
+                ),
+              ]),
+            ],
+            { optional: true }
+          ),
+        ]),
       ]),
     ]),
   ],
 })
-export class EventsComponent implements AfterViewInit, OnInit {
-  // Hero Animation Vars
-  scrollPosition: number = 0;
-  heroScale: number = 1;
-  heroOpacity: number = 1;
+export class EventsComponent implements OnInit, AfterViewInit {
+  // Hero Animasyonu
   heroMoveX: number = 0;
   heroMoveY: number = 0;
-  showScrollIndicator: boolean = true;
 
-  // Filter & Search
+  // Filtreleme
   activeCategory: string = 'Tümü';
-  currentFilter: 'all' | 'active' | 'upcoming' = 'all';
+  categories: string[] = ['Tümü', 'Teknoloji', 'Sanat', 'Müzik', 'Kariyer', 'Spor', 'Gezi'];
   searchQuery: string = '';
-  sortCriteria: 'date' | 'name' = 'date';
+  currentFilter: 'all' | 'active' | 'upcoming' = 'all';
+
+  // Sıralama
+  sortCriteria: 'date' | 'name' | 'semester' = 'date';
   sortAscending: boolean = true;
 
-  categories: string[] = ['Tümü', 'Teknoloji', 'Sanat', 'Müzik', 'Kariyer', 'Spor', 'Gezi'];
+  // Detay Modal & Üyelik Kontrolü
+  selectedEvent: EventCard | null = null;
+  isJoined: boolean = false;
+  isLoggedIn: boolean = false; // Varsayılan olarak giriş yapılmamış
 
-  // Data
+  // Sayfalama
+  allEventsPool: EventCard[] = [];
+  displayedEvents: EventCard[] = [];
+  currentPage: number = 0;
+  pageSize: number = 8;
+  isLoadingMore: boolean = false;
+  hasMoreData: boolean = true;
+
+  @ViewChildren('animItem') animItems!: QueryList<ElementRef>;
+
+  // Slider Görselleri
+  sliderImages: string[] = [
+    'https://images.unsplash.com/photo-1540575467063-178a50d2df87?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1523580494863-6f3031224c94?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=800&auto=format&fit=crop',
+  ];
+
+  // --- VERİ SETİ ---
   baseEvents: EventCard[] = [
     {
       id: 1,
       title: 'Yapay Zeka Zirvesi',
       description: 'Geleceğin teknolojilerini sektör liderlerinden dinleyin.',
       category: 'Teknoloji',
-      startDate: '2025-10-25',
+      date: '25 Ekim',
       dateObj: new Date('2025-10-25'),
-      university: 'İTÜ',
-      club: 'YZ Kulübü',
-      semester: 'Güz',
-      location: 'Merkez Kampüs',
+      time: '14:00',
+      university: 'İstanbul Teknik Üniversitesi',
+      club: 'Yapay Zeka Kulübü',
+      semester: '1. Dönem',
+      location: 'Süleyman Demirel Kültür Merkezi',
       quota: 150,
-      image: 'assets/images/events/event1.jpg',
-      status: 'upcoming',
+      status: 'active',
+      imageUrl:
+        'https://images.unsplash.com/photo-1677442136019-21780ecad995?q=80&w=800&auto=format&fit=crop',
+      color: '#2563eb',
     },
     {
       id: 2,
       title: 'Bahar Festivali',
       description: 'Dev sahne, sürpriz sanatçılar ve gün boyu eğlence.',
       category: 'Müzik',
-      startDate: '2025-05-15',
+      date: '15 Mayıs',
       dateObj: new Date('2025-05-15'),
-      university: 'Boğaziçi',
+      time: '16:00',
+      university: 'Boğaziçi Üniversitesi',
       club: 'Müzik Kulübü',
-      semester: 'Bahar',
-      location: 'Güney Meydan',
+      semester: '2. Dönem',
+      location: 'Güney Kampüs Meydan',
       quota: 5000,
-      image: 'assets/images/events/event2.jpg',
       status: 'upcoming',
+      imageUrl:
+        'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=800&auto=format&fit=crop',
+      color: '#4f46e5',
     },
     {
       id: 3,
       title: 'UI/UX Tasarım Atölyesi',
       description: 'Figma ile mobil uygulama arayüzü tasarlamayı öğrenin.',
       category: 'Sanat',
-      startDate: '2025-11-12',
+      date: '12 Kasım',
       dateObj: new Date('2025-11-12'),
-      university: 'MSGSÜ',
-      club: 'Tasarım',
-      semester: 'Güz',
-      location: 'Fındıklı',
+      time: '10:00',
+      university: 'Mimar Sinan Güzel Sanatlar',
+      club: 'Tasarım Topluluğu',
+      semester: '1. Dönem',
+      location: 'Fındıklı Kampüsü',
       quota: 30,
-      image: 'assets/images/events/event3.jpg',
       status: 'active',
+      imageUrl:
+        'https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?q=80&w=800&auto=format&fit=crop',
+      color: '#0ea5e9',
     },
     {
       id: 4,
-      title: 'Start-Up 101',
-      description: 'Kendi girişiminizi kurmanın yolları.',
+      title: 'Global Kariyer Fuarı',
+      description: 'Global şirketlerle tanışma ve mülakat simülasyonları.',
       category: 'Kariyer',
-      startDate: '2025-09-20',
-      dateObj: new Date('2025-09-20'),
-      university: 'ODTÜ',
-      club: 'Girişimcilik',
-      semester: 'Güz',
-      location: 'Teknokent',
-      quota: 100,
-      image: 'assets/images/events/event4.jpg',
+      date: '05 Aralık',
+      dateObj: new Date('2025-12-05'),
+      time: '09:00',
+      university: 'Yıldız Teknik Üniversitesi',
+      club: 'Kariyer Kulübü',
+      semester: '1. Dönem',
+      location: 'Davutpaşa Kongre Merkezi',
+      quota: 500,
+      status: 'upcoming',
+      imageUrl:
+        'https://images.unsplash.com/photo-1511376777868-611b54f68947?q=80&w=800&auto=format&fit=crop',
+      color: '#0f172a',
+    },
+    {
+      id: 5,
+      title: 'Valorant Turnuvası',
+      description: '5 kişilik takımını kur, büyük ödül için yarış.',
+      category: 'Spor',
+      date: '20 Şubat',
+      dateObj: new Date('2025-02-20'),
+      time: '12:00',
+      university: 'Bahçeşehir Üniversitesi',
+      club: 'E-Spor Kulübü',
+      semester: '2. Dönem',
+      location: 'Galata Kampüsü',
+      quota: 64,
       status: 'active',
+      imageUrl:
+        'https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=800&auto=format&fit=crop',
+      color: '#ef4444',
+    },
+    {
+      id: 6,
+      title: 'Doğa Yürüyüşü',
+      description: "Belgrad Ormanı'nda trekking ve kahvaltı.",
+      category: 'Gezi',
+      date: '28 Eylül',
+      dateObj: new Date('2025-09-28'),
+      time: '07:30',
+      university: 'İstanbul Üniversitesi',
+      club: 'Doğa Sporları',
+      semester: '1. Dönem',
+      location: 'Belgrad Ormanı',
+      quota: 40,
+      status: 'upcoming',
+      imageUrl:
+        'https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=800&auto=format&fit=crop',
+      color: '#10b981',
     },
   ];
 
-  filteredEvents: EventCard[] = [];
-  displayedEvents: EventCard[] = [];
-
-  // Pagination / Load More
-  currentPage: number = 0;
-  pageSize: number = 6;
-  hasMoreData: boolean = true;
-  isLoadingMore: boolean = false;
-
-  // Modals
-  selectedEvent: EventCard | null = null;
-  showAddModal: boolean = false;
-  isJoined: boolean = false;
-
-  // Form Model
-  newProject: any = { title: '', status: 'active', category: 'Teknoloji', description: '' };
-
-  // Slider
-  sliderImages: string[] = [
-    'assets/images/gallery/g1.jpg',
-    'assets/images/gallery/g2.jpg',
-    'assets/images/gallery/g3.jpg',
-    'assets/images/gallery/g4.jpg',
-  ];
-
-  @ViewChildren('animItem') animItems!: QueryList<ElementRef>;
-
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
+  // Router Inject Edildi
+  constructor(@Inject(PLATFORM_ID) private platformId: Object, private router: Router) {}
 
   ngOnInit() {
-    this.applyFilters();
+    this.allEventsPool = [...this.baseEvents];
+    this.applyFiltersAndLoadFirstPage();
   }
 
   ngAfterViewInit() {
     if (isPlatformBrowser(this.platformId)) {
-      const observer = new IntersectionObserver(
+      const revealObserver = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
-              entry.target.classList.add('animate-fadeInUp');
-              observer.unobserve(entry.target);
+              entry.target.classList.add('reveal-active');
+              revealObserver.unobserve(entry.target);
             }
           });
         },
         { threshold: 0.1 }
       );
-      this.animItems.forEach((item) => observer.observe(item.nativeElement));
+      this.animItems.forEach((item) => revealObserver.observe(item.nativeElement));
     }
   }
 
-  // --- LOGIC ---
+  onHeroMouseMove(event: MouseEvent) {
+    if (isPlatformBrowser(this.platformId)) {
+      const x = event.clientX - window.innerWidth / 2;
+      const y = event.clientY - 200;
+      this.heroMoveX = x / 30;
+      this.heroMoveY = y / 30;
+    }
+  }
 
-  applyFilters() {
-    let result = [...this.baseEvents];
+  // --- FİLTRELEME VE SIRALAMA ---
+  getFilteredAndSortedPool(): EventCard[] {
+    let filtered =
+      this.activeCategory === 'Tümü'
+        ? [...this.allEventsPool]
+        : this.allEventsPool.filter((e) => e.category === this.activeCategory);
 
-    // 1. Text Search
-    if (this.searchQuery.trim()) {
-      const q = this.searchQuery.toLowerCase();
-      result = result.filter(
+    // Ana Filtre
+    if (this.currentFilter !== 'all') {
+      filtered = filtered.filter((e) => e.status === this.currentFilter);
+    }
+
+    // Arama
+    if (this.searchQuery && this.searchQuery.trim() !== '') {
+      const query = this.searchQuery.toLowerCase();
+      filtered = filtered.filter(
         (e) =>
-          e.title.toLowerCase().includes(q) ||
-          e.university.toLowerCase().includes(q) ||
-          e.club.toLowerCase().includes(q)
+          e.title.toLowerCase().includes(query) ||
+          e.university.toLowerCase().includes(query) ||
+          e.club.toLowerCase().includes(query)
       );
     }
 
-    // 2. Category Filter
-    if (this.activeCategory !== 'Tümü') {
-      result = result.filter((e) => e.category === this.activeCategory);
-    }
-
-    // 3. Status Filter
-    if (this.currentFilter !== 'all') {
-      result = result.filter((e) => e.status === this.currentFilter);
-    }
-
-    // 4. Sort
-    result.sort((a, b) => {
+    return filtered.sort((a, b) => {
+      let comparison = 0;
       if (this.sortCriteria === 'date') {
-        return this.sortAscending
-          ? a.dateObj.getTime() - b.dateObj.getTime()
-          : b.dateObj.getTime() - a.dateObj.getTime();
-      } else {
-        return this.sortAscending ? a.title.localeCompare(b.title) : b.title.localeCompare(a.title);
+        comparison = a.dateObj.getTime() - b.dateObj.getTime();
+      } else if (this.sortCriteria === 'name') {
+        comparison = a.title.localeCompare(b.title, 'tr');
+      } else if (this.sortCriteria === 'semester') {
+        comparison = a.semester.localeCompare(b.semester, 'tr');
       }
+      return this.sortAscending ? comparison : -comparison;
     });
+  }
 
-    this.filteredEvents = result;
+  applyFiltersAndLoadFirstPage() {
     this.currentPage = 0;
     this.displayedEvents = [];
     this.hasMoreData = true;
@@ -244,130 +298,95 @@ export class EventsComponent implements AfterViewInit, OnInit {
 
   loadMoreEvents() {
     if (this.isLoadingMore || !this.hasMoreData) return;
+
     this.isLoadingMore = true;
 
-    // Simulate Network Delay
     setTimeout(() => {
-      const start = this.currentPage * this.pageSize;
-      const end = start + this.pageSize;
-      const nextBatch = this.filteredEvents.slice(start, end);
+      const filteredPool = this.getFilteredAndSortedPool();
+      const startIndex = this.currentPage * this.pageSize;
+      const endIndex = startIndex + this.pageSize;
+      const nextBatch = filteredPool.slice(startIndex, endIndex);
 
       this.displayedEvents = [...this.displayedEvents, ...nextBatch];
       this.currentPage++;
       this.isLoadingMore = false;
 
-      if (this.displayedEvents.length >= this.filteredEvents.length) {
+      if (this.displayedEvents.length >= filteredPool.length) {
         this.hasMoreData = false;
       }
-    }, 500);
+    }, 600);
+  }
+
+  setFilter(filter: 'all' | 'active' | 'upcoming') {
+    this.currentFilter = filter;
+    this.applyFiltersAndLoadFirstPage();
   }
 
   setCategory(cat: string) {
     this.activeCategory = cat;
-    this.applyFilters();
+    this.applyFiltersAndLoadFirstPage();
   }
 
-  setFilter(status: 'all' | 'active' | 'upcoming') {
-    this.currentFilter = status;
-    this.applyFilters();
+  onSearch(event: Event) {
+    const inputElement = event.target as HTMLInputElement;
+    this.searchQuery = inputElement.value;
+    this.applyFiltersAndLoadFirstPage();
   }
 
-  changeSortCriteria(crit: 'date' | 'name') {
-    if (this.sortCriteria === crit) this.sortAscending = !this.sortAscending;
-    else {
-      this.sortCriteria = crit;
+  changeSortCriteria(criteria: 'date' | 'name' | 'semester') {
+    if (this.sortCriteria === criteria) {
+      this.sortAscending = !this.sortAscending;
+    } else {
+      this.sortCriteria = criteria;
       this.sortAscending = true;
     }
-    this.applyFilters();
+    this.applyFiltersAndLoadFirstPage();
   }
 
-  // --- HERO ANIMATION ---
-  @HostListener('window:scroll')
-  onWindowScroll() {
-    if (isPlatformBrowser(this.platformId)) {
-      this.scrollPosition = window.scrollY;
-      this.showScrollIndicator = this.scrollPosition < 100;
-
-      const limit = 600;
-      if (this.scrollPosition < limit) {
-        this.heroScale = 1 - this.scrollPosition / (limit * 3);
-        this.heroOpacity = 1 - this.scrollPosition / limit;
-      }
-    }
+  trackByEventId(index: number, event: EventCard): number {
+    return event.id;
   }
 
-  onHeroMouseMove(e: MouseEvent) {
-    if (isPlatformBrowser(this.platformId)) {
-      const x = e.clientX - window.innerWidth / 2;
-      const y = e.clientY - window.innerHeight / 2;
-      this.heroMoveX = x / 20;
-      this.heroMoveY = y / 20;
-    }
-  }
-
-  // --- TILT EFFECT ---
-  cardTilt(e: MouseEvent, card: HTMLElement) {
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+  // --- KART EFEKTLERİ ---
+  cardTilt(event: MouseEvent, cardElement: HTMLElement) {
+    const rect = cardElement.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
-    const rotX = ((y - centerY) / centerY) * -10;
-    const rotY = ((x - centerX) / centerX) * 10;
-
-    card.style.transform = `perspective(1000px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale(1.02)`;
+    const rotateX = ((y - centerY) / centerY) * -5;
+    const rotateY = ((x - centerX) / centerX) * 5;
+    cardElement.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.01)`;
   }
 
-  cardReset(card: HTMLElement) {
-    card.style.transform = `perspective(1000px) rotateX(0) rotateY(0) scale(1)`;
+  cardReset(cardElement: HTMLElement) {
+    cardElement.style.transform = `perspective(1000px) rotateX(0) rotateY(0) scale(1)`;
   }
 
-  // --- MODAL ACTIONS ---
+  // --- MODAL İŞLEMLERİ ---
   openEventDetail(event: EventCard) {
     this.selectedEvent = event;
     this.isJoined = false;
     document.body.style.overflow = 'hidden';
   }
 
-  closeDetail() {
+  closeModal() {
     this.selectedEvent = null;
     document.body.style.overflow = 'auto';
   }
 
+  // YENİ: Giriş kontrolü yapan fonksiyon
+  handleJoinClick() {
+    if (!this.isLoggedIn) {
+      this.closeModal(); // Modalı kapat
+      this.router.navigate(['/login']); // Login sayfasına yönlendir
+    } else {
+      this.isJoined = true;
+    }
+  }
+
+  // Eski fonksiyonu sadece mantık içinde kullandık
   joinEvent() {
     this.isJoined = true;
-  }
-
-  openAddModal() {
-    this.showAddModal = true;
-  }
-  closeAddModal() {
-    this.showAddModal = false;
-  }
-  saveProject() {
-    // Mock save
-    const newId = this.baseEvents.length + 1;
-    this.baseEvents.unshift({
-      ...this.newProject,
-      id: newId,
-      startDate: new Date().toISOString(),
-      dateObj: new Date(),
-      image: 'assets/images/page-title1.jpg',
-      university: 'Ünides',
-      club: 'Genel',
-      semester: 'Güz',
-      location: 'Online',
-      quota: 100,
-    });
-    this.closeAddModal();
-    this.applyFilters();
-  }
-
-  onFileSelected(event: any) {
-    // File upload logic here
-  }
-
-  trackByEventId(index: number, item: EventCard) {
-    return item.id;
   }
 }

@@ -1,148 +1,127 @@
-// --- VARIABLES (Eski Projenin Renklerine Güncellendi) ---
-// Turkuaz (#14d2cc) yerine Kırmızı (#fd1616)
-$primary-color: #fd1616;
-$secondary-color: #212529;
-$text-dark: #212529;
-$text-light: #666;
-$bg-gray: #f9f9f9;
-
-// Font: Eski projenin default fontu (Space Grotesk kaldırıldı, System font kullanılıyor)
-$font-main: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
-  sans-serif;
+// --- YENİ RENK PALETİ (Mavi/Gri/Siyah/Beyaz) ---
+$primary-blue: #2563eb; // Canlı Modern Mavi
+$dark-blue: #1e3a8a; // Koyu Lacivert
+$text-dark: #0f172a; // Slate 900
+$text-gray: #64748b; // Slate 500
+$text-light-gray: #94a3b8; // Slate 400
+$bg-light: #f8fafc; // Slate 50
+$white: #ffffff;
+$border-color: #e2e8f0; // Slate 200
 
 :host {
   display: block;
-  font-family: $font-main;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   color: $text-dark;
-  overflow-x: hidden;
+  background-color: $white;
 }
 
-// --- 1. HERO SECTION (Renkler Düzenlendi) ---
-.hero-section {
-  height: 80vh; // Biraz kısaltıldı
-  width: 100%;
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+// --- HEADER ALANI ---
+.page-spacer {
+  padding-top: 140px;
+  padding-bottom: 70px;
+  background-color: $bg-light;
+  text-align: center;
+  border-bottom: 1px solid $border-color;
   position: relative;
   overflow: hidden;
-}
 
-.hero-sticky {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.hero-background {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: #fff0f0; // Hafif kırmızımsı arka plan
-
-  .interactive-blob {
-    position: absolute;
-    width: 60vw;
-    height: 60vw;
-    top: 50%;
-    left: 50%;
-    margin-top: -30vw;
-    margin-left: -30vw;
-    // Blob gradienti kırmızı/turuncu tonlarına çevrildi
-    background: radial-gradient(
-      circle,
-      rgba(253, 22, 22, 0.35) 0%,
-      rgba(255, 159, 67, 0.25) 40%,
-      rgba(255, 255, 255, 0) 70%
-    );
-    filter: blur(60px);
-    border-radius: 50%;
-    transition: transform 0.1s ease-out;
+  .container {
+    position: relative;
+    z-index: 2;
   }
 
-  .noise-overlay {
+  .background-wrapper {
     position: absolute;
     inset: 0;
-    opacity: 0.04;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-  }
-}
+    z-index: 1;
+    overflow: hidden;
 
-.hero-content {
-  text-align: center;
-  z-index: 10;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-
-  .giant-text {
-    font-size: clamp(3rem, 10vw, 8rem);
-    font-weight: 800;
-    line-height: 1.1;
-    letter-spacing: -0.02em;
-    margin: 0;
-    color: $text-dark;
-
-    .highlight-text {
-      color: transparent;
-      -webkit-text-stroke: 2px $primary-color; // Kırmızı stroke
-      display: block;
+    .interactive-blob {
+      position: absolute;
+      width: 450px;
+      height: 450px;
+      top: 50%;
+      left: 50%;
+      margin-top: -225px;
+      margin-left: -225px;
+      background: radial-gradient(
+        circle,
+        rgba(37, 99, 235, 0.12) 0%,
+        rgba(6, 182, 212, 0.08) 40%,
+        rgba(255, 255, 255, 0) 70%
+      );
+      filter: blur(70px);
+      border-radius: 50%;
+      transition: transform 0.1s ease-out;
     }
   }
 
-  .subtitle {
-    font-size: clamp(1rem, 2vw, 1.25rem);
-    color: $text-light;
-    margin-top: 15px;
-    font-weight: 500;
-    background: rgba(255, 255, 255, 0.7);
-    padding: 5px 20px;
-    border-radius: 20px;
+  .page-title {
+    font-size: 2.8rem;
+    font-weight: 800;
+    color: $text-dark;
+    margin-bottom: 12px;
+    letter-spacing: -1px;
+    line-height: 1.1;
+
+    .highlight-text {
+      color: transparent;
+      -webkit-text-stroke: 1.5px $primary-blue;
+      display: inline-block;
+      margin-left: 10px;
+    }
+  }
+
+  .page-subtitle {
+    font-size: 1.05rem;
+    color: $text-gray;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+    font-weight: 400;
   }
 }
 
 .scroll-indicator {
   position: absolute;
-  bottom: 30px;
+  bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  font-size: 0.8rem;
+  gap: 6px;
+  font-size: 0.7rem;
+  letter-spacing: 2px;
   text-transform: uppercase;
-  color: $primary-color;
+  color: $text-gray;
   font-weight: 700;
+  opacity: 0.7;
+  z-index: 3;
+
   .line {
     width: 2px;
-    height: 40px;
-    background: linear-gradient(to bottom, $primary-color, transparent);
+    height: 25px;
+    background: linear-gradient(to bottom, $primary-blue, transparent);
     animation: dropLine 2s infinite;
   }
 }
 
-// --- 2. CONTENT SECTION ---
-.content-section {
-  position: relative;
-  background: linear-gradient(180deg, #ffffff 0%, #fff5f5 100%);
-  padding-top: 60px;
-  padding-bottom: 80px;
-  z-index: 5;
-  box-shadow: 0 -30px 60px rgba(0, 0, 0, 0.05);
-  border-radius: 40px 40px 0 0;
+// --- İÇERİK BÖLÜMÜ ---
+.events-content-section {
+  padding: 50px 0 100px;
+  background-color: $white;
 }
 
-// ARAMA
 .search-container {
   display: flex;
   justify-content: center;
-  margin-bottom: 30px;
+  margin-bottom: 40px;
   padding: 0 20px;
   .search-box {
     position: relative;
@@ -151,16 +130,18 @@ $font-main: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Ne
     input {
       width: 100%;
       padding: 16px 20px 16px 50px;
-      border-radius: 50px;
-      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      border: 1px solid $border-color;
       background: #fff;
+      font-family: inherit;
       font-size: 1rem;
       color: $text-dark;
       outline: none;
-      transition: 0.3s;
+      transition: all 0.3s;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
       &:focus {
-        border-color: $primary-color;
-        box-shadow: 0 0 0 4px rgba($primary-color, 0.1);
+        border-color: $primary-blue;
+        box-shadow: 0 0 0 4px rgba($primary-blue, 0.1);
       }
     }
     .search-icon {
@@ -168,64 +149,110 @@ $font-main: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Ne
       left: 18px;
       top: 50%;
       transform: translateY(-50%);
-      color: #94a3b8;
+      color: $text-gray;
+      font-size: 1.3rem;
+      transition: 0.3s;
+    }
+    input:focus + .search-icon {
+      color: $primary-blue;
     }
   }
 }
 
-// FİLTRE BUTONLARI
 .events-filter-menu {
+  margin-bottom: 40px;
   .filter-btn {
     background: transparent;
-    border: 1px solid #ddd;
-    padding: 8px 24px;
+    border: 1px solid $border-color;
+    padding: 10px 28px;
     margin: 0 5px;
-    border-radius: 25px;
+    border-radius: 8px;
     font-weight: 600;
-    color: $text-light;
-    cursor: pointer;
+    color: $text-gray;
     transition: 0.3s;
-    &:hover,
+    cursor: pointer;
+    font-size: 0.9rem;
+    &:hover {
+      border-color: $text-dark;
+      color: $text-dark;
+    }
     &.active {
-      background-color: $primary-color;
+      background-color: $text-dark;
       color: #fff;
-      border-color: $primary-color;
-      box-shadow: 0 5px 15px rgba($primary-color, 0.3);
+      border-color: $text-dark;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
   }
 }
 
-// KATEGORİ SCROLL
 .filter-bar-container {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 40px;
+  padding: 0 20px;
   margin-bottom: 30px;
   gap: 20px;
-  flex-wrap: wrap;
+  border-bottom: 1px solid $border-color;
+  padding-bottom: 20px;
 
   .filter-scroll {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     overflow-x: auto;
     padding-bottom: 5px;
     &::-webkit-scrollbar {
       display: none;
     }
     .filter-pill {
-      background: #fff;
-      border: 1px solid #e2e8f0;
-      padding: 8px 20px;
-      border-radius: 50px;
-      font-size: 0.9rem;
-      color: $text-light;
+      background: $bg-light;
+      border: 1px solid transparent;
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-family: inherit;
+      font-weight: 500;
+      color: $text-gray;
       cursor: pointer;
-      transition: 0.3s;
       white-space: nowrap;
+      transition: all 0.2s;
+      font-size: 0.9rem;
       &:hover {
-        background: #f1f5f9;
+        background: #e2e8f0;
         color: $text-dark;
+      }
+      &.active {
+        background: $primary-blue;
+        color: $white;
+        font-weight: 600;
+      }
+    }
+  }
+
+  .sort-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    .sort-label {
+      font-size: 0.85rem;
+      color: $text-gray;
+      font-weight: 600;
+    }
+    .sort-btn {
+      background: #fff;
+      border: 1px solid $border-color;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-family: inherit;
+      font-weight: 600;
+      color: $text-gray;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+      &:hover {
+        border-color: $primary-blue;
+        color: $primary-blue;
       }
       &.active {
         background: $text-dark;
@@ -234,86 +261,66 @@ $font-main: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Ne
       }
     }
   }
-
-  .sort-group {
-    display: flex;
-    gap: 10px;
-    .sort-btn {
-      background: #fff;
-      border: 1px solid #e2e8f0;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 0.85rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      &:hover {
-        color: $primary-color;
-      }
-      &.active {
-        background: $text-dark;
-        color: #fff;
-      }
-    }
-    .add-event-btn {
-      background: $primary-color;
-      color: #fff;
-      border: none;
-      padding: 8px 20px;
-      border-radius: 20px;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      &:hover {
-        background: darken($primary-color, 10%);
-      }
-    }
-  }
 }
 
 .section-header {
-  padding: 0 40px;
-  margin-bottom: 30px;
+  padding: 0 20px;
+  margin-bottom: 25px;
   h2 {
-    font-size: 2rem;
+    font-size: 1.7rem;
+    margin: 0;
     color: $text-dark;
     font-weight: 800;
+    letter-spacing: -0.5px;
     .highlight {
-      color: $primary-color;
+      color: $primary-blue;
     }
   }
   p {
-    color: $text-light;
+    color: $text-gray;
+    font-size: 0.95rem;
+    margin-top: 4px;
   }
 }
 
-// --- GRID LAYOUT ---
+// --- GRID ve LAYOUT SHIFT DÜZELTMESİ ---
 .events-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 30px;
-  padding: 0 40px 40px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  padding: 0 20px 40px;
+  // Burada min-height vererek içerik azalsa bile slider'ın yukarı zıplamasını engelliyoruz
+  min-height: 800px;
 }
 
 .event-card {
   position: relative;
+  width: 100%;
   height: 420px;
-  background: #fff;
-  border-radius: 20px;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-  border: 1px solid #eee;
-  transform-style: preserve-3d;
-  transition: transform 0.1s;
+  background: #ffffff;
+  border: 1px solid $border-color;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transform-origin: center center;
   cursor: pointer;
   display: flex;
   flex-direction: column;
+  transition: all 0.3s ease;
+
+  &:hover {
+    z-index: 10;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
+    border-color: lighten($primary-blue, 25%);
+    transform: translateY(-4px);
+    .tap-hint {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 
   .card-image {
-    height: 50%;
+    height: 42%;
     width: 100%;
     position: relative;
     img {
@@ -323,154 +330,192 @@ $font-main: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Ne
     }
     .date-badge {
       position: absolute;
-      top: 15px;
-      left: 15px;
+      top: 12px;
+      left: 12px;
       padding: 6px 12px;
-      background: rgba(255, 255, 255, 0.95);
-      color: $text-dark;
-      font-weight: 800;
-      border-radius: 10px;
-      font-size: 0.8rem;
+      background: rgba(15, 23, 42, 0.9);
+      color: $white;
+      font-weight: 700;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      z-index: 2;
+      backdrop-filter: blur(4px);
     }
     .tap-hint {
       position: absolute;
       inset: 0;
-      background: rgba(0, 0, 0, 0.3);
+      background: rgba(15, 23, 42, 0.3);
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
-      font-weight: 700;
-      gap: 5px;
+      font-weight: 600;
+      gap: 6px;
       opacity: 0;
-      transition: 0.3s;
+      transform: translateY(10px);
+      transition: all 0.3s;
+      z-index: 3;
+      backdrop-filter: blur(2px);
     }
-  }
-  &:hover .tap-hint {
-    opacity: 1;
   }
 
   .card-info {
-    padding: 20px;
-    flex: 1;
+    padding: 18px;
+    background: #fff;
+    height: 58%;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+
     .tags-row {
       display: flex;
-      gap: 5px;
       flex-wrap: wrap;
+      gap: 6px;
       margin-bottom: 10px;
       .tag {
         font-size: 0.7rem;
-        font-weight: 700;
+        font-weight: 600;
         padding: 4px 8px;
-        border-radius: 6px;
-      }
-      .tag.uni {
-        background: #f1f5f9;
-        color: $text-dark;
-      }
-      .tag.semester {
-        background: rgba($primary-color, 0.1);
-        color: $primary-color;
+        border-radius: 4px;
+        &.uni {
+          background: $bg-light;
+          color: $text-dark;
+          border: 1px solid $border-color;
+          max-width: 100%;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        &.semester {
+          background: rgba($primary-blue, 0.08);
+          color: $primary-blue;
+        }
       }
     }
+
     h3 {
       font-size: 1.1rem;
-      margin: 0 0 8px;
-      font-weight: 700;
+      margin: 0 0 6px;
+      line-height: 1.35;
       color: $text-dark;
+      font-weight: 700;
+      letter-spacing: -0.2px;
     }
     .short-desc {
       font-size: 0.85rem;
-      color: $text-light;
+      color: $text-gray;
+      line-height: 1.5;
       display: -webkit-box;
       -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow: hidden;
+      margin-bottom: 12px;
     }
+
     .bottom-meta {
-      margin-top: 10px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      border-top: 1px solid $bg-light;
+      padding-top: 12px;
       .category {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         text-transform: uppercase;
-        font-weight: 800;
-        color: $primary-color;
+        letter-spacing: 0.6px;
+        font-weight: 700;
+        color: $primary-blue;
       }
       .mini-location {
         display: flex;
         align-items: center;
-        font-size: 0.8rem;
-        color: $text-light;
-        span {
-          font-size: 1rem;
-          color: $primary-color;
-        }
+        gap: 4px;
+        font-size: 0.75rem;
+        color: $text-gray;
       }
     }
   }
 }
 
-// --- BUTTONS & EXTRAS ---
 .load-more-container {
-  text-align: center;
-  margin-bottom: 50px;
+  display: flex;
+  justify-content: center;
+  padding: 10px 0 50px;
   .load-more-btn {
-    background: #fff;
-    border: 1px solid #e2e8f0;
-    padding: 12px 30px;
-    border-radius: 30px;
+    background: $white;
+    color: $text-dark;
+    border: 1px solid $border-color;
+    padding: 10px 28px;
+    border-radius: 6px;
     font-weight: 600;
+    font-size: 0.9rem;
     cursor: pointer;
-    transition: 0.3s;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
     &:hover {
-      border-color: $primary-color;
-      color: $primary-color;
+      background: $bg-light;
+      transform: translateY(-2px);
+      border-color: $text-gray;
     }
-    .loading-content {
-      display: flex;
-      align-items: center;
-      gap: 10px;
+    &:disabled {
+      opacity: 0.6;
+      cursor: wait;
+      transform: none;
     }
     .spinner-ring {
       width: 16px;
       height: 16px;
-      border: 2px solid #ccc;
-      border-top-color: $primary-color;
+      border: 2px solid rgba($text-dark, 0.2);
+      border-top-color: $text-dark;
       border-radius: 50%;
-      animation: spin 1s infinite linear;
+      animation: spin 1s linear infinite;
     }
   }
 }
+.end-of-list {
+  text-align: center;
+  color: $text-gray;
+  font-weight: 500;
+  padding-bottom: 40px;
+}
 
 .slider-section {
-  padding: 40px 0;
+  padding: 30px 0 80px;
   overflow: hidden;
+  border-top: 1px solid $border-color;
   .slider-title {
     text-align: center;
-    font-size: 1.5rem;
+    font-size: 1.4rem;
+    font-weight: 800;
     margin-bottom: 30px;
-    font-weight: 700;
+    color: $text-dark;
   }
-  .slider-track {
-    display: flex;
-    gap: 20px;
-    width: max-content;
-    animation: scroll 30s linear infinite;
-  }
-  .slide {
-    width: 300px;
-    height: 200px;
-    border-radius: 15px;
-    overflow: hidden;
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+  .slider-container {
+    width: 100%;
+    position: relative;
+    .slider-track {
+      display: flex;
+      gap: 20px;
+      width: max-content;
+      animation: scroll 50s linear infinite;
+      .slide {
+        width: 280px;
+        height: 180px;
+        border-radius: 10px;
+        overflow: hidden;
+        flex-shrink: 0;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform 0.4s;
+          &:hover {
+            transform: scale(1.05);
+          }
+        }
+      }
     }
   }
 }
@@ -479,166 +524,161 @@ $font-main: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Ne
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 1000;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(5px);
+  z-index: 9999;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
-  .modal-content {
-    background: #fff;
-    width: 100%;
-    max-width: 500px;
-    border-radius: 20px;
-    overflow: hidden;
-    position: relative;
-    animation: slideUp 0.3s ease;
-    .close-btn {
-      position: absolute;
-      top: 15px;
-      right: 15px;
-      width: 35px;
-      height: 35px;
-      border-radius: 50%;
-      background: rgba(0, 0, 0, 0.5);
-      color: #fff;
-      border: none;
-      cursor: pointer;
-      z-index: 5;
-    }
-    .modal-header {
-      height: 180px;
-      position: relative;
-      img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
-      .modal-cat-badge {
-        position: absolute;
-        bottom: 15px;
-        left: 20px;
-        background: $primary-color;
-        color: #fff;
-        padding: 5px 12px;
-        border-radius: 20px;
-        font-size: 0.8rem;
-        font-weight: 700;
-      }
-    }
-    .modal-body {
-      padding: 25px;
-      h2 {
-        font-size: 1.5rem;
-        margin-bottom: 20px;
-        color: $text-dark;
-      }
-      .detail-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 15px;
-        background: #f8f9fa;
-        padding: 15px;
-        border-radius: 15px;
-        margin-bottom: 20px;
-        .detail-item {
-          display: flex;
-          flex-direction: column;
-          .label {
-            font-size: 0.7rem;
-            color: $text-light;
-            text-transform: uppercase;
-            font-weight: 700;
-          }
-          .value {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: $text-dark;
-          }
-        }
-        .full-width {
-          grid-column: span 2;
-        }
-      }
-      .join-btn {
-        width: 100%;
-        padding: 15px;
-        background: $text-dark;
-        color: #fff;
-        border: none;
-        border-radius: 12px;
-        font-weight: 700;
-        cursor: pointer;
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-        &:hover {
-          background: $primary-color;
-        }
-        &.success {
-          background: #10b981;
-        }
-      }
-    }
-  }
 }
 
-// --- ADD MODAL ---
-.event-add-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 1050;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  .event-add-card {
-    background: #fff;
-    padding: 30px;
-    width: 90%;
-    max-width: 450px;
-    border-radius: 15px;
+.modal-content {
+  background: #fff;
+  width: 100%;
+  max-width: 600px;
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+
+  .close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 36px;
+    height: 36px;
+    background: rgba(0, 0, 0, 0.5);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s;
+    &:hover {
+      background: $primary-blue;
+      transform: rotate(90deg);
+    }
+  }
+
+  .modal-header {
+    height: 200px;
     position: relative;
-    .form-scroll {
-      max-height: 60vh;
-      overflow-y: auto;
-      padding-right: 5px;
-    }
-    .form-group {
-      margin-bottom: 15px;
-      label {
-        font-weight: 600;
-        display: block;
-        margin-bottom: 5px;
-        font-size: 0.9rem;
-      }
-      input,
-      select,
-      textarea {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-      }
-    }
-    .save-btn {
+    img {
       width: 100%;
-      background: $primary-color;
-      color: #fff;
-      padding: 12px;
+      height: 100%;
+      object-fit: cover;
+    }
+    .modal-cat-badge {
+      position: absolute;
+      bottom: 20px;
+      left: 30px;
+      padding: 6px 14px;
+      color: white;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+  }
+
+  .modal-body {
+    padding: 30px;
+    h2 {
+      font-size: 1.8rem;
+      margin-bottom: 24px;
+      color: $text-dark;
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -0.5px;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px 30px;
+      background: $bg-light;
+      padding: 24px;
+      border-radius: 12px;
+      margin-bottom: 25px;
+      border: 1px solid $border-color;
+
+      .detail-item {
+        display: flex;
+        flex-direction: column;
+        &.full-width {
+          grid-column: span 2;
+        }
+        .label {
+          font-size: 0.7rem;
+          font-weight: 700;
+          color: $text-light-gray;
+          text-transform: uppercase;
+          letter-spacing: 0.8px;
+          margin-bottom: 6px;
+          display: block;
+        }
+        .value {
+          font-size: 1rem;
+          font-weight: 600;
+          color: $text-dark;
+          line-height: 1.4;
+          display: block;
+        }
+      }
+    }
+
+    .divider {
+      height: 1px;
+      background: $border-color;
+      margin: 24px 0;
+    }
+    .description {
+      color: #475569;
+      line-height: 1.7;
+      margin-bottom: 30px;
+      font-size: 1rem;
+    }
+
+    .join-btn {
+      width: 100%;
+      padding: 14px;
+      background: $text-dark;
+      color: white;
       border: none;
       border-radius: 8px;
       font-weight: 700;
+      font-size: 1rem;
       cursor: pointer;
-    }
-    .close-btn {
-      position: absolute;
-      top: 10px;
-      right: 15px;
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      transition: 0.3s;
+
+      &:hover {
+        background: $primary-blue;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(37, 99, 235, 0.2);
+      }
+      &.success {
+        background: #10b981;
+        pointer-events: none;
+      }
+
+      // Giriş yapma uyarısı için özel stil
+      &.login-required {
+        background: transparent;
+        border: 2px solid $primary-blue;
+        color: $primary-blue;
+        &:hover {
+          background: $primary-blue;
+          color: white;
+        }
+      }
     }
   }
 }
@@ -670,36 +710,45 @@ $font-main: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Ne
   }
 }
 @keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
   100% {
     transform: rotate(360deg);
   }
 }
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+@media (max-width: 1200px) {
+  .events-grid {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
-
-// Mobil
+@media (max-width: 900px) {
+  .events-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
 @media (max-width: 768px) {
-  .hero-section {
-    height: 60vh;
+  .events-filter-menu .filter-btn {
+    display: block;
+    width: 100%;
+    margin: 8px 0;
   }
   .filter-bar-container {
-    padding: 0 20px;
     flex-direction: column;
     align-items: stretch;
+    .sort-group {
+      justify-content: space-between;
+      margin-top: 15px;
+    }
   }
+  .modal-content .modal-body .detail-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+@media (max-width: 600px) {
   .events-grid {
     grid-template-columns: 1fr;
-    padding: 0 20px 40px;
-  }
-  .hero-content .giant-text {
-    font-size: 3.5rem;
   }
 }

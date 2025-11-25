@@ -1,61 +1,44 @@
 <app-header></app-header>
 
-<!-- Page Banner (Eski koddan gelen yapı) -->
-<app-page-banner
-  [pageTitle]="'Ünides Projeleri'"
-  [backgroundImage]="'assets/images/page-title1.jpg'"
-></app-page-banner>
+<!-- HERO / HEADER ALANI -->
+<div class="page-spacer" (mousemove)="onHeroMouseMove($event)">
+  <div class="background-wrapper">
+    <div
+      class="interactive-blob"
+      [style.transform]="'translate(' + -heroMoveX + 'px, ' + -heroMoveY + 'px)'"
+    ></div>
+  </div>
 
-<!-- Yeni Tasarımın Entegre Edildiği Alan -->
-<div class="events-wrapper">
-  <!-- 1. HERO SECTION (Yeni Tasarım - Renkler Güncellendi) -->
-  <section class="hero-section" (mousemove)="onHeroMouseMove($event)">
-    <div class="hero-sticky">
-      <div
-        class="hero-background"
-        [style.transform]="'scale(' + heroScale + ')'"
-        [style.opacity]="heroOpacity"
-      >
-        <!-- Blob Rengi Kırmızı Tonlarına Güncellendi -->
-        <div
-          class="interactive-blob"
-          [style.transform]="'translate(' + -heroMoveX + 'px, ' + -heroMoveY + 'px)'"
-        ></div>
-        <div class="noise-overlay"></div>
-      </div>
+  <div class="container relative-content">
+    <h1 class="page-title">ÜNİDES <span class="highlight-text">ETKİNLİKLER</span></h1>
+    <p class="page-subtitle">
+      Kampüsün tüm renkleri tek bir platformda. Aktif olarak devam eden projelerimize katılabilir
+      veya gelecek etkinlikleri takvimine ekleyebilirsin.
+    </p>
+  </div>
 
-      <div class="hero-content">
-        <div class="text-wrapper">
-          <h1 class="giant-text" [style.transform]="'translateY(' + -scrollPosition * 0.2 + 'px)'">
-            ÜNİDES<br />
-            <span class="highlight-text">ETKİNLİKLER</span>
-          </h1>
-          <p class="subtitle">Kampüsün tüm renkleri tek bir platformda.</p>
-        </div>
+  <div class="scroll-indicator">
+    <span>Keşfet</span>
+    <div class="line"></div>
+  </div>
+</div>
 
-        <div class="scroll-indicator" *ngIf="showScrollIndicator">
-          <span>Keşfet</span>
-          <div class="line"></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 2. CONTENT SECTION -->
-  <section class="content-section">
-    <!-- Arama ve Filtreleme -->
+<!-- İÇERİK BÖLÜMÜ -->
+<section class="events-content-section">
+  <div class="container">
+    <!-- ARAMA -->
     <div class="search-container" #animItem>
       <div class="search-box">
         <span class="material-symbols-outlined search-icon">search</span>
         <input
           type="text"
           placeholder="Etkinlik, üniversite veya kulüp ara..."
-          [(ngModel)]="searchQuery"
-          (input)="applyFilters()"
+          (input)="onSearch($event)"
         />
       </div>
     </div>
 
+    <!-- ANA FİLTRELER -->
     <div class="events-filter-menu text-center mb-5" #animItem>
       <button
         class="filter-btn"
@@ -80,7 +63,7 @@
       </button>
     </div>
 
-    <!-- Kategori ve Sıralama Barı -->
+    <!-- DETAYLI FİLTRE & SIRALAMA BAR -->
     <div class="filter-bar-container" #animItem>
       <div class="filter-scroll">
         <button
@@ -94,34 +77,51 @@
       </div>
 
       <div class="sort-group">
+        <span class="sort-label">Sırala:</span>
         <button
           class="sort-btn"
           [class.active]="sortCriteria === 'date'"
           (click)="changeSortCriteria('date')"
         >
           Tarih
-          <span class="material-symbols-outlined icon-tiny" *ngIf="sortCriteria === 'date'">
-            {{ sortAscending ? 'arrow_upward' : 'arrow_downward' }}
-          </span>
+          <span class="material-symbols-outlined icon-tiny" *ngIf="sortCriteria === 'date'">{{
+            sortAscending ? 'arrow_upward' : 'arrow_downward'
+          }}</span>
         </button>
-
-        <button class="add-event-btn" (click)="openAddModal()">
-          <span class="material-symbols-outlined">add</span> Etkinlik Ekle
+        <button
+          class="sort-btn"
+          [class.active]="sortCriteria === 'name'"
+          (click)="changeSortCriteria('name')"
+        >
+          İsim
+          <span class="material-symbols-outlined icon-tiny" *ngIf="sortCriteria === 'name'">{{
+            sortAscending ? 'arrow_upward' : 'arrow_downward'
+          }}</span>
         </button>
       </div>
     </div>
 
-    <!-- Etkinlik Başlığı -->
+    <!-- SECTION HEADER -->
     <div class="section-header" #animItem>
-      <h2>Güncel <span class="highlight">Projeler</span></h2>
-      <p>{{ activeCategory === 'Tümü' ? 'Tüm kategoriler' : activeCategory }} listeleniyor.</p>
+      <h2>Yaklaşan <span class="highlight">Etkinlikler</span></h2>
+      <p>{{ activeCategory }} kategorisi listeleniyor.</p>
     </div>
 
-    <!-- GRID SECTION (Yeni Tasarım Kartları) -->
-    <div class="col-12 text-center" *ngIf="displayedEvents.length === 0">
-      <p class="alert alert-warning">Bu kriterlere uygun proje bulunamadı.</p>
+    <!-- BOŞ DURUM -->
+    <div class="col-12 text-center" *ngIf="displayedEvents.length === 0 && !isLoadingMore">
+      <div class="empty-state">
+        <span
+          class="material-symbols-outlined"
+          style="font-size: 48px; color: #cbd5e1; margin-bottom: 10px"
+          >search_off</span
+        >
+        <p class="alert alert-warning" style="color: #64748b">
+          Bu kriterlere uygun proje bulunmuyor.
+        </p>
+      </div>
     </div>
 
+    <!-- GRID -->
     <div class="events-grid" #animItem [@listAnimation]="displayedEvents.length">
       <div
         class="event-card"
@@ -133,17 +133,16 @@
       >
         <div class="card-image">
           <img
-            [src]="event.image"
+            [src]="event.imageUrl"
             [alt]="event.title"
             loading="lazy"
             onerror="this.src='assets/images/page-title1.jpg'"
           />
-          <div class="card-overlay"></div>
           <div class="date-badge">
-            {{ event.startDate | date : 'd MMM' }}
+            {{ event.date }}
           </div>
           <div class="tap-hint">
-            <span class="material-symbols-outlined">touch_app</span> İncele
+            <span class="material-symbols-outlined">visibility</span> İncele
           </div>
         </div>
 
@@ -157,7 +156,7 @@
           <p class="short-desc">{{ event.description }}</p>
 
           <div class="bottom-meta">
-            <span class="category">{{ event.category }}</span>
+            <span class="category" [style.color]="event.color">{{ event.category }}</span>
             <div class="mini-location">
               <span class="material-symbols-outlined">location_on</span>
               {{ event.location }}
@@ -167,7 +166,7 @@
       </div>
     </div>
 
-    <!-- Load More Butonu -->
+    <!-- YÜKLEME BUTONU -->
     <div class="load-more-container" *ngIf="hasMoreData && displayedEvents.length > 0">
       <button class="load-more-btn" (click)="loadMoreEvents()" [disabled]="isLoadingMore">
         <span *ngIf="!isLoadingMore">Daha Fazla Göster</span>
@@ -178,38 +177,43 @@
       </button>
     </div>
 
-    <!-- Slider Section (Opsiyonel görsel şölen) -->
+    <div class="end-of-list" *ngIf="!hasMoreData && displayedEvents.length > 0">
+      Tüm etkinlikleri görüntülediniz 🎉
+    </div>
+
+    <!-- SLIDER -->
     <div class="slider-section" #animItem>
-      <h3 class="slider-title">Geçmiş Etkinliklerden Kareler</h3>
+      <h3 class="slider-title">Geçmişten Kareler</h3>
       <div class="slider-container">
         <div class="slider-track">
           <div class="slide" *ngFor="let img of sliderImages">
             <img [src]="img" alt="Etkinlik Karesi" loading="lazy" />
           </div>
-          <!-- Infinite loop için kopya -->
           <div class="slide" *ngFor="let img of sliderImages">
             <img [src]="img" alt="Etkinlik Karesi" loading="lazy" />
           </div>
         </div>
       </div>
     </div>
-  </section>
-</div>
+  </div>
+</section>
 
-<!-- MODAL: ETKİNLİK DETAY -->
-<div class="modal-backdrop" *ngIf="selectedEvent" (click)="closeDetail()">
+<app-footer></app-footer>
+
+<!-- DETAY MODALI (DÜZENLENDİ) -->
+<div class="modal-backdrop" *ngIf="selectedEvent" (click)="closeModal()">
   <div class="modal-content" (click)="$event.stopPropagation()">
-    <button class="close-btn" (click)="closeDetail()">
+    <button class="close-btn" (click)="closeModal()">
       <span class="material-symbols-outlined">close</span>
     </button>
 
     <div class="modal-header">
       <img
-        [src]="selectedEvent.image"
+        [src]="selectedEvent.imageUrl"
         class="modal-cover"
         onerror="this.src='assets/images/page-title1.jpg'"
       />
-      <span class="modal-cat-badge">
+      <span class="modal-cat-badge" [style.background]="selectedEvent.color">
         {{ selectedEvent.category }}
       </span>
     </div>
@@ -219,86 +223,57 @@
 
       <div class="detail-grid">
         <div class="detail-item">
-          <span class="label">Üniversite</span>
+          <span class="label">ÜNİVERSİTE</span>
           <span class="value">{{ selectedEvent.university }}</span>
         </div>
         <div class="detail-item">
-          <span class="label">Kulüp</span>
+          <span class="label">DÖNEM</span>
+          <span class="value">{{ selectedEvent.semester }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">KULÜP</span>
           <span class="value">{{ selectedEvent.club }}</span>
         </div>
         <div class="detail-item">
-          <span class="label">Tarih</span>
-          <span class="value">{{ selectedEvent.startDate | date : 'fullDate' }}</span>
+          <span class="label">TARİH & SAAT</span>
+          <span class="value">{{ selectedEvent.date }} | {{ selectedEvent.time }}</span>
         </div>
         <div class="detail-item">
-          <span class="label">Konum</span>
+          <span class="label">KONUM</span>
           <span class="value">{{ selectedEvent.location }}</span>
         </div>
         <div class="detail-item full-width">
-          <span class="label">Kontenjan Durumu</span>
+          <span class="label">KONTENJAN</span>
           <span class="value">{{ selectedEvent.quota }} Kişilik Yer Var</span>
         </div>
       </div>
 
       <div class="divider"></div>
+
       <p class="description">{{ selectedEvent.description }}</p>
 
-      <button class="join-btn" [class.success]="isJoined" (click)="joinEvent()">
-        <span class="material-symbols-outlined" *ngIf="!isJoined">how_to_reg</span>
-        <span class="material-symbols-outlined" *ngIf="isJoined">check_circle</span>
-        {{ isJoined ? 'BAŞVURU ALINDI' : 'ETKİNLİĞE KATIL' }}
+      <!-- YENİ BUTON MANTIĞI -->
+      <button
+        class="join-btn"
+        [class.success]="isJoined"
+        [class.login-required]="!isLoggedIn"
+        (click)="handleJoinClick()"
+      >
+        <!-- İkonlar -->
+        <span class="material-symbols-outlined" *ngIf="isLoggedIn && !isJoined">how_to_reg</span>
+        <span class="material-symbols-outlined" *ngIf="isLoggedIn && isJoined">check_circle</span>
+        <span class="material-symbols-outlined" *ngIf="!isLoggedIn">login</span>
+
+        <!-- Yazılar -->
+        <ng-container *ngIf="isLoggedIn">
+          {{ isJoined ? 'KAYIT ALINDI' : 'ETKİNLİĞE KATIL' }}
+        </ng-container>
+        <ng-container *ngIf="!isLoggedIn"> Önce Giriş Yapmalısın </ng-container>
       </button>
     </div>
   </div>
 </div>
 
-<!-- MODAL: ETKİNLİK EKLE -->
-<div class="event-add-overlay" *ngIf="showAddModal" (click)="closeAddModal()">
-  <div class="event-add-card" (click)="$event.stopPropagation()">
-    <button type="button" class="close-btn" (click)="closeAddModal()">&times;</button>
-    <h2>Yeni Etkinlik Ekle</h2>
-
-    <div class="form-scroll">
-      <div class="form-group">
-        <label>Etkinlik Başlığı</label>
-        <input type="text" [(ngModel)]="newProject.title" placeholder="Örn: Teknoloji Zirvesi" />
-      </div>
-
-      <div class="form-group">
-        <label>Durum</label>
-        <select [(ngModel)]="newProject.status">
-          <option value="active">Başlayan</option>
-          <option value="upcoming">Başlayacak</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>Kategori</label>
-        <select [(ngModel)]="newProject.category">
-          <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>Açıklama</label>
-        <textarea
-          rows="3"
-          [(ngModel)]="newProject.description"
-          placeholder="Açıklama giriniz..."
-        ></textarea>
-      </div>
-
-      <div class="form-group">
-        <label>Görsel Seç</label>
-        <input type="file" (change)="onFileSelected($event)" />
-      </div>
-    </div>
-
-    <button class="save-btn" (click)="saveProject()">Kaydet</button>
-  </div>
-</div>
-
-<app-footer></app-footer>
 <link
   rel="stylesheet"
   href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
