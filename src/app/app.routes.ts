@@ -48,6 +48,9 @@ import { CommunitiesPageComponent } from './pages/communities-page/communities-p
 // Etkinlikler Component Importu
 import { EventsComponent } from './pages/events-page/events.component';
 
+import { StudentDashboardComponent } from './pages/student-dashboard/student-dashboard.component';
+import { EditProfileComponent } from './pages/edit-profile/edit-profile.component';
+
 
 export const routes: Routes = [
     {path: '', component: HomeComponent},
@@ -73,6 +76,8 @@ export const routes: Routes = [
     {path: 'faq', component: FaqPageComponent},
     {path: 'login', component: LoginPageComponent},
     {path: 'register', component: RegisterPageComponent},
+    { path: 'hesabim', component: StudentDashboardComponent },
+    { path: 'hesabim/profil', component: EditProfileComponent },
     // {path: 'shop', component: ShopPageComponent},
     // {path: 'cart', component: CartPageComponent},
     // {path: 'checkout', component: CheckoutPageComponent},

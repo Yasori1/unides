@@ -1,0 +1,104 @@
+<app-header />
+
+<section class="edit-profile-section">
+  <div class="container fade-in-up">
+    
+    <div class="page-header">
+      <button class="back-btn" (click)="goBack()">
+        <span class="arrow-icon">←</span> Vazgeç
+      </button>
+      <h2>Profilini Düzenle ✏️</h2>
+    </div>
+
+    <div class="glass-card">
+      
+      <div class="avatar-section">
+        <div class="avatar-wrapper">
+          <div class="avatar-image" 
+               [style.backgroundImage]="'url(' + (avatarPreview || 'https://i.pravatar.cc/150?img=5') + ')'">
+          </div>
+          <label class="upload-overlay">
+            <span class="icon">📷</span>
+            <span class="text">Değiştir</span>
+            <input type="file" accept="image/*" (change)="onFileSelected($event)" hidden />
+          </label>
+        </div>
+        <p class="avatar-hint">Önerilen: 500x500px JPG veya PNG</p>
+      </div>
+
+      <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="modern-form">
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="fullName">Ad Soyad</label>
+            <input id="fullName" type="text" formControlName="fullName" placeholder="Adınız Soyadınız"
+              [class.error-border]="profileForm.get('fullName')?.invalid && profileForm.get('fullName')?.touched" />
+            <small class="error-msg" *ngIf="profileForm.get('fullName')?.invalid && profileForm.get('fullName')?.touched">
+              Ad soyad en az 3 karakter olmalı.
+            </small>
+          </div>
+
+          <div class="form-group">
+            <label for="email">Üniversite E-posta</label>
+            <input id="email" type="email" formControlName="email" readonly class="readonly-input" />
+            <small class="hint-msg">E-posta adresi değiştirilemez.</small>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="studentId">Öğrenci No</label>
+            <input id="studentId" type="text" formControlName="studentId" readonly class="readonly-input" />
+          </div>
+          
+          <div class="form-group">
+            <label for="program">Program</label>
+            <div class="select-wrapper">
+              <select id="program" formControlName="program">
+                <option value="Ön Lisans">Ön Lisans</option>
+                <option value="Lisans">Lisans</option>
+                <option value="Yüksek Lisans">Yüksek Lisans</option>
+                <option value="Doktora">Doktora</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="department">Bölüm</label>
+          <input id="department" type="text" formControlName="department" />
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="phone">Telefon (Opsiyonel)</label>
+            <input id="phone" type="tel" formControlName="phone" placeholder="0555 555 55 55" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="bio">Hakkımda <span>(Profilinde görünür)</span></label>
+          <textarea id="bio" formControlName="bio" rows="3" placeholder="Kendinden kısaca bahset..."></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="save-btn" 
+                  [disabled]="profileForm.invalid || isSaving"
+                  [ngClass]="{'loading': isSaving, 'success': saveSuccess}">
+            
+            <span *ngIf="!isSaving && !saveSuccess">Değişiklikleri Kaydet</span>
+            
+            <span *ngIf="isSaving" class="loader-wrapper">
+              <span class="spinner"></span> Kaydediliyor...
+            </span>
+            
+            <span *ngIf="saveSuccess">🎉 Başarıyla Kaydedildi!</span>
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</section>
+
+<app-footer />

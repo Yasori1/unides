@@ -1,0 +1,72 @@
+<app-header />
+
+<section class="dashboard-section">
+  <div class="container">
+    
+    <div class="hero-banner fade-in-up">
+      <div class="hero-content">
+        <div class="text-group">
+          <h1>Selam, {{ student.name.split(' ')[0] }}! 👋</h1>
+          <p>Bugün kampüste neler yapmak istersin?</p>
+        </div>
+        <div class="avatar-wrapper">
+          <img [src]="student.avatar" alt="Profil" />
+          <span class="status-dot"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-grid">
+      
+      <div class="left-column fade-in-up delay-1">
+        
+        <div class="section-title">Hızlı Erişim</div>
+        <div class="quick-links-grid">
+          <a *ngFor="let link of quickLinks" [routerLink]="link.link" class="bento-card">
+            <div class="emoji-icon">{{ link.emoji }}</div>
+            <span>{{ link.title }}</span>
+          </a>
+        </div>
+
+        <div class="profile-mini-card">
+          <div class="info-row">
+            <span class="label">Bölüm</span>
+            <span class="value">{{ student.department }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Numara</span>
+            <span class="value">{{ student.studentId }}</span>
+          </div>
+          <a routerLink="/hesabim/profil" class="details-link">Tüm Detaylar →</a>
+        </div>
+      </div>
+
+      <div class="right-column fade-in-up delay-2">
+        <div class="section-title">
+          Bildirimler 
+          <span class="badge" *ngIf="notifications.length > 0">{{ notifications.length }}</span>
+        </div>
+        
+        <div class="notification-list">
+          <div *ngFor="let notif of notifications" 
+               class="notif-card" 
+               [class.read]="notif.read"
+               (click)="toggleRead(notif.id)">
+            <div class="notif-indicator" [class.active]="!notif.read"></div>
+            <div class="notif-content">
+              <p>{{ notif.text }}</p>
+              <small>{{ notif.time }}</small>
+            </div>
+          </div>
+          
+          <div class="empty-state" *ngIf="notifications.length === 0">
+            <p>Hiç yeni bildirimin yok, her şey yolunda! 🌞</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<app-footer />
