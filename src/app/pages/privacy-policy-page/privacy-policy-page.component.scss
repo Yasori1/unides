@@ -1,160 +1,439 @@
-.privacy-policy-content {
-    h6 {
-        font-size: 20px;
-        margin-bottom: 15px;
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
-        &:not(:first-child) {
-            margin-top: 30px;
-        }
+// --- RENK PALETİ ---
+$primary-blue: #2563eb;
+$dark-blue: #1e3a8a;
+$text-dark: #0f172a;
+$text-gray: #64748b;
+$bg-light: #f8fafc;
+$white: #ffffff;
+$border-color: #e2e8f0;
+// Gönderilen koddaki bg-muted/70 karşılığı (yaklaşık)
+$card-bg: rgba(241, 245, 249, 0.7);
+
+:host {
+  display: block;
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+}
+
+// --- PAGE SPACER ---
+.page-spacer {
+  padding-top: 140px;
+  padding-bottom: 70px;
+  background-color: $bg-light;
+  text-align: center;
+  border-bottom: 1px solid $border-color;
+  position: relative;
+  overflow: hidden;
+  .container {
+    position: relative;
+    z-index: 2;
+  }
+  .background-wrapper {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+    .interactive-blob {
+      position: absolute;
+      width: 450px;
+      height: 450px;
+      top: 50%;
+      left: 50%;
+      margin-top: -225px;
+      margin-left: -225px;
+      background: radial-gradient(
+        circle,
+        rgba(37, 99, 235, 0.12) 0%,
+        rgba(6, 182, 212, 0.08) 40%,
+        rgba(255, 255, 255, 0) 70%
+      );
+      filter: blur(70px);
+      border-radius: 50%;
+      transition: transform 0.1s ease-out;
     }
-    h5 {
-        font-size: 22px;
-        margin-bottom: 15px;
-
-        &:not(:first-child) {
-            margin-top: 30px;
-        }
+    .noise-overlay {
+      position: absolute;
+      inset: 0;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      pointer-events: none;
     }
-    h4 {
-        font-size: 24px;
-        margin-bottom: 15px;
-
-        &:not(:first-child) {
-            margin-top: 30px;
-        }
+  }
+  .page-title {
+    font-size: 2.8rem;
+    font-weight: 800;
+    color: $text-dark;
+    margin-bottom: 12px;
+    letter-spacing: -1px;
+    line-height: 1.1;
+    .highlight-text {
+      color: transparent;
+      -webkit-text-stroke: 1.5px $primary-blue;
+      display: inline-block;
+      margin-left: 10px;
     }
-    h3 {
-        font-size: 26px;
-        margin-bottom: 15px;
+  }
+  .page-subtitle {
+    font-size: 1.05rem;
+    color: $text-gray;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+    font-weight: 400;
+  }
+  .scroll-indicator {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: $text-gray;
+    font-weight: 700;
+    opacity: 0.7;
+    z-index: 3;
+    .line {
+      width: 2px;
+      height: 25px;
+      background: linear-gradient(to bottom, $primary-blue, transparent);
+      animation: dropLine 2s infinite;
+    }
+  }
+}
 
-        &:not(:first-child) {
-            margin-top: 30px;
-        }
+// --- GRID SECTION (Yığın Değil, Izgara) ---
+.privacy-grid-section {
+  padding: 80px 0 120px;
+  background: $white;
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .cards-grid {
+    display: grid;
+    // Responsive Grid: Ekran küçülünce kartlar aşağı kayar
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px; // Kartlar arası boşluk
+    padding: 20px;
+  }
+}
+
+// --- DISPLAY CARD STYLING (Gönderilen Kodun Uyarlaması) ---
+.display-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 220px; // Sabit yükseklik (h-36'dan biraz büyük, içerik sığsın diye)
+  width: 100%;
+
+  // Hafif Skew (İsteğe bağlı, çok fazla gelirse 0 yapılabilir)
+  transform: skewY(0deg);
+
+  user-select: none;
+  border-radius: 12px; // rounded-xl
+  border: 2px solid $border-color; // border-2
+  background-color: $card-bg; // bg-muted/70
+  backdrop-filter: blur(4px); // backdrop-blur-sm
+
+  padding: 20px 24px;
+  transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1); // duration-700
+  cursor: pointer;
+  overflow: hidden;
+
+  // Gradient Overlay (Gönderilen koddaki after:...)
+  &::after {
+    content: '';
+    position: absolute;
+    top: -5%;
+    right: -4px;
+    height: 110%;
+    width: 90%;
+    background: linear-gradient(to left, $white 0%, transparent 100%);
+    pointer-events: none;
+    opacity: 0.6;
+    transition: opacity 0.7s ease;
+  }
+
+  // Hover Efektleri
+  &:hover {
+    transform: translateY(-10px); // hover:-translate-y-10
+    border-color: rgba($primary-blue, 0.3); // hover:border-white/20
+    background-color: #f1f5f9; // hover:bg-muted
+    box-shadow: 0 20px 40px rgba(37, 99, 235, 0.15);
+
+    &::after {
+      opacity: 0;
+    } // Gradient kaybolur
+
+    .icon-box {
+      background: $primary-blue;
+      color: $white;
+      transform: scale(1.1);
+    }
+  }
+
+  // --- İÇERİK ---
+  .card-header {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+
+    .icon-box {
+      width: 48px;
+      height: 48px;
+      background: rgba($primary-blue, 0.1);
+      color: $primary-blue;
+      border-radius: 50%; // rounded-full
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      span {
+        font-size: 1.5rem;
+      }
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: $text-dark;
+      margin: 0;
+      line-height: 1.2;
+    }
+  }
+
+  .card-desc {
+    position: relative;
+    z-index: 10;
+    font-size: 0.95rem;
+    color: $text-gray;
+    line-height: 1.5;
+    // Çok satırlı taşma kontrolü
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin: 15px 0;
+  }
+
+  .card-date {
+    position: relative;
+    z-index: 10;
+    font-size: 0.85rem;
+    color: lighten($text-gray, 10%); // text-muted-foreground
+    margin-top: auto;
+    font-weight: 500;
+  }
+}
+
+// --- MODAL (Aynı kaldı) ---
+.policy-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.policy-modal-content {
+  background: $white;
+  width: 100%;
+  max-width: 600px;
+  max-height: 85vh;
+  border-radius: 24px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  animation: scaleUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+
+  .close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: $bg-light;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+    z-index: 10;
+    &:hover {
+      background: #fee2e2;
+      color: #ef4444;
+    }
+  }
+
+  .modal-header {
+    padding: 40px 40px 20px;
+    background: linear-gradient(to bottom right, $bg-light, $white);
+    border-bottom: 1px solid $border-color;
+    .modal-icon {
+      width: 60px;
+      height: 60px;
+      background: $primary-blue;
+      color: white;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      span {
+        font-size: 2rem;
+      }
     }
     h2 {
-        font-size: 28px;
-        margin-bottom: 15px;
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: $text-dark;
+      margin: 0;
+    }
+  }
 
-        &:not(:first-child) {
-            margin-top: 30px;
-        }
+  .modal-body {
+    padding: 30px 40px;
+    overflow-y: auto;
+    flex-grow: 1;
+    ::ng-deep h3 {
+      font-size: 1.1rem;
+      color: $primary-blue;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      font-weight: 700;
     }
-    h1 {
-        font-size: 30px;
-        margin-bottom: 15px;
+    ::ng-deep ul {
+      padding-left: 20px;
+      margin-bottom: 15px;
+      li {
+        margin-bottom: 8px;
+        color: $text-gray;
+        line-height: 1.6;
+        &::marker {
+          color: $primary-blue;
+        }
+      }
+    }
+    ::ng-deep p {
+      margin-bottom: 15px;
+      color: $text-gray;
+      line-height: 1.7;
+    }
+    ::ng-deep .highlight {
+      background: #eff6ff;
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 4px solid $primary-blue;
+      color: $dark-blue;
+    }
+    ::ng-deep .contact {
+      background: $bg-light;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid $border-color;
+      font-weight: 600;
+    }
+  }
 
-        &:not(:first-child) {
-            margin-top: 30px;
-        }
+  .modal-footer {
+    padding: 20px 40px;
+    border-top: 1px solid $border-color;
+    background: $bg-light;
+    text-align: right;
+    .btn-confirm {
+      background: $text-dark;
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+      &:hover {
+        background: $primary-blue;
+        transform: translateY(-2px);
+      }
     }
-    strong {
-        color: var(--blackColor) !important;
-    }
-    p {
-        a {
-            color: var(--primaryColor1);
-
-            &:hover {
-                text-decoration: underline;
-            }
-        }
-    }
-    ul {
-        li {
-            color: var(--bodyColor);
-            margin-bottom: 12px;
-
-            a {
-                color: var(--primaryColor1);
-    
-                &:hover {
-                    text-decoration: underline;
-                }
-            }
-            &:last-child {
-                margin-bottom: 0;
-            }
-        }
-    }
-    ol {
-        li {
-            color: var(--bodyColor);
-            margin-bottom: 12px;
-
-            a {
-                color: var(--primaryColor1);
-    
-                &:hover {
-                    text-decoration: underline;
-                }
-            }
-            &:last-child {
-                margin-bottom: 0;
-            }
-        }
-    }
+  }
 }
 
-/* Max width 767px */
-@media only screen and (max-width: 767px) {
-
-    .privacy-policy-content {
-        h6 {
-            font-size: 16px;
-        }
-        h5 {
-            font-size: 17px;
-        }
-        h4 {
-            font-size: 18px;
-        }
-        h3 {
-            font-size: 19px;
-        }
-        h2 {
-            font-size: 20px;
-        }
-        h1 {
-            font-size: 21px;
-        }
-    }
-
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes scaleUp {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+@keyframes dropLine {
+  0% {
+    transform: scaleY(0);
+    transform-origin: top;
+  }
+  50% {
+    transform: scaleY(1);
+    transform-origin: top;
+  }
+  51% {
+    transform: scaleY(1);
+    transform-origin: bottom;
+  }
+  100% {
+    transform: scaleY(0);
+    transform-origin: bottom;
+  }
 }
 
-/* Min width 576px to Max width 767px */
-@media only screen and (min-width: 576px) and (max-width: 767px) {}
-
-/* Min width 768px to Max width 991px */
-@media only screen and (min-width: 768px) and (max-width: 991px) {
-
-    .privacy-policy-content {
-        h6 {
-            font-size: 18px;
-        }
-        h5 {
-            font-size: 19px;
-        }
-        h4 {
-            font-size: 20px;
-        }
-        h3 {
-            font-size: 21px;
-        }
-        h2 {
-            font-size: 22px;
-        }
-        h1 {
-            font-size: 23px;
-        }
+@media (max-width: 768px) {
+  .page-spacer {
+    padding-top: 120px;
+    .page-title {
+      font-size: 2rem;
     }
-
+  }
+  .cards-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .policy-modal-content {
+    max-height: 90vh;
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+  }
 }
-
-/* Min width 992px to Max width 1199px */
-@media only screen and (min-width: 992px) and (max-width: 1199px) {}
-
-/* Min width 1200px to Max width 1399px */
-@media only screen and (min-width: 1200px) and (max-width: 1399px) {}
-
-/* Min width 1550px */
-@media only screen and (min-width: 1550px) {}

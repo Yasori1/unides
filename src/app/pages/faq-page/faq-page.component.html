@@ -1,12 +1,182 @@
-<app-header />
+<app-header></app-header>
 
-<app-page-banner
-    [pageTitle]="'Frequently Asked Questions'"
-    [backgroundImage]="'images/page-title3.jpg'"
+<!-- SAYFA BANNERI (Diğer sayfalarla uyumlu standart başlık) -->
+<div class="page-spacer" (mousemove)="onHeroMouseMove($event)">
+  <div class="background-wrapper">
+    <div
+      class="interactive-blob"
+      [style.transform]="'translate(' + -heroMoveX + 'px, ' + -heroMoveY + 'px)'"
+    ></div>
+    <div class="noise-overlay"></div>
+  </div>
+
+  <div class="container relative-content">
+    <h1 class="page-title">ÜNİDES <span class="highlight-text">YARDIM MERKEZİ</span></h1>
+    <p class="page-subtitle">
+      Aklınıza takılan tüm soruların cevapları, kullanım rehberleri ve destek dökümanları burada.
+    </p>
+  </div>
+
+  <div class="scroll-indicator">
+    <span>Aşağı Kaydır</span>
+    <div class="line"></div>
+  </div>
+</div>
+
+<!-- FAQ İÇERİK ALANI -->
+<div class="faq-page-wrapper">
+  <!-- FAQ ÖZEL ARAMA & HERO ALANI -->
+  <section class="hero-section" (mousemove)="onHeroMouseMove($event)">
+    <div class="hero-bg">
+      <!-- Bannerdaki blob ile çakışmaması için opacity düşürülebilir veya farklı renk kullanılabilir -->
+      <div
+        class="blob"
+        [style.transform]="'translate(' + -heroMoveX + 'px, ' + -heroMoveY + 'px)'"
+      ></div>
+      <div class="noise"></div>
+    </div>
+
+    <div class="floaters-container">
+      <div
+        class="floater f1"
+        [style.transform]="'translate(' + heroMoveX * 0.8 + 'px, ' + heroMoveY * 0.8 + 'px)'"
+      >
+        <div class="icon-bubble">?</div>
+      </div>
+      <div
+        class="floater f2"
+        [style.transform]="'translate(' + heroMoveX * -0.5 + 'px, ' + heroMoveY * -0.5 + 'px)'"
+      >
+        <div class="icon-bubble">💡</div>
+      </div>
+      <div
+        class="floater f3"
+        [style.transform]="'translate(' + heroMoveX * 0.4 + 'px, ' + heroMoveY * 0.4 + 'px)'"
+      >
+        <div class="icon-bubble">💬</div>
+      </div>
+    </div>
+
+    <div class="container hero-content" #animItem>
+      <div class="badge">Destek Portalı</div>
+      <h1>
+        Nasıl Yardımcı <br />
+        <span class="highlight">Olabiliriz?</span>
+      </h1>
+
+      <div class="search-wrapper">
+        <span class="material-symbols-outlined search-icon">search</span>
+        <input
+          type="text"
+          placeholder="Bir soru veya anahtar kelime arayın..."
+          [(ngModel)]="searchText"
+          (input)="filterFaq()"
+        />
+        <button class="search-btn">
+          <span class="material-symbols-outlined">arrow_forward</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- İÇERİK VE SIDEBAR -->
+  <section class="content-section">
+    <div class="container layout-grid">
+      <!-- Yan Menü -->
+      <aside class="sidebar" #animItem>
+        <div class="sidebar-inner">
+          <h3>Kategoriler</h3>
+          <nav>
+            <button
+              *ngFor="let cat of filteredCategories"
+              [class.active]="activeCategory === cat.id"
+              (click)="scrollToCategory(cat.id)"
+            >
+              <span class="material-symbols-outlined icon">{{ cat.icon }}</span>
+              {{ cat.title }}
+            </button>
+          </nav>
+
+          <div class="support-mini">
+            <p>Cevabı bulamadınız mı?</p>
+            <a href="mailto:unidesbilgi@gsb.gov.tr">Bize Yazın →</a>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Akordiyon Listesi -->
+      <div class="faq-content">
+        <div class="no-results" *ngIf="filteredCategories.length === 0">
+          <span class="material-symbols-outlined">search_off</span>
+          <p>Aradığınız kriterlere uygun sonuç bulunamadı.</p>
+        </div>
+
+        <div
+          class="category-block"
+          *ngFor="let cat of filteredCategories; let cIndex = index"
+          [id]="cat.id"
+          #animItem
+        >
+          <h2 class="cat-title">
+            <div class="title-icon">
+              <span class="material-symbols-outlined">{{ cat.icon }}</span>
+            </div>
+            {{ cat.title }}
+          </h2>
+
+          <div class="accordion-list">
+            <div
+              class="accordion-item"
+              *ngFor="let item of cat.items; let qIndex = index"
+              [class.open]="item.isOpen"
+              (click)="toggleQuestion(cIndex, qIndex)"
+            >
+              <div class="accordion-header">
+                <span class="question-text">{{ item.question }}</span>
+                <div class="icon-wrapper">
+                  <span class="material-symbols-outlined toggle-icon">expand_more</span>
+                </div>
+              </div>
+
+              <div class="accordion-body">
+                <div class="answer-content" [innerHTML]="item.answer"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DOKÜMANLAR -->
+  <section class="docs-section">
+    <div class="container">
+      <div class="docs-header" #animItem>
+        <h2>Faydalı Dokümanlar</h2>
+        <p>Topluluk Başkanları İçin Kaynaklar</p>
+      </div>
+
+      <div class="docs-grid">
+        <div class="doc-card" *ngFor="let doc of documents" #animItem>
+          <div class="doc-icon-box">
+            <span class="material-symbols-outlined">{{ doc.icon }}</span>
+          </div>
+          <div class="doc-info">
+            <h4>{{ doc.title }}</h4>
+            <span class="file-type">{{ doc.type }}</span>
+          </div>
+          <button class="download-btn" (click)="downloadFile(doc.url)">
+            <span class="material-symbols-outlined">download</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<app-footer></app-footer>
+
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
 />
-
-<app-faq />
-
-<app-partners />
-
-<app-footer />

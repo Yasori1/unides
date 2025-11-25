@@ -1,151 +1,76 @@
-<app-header />
+<app-header></app-header>
 
-<app-page-banner [pageTitle]="'Gizlilik Sözleşmesi'" [backgroundImage]="'images/titles/uni-1.png'" />
+<!-- BANNER -->
+<div class="page-spacer" (mousemove)="onHeroMouseMove($event)">
+  <div class="background-wrapper">
+    <div
+      class="interactive-blob"
+      [style.transform]="'translate(' + -heroMoveX + 'px, ' + -heroMoveY + 'px)'"
+    ></div>
+    <div class="noise-overlay"></div>
+  </div>
 
-<!-- Privacy Policy -->
-<div class="privacy-policy-area ptb-100">
+  <div class="container relative-content">
+    <h1 class="page-title">ÜNİDES <span class="highlight-text">GİZLİLİK POLİTİKASI</span></h1>
+    <p class="page-subtitle">Şeffaflık ilkemizdir. Verilerinizi nasıl koruduğumuzu keşfedin.</p>
+  </div>
+
+  <div class="scroll-indicator">
+    <span>İncele</span>
+    <div class="line"></div>
+  </div>
+</div>
+
+<!-- KARTLAR BÖLÜMÜ (GRID) -->
+<section class="privacy-grid-section">
   <div class="container">
-    <div class="privacy-policy-content">
-      <p><em>Güncellenme Tarihi: 20.11.2025</em></p>
+    <div class="cards-grid">
+      <!-- DÖNGÜ İLE KARTLARI OLUŞTURUYORUZ -->
+      <div class="display-card" *ngFor="let item of policyItems" (click)="openCard(item)">
+        <!-- Kart Üstü (Header) -->
+        <div class="card-header">
+          <div class="icon-box">
+            <span class="material-symbols-outlined">{{ item.icon }}</span>
+          </div>
+          <h3 class="card-title">{{ item.title }}</h3>
+        </div>
 
-      <p>
-        Bu Gizlilik Politikası, Üniversite Topluluğuna (“Topluluk”) katıldığınızda bilgilerinizin nasıl toplandığını,
-        kullanıldığını, paylaşıldığını ve korunduğunu açıklar. Topluluk platformunu, web sitesini, mobil uygulamasını
-        veya ilgili hizmetleri (“Hizmetler”) kullanarak bu politikayı kabul etmiş olursunuz.
-      </p>
+        <!-- Kart Açıklaması -->
+        <p class="card-desc">{{ item.description }}</p>
 
-      <hr>
+        <!-- Tarih -->
+        <p class="card-date">{{ item.date }}</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-      <h2>1. Topladığımız Bilgiler</h2>
+<!-- DETAY MODALI -->
+<div class="policy-modal-backdrop" *ngIf="isModalOpen" (click)="closeCard()">
+  <div class="policy-modal-content" (click)="$event.stopPropagation()">
+    <button class="close-btn" (click)="closeCard()">
+      <span class="material-symbols-outlined">close</span>
+    </button>
 
-      <h3>1.1 Kişisel Bilgiler</h3>
-      <p>Topluluğa kaydolduğunuzda veya etkileşimde bulunduğunuzda şu verileri toplayabiliriz:</p>
-      <ul>
-        <li>Ad ve soyadı</li>
-        <li>Üniversite e-posta adresi</li>
-        <li>Öğrenci veya personel numarası</li>
-        <li>Profil bilgileri (bölüm, program, rol)</li>
-        <li>Sağlamayı tercih ettiğiniz iletişim bilgileri</li>
-        <li>Gönüllü olarak paylaştığınız bilgiler (gönderiler, mesajlar, dosyalar, yorumlar)</li>
-      </ul>
+    <div class="modal-header" *ngIf="selectedPolicy">
+      <div class="modal-icon">
+        <span class="material-symbols-outlined">{{ selectedPolicy.icon }}</span>
+      </div>
+      <h2>{{ selectedPolicy.title }}</h2>
+    </div>
 
-      <h3>1.2 Otomatik Toplanan Veriler</h3>
-      <ul>
-        <li>Cihaz bilgileri (tarayıcı türü, işletim sistemi)</li>
-        <li>IP adresi</li>
-        <li>Kullanım verileri (ziyaret edilen sayfalar, tıklamalar, zaman damgaları)</li>
-        <li>Çerezler ve benzeri teknolojiler</li>
-      </ul>
+    <div class="modal-body" *ngIf="selectedPolicy">
+      <div class="content-html" [innerHTML]="selectedPolicy.content"></div>
+    </div>
 
-      <h3>1.3 Hassas Veriler</h3>
-      <p>Gerekmedikçe hassas veri paylaşmayınız; bu tür verileri bilerek toplamıyoruz.</p>
-
-      <hr>
-
-      <h2>2. Bilgilerinizi Nasıl Kullanıyoruz</h2>
-      <ul>
-        <li>Kullanıcı hesabı oluşturma ve yönetme</li>
-        <li>Üniversite kimliğinin doğrulanması</li>
-        <li>Topluluk içi iletişimi sağlama</li>
-        <li>Akademik ve sosyal etkileşimi destekleme</li>
-        <li>Hizmet güvenliği ve işlevselliğini artırma</li>
-        <li>Duyuru ve bildirim gönderme</li>
-        <li>Destek taleplerine yanıt verme</li>
-        <li>Kural ve politikaları uygulama</li>
-      </ul>
-
-      <hr>
-
-      <h2>3. İşleme Hukuki Dayanakları (KVKK / GDPR)</h2>
-      <ul>
-        <li>Açık rıza</li>
-        <li>Sözleşmenin ifası</li>
-        <li>Hukuki yükümlülükler</li>
-        <li>Meşru menfaatler</li>
-      </ul>
-
-      <hr>
-
-      <h2>4. Bilgi Paylaşımı</h2>
-      <ul>
-        <li>Üniversite birimleri</li>
-        <li>Hizmet sağlayıcılar</li>
-        <li>Moderatörler ve yöneticiler</li>
-        <li>Yasal merciler (yalnızca zorunlu hallerde)</li>
-      </ul>
-
-      <p><strong>Kişisel bilgiler üçüncü taraflara satılmaz veya kiralanmaz.</strong></p>
-
-      <hr>
-
-      <h2>5. Veri Saklama Süresi</h2>
-      <ul>
-        <li>Hesabınız aktif olduğu sürece</li>
-        <li>Yasal gereklilikler boyunca</li>
-        <li>Hesap silme sonrası kısa bir süre (güvenlik ve denetim için)</li>
-      </ul>
-
-      <hr>
-
-      <h2>6. Güvenlik Önlemleri</h2>
-      <ul>
-        <li>HTTPS şifrelemesi</li>
-        <li>Erişim kontrolleri</li>
-        <li>Güvenlik izlemeleri</li>
-      </ul>
-      <p>Hiçbir sistem %100 güvenli değildir.</p>
-
-      <hr>
-
-      <h2>7. Haklarınız</h2>
-      <ul>
-        <li>Verilerinize erişim talebi</li>
-        <li>Düzeltme talebi</li>
-        <li>Silme talebi</li>
-        <li>İtiraz veya sınırlandırma</li>
-        <li>Açık rızayı geri çekme</li>
-        <li>Veri kopyası talebi</li>
-      </ul>
-
-      <p>Talepleriniz için: <strong>info&#64;unides.com</strong></p>
-
-      <hr>
-
-      <h2>8. Çerezler ve Takip Teknolojileri</h2>
-      <ul>
-        <li>Kimlik doğrulama</li>
-        <li>Oturum yönetimi</li>
-        <li>Tercih kayıtları</li>
-        <li>Analitik işlemler</li>
-      </ul>
-
-      <p>Çerezleri devre dışı bırakabilirsiniz, ancak bazı özellikler çalışmayabilir.</p>
-
-      <hr>
-
-      <h2>9. Çocukların Gizliliği</h2>
-      <p>Hizmetler, üniversite öğrencileri ve personeli içindir; küçüklerden bilerek veri toplamayız.</p>
-
-      <hr>
-
-      <h2>10. Politikadaki Değişiklikler</h2>
-      <p>
-        Bu politika zaman zaman güncellenebilir. Yayınlanan yeni sürüm geçerli olur. Hizmetlerin kullanılmaya devam
-        edilmesi,
-        değişikliklerin kabul edildiği anlamına gelir.
-      </p>
-
-      <hr>
-
-      <h2>11. İletişim Bilgileri</h2>
-      <p>
-        <strong>GSB – Veri Koruma Birimi</strong><br>
-        E-posta: info&#64;unides.com <br>
-        Telefon: (0312) 551 70 00
-      </p>
+    <div class="modal-footer">
+      <button class="btn-confirm" (click)="closeCard()">Anladım</button>
     </div>
   </div>
 </div>
-<!-- End Privacy Policy -->
 
-<app-footer />
+<app-footer></app-footer>
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+/>
