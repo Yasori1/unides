@@ -1,0 +1,196 @@
+/* --- VARIABLES --- */
+$st-gold: #bf9b30;
+$st-bg-dark: #121212;
+$st-bg-panel: #1a1a1a;
+$st-border: #333;
+$text-main: #e0e0e0;
+
+:host {
+    display: block;
+    font-family: 'Inter', sans-serif;
+    color: $text-main;
+}
+
+a { text-decoration: none; color: inherit; transition: 0.2s; }
+
+/* MAIN WRAPPER */
+.st-main-wrapper {
+    /* Arka plan görseli */
+    background-image: url('https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?q=80&w=1920&auto=format&fit=crop');
+    background-size: cover; 
+    background-position: center; 
+    background-attachment: fixed;
+    min-height: 100vh; 
+    padding: 40px 0; 
+    position: relative;
+    
+    /* Karartma efekti */
+    &::before { 
+        content: ''; position: absolute; top:0; left:0; width:100%; height:100%; 
+        background: rgba(0,0,0,0.85); z-index: 0; backdrop-filter: blur(3px); 
+    }
+}
+
+.st-container { position: relative; z-index: 2; max-width: 1250px; margin: 0 auto; padding: 0 15px; }
+
+/* 1. BREADCRUMB & HEADER */
+.category-top-section {
+    margin-bottom: 25px;
+    
+    .breadcrumb {
+        font-size: 12px; color: #888; margin-bottom: 15px; display: flex; align-items: center;
+        a { color: #aaa; text-decoration: none; &:hover { color: $st-gold; } i { font-size: 14px; } }
+        .sep { margin: 0 8px; color: #444; }
+        .current { color: $st-gold; font-weight: 600; }
+    }
+
+    .cat-title-bar {
+        background: rgba(26, 26, 26, 0.9); border: 1px solid $st-border; padding: 20px 25px; border-radius: 4px;
+        display: flex; justify-content: space-between; align-items: center; border-left: 4px solid $st-gold;
+        
+        .info {
+            h1 { margin: 0 0 5px; font-size: 22px; color: #fff; text-transform: uppercase; letter-spacing: 0.5px; }
+            p { margin: 0; color: #888; font-size: 13px; }
+        }
+
+        .btn-new-topic {
+            background: $st-gold; color: #111; border: none; padding: 10px 20px; font-weight: 800; font-size: 13px; border-radius: 3px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s;
+            &:hover { background: lighten($st-gold, 10%); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(191, 155, 48, 0.3); }
+        }
+    }
+}
+
+/* 2. LAYOUT GRID */
+.forum-grid-layout {
+    display: grid; 
+    grid-template-columns: 1fr 300px; /* Sol geniş, sağ sabit */
+    gap: 25px;
+    
+    @media (max-width: 991px) { grid-template-columns: 1fr; }
+}
+
+/* 3. TOPIC LIST AREA */
+.topic-list-area {
+    
+    /* Toolbar (Filtre & Sayfalama) */
+    .toolbar {
+        background: #222; border: 1px solid $st-border; padding: 10px 15px; border-radius: 4px 4px 0 0; display: flex; justify-content: space-between; align-items: center; margin-bottom: -1px; position: relative; z-index: 5;
+        
+        &.bottom { margin-top: 20px; border-radius: 4px; background: transparent; border: none; padding: 0; }
+
+        .filters {
+            a { color: #888; text-decoration: none; font-size: 12px; font-weight: 700; margin-right: 15px; text-transform: uppercase; padding-bottom: 2px; 
+                &.active { color: #fff; border-bottom: 2px solid $st-gold; } 
+                &:hover { color: #fff; } 
+            }
+        }
+        
+        .pagination {
+            display: flex; gap: 5px;
+            a, span { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 12px; border-radius: 3px; color: #888; background: #1a1a1a; border: 1px solid #333; text-decoration: none; }
+            a:hover { background: #333; color: #fff; }
+            span.active { background: $st-gold; color: #111; border-color: $st-gold; font-weight: 700; }
+            span.dots { border: none; background: transparent; }
+        }
+        
+        .btn-new-topic.small {
+            background: #333; color: #fff; border: 1px solid #444; padding: 6px 15px; font-size: 12px; border-radius: 3px; cursor: pointer; display: flex; align-items: center; gap: 5px;
+            &:hover { background: $st-gold; color: #000; border-color: $st-gold; }
+        }
+    }
+
+    /* Table Styling */
+    .st-topic-table {
+        border: 1px solid $st-border; background: #1a1a1a;
+        
+        .table-header {
+            background: #151515; border-bottom: 1px solid $st-border; padding: 10px 15px; 
+            display: grid; grid-template-columns: 1fr 120px 200px; 
+            font-size: 11px; font-weight: 700; color: #666;
+            @media (max-width: 768px) { display: none; }
+        }
+
+        .topic-group-label {
+            background: #252525; padding: 6px 15px; font-size: 10px; font-weight: 700; color: $st-gold; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid $st-border;
+            &.normal { margin-top: 0; border-top: 1px solid $st-border; }
+        }
+
+        .topic-row {
+            display: grid; 
+            grid-template-columns: 50px 1fr 120px 200px; /* Sütun genişlikleri */
+            align-items: center; 
+            padding: 12px 0; 
+            border-bottom: 1px solid #252525; 
+            background: #1e1e1e; 
+            transition: 0.2s;
+            
+            &:hover { background: #242424; transform: translateX(5px); border-left: 3px solid $st-gold; }
+            
+            &.sticky { background: rgba(191, 155, 48, 0.05); } 
+
+            /* Icon */
+            .t-icon { 
+                display: flex; justify-content: center; font-size: 18px; color: #666; 
+                &.normal { color: #444; }
+                .icon-gold { color: $st-gold; transform: rotate(45deg); }
+                .icon-red { color: #c0392b; }
+            }
+
+            /* Main Info */
+            .t-main {
+                padding-right: 15px;
+                display: flex; flex-direction: column; justify-content: center;
+                
+                .t-tags { margin-bottom: 4px; }
+                .tag { font-size: 9px; padding: 2px 5px; border-radius: 2px; font-weight: 700; margin-right: 5px; color: #fff; background: #444; 
+                    &.red { background: #c0392b; } &.gold { background: $st-gold; color: #000; } &.blue { background: #2980b9; } &.green { background: #27ae60; } &.purple { background: #8e44ad; } &.orange { background: #d35400; } &.cyan { background: #00cec9; color: #000; } &.gray { background: #636e72; }
+                }
+                
+                h3 { margin: 0 0 3px; font-size: 15px; a { color: #ddd; font-weight: 600; text-decoration: none; &:hover { color: $st-gold; } } }
+                .t-author { font-size: 11px; color: #666; i { margin-right: 3px; } }
+            }
+
+            /* Stats */
+            .t-stats {
+                text-align: center; border-left: 1px solid #2a2a2a; border-right: 1px solid #2a2a2a; padding: 0 10px; display: flex; flex-direction: column; justify-content: center; gap: 2px;
+                .stat-item { font-size: 11px; color: #aaa; strong { color: #fff; font-size: 13px; } &.sub { color: #555; font-size: 10px; } }
+            }
+
+            /* Last Post */
+            .t-last {
+                padding-left: 15px; padding-right: 15px; display: flex; align-items: center; gap: 10px;
+                .avatar { width: 32px; height: 32px; border-radius: 50%; border: 1px solid #444; object-fit: cover; }
+                .meta { display: flex; flex-direction: column; font-size: 11px; color: #666; .time { color: #999; } .user strong { color: $st-gold; } }
+            }
+
+            /* Mobile */
+            @media (max-width: 768px) {
+                grid-template-columns: 40px 1fr;
+                .t-stats, .t-last { display: none; }
+            }
+        }
+    }
+}
+
+/* 4. SIDEBAR STYLING */
+.forum-sidebar {
+    .sidebar-box {
+        background: #222; border: 1px solid $st-border; margin-bottom: 20px; border-radius: 4px; overflow: hidden;
+        
+        .box-header { 
+            background: #2a2a2a; padding: 10px 15px; font-size: 12px; font-weight: 700; color: #ccc; 
+            border-bottom: 1px solid $st-border; border-left: 3px solid $st-gold; text-transform: uppercase; 
+        }
+        
+        .box-content { padding: 15px; font-size: 12px; color: #888; }
+
+        .stats-rows .row { display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px dashed #333; padding-bottom: 8px; strong { color: #fff; } &:last-child { margin-bottom: 0; border: none; padding: 0; } }
+
+        .mods-list {
+            display: flex; gap: 15px;
+            .mod-item { display: flex; flex-direction: column; align-items: center; gap: 5px; img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid $st-gold; object-fit: cover; } span { color: $st-gold; font-weight: 700; } }
+        }
+
+        .tags-cloud { display: flex; flex-wrap: wrap; gap: 5px; .tag-cloud-item { background: #333; padding: 4px 10px; border-radius: 3px; color: #aaa; cursor: pointer; transition: 0.2s; &:hover { background: $st-gold; color: #000; } } }
+    }
+}

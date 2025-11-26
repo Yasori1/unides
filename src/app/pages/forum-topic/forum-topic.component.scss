@@ -1,0 +1,140 @@
+/* --- VARIABLES --- */
+$st-gold: #bf9b30;
+$st-bg-dark: #121212;
+$st-border: #333;
+$text-main: #e0e0e0;
+
+/* GLOBAL */
+:host { font-family: 'Inter', sans-serif; color: $text-main; display: block; }
+a { text-decoration: none; color: inherit; transition: 0.2s; }
+.mb-20 { margin-bottom: 20px; }
+
+/* MAIN WRAPPER */
+.st-main-wrapper {
+    background-image: url('https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?q=80&w=1920&auto=format&fit=crop');
+    background-size: cover; background-position: center; background-attachment: fixed;
+    min-height: 100vh; padding: 40px 0; position: relative;
+    &::before { content: ''; position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); z-index: 0; backdrop-filter: blur(3px); }
+}
+.st-container { position: relative; z-index: 2; max-width: 1250px; margin: 0 auto; padding: 0 15px; }
+
+/* BREADCRUMB & HEADER */
+.breadcrumb {
+    font-size: 12px; color: #888; display: flex; align-items: center;
+    a { color: #aaa; &:hover { color: $st-gold; } i { font-size: 14px; } }
+    .sep { margin: 0 8px; color: #444; }
+    .current { color: $st-gold; font-weight: 600; }
+}
+
+.topic-header-section {
+    background: rgba(26,26,26,0.9); border: 1px solid $st-border; padding: 20px 25px; border-radius: 4px;
+    display: flex; justify-content: space-between; align-items: flex-start; border-left: 4px solid $st-gold;
+    .tags { margin-bottom: 8px; display: flex; gap: 5px; .tag { background: #333; color: $st-gold; font-size: 10px; padding: 2px 6px; border-radius: 2px; font-weight: 700; } }
+    h1 { margin: 0; font-size: 24px; color: #fff; line-height: 1.3; }
+    .btn-reply { background: $st-gold; color: #111; border: none; padding: 10px 20px; font-weight: 800; font-size: 13px; border-radius: 3px; cursor: pointer; &:hover { background: lighten($st-gold, 10%); } }
+}
+
+.forum-grid-layout {
+    display: grid; grid-template-columns: 1fr 280px; gap: 20px;
+    @media (max-width: 991px) { grid-template-columns: 1fr; }
+}
+
+/* --- POST BLOCK DESIGN (GELİŞMİŞ) --- */
+.st-post-block {
+    display: grid; grid-template-columns: 240px 1fr; /* Sol tarafı genişlettik (User Card) */
+    background: #1a1a1a; border: 1px solid $st-border; margin-bottom: 20px; border-radius: 4px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    @media (max-width: 768px) { grid-template-columns: 1fr; }
+
+    /* SOL: ÜYE KARTI */
+    .post-user-col {
+        background: #151515; border-right: 1px solid $st-border; padding: 20px 15px; text-align: center; display: flex; flex-direction: column; align-items: center;
+
+        /* İsim ve Rütbe */
+        .user-header {
+            margin-bottom: 15px;
+            h3 { margin: 0 0 5px; font-size: 16px; a { color: $st-gold; font-weight: 700; } }
+            .user-title { font-size: 11px; padding: 2px 8px; border-radius: 2px; font-weight: 700; text-transform: uppercase;
+                &.admin { color: #e74c3c; border: 1px solid #e74c3c; }
+                &.mod { color: #2ecc71; border: 1px solid #2ecc71; }
+                &.member { color: #95a5a6; border: 1px solid #95a5a6; }
+            }
+        }
+
+        /* Avatar */
+        .user-avatar-area {
+            position: relative; margin-bottom: 10px;
+            img { width: 100px; height: 100px; border-radius: 50%; border: 4px solid #222; box-shadow: 0 0 15px rgba(0,0,0,0.5); }
+            .online-status { position: absolute; bottom: 5px; right: 10px; width: 14px; height: 14px; background: #2ecc71; border-radius: 50%; border: 2px solid #151515; }
+        }
+
+        /* Yıldızlar */
+        .rank-stars { color: $st-gold; font-size: 12px; margin-bottom: 15px; letter-spacing: 2px; }
+
+        /* ROZETLER (BADGES) - YENİ */
+        .user-badges {
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; margin-bottom: 20px; width: 100%; padding: 0 10px;
+            .badge-item {
+                width: 28px; height: 28px; background: #222; border: 1px solid #333; border-radius: 4px;
+                display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: help;
+                transition: 0.2s;
+                &:hover { border-color: $st-gold; transform: scale(1.1); background: #2a2a2a; }
+            }
+        }
+
+        /* DETAY TABLOSU - YENİ */
+        .user-details-table {
+            width: 100%; background: #121212; border: 1px solid #222; border-radius: 4px; padding: 10px;
+            .row {
+                display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 5px; border-bottom: 1px dashed #2a2a2a; padding-bottom: 5px;
+                &:last-child { margin-bottom: 0; border: none; padding-bottom: 0; }
+                .label { color: #777; }
+                .val { color: #ccc; font-weight: 600; &.highlight { color: $st-gold; } }
+            }
+        }
+    }
+
+    /* SAĞ: İÇERİK */
+    .post-content-col {
+        padding: 20px; display: flex; flex-direction: column; min-height: 300px;
+
+        .post-meta-header {
+            border-bottom: 1px solid #2a2a2a; padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; font-size: 12px; color: #666;
+            .share-link { cursor: pointer; &:hover { color: #fff; } }
+        }
+
+        .post-body {
+            flex: 1; font-size: 14px; line-height: 1.6; color: #ccc;
+            ::ng-deep pre.code-block { background: #111; border: 1px solid #333; padding: 15px; border-left: 3px solid $st-gold; color: #a5d6a7; font-family: 'Consolas', monospace; overflow-x: auto; margin: 15px 0; border-radius: 3px; }
+            ::ng-deep code { background: #252525; padding: 2px 5px; border-radius: 3px; color: $st-gold; font-size: 13px; }
+        }
+
+        /* İMZA ALANI - YENİ */
+        .post-signature {
+            margin-top: 40px; padding-top: 20px; border-top: 1px solid #2a2a2a; 
+            opacity: 0.8; /* Biraz silik dursun */
+            font-size: 13px;
+            /* Maksimum yükseklik verip taşmayı engelleyelim */
+            max-height: 150px; overflow: hidden; position: relative;
+            
+            &:hover { opacity: 1; } /* Üzerine gelince netleşsin */
+        }
+
+        .post-footer-actions {
+            margin-top: 20px; padding-top: 15px; border-top: 1px dashed #333; display: flex; justify-content: space-between; align-items: center;
+            .btn-action {
+                background: transparent; border: 1px solid #333; color: #888; padding: 5px 12px; font-size: 12px; border-radius: 3px; cursor: pointer; margin-left: 5px; transition: 0.2s;
+                i { margin-right: 4px; }
+                &:hover { background: #252525; color: #fff; }
+                &.like:hover { border-color: $st-gold; color: $st-gold; }
+            }
+        }
+    }
+}
+
+/* SIDEBAR */
+.forum-sidebar .sidebar-box {
+    background: #222; border: 1px solid $st-border; margin-bottom: 20px; border-radius: 4px;
+    .box-header { background: #2a2a2a; padding: 10px 15px; font-size: 12px; font-weight: 700; color: #ccc; border-bottom: 1px solid $st-border; border-left: 3px solid $st-gold; text-transform: uppercase; }
+    .box-content { padding: 15px; font-size: 12px; color: #888; }
+    .info-list .row { display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px dashed #333; padding-bottom: 5px; strong { color: #fff; } }
+}
