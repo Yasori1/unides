@@ -13,9 +13,9 @@ $text-main: #e0e0e0;
 
 a { text-decoration: none; color: inherit; transition: 0.2s; }
 
-/* MAIN WRAPPER */
+
 .st-main-wrapper {
-    /* Arka plan görseli */
+    
     background-image: url('https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?q=80&w=1920&auto=format&fit=crop');
     background-size: cover; 
     background-position: center; 
@@ -24,7 +24,7 @@ a { text-decoration: none; color: inherit; transition: 0.2s; }
     padding: 40px 0; 
     position: relative;
     
-    /* Karartma efekti */
+    
     &::before { 
         content: ''; position: absolute; top:0; left:0; width:100%; height:100%; 
         background: rgba(0,0,0,0.85); z-index: 0; backdrop-filter: blur(3px); 
@@ -33,7 +33,7 @@ a { text-decoration: none; color: inherit; transition: 0.2s; }
 
 .st-container { position: relative; z-index: 2; max-width: 1250px; margin: 0 auto; padding: 0 15px; }
 
-/* 1. BREADCRUMB & HEADER */
+
 .category-top-section {
     margin-bottom: 25px;
     
@@ -60,7 +60,7 @@ a { text-decoration: none; color: inherit; transition: 0.2s; }
     }
 }
 
-/* 2. LAYOUT GRID */
+
 .forum-grid-layout {
     display: grid; 
     grid-template-columns: 1fr 300px; /* Sol geniş, sağ sabit */
@@ -69,10 +69,10 @@ a { text-decoration: none; color: inherit; transition: 0.2s; }
     @media (max-width: 991px) { grid-template-columns: 1fr; }
 }
 
-/* 3. TOPIC LIST AREA */
+
 .topic-list-area {
     
-    /* Toolbar (Filtre & Sayfalama) */
+    
     .toolbar {
         background: #222; border: 1px solid $st-border; padding: 10px 15px; border-radius: 4px 4px 0 0; display: flex; justify-content: space-between; align-items: center; margin-bottom: -1px; position: relative; z-index: 5;
         
@@ -99,7 +99,7 @@ a { text-decoration: none; color: inherit; transition: 0.2s; }
         }
     }
 
-    /* Table Styling */
+    
     .st-topic-table {
         border: 1px solid $st-border; background: #1a1a1a;
         
@@ -128,7 +128,7 @@ a { text-decoration: none; color: inherit; transition: 0.2s; }
             
             &.sticky { background: rgba(191, 155, 48, 0.05); } 
 
-            /* Icon */
+            
             .t-icon { 
                 display: flex; justify-content: center; font-size: 18px; color: #666; 
                 &.normal { color: #444; }
@@ -136,7 +136,7 @@ a { text-decoration: none; color: inherit; transition: 0.2s; }
                 .icon-red { color: #c0392b; }
             }
 
-            /* Main Info */
+            
             .t-main {
                 padding-right: 15px;
                 display: flex; flex-direction: column; justify-content: center;
@@ -150,20 +150,20 @@ a { text-decoration: none; color: inherit; transition: 0.2s; }
                 .t-author { font-size: 11px; color: #666; i { margin-right: 3px; } }
             }
 
-            /* Stats */
+            
             .t-stats {
                 text-align: center; border-left: 1px solid #2a2a2a; border-right: 1px solid #2a2a2a; padding: 0 10px; display: flex; flex-direction: column; justify-content: center; gap: 2px;
                 .stat-item { font-size: 11px; color: #aaa; strong { color: #fff; font-size: 13px; } &.sub { color: #555; font-size: 10px; } }
             }
 
-            /* Last Post */
+            
             .t-last {
                 padding-left: 15px; padding-right: 15px; display: flex; align-items: center; gap: 10px;
                 .avatar { width: 32px; height: 32px; border-radius: 50%; border: 1px solid #444; object-fit: cover; }
                 .meta { display: flex; flex-direction: column; font-size: 11px; color: #666; .time { color: #999; } .user strong { color: $st-gold; } }
             }
 
-            /* Mobile */
+            
             @media (max-width: 768px) {
                 grid-template-columns: 40px 1fr;
                 .t-stats, .t-last { display: none; }
@@ -172,7 +172,7 @@ a { text-decoration: none; color: inherit; transition: 0.2s; }
     }
 }
 
-/* 4. SIDEBAR STYLING */
+
 .forum-sidebar {
     .sidebar-box {
         background: #222; border: 1px solid $st-border; margin-bottom: 20px; border-radius: 4px; overflow: hidden;

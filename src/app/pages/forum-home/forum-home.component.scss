@@ -1,4 +1,4 @@
-/* --- COLOR PALETTE --- */
+
 $st-gold: #bf9b30;        
 $st-gold-light: #d4b045;   
 $st-bg-dark: #121212;      
@@ -14,7 +14,7 @@ $text-main: #e0e0e0;
 
 a { text-decoration: none; color: inherit; transition: 0.2s; }
 
-/* 1. TOP BAR */
+
 .st-top-bar {
     background: #0a0a0a; border-bottom: 1px solid $st-border; height: 50px; display: flex; align-items: center;
     .top-flex { display: flex; justify-content: space-between; align-items: center; width: 100%; }
@@ -26,7 +26,7 @@ a { text-decoration: none; color: inherit; transition: 0.2s; }
     }
 }
 
-/* 2. NEWS TICKER */
+
 .news-ticker-wrapper {
     background: #181818; 
     border-bottom: 1px solid $st-border; 
@@ -69,7 +69,7 @@ a { text-decoration: none; color: inherit; transition: 0.2s; }
 }
 @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
 
-/* 3. MAIN WRAPPER - Arka Planı ve Karartmayı Burası Yapar */
+
 .st-main-wrapper {
     background-image: url('https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?q=80&w=1920&auto=format&fit=crop');
     background-size: cover; 
@@ -79,7 +79,7 @@ a { text-decoration: none; color: inherit; transition: 0.2s; }
     padding: 40px 0; 
     position: relative;
     
-    /* Karartma Efekti (Overlay) */
+    
     &::before { 
         content: ''; 
         position: absolute; 
@@ -92,7 +92,7 @@ a { text-decoration: none; color: inherit; transition: 0.2s; }
 
 .st-container { position: relative; z-index: 2; max-width: 1250px; margin: 0 auto; padding: 0 15px; }
 
-/* 4. FORUM LISTE TASARIMI */
+
 .st-forum-list-area {
     
     .st-category-block {
@@ -101,9 +101,8 @@ a { text-decoration: none; color: inherit; transition: 0.2s; }
         border-radius: 4px; 
         overflow: hidden;
         box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
-        background-color: $st-bg-panel; /* Kutuların arkası koyu gri olsun, şeffaf değil! */
-
-        /* Header (Sarı Bant) */
+        background-color: $st-bg-panel; 
+        
         .st-cat-header {
             background: linear-gradient(135deg, #bf9b30 0%, #8a6d1c 100%); 
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.25); 
@@ -119,7 +118,7 @@ a { text-decoration: none; color: inherit; transition: 0.2s; }
         }
 
         .st-forum-row {
-            background: rgba(30,30,30, 0.95); /* Satırların arkası */
+            background: rgba(30,30,30, 0.95);
             border-bottom: 1px solid #2a2a2a;
             display: grid; 
             grid-template-columns: 80px 1fr 140px 250px; 
@@ -136,7 +135,7 @@ a { text-decoration: none; color: inherit; transition: 0.2s; }
                 box-shadow: 0 5px 15px rgba(0,0,0,0.2); 
             }
 
-            /* 1. İkon */
+            
             .sf-icon {
                 display: flex; justify-content: center;
                 .icon-glow {
@@ -154,7 +153,7 @@ a { text-decoration: none; color: inherit; transition: 0.2s; }
                 }
             }
 
-            /* 2. Bilgi */
+            
             .sf-info {
                 padding: 0 15px;
                 h4 { margin: 0 0 5px; font-size: 17px; a { color: #eee; font-weight: 700; &:hover { color: $st-gold; } } }
@@ -166,7 +165,7 @@ a { text-decoration: none; color: inherit; transition: 0.2s; }
                 }
             }
 
-            /* 3. İstatistik */
+            
             .sf-stats {
                 display: flex; gap: 10px; justify-content: center;
                 .stat-bubble {
@@ -176,7 +175,7 @@ a { text-decoration: none; color: inherit; transition: 0.2s; }
                 }
             }
 
-            /* 4. Son Mesaj */
+            
             .sf-last-post {
                 display: flex; align-items: center; gap: 12px; padding-right: 20px;
                 
@@ -197,7 +196,7 @@ a { text-decoration: none; color: inherit; transition: 0.2s; }
             
             &:hover .sf-last-post img { transform: scale(1.1); border-color: $st-gold; }
 
-            /* Mobile */
+            
             @media (max-width: 900px) {
                 grid-template-columns: 60px 1fr;
                 .sf-stats, .sf-last-post { display: none; } 
@@ -206,7 +205,7 @@ a { text-decoration: none; color: inherit; transition: 0.2s; }
     }
 }
 
-/* 5. FOOTER İSTATİSTİK PANELİ */
+
 .st-bottom-stats-panel {
     background: #1a1a1a; border: 1px solid $st-border; border-radius: 4px; margin-top: 40px;
     .sub-header {

@@ -11,7 +11,7 @@ import { RouterLink } from '@angular/router';
 })
 export class ForumHomeComponent {
   
-  // Haber Bandı
+  
   tickerItems = [
     'ÜNİDES 2025 Başvuruları Başladı!',
     'Hackathon İstanbul Kazananları Belli Oldu.',
@@ -19,7 +19,7 @@ export class ForumHomeComponent {
     'Forum Bakım Çalışması: Bu gece 03:00 - 04:00 arası.'
   ];
 
-  // Kategoriler
+  
   categories = [
     {
       title: 'ÜNİDES GENEL MERKEZ', 
@@ -99,7 +99,7 @@ export class ForumHomeComponent {
     }
   ];
 
-  // İstatistikler
+  
   forumStats = {
     totalPosts: '342,102',
     totalTopics: '45,201',

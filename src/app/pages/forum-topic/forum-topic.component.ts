@@ -34,7 +34,7 @@ export class ForumTopicComponent {
           joinDate: '12 Eki 2023',
           messages: '12,405',
           location: 'İstanbul',
-          likes: '5,200' // DÜZELTİLDİ: 'reputation' yerine 'likes' yapıldı
+          likes: '5,200'
         },
         badges: [
             { 
@@ -61,7 +61,7 @@ export class ForumTopicComponent {
       `,
       date: 'Bugün, 14:30',
       signature: `<strong>ÜNİDES Platform Yöneticisi</strong>`,
-      likes: 12 // Bu, mesajın beğenisi (Post Likes)
+      likes: 12 
     },
     {
       id: 2,
@@ -74,7 +74,7 @@ export class ForumTopicComponent {
           joinDate: '05 Kas 2024',
           messages: '856',
           location: 'Ankara',
-          likes: '142' // DÜZELTİLDİ
+          likes: '142' 
         },
         badges: [
             { 
@@ -106,7 +106,7 @@ export class ForumTopicComponent {
           joinDate: '20 Ara 2023',
           messages: '4,210',
           location: 'İzmir',
-          likes: '2,100' // DÜZELTİLDİ
+          likes: '2,100'
         },
         badges: [
             { icon: 'fa-solid fa-gavel', name: 'Moderatör', color: '#2ecc71', tooltip: 'Moderatör' },

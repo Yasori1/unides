@@ -1,14 +1,12 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-// ŞU İKİ SATIRI EKLEDİK:
 import { HeaderComponent } from '../../common/header/header.component'; 
 import { FooterComponent } from '../../common/footer/footer.component';
 
 @Component({
   selector: 'app-forum-category',
   standalone: true,
-  // ŞU IMPORTLARI EKLEDİK:
   imports: [CommonModule, RouterLink, HeaderComponent, FooterComponent], 
   templateUrl: './forum-category.component.html',
   styleUrl: './forum-category.component.scss'
