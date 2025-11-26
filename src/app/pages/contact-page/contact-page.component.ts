@@ -1,13 +1,89 @@
-import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import {
+  Component,
+  Inject,
+  PLATFORM_ID,
+  OnInit,
+  AfterViewInit,
+  ViewChildren,
+  QueryList,
+  ElementRef,
+} from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+
 import { HeaderComponent } from '../../common/header/header.component';
-import { PageBannerComponent } from '../../common/page-banner/page-banner.component';
 import { FooterComponent } from '../../common/footer/footer.component';
 
 @Component({
-    selector: 'app-contact-page',
-    imports: [RouterLink, HeaderComponent, PageBannerComponent, FooterComponent],
-    templateUrl: './contact-page.component.html',
-    styleUrl: './contact-page.component.scss'
+  selector: 'app-contact-page',
+  standalone: true,
+  imports: [CommonModule, HeaderComponent, FooterComponent],
+  templateUrl: './contact-page.component.html',
+  styleUrls: ['./contact-page.component.scss'],
 })
-export class ContactPageComponent {}
+export class ContactPageComponent implements OnInit, AfterViewInit {
+  heroMoveX = 0;
+  heroMoveY = 0;
+
+  @ViewChildren('animItem') animItems!: QueryList<ElementRef>;
+
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
+
+  ngOnInit(): void {
+    console.log('İletişim sayfası yüklendi.');
+  }
+
+  ngAfterViewInit() {
+    // Scroll animasyonlarını tetikleyen Observer
+    if (isPlatformBrowser(this.platformId)) {
+      const revealObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              const target = entry.target as HTMLElement;
+              target.classList.add('reveal-active');
+              revealObserver.unobserve(target);
+            }
+          });
+        },
+        { threshold: 0.15 }
+      );
+
+      this.animItems.forEach((item) => revealObserver.observe(item.nativeElement));
+    }
+  }
+
+  // Hero bölümündeki blob'un mouse ile hareketi
+  onHeroMouseMove(event: MouseEvent) {
+    if (isPlatformBrowser(this.platformId)) {
+      const x = event.clientX - window.innerWidth / 2;
+      const y = event.clientY - window.innerHeight / 2;
+      this.heroMoveX = x / 40;
+      this.heroMoveY = y / 40;
+    }
+  }
+
+  // 3D Kart Tilt Efekti
+  cardTilt(event: MouseEvent, cardElement: HTMLElement) {
+    const rect = cardElement.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    // Dönüş açılarını hesapla
+    const rotateX = ((y - centerY) / centerY) * -10; // -10 derece max tilt
+    const rotateY = ((x - centerX) / centerX) * 10;
+
+    cardElement.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+  }
+
+  // Karttan çıkınca sıfırla
+  cardReset(cardElement: HTMLElement) {
+    cardElement.style.transform = `perspective(1000px) rotateX(0) rotateY(0) scale(1)`;
+  }
+
+  onSubmit(event: Event) {
+    event.preventDefault();
+    alert('Mesajınız başarıyla gönderildi! En kısa sürede size dönüş yapacağız.');
+  }
+}
