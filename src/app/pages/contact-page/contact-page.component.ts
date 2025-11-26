@@ -1,13 +1,20 @@
-import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { HeaderComponent } from '../../common/header/header.component';
-import { PageBannerComponent } from '../../common/page-banner/page-banner.component';
-import { FooterComponent } from '../../common/footer/footer.component';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 @Component({
-    selector: 'app-contact-page',
-    imports: [RouterLink, HeaderComponent, PageBannerComponent, FooterComponent],
-    templateUrl: './contact-page.component.html',
-    styleUrl: './contact-page.component.scss'
+  selector: 'app-contact-page',
+  standalone: true,
+  imports: [CommonModule],
+  templateUrl: './contact-page.component.html',
+  styleUrls: ['./contact-page.component.scss']
 })
-export class ContactPageComponent {}
+export class ContactPageComponent implements OnInit {
+
+  constructor() { }
+
+  ngOnInit(): void {
+    // Sayfa yüklendiğinde çalışacak kodlar buraya
+    console.log('İletişim sayfası hazır 🚀');
+  }
+
+}
