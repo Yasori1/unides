@@ -19,20 +19,19 @@ interface Member {
   name: string;
   role: string;
   department: string;
-  email: string; // EKLİ
-  phone: string; // EKLİ
-  grade: string; // EKLİ
+  email: string;
+  phone: string;
+  grade: string;
   avatar: string;
   status: 'Aktif' | 'Pasif';
 }
 
-interface EventItem { id: number; title: string; date: string; type: 'Toplantı' | 'Etkinlik' | 'Rapor' | 'Deadline'; }
 interface Notification { id: number; text: string; time: string; read: boolean; }
 interface ChatContact { id: number; name: string; avatar: string; lastMsg: string; time: string; unread: number; online: boolean; }
 interface ChatMessage { id: number; sender: 'me' | 'them'; text: string; time: string; }
 interface SponsorOpportunity { id: number; name: string; type: 'Hibe' | 'Sponsorluk' | 'Materyal'; amount: string; deadline: string; logo: string; status: 'Başvuruldu' | 'Açık'; }
 interface Collaboration { id: number; clubName: string; university: string; type: 'Partner Arıyor' | 'Konuşmacı Arıyor' | 'Turne'; description: string; logo: string; }
-interface DocumentTemplate { id: number; name: string; type: 'PDF' | 'DOCX'; icon: string; }
+interface DocumentTemplate { id: number; name: string; type: 'PDF' | 'DOCX' | 'ZIP'; icon: string; }
 
 @Component({
   selector: 'app-community',
@@ -71,7 +70,7 @@ export class CommunityComponent implements OnInit, AfterViewChecked {
     balance: 18500,
     email: 'ai@itu.edu.tr',
     phone: '+90 555 123 45 67',
-    instagram: '@itu_ai',
+    instagram: '@itu_ai_official',
     description: 'Geleceği kodlayanların buluşma noktası.'
   };
 
@@ -89,17 +88,7 @@ export class CommunityComponent implements OnInit, AfterViewChecked {
     { id: 2, name: 'Mert Demir', role: 'Başkan Yrd.', department: 'Endüstri Müh.', email: 'mert@itu.edu.tr', phone: '555-222-3344', grade: '4. Sınıf', avatar: 'https://ui-avatars.com/api/?name=MD&background=e2e8f0&color=1e293b', status: 'Aktif' },
     { id: 3, name: 'Selin Kaya', role: 'Sosyal Medya', department: 'Mimarlık', email: 'selin@itu.edu.tr', phone: '555-333-4455', grade: '2. Sınıf', avatar: 'https://ui-avatars.com/api/?name=SK&background=e2e8f0&color=1e293b', status: 'Aktif' },
     { id: 4, name: 'Burak Çelik', role: 'Üye', department: 'Makine Müh.', email: 'burak@itu.edu.tr', phone: '555-444-5566', grade: '1. Sınıf', avatar: 'https://ui-avatars.com/api/?name=BC&background=e2e8f0&color=1e293b', status: 'Pasif' },
-    { 
-      id: 5, name: 'Ayşe Can', role: 'Üye', department: 'Matematik', 
-      email: 'ayse.can@itu.edu.tr', phone: '555-555-6677', grade: '2. Sınıf', // EKSİK ALANLAR DÜZELTİLDİ
-      avatar: 'https://ui-avatars.com/api/?name=AC&background=e2e8f0&color=1e293b', status: 'Aktif' 
-    },
-  ];
-
-  calendarEvents: EventItem[] = [
-    { id: 1, title: 'Yönetim Kurulu', date: '26 Ekim', type: 'Toplantı' },
-    { id: 2, title: 'AI Zirvesi', date: '28 Ekim', type: 'Etkinlik' },
-    { id: 3, title: 'Mali Rapor', date: '01 Kasım', type: 'Rapor' },
+    { id: 5, name: 'Ayşe Can', role: 'Üye', department: 'Matematik', email: 'ayse.can@itu.edu.tr', phone: '555-555-6677', grade: '2. Sınıf', avatar: 'https://ui-avatars.com/api/?name=AC&background=e2e8f0&color=1e293b', status: 'Aktif' },
   ];
 
   notifications: Notification[] = [
@@ -115,14 +104,16 @@ export class CommunityComponent implements OnInit, AfterViewChecked {
   ];
 
   collaborations: Collaboration[] = [
-    { id: 1, clubName: 'ODTÜ Robotik', university: 'ODTÜ', type: 'Partner Arıyor', description: 'Otonom araç...', logo: 'https://ui-avatars.com/api/?name=ODTU&background=ef4444&color=fff' },
-    { id: 2, clubName: 'Boğaziçi Girişim', university: 'Boğaziçi', type: 'Konuşmacı Arıyor', description: 'Fintech zirvesi...', logo: 'https://ui-avatars.com/api/?name=BOUN&background=3b82f6&color=fff' },
+    { id: 1, clubName: 'ODTÜ Robotik', university: 'ODTÜ', type: 'Partner Arıyor', description: 'Otonom araç projesi için yazılım ekibi arıyoruz.', logo: 'https://ui-avatars.com/api/?name=ODTU&background=ef4444&color=fff' },
+    { id: 2, clubName: 'Boğaziçi Girişim', university: 'Boğaziçi', type: 'Konuşmacı Arıyor', description: 'Fintech zirvesi için organizasyon partneri.', logo: 'https://ui-avatars.com/api/?name=BOUN&background=3b82f6&color=fff' },
+    { id: 3, clubName: 'YTÜ SKY LAB', university: 'Yıldız Teknik', type: 'Turne', description: 'Hackathon serisi başlatıyoruz.', logo: 'https://ui-avatars.com/api/?name=YTU&background=f59e0b&color=fff' },
   ];
 
   documents: DocumentTemplate[] = [
-    { id: 1, name: 'Etkinlik İzin', type: 'DOCX', icon: 'description' },
-    { id: 2, name: 'Sponsorluk Dosyası', type: 'PDF', icon: 'picture_as_pdf' },
-    { id: 3, name: 'Üye Kayıt', type: 'DOCX', icon: 'assignment' },
+    { id: 1, name: 'Sponsorluk_Dosyası_v2.pdf', type: 'PDF', icon: 'picture_as_pdf' },
+    { id: 2, name: 'Etkinlik_Bütçesi_2025.xlsx', type: 'DOCX', icon: 'table_view' },
+    { id: 3, name: 'Yönetim_Kurulu_Kararları.docx', type: 'DOCX', icon: 'description' },
+    { id: 4, name: 'Logo_Pack.zip', type: 'ZIP', icon: 'folder_zip' },
   ];
 
   // Chat
@@ -149,8 +140,7 @@ export class CommunityComponent implements OnInit, AfterViewChecked {
   @HostListener('document:click', ['$event'])
   clickout(event: any) {
     if(!event.target.closest('.profile-wrapper')) { this.isProfileOpen = false; }
-    if(!event.target.closest('.notification-wrapper')) { this.showNotifications = false; }
-    if(!event.target.closest('.more-btn-wrapper')) { this.activeRowMenuId = null; }
+    if(!event.target.closest('.notification-btn')) { this.showNotifications = false; } // Class name updated
   }
 
   // Getters
@@ -209,5 +199,4 @@ export class CommunityComponent implements OnInit, AfterViewChecked {
   deleteMember(id: number) { if(confirm('Silinsin mi?')) { this.members = this.members.filter(m => m.id !== id); this.stats.totalMembers--; this.showToast('Silindi.', 'error'); } }
   
   showToast(msg: string, type: 'success' | 'error') { this.toastMessage = msg; this.toastType = type; setTimeout(() => this.toastMessage = null, 3000); }
-  getStatusColor(status: string): string { switch (status) { case 'Yayında': return '#10b981'; case 'Onay Bekliyor': return '#f59e0b'; case 'Taslak': return '#64748b'; case 'Reddedildi': return '#ef4444'; default: return '#3b82f6'; } }
 }

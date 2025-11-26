@@ -1,175 +1,483 @@
+<div class="background-fx">
+  <div class="shape shape-1"></div>
+  <div class="shape shape-2"></div>
+  <div class="shape shape-3"></div>
+</div>
+
 <div class="dashboard-container">
   
-  <aside class="sidebar" [class.collapsed]="isSidebarCollapsed">
+  <aside class="sidebar glass-panel" [class.collapsed]="isSidebarCollapsed">
     <div class="brand" (click)="switchTab('overview')">
-      <div class="logo-square"><span class="material-symbols-outlined">hub</span></div>
-      <div class="brand-text" *ngIf="!isSidebarCollapsed"><h2>ÜNİDES</h2><span>Yönetim</span></div>
+      <div class="logo-container">
+        <span class="material-symbols-outlined">hub</span>
+      </div>
+      <div class="brand-text" *ngIf="!isSidebarCollapsed">
+        <h2>ÜNİDES</h2>
+        <span class="subtitle">Next Gen</span>
+      </div>
     </div>
+
     <nav class="menu">
-      <button class="menu-item" [class.active]="activeTab === 'overview'" (click)="switchTab('overview')" title="Genel Bakış">
-        <span class="material-symbols-outlined">grid_view</span><span *ngIf="!isSidebarCollapsed">Genel Bakış</span>
+      <div class="menu-section">
+        <button class="menu-item" [class.active]="activeTab === 'overview'" (click)="switchTab('overview')">
+          <span class="material-symbols-outlined">grid_view</span>
+          <span *ngIf="!isSidebarCollapsed">Genel Bakış</span>
+          <div class="glow-indicator" *ngIf="activeTab === 'overview'"></div>
+        </button>
+      </div>
+
+      <div class="menu-divider" *ngIf="!isSidebarCollapsed">PROJE & FON</div>
+      
+      <button class="menu-item" [class.active]="activeTab === 'projects'" (click)="switchTab('projects')">
+        <span class="material-symbols-outlined">rocket_launch</span>
+        <span *ngIf="!isSidebarCollapsed">Projeler</span>
       </button>
-      <div class="menu-divider" *ngIf="!isSidebarCollapsed">PROJE</div>
-      <button class="menu-item" [class.active]="activeTab === 'projects'" (click)="switchTab('projects')" title="Projeler">
-        <span class="material-symbols-outlined">folder_open</span><span *ngIf="!isSidebarCollapsed">Projelerim</span>
+      
+      <button class="menu-item" [class.active]="activeTab === 'sponsors'" (click)="switchTab('sponsors')">
+        <span class="material-symbols-outlined">monetization_on</span>
+        <span *ngIf="!isSidebarCollapsed">Sponsorluk</span>
       </button>
-      <button class="menu-item" [class.active]="activeTab === 'sponsors'" (click)="switchTab('sponsors')" title="Sponsorluk">
-        <span class="material-symbols-outlined">monetization_on</span><span *ngIf="!isSidebarCollapsed">Sponsorluk</span>
+
+      <div class="menu-divider" *ngIf="!isSidebarCollapsed">AĞ & İLETİŞİM</div>
+
+      <button class="menu-item" [class.active]="activeTab === 'network'" (click)="switchTab('network')">
+        <span class="material-symbols-outlined">public</span>
+        <span *ngIf="!isSidebarCollapsed">Network</span>
       </button>
-      <div class="menu-divider" *ngIf="!isSidebarCollapsed">AĞ</div>
-      <button class="menu-item" [class.active]="activeTab === 'network'" (click)="switchTab('network')" title="İş Birliği">
-        <span class="material-symbols-outlined">public</span><span *ngIf="!isSidebarCollapsed">İş Birliği Ağı</span>
-      </button>
-      <button class="menu-item" [class.active]="activeTab === 'messages'" (click)="switchTab('messages')" title="Mesajlar">
-        <span class="material-symbols-outlined">chat_bubble_outline</span><span *ngIf="!isSidebarCollapsed">Mesajlar</span>
+      
+      <button class="menu-item" [class.active]="activeTab === 'messages'" (click)="switchTab('messages')">
+        <span class="material-symbols-outlined">chat_bubble</span>
+        <span *ngIf="!isSidebarCollapsed">Mesajlar</span>
         <span class="badge" *ngIf="activeTab !== 'messages' && !isSidebarCollapsed">2</span>
       </button>
+
       <div class="menu-divider" *ngIf="!isSidebarCollapsed">YÖNETİM</div>
-      <button class="menu-item" [class.active]="activeTab === 'documents'" (click)="switchTab('documents')" title="Belgeler">
-        <span class="material-symbols-outlined">article</span><span *ngIf="!isSidebarCollapsed">Belgeler</span>
+
+      <button class="menu-item" [class.active]="activeTab === 'documents'" (click)="switchTab('documents')">
+        <span class="material-symbols-outlined">folder_open</span>
+        <span *ngIf="!isSidebarCollapsed">Belgeler</span>
       </button>
-      <button class="menu-item" [class.active]="activeTab === 'members'" (click)="switchTab('members')" title="Üyeler">
-        <span class="material-symbols-outlined">groups</span><span *ngIf="!isSidebarCollapsed">Üyeler</span>
+      
+      <button class="menu-item" [class.active]="activeTab === 'members'" (click)="switchTab('members')">
+        <span class="material-symbols-outlined">diversity_3</span>
+        <span *ngIf="!isSidebarCollapsed">Üyeler</span>
       </button>
-      <button class="menu-item" [class.active]="activeTab === 'settings'" (click)="switchTab('settings')" title="Ayarlar">
-        <span class="material-symbols-outlined">settings</span><span *ngIf="!isSidebarCollapsed">Ayarlar</span>
+      
+      <button class="menu-item" [class.active]="activeTab === 'settings'" (click)="switchTab('settings')">
+        <span class="material-symbols-outlined">tune</span>
+        <span *ngIf="!isSidebarCollapsed">Ayarlar</span>
       </button>
     </nav>
+
     <div class="sidebar-footer">
-      <button class="logout-btn" (click)="logout()" title="Çıkış">
-        <span class="material-symbols-outlined">logout</span><span *ngIf="!isSidebarCollapsed">Çıkış</span>
+      <button class="logout-btn-modern" (click)="logout()" title="Çıkış Yap">
+        <div class="icon-box">
+          <span class="material-symbols-outlined">power_settings_new</span>
+        </div>
+        <span *ngIf="!isSidebarCollapsed">Oturumu Kapat</span>
       </button>
     </div>
   </aside>
 
   <main class="main-content">
     
-    <header class="top-header">
+    <header class="top-header glass-panel">
       <div class="header-left">
-        <button class="icon-btn toggle-sidebar" (click)="toggleSidebar()"><span class="material-symbols-outlined">menu_open</span></button>
-        <div class="breadcrumb">
-          <span class="material-symbols-outlined home-icon">home</span><span class="sep">/</span><span>Panel</span><span class="sep">/</span><span class="current">{{ activeTab | titlecase }}</span>
+        <button class="icon-btn toggle-sidebar" (click)="toggleSidebar()">
+          <span class="material-symbols-outlined">menu</span>
+        </button>
+        <div class="page-title">
+          <h1>{{ activeTab === 'overview' ? 'Hoş Geldin, Ece! 👋' : (activeTab | titlecase) }}</h1>
         </div>
       </div>
+
       <div class="header-right">
-        <button class="icon-btn notification" (click)="toggleNotifications($event)">
-          <span class="material-symbols-outlined">notifications</span><span class="indicator" *ngIf="notifications.length"></span>
+        <button class="icon-btn notification-btn" (click)="toggleNotifications($event)">
+          <span class="material-symbols-outlined">notifications</span>
+          <span class="indicator" *ngIf="notifications.length"></span>
         </button>
-        <div class="dropdown-menu notifications" *ngIf="showNotifications"><div class="dd-header">Bildirimler</div><ul><li *ngFor="let n of notifications">{{ n.text }} <small>{{ n.time }}</small></li></ul></div>
-        <div class="profile-wrapper">
-          <div class="profile-pic" (click)="toggleProfileDropdown($event)"><img [src]="clubInfo.logo" alt="Logo"></div>
-          <div class="dropdown-menu profile-dropdown" *ngIf="isProfileOpen">
-             <div class="dd-header">{{ clubInfo.name }}</div>
-             <ul><li (click)="switchTab('settings')"><span class="material-symbols-outlined small-icon">settings</span> Ayarlar</li><li (click)="logout()" class="danger-item"><span class="material-symbols-outlined small-icon">logout</span> Çıkış</li></ul>
+        
+        <div class="dropdown-menu glass-dropdown" *ngIf="showNotifications">
+          <div class="dd-header">Bildirimler</div>
+          <ul>
+            <li *ngFor="let n of notifications">
+              <div class="notif-dot"></div>
+              <div class="notif-content">
+                <p>{{ n.text }}</p>
+                <small>{{ n.time }}</small>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="profile-wrapper" (click)="toggleProfileDropdown($event)">
+          <img [src]="clubInfo.logo" alt="Logo" class="profile-img">
+          <div class="profile-info">
+            <span class="club-name">{{ clubInfo.name }}</span>
+            <span class="club-role">Yönetici</span>
+          </div>
+          
+          <div class="dropdown-menu glass-dropdown" *ngIf="isProfileOpen">
+             <ul>
+               <li (click)="switchTab('settings')"><span class="material-symbols-outlined">settings</span> Ayarlar</li>
+               <li (click)="logout()" class="danger"><span class="material-symbols-outlined">logout</span> Çıkış</li>
+             </ul>
           </div>
         </div>
       </div>
     </header>
 
-    <div class="toast-notification" *ngIf="toastMessage" [class.error]="toastType === 'error'">
-      <span class="material-symbols-outlined">{{ toastType === 'success' ? 'check_circle' : 'error' }}</span><span>{{ toastMessage }}</span>
+    <div class="toast-notification glass-panel" *ngIf="toastMessage" [class.error]="toastType === 'error'">
+      <div class="toast-icon">
+        <span class="material-symbols-outlined">{{ toastType === 'success' ? 'check' : 'priority_high' }}</span>
+      </div>
+      <span>{{ toastMessage }}</span>
     </div>
 
-    <div class="view-container" *ngIf="activeTab === 'overview'">
-      <div class="stats-grid-compact">
-        <div class="stat-card-mini"><div class="icon-box blue"><span class="material-symbols-outlined">group</span></div><div class="text"><span>Üye</span><h3>{{ stats.totalMembers }}</h3></div></div>
-        <div class="stat-card-mini"><div class="icon-box green"><span class="material-symbols-outlined">rocket_launch</span></div><div class="text"><span>Proje</span><h3>{{ stats.activeProjects }}</h3></div></div>
-        <div class="stat-card-mini"><div class="icon-box purple"><span class="material-symbols-outlined">event</span></div><div class="text"><span>Etkinlik</span><h3>{{ stats.totalEvents }}</h3></div></div>
-        <div class="stat-card-mini"><div class="icon-box orange"><span class="material-symbols-outlined">pending</span></div><div class="text"><span>İstek</span><h3>{{ stats.pendingRequests }}</h3></div></div>
+    <div class="content-scroll-area">
+      
+      <div class="view-section fade-in" *ngIf="activeTab === 'overview'">
+        <div class="kpi-grid">
+          <div class="kpi-card glass-panel" *ngFor="let stat of [
+            {label: 'Toplam Üye', val: stats.totalMembers, icon: 'group', color: 'cyan'},
+            {label: 'Aktif Proje', val: stats.activeProjects, icon: 'rocket', color: 'purple'},
+            {label: 'Etkinlikler', val: stats.totalEvents, icon: 'event', color: 'pink'},
+            {label: 'Bekleyen', val: stats.pendingRequests, icon: 'hourglass_top', color: 'orange'}
+          ]">
+            <div class="icon-circle" [class]="stat.color">
+              <span class="material-symbols-outlined">{{stat.icon}}</span>
+            </div>
+            <div class="kpi-info">
+              <h3>{{stat.val}}</h3>
+              <span>{{stat.label}}</span>
+            </div>
+            <div class="decor-blob" [class]="stat.color"></div>
+          </div>
+        </div>
+
+        <div class="dashboard-split">
+          <div class="glass-panel table-panel">
+            <div class="panel-header">
+              <h3>Son Projeler</h3>
+              <button class="btn-text" (click)="switchTab('projects')">Tümünü Gör</button>
+            </div>
+            <table class="modern-table">
+              <thead><tr><th>Proje</th><th>Durum</th><th>Tarih</th></tr></thead>
+              <tbody>
+                <tr *ngFor="let p of projects.slice(0,3)">
+                  <td><span class="fw-bold">{{ p.name }}</span></td>
+                  <td><span class="status-pill" [attr.data-status]="p.status">{{ p.status }}</span></td>
+                  <td>{{ p.deadline }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="glass-panel quick-actions">
+            <h3>Hızlı Erişim</h3>
+            <div class="action-grid">
+              <button class="action-tile" (click)="openModal('new-project')">
+                <span class="material-symbols-outlined">add_circle</span> Yeni Proje
+              </button>
+              <button class="action-tile" (click)="openModal('new-member')">
+                <span class="material-symbols-outlined">person_add</span> Üye Ekle
+              </button>
+              <button class="action-tile" (click)="switchTab('sponsors')">
+                <span class="material-symbols-outlined">diamond</span> Sponsor
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="split-grid">
-        <div class="card table-card">
-          <div class="card-header"><h3>Son Projeler</h3><button class="btn-text" (click)="switchTab('projects')">Tümünü Gör</button></div>
-          <table class="data-table">
-            <thead><tr><th>Proje Adı</th><th>Durum</th><th>Tarih</th></tr></thead>
+
+      <div class="view-section fade-in" *ngIf="activeTab === 'projects'">
+        <div class="section-header">
+          <button class="btn-glass" (click)="exportData('excel')"><span class="material-symbols-outlined">download</span> Raporla</button>
+          <button class="btn-gradient" (click)="openModal('new-project')"><span class="material-symbols-outlined">add</span> Yeni Proje</button>
+        </div>
+        <div class="glass-panel">
+          <table class="modern-table full">
+            <thead><tr><th>Proje Adı</th><th>Bütçe</th><th>Durum</th><th>İlerleme</th><th>Tarih</th></tr></thead>
             <tbody>
-              <tr *ngFor="let p of projects.slice(0,3)">
-                <td><span class="p-name">{{ p.name }}</span></td>
-                <td><span class="status-badge" [style.background]="getStatusColor(p.status) + '20'" [style.color]="getStatusColor(p.status)">{{ p.status }}</span></td>
+              <tr *ngFor="let p of projects">
+                <td>
+                  <div class="flex-align">
+                    <span class="material-symbols-outlined star-icon" [class.active]="p.isPromoted" (click)="togglePromote(p)">star</span>
+                    {{ p.name }}
+                  </div>
+                </td>
+                <td>{{ p.budget | number }}₺</td>
+                <td><span class="status-pill" [attr.data-status]="p.status">{{ p.status }}</span></td>
+                <td>
+                  <div class="progress-bar-container">
+                    <div class="progress-bar-fill" [style.width.%]="p.progress"></div>
+                  </div>
+                  <span class="progress-text">%{{ p.progress }}</span>
+                </td>
                 <td>{{ p.deadline }}</td>
               </tr>
             </tbody>
           </table>
         </div>
-        <div class="card quick-actions-card">
-          <h3>Hızlı Erişim</h3>
-          <div class="actions-grid">
-            <button class="tile-btn" (click)="openModal('new-project')"><span class="material-symbols-outlined">add_circle</span><span>Proje</span></button>
-            <button class="tile-btn" (click)="openModal('new-member')"><span class="material-symbols-outlined">person_add</span><span>Üye</span></button>
-            <button class="tile-btn" (click)="switchTab('sponsors')"><span class="material-symbols-outlined">search</span><span>Sponsor</span></button>
-            <button class="tile-btn" (click)="switchTab('messages')"><span class="material-symbols-outlined">chat</span><span>Mesaj</span></button>
+      </div>
+
+      <div class="view-section fade-in" *ngIf="activeTab === 'sponsors'">
+        <div class="page-header-glass">
+          <h2>Sponsorluk Fırsatları 💎</h2>
+          <p>Kulübün için aktif hibe ve destek programları.</p>
+        </div>
+        
+        <div class="sponsor-grid">
+          <div class="glass-card sponsor-card" *ngFor="let s of sponsors">
+            <div class="card-badge" [class.open]="s.status === 'Açık'">{{ s.status }}</div>
+            <div class="sponsor-logo-area">
+              <img [src]="s.logo" alt="logo">
+            </div>
+            <div class="sponsor-content">
+              <span class="type-tag">{{ s.type }}</span>
+              <h3>{{ s.name }}</h3>
+              <div class="detail-row">
+                <span class="material-symbols-outlined">payments</span>
+                <strong>{{ s.amount }}</strong>
+              </div>
+              <div class="detail-row">
+                <span class="material-symbols-outlined">event</span>
+                <span>Son: {{ s.deadline }}</span>
+              </div>
+              <button class="btn-glow full" (click)="applySponsor(s.name)">
+                Hemen Başvur <span class="material-symbols-outlined">arrow_forward</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="view-container" *ngIf="activeTab === 'projects'">
-      <div class="page-header"><h2>Projeler</h2><div class="header-controls"><button class="btn-secondary" (click)="exportData('excel')"><span class="material-symbols-outlined">download</span> Excel</button><button class="btn-primary" (click)="openModal('new-project')"><span class="material-symbols-outlined">add</span> Yeni</button></div></div>
-      <div class="card"><table class="data-table full"><thead><tr><th>Proje Adı</th><th>Bütçe</th><th>Durum</th><th>İlerleme</th><th>Bitiş Tarihi</th><th>İşlemler</th></tr></thead><tbody><tr *ngFor="let p of projects"><td><div class="project-name-cell"><span class="material-symbols-outlined star" [class.active]="p.isPromoted" (click)="togglePromote(p)">star</span>{{ p.name }}</div></td><td>{{ p.budget | number }}₺</td><td><span class="status-badge" [style.background]="getStatusColor(p.status) + '20'" [style.color]="getStatusColor(p.status)">{{ p.status }}</span></td><td><div class="progress-container"><span>%{{ p.progress }}</span><div class="progress-track"><div class="progress-fill" [style.width.%]="p.progress"></div></div></div></td><td>{{ p.deadline }}</td><td><button class="icon-btn-sm"><span class="material-symbols-outlined">more_vert</span></button></td></tr></tbody></table></div>
-    </div>
-
-    <div class="view-container" *ngIf="activeTab === 'members'">
-      <div class="page-header"><h2>Üye Yönetimi</h2><div class="header-controls"><div class="search-input"><span class="material-symbols-outlined">search</span><input type="text" placeholder="Ara..." [(ngModel)]="memberSearchText"></div><button class="btn-secondary" (click)="exportData('pdf')"><span class="material-symbols-outlined">print</span> Yazdır</button><button class="btn-primary" (click)="openModal('new-member')"><span class="material-symbols-outlined">add</span> Ekle</button></div></div>
-      <div class="card"><table class="data-table full"><thead><tr><th>Üye</th><th>Bölüm</th><th>Rol</th><th>Durum</th><th>Aksiyon</th></tr></thead><tbody><tr *ngFor="let m of filteredMembers"><td><div class="user-cell"><img [src]="m.avatar" alt=""><div class="user-text"><span class="name">{{ m.name }}</span><span class="id">#{{ m.id }}</span></div></div></td><td>{{ m.department }}</td><td><span class="role-tag">{{ m.role }}</span></td><td><span class="status-dot" [class.active]="m.status === 'Aktif'"></span> {{ m.status }}</td><td><button class="icon-btn-sm delete" (click)="deleteMember(m.id)"><span class="material-symbols-outlined">delete</span></button></td></tr></tbody></table></div>
-    </div>
-
-    <div class="view-container" *ngIf="activeTab === 'sponsors'"><div class="page-header"><h2>Sponsorluk Fırsatları</h2></div><div class="grid-cards"><div class="simple-card" *ngFor="let s of sponsors"><div class="card-head"><img [src]="s.logo" alt=""><span class="chip">{{ s.type }}</span></div><h4>{{ s.name }}</h4><p>Destek: <strong>{{ s.amount }}</strong></p><p class="date">Son Başvuru: {{ s.deadline }}</p><button class="btn-outline full" (click)="applySponsor(s.name)">Başvur</button></div></div></div>
-    <div class="view-container" *ngIf="activeTab === 'network'"><div class="page-header"><h2>İş Birliği Ağı</h2></div><div class="grid-cards"><div class="simple-card" *ngFor="let c of collaborations"><div class="card-head"><img [src]="c.logo" alt="" style="border-radius: 50%;"><span class="chip blue">{{ c.type }}</span></div><h4>{{ c.clubName }}</h4><p style="font-size: 0.9rem; color: #64748b; margin-bottom: 15px;">{{ c.description }}</p><button class="btn-outline full" (click)="contactClub(c.clubName)">İletişime Geç</button></div></div></div>
-    <div class="view-container" *ngIf="activeTab === 'documents'"><div class="page-header"><h2>Belge Sihirbazı</h2></div><div class="grid-cards"><div class="simple-card" *ngFor="let d of documents"><div class="doc-icon" [class.pdf]="d.type === 'PDF'" [class.word]="d.type === 'DOCX'"><span class="material-symbols-outlined">{{ d.icon }}</span></div><h4 style="margin-top: 10px;">{{ d.name }}</h4><p style="color: #64748b;">{{ d.type }} Şablonu</p><button class="btn-secondary full" (click)="downloadDoc(d.name)">İndir</button></div></div></div>
-    
-    <div class="view-container no-padding" *ngIf="activeTab === 'messages'"><div class="chat-container"><div class="chat-sidebar"><div class="chat-header"><h3>Sohbetler</h3></div><div class="contact-list"><div class="contact-item" *ngFor="let c of chatContacts" [class.active]="activeContactId === c.id" (click)="selectContact(c.id)"><img [src]="c.avatar" alt=""><div class="contact-info"><span class="name">{{ c.name }}</span><span class="last-msg">{{ c.lastMsg }}</span></div></div></div></div><div class="chat-main"><div class="chat-top-bar"><div class="user-details" *ngIf="activeContact"><img [src]="activeContact.avatar" alt=""><h4>{{ activeContact.name }}</h4></div></div><div class="messages-area" #scrollMe><div class="message-bubble" *ngFor="let msg of activeChatMessages" [class.mine]="msg.sender === 'me'"><p>{{ msg.text }}</p></div></div><div class="input-area"><input type="text" placeholder="Mesaj yaz..." [(ngModel)]="newMessageText" (keyup.enter)="sendMessage()"><button class="icon-btn" (click)="sendMessage()"><span class="material-symbols-outlined">send</span></button></div></div></div></div>
-
-    <div class="view-container" *ngIf="activeTab === 'settings'">
-      <div class="settings-layout">
-        <div class="settings-sidebar">
-          <div class="club-avatar-edit"><img [src]="clubInfo.logo" alt="Logo"><button class="edit-icon"><span class="material-symbols-outlined">edit</span></button></div>
-          <h3>{{ clubInfo.name }}</h3><p>{{ clubInfo.university }}</p>
+      <div class="view-section fade-in" *ngIf="activeTab === 'network'">
+        <div class="page-header-glass">
+          <h2>İş Birliği Ağı 🌐</h2>
+          <p>Diğer üniversite kulüpleriyle eşleş ve proje üret.</p>
         </div>
-        <div class="settings-form-card">
-          <h3>Kulüp Bilgileri</h3>
-          <div class="form-grid">
-            <div class="form-group"><label>Kulüp Adı</label><input type="text" [(ngModel)]="clubInfo.name" class="modern-input"></div>
-            <div class="form-group"><label>Email</label><input type="email" [(ngModel)]="clubInfo.email" class="modern-input"></div>
-            <div class="form-group"><label>Telefon</label><input type="text" placeholder="+90..." class="modern-input"></div>
-            <div class="form-group"><label>Sosyal Medya</label><input type="text" placeholder="@kullanici" class="modern-input"></div>
-            <div class="form-group full"><label>Hakkımızda</label><textarea [(ngModel)]="clubInfo.description" rows="4" class="modern-input"></textarea></div>
+
+        <div class="network-grid">
+          <div class="glass-card collab-card" *ngFor="let c of collaborations">
+            <div class="collab-header">
+              <img [src]="c.logo" class="collab-avatar">
+              <div class="uni-badge">{{ c.university }}</div>
+            </div>
+            <div class="collab-body">
+              <h3>{{ c.clubName }}</h3>
+              <p class="desc">{{ c.description }}</p>
+              <div class="match-score">
+                <span class="material-symbols-outlined">bolt</span> %95 Eşleşme
+              </div>
+              <div class="tags-container">
+                <span class="mini-tag">#AI</span>
+                <span class="mini-tag">#Robotik</span>
+              </div>
+              <button class="btn-outline-modern" (click)="contactClub(c.clubName)">
+                <span class="material-symbols-outlined">chat</span> İletişime Geç
+              </button>
+            </div>
           </div>
-          <div class="form-actions"><button class="btn-primary" (click)="updateSettings()">Kaydet</button></div>
         </div>
       </div>
+
+      <div class="view-section fade-in" *ngIf="activeTab === 'members'">
+        <div class="section-header">
+          <div class="search-glass">
+            <span class="material-symbols-outlined">search</span>
+            <input type="text" placeholder="Üye ara..." [(ngModel)]="memberSearchText">
+          </div>
+          <button class="btn-gradient" (click)="openModal('new-member')">Üye Ekle</button>
+        </div>
+        <div class="member-grid">
+          <div class="member-card glass-panel" *ngFor="let m of filteredMembers">
+            <div class="member-header">
+               <img [src]="m.avatar" alt="">
+               <span class="status-dot" [class.online]="m.status === 'Aktif'"></span>
+            </div>
+            <h4>{{ m.name }}</h4>
+            <p>{{ m.department }}</p>
+            <div class="tags">
+              <span class="role-tag">{{ m.role }}</span>
+              <span class="grade-tag">{{ m.grade }}</span>
+            </div>
+            <button class="btn-icon-only delete" (click)="deleteMember(m.id)"><span class="material-symbols-outlined">delete</span></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="view-section fade-in" *ngIf="activeTab === 'documents'">
+        
+        <div class="glass-panel storage-banner">
+          <div class="storage-info">
+            <div class="icon-circle big cyan"><span class="material-symbols-outlined">cloud_queue</span></div>
+            <div>
+              <h3>Bulut Depolama</h3>
+              <p>5GB / 15GB Kullanılıyor</p>
+            </div>
+          </div>
+          <div class="storage-bar-wrapper">
+            <div class="storage-bar-fill" style="width: 33%"></div>
+          </div>
+        </div>
+
+        <div class="upload-zone glass-panel">
+          <span class="material-symbols-outlined">cloud_upload</span>
+          <p>Dosyaları buraya sürükleyin veya <strong>Gözatın</strong></p>
+        </div>
+
+        <h3 class="section-title">Son Dosyalar</h3>
+        <div class="docs-grid">
+          <div class="glass-card doc-card" *ngFor="let d of documents">
+            <div class="doc-icon-box" [class.pdf]="d.type === 'PDF'" [class.word]="d.type === 'DOCX'" [class.zip]="d.type === 'ZIP'">
+              <span class="material-symbols-outlined">{{ d.icon }}</span>
+            </div>
+            <div class="doc-info">
+              <h4>{{ d.name }}</h4>
+              <span class="meta">2.4 MB • Bugün</span>
+            </div>
+            <button class="icon-btn-ghost" (click)="downloadDoc(d.name)">
+              <span class="material-symbols-outlined">download</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="view-section no-pad fade-in" *ngIf="activeTab === 'messages'">
+        <div class="glass-panel chat-layout">
+          <div class="chat-list">
+            <div class="list-header">Sohbetler</div>
+            <div class="contact" *ngFor="let c of chatContacts" [class.active]="activeContactId === c.id" (click)="selectContact(c.id)">
+              <img [src]="c.avatar">
+              <div class="info">
+                <span class="name">{{ c.name }}</span>
+                <span class="msg">{{ c.lastMsg }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="chat-area">
+             <div class="messages" #scrollMe>
+               <div class="bubble" *ngFor="let msg of activeChatMessages" [class.me]="msg.sender === 'me'">
+                 {{ msg.text }}
+               </div>
+             </div>
+             <div class="input-zone">
+               <input type="text" placeholder="Bir şeyler yaz..." [(ngModel)]="newMessageText" (keyup.enter)="sendMessage()">
+               <button class="send-btn" (click)="sendMessage()"><span class="material-symbols-outlined">send</span></button>
+             </div>
+          </div>
+        </div>
+      </div>
+
+       <div class="view-section fade-in" *ngIf="activeTab === 'settings'">
+        <div class="settings-container">
+          
+          <div class="glass-panel settings-menu">
+            <div class="menu-header">Ayarlar</div>
+            <button class="s-menu-item active"><span class="material-symbols-outlined">manage_accounts</span> Genel Bilgiler</button>
+            <button class="s-menu-item"><span class="material-symbols-outlined">notifications</span> Bildirimler</button>
+            <button class="s-menu-item"><span class="material-symbols-outlined">lock</span> Güvenlik</button>
+            <button class="s-menu-item danger"><span class="material-symbols-outlined">delete</span> Hesabı Sil</button>
+          </div>
+      
+          <div class="glass-panel settings-content">
+            
+            <div class="profile-banner-area">
+              <div class="banner-bg"></div>
+              <div class="profile-edit-avatar">
+                <img [src]="clubInfo.logo" alt="Logo">
+                <button class="edit-btn"><span class="material-symbols-outlined">photo_camera</span></button>
+              </div>
+            </div>
+      
+            <div class="form-section">
+              <h3>Kulüp Profili</h3>
+              <div class="grid-2">
+                <div class="input-group-modern">
+                  <label>Kulüp Adı</label>
+                  <input type="text" [(ngModel)]="clubInfo.name">
+                </div>
+                <div class="input-group-modern">
+                  <label>Üniversite</label>
+                  <input type="text" [(ngModel)]="clubInfo.university" disabled> </div>
+              </div>
+              
+              <div class="input-group-modern">
+                <label>Hakkımızda (Bio)</label>
+                <textarea rows="3" [(ngModel)]="clubInfo.description"></textarea>
+              </div>
+      
+              <div class="grid-2">
+                <div class="input-group-modern">
+                  <label>E-Posta</label>
+                  <input type="email" [(ngModel)]="clubInfo.email">
+                </div>
+                <div class="input-group-modern">
+                  <label>Instagram</label>
+                  <input type="text" [(ngModel)]="clubInfo.instagram">
+                </div>
+              </div>
+            </div>
+      
+            <div class="form-section">
+              <h3>Tercihler</h3>
+              <div class="toggle-row">
+                <span>Herkese Açık Profil</span>
+                <label class="switch">
+                  <input type="checkbox" checked>
+                  <span class="slider round"></span>
+                </label>
+              </div>
+              <div class="toggle-row">
+                <span>Yeni Üye Bildirimleri</span>
+                <label class="switch">
+                  <input type="checkbox" checked>
+                  <span class="slider round"></span>
+                </label>
+              </div>
+            </div>
+      
+            <div class="action-footer">
+              <button class="btn-ghost">İptal</button>
+              <button class="btn-glow" (click)="updateSettings()">Değişiklikleri Kaydet</button>
+            </div>
+      
+          </div>
+        </div>
+      </div>
+
     </div>
   </main>
 
-  <div class="modal-backdrop" *ngIf="isModalOpen" (click)="closeModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <div class="modal-header"><h3>İşlem</h3><button class="close-btn" (click)="closeModal()">✕</button></div>
+  <div class="modal-overlay" *ngIf="isModalOpen" (click)="closeModal()">
+    <div class="glass-modal" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <h3>{{ modalType === 'new-project' ? 'Yeni Proje Başlat' : 'Takıma Üye Ekle' }}</h3>
+        <button class="close" (click)="closeModal()">✕</button>
+      </div>
+      
       <div class="modal-body" *ngIf="modalType === 'new-project'">
-        <div class="form-row">
-          <div class="form-group"><label>Proje Adı</label><input type="text" [(ngModel)]="newProjectData.name" class="modern-input"></div>
-          <div class="form-group"><label>Kategori</label><select [(ngModel)]="newProjectData.category" class="modern-input"><option>Teknoloji</option><option>Sanat</option></select></div>
-        </div>
-        <div class="form-row">
-          <div class="form-group"><label>Bütçe (₺)</label><input type="number" [(ngModel)]="newProjectData.budget" class="modern-input"></div>
-          <div class="form-group"><label>Bitiş</label><input type="date" [(ngModel)]="newProjectData.deadline" class="modern-input"></div>
-        </div>
-        <button class="btn-primary full" (click)="saveProject()">Oluştur</button>
+         <input type="text" placeholder="Proje Adı" [(ngModel)]="newProjectData.name" class="glass-input">
+         <div class="row">
+           <input type="number" placeholder="Bütçe" [(ngModel)]="newProjectData.budget" class="glass-input">
+           <input type="date" [(ngModel)]="newProjectData.deadline" class="glass-input">
+         </div>
+         <button class="btn-gradient full" (click)="saveProject()">Oluştur 🚀</button>
       </div>
+
       <div class="modal-body" *ngIf="modalType === 'new-member'">
-        <div class="form-group"><label>Ad Soyad</label><input type="text" [(ngModel)]="newMemberData.name" class="modern-input"></div>
-        <div class="form-row">
-           <div class="form-group"><label>Email</label><input type="text" [(ngModel)]="newMemberData.email" class="modern-input"></div>
-           <div class="form-group"><label>Telefon</label><input type="text" [(ngModel)]="newMemberData.phone" class="modern-input"></div>
-        </div>
-        <div class="form-row">
-           <div class="form-group"><label>Bölüm</label><input type="text" [(ngModel)]="newMemberData.department" class="modern-input"></div>
-           <div class="form-group"><label>Sınıf</label><select [(ngModel)]="newMemberData.grade" class="modern-input"><option>1. Sınıf</option><option>2. Sınıf</option><option>3. Sınıf</option><option>4. Sınıf</option></select></div>
-        </div>
-        <div class="form-group"><label>Rol</label><select [(ngModel)]="newMemberData.role" class="modern-input"><option>Üye</option><option>YK Üyesi</option></select></div>
-        <button class="btn-primary full" (click)="saveMember()">Kaydet</button>
+        <input type="text" placeholder="Ad Soyad" [(ngModel)]="newMemberData.name" class="glass-input">
+        <input type="text" placeholder="Bölüm" [(ngModel)]="newMemberData.department" class="glass-input">
+        <select [(ngModel)]="newMemberData.role" class="glass-input">
+          <option>Üye</option><option>YK Üyesi</option>
+        </select>
+        <button class="btn-gradient full" (click)="saveMember()">Kaydet ✨</button>
       </div>
+
     </div>
   </div>
-
 </div>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
