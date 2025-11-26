@@ -70,9 +70,21 @@
             <a href="javascript:void(0)" class="forgot-link">Şifremi Unuttum?</a>
           </div>
 
-          <!-- Giriş Yap Butonu -->
-          <button type="submit" class="btn-primary" [style.opacity]="emailError ? '0.7' : '1'">
-            Giriş Yap <i class="bx bx-right-arrow-alt"></i>
+          <!-- Giriş Yap Butonu (Animasyonlu) -->
+          <button
+            type="submit"
+            class="btn-primary"
+            [style.opacity]="emailError ? '0.7' : '1'"
+            [disabled]="isLoading"
+          >
+            <ng-container *ngIf="!isLoading">
+              Giriş Yap <i class="bx bx-right-arrow-alt"></i>
+            </ng-container>
+
+            <ng-container *ngIf="isLoading">
+              <!-- Yükleniyor Animasyonu -->
+              <app-luma-spin></app-luma-spin>
+            </ng-container>
           </button>
 
           <div class="divider">
@@ -110,5 +122,5 @@
   </div>
 </div>
 
-<!-- TOAST BİLEŞENİ BURADA -->
+<!-- TOAST BİLEŞENİ -->
 <app-toast></app-toast>

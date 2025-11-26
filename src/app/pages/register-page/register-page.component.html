@@ -4,6 +4,9 @@
 />
 <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
 
+<!-- DÜZELTME: Artık input (message, type) göndermiyoruz. Servis üzerinden çalışıyor. -->
+<app-toast></app-toast>
+
 <div class="main-container">
   <div class="split-layout">
     <div class="visual-side">
@@ -29,7 +32,13 @@
         <form (submit)="onSubmit($event)">
           <div class="input-group">
             <div class="icon-wrapper"><i class="bx bx-user"></i></div>
-            <input type="text" placeholder="Ad Soyad" class="modern-input" required />
+            <input
+              type="text"
+              placeholder="Ad Soyad"
+              class="modern-input"
+              (input)="updateName($event)"
+              required
+            />
           </div>
 
           <div class="input-group">
@@ -88,16 +97,20 @@
           <button
             type="submit"
             class="btn-primary"
+            [disabled]="isLoading"
             [style.opacity]="emailError || passwordMismatch ? '0.7' : '1'"
           >
-            Öğrenci Olarak Kayıt Ol <i class="bx bx-right-arrow-alt"></i>
+            <span *ngIf="!isLoading">
+              Öğrenci Olarak Kayıt Ol <i class="bx bx-right-arrow-alt"></i>
+            </span>
+
+            <div *ngIf="isLoading" class="spinner-container">
+              <app-luma-spin></app-luma-spin>
+            </div>
           </button>
         </form>
       </div>
-
       <footer class="simple-footer">© T.C Gençlik ve Spor Bakanlığı</footer>
     </div>
   </div>
 </div>
-
-<app-toast></app-toast>

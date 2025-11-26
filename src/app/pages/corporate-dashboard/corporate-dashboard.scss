@@ -6,12 +6,14 @@
   --bg-main: #f1f5f9;
   --white: #ffffff;
   --border: #cbd5e1;
+  --text-light: #64748b;
+  --text-dark: #334155;
 }
 
 .dashboard-layout {
   display: flex;
   min-height: 100vh;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
 }
 
 /* SIDEBAR */
@@ -130,7 +132,7 @@
   border-bottom: 1px solid var(--border);
   h2 {
     font-size: 1.5rem;
-    color: #334155;
+    color: var(--text-dark);
     margin: 0;
     font-weight: 600;
   }
@@ -146,7 +148,7 @@
     }
     span {
       font-weight: 500;
-      color: #475569;
+      color: var(--text-light);
     }
   }
 }
@@ -188,7 +190,7 @@
   }
   .info p {
     margin: 0;
-    color: #64748b;
+    color: var(--text-light);
     font-size: 0.9rem;
   }
   &.blue {
@@ -218,6 +220,33 @@
       color: #a855f7;
     }
     border-bottom: 4px solid #a855f7;
+  }
+}
+
+.quick-actions {
+  h3 {
+    font-size: 1.1rem;
+    color: var(--text-dark);
+    margin-bottom: 15px;
+  }
+  .actions-row {
+    display: flex;
+    gap: 15px;
+    button {
+      background: white;
+      border: 1px solid var(--border);
+      padding: 15px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      color: var(--text-dark);
+      transition: 0.2s;
+      &:hover {
+        border-color: var(--active-item);
+        color: var(--active-item);
+        background: #eff6ff;
+      }
+    }
   }
 }
 
@@ -268,7 +297,7 @@ table {
     vertical-align: middle;
   }
   th {
-    color: #64748b;
+    color: var(--text-light);
     font-weight: 600;
     font-size: 0.9rem;
     text-transform: uppercase;
@@ -289,14 +318,10 @@ table {
     border-radius: 20px;
     font-size: 0.8rem;
     background: #f1f5f9;
-    color: #64748b;
+    color: var(--text-light);
     &.active {
       background: #dcfce7;
       color: #166534;
-    }
-    &.active-pub {
-      background: #dbeafe;
-      color: #1e40af;
     }
     &.warning {
       background: #ffedd5;
@@ -326,6 +351,55 @@ table {
   }
 }
 
+/* CARDS GRID (Duyurular vb) */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+.admin-card {
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  padding: 20px;
+  border-radius: 10px;
+  .card-head {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    h4 {
+      margin: 0;
+      color: var(--text-dark);
+    }
+    .date {
+      font-size: 0.8rem;
+      color: var(--text-light);
+    }
+  }
+  p {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin-bottom: 15px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .card-actions button {
+    font-size: 0.85rem;
+    margin-right: 10px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: var(--active-item);
+    &.text-danger {
+      color: #ef4444;
+    }
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
 /* MODAL */
 .modal-overlay {
   position: fixed;
@@ -346,8 +420,7 @@ table {
   overflow: hidden;
   animation: slideUp 0.3s ease;
   max-height: 90vh;
-  overflow-y: auto; /* İçerik taşarsa scroll */
-
+  overflow-y: auto;
   .modal-header {
     padding: 20px;
     border-bottom: 1px solid var(--border);
@@ -369,12 +442,13 @@ table {
     padding: 20px;
   }
   .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 20px;
     label {
       display: block;
-      margin-bottom: 5px;
-      color: #64748b;
+      margin-bottom: 8px;
+      color: var(--text-light);
       font-size: 0.9rem;
+      font-weight: 500;
     }
     .admin-input {
       width: 100%;
@@ -407,7 +481,7 @@ table {
       border: none;
       &.cancel-btn {
         background: #f1f5f9;
-        color: #64748b;
+        color: var(--text-light);
       }
       &.save-btn {
         background: #3b82f6;
@@ -415,6 +489,146 @@ table {
       }
     }
   }
+}
+
+/* --- YENİ RESİM YÜKLEME ALANI TASARIMI (Shadcn Style) --- */
+.custom-file-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 160px;
+  width: 100%;
+  border: 2px dashed rgba(148, 163, 184, 0.4); // border-muted-foreground/25
+  border-radius: 8px; // rounded-lg
+  background-color: rgba(241, 245, 249, 0.5); // bg-muted/50
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: #f1f5f9; // hover:bg-muted
+    border-color: rgba(148, 163, 184, 0.6);
+  }
+
+  &.dragging {
+    border-color: rgba(59, 130, 246, 0.5); // border-primary/50
+    background-color: rgba(59, 130, 246, 0.05); // bg-primary/5
+  }
+
+  .icon-wrapper {
+    background: var(--white);
+    padding: 10px;
+    border-radius: 50%;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    margin-bottom: 12px;
+
+    i {
+      font-size: 1.5rem;
+      color: var(--text-light);
+    }
+  }
+
+  .upload-text {
+    text-align: center;
+    .primary-text {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-dark);
+      margin-bottom: 2px;
+    }
+    .secondary-text {
+      font-size: 0.75rem;
+      color: var(--text-light);
+    }
+  }
+}
+
+/* Önizleme Alanı */
+.image-preview-container {
+  position: relative;
+  height: 160px;
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  // Hover durumunda overlay ve butonları göster
+  .overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  &:hover {
+    img {
+      transform: scale(1.05);
+    }
+    .overlay {
+      opacity: 1;
+    }
+  }
+
+  .preview-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+    i {
+      font-size: 1.1rem;
+    }
+
+    &.change-btn {
+      background: var(--white);
+      color: var(--text-dark);
+      &:hover {
+        background: #f8fafc;
+      }
+    }
+
+    &.remove-btn {
+      background: #ef4444;
+      color: white;
+      &:hover {
+        background: #dc2626;
+      }
+    }
+  }
+
+  .file-name {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.hidden-input {
+  display: none;
 }
 
 @keyframes slideUp {

@@ -1,92 +1,121 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-// Toast Servis ve Component'i Import Ediyoruz
+import { Router, RouterModule } from '@angular/router';
+import { AuthService, RegisterRequest } from '../../services/auth.services';
+
+// Servis ve UI Bileşenleri
 import { ToastService } from '../../services/toast.services';
 import { ToastComponent } from '../../components/ui/toast/toast.component';
+import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
 
 @Component({
   selector: 'app-register-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, ToastComponent], // ToastComponent'i eklemeyi unutmayın
+  imports: [CommonModule, RouterModule, ToastComponent, LumaSpinComponent],
   templateUrl: './register-page.component.html',
   styleUrls: ['./register-page.component.scss'],
 })
 export class RegisterPageComponent {
   emailError: boolean = false;
   passwordMismatch: boolean = false;
+  isLoading: boolean = false;
 
-  private password = '';
-  private confirmPassword = '';
+  private name: string = '';
+  private email: string = '';
+  private password: string = '';
+  private confirmPassword: string = '';
 
-  // Toast Servisini Enjekte Ediyoruz
-  constructor(private toastService: ToastService) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private toastService: ToastService
+  ) {}
 
-  // Sadece numara girilmesine izin verir
-  onlyNumbers(event: any) {
-    const pattern = /[0-9]/;
-    const inputChar = String.fromCharCode(event.charCode);
-    if (!pattern.test(inputChar)) {
-      event.preventDefault();
-    }
+  updateName(event: any) {
+    this.name = event.target.value;
   }
 
-  // Öğrenci E-posta Doğrulama
   validateStudentEmail(event: any) {
-    const email = event.target.value;
-    if (!email) {
+    const val = event.target.value;
+    this.email = val;
+
+    if (!val) {
       this.emailError = false;
       return;
     }
-    if (email.includes('@') && !email.endsWith('.edu.tr')) {
+    if (val.includes('@') && !val.endsWith('.edu.tr')) {
       this.emailError = true;
     } else {
       this.emailError = false;
     }
   }
 
-  // Şifre Eşleşme Kontrolü
   checkPasswords(event: any, type: string) {
     const val = event.target.value;
+    if (type === 'p1') this.password = val;
+    else this.confirmPassword = val;
 
-    if (type === 'p1') {
-      this.password = val;
-    } else {
-      this.confirmPassword = val;
-    }
-
-    if (this.confirmPassword && this.password !== this.confirmPassword) {
-      this.passwordMismatch = true;
-    } else {
-      this.passwordMismatch = false;
-    }
+    this.passwordMismatch = !!this.confirmPassword && this.password !== this.confirmPassword;
   }
 
   onSubmit(event: Event) {
     event.preventDefault();
 
+    // Validasyon Kontrolleri
+    if (!this.name || !this.email || !this.password) {
+      this.toastService.show('Lütfen tüm alanları doldurunuz.', 'error');
+      return;
+    }
+
     if (this.emailError) {
-      // Hata Mesajı
       this.toastService.show('Lütfen geçerli bir öğrenci e-postası (.edu.tr) giriniz.', 'error');
       return;
     }
 
     if (this.passwordMismatch) {
-      // Hata Mesajı
-      this.toastService.show('Şifreler eşleşmiyor! Lütfen kontrol edin.', 'error');
+      this.toastService.show('Şifreler eşleşmiyor!', 'error');
       return;
     }
 
-    // --- BAŞARILI KAYIT SENARYOSU ---
-    console.log('Öğrenci Kayıt formu başarıyla gönderildi.');
+    // Yükleniyor durumunu başlat (Spinner görünür)
+    this.isLoading = true;
 
-    // Başarı Mesajı
-    this.toastService.show(
-      'Kayıt işleminiz başarıyla tamamlandı! Yönlendiriliyorsunuz...',
-      'success'
-    );
+    const requestData: RegisterRequest = {
+      name: this.name,
+      email: this.email,
+      password: this.password,
+    };
 
-    // İsteğe bağlı: Yönlendirme vb.
-    // setTimeout(() => this.router.navigate(['/login']), 2000);
+    this.authService.registerStudent(requestData).subscribe({
+      next: (response) => {
+        console.log('Kayıt Başarılı:', response);
+
+        // BAŞARILI DURUM:
+        // 1. Kullanıcıya bilgi ver
+        this.toastService.show(
+          'Kayıt işleminiz başarıyla tamamlandı! Giriş sayfasına yönlendiriliyorsunuz...',
+          'success'
+        );
+
+        // 2. Yönlendirme yap (Kullanıcı mesajı okuyabilsin diye kısa bir gecikme ekledik)
+        setTimeout(() => {
+          // isLoading false yapmaya gerek yok çünkü sayfa değişecek
+          this.router.navigate(['/login']);
+        }, 2000);
+      },
+      error: (error) => {
+        console.error('Kayıt Hatası:', error);
+
+        // BAŞARISIZ DURUM:
+        // 1. Spinner'ı kapat, butonu geri getir
+        this.isLoading = false;
+
+        // 2. Hatayı göster
+        const errorMessage = error.error?.message || 'Kayıt sırasında bir hata oluştu.';
+        this.toastService.show(errorMessage, 'error');
+
+        // 3. Yönlendirme YAPMA (Kullanıcı sayfada kalır ve tekrar deneyebilir)
+      },
+    });
   }
 }

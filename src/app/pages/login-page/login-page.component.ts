@@ -1,31 +1,32 @@
 import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router'; // Router Eklendi
+import { Router, RouterLink } from '@angular/router';
 // Servisler
 import { ToastService } from '../../services/toast.services';
-import { AuthService } from '../../services/auth.services'; // Auth Servisi Eklendi
+import { AuthService, LoginResponse } from '../../services/auth.services';
 // Bileşenler
 import { ToastComponent } from '../../components/ui/toast/toast.component';
-// Http Client Modülü (Standalone component içinde http kullanabilmek için gerekebilir)
-import { HttpClientModule } from '@angular/common/http';
+import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component'; // YENİ: Luma Spin Eklendi
+// Http Client
+import { HttpClientModule, HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-login-page',
   standalone: true,
-  // HttpClientModule'ü buraya ekliyoruz ki servis çalışsın
-  imports: [CommonModule, RouterLink, ToastComponent, HttpClientModule],
+  // LumaSpinComponent buraya eklendi
+  imports: [CommonModule, RouterLink, ToastComponent, HttpClientModule, LumaSpinComponent],
   templateUrl: './login-page.component.html',
   styleUrls: ['./login-page.component.scss'],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class LoginPageComponent implements OnInit {
   emailError: boolean = false;
-  isLoading: boolean = false; // Yükleniyor durumu için (Butonu pasif yapmak için)
+  isLoading: boolean = false;
 
   constructor(
     private toastService: ToastService,
-    private authService: AuthService, // Auth servisini çağırıyoruz
-    private router: Router // Yönlendirme için
+    private authService: AuthService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -59,7 +60,7 @@ export class LoginPageComponent implements OnInit {
   onSubmit(event: Event) {
     event.preventDefault();
 
-    if (this.isLoading) return; // Zaten işlem yapılıyorsa tekrar basılmasın
+    if (this.isLoading) return;
 
     const form = event.target as HTMLFormElement;
     const emailInput = form.querySelector('input[type="email"]') as HTMLInputElement;
@@ -80,31 +81,24 @@ export class LoginPageComponent implements OnInit {
     }
 
     // 2. BACKEND SORGUSU BAŞLIYOR
-    this.isLoading = true; // Butonu kilitle
-    // ARA BİLDİRİM KALDIRILDI: Artık sorgu bitene kadar sessizce bekleyecek.
+    this.isLoading = true;
 
-    this.authService.login(email, password).subscribe({
-      next: (response) => {
+    this.authService.loginStudent(email, password).subscribe({
+      next: (response: LoginResponse) => {
         // --- BAŞARILI GİRİŞ ---
         this.isLoading = false;
-
-        // Token'ı kaydet
-        this.authService.saveToken(response.token);
-
         this.toastService.show('Giriş başarılı! Anasayfaya yönlendiriliyorsunuz...', 'success');
 
-        // 1.5 saniye sonra yönlendir (Toast okunsun diye)
         setTimeout(() => {
-          this.router.navigate(['/']); // Anasayfaya git
+          this.router.navigate(['/']);
         }, 1500);
       },
-      error: (error) => {
+      error: (error: HttpErrorResponse) => {
         // --- HATALI GİRİŞ ---
         this.isLoading = false;
         console.error('Giriş Hatası:', error);
 
-        // Backend'den gelen hata mesajını veya genel bir mesajı göster
-        const message = error.message || 'E-posta veya şifre hatalı!';
+        const message = error.error?.message || error.message || 'E-posta veya şifre hatalı!';
         this.toastService.show(message, 'error');
       },
     });

@@ -1,6 +1,6 @@
 /* --- MODERN CSS RESET & VARIABLES --- */
 :host {
-  --primary-color: #4f46e5; /* İndigo - Öğrenci Teması */
+  --primary-color: #4f46e5;
   --primary-hover: #4338ca;
   --secondary-bg: #f3f4f6;
   --text-dark: #111827;
@@ -39,7 +39,6 @@
   display: none;
   width: 50%;
   position: relative;
-  /* Öğrenci/Kampüs Görseli */
   background-image: url('https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80');
   background-size: cover;
   background-position: center;
@@ -51,7 +50,6 @@
     left: 0;
     width: 100%;
     height: 100%;
-    /* Mor/Mavi Degrade Overlay */
     background: linear-gradient(135deg, rgba(79, 70, 229, 0.9) 0%, rgba(124, 58, 237, 0.7) 100%);
     backdrop-filter: blur(2px);
   }
@@ -105,7 +103,6 @@
   padding: 40px 20px;
   background-color: var(--white);
   position: relative;
-  /* Form uzun olduğu için mobilde scroll gerekebilir */
   overflow-y: auto;
 }
 .form-wrapper {
@@ -156,10 +153,6 @@
   position: relative;
   margin-bottom: 15px;
 }
-.mt-3 {
-  margin-top: 15px;
-}
-
 .icon-wrapper {
   position: absolute;
   left: 16px;
@@ -261,6 +254,8 @@
   align-items: center;
   gap: 8px;
   font-family: var(--font-main);
+  /* Buton yüksekliğini sabitlemek spinner sırasında zıplamayı önler */
+  min-height: 56px;
 
   &:hover {
     transform: translateY(-2px);
@@ -269,54 +264,22 @@
   &:active {
     transform: translateY(0);
   }
-}
 
-/* ALT LINKLER */
-.divider {
-  margin: 30px 0 20px 0;
-  text-align: center;
-  position: relative;
-  &::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    width: 100%;
-    height: 1px;
-    background-color: var(--border-color);
-    z-index: 1;
-  }
-  span {
-    position: relative;
-    z-index: 2;
-    background-color: var(--white);
-    padding: 0 15px;
-    color: var(--text-gray);
-    font-size: 12px;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+  &:disabled {
+    opacity: 0.8;
+    cursor: not-allowed;
+    transform: none;
   }
 }
 
-.other-register-links {
+/* Spinner Container */
+.spinner-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 10px;
-  font-size: 14px;
-  .text-link {
-    color: var(--text-gray);
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.2s;
-    &:hover {
-      color: var(--primary-color);
-    }
-  }
-  .dot {
-    color: var(--border-color);
-  }
+  width: 100%;
+  /* Luma spin'in boyutuna göre buraya scale ekleyebilirsin */
+  /* transform: scale(0.8); */
 }
 
 .simple-footer {
@@ -340,13 +303,13 @@
     padding: 0;
     height: 100vh;
     overflow-y: hidden;
-  } /* Masaüstünde formu ortala */
+  }
   .form-wrapper {
     margin-top: 0;
     max-height: 100vh;
     overflow-y: auto;
     padding: 40px 20px;
-  } /* İçerik taşarsa sadece form alanı kayar */
+  }
   .simple-footer {
     position: absolute;
     bottom: 10px;

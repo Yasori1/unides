@@ -1,5 +1,5 @@
 <div class="dashboard-layout">
-  <!-- SIDEBAR (SOL MENÜ) -->
+  <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="sidebar-header">
       <div class="logo">
@@ -32,9 +32,8 @@
     </div>
   </aside>
 
-  <!-- MAIN CONTENT (SAĞ TARAF) -->
+  <!-- MAIN CONTENT -->
   <main class="main-content">
-    <!-- HEADER -->
     <header class="dashboard-header">
       <h2>
         {{
@@ -59,9 +58,8 @@
       </div>
     </header>
 
-    <!-- CONTENT AREA -->
     <div class="content-body">
-      <!-- 1. DASHBOARD (GENEL BAKIŞ) -->
+      <!-- 1. DASHBOARD -->
       <div *ngIf="activeTab === 'dashboard'" class="dashboard-view fade-in">
         <div class="stats-grid">
           <div class="stat-card" *ngFor="let stat of stats" [ngClass]="stat.color">
@@ -72,7 +70,6 @@
             </div>
           </div>
         </div>
-        <!-- Hızlı Erişim -->
         <div class="quick-actions mt-4">
           <h3>Hızlı İşlemler</h3>
           <div class="actions-row">
@@ -139,7 +136,7 @@
         </div>
       </div>
 
-      <!-- 3. ETKİNLİK YÖNETİMİ -->
+      <!-- 3. ETKİNLİK -->
       <div *ngIf="activeTab === 'events'" class="table-view fade-in">
         <div class="table-header">
           <input type="text" placeholder="Etkinlik ara..." class="search-input" />
@@ -234,9 +231,7 @@
                   }}</span>
                 </td>
                 <td class="actions">
-                  <button class="edit" title="Onayla/Cevapla">
-                    <i class="bx bx-check-circle"></i>
-                  </button>
+                  <button class="edit"><i class="bx bx-check-circle"></i></button>
                   <button class="delete" (click)="deleteItem('forum', f.id)">
                     <i class="bx bx-trash"></i>
                   </button>
@@ -249,7 +244,7 @@
     </div>
   </main>
 
-  <!-- MODAL (GÜNCELLENDİ: Resim Yükleme Bileşeni Dahil) -->
+  <!-- MODAL -->
   <div class="modal-overlay" *ngIf="isModalOpen" (click)="closeModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
@@ -258,8 +253,8 @@
       </div>
       <div class="modal-body">
         <form (submit)="saveItem()">
-          <!-- Topluluk Formu -->
           <ng-container *ngIf="modalType === 'community'">
+            <!-- 1. Satır -->
             <div class="form-row">
               <div class="form-group half">
                 <label>Topluluk Adı</label>
@@ -283,6 +278,7 @@
               </div>
             </div>
 
+            <!-- 2. Satır -->
             <div class="form-row">
               <div class="form-group half">
                 <label>Kategori</label>
@@ -307,23 +303,138 @@
               </div>
             </div>
 
-            <!-- RESİM YÜKLEME BİLEŞENLERİ -->
-            <div class="form-group">
-              <app-image-upload
-                [label]="'Kapak Resmi (Banner)'"
-                [previewUrl]="formData.coverImage"
-                (onImageSelected)="updateImage('coverImage', $event)"
-              >
-              </app-image-upload>
+            <!-- 3. Satır: Şehir -->
+            <div class="form-row">
+              <div class="form-group half">
+                <label>Şehir</label>
+                <input
+                  type="text"
+                  [(ngModel)]="formData.city"
+                  name="city"
+                  class="admin-input"
+                  placeholder="Örn: İstanbul"
+                />
+              </div>
+              <div class="form-group half"></div>
             </div>
 
+            <!-- BANNER YÜKLEME (Yeni Tasarım) -->
             <div class="form-group">
-              <app-image-upload
-                [label]="'Topluluk Logosu'"
-                [previewUrl]="formData.logo"
-                (onImageSelected)="updateImage('logo', $event)"
+              <label>Kapak Resmi (Banner)</label>
+
+              <!-- Yükleme Alanı (Resim Yoksa) -->
+              <div
+                *ngIf="!formData.coverImage"
+                class="custom-file-upload"
+                [class.dragging]="dragState['coverImage']"
+                (click)="triggerFileInput('coverImage')"
+                (dragover)="handleDragOver($event, 'coverImage')"
+                (dragleave)="handleDragLeave($event, 'coverImage')"
+                (drop)="handleDrop($event, 'coverImage')"
               >
-              </app-image-upload>
+                <div class="icon-wrapper">
+                  <i class="bx bx-image-add"></i>
+                </div>
+                <div class="upload-text">
+                  <p class="primary-text">Tıkla ve seç</p>
+                  <p class="secondary-text">veya dosyayı buraya sürükle</p>
+                </div>
+                <!-- Gizli Input -->
+                <input
+                  type="file"
+                  #coverImageInput
+                  class="hidden-input"
+                  accept="image/*"
+                  (change)="onFileSelected($event, 'coverImage')"
+                />
+              </div>
+
+              <!-- Önizleme (Resim Varsa) -->
+              <div *ngIf="formData.coverImage" class="image-preview-container">
+                <img [src]="formData.coverImage" alt="Banner" />
+                <div class="overlay">
+                  <button
+                    type="button"
+                    class="preview-btn change-btn"
+                    (click)="triggerFileInput('coverImage')"
+                  >
+                    <i class="bx bx-upload"></i>
+                  </button>
+                  <button
+                    type="button"
+                    class="preview-btn remove-btn"
+                    (click)="removeImage('coverImage')"
+                  >
+                    <i class="bx bx-trash"></i>
+                  </button>
+                </div>
+                <!-- Yeniden yükleme için gizli input (gerekirse) -->
+                <input
+                  type="file"
+                  #coverImageInputRef
+                  class="hidden-input"
+                  accept="image/*"
+                  (change)="onFileSelected($event, 'coverImage')"
+                />
+              </div>
+            </div>
+
+            <!-- LOGO YÜKLEME (GÜNCELLENDİ: Boyut Eşitlendi) -->
+            <div class="form-group">
+              <label>Topluluk Logosu</label>
+
+              <div
+                *ngIf="!formData.logo"
+                class="custom-file-upload"
+                [class.dragging]="dragState['logo']"
+                (click)="triggerFileInput('logo')"
+                (dragover)="handleDragOver($event, 'logo')"
+                (dragleave)="handleDragLeave($event, 'logo')"
+                (drop)="handleDrop($event, 'logo')"
+              >
+                <div class="icon-wrapper">
+                  <i class="bx bx-image-add"></i>
+                </div>
+                <div class="upload-text">
+                  <p class="primary-text">Tıkla ve seç</p>
+                  <p class="secondary-text">veya dosyayı buraya sürükle</p>
+                </div>
+                <input
+                  type="file"
+                  #logoInput
+                  class="hidden-input"
+                  accept="image/*"
+                  (change)="onFileSelected($event, 'logo')"
+                />
+              </div>
+
+              <!-- Eski style="height: 100px; width: 100px;" kaldırıldı, Banner ile aynı genişlik sağlandı -->
+              <div *ngIf="formData.logo" class="image-preview-container">
+                <img [src]="formData.logo" alt="Logo" style="object-fit: contain" />
+                <div class="overlay">
+                  <button
+                    type="button"
+                    class="preview-btn change-btn"
+                    (click)="triggerFileInput('logo')"
+                  >
+                    <i class="bx bx-upload"></i>
+                  </button>
+                  <button
+                    type="button"
+                    class="preview-btn remove-btn"
+                    (click)="removeImage('logo')"
+                  >
+                    <i class="bx bx-trash"></i>
+                  </button>
+                </div>
+                <input
+                  type="file"
+                  #logoInputRef
+                  class="hidden-input"
+                  accept="image/*"
+                  (change)="onFileSelected($event, 'logo')"
+                />
+              </div>
             </div>
 
             <div class="form-group">
@@ -337,15 +448,15 @@
             </div>
           </ng-container>
 
-          <!-- Duyuru Formu -->
+          <!-- Diğer form tipleri (announcement, event) aynı kalacak -->
           <ng-container *ngIf="modalType === 'announcement'">
             <div class="form-group">
-              <label>Başlık</label>
-              <input type="text" [(ngModel)]="formData.title" name="title" class="admin-input" />
+              <label>Başlık</label
+              ><input type="text" [(ngModel)]="formData.title" name="title" class="admin-input" />
             </div>
             <div class="form-group">
-              <label>İçerik</label>
-              <textarea
+              <label>İçerik</label
+              ><textarea
                 [(ngModel)]="formData.content"
                 name="content"
                 class="admin-input"
@@ -354,15 +465,14 @@
             </div>
           </ng-container>
 
-          <!-- Etkinlik Formu -->
           <ng-container *ngIf="modalType === 'event'">
             <div class="form-group">
-              <label>Etkinlik Adı</label>
-              <input type="text" [(ngModel)]="formData.title" name="title" class="admin-input" />
+              <label>Etkinlik Adı</label
+              ><input type="text" [(ngModel)]="formData.title" name="title" class="admin-input" />
             </div>
             <div class="form-group">
-              <label>Konum</label>
-              <input
+              <label>Konum</label
+              ><input
                 type="text"
                 [(ngModel)]="formData.location"
                 name="location"
@@ -370,8 +480,8 @@
               />
             </div>
             <div class="form-group">
-              <label>Tarih</label>
-              <input type="text" [(ngModel)]="formData.date" name="date" class="admin-input" />
+              <label>Tarih</label
+              ><input type="text" [(ngModel)]="formData.date" name="date" class="admin-input" />
             </div>
           </ng-container>
 

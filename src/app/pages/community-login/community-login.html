@@ -26,14 +26,6 @@
 
         <div class="header-text">
           <h3>Topluluk Girişi</h3>
-          <!--
-          <p>
-            Topluluğunuz yok mu?
-            <a routerLink="/community-register" class="register-link">Topluluk Oluştur</a>
-          </p>
-        </div>
--->
-
           <br />
           <form (submit)="onSubmit($event)">
             <!-- E-Posta Input -->
@@ -71,9 +63,22 @@
               <a href="javascript:void(0)" class="forgot-link">Şifremi Unuttum?</a>
             </div>
 
-            <!-- Giriş Yap Butonu -->
-            <button type="submit" class="btn-primary" [style.opacity]="emailError ? '0.7' : '1'">
-              Topluluğa Giriş Yap <i class="bx bx-right-arrow-alt"></i>
+            <!-- Giriş Yap Butonu (GÜNCELLENDİ) -->
+            <button
+              type="submit"
+              class="btn-primary"
+              [disabled]="isLoading"
+              [style.opacity]="emailError || isLoading ? '0.7' : '1'"
+            >
+              <!-- Normal Durum -->
+              <span *ngIf="!isLoading">
+                Topluluğa Giriş Yap <i class="bx bx-right-arrow-alt"></i>
+              </span>
+
+              <!-- Yükleniyor Durumu -->
+              <div *ngIf="isLoading" class="spinner-container">
+                <app-luma-spin></app-luma-spin>
+              </div>
             </button>
 
             <div class="divider">
@@ -111,3 +116,6 @@
     </div>
   </div>
 </div>
+
+<!-- TOAST COMPONENT -->
+<app-toast></app-toast>

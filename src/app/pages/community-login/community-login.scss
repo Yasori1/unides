@@ -45,7 +45,6 @@
   display: none;
   width: 50%;
   position: relative;
-  /* Topluluk odaklı, kalabalık, sosyal bir görsel */
   background-image: url('https://images.unsplash.com/photo-1529156069898-49953e39b3ac?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80');
   background-size: cover;
   background-position: center;
@@ -57,7 +56,6 @@
     left: 0;
     width: 100%;
     height: 100%;
-    /* Mavi tonlu degrade overlay */
     background: linear-gradient(135deg, rgba(37, 99, 235, 0.9) 0%, rgba(29, 78, 216, 0.7) 100%);
     backdrop-filter: blur(2px);
   }
@@ -191,7 +189,7 @@
   &:focus {
     background-color: var(--white);
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); /* Mavi gölge */
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
   }
 
   &:focus + .icon-wrapper,
@@ -262,6 +260,8 @@
   align-items: center;
   gap: 8px;
   font-family: var(--font-main);
+  /* Spinner zıplamasını engellemek için min-height */
+  min-height: 56px;
 
   &:hover {
     transform: translateY(-2px);
@@ -270,6 +270,18 @@
   &:active {
     transform: translateY(0);
   }
+  &:disabled {
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+/* Spinner Container */
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
 }
 
 .divider {
@@ -338,7 +350,6 @@
     color: var(--text-dark);
   }
 
-  /* Hover Durumları */
   &:hover {
     background-color: #f8fafc;
     border-color: #cbd5e1;
@@ -357,9 +368,9 @@
 .simple-footer {
   position: absolute;
   bottom: 20px;
-  width: 100%; /* Tüm genişliği kapla */
-  text-align: center; /* Yazıyı ortala */
-  left: 0; /* Sol tarafa yasla */
+  width: 100%;
+  text-align: center;
+  left: 0;
   color: #9ca3af;
   font-size: 12px;
 }

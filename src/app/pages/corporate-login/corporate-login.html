@@ -64,9 +64,22 @@
             <a href="javascript:void(0)" class="forgot-link">Şifremi Unuttum?</a>
           </div>
 
-          <!-- Giriş Butonu (Kurumsal Stil) -->
-          <button type="submit" class="btn-primary" [style.opacity]="emailError ? '0.7' : '1'">
-            Yönetim Paneline Gir <i class="bx bx-right-arrow-alt"></i>
+          <!-- Giriş Butonu (YENİLENMİŞ) -->
+          <button
+            type="submit"
+            class="btn-primary"
+            [disabled]="isLoading"
+            [style.opacity]="emailError || isLoading ? '0.7' : '1'"
+          >
+            <!-- Normal Durum: Yazı -->
+            <span *ngIf="!isLoading">
+              Yönetim Paneline Gir <i class="bx bx-right-arrow-alt"></i>
+            </span>
+
+            <!-- Yükleniyor Durumu: Spinner -->
+            <div *ngIf="isLoading" class="spinner-container">
+              <app-luma-spin></app-luma-spin>
+            </div>
           </button>
 
           <div class="divider">

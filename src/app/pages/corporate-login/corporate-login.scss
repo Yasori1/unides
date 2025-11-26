@@ -1,6 +1,5 @@
 /* --- KURUMSAL TEMA (SLATE / KOYU MAVİ) --- */
 :host {
-  /* Kurumsal Renk Paleti: Ciddi ve Güven Veren Koyu Tonlar */
   --primary-color: #0f172a; /* Slate 900 */
   --primary-hover: #1e293b; /* Slate 800 */
   --secondary-bg: #f3f4f6;
@@ -9,10 +8,7 @@
   --white: #ffffff;
   --input-bg: #f9fafb;
   --border-color: #e5e7eb;
-
-  /* Diğer Buton Renkleri */
-  --community-color: #2563eb; /* Topluluk Mavi */
-
+  --community-color: #2563eb;
   --error-color: #ef4444;
   --font-main: 'Poppins', sans-serif;
 
@@ -44,7 +40,6 @@
   display: none;
   width: 50%;
   position: relative;
-  /* Ofis / Plaza Görseli */
   background-image: url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80');
   background-size: cover;
   background-position: center;
@@ -56,7 +51,6 @@
     left: 0;
     width: 100%;
     height: 100%;
-    /* Koyu Gri/Lacivert Overlay */
     background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.8) 100%);
     backdrop-filter: blur(2px);
   }
@@ -141,17 +135,6 @@
   }
 }
 
-.register-link {
-  color: var(--primary-color);
-  font-weight: 600;
-  text-decoration: none;
-  transition: color 0.2s;
-}
-.register-link:hover {
-  color: var(--primary-hover);
-  text-decoration: underline;
-}
-
 /* INPUTLAR */
 .input-group {
   position: relative;
@@ -190,7 +173,6 @@
   &:focus {
     background-color: var(--white);
     border-color: var(--primary-color);
-    /* Koyu renkli focus halkası */
     box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.1);
   }
 
@@ -262,6 +244,8 @@
   align-items: center;
   gap: 8px;
   font-family: var(--font-main);
+  /* Spinner zıplamasını engellemek için min-height */
+  min-height: 56px;
 
   &:hover {
     transform: translateY(-2px);
@@ -270,6 +254,18 @@
   &:active {
     transform: translateY(0);
   }
+  &:disabled {
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+/* Spinner Ortalama */
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
 }
 
 .divider {
@@ -348,7 +344,6 @@
     border-color: #cbd5e1;
   }
 
-  /* Topluluk Butonu için Hover Efekti */
   &.btn-community:hover {
     border-color: var(--community-color);
     background-color: #eff6ff;

@@ -1,63 +1,109 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http'; // Backend isteği için
-import { Observable, of, throwError } from 'rxjs';
-import { delay } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
+import { Observable, tap } from 'rxjs';
+import { Router } from '@angular/router';
+
+export interface LoginResponse {
+  token: string;
+  user: {
+    id: number;
+    name: string;
+    email: string;
+    role: 'student' | 'corporate' | 'community' | 'admin';
+  };
+}
+
+export interface RegisterRequest {
+  name: string;
+  email: string;
+  password: string;
+}
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  // Backend API Adresiniz (Burası değişecek)
-  private apiUrl = 'https://api.unides.com.tr/api/v1';
+  private apiUrl = 'https://api.unides.com/api';
 
-  // HttpClient'ı inject ediyoruz (app.config.ts'de provideHttpClient() olmalı)
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private router: Router) {}
 
-  /**
-   * GİRİŞ YAPMA FONKSİYONU
-   * @param email Öğrenci E-postası
-   * @param password Şifre
-   */
-  login(email: string, password: string): Observable<any> {
-    // --- SENARYO 1: GERÇEK BACKEND (Backend hazır olunca burayı açın) ---
-    /*
-    return this.http.post(`${this.apiUrl}/auth/login`, { 
-      email: email, 
-      password: password 
-    });
-    */
-
-    // --- SENARYO 2: DEMO / SİMÜLASYON (Şu an çalışan) ---
-    // Backend varmış gibi 1 saniye bekletip cevap döner.
-    return new Observable((observer) => {
-      setTimeout(() => {
-        if (email === 'demo@univ.edu.tr' && password === '123456') {
-          // Başarılı Cevap Simülasyonu
-          observer.next({
-            success: true,
-            token: 'fake-jwt-token-123456',
-            user: { name: 'Öğrenci', email: email },
-          });
-          observer.complete();
-        } else {
-          // Hatalı Cevap Simülasyonu
-          observer.error({ status: 401, message: 'E-posta veya şifre hatalı.' });
+  // --- 1. ÖĞRENCİ GİRİŞİ ---
+  loginStudent(email: string, password: string): Observable<LoginResponse> {
+    const payload = { email, password };
+    return this.http.post<LoginResponse>(`${this.apiUrl}/auth/student/login`, payload).pipe(
+      tap((response) => {
+        if (response.token) {
+          this.saveToken(response.token);
+          this.saveUser(response.user);
+          this.saveUserType('student');
         }
-      }, 1000); // 1 saniye gecikme
-    });
+      })
+    );
   }
 
-  /**
-   * TOKEN KAYDETME (Giriş başarılıysa token'ı tarayıcıya kaydeder)
-   */
-  saveToken(token: string) {
+  // --- 2. KURUMSAL GİRİŞ ---
+  loginCorporate(email: string, password: string): Observable<LoginResponse> {
+    const payload = { email, password };
+    return this.http.post<LoginResponse>(`${this.apiUrl}/auth/corporate/login`, payload).pipe(
+      tap((response) => {
+        if (response.token) {
+          this.saveToken(response.token);
+          this.saveUser(response.user);
+          this.saveUserType('corporate');
+        }
+      })
+    );
+  }
+
+  // --- 3. TOPLULUK GİRİŞİ (YENİ EKLENDİ) ---
+  loginCommunity(email: string, password: string): Observable<LoginResponse> {
+    const payload = { email, password };
+    // Backend endpoint varsayımı: /auth/community/login
+    return this.http.post<LoginResponse>(`${this.apiUrl}/auth/community/login`, payload).pipe(
+      tap((response) => {
+        if (response.token) {
+          this.saveToken(response.token);
+          this.saveUser(response.user);
+          this.saveUserType('community');
+        }
+      })
+    );
+  }
+
+  // --- 4. ÖĞRENCİ KAYDI ---
+  registerStudent(data: RegisterRequest): Observable<any> {
+    return this.http.post(`${this.apiUrl}/auth/student/register`, data);
+  }
+
+  // --- ORTAK YARDIMCI METOTLAR ---
+  saveToken(token: string): void {
     localStorage.setItem('auth_token', token);
   }
+  getToken(): string | null {
+    return localStorage.getItem('auth_token');
+  }
+  saveUser(user: any): void {
+    localStorage.setItem('user_info', JSON.stringify(user));
+  }
+  getUser(): any | null {
+    const user = localStorage.getItem('user_info');
+    return user ? JSON.parse(user) : null;
+  }
+  saveUserType(type: string): void {
+    localStorage.setItem('user_type', type);
+  }
+  getUserType(): string | null {
+    return localStorage.getItem('user_type');
+  }
 
-  /**
-   * ÇIKIŞ YAPMA
-   */
-  logout() {
+  logout(): void {
     localStorage.removeItem('auth_token');
+    localStorage.removeItem('user_info');
+    localStorage.removeItem('user_type');
+    this.router.navigate(['/login']);
+  }
+
+  isAuthenticated(): boolean {
+    return !!this.getToken();
   }
 }

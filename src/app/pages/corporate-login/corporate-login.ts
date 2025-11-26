@@ -1,20 +1,29 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
+// Servis importları
 import { ToastService } from '../../services/toast.services';
+import { AuthService } from '../../services/auth.services';
 import { ToastComponent } from '../../components/ui/toast/toast.component';
+// Spinner Bileşeni
+import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
 
 @Component({
   selector: 'app-corporate-login',
   standalone: true,
-  imports: [CommonModule, RouterModule, ToastComponent],
+  imports: [CommonModule, RouterModule, ToastComponent, LumaSpinComponent],
   templateUrl: './corporate-login.html',
   styleUrls: ['./corporate-login.scss'],
 })
 export class CorporateLoginComponent {
   emailError: boolean = false;
+  isLoading: boolean = false;
 
-  constructor(private router: Router, private toastService: ToastService) {}
+  constructor(
+    private router: Router,
+    private toastService: ToastService,
+    private authService: AuthService
+  ) {}
 
   validateStudentEmail(event: any) {
     const email = event.target.value;
@@ -22,8 +31,6 @@ export class CorporateLoginComponent {
       this.emailError = false;
       return;
     }
-    // Kurumsal e-posta kontrolü (Örn: .gov.tr veya .edu.tr)
-    // Basit kontrol: İçinde @ varsa kabul et (Geliştirilebilir)
     if (email.includes('@')) {
       this.emailError = false;
     } else {
@@ -38,28 +45,52 @@ export class CorporateLoginComponent {
     const emailInput = form.querySelector('input[type="email"]') as HTMLInputElement;
     const passwordInput = form.querySelector('input[type="password"]') as HTMLInputElement;
 
-    const email = emailInput.value;
-    const password = passwordInput.value;
+    const email = emailInput?.value;
+    const password = passwordInput?.value;
 
-    // 1. Boş Alan Kontrolü
     if (!email || !password) {
       this.toastService.show('Lütfen e-posta ve şifre alanlarını doldurunuz.', 'error');
       return;
     }
 
-    // 2. Format Hatası Kontrolü
     if (this.emailError) {
       this.toastService.show('Lütfen geçerli bir kurumsal e-posta giriniz.', 'error');
       return;
     }
 
-    // 3. Başarılı Giriş Simülasyonu
-    console.log('Kurumsal giriş başarılı.');
-    this.toastService.show('Giriş başarılı! Yönetim paneline yönlendiriliyorsunuz...', 'success');
+    // Yükleniyor durumunu başlat
+    this.isLoading = true;
 
-    // 1.5 Saniye sonra Dashboard'a yönlendir
-    setTimeout(() => {
-      this.router.navigate(['/corporate-dashboard']);
-    }, 1500);
+    this.authService.loginCorporate(email, password).subscribe({
+      next: (response) => {
+        // --- BAŞARILI ---
+        console.log('Kurumsal giriş başarılı:', response);
+
+        // 1. Toast Mesajı
+        this.toastService.show(
+          'Giriş başarılı! Yönetim paneline yönlendiriliyorsunuz...',
+          'success'
+        );
+
+        // 2. Yönlendirme ve Buton Durumu
+        setTimeout(() => {
+          this.isLoading = false; // Spinner durur, yazı geri gelir
+          this.router.navigate(['/corporate-dashboard']); // Yönlendirme
+        }, 1500);
+      },
+      error: (error) => {
+        // --- HATA ---
+        console.error('Giriş Hatası:', error);
+
+        // 1. Spinner'ı durdur, butonu eski haline getir
+        this.isLoading = false;
+
+        // 2. Özel Hata Mesajı
+        const errorMessage =
+          error.error?.message ||
+          'Giriş yapılamadı. Lütfen bilgilerinizi kontrol edip tekrar deneyiniz.';
+        this.toastService.show(errorMessage, 'error');
+      },
+    });
   }
 }
