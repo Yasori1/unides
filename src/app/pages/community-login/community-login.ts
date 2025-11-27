@@ -19,7 +19,7 @@ import { HttpClientModule, HttpErrorResponse } from '@angular/common/http';
   // BU SATIR EKLENMELİ: Spline gibi custom element'leri tanıması için gereklidir
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class LoginPageComponent implements OnInit {
+export class CommunityLoginComponent implements OnInit {
   emailError: boolean = false;
   isLoading: boolean = false;
 
