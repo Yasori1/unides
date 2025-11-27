@@ -149,7 +149,10 @@
         <div class="card-info">
           <div class="tags-row">
             <span class="tag uni" title="{{ event.university }}">{{ event.university }}</span>
-            <span class="tag semester">{{ event.semester }}</span>
+            <!-- BURASI GÜNCELLENDİ: Artık Topluluk İsmi Gösteriliyor -->
+            <span class="tag semester" *ngIf="event.semester">
+              <i class="bx bx-group"></i> {{ event.semester }}
+            </span>
           </div>
 
           <h3>{{ event.title }}</h3>
@@ -200,7 +203,7 @@
 
 <app-footer></app-footer>
 
-<!-- DETAY MODALI (DÜZENLENDİ) -->
+<!-- DETAY MODALI -->
 <div class="modal-backdrop" *ngIf="selectedEvent" (click)="closeModal()">
   <div class="modal-content" (click)="$event.stopPropagation()">
     <button class="close-btn" (click)="closeModal()">
@@ -227,11 +230,12 @@
           <span class="value">{{ selectedEvent.university }}</span>
         </div>
         <div class="detail-item">
-          <span class="label">DÖNEM</span>
+          <span class="label">TOPLULUK</span>
+          <!-- Etiket Güncellendi -->
           <span class="value">{{ selectedEvent.semester }}</span>
         </div>
         <div class="detail-item">
-          <span class="label">KULÜP</span>
+          <span class="label">KULÜP (Detay)</span>
           <span class="value">{{ selectedEvent.club }}</span>
         </div>
         <div class="detail-item">
@@ -252,19 +256,16 @@
 
       <p class="description">{{ selectedEvent.description }}</p>
 
-      <!-- YENİ BUTON MANTIĞI -->
       <button
         class="join-btn"
         [class.success]="isJoined"
         [class.login-required]="!isLoggedIn"
         (click)="handleJoinClick()"
       >
-        <!-- İkonlar -->
         <span class="material-symbols-outlined" *ngIf="isLoggedIn && !isJoined">how_to_reg</span>
         <span class="material-symbols-outlined" *ngIf="isLoggedIn && isJoined">check_circle</span>
         <span class="material-symbols-outlined" *ngIf="!isLoggedIn">login</span>
 
-        <!-- Yazılar -->
         <ng-container *ngIf="isLoggedIn">
           {{ isJoined ? 'KAYIT ALINDI' : 'ETKİNLİĞE KATIL' }}
         </ng-container>

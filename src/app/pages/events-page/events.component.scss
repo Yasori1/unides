@@ -1,12 +1,12 @@
-// --- YENİ RENK PALETİ (Mavi/Gri/Siyah/Beyaz) ---
-$primary-blue: #2563eb; // Canlı Modern Mavi
-$dark-blue: #1e3a8a; // Koyu Lacivert
-$text-dark: #0f172a; // Slate 900
-$text-gray: #64748b; // Slate 500
-$text-light-gray: #94a3b8; // Slate 400
-$bg-light: #f8fafc; // Slate 50
+// --- YENİ RENK PALETİ ---
+$primary-blue: #2563eb;
+$dark-blue: #1e3a8a;
+$text-dark: #0f172a;
+$text-gray: #64748b;
+$text-light-gray: #94a3b8;
+$bg-light: #f8fafc;
 $white: #ffffff;
-$border-color: #e2e8f0; // Slate 200
+$border-color: #e2e8f0;
 
 :host {
   display: block;
@@ -40,7 +40,6 @@ $border-color: #e2e8f0; // Slate 200
     inset: 0;
     z-index: 1;
     overflow: hidden;
-
     .interactive-blob {
       position: absolute;
       width: 450px;
@@ -68,7 +67,6 @@ $border-color: #e2e8f0; // Slate 200
     margin-bottom: 12px;
     letter-spacing: -1px;
     line-height: 1.1;
-
     .highlight-text {
       color: transparent;
       -webkit-text-stroke: 1.5px $primary-blue;
@@ -103,7 +101,6 @@ $border-color: #e2e8f0; // Slate 200
   font-weight: 700;
   opacity: 0.7;
   z-index: 3;
-
   .line {
     width: 2px;
     height: 25px;
@@ -130,7 +127,8 @@ $border-color: #e2e8f0; // Slate 200
     input {
       width: 100%;
       padding: 16px 20px 16px 50px;
-      border-radius: 12px;
+      // Navbar ile uyumlu tam yuvarlak (pill) yapısı
+      border-radius: 999px;
       border: 1px solid $border-color;
       background: #fff;
       font-family: inherit;
@@ -166,7 +164,8 @@ $border-color: #e2e8f0; // Slate 200
     border: 1px solid $border-color;
     padding: 10px 28px;
     margin: 0 5px;
-    border-radius: 8px;
+    // Navbar gibi tam yuvarlak
+    border-radius: 999px;
     font-weight: 600;
     color: $text-gray;
     transition: 0.3s;
@@ -175,6 +174,7 @@ $border-color: #e2e8f0; // Slate 200
     &:hover {
       border-color: $text-dark;
       color: $text-dark;
+      background-color: $bg-light;
     }
     &.active {
       background-color: $text-dark;
@@ -206,8 +206,9 @@ $border-color: #e2e8f0; // Slate 200
     .filter-pill {
       background: $bg-light;
       border: 1px solid transparent;
-      padding: 8px 18px;
-      border-radius: 6px;
+      padding: 8px 20px;
+      // Tam yuvarlak tasarım
+      border-radius: 999px;
       font-family: inherit;
       font-weight: 500;
       color: $text-gray;
@@ -223,6 +224,7 @@ $border-color: #e2e8f0; // Slate 200
         background: $primary-blue;
         color: $white;
         font-weight: 600;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
       }
     }
   }
@@ -239,8 +241,9 @@ $border-color: #e2e8f0; // Slate 200
     .sort-btn {
       background: #fff;
       border: 1px solid $border-color;
-      padding: 8px 16px;
-      border-radius: 6px;
+      padding: 8px 18px;
+      // Tam yuvarlak tasarım
+      border-radius: 999px;
       font-family: inherit;
       font-weight: 600;
       color: $text-gray;
@@ -253,11 +256,13 @@ $border-color: #e2e8f0; // Slate 200
       &:hover {
         border-color: $primary-blue;
         color: $primary-blue;
+        background-color: $bg-light;
       }
       &.active {
         background: $text-dark;
         color: #fff;
         border-color: $text-dark;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
       }
     }
   }
@@ -289,7 +294,6 @@ $border-color: #e2e8f0; // Slate 200
   grid-template-columns: repeat(4, 1fr);
   gap: 24px;
   padding: 0 20px 40px;
-  // Burada min-height vererek içerik azalsa bile slider'ın yukarı zıplamasını engelliyoruz
   min-height: 800px;
 }
 
@@ -297,7 +301,7 @@ $border-color: #e2e8f0; // Slate 200
   position: relative;
   width: 100%;
   height: 420px;
-  border-radius: 12px;
+  border-radius: 20px; /* Kartlar hafif köşeli kalabilir veya 24px ile daha yumuşatılabilir */
   overflow: hidden;
   background: #ffffff;
   border: 1px solid $border-color;
@@ -389,6 +393,12 @@ $border-color: #e2e8f0; // Slate 200
         &.semester {
           background: rgba($primary-blue, 0.08);
           color: $primary-blue;
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          i {
+            font-size: 0.8rem;
+          }
         }
       }
     }
@@ -445,7 +455,8 @@ $border-color: #e2e8f0; // Slate 200
     color: $text-dark;
     border: 1px solid $border-color;
     padding: 10px 28px;
-    border-radius: 6px;
+    // Tam yuvarlak buton
+    border-radius: 999px;
     font-weight: 600;
     font-size: 0.9rem;
     cursor: pointer;
@@ -502,7 +513,7 @@ $border-color: #e2e8f0; // Slate 200
       .slide {
         width: 280px;
         height: 180px;
-        border-radius: 10px;
+        border-radius: 12px;
         overflow: hidden;
         flex-shrink: 0;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
@@ -537,7 +548,7 @@ $border-color: #e2e8f0; // Slate 200
   background: #fff;
   width: 100%;
   max-width: 600px;
-  border-radius: 16px;
+  border-radius: 20px;
   overflow: hidden;
   position: relative;
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
@@ -578,7 +589,7 @@ $border-color: #e2e8f0; // Slate 200
       left: 30px;
       padding: 6px 14px;
       color: white;
-      border-radius: 6px;
+      border-radius: 99px;
       font-size: 0.75rem;
       font-weight: 700;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
@@ -602,7 +613,7 @@ $border-color: #e2e8f0; // Slate 200
       gap: 24px 30px;
       background: $bg-light;
       padding: 24px;
-      border-radius: 12px;
+      border-radius: 16px;
       margin-bottom: 25px;
       border: 1px solid $border-color;
 
@@ -649,7 +660,7 @@ $border-color: #e2e8f0; // Slate 200
       background: $text-dark;
       color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 99px; // Buton da yuvarlak
       font-weight: 700;
       font-size: 1rem;
       cursor: pointer;

@@ -5,22 +5,70 @@
   --border-color: #e4e4e7;
   --primary-color: #09090b;
   --secondary-color: #71717a;
-  --accent-color: #5ecfb1;
+  --accent-color: #2563eb;
+  --hover-color: #1d4ed8;
+  --bg-light: #f8fafc;
 }
 
+// --- 1. PAGE SPACER (Banner) ---
 .page-spacer {
-  padding-top: 150px;
-  padding-bottom: 60px;
-  background-color: #f9f9f9;
+  padding-top: 140px;
+  padding-bottom: 70px;
+  background-color: var(--bg-light);
   text-align: center;
   border-bottom: 1px solid var(--border-color);
+  position: relative;
+  overflow: hidden;
+
+  .background-wrapper {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+    .interactive-blob {
+      position: absolute;
+      width: 450px;
+      height: 450px;
+      top: 50%;
+      left: 50%;
+      margin-top: -225px;
+      margin-left: -225px;
+      background: radial-gradient(
+        circle,
+        rgba(37, 99, 235, 0.12) 0%,
+        rgba(6, 182, 212, 0.08) 40%,
+        rgba(255, 255, 255, 0) 70%
+      );
+      filter: blur(70px);
+      border-radius: 50%;
+      transition: transform 0.1s ease-out;
+    }
+    .noise-overlay {
+      position: absolute;
+      inset: 0;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+  }
+
+  .container {
+    position: relative;
+    z-index: 2;
+  }
 
   .page-title {
-    font-size: 2.5rem;
+    font-size: 2.8rem;
     font-weight: 800;
     color: var(--primary-color);
-    margin-bottom: 15px;
+    margin-bottom: 12px;
     letter-spacing: -1px;
+    .highlight-text {
+      color: transparent;
+      -webkit-text-stroke: 1.5px var(--accent-color);
+      display: inline-block;
+      margin-left: 10px;
+    }
   }
 
   .page-subtitle {
@@ -28,11 +76,37 @@
     color: var(--secondary-color);
     max-width: 600px;
     margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .scroll-indicator {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--secondary-color);
+    font-weight: 700;
+    opacity: 0.7;
+    z-index: 3;
+    .line {
+      width: 2px;
+      height: 25px;
+      background: linear-gradient(to bottom, var(--accent-color), transparent);
+      animation: dropLine 2s infinite;
+    }
   }
 }
 
+// --- 2. FILTERS BAR ---
 .communities-grid-section {
-  padding: 60px 0 100px;
+  padding: 40px 0 100px;
   background-color: var(--bg-color);
 
   .container {
@@ -42,52 +116,151 @@
   }
 }
 
-.loading-state {
-  text-align: center;
-  padding: 50px;
-  font-size: 1.2rem;
-  color: var(--secondary-color);
+.filters-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  background: white;
+  padding: 20px;
+  /* Navbar dropdown'larıyla uyumlu olması için 24px yapıldı */
+  border-radius: 24px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  margin-bottom: 30px;
+  align-items: center;
+
+  .search-group {
+    flex: 2;
+    min-width: 250px;
+    position: relative;
+    i {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--secondary-color);
+      font-size: 1.2rem;
+    }
+    input {
+      width: 100%;
+      padding: 12px 15px 12px 45px;
+      border: 1px solid var(--border-color);
+      /* Inputlar da uyumlu olsun */
+      border-radius: 12px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.2s;
+      &:focus {
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      }
+    }
+  }
+
+  .filter-groups {
+    flex: 3;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+
+    .select-wrapper {
+      flex: 1;
+      min-width: 160px;
+      position: relative;
+      i {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--secondary-color);
+        pointer-events: none;
+      }
+      select {
+        width: 100%;
+        padding: 12px 35px 12px 15px;
+        border: 1px solid var(--border-color);
+        /* Selectler de uyumlu olsun */
+        border-radius: 12px;
+        font-size: 0.95rem;
+        color: var(--primary-color);
+        background: white;
+        outline: none;
+        appearance: none;
+        cursor: pointer;
+        transition: all 0.2s;
+        &:focus {
+          border-color: var(--accent-color);
+        }
+      }
+    }
+  }
 }
 
-// GRID YAPISI
+.results-count {
+  margin-bottom: 20px;
+  color: var(--secondary-color);
+  font-size: 0.9rem;
+  strong {
+    color: var(--primary-color);
+  }
+}
+
+// --- 3. GRID & CARDS ---
+.loading-state {
+  text-align: center;
+  padding: 80px 0;
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #e4e4e7;
+    border-top-color: var(--accent-color);
+    border-radius: 50%;
+    margin: 0 auto 15px;
+    animation: spin 1s linear infinite;
+  }
+  p {
+    color: var(--secondary-color);
+  }
+}
+
 .grid-container {
   display: grid;
   grid-template-columns: repeat(1, 1fr);
   gap: 30px;
-
   @media (min-width: 768px) {
     grid-template-columns: repeat(2, 1fr);
   }
-
   @media (min-width: 1024px) {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
-// KART TASARIMI
 .community-card {
   display: flex;
   flex-direction: column;
   background: var(--card-bg);
   border: 1px solid var(--border-color);
-  border-radius: 20px;
+  /* Navbar ile uyumlu olması için 24px yapıldı */
+  border-radius: 24px;
   overflow: hidden;
   text-decoration: none;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   height: 100%;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
   position: relative;
 
   &:hover {
     transform: translateY(-8px);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
     border-color: var(--accent-color);
-
     .action-text {
       color: var(--accent-color);
       i {
         transform: translateX(5px);
       }
+    }
+    .cover-img {
+      transform: scale(1.05);
     }
   }
 
@@ -96,25 +269,28 @@
     width: 100%;
     position: relative;
     background-color: #f4f4f5;
+    overflow: hidden;
 
     .cover-img {
       width: 100%;
       height: 100%;
       object-fit: cover;
+      transition: transform 0.5s ease;
     }
 
     .category-badge {
       position: absolute;
       top: 15px;
       right: 15px;
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(255, 255, 255, 0.9);
       backdrop-filter: blur(4px);
-      color: white;
+      color: var(--primary-color);
       font-size: 0.75rem;
-      font-weight: 600;
-      padding: 4px 12px;
+      font-weight: 700;
+      padding: 6px 14px;
       border-radius: 20px;
       text-transform: uppercase;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
   }
 
@@ -134,26 +310,25 @@
     }
 
     .logo-wrapper {
-      width: 70px;
-      height: 70px;
-      border-radius: 15px;
+      width: 76px;
+      height: 76px;
+      border-radius: 20px; /* Logo çerçevesi de yumuşatıldı */
       background: white;
       padding: 4px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
       flex-shrink: 0;
-
       .logo-img {
         width: 100%;
         height: 100%;
         object-fit: contain;
-        border-radius: 12px;
+        border-radius: 16px;
         background-color: #fff;
+        border: 1px solid #f4f4f5;
       }
     }
 
     .title-wrapper {
       padding-top: 35px;
-
       .community-name {
         font-size: 1.1rem;
         font-weight: 700;
@@ -165,11 +340,23 @@
         -webkit-box-orient: vertical;
         overflow: hidden;
       }
-
       .university-name {
         font-size: 0.8rem;
         color: var(--secondary-color);
         font-weight: 500;
+        display: block;
+      }
+      .city-tag {
+        font-size: 0.75rem;
+        color: var(--accent-color);
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin-top: 4px;
+        background: rgba(37, 99, 235, 0.05);
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-weight: 600;
       }
     }
 
@@ -180,7 +367,6 @@
       margin-top: 10px;
       margin-bottom: 20px;
       flex-grow: 1;
-
       display: -webkit-box;
       -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
@@ -194,19 +380,16 @@
       border-top: 1px solid var(--border-color);
       padding-top: 15px;
       font-size: 0.85rem;
-
       .stat {
         display: flex;
         align-items: center;
         gap: 6px;
         color: var(--secondary-color);
         font-weight: 500;
-
         i {
           font-size: 1.1rem;
         }
       }
-
       .action-text {
         font-weight: 600;
         color: var(--primary-color);
@@ -214,7 +397,6 @@
         align-items: center;
         gap: 4px;
         transition: color 0.3s;
-
         i {
           transition: transform 0.3s;
         }
@@ -223,7 +405,38 @@
   }
 }
 
-// SAYFALAMA (PAGINATION) TASARIMI
+// --- 4. NO DATA & PAGINATION ---
+.no-data {
+  text-align: center;
+  padding: 60px 0;
+  .empty-icon {
+    font-size: 4rem;
+    color: #e4e4e7;
+    margin-bottom: 15px;
+  }
+  h3 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+  }
+  p {
+    color: var(--secondary-color);
+    margin-bottom: 20px;
+  }
+  .reset-btn {
+    padding: 10px 20px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: 0.2s;
+    &:hover {
+      background: #27272a;
+    }
+  }
+}
+
 .pagination-area {
   display: flex;
   justify-content: center;
@@ -235,7 +448,7 @@
   .page-btn {
     width: 40px;
     height: 40px;
-    border-radius: 10px;
+    border-radius: 12px; /* Butonlar da yumuşatıldı */
     border: 1px solid var(--border-color);
     background: white;
     color: var(--secondary-color);
@@ -250,21 +463,60 @@
       border-color: var(--accent-color);
       color: var(--accent-color);
     }
-
     &.active {
       background-color: var(--accent-color);
       color: white;
       border-color: var(--accent-color);
     }
-
     &[disabled] {
       opacity: 0.5;
       cursor: not-allowed;
       background-color: #f4f4f5;
     }
-
     i {
       font-size: 1.2rem;
+    }
+  }
+}
+
+// Animations
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes dropLine {
+  0% {
+    transform: scaleY(0);
+    transform-origin: top;
+  }
+  50% {
+    transform: scaleY(1);
+    transform-origin: top;
+  }
+  51% {
+    transform: scaleY(1);
+    transform-origin: bottom;
+  }
+  100% {
+    transform: scaleY(0);
+    transform-origin: bottom;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-spacer .page-title {
+    font-size: 2rem;
+  }
+  .filters-bar {
+    flex-direction: column;
+    align-items: stretch;
+    .search-group,
+    .filter-groups {
+      flex: 1;
+    }
+    .filter-groups {
+      flex-direction: column;
     }
   }
 }

@@ -1,23 +1,87 @@
 <app-header />
 
-<div class="page-spacer">
-  <div class="container">
-    <h1 class="page-title">Topluluklar</h1>
+<!-- YENİ BANNER (FAQ Sayfası Tarzı) -->
+<div class="page-spacer" (mousemove)="onHeroMouseMove($event)">
+  <div class="background-wrapper">
+    <div
+      class="interactive-blob"
+      [style.transform]="'translate(' + -heroMoveX + 'px, ' + -heroMoveY + 'px)'"
+    ></div>
+    <div class="noise-overlay"></div>
+  </div>
+
+  <div class="container relative-content">
+    <h1 class="page-title">ÜNİDES <span class="highlight-text">TOPLULUKLAR</span></h1>
     <p class="page-subtitle">
       İlgi alanına uygun topluluğu bul, aramıza katıl ve üniversite hayatını renklendir.
     </p>
   </div>
+
+  <div class="scroll-indicator">
+    <span>Keşfet</span>
+    <div class="line"></div>
+  </div>
 </div>
 
+<!-- FİLTRELEME & GRID ALANI -->
 <section class="communities-grid-section">
   <div class="container">
-    <!-- Yükleniyor Göstergesi -->
+    <!-- FİLTRELEME ÇUBUĞU -->
+    <div class="filters-bar">
+      <!-- Arama -->
+      <div class="search-group">
+        <i class="bx bx-search"></i>
+        <input
+          type="text"
+          placeholder="Topluluk ara..."
+          [(ngModel)]="searchText"
+          (input)="applyFilters()"
+        />
+      </div>
+
+      <!-- Filtreler -->
+      <div class="filter-groups">
+        <div class="select-wrapper">
+          <select [(ngModel)]="selectedCity" (change)="applyFilters()">
+            <option value="">Tüm Şehirler</option>
+            <option *ngFor="let city of cities" [value]="city">{{ city }}</option>
+          </select>
+          <i class="bx bx-chevron-down"></i>
+        </div>
+
+        <div class="select-wrapper">
+          <select [(ngModel)]="selectedCategory" (change)="applyFilters()">
+            <option value="">Tüm Kategoriler</option>
+            <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+          </select>
+          <i class="bx bx-chevron-down"></i>
+        </div>
+
+        <div class="select-wrapper">
+          <select [(ngModel)]="sortOrder" (change)="applyFilters()">
+            <option value="default">Önerilen Sıralama</option>
+            <option value="member_desc">Üye Sayısı (Çoktan Az)</option>
+            <option value="member_asc">Üye Sayısı (Azdan Çok)</option>
+          </select>
+          <i class="bx bx-sort-alt-2"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- SONUÇ SAYISI -->
+    <div class="results-count" *ngIf="!isLoading">
+      <p>
+        Toplam <strong>{{ filteredCommunities.length }}</strong> topluluk bulundu.
+      </p>
+    </div>
+
+    <!-- Yükleniyor -->
     <div *ngIf="isLoading" class="loading-state">
+      <div class="spinner"></div>
       <p>Topluluklar yükleniyor...</p>
     </div>
 
     <!-- GRID YAPISI -->
-    <!-- Sadece yükleme bittiğinde ve veri varsa göster -->
     <div class="grid-container" *ngIf="!isLoading && displayedCommunities.length > 0">
       <a
         *ngFor="let item of displayedCommunities"
@@ -25,7 +89,12 @@
         class="community-card"
       >
         <div class="cover-area">
-          <img [src]="item.coverImage" [alt]="item.name" class="cover-img" />
+          <img
+            [src]="item.coverImage"
+            [alt]="item.name"
+            class="cover-img"
+            onerror="this.src='assets/img/placeholder-cover.jpg'"
+          />
           <span class="category-badge">{{ item.category }}</span>
         </div>
 
@@ -42,6 +111,10 @@
             <div class="title-wrapper">
               <h3 class="community-name">{{ item.name }}</h3>
               <span class="university-name">{{ item.university }}</span>
+              <!-- Şehir bilgisi varsa gösterelim, yoksa gizli kalsın -->
+              <span class="city-tag" *ngIf="item.city"
+                ><i class="bx bxs-map"></i> {{ item.city }}</span
+              >
             </div>
           </div>
 
@@ -60,10 +133,13 @@
 
     <!-- Veri Yoksa -->
     <div class="no-data" *ngIf="!isLoading && displayedCommunities.length === 0">
-      <p>Aradığınız kriterlere uygun topluluk bulunamadı.</p>
+      <div class="empty-icon"><i class="bx bx-search-alt"></i></div>
+      <h3>Sonuç Bulunamadı</h3>
+      <p>Aradığınız kriterlere uygun topluluk mevcut değil. Filtreleri temizlemeyi deneyin.</p>
+      <button class="reset-btn" (click)="resetFilters()">Filtreleri Temizle</button>
     </div>
 
-    <!-- SAYFALAMA (PAGINATION) -->
+    <!-- SAYFALAMA -->
     <div class="pagination-area" *ngIf="!isLoading && totalPages > 1">
       <button
         class="page-btn prev"

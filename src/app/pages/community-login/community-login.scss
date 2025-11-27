@@ -1,20 +1,16 @@
 /* --- MODERN CSS RESET & VARIABLES --- */
 :host {
-  /* Topluluk Teması: Canlı Mavi */
-  --primary-color: #2563eb; /* Blue 600 */
-  --primary-hover: #1d4ed8; /* Blue 700 */
+  --primary-color: #4f46e5;
+  --primary-hover: #4338ca;
   --secondary-bg: #f3f4f6;
   --text-dark: #111827;
   --text-gray: #6b7280;
   --white: #ffffff;
   --input-bg: #f9fafb;
   --border-color: #e5e7eb;
-
-  /* Alt Buton Renkleri */
-  --official-color: #1e293b; /* Yetkili Butonu için Koyu */
-  --student-color: #4f46e5; /* Öğrenci Butonu için İndigo */
-
-  --error-color: #ef4444;
+  --official-color: #1e293b;
+  --community-color: #2563eb;
+  --error-color: #ef4444; /* Kırmızı Hata Rengi */
   --font-main: 'Poppins', sans-serif;
 
   font-family: var(--font-main);
@@ -40,15 +36,23 @@
   height: 100%;
 }
 
-/* SOL TARAF - GÖRSEL */
+/* SOL TARAF - 3D SAHNE ALANI */
 .visual-side {
   display: none;
   width: 50%;
-  position: relative;
-  background-image: url('https://images.unsplash.com/photo-1529156069898-49953e39b3ac?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80');
-  background-size: cover;
-  background-position: center;
+  position: relative; /* Spline'ın buna göre konumlanması için */
+  background-color: #1e1e1e; /* Yüklenirken görünecek arka plan rengi */
   overflow: hidden;
+
+  /* Spline Viewer Ayarları */
+  spline-viewer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1; /* En altta */
+  }
 
   .visual-overlay {
     position: absolute;
@@ -56,19 +60,23 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, rgba(37, 99, 235, 0.9) 0%, rgba(29, 78, 216, 0.7) 100%);
-    backdrop-filter: blur(2px);
+    z-index: 2; /* 3D sahnenin üzerinde ama içeriğin altında */
+    /* 3D sahneyi tamamen kapatmamak için daha şeffaf bir gradient */
+    background: linear-gradient(135deg, rgba(79, 70, 229, 0.4) 0%, rgba(67, 56, 202, 0.2) 100%);
+    backdrop-filter: blur(0px); /* Netlik için blur'u kaldırdık */
+    pointer-events: none; /* Mouse olayları 3D sahneye geçebilsin */
   }
 
   .visual-content {
     position: relative;
-    z-index: 2;
+    z-index: 3; /* En üstte */
     height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     padding: 60px;
     color: white;
+    pointer-events: none; /* İçerik mouse'u engellemesin */
   }
 }
 
@@ -87,6 +95,7 @@
     font-weight: 700;
     margin-bottom: 20px;
     animation: fadeInUp 0.8s ease-out;
+    text-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     color: white;
   }
   p {
@@ -95,11 +104,12 @@
     max-width: 400px;
     font-weight: 300;
     animation: fadeInUp 1s ease-out;
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
     color: white;
   }
 }
 
-/* SAĞ TARAF - FORM */
+/* SAĞ TARAF FORM */
 .form-side {
   width: 100%;
   display: flex;
@@ -189,7 +199,7 @@
   &:focus {
     background-color: var(--white);
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
   }
 
   &:focus + .icon-wrapper,
@@ -197,9 +207,11 @@
     color: var(--primary-color);
   }
 
+  /* Hata Durumları */
   &.input-error {
     border-color: var(--error-color);
-    background-color: #fef2f2;
+    background-color: #fef2f2; /* Açık kırmızı arka plan */
+
     &:focus {
       box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
       border-color: var(--error-color);
@@ -243,11 +255,10 @@
   color: var(--primary-color);
 }
 
-/* ANA BUTON */
 .btn-primary {
   width: 100%;
   padding: 16px;
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+  background: linear-gradient(135deg, var(--primary-color) 0%, #4338ca 100%);
   color: white;
   border: none;
   border-radius: 12px;
@@ -260,28 +271,14 @@
   align-items: center;
   gap: 8px;
   font-family: var(--font-main);
-  /* Spinner zıplamasını engellemek için min-height */
-  min-height: 56px;
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.4);
+    box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.4);
   }
   &:active {
     transform: translateY(0);
   }
-  &:disabled {
-    cursor: not-allowed;
-    transform: none;
-  }
-}
-
-/* Spinner Container */
-.spinner-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
 }
 
 .divider {
@@ -308,7 +305,6 @@
   }
 }
 
-/* SOSYAL BUTONLAR */
 .social-login-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -323,56 +319,58 @@
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: left;
-
-  .btn-content {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .text-col {
-    display: flex;
-    flex-direction: column;
-  }
-  .btn-label {
-    font-size: 10px;
-    text-transform: uppercase;
-    color: #9ca3af;
-    letter-spacing: 0.5px;
-    font-weight: 600;
-  }
-  .btn-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-dark);
-  }
-  .icon-official {
-    font-size: 24px;
-    color: var(--text-dark);
-  }
-
-  &:hover {
-    background-color: #f8fafc;
-    border-color: #cbd5e1;
-  }
-
-  &.btn-official:hover {
-    border-color: var(--official-color);
-    background-color: #f1f5f9;
-    .icon-official {
-      color: var(--official-color);
-    }
-  }
 }
 
-/* FOOTER ORTALAMA DÜZELTMESİ */
+.btn-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.text-col {
+  display: flex;
+  flex-direction: column;
+}
+.btn-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: #9ca3af;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+.btn-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+.icon-official {
+  font-size: 24px;
+  color: var(--official-color);
+}
+.emoji-icon {
+  font-size: 20px;
+  font-style: normal;
+  line-height: 1;
+}
+
+.btn-official:hover {
+  border-color: var(--official-color);
+  background-color: #f8fafc;
+}
+.btn-community:hover {
+  border-color: var(--community-color);
+  background-color: #eff6ff;
+}
+
+/* DÜZELTME: Footer stilleri güncellendi */
 .simple-footer {
   position: absolute;
   bottom: 20px;
-  width: 100%;
-  text-align: center;
-  left: 0;
+  width: 100%; /* Tam genişlik */
+  text-align: center; /* Ortala */
+  left: 0; /* Solu sıfırla */
   color: #9ca3af;
   font-size: 12px;
+  pointer-events: none; /* Etkileşimi engelle */
 }
 
 /* RESPONSIVE */

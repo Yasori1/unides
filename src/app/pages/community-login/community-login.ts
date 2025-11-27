@@ -1,91 +1,106 @@
-import { Component } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
-// Servisler ve Bileşenler
+import { Router, RouterLink } from '@angular/router';
+// Servisler
 import { ToastService } from '../../services/toast.services';
-import { AuthService } from '../../services/auth.services';
+import { AuthService, LoginResponse } from '../../services/auth.services';
+// Bileşenler
 import { ToastComponent } from '../../components/ui/toast/toast.component';
 import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
+// Http Client
+import { HttpClientModule, HttpErrorResponse } from '@angular/common/http';
 
 @Component({
-  selector: 'app-community-login',
+  selector: 'app-login-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, ToastComponent, LumaSpinComponent],
+  imports: [CommonModule, RouterLink, ToastComponent, HttpClientModule, LumaSpinComponent],
   templateUrl: './community-login.html',
   styleUrls: ['./community-login.scss'],
+  // BU SATIR EKLENMELİ: Spline gibi custom element'leri tanıması için gereklidir
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class CommunityLoginComponent {
+export class LoginPageComponent implements OnInit {
   emailError: boolean = false;
   isLoading: boolean = false;
 
   constructor(
-    private router: Router,
     private toastService: ToastService,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) {}
+
+  ngOnInit(): void {
+    // Spline Viewer scriptini dinamik olarak yükle
+    const scriptCheck = document.querySelector(
+      'script[src="https://unpkg.com/@splinetool/viewer@1.9.59/build/spline-viewer.js"]'
+    );
+
+    if (!scriptCheck) {
+      const script = document.createElement('script');
+      script.type = 'module';
+      script.src = 'https://unpkg.com/@splinetool/viewer@1.9.59/build/spline-viewer.js';
+      document.head.appendChild(script);
+    }
+  }
 
   validateStudentEmail(event: any) {
     const email = event.target.value;
+
     if (!email) {
       this.emailError = false;
       return;
     }
-    // Topluluklar için basit e-posta formatı kontrolü
-    if (email.includes('@')) {
-      this.emailError = false;
-    } else {
+
+    if (email.includes('@') && !email.endsWith('.edu.tr')) {
       this.emailError = true;
+    } else {
+      this.emailError = false;
     }
   }
 
   onSubmit(event: Event) {
     event.preventDefault();
 
+    if (this.isLoading) return;
+
     const form = event.target as HTMLFormElement;
     const emailInput = form.querySelector('input[type="email"]') as HTMLInputElement;
     const passwordInput = form.querySelector('input[type="password"]') as HTMLInputElement;
 
-    const email = emailInput?.value;
-    const password = passwordInput?.value;
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
 
-    // 1. Boş Alan Kontrolü
+    // 1. Validasyonlar
     if (!email || !password) {
       this.toastService.show('Lütfen e-posta ve şifre alanlarını doldurunuz.', 'error');
       return;
     }
 
-    // 2. Validasyon Kontrolü
     if (this.emailError) {
-      this.toastService.show('Lütfen geçerli bir e-posta adresi giriniz.', 'error');
+      this.toastService.show('Lütfen geçerli bir öğrenci e-postası (.edu.tr) giriniz.', 'error');
       return;
     }
 
-    // 3. Giriş İşlemi
+    // 2. BACKEND SORGUSU BAŞLIYOR
     this.isLoading = true;
 
-    this.authService.loginCommunity(email, password).subscribe({
-      next: (response) => {
-        // --- BAŞARILI ---
-        console.log('Topluluk girişi başarılı:', response);
-        this.toastService.show(
-          'Giriş başarılı! Topluluk paneline yönlendiriliyorsunuz...',
-          'success'
-        );
+    this.authService.loginStudent(email, password).subscribe({
+      next: (response: LoginResponse) => {
+        // --- BAŞARILI GİRİŞ ---
+        this.isLoading = false;
+        this.toastService.show('Giriş başarılı! Anasayfaya yönlendiriliyorsunuz...', 'success');
 
         setTimeout(() => {
-          this.isLoading = false;
-          // Topluluk Dashboard'una yönlendir (Henüz yoksa oluşturacağız)
-          this.router.navigate(['/community-dashboard']);
+          this.router.navigate(['/']);
         }, 1500);
       },
-      error: (error) => {
-        // --- HATA ---
-        console.error('Giriş Hatası:', error);
+      error: (error: HttpErrorResponse) => {
+        // --- HATALI GİRİŞ ---
         this.isLoading = false;
+        console.error('Giriş Hatası:', error);
 
-        const errorMessage =
-          error.error?.message || 'Giriş yapılamadı. Bilgilerinizi kontrol ediniz.';
-        this.toastService.show(errorMessage, 'error');
+        const message = error.error?.message || error.message || 'E-posta veya şifre hatalı!';
+        this.toastService.show(message, 'error');
       },
     });
   }

@@ -7,16 +7,22 @@
 
 <div class="main-container">
   <div class="split-layout">
-    <!-- SOL TARAF: GÖRSEL VE MARKALAMA -->
+    <!-- SOL TARAF: SPLINE 3D SAHNESİ -->
     <div class="visual-side">
+      <spline-viewer>
+        url="https://prod.spline.design/gWnX-vzrht9nTCAi/scene.splinecode"
+      </spline-viewer>
+
       <div class="visual-overlay"></div>
+
       <div class="visual-content">
         <div class="brand-badge"><i class="bx bxs-graduation"></i> ÜNİDES</div>
         <div class="quote-container">
-          <h1>Birlikte<br />Daha Güçlüyüz.</h1>
-          <p>Kulüpler, topluluklar ve etkinlikler için tek bir merkez.</p>
+          <h1>Geleceğe<br />Hoş Geldin.</h1>
+          <p>Kampüs hayatını dijitalleştiren platforma tekrar bağlan.</p>
         </div>
       </div>
+      <!-- DÜZELTME: Footer buradan kaldırıldı, sabit durması için sağ tarafa alındı. -->
     </div>
 
     <!-- SAĞ TARAF: MODERN FORM -->
@@ -25,97 +31,98 @@
         <div class="mobile-logo"><i class="bx bxs-graduation"></i> ÜNİDES</div>
 
         <div class="header-text">
-          <h3>Topluluk Girişi</h3>
-          <br />
-          <form (submit)="onSubmit($event)">
-            <!-- E-Posta Input -->
-            <div class="input-group">
-              <div class="icon-wrapper" [class.error-icon]="emailError">
-                <i class="bx bx-group"></i>
-              </div>
-              <input
-                type="email"
-                (input)="validateStudentEmail($event)"
-                placeholder="Topluluk E-Posta Adresi"
-                class="modern-input"
-                [class.input-error]="emailError"
-              />
+          <h3>Tekrar Merhaba! 👋</h3>
+          <p>Hesabın yok mu? <a routerLink="/register" class="register-link">Hemen Kayıt Ol</a></p>
+        </div>
+
+        <form (submit)="onSubmit($event)">
+          <!-- E-Posta Input -->
+          <div class="input-group">
+            <div class="icon-wrapper" [class.error-icon]="emailError">
+              <i class="bx bx-envelope"></i>
             </div>
+            <input
+              type="email"
+              (input)="validateStudentEmail($event)"
+              placeholder="Öğrenci E-Posta (xxx@univ.edu.tr)"
+              class="modern-input"
+              [class.input-error]="emailError"
+            />
+          </div>
 
-            <!-- Hata Mesajı -->
-            <div *ngIf="emailError" class="error-message">
-              <i class="bx bx-error-circle"></i> Geçerli bir e-posta adresi giriniz.
+          <div *ngIf="emailError" class="error-message">
+            <i class="bx bx-error-circle"></i> Sadece <b>.edu.tr</b> uzantılı öğrenci mailleri kabul
+            edilmektedir.
+          </div>
+
+          <!-- Şifre Input -->
+          <div class="input-group mt-3">
+            <div class="icon-wrapper">
+              <i class="bx bx-lock-alt"></i>
             </div>
+            <input type="password" placeholder="Şifreniz" class="modern-input" />
+          </div>
 
-            <!-- Şifre Input -->
-            <div class="input-group mt-3">
-              <div class="icon-wrapper">
-                <i class="bx bx-lock-alt"></i>
-              </div>
-              <input type="password" placeholder="Şifre" class="modern-input" />
-            </div>
+          <div class="form-actions">
+            <label class="remember-me">
+              <input type="checkbox" />
+              <span>Beni Hatırla</span>
+            </label>
+            <a href="javascript:void(0)" class="forgot-link">Şifremi Unuttum?</a>
+          </div>
 
-            <div class="form-actions">
-              <label class="remember-me">
-                <input type="checkbox" />
-                <span>Beni Hatırla</span>
-              </label>
-              <a href="javascript:void(0)" class="forgot-link">Şifremi Unuttum?</a>
-            </div>
+          <!-- Giriş Yap Butonu (Animasyonlu) -->
+          <button
+            type="submit"
+            class="btn-primary"
+            [style.opacity]="emailError ? '0.7' : '1'"
+            [disabled]="isLoading"
+          >
+            <ng-container *ngIf="!isLoading">
+              Giriş Yap <i class="bx bx-right-arrow-alt"></i>
+            </ng-container>
 
-            <!-- Giriş Yap Butonu (GÜNCELLENDİ) -->
-            <button
-              type="submit"
-              class="btn-primary"
-              [disabled]="isLoading"
-              [style.opacity]="emailError || isLoading ? '0.7' : '1'"
-            >
-              <!-- Normal Durum -->
-              <span *ngIf="!isLoading">
-                Topluluğa Giriş Yap <i class="bx bx-right-arrow-alt"></i>
-              </span>
+            <ng-container *ngIf="isLoading">
+              <!-- Yükleniyor Animasyonu -->
+              <app-luma-spin></app-luma-spin>
+            </ng-container>
+          </button>
 
-              <!-- Yükleniyor Durumu -->
-              <div *ngIf="isLoading" class="spinner-container">
-                <app-luma-spin></app-luma-spin>
+          <div class="divider">
+            <span>veya</span>
+          </div>
+
+          <div class="social-login-grid">
+            <!-- Yetkili Girişi -->
+            <button type="button" class="btn-social btn-official" routerLink="/corporate-login">
+              <div class="btn-content">
+                <i class="bx bxs-id-card icon-official"></i>
+                <div class="text-col">
+                  <span class="btn-label">Kurumsal</span>
+                  <span class="btn-title">Yetkili Girişi</span>
+                </div>
               </div>
             </button>
 
-            <div class="divider">
-              <span>veya</span>
-            </div>
-
-            <div class="social-login-grid">
-              <!-- Standart (Öğrenci) Girişi -->
-              <button type="button" class="btn-social" routerLink="/login">
-                <div class="btn-content">
-                  <i class="bx bxs-graduation icon-official"></i>
-                  <div class="text-col">
-                    <span class="btn-label">Standart</span>
-                    <span class="btn-title">Öğrenci Girişi</span>
-                  </div>
+            <!-- Topluluk Girişi -->
+            <button type="button" class="btn-social btn-community" routerLink="/community-login">
+              <div class="btn-content">
+                <span class="emoji-icon">👥</span>
+                <div class="text-col">
+                  <span class="btn-label">Sosyal</span>
+                  <span class="btn-title">Topluluk Girişi</span>
                 </div>
-              </button>
-
-              <!-- Yetkili (Kurumsal) Girişi -->
-              <button type="button" class="btn-social btn-official" routerLink="/corporate-login">
-                <div class="btn-content">
-                  <i class="bx bxs-id-card icon-official"></i>
-                  <div class="text-col">
-                    <span class="btn-label">Kurumsal</span>
-                    <span class="btn-title">Yetkili Girişi</span>
-                  </div>
-                </div>
-              </button>
-            </div>
-          </form>
-        </div>
-
-        <footer class="simple-footer">© T.C Gençlik ve Spor Bakanlığı</footer>
+              </div>
+            </button>
+          </div>
+        </form>
       </div>
+
+      <!-- DÜZELTME: Footer buraya taşındı. Artık form-side'ın bir parçası ve sabit duracak. -->
+      <footer class="simple-footer">© T.C Gençlik ve Spor Bakanlığı</footer>
     </div>
   </div>
 </div>
 
-<!-- TOAST COMPONENT -->
+<!-- TOAST BİLEŞENİ -->
 <app-toast></app-toast>

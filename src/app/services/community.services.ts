@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { delay, map } from 'rxjs/operators';
 
-// Ortak Veri Modeli
+// Community Interface
 export interface Community {
   id: number;
   name: string;
@@ -12,157 +11,275 @@ export interface Community {
   coverImage: string;
   logo: string;
   memberCount: number;
+  city?: string;
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class CommunityService {
-  // --- ANA VERİ HAVUZU (Backend gelene kadar burası) ---
-  private demoData: Community[] = [
+  // Mock Veriler - Sayfalama testi için 20 adete çıkarıldı
+  private communities: Community[] = [
     {
       id: 1,
       name: 'ODTÜ Yazılım Topluluğu',
       university: 'Orta Doğu Teknik Üniversitesi',
       category: 'Teknoloji',
-      description:
-        'Yazılım dünyasındaki yenilikleri takip eden, hackathonlar ve eğitimler düzenleyen aktif topluluk.',
+      description: 'Yazılım dünyasındaki yenilikleri takip eden ve projeler geliştiren topluluk.',
       coverImage:
-        'https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=2070&auto=format&fit=crop',
-      logo: 'https://upload.wikimedia.org/wikipedia/tr/6/62/ODT%C3%9C_logo.jpg',
+        'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1000&q=80',
+      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
       memberCount: 450,
+      city: 'Ankara',
     },
     {
       id: 2,
-      name: 'İTÜ Robotik Kulübü',
+      name: 'İTÜ Girişimcilik Kulübü',
       university: 'İstanbul Teknik Üniversitesi',
-      category: 'Mühendislik',
-      description:
-        'Otonom robotlar, drone teknolojileri ve yapay zeka üzerine projeler geliştiren öğrenci kulübü.',
+      category: 'Girişimcilik',
+      description: 'Girişimcilik ekosistemine yeni yetenekler kazandırmayı hedefleyen kulüp.',
       coverImage:
-        'https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=2070&auto=format&fit=crop',
-      logo: 'https://upload.wikimedia.org/wikipedia/tr/8/87/%C4%B0T%C3%9C_yeni_logo.png',
-      memberCount: 320,
+        'https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&w=1000&q=80',
+      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      memberCount: 1200,
+      city: 'İstanbul',
     },
     {
       id: 3,
-      name: 'Boğaziçi Müzik Kulübü',
-      university: 'Boğaziçi Üniversitesi',
+      name: 'Hacettepe Dans Topluluğu',
+      university: 'Hacettepe Üniversitesi',
       category: 'Sanat',
-      description:
-        'Kampüsün ritmini tutan, konserler ve müzik atölyeleri düzenleyen sanat topluluğu.',
+      description: 'Modern ve halk dansları üzerine eğitimler ve gösteriler düzenler.',
       coverImage:
-        'https://images.unsplash.com/photo-1514320291940-7c281c0ed291?q=80&w=2070&auto=format&fit=crop',
-      logo: 'https://upload.wikimedia.org/wikipedia/tr/e/e2/Bo%C4%9Fazi%C3%A7i_%C3%9Cniversitesi_Logosu.png',
-      memberCount: 600,
+        'https://images.unsplash.com/photo-1547153760-18fc86324498?auto=format&fit=crop&w=1000&q=80',
+      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      memberCount: 300,
+      city: 'Ankara',
     },
     {
       id: 4,
-      name: 'Yıldız Fotoğrafçılık Kulübü',
-      university: 'Yıldız Teknik Üniversitesi',
-      category: 'Sanat',
-      description:
-        'Anı yakalamayı sevenlerin buluşma noktası. Fotoğraf gezileri ve sergiler düzenliyoruz.',
+      name: 'Boğaziçi Müzik Kulübü',
+      university: 'Boğaziçi Üniversitesi',
+      category: 'Müzik',
+      description: 'Kampüsün ritmini tutan, konserler ve atölyeler düzenleyen kulüp.',
       coverImage:
-        'https://images.unsplash.com/photo-1552168324-d612d77725e3?q=80&w=2000&auto=format&fit=crop',
-      logo: 'https://upload.wikimedia.org/wikipedia/tr/0/07/Yildiz_Teknik_Universitesi_Logo.png',
-      memberCount: 180,
+        'https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=1000&q=80',
+      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      memberCount: 800,
+      city: 'İstanbul',
     },
     {
       id: 5,
-      name: 'Hacettepe Girişimcilik',
-      university: 'Hacettepe Üniversitesi',
-      category: 'Kariyer',
-      description:
-        'Fikirleri işe dönüştüren, startup ekosistemiyle öğrencileri buluşturan dinamik yapı.',
+      name: 'Ege Üniversitesi Sinema Topluluğu',
+      university: 'Ege Üniversitesi',
+      category: 'Sanat',
+      description: 'Sinema sanatına gönül vermiş öğrencilerin buluşma noktası.',
       coverImage:
-        'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=2000&auto=format&fit=crop',
-      logo: 'https://upload.wikimedia.org/wikipedia/tr/6/6f/Hacettepe_%C3%9Cniversitesi_Logosu.png',
-      memberCount: 240,
+        'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1000&q=80',
+      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      memberCount: 150,
+      city: 'İzmir',
     },
     {
       id: 6,
-      name: 'Ege Su Altı Topluluğu',
-      university: 'Ege Üniversitesi',
-      category: 'Spor',
-      description:
-        'Mavilikleri keşfeden, dalış eğitimleri ve deniz temizliği etkinlikleri yapan spor kulübü.',
+      name: 'YTÜ Robotik Kulübü',
+      university: 'Yıldız Teknik Üniversitesi',
+      category: 'Teknoloji',
+      description: 'Robotik sistemler ve otomasyon üzerine çalışmalar yapar.',
       coverImage:
-        'https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=2070&auto=format&fit=crop',
-      logo: 'https://upload.wikimedia.org/wikipedia/tr/0/0d/Ege_%C3%9Cniversitesi_logo.png',
-      memberCount: 120,
+        'https://images.unsplash.com/photo-1581092160562-40aa08e78837?auto=format&fit=crop&w=1000&q=80',
+      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      memberCount: 600,
+      city: 'İstanbul',
     },
     {
       id: 7,
-      name: 'Ankara Üni. Tiyatro',
-      university: 'Ankara Üniversitesi',
+      name: 'Gazi Üniversitesi Tiyatro Topluluğu',
+      university: 'Gazi Üniversitesi',
       category: 'Sanat',
-      description:
-        'Sahne tozunu yutmak isteyenler için oyunculuk eğitimleri ve sahne performansları.',
+      description: 'Tiyatro sanatını sevdirmek ve sahne deneyimi kazandırmak için çalışır.',
       coverImage:
-        'https://images.unsplash.com/photo-1507676184212-d03ab07a11d0?q=80&w=2070&auto=format&fit=crop',
-      logo: 'https://upload.wikimedia.org/wikipedia/tr/2/23/Ankara_%C3%9Cniversitesi_Logosu.png',
-      memberCount: 200,
+        'https://esenler.bel.tr/wp-content/uploads/2021/08/144438347-1600775959586-gfhfghfgh.jpg', // Tiyatro Sahnesi
+      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      memberCount: 220,
+      city: 'Ankara',
     },
     {
       id: 8,
-      name: 'Gazi E-Spor',
-      university: 'Gazi Üniversitesi',
-      category: 'Oyun',
-      description:
-        'Rekabetçi oyun dünyasında üniversitemizi temsil eden, turnuvalar düzenleyen topluluk.',
+      name: 'Marmara Fotoğrafçılık Kulübü',
+      university: 'Marmara Üniversitesi',
+      category: 'Sanat',
+      description: 'Anı yakalamayı seven fotoğraf tutkunlarının bir araya geldiği kulüp.',
       coverImage:
-        'https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2070&auto=format&fit=crop',
-      logo: 'https://upload.wikimedia.org/wikipedia/tr/1/1a/Gazi_%C3%9Cniversitesi_logo.png',
-      memberCount: 550,
+        'https://images.unsplash.com/photo-1552168324-d612d77725e3?auto=format&fit=crop&w=1000&q=80',
+      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      memberCount: 340,
+      city: 'İstanbul',
     },
     {
       id: 9,
-      name: 'Marmara Gastronomi',
-      university: 'Marmara Üniversitesi',
-      category: 'Yaşam',
-      description: 'Lezzet tutkunlarının buluştuğu, tadım etkinlikleri ve workshoplar yapan kulüp.',
+      name: 'Anadolu Üniversitesi Havacılık Kulübü',
+      university: 'Anadolu Üniversitesi',
+      category: 'Bilim',
+      description: 'Gökyüzüne tutkun, havacılık meraklısı öğrencilerin buluşma adresi.',
       coverImage:
-        'https://images.unsplash.com/photo-1556910103-1c02745a30bf?q=80&w=2070&auto=format&fit=crop',
-      logo: 'https://upload.wikimedia.org/wikipedia/tr/e/e6/Marmara_%C3%9Cniversitesi_logo.png',
-      memberCount: 150,
+        'https://images.unsplash.com/photo-1483304528321-0674f0040030?auto=format&fit=crop&w=1000&q=80',
+      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      memberCount: 550,
+      city: 'Eskişehir',
+    },
+    {
+      id: 10,
+      name: 'Akdeniz Üni. Sualtı Sporları',
+      university: 'Akdeniz Üniversitesi',
+      category: 'Spor',
+      description: 'Mavilikleri keşfetmek isteyenler için dalış ve sualtı etkinlikleri.',
+      coverImage:
+        'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1000&q=80',
+      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      memberCount: 180,
+      city: 'Antalya',
+    },
+    {
+      id: 11,
+      name: 'DEÜ Yelken Topluluğu',
+      university: 'Dokuz Eylül Üniversitesi',
+      category: 'Spor',
+      description: 'Rüzgarla dans edenlerin, deniz tutkunlarının bir araya geldiği topluluk.',
+      coverImage:
+        'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1000&q=80',
+      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      memberCount: 210,
+      city: 'İzmir',
+    },
+    {
+      id: 12,
+      name: 'Bilkent Münazara Topluluğu',
+      university: 'Bilkent Üniversitesi',
+      category: 'Kültür',
+      description: 'Fikirlerin çarpıştığı, retorik ve argümantasyon becerilerinin geliştiği ortam.',
+      coverImage:
+        'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=1000&q=80',
+      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      memberCount: 400,
+      city: 'Ankara',
+    },
+    {
+      id: 13,
+      name: 'Sabancı Veri Bilimi Kulübü',
+      university: 'Sabancı Üniversitesi',
+      category: 'Teknoloji',
+      description: 'Büyük veri, yapay zeka ve makine öğrenmesi üzerine çalışmalar yapar.',
+      coverImage:
+        'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1000&q=80',
+      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      memberCount: 320,
+      city: 'İstanbul',
+    },
+    {
+      id: 14,
+      name: 'Koç Pazarlama Kulübü',
+      university: 'Koç Üniversitesi',
+      category: 'İşletme',
+      description: 'Pazarlama dünyasının trendlerini takip eden, vaka analizleri yapan kulüp.',
+      coverImage:
+        'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1000&q=80',
+      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      memberCount: 500,
+      city: 'İstanbul',
+    },
+    {
+      id: 15,
+      name: 'Çukurova E-Spor Topluluğu',
+      university: 'Çukurova Üniversitesi',
+      category: 'Oyun',
+      description: 'Rekabetçi oyun dünyasında üniversitemizi temsil eden oyuncular topluluğu.',
+      coverImage:
+        'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1000&q=80',
+      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      memberCount: 850,
+      city: 'Adana',
+    },
+    {
+      id: 16,
+      name: 'Erciyes Dağcılık Kulübü',
+      university: 'Erciyes Üniversitesi',
+      category: 'Spor',
+      description: 'Zirvelere tırmanmayı hedefleyen, doğa ile iç içe sporcuların kulübü.',
+      coverImage:
+        'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1000&q=80', // Karlı Dağ
+      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      memberCount: 190,
+      city: 'Kayseri',
+    },
+    {
+      id: 17,
+      name: 'KTÜ Mimarlık Kulübü',
+      university: 'Karadeniz Teknik Üniversitesi',
+      category: 'Tasarım',
+      description: 'Mimarlık öğrencileri için atölyeler, geziler ve söyleşiler düzenler.',
+      coverImage:
+        'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1000&q=80',
+      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      memberCount: 420,
+      city: 'Trabzon',
+    },
+    {
+      id: 18,
+      name: 'Uludağ Otomotiv Topluluğu',
+      university: 'Uludağ Üniversitesi',
+      category: 'Mühendislik',
+      description: 'Otomotiv teknolojileri ve alternatif enerjili araçlar üzerine çalışır.',
+      coverImage:
+        'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1000&q=80',
+      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      memberCount: 360,
+      city: 'Bursa',
+    },
+    {
+      id: 19,
+      name: 'Selçuk Arkeoloji Topluluğu',
+      university: 'Selçuk Üniversitesi',
+      category: 'Tarih',
+      description: 'Tarihin izinde, kültürel mirasımızı koruyan ve tanıtan topluluk.',
+      coverImage: 'https://www.antiktarih.com/wp-content/uploads/2018/07/indi4-750x445.jpg', // Antik Harabeler
+      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      memberCount: 140,
+      city: 'Konya',
+    },
+    {
+      id: 20,
+      name: 'Galatasaray Hukuk Kulübü',
+      university: 'Galatasaray Üniversitesi',
+      category: 'Hukuk',
+      description: 'Hukuk dünyasındaki güncel gelişmeleri takip eden, paneller düzenleyen kulüp.',
+      coverImage:
+        'https://images.unsplash.com/photo-1505664194779-8beaceb93744?auto=format&fit=crop&w=1000&q=80', // Adalet Heykeli
+      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      memberCount: 650,
+      city: 'İstanbul',
     },
   ];
 
   constructor() {}
 
-  /**
-   * Tüm toplulukları getirir (Communities Sayfası İçin)
-   * Simüle edilmiş bir HTTP isteği gibi Observable döner.
-   */
+  // Tüm Toplulukları Getir
   getAllCommunities(): Observable<Community[]> {
-    // Demo amaçlı veriyi çoğaltıyoruz (Sayfalama testi için)
-    let extendedData: Community[] = [];
-    for (let i = 0; i < 4; i++) {
-      const batch = this.demoData.map((item) => ({
-        ...item,
-        id: item.id + i * 100,
-        name: i === 0 ? item.name : `${item.name} (${i + 1})`,
-      }));
-      extendedData = [...extendedData, ...batch];
-    }
-
-    return of(extendedData).pipe(delay(500)); // 0.5sn gecikme
+    return of(this.communities);
   }
 
-  /**
-   * En çok üyesi olan 'n' tane topluluğu getirir (Anasayfa Favoriler İçin)
-   * @param limit Gösterilecek topluluk sayısı
-   */
-  getTopCommunities(limit: number = 9): Observable<Community[]> {
-    return of(this.demoData).pipe(
-      delay(500),
-      map((communities) => {
-        // 1. Üye sayısına göre büyükten küçüğe sırala
-        const sorted = [...communities].sort((a, b) => b.memberCount - a.memberCount);
-        // 2. İstenilen sayı kadarını al
-        return sorted.slice(0, limit);
-      })
-    );
+  // --- EKLENEN METOT: En Popüler Toplulukları Getir ---
+  // limit: Kaç adet topluluk getirileceğini belirler
+  getTopCommunities(limit: number): Observable<Community[]> {
+    // Üye sayısına göre çoktan aza sırala ve limit kadarını al
+    const topCommunities = [...this.communities]
+      .sort((a, b) => b.memberCount - a.memberCount)
+      .slice(0, limit);
+    return of(topCommunities);
+  }
+
+  getCommunityById(id: number): Observable<Community | undefined> {
+    const community = this.communities.find((c) => c.id === id);
+    return of(community);
   }
 }

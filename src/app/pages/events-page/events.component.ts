@@ -1,6 +1,5 @@
 import {
   Component,
-  HostListener,
   ElementRef,
   ViewChildren,
   QueryList,
@@ -10,12 +9,14 @@ import {
   OnInit,
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { RouterModule, Router } from '@angular/router'; // Router Eklendi
+import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate, query, stagger, group } from '@angular/animations';
 
 import { HeaderComponent } from '../../common/header/header.component';
 import { FooterComponent } from '../../common/footer/footer.component';
+// CommunityService import edildi
+import { CommunityService } from '../../services/community.services';
 
 interface EventCard {
   id: number;
@@ -28,11 +29,12 @@ interface EventCard {
   location: string;
   university: string;
   club: string;
-  semester: string;
+  semester: string; // Topluluk İsmi
   quota: number;
   imageUrl: string;
   color: string;
   status: 'active' | 'upcoming';
+  city?: string; // Arama için şehir bilgisi eklendi
 }
 
 @Component({
@@ -86,7 +88,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
   // Detay Modal & Üyelik Kontrolü
   selectedEvent: EventCard | null = null;
   isJoined: boolean = false;
-  isLoggedIn: boolean = false; // Varsayılan olarak giriş yapılmamış
+  isLoggedIn: boolean = false;
 
   // Sayfalama
   allEventsPool: EventCard[] = [];
@@ -100,14 +102,14 @@ export class EventsComponent implements OnInit, AfterViewInit {
 
   // Slider Görselleri
   sliderImages: string[] = [
-    'https://images.unsplash.com/photo-1540575467063-178a50d2df87?q=80&w=800&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=800&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1544531586-fde5298cdd40?q=80&w=800&auto=format&fit=crop',
     'https://images.unsplash.com/photo-1523580494863-6f3031224c94?q=80&w=800&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=800&auto=format&fit=crop',
+    'https://media.istockphoto.com/id/1486287149/tr/foto%C4%9Fraf/group-of-multiracial-asian-business-participants-casual-chat-after-successful-conference.jpg?s=612x612&w=0&k=20&c=UIA06kHeAHdKyPRyREEGmmkfyvi0RMyjbldymvolJiY=',
   ];
 
-  // --- VERİ SETİ ---
+  // Base Events
   baseEvents: EventCard[] = [
     {
       id: 1,
@@ -117,10 +119,10 @@ export class EventsComponent implements OnInit, AfterViewInit {
       date: '25 Ekim',
       dateObj: new Date('2025-10-25'),
       time: '14:00',
-      university: 'İstanbul Teknik Üniversitesi',
+      university: '',
       club: 'Yapay Zeka Kulübü',
-      semester: '1. Dönem',
-      location: 'Süleyman Demirel Kültür Merkezi',
+      semester: '',
+      location: '',
       quota: 150,
       status: 'active',
       imageUrl:
@@ -135,10 +137,10 @@ export class EventsComponent implements OnInit, AfterViewInit {
       date: '15 Mayıs',
       dateObj: new Date('2025-05-15'),
       time: '16:00',
-      university: 'Boğaziçi Üniversitesi',
+      university: '',
       club: 'Müzik Kulübü',
-      semester: '2. Dönem',
-      location: 'Güney Kampüs Meydan',
+      semester: '',
+      location: '',
       quota: 5000,
       status: 'upcoming',
       imageUrl:
@@ -153,10 +155,10 @@ export class EventsComponent implements OnInit, AfterViewInit {
       date: '12 Kasım',
       dateObj: new Date('2025-11-12'),
       time: '10:00',
-      university: 'Mimar Sinan Güzel Sanatlar',
+      university: '',
       club: 'Tasarım Topluluğu',
-      semester: '1. Dönem',
-      location: 'Fındıklı Kampüsü',
+      semester: '',
+      location: '',
       quota: 30,
       status: 'active',
       imageUrl:
@@ -171,10 +173,10 @@ export class EventsComponent implements OnInit, AfterViewInit {
       date: '05 Aralık',
       dateObj: new Date('2025-12-05'),
       time: '09:00',
-      university: 'Yıldız Teknik Üniversitesi',
+      university: '',
       club: 'Kariyer Kulübü',
-      semester: '1. Dönem',
-      location: 'Davutpaşa Kongre Merkezi',
+      semester: '',
+      location: '',
       quota: 500,
       status: 'upcoming',
       imageUrl:
@@ -189,10 +191,10 @@ export class EventsComponent implements OnInit, AfterViewInit {
       date: '20 Şubat',
       dateObj: new Date('2025-02-20'),
       time: '12:00',
-      university: 'Bahçeşehir Üniversitesi',
+      university: '',
       club: 'E-Spor Kulübü',
-      semester: '2. Dönem',
-      location: 'Galata Kampüsü',
+      semester: '',
+      location: '',
       quota: 64,
       status: 'active',
       imageUrl:
@@ -207,10 +209,10 @@ export class EventsComponent implements OnInit, AfterViewInit {
       date: '28 Eylül',
       dateObj: new Date('2025-09-28'),
       time: '07:30',
-      university: 'İstanbul Üniversitesi',
+      university: '',
       club: 'Doğa Sporları',
-      semester: '1. Dönem',
-      location: 'Belgrad Ormanı',
+      semester: '',
+      location: '',
       quota: 40,
       status: 'upcoming',
       imageUrl:
@@ -219,12 +221,44 @@ export class EventsComponent implements OnInit, AfterViewInit {
     },
   ];
 
-  // Router Inject Edildi
-  constructor(@Inject(PLATFORM_ID) private platformId: Object, private router: Router) {}
+  constructor(
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private router: Router,
+    private communityService: CommunityService
+  ) {}
 
   ngOnInit() {
-    this.allEventsPool = [...this.baseEvents];
-    this.applyFiltersAndLoadFirstPage();
+    this.communityService.getAllCommunities().subscribe((communities) => {
+      if (communities.length > 0) {
+        this.baseEvents.forEach((event, index) => {
+          const community = communities[index % communities.length];
+
+          event.semester = community.name;
+          event.university = community.university;
+          event.city = community.city || 'İstanbul'; // Şehri kaydet
+          event.location = this.getVenueByCity(event.city);
+        });
+      }
+
+      this.allEventsPool = [...this.baseEvents];
+      this.applyFiltersAndLoadFirstPage();
+    });
+  }
+
+  getVenueByCity(city: string): string {
+    const venues: { [key: string]: string } = {
+      Ankara: 'Congresium Ankara',
+      İstanbul: 'Zorlu PSM',
+      İzmir: 'Ahmed Adnan Saygun Sanat Merkezi',
+      Eskişehir: 'Atatürk Kültür Sanat ve Kongre Merkezi',
+      Antalya: 'Cam Piramit Kongre Merkezi',
+      Adana: 'Çukurova Kongre Merkezi',
+      Kayseri: 'Erciyes Kültür Merkezi',
+      Trabzon: 'KTÜ Atatürk Kültür Merkezi',
+      Bursa: 'Merinos AKKM',
+      Konya: 'Selçuklu Kongre Merkezi',
+    };
+    return venues[city] || 'Merkez Kampüs Etkinlik Alanı';
   }
 
   ngAfterViewInit() {
@@ -253,7 +287,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
     }
   }
 
-  // --- FİLTRELEME VE SIRALAMA ---
+  // --- GÜNCELLENEN FİLTRELEME MANTIĞI ---
   getFilteredAndSortedPool(): EventCard[] {
     let filtered =
       this.activeCategory === 'Tümü'
@@ -265,14 +299,16 @@ export class EventsComponent implements OnInit, AfterViewInit {
       filtered = filtered.filter((e) => e.status === this.currentFilter);
     }
 
-    // Arama
+    // Arama (Genişletilmiş)
     if (this.searchQuery && this.searchQuery.trim() !== '') {
       const query = this.searchQuery.toLowerCase();
       filtered = filtered.filter(
         (e) =>
           e.title.toLowerCase().includes(query) ||
           e.university.toLowerCase().includes(query) ||
-          e.club.toLowerCase().includes(query)
+          e.club.toLowerCase().includes(query) ||
+          (e.location && e.location.toLowerCase().includes(query)) || // Mekan araması
+          (e.city && e.city.toLowerCase().includes(query)) // Şehir araması
       );
     }
 
@@ -375,18 +411,12 @@ export class EventsComponent implements OnInit, AfterViewInit {
     document.body.style.overflow = 'auto';
   }
 
-  // YENİ: Giriş kontrolü yapan fonksiyon
   handleJoinClick() {
     if (!this.isLoggedIn) {
-      this.closeModal(); // Modalı kapat
-      this.router.navigate(['/login']); // Login sayfasına yönlendir
+      this.closeModal();
+      this.router.navigate(['/login']);
     } else {
       this.isJoined = true;
     }
-  }
-
-  // Eski fonksiyonu sadece mantık içinde kullandık
-  joinEvent() {
-    this.isJoined = true;
   }
 }

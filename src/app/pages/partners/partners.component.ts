@@ -9,15 +9,15 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./partners.component.scss'],
 })
 export class PartnersComponent {
-  // Logo listesi (Şimdilik örnek SVG linkleri, ileride kendi assetlerinizi koyabilirsiniz)
+  // Güncellenmiş Logo Listesi
   logos = [
-    { src: 'https://svgl.app/library/nvidia-wordmark-light.svg', alt: 'Nvidia' },
-    { src: 'https://svgl.app/library/supabase_wordmark_light.svg', alt: 'Supabase' },
-    { src: 'https://svgl.app/library/openai_wordmark_light.svg', alt: 'OpenAI' },
-    { src: 'https://svgl.app/library/turso-wordmark-light.svg', alt: 'Turso' },
-    { src: 'https://svgl.app/library/vercel_wordmark.svg', alt: 'Vercel' },
-    { src: 'https://svgl.app/library/github_wordmark_light.svg', alt: 'GitHub' },
-    { src: 'https://svgl.app/library/claude-ai-wordmark-icon_light.svg', alt: 'Claude AI' },
-    { src: 'https://svgl.app/library/clerk-wordmark-light.svg', alt: 'Clerk' },
+    { src: 'images/logos/itü.jpg', alt: 'Nvidia' },
+    { src: 'images/logos/odtü.jpg', alt: 'Supabase' },
+    { src: 'images/logos/bogazici.png', alt: 'OpenAI' },
+    { src: 'images/logos/ytü.png', alt: 'Turso' },
+    { src: 'images/logos/hacettepe.png', alt: 'Vercel' },
+    { src: 'images/logos/ege.png', alt: 'GitHub' },
+    { src: 'images/logos/marmara.png', alt: 'Claude AI' },
+    { src: 'images/logos/koç.png', alt: 'Clerk' },
   ];
 }
