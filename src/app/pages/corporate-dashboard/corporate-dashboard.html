@@ -1,495 +1,454 @@
-<div class="dashboard-layout">
+<!-- Fontlar -->
+<link
+  href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+  rel="stylesheet"
+/>
+<link
+  href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+  rel="stylesheet"
+/>
+
+<div class="dashboard-container">
+  <!-- Toast Component Entegrasyonu -->
+  <app-toast></app-toast>
+
   <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <div class="logo">
-        <i class="bx bxs-bank"></i>
-        <span>Kurumsal Panel</span>
+  <aside class="sidebar" [class.collapsed]="isSidebarCollapsed">
+    <div class="brand" (click)="switchTab('overview')">
+      <div class="logo-square">
+        <span class="material-symbols-outlined">apartment</span>
       </div>
-      <p class="role-badge">Gençlik ve Spor Bakanlığı</p>
+      <div class="brand-text" *ngIf="!isSidebarCollapsed">
+        <h2>ÜNİDES</h2>
+        <span>KURUMSAL</span>
+      </div>
     </div>
 
-    <nav class="sidebar-nav">
-      <button [class.active]="activeTab === 'dashboard'" (click)="switchTab('dashboard')">
-        <i class="bx bxs-dashboard"></i> Genel Bakış
+    <nav class="menu">
+      <button
+        class="menu-item"
+        [class.active]="activeTab === 'overview'"
+        (click)="switchTab('overview')"
+        title="Genel Bakış"
+      >
+        <span class="material-symbols-outlined">dashboard</span>
+        <span *ngIf="!isSidebarCollapsed">Genel Bakış</span>
       </button>
-      <button [class.active]="activeTab === 'communities'" (click)="switchTab('communities')">
-        <i class="bx bxs-group"></i> Topluluk Yönetimi
+
+      <div class="menu-divider" *ngIf="!isSidebarCollapsed">YÖNETİM</div>
+
+      <button
+        class="menu-item"
+        [class.active]="activeTab === 'communities'"
+        (click)="switchTab('communities')"
+        title="Topluluklar"
+      >
+        <span class="material-symbols-outlined">groups</span>
+        <span *ngIf="!isSidebarCollapsed">Topluluklar</span>
       </button>
-      <button [class.active]="activeTab === 'events'" (click)="switchTab('events')">
-        <i class="bx bxs-calendar-event"></i> Etkinlikler
+
+      <button
+        class="menu-item"
+        [class.active]="activeTab === 'events'"
+        (click)="switchTab('events')"
+        title="Etkinlikler"
+      >
+        <span class="material-symbols-outlined">event_available</span>
+        <span *ngIf="!isSidebarCollapsed">Etkinlikler</span>
+        <span class="badge" *ngIf="pendingEventCount > 0 && !isSidebarCollapsed">{{
+          pendingEventCount
+        }}</span>
       </button>
-      <button [class.active]="activeTab === 'announcements'" (click)="switchTab('announcements')">
-        <i class="bx bxs-megaphone"></i> Duyurular
+
+      <div class="menu-divider" *ngIf="!isSidebarCollapsed">İLETİŞİM</div>
+
+      <button
+        class="menu-item"
+        [class.active]="activeTab === 'announcements'"
+        (click)="switchTab('announcements')"
+        title="Duyurular"
+      >
+        <span class="material-symbols-outlined">campaign</span>
+        <span *ngIf="!isSidebarCollapsed">Duyurular</span>
       </button>
-      <button [class.active]="activeTab === 'forum'" (click)="switchTab('forum')">
-        <i class="bx bxs-chat"></i> Forum & Destek
+
+      <!-- Mesajlar Butonu Silindi -->
+
+      <div class="menu-divider" *ngIf="!isSidebarCollapsed">SİSTEM</div>
+
+      <button
+        class="menu-item"
+        [class.active]="activeTab === 'settings'"
+        (click)="switchTab('settings')"
+        title="Ayarlar"
+      >
+        <span class="material-symbols-outlined">settings</span>
+        <span *ngIf="!isSidebarCollapsed">Ayarlar</span>
       </button>
     </nav>
 
     <div class="sidebar-footer">
-      <button class="logout-btn" (click)="logout()"><i class="bx bx-log-out"></i> Çıkış Yap</button>
+      <button class="logout-btn" (click)="logout()" title="Çıkış">
+        <span class="material-symbols-outlined">logout</span>
+        <span *ngIf="!isSidebarCollapsed">Çıkış Yap</span>
+      </button>
     </div>
   </aside>
 
-  <!-- MAIN CONTENT -->
+  <!-- ANA İÇERİK -->
   <main class="main-content">
-    <header class="dashboard-header">
-      <h2>
-        {{
-          activeTab === 'dashboard'
-            ? 'Genel Bakış'
-            : activeTab === 'communities'
-            ? 'Toplulukları Yönet'
-            : activeTab === 'events'
-            ? 'Etkinlik Takvimi'
-            : activeTab === 'announcements'
-            ? 'Duyuru Paneli'
-            : 'Forum Moderasyonu'
-        }}
-      </h2>
-      <div class="user-profile">
-        <img
-          src="assets/images/official-avatar.png"
-          onerror="this.src='https://ui-avatars.com/api/?name=GSB&background=1e293b&color=fff'"
-          alt="Admin"
-        />
-        <span>Sistem Yetkilisi</span>
+    <!-- ÜST HEADER -->
+    <header class="top-header">
+      <div class="header-left">
+        <button class="icon-btn toggle-sidebar" (click)="toggleSidebar()">
+          <span class="material-symbols-outlined">menu_open</span>
+        </button>
+        <div class="breadcrumb">
+          <span class="material-symbols-outlined home-icon">domain</span>
+          <span class="sep">/</span>
+          <span>Kurumsal Panel</span>
+          <span class="sep">/</span>
+          <span class="current">{{ getTabTitle() }}</span>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <button class="icon-btn notification" (click)="toggleNotifications($event)">
+          <span class="material-symbols-outlined">notifications</span>
+          <span class="indicator" *ngIf="notifications.length"></span>
+        </button>
+
+        <!-- Bildirim Dropdown -->
+        <div
+          class="dropdown-menu notifications"
+          *ngIf="showNotifications"
+          (click)="$event.stopPropagation()"
+        >
+          <div class="dd-header">Bildirimler</div>
+          <ul>
+            <li *ngFor="let n of notifications">
+              {{ n.text }} <small>{{ n.time }}</small>
+            </li>
+          </ul>
+        </div>
+
+        <div class="profile-wrapper">
+          <div class="profile-pic" (click)="toggleProfileDropdown($event)">
+            <img [src]="corporateInfo.logo" alt="Logo" />
+          </div>
+
+          <!-- Profil Dropdown -->
+          <div
+            class="dropdown-menu profile-dropdown"
+            *ngIf="isProfileOpen"
+            (click)="$event.stopPropagation()"
+          >
+            <div class="dd-header">{{ corporateInfo.name }}</div>
+            <ul>
+              <li (click)="switchTab('settings')">
+                <span class="material-symbols-outlined small-icon">settings</span> Ayarlar
+              </li>
+              <li (click)="logout()" class="danger-item">
+                <span class="material-symbols-outlined small-icon">logout</span> Çıkış
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
     </header>
 
-    <div class="content-body">
-      <!-- 1. DASHBOARD -->
-      <div *ngIf="activeTab === 'dashboard'" class="dashboard-view fade-in">
-        <div class="stats-grid">
-          <div class="stat-card" *ngFor="let stat of stats" [ngClass]="stat.color">
-            <div class="icon"><i [class]="stat.icon"></i></div>
-            <div class="info">
-              <h3>{{ stat.value }}</h3>
-              <p>{{ stat.title }}</p>
-            </div>
+    <!-- 1. TAB: GENEL BAKIŞ -->
+    <div class="view-container" *ngIf="activeTab === 'overview'">
+      <div class="stats-grid-compact">
+        <div class="stat-card-mini" *ngFor="let stat of stats">
+          <div class="icon-box" [ngClass]="stat.colorClass">
+            <span class="material-symbols-outlined">{{ stat.icon }}</span>
+          </div>
+          <div class="text">
+            <span>{{ stat.label }}</span>
+            <h3>{{ stat.value }}</h3>
           </div>
         </div>
-        <div class="quick-actions mt-4">
+      </div>
+
+      <div class="split-grid">
+        <!-- Bekleyen Onaylar -->
+        <div class="card table-card">
+          <div class="card-header">
+            <h3>Bekleyen Etkinlik Onayları</h3>
+            <button class="btn-text" (click)="switchTab('events')">Tümünü Gör</button>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Topluluk</th>
+                <th>Etkinlik</th>
+                <th>Tarih</th>
+                <th>Durum</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let req of pendingEvents.slice(0, 4)">
+                <td>
+                  <span class="p-name">{{ req.communityName }}</span>
+                </td>
+                <td>{{ req.eventName }}</td>
+                <td>{{ req.date }}</td>
+                <td>
+                  <span class="status-badge warning">Onay Bekliyor</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Hızlı Erişim -->
+        <div class="card quick-actions-card">
           <h3>Hızlı İşlemler</h3>
-          <div class="actions-row">
-            <button (click)="switchTab('announcements'); openModal('announcement')">
-              + Yeni Duyuru Ekle
+          <div class="actions-grid">
+            <button class="tile-btn" (click)="openModal('new-announcement')">
+              <span class="material-symbols-outlined">campaign</span>
+              <span>Duyuru Yap</span>
             </button>
-            <button (click)="switchTab('events'); openModal('event')">+ Etkinlik Oluştur</button>
-            <button (click)="switchTab('communities')">Topluluk Başvurularını İncele</button>
+            <button class="tile-btn" (click)="switchTab('communities')">
+              <span class="material-symbols-outlined">add_business</span>
+              <span>Topluluk Onayla</span>
+            </button>
+            <button class="tile-btn" (click)="switchTab('events')">
+              <span class="material-symbols-outlined">event</span>
+              <span>Takvim</span>
+            </button>
+            <!-- Mesajlar (Destek) Butonu Silindi -->
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- 2. TOPLULUK YÖNETİMİ -->
-      <div *ngIf="activeTab === 'communities'" class="table-view fade-in">
-        <div class="table-header">
-          <input type="text" placeholder="Topluluk ara..." class="search-input" />
-          <button class="add-btn" (click)="openModal('community')">
-            <i class="bx bx-plus"></i> Yeni Topluluk
+    <!-- 2. TAB: TOPLULUKLAR -->
+    <div class="view-container" *ngIf="activeTab === 'communities'">
+      <div class="page-header">
+        <h2>Bağlı Topluluklar</h2>
+        <div class="header-controls">
+          <div class="search-input">
+            <span class="material-symbols-outlined">search</span>
+            <input type="text" placeholder="Topluluk Ara..." [(ngModel)]="searchText" />
+          </div>
+          <button class="btn-secondary">
+            <span class="material-symbols-outlined">filter_list</span> Filtrele
           </button>
-        </div>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Logo</th>
-                <th>Topluluk Adı</th>
-                <th>Üniversite</th>
-                <th>Kategori</th>
-                <th>Üye Sayısı</th>
-                <th>İşlemler</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let c of communities">
-                <td>#{{ c.id }}</td>
-                <td>
-                  <img
-                    [src]="c.logo"
-                    alt="logo"
-                    class="table-thumb"
-                    onerror="this.src='assets/img/placeholder-logo.png'"
-                  />
-                </td>
-                <td>
-                  <strong>{{ c.name }}</strong>
-                </td>
-                <td>{{ c.university }}</td>
-                <td>
-                  <span class="category-tag">{{ c.category }}</span>
-                </td>
-                <td>{{ c.memberCount }}</td>
-                <td class="actions">
-                  <button class="edit" (click)="openModal('community', c)">
-                    <i class="bx bx-edit"></i>
-                  </button>
-                  <button class="delete" (click)="deleteItem('community', c.id)">
-                    <i class="bx bx-trash"></i>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
         </div>
       </div>
 
-      <!-- 3. ETKİNLİK -->
-      <div *ngIf="activeTab === 'events'" class="table-view fade-in">
-        <div class="table-header">
-          <input type="text" placeholder="Etkinlik ara..." class="search-input" />
-          <button class="add-btn" (click)="openModal('event')">
-            <i class="bx bx-plus"></i> Yeni Etkinlik
-          </button>
-        </div>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Etkinlik Başlığı</th>
-                <th>Tarih</th>
-                <th>Konum</th>
-                <th>Durum</th>
-                <th>İşlemler</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let e of events">
-                <td>#{{ e.id }}</td>
-                <td>{{ e.title }}</td>
-                <td>{{ e.date }}</td>
-                <td>{{ e.location }}</td>
-                <td>
-                  <span class="status-pill" [class.active]="e.status === 'Yayında'">{{
-                    e.status
-                  }}</span>
-                </td>
-                <td class="actions">
-                  <button class="edit" (click)="openModal('event', e)">
-                    <i class="bx bx-edit"></i>
-                  </button>
-                  <button class="delete" (click)="deleteItem('event', e.id)">
-                    <i class="bx bx-trash"></i>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <div class="grid-cards">
+        <div class="simple-card" *ngFor="let c of communities">
+          <div class="card-head">
+            <img [src]="c.logo" alt="Logo" class="rounded-logo" />
+            <span
+              class="chip"
+              [ngClass]="{ green: c.status === 'Aktif', orange: c.status === 'Onay Bekliyor' }"
+            >
+              {{ c.status }}
+            </span>
+          </div>
+          <h4>{{ c.name }}</h4>
+          <p class="role-text">{{ c.category }}</p>
 
-      <!-- 4. DUYURULAR -->
-      <div *ngIf="activeTab === 'announcements'" class="table-view fade-in">
-        <div class="table-header">
-          <h3>Tüm Duyurular</h3>
-          <button class="add-btn" (click)="openModal('announcement')">
-            <i class="bx bx-plus"></i> Duyuru Ekle
-          </button>
-        </div>
-        <div class="cards-grid">
-          <div class="admin-card" *ngFor="let a of announcements">
-            <div class="card-head">
-              <h4>{{ a.title }}</h4>
-              <span class="date">{{ a.date }}</span>
+          <div class="card-stats-row">
+            <div class="mini-stat">
+              <span class="material-symbols-outlined">group</span> {{ c.memberCount }} Üye
             </div>
-            <p>{{ a.content }}</p>
-            <div class="card-actions">
-              <button (click)="openModal('announcement', a)">Düzenle</button>
-              <button class="text-danger" (click)="deleteItem('announcement', a.id)">Sil</button>
+            <div class="mini-stat">
+              <span class="material-symbols-outlined">person</span> {{ c.president }}
             </div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn-outline full">Detaylar</button>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- 5. FORUM -->
-      <div *ngIf="activeTab === 'forum'" class="table-view fade-in">
-        <div class="table-header">
-          <h3>Gelen Sorular</h3>
+    <!-- 3. TAB: ETKİNLİKLER -->
+    <div class="view-container" *ngIf="activeTab === 'events'">
+      <div class="page-header">
+        <h2>Etkinlik Yönetimi</h2>
+        <div class="header-controls">
+          <button class="btn-secondary">
+            <span class="material-symbols-outlined">calendar_month</span> Takvim Görünümü
+          </button>
         </div>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Kullanıcı</th>
-                <th>Soru</th>
-                <th>Tarih</th>
-                <th>Durum</th>
-                <th>İşlemler</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let f of forumPosts">
-                <td>{{ f.user }}</td>
-                <td class="text-truncate" style="max-width: 300px">{{ f.question }}</td>
-                <td>{{ f.date }}</td>
-                <td>
-                  <span class="status-pill" [class.warning]="f.status === 'Beklemede'">{{
-                    f.status
-                  }}</span>
-                </td>
-                <td class="actions">
-                  <button class="edit"><i class="bx bx-check-circle"></i></button>
-                  <button class="delete" (click)="deleteItem('forum', f.id)">
-                    <i class="bx bx-trash"></i>
+      </div>
+
+      <div class="card">
+        <table class="data-table full">
+          <thead>
+            <tr>
+              <th>Etkinlik Adı</th>
+              <th>Topluluk</th>
+              <th>Tarih / Yer</th>
+              <th>Bütçe</th>
+              <th>Durum</th>
+              <th>İşlemler</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let e of allEvents">
+              <td>
+                <div class="project-name-cell">{{ e.eventName }}</div>
+              </td>
+              <td>{{ e.communityName }}</td>
+              <td>
+                <div class="date-loc">
+                  <span>{{ e.date }}</span>
+                  <small>{{ e.location }}</small>
+                </div>
+              </td>
+              <td>{{ e.budget | number }} ₺</td>
+              <td>
+                <span
+                  class="status-badge"
+                  [ngClass]="{
+                    success: e.status === 'Onaylandı',
+                    warning: e.status === 'Beklemede',
+                    danger: e.status === 'Reddedildi'
+                  }"
+                >
+                  {{ e.status }}
+                </span>
+              </td>
+              <td>
+                <div class="actions">
+                  <button
+                    class="icon-btn-sm success"
+                    *ngIf="e.status === 'Beklemede'"
+                    (click)="approveEvent(e.id)"
+                    title="Onayla"
+                  >
+                    <span class="material-symbols-outlined">check</span>
                   </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                  <button
+                    class="icon-btn-sm delete"
+                    *ngIf="e.status === 'Beklemede'"
+                    (click)="rejectEvent(e.id)"
+                    title="Reddet"
+                  >
+                    <span class="material-symbols-outlined">close</span>
+                  </button>
+                  <button class="icon-btn-sm" title="Detay">
+                    <span class="material-symbols-outlined">visibility</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 4. TAB: DUYURULAR -->
+    <div class="view-container" *ngIf="activeTab === 'announcements'">
+      <div class="page-header">
+        <h2>Duyuru Merkezi</h2>
+        <button class="btn-primary" (click)="openModal('new-announcement')">
+          <span class="material-symbols-outlined">add</span> Yeni Duyuru
+        </button>
+      </div>
+
+      <div class="grid-cards">
+        <div class="simple-card announcement-card" *ngFor="let a of announcements">
+          <div class="ann-icon">
+            <span class="material-symbols-outlined">campaign</span>
+          </div>
+          <div class="ann-content">
+            <h4>{{ a.title }}</h4>
+            <div class="ann-meta">
+              <span><span class="material-symbols-outlined tiny">groups</span> {{ a.target }}</span>
+              <span
+                ><span class="material-symbols-outlined tiny">calendar_today</span>
+                {{ a.date }}</span
+              >
+            </div>
+            <div class="ann-footer">
+              <span class="status-dot" [class.active]="a.status === 'Yayında'"></span>
+              {{ a.status }}
+              <span class="views">{{ a.views }} Görüntülenme</span>
+            </div>
+          </div>
+          <button class="icon-btn-sm">
+            <span class="material-symbols-outlined">more_vert</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. TAB: AYARLAR -->
+    <div class="view-container" *ngIf="activeTab === 'settings'">
+      <div class="settings-layout">
+        <div class="settings-sidebar">
+          <div class="club-avatar-edit">
+            <img [src]="corporateInfo.logo" alt="Logo" />
+          </div>
+          <h3>{{ corporateInfo.name }}</h3>
+          <p>Kurumsal Yönetici</p>
+        </div>
+        <div class="settings-form-card">
+          <h3>Kurum Bilgileri</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Kurum Adı</label>
+              <input type="text" [(ngModel)]="corporateInfo.name" class="modern-input" />
+            </div>
+            <div class="form-group">
+              <label>Yönetici Email</label>
+              <input type="email" value="admin@unides.com" class="modern-input" />
+            </div>
+            <div class="form-actions">
+              <button class="btn-primary" (click)="showToast('Bilgiler güncellendi', 'success')">
+                Güncelle
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </main>
 
   <!-- MODAL -->
-  <div class="modal-overlay" *ngIf="isModalOpen" (click)="closeModal()">
+  <div class="modal-backdrop" *ngIf="isModalOpen" (click)="closeModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h3>{{ editingItem ? 'Düzenle' : 'Yeni Ekle' }}: {{ getModalTitle() }}</h3>
-        <button class="close-btn" (click)="closeModal()"><i class="bx bx-x"></i></button>
+        <h3>{{ modalType === 'new-announcement' ? 'Yeni Duyuru Oluştur' : 'İşlem' }}</h3>
+        <button class="close-btn" (click)="closeModal()">✕</button>
       </div>
-      <div class="modal-body">
-        <form (submit)="saveItem()">
-          <ng-container *ngIf="modalType === 'community'">
-            <!-- 1. Satır -->
-            <div class="form-row">
-              <div class="form-group half">
-                <label>Topluluk Adı</label>
-                <input
-                  type="text"
-                  [(ngModel)]="formData.name"
-                  name="name"
-                  class="admin-input"
-                  required
-                />
-              </div>
-              <div class="form-group half">
-                <label>Üniversite</label>
-                <input
-                  type="text"
-                  [(ngModel)]="formData.university"
-                  name="university"
-                  class="admin-input"
-                  required
-                />
-              </div>
-            </div>
 
-            <!-- 2. Satır -->
-            <div class="form-row">
-              <div class="form-group half">
-                <label>Kategori</label>
-                <select [(ngModel)]="formData.category" name="category" class="admin-input">
-                  <option value="Teknoloji">Teknoloji</option>
-                  <option value="Sanat">Sanat</option>
-                  <option value="Spor">Spor</option>
-                  <option value="Kariyer">Kariyer</option>
-                  <option value="Mühendislik">Mühendislik</option>
-                  <option value="Oyun">Oyun</option>
-                  <option value="Yaşam">Yaşam</option>
-                </select>
-              </div>
-              <div class="form-group half">
-                <label>Üye Sayısı</label>
-                <input
-                  type="number"
-                  [(ngModel)]="formData.memberCount"
-                  name="memberCount"
-                  class="admin-input"
-                />
-              </div>
-            </div>
-
-            <!-- 3. Satır: Şehir -->
-            <div class="form-row">
-              <div class="form-group half">
-                <label>Şehir</label>
-                <input
-                  type="text"
-                  [(ngModel)]="formData.city"
-                  name="city"
-                  class="admin-input"
-                  placeholder="Örn: İstanbul"
-                />
-              </div>
-              <div class="form-group half"></div>
-            </div>
-
-            <!-- BANNER YÜKLEME (Yeni Tasarım) -->
-            <div class="form-group">
-              <label>Kapak Resmi (Banner)</label>
-
-              <!-- Yükleme Alanı (Resim Yoksa) -->
-              <div
-                *ngIf="!formData.coverImage"
-                class="custom-file-upload"
-                [class.dragging]="dragState['coverImage']"
-                (click)="triggerFileInput('coverImage')"
-                (dragover)="handleDragOver($event, 'coverImage')"
-                (dragleave)="handleDragLeave($event, 'coverImage')"
-                (drop)="handleDrop($event, 'coverImage')"
-              >
-                <div class="icon-wrapper">
-                  <i class="bx bx-image-add"></i>
-                </div>
-                <div class="upload-text">
-                  <p class="primary-text">Tıkla ve seç</p>
-                  <p class="secondary-text">veya dosyayı buraya sürükle</p>
-                </div>
-                <!-- Gizli Input -->
-                <input
-                  type="file"
-                  #coverImageInput
-                  class="hidden-input"
-                  accept="image/*"
-                  (change)="onFileSelected($event, 'coverImage')"
-                />
-              </div>
-
-              <!-- Önizleme (Resim Varsa) -->
-              <div *ngIf="formData.coverImage" class="image-preview-container">
-                <img [src]="formData.coverImage" alt="Banner" />
-                <div class="overlay">
-                  <button
-                    type="button"
-                    class="preview-btn change-btn"
-                    (click)="triggerFileInput('coverImage')"
-                  >
-                    <i class="bx bx-upload"></i>
-                  </button>
-                  <button
-                    type="button"
-                    class="preview-btn remove-btn"
-                    (click)="removeImage('coverImage')"
-                  >
-                    <i class="bx bx-trash"></i>
-                  </button>
-                </div>
-                <!-- Yeniden yükleme için gizli input (gerekirse) -->
-                <input
-                  type="file"
-                  #coverImageInputRef
-                  class="hidden-input"
-                  accept="image/*"
-                  (change)="onFileSelected($event, 'coverImage')"
-                />
-              </div>
-            </div>
-
-            <!-- LOGO YÜKLEME (GÜNCELLENDİ: Boyut Eşitlendi) -->
-            <div class="form-group">
-              <label>Topluluk Logosu</label>
-
-              <div
-                *ngIf="!formData.logo"
-                class="custom-file-upload"
-                [class.dragging]="dragState['logo']"
-                (click)="triggerFileInput('logo')"
-                (dragover)="handleDragOver($event, 'logo')"
-                (dragleave)="handleDragLeave($event, 'logo')"
-                (drop)="handleDrop($event, 'logo')"
-              >
-                <div class="icon-wrapper">
-                  <i class="bx bx-image-add"></i>
-                </div>
-                <div class="upload-text">
-                  <p class="primary-text">Tıkla ve seç</p>
-                  <p class="secondary-text">veya dosyayı buraya sürükle</p>
-                </div>
-                <input
-                  type="file"
-                  #logoInput
-                  class="hidden-input"
-                  accept="image/*"
-                  (change)="onFileSelected($event, 'logo')"
-                />
-              </div>
-
-              <!-- Eski style="height: 100px; width: 100px;" kaldırıldı, Banner ile aynı genişlik sağlandı -->
-              <div *ngIf="formData.logo" class="image-preview-container">
-                <img [src]="formData.logo" alt="Logo" style="object-fit: contain" />
-                <div class="overlay">
-                  <button
-                    type="button"
-                    class="preview-btn change-btn"
-                    (click)="triggerFileInput('logo')"
-                  >
-                    <i class="bx bx-upload"></i>
-                  </button>
-                  <button
-                    type="button"
-                    class="preview-btn remove-btn"
-                    (click)="removeImage('logo')"
-                  >
-                    <i class="bx bx-trash"></i>
-                  </button>
-                </div>
-                <input
-                  type="file"
-                  #logoInputRef
-                  class="hidden-input"
-                  accept="image/*"
-                  (change)="onFileSelected($event, 'logo')"
-                />
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label>Hakkında (Kısa Açıklama)</label>
-              <textarea
-                [(ngModel)]="formData.description"
-                name="description"
-                class="admin-input"
-                rows="4"
-              ></textarea>
-            </div>
-          </ng-container>
-
-          <!-- Diğer form tipleri (announcement, event) aynı kalacak -->
-          <ng-container *ngIf="modalType === 'announcement'">
-            <div class="form-group">
-              <label>Başlık</label
-              ><input type="text" [(ngModel)]="formData.title" name="title" class="admin-input" />
-            </div>
-            <div class="form-group">
-              <label>İçerik</label
-              ><textarea
-                [(ngModel)]="formData.content"
-                name="content"
-                class="admin-input"
-                rows="4"
-              ></textarea>
-            </div>
-          </ng-container>
-
-          <ng-container *ngIf="modalType === 'event'">
-            <div class="form-group">
-              <label>Etkinlik Adı</label
-              ><input type="text" [(ngModel)]="formData.title" name="title" class="admin-input" />
-            </div>
-            <div class="form-group">
-              <label>Konum</label
-              ><input
-                type="text"
-                [(ngModel)]="formData.location"
-                name="location"
-                class="admin-input"
-              />
-            </div>
-            <div class="form-group">
-              <label>Tarih</label
-              ><input type="text" [(ngModel)]="formData.date" name="date" class="admin-input" />
-            </div>
-          </ng-container>
-
-          <div class="modal-actions">
-            <button type="button" class="cancel-btn" (click)="closeModal()">İptal</button>
-            <button type="submit" class="save-btn">Kaydet</button>
-          </div>
-        </form>
+      <div class="modal-body" *ngIf="modalType === 'new-announcement'">
+        <div class="form-group">
+          <label>Başlık</label>
+          <input
+            type="text"
+            [(ngModel)]="newAnnouncement.title"
+            class="modern-input"
+            placeholder="Duyuru başlığı..."
+          />
+        </div>
+        <div class="form-group">
+          <label>Hedef Kitle</label>
+          <select [(ngModel)]="newAnnouncement.target" class="modern-input">
+            <option>Tüm Topluluklar</option>
+            <option>Teknoloji Toplulukları</option>
+            <option>Sanat Toplulukları</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>İçerik</label>
+          <textarea
+            rows="4"
+            class="modern-input"
+            placeholder="Duyuru metnini buraya yazın..."
+          ></textarea>
+        </div>
+        <button class="btn-primary full" (click)="saveAnnouncement()">Yayınla</button>
       </div>
     </div>
   </div>
