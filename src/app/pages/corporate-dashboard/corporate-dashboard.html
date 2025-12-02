@@ -231,41 +231,95 @@
         <div class="header-controls">
           <div class="search-input">
             <span class="material-symbols-outlined">search</span>
-            <input type="text" placeholder="Topluluk Ara..." [(ngModel)]="searchText" />
+            <input
+              type="text"
+              placeholder="Topluluk Ara..."
+              [(ngModel)]="searchText"
+              (input)="applyFilters()"
+            />
           </div>
-          <button class="btn-secondary">
-            <span class="material-symbols-outlined">filter_list</span> Filtrele
-          </button>
+          <select class="status-filter" [(ngModel)]="statusFilter" (change)="applyFilters()">
+            <option value="">Tüm Durumlar</option>
+            <option value="Aktif">Aktif</option>
+            <option value="Pasif">Pasif</option>
+          </select>
         </div>
       </div>
 
+      <!-- Sonuç Sayısı -->
+      <div class="results-info">
+        <p>
+          Toplam <strong>{{ filteredCommunities.length }}</strong> topluluk bulundu.
+        </p>
+      </div>
+
       <div class="grid-cards">
-        <div class="simple-card" *ngFor="let c of communities">
-          <div class="card-head">
-            <img [src]="c.logo" alt="Logo" class="rounded-logo" />
-            <span
-              class="chip"
-              [ngClass]="{ green: c.status === 'Aktif', orange: c.status === 'Onay Bekliyor' }"
-            >
-              {{ c.status }}
-            </span>
+        <div class="simple-card community-card-enhanced" *ngFor="let c of displayedCommunities">
+          <!-- Banner -->
+          <div class="card-banner" *ngIf="c.banner">
+            <img [src]="c.banner" alt="Banner" />
           </div>
-          <h4>{{ c.name }}</h4>
-          <p class="role-text">{{ c.category }}</p>
-
-          <div class="card-stats-row">
-            <div class="mini-stat">
-              <span class="material-symbols-outlined">group</span> {{ c.memberCount }} Üye
+          <div class="card-body-content">
+            <div class="card-head">
+              <img [src]="c.logo" alt="Logo" class="rounded-logo" />
+              <span
+                class="chip"
+                [ngClass]="{ green: c.status === 'Aktif', red: c.status === 'Pasif' }"
+              >
+                {{ c.status }}
+              </span>
             </div>
-            <div class="mini-stat">
-              <span class="material-symbols-outlined">person</span> {{ c.president }}
-            </div>
-          </div>
+            <h4>{{ c.name }}</h4>
+            <p class="category-text">
+              <span class="material-symbols-outlined tiny">category</span> {{ c.category }}
+            </p>
+            <p class="role-text">
+              <span class="material-symbols-outlined tiny">school</span> {{ c.university }}
+            </p>
+            <p class="role-text">
+              <span class="material-symbols-outlined tiny">location_on</span> {{ c.city }}
+            </p>
 
-          <div class="btn-row">
-            <button class="btn-outline full">Detaylar</button>
+            <div class="card-stats-row">
+              <div class="mini-stat">
+                <span class="material-symbols-outlined">group</span> {{ c.memberCount }} Üye
+              </div>
+            </div>
+
+            <div class="btn-row">
+              <button class="btn-outline full" (click)="openCommunityDetail(c)">Detaylar</button>
+            </div>
           </div>
         </div>
+      </div>
+
+      <!-- Sayfalama -->
+      <div class="pagination-area" *ngIf="totalPages > 1">
+        <button
+          class="page-btn prev"
+          [disabled]="currentPage === 1"
+          (click)="changePage(currentPage - 1)"
+        >
+          <span class="material-symbols-outlined">chevron_left</span>
+        </button>
+
+        <ng-container *ngFor="let page of pages">
+          <button
+            class="page-btn number"
+            [class.active]="page === currentPage"
+            (click)="changePage(page)"
+          >
+            {{ page }}
+          </button>
+        </ng-container>
+
+        <button
+          class="page-btn next"
+          [disabled]="currentPage === totalPages"
+          (click)="changePage(currentPage + 1)"
+        >
+          <span class="material-symbols-outlined">chevron_right</span>
+        </button>
       </div>
     </div>
 
@@ -355,29 +409,37 @@
         </button>
       </div>
 
-      <div class="grid-cards">
-        <div class="simple-card announcement-card" *ngFor="let a of announcements">
-          <div class="ann-icon">
+      <div class="announcements-grid">
+        <div class="announcement-card-enhanced" *ngFor="let a of announcements">
+          <!-- Duyuru Görseli -->
+          <div class="announcement-image" *ngIf="a.image">
+            <img [src]="a.image" [alt]="a.title" />
+            <span class="category-badge">DUYURULAR</span>
+          </div>
+          <div class="announcement-image placeholder" *ngIf="!a.image">
             <span class="material-symbols-outlined">campaign</span>
+            <span class="category-badge">DUYURULAR</span>
           </div>
-          <div class="ann-content">
-            <h4>{{ a.title }}</h4>
-            <div class="ann-meta">
-              <span><span class="material-symbols-outlined tiny">groups</span> {{ a.target }}</span>
-              <span
-                ><span class="material-symbols-outlined tiny">calendar_today</span>
-                {{ a.date }}</span
-              >
+
+          <!-- Duyuru İçeriği -->
+          <div class="announcement-body">
+            <h4 class="announcement-title">{{ a.title }}</h4>
+            <p class="announcement-description">{{ a.shortDescription }}</p>
+
+            <div class="announcement-meta">
+              <span class="meta-item">
+                <span class="material-symbols-outlined">calendar_today</span>
+                {{ a.date }}
+              </span>
             </div>
-            <div class="ann-footer">
-              <span class="status-dot" [class.active]="a.status === 'Yayında'"></span>
-              {{ a.status }}
-              <span class="views">{{ a.views }} Görüntülenme</span>
+
+            <div class="announcement-footer">
+              <button class="btn-detail" (click)="openAnnouncementDetail(a)">
+                Detaylar
+                <span class="material-symbols-outlined">arrow_forward</span>
+              </button>
             </div>
           </div>
-          <button class="icon-btn-sm">
-            <span class="material-symbols-outlined">more_vert</span>
-          </button>
         </div>
       </div>
     </div>
@@ -396,12 +458,30 @@
           <h3>Kurum Bilgileri</h3>
           <div class="form-grid">
             <div class="form-group">
-              <label>Kurum Adı</label>
+              <label>İl Adı</label>
               <input type="text" [(ngModel)]="corporateInfo.name" class="modern-input" />
             </div>
             <div class="form-group">
               <label>Yönetici Email</label>
-              <input type="email" value="admin@unides.com" class="modern-input" />
+              <input
+                type="email"
+                [value]="corporateInfo.email"
+                class="modern-input disabled-input"
+                readonly
+                disabled
+                title="Bu alan değiştirilemez"
+              />
+            </div>
+            <div class="form-group">
+              <label>Kullanıcı Adı</label>
+              <input
+                type="text"
+                [value]="corporateInfo.username"
+                class="modern-input disabled-input"
+                readonly
+                disabled
+                title="Bu alan değiştirilemez"
+              />
             </div>
             <div class="form-actions">
               <button class="btn-primary" (click)="showToast('Bilgiler güncellendi', 'success')">
@@ -416,39 +496,320 @@
 
   <!-- MODAL -->
   <div class="modal-backdrop" *ngIf="isModalOpen" (click)="closeModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
+    <div
+      class="modal-content"
+      [class.wide]="
+        modalType === 'edit-community' ||
+        modalType === 'new-announcement' ||
+        modalType === 'edit-announcement'
+      "
+      (click)="$event.stopPropagation()"
+    >
       <div class="modal-header">
-        <h3>{{ modalType === 'new-announcement' ? 'Yeni Duyuru Oluştur' : 'İşlem' }}</h3>
+        <h3>
+          {{
+            modalType === 'new-announcement'
+              ? 'Yeni Duyuru Oluştur'
+              : modalType === 'edit-announcement'
+              ? 'Duyuru Güncelle'
+              : modalType === 'edit-community'
+              ? 'Topluluk Güncelle'
+              : 'İşlem'
+          }}
+        </h3>
         <button class="close-btn" (click)="closeModal()">✕</button>
       </div>
 
-      <div class="modal-body" *ngIf="modalType === 'new-announcement'">
-        <div class="form-group">
-          <label>Başlık</label>
-          <input
-            type="text"
-            [(ngModel)]="newAnnouncement.title"
-            class="modern-input"
-            placeholder="Duyuru başlığı..."
-          />
+      <!-- Yeni Duyuru Modal -->
+      <div class="modal-body modal-body-scrollable" *ngIf="modalType === 'new-announcement'">
+        <!-- Görsel Upload (Sadece dosya yükleme) -->
+        <div class="single-image-upload no-url-input">
+          <app-image-upload
+            label="Duyuru Görseli"
+            [previewUrl]="newAnnouncement.image || null"
+            (onImageSelected)="onNewAnnouncementImageSelected($event)"
+          ></app-image-upload>
         </div>
-        <div class="form-group">
-          <label>Hedef Kitle</label>
-          <select [(ngModel)]="newAnnouncement.target" class="modern-input">
-            <option>Tüm Topluluklar</option>
-            <option>Teknoloji Toplulukları</option>
-            <option>Sanat Toplulukları</option>
-          </select>
+
+        <div class="form-section">
+          <h5 class="section-title">Duyuru Bilgileri</h5>
+          <div class="form-group">
+            <label>Başlık</label>
+            <input
+              type="text"
+              [(ngModel)]="newAnnouncement.title"
+              class="modern-input"
+              placeholder="Duyuru başlığı..."
+            />
+          </div>
+          <div class="form-group">
+            <label>Kısa Açıklama</label>
+            <textarea
+              [(ngModel)]="newAnnouncement.shortDescription"
+              class="modern-input"
+              rows="2"
+              placeholder="Duyurunun kısa özeti..."
+            ></textarea>
+          </div>
+          <div class="form-group">
+            <label>Detaylı İçerik</label>
+            <textarea
+              [(ngModel)]="newAnnouncement.content"
+              class="modern-input"
+              rows="6"
+              placeholder="Duyurunun tam metnini buraya yazın..."
+            ></textarea>
+          </div>
+          <div class="form-group">
+            <label>Duyuru Linki (Opsiyonel)</label>
+            <input
+              type="url"
+              [(ngModel)]="newAnnouncement.link"
+              class="modern-input"
+              placeholder="https://..."
+            />
+          </div>
         </div>
-        <div class="form-group full">
-          <label>İçerik</label>
-          <textarea
-            rows="4"
-            class="modern-input"
-            placeholder="Duyuru metnini buraya yazın..."
-          ></textarea>
+
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="closeModal()">İptal</button>
+          <button class="btn-primary" (click)="saveAnnouncement()">
+            <span class="material-symbols-outlined">publish</span>
+            Yayınla
+          </button>
         </div>
-        <button class="btn-primary full" (click)="saveAnnouncement()">Yayınla</button>
+      </div>
+
+      <!-- Duyuru Düzenleme Modal -->
+      <div
+        class="modal-body modal-body-scrollable"
+        *ngIf="modalType === 'edit-announcement' && editingAnnouncement"
+      >
+        <!-- Görsel Upload (Sadece dosya yükleme) -->
+        <div class="single-image-upload no-url-input">
+          <app-image-upload
+            label="Duyuru Görseli"
+            [previewUrl]="editingAnnouncement.image"
+            (onImageSelected)="onAnnouncementImageSelected($event)"
+          ></app-image-upload>
+        </div>
+
+        <div class="form-section">
+          <h5 class="section-title">Duyuru Bilgileri</h5>
+          <div class="form-group">
+            <label>Başlık</label>
+            <input
+              type="text"
+              [(ngModel)]="editingAnnouncement.title"
+              class="modern-input"
+              placeholder="Duyuru başlığı..."
+            />
+          </div>
+          <div class="form-group">
+            <label>Kısa Açıklama</label>
+            <textarea
+              [(ngModel)]="editingAnnouncement.shortDescription"
+              class="modern-input"
+              rows="2"
+              placeholder="Duyurunun kısa özeti..."
+            ></textarea>
+          </div>
+          <div class="form-group">
+            <label>Detaylı İçerik</label>
+            <textarea
+              [(ngModel)]="editingAnnouncement.content"
+              class="modern-input"
+              rows="8"
+              placeholder="Duyurunun tam metnini buraya yazın..."
+            ></textarea>
+          </div>
+          <div class="form-group">
+            <label>Duyuru Linki (Opsiyonel)</label>
+            <input
+              type="url"
+              [(ngModel)]="editingAnnouncement.link"
+              class="modern-input"
+              placeholder="https://..."
+            />
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h5 class="section-title">Duyuru Bilgisi</h5>
+          <div class="announcement-stats">
+            <div class="stat-item">
+              <span class="material-symbols-outlined">calendar_today</span>
+              <span>{{ editingAnnouncement.date }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-danger" (click)="deleteAnnouncement()">
+            <span class="material-symbols-outlined">delete</span>
+            Duyuruyu Sil
+          </button>
+          <button class="btn-primary" (click)="updateAnnouncement()">
+            <span class="material-symbols-outlined">save</span>
+            Kaydet
+          </button>
+        </div>
+      </div>
+
+      <!-- Topluluk Düzenleme Modal -->
+      <div
+        class="modal-body modal-body-scrollable"
+        *ngIf="modalType === 'edit-community' && editingCommunity"
+      >
+        <!-- Banner ve Logo Upload Alanı -->
+        <div class="image-uploads-section">
+          <div class="banner-upload-wrapper">
+            <app-image-upload
+              label="Banner Görseli"
+              [previewUrl]="editingCommunity.banner"
+              (onImageSelected)="onBannerSelected($event)"
+            ></app-image-upload>
+          </div>
+          <div class="logo-upload-wrapper">
+            <app-image-upload
+              label="Logo"
+              [previewUrl]="editingCommunity.logo"
+              (onImageSelected)="onLogoSelected($event)"
+            ></app-image-upload>
+          </div>
+        </div>
+
+        <!-- Durum Seçimi -->
+        <div class="status-toggle-section">
+          <label>Topluluk Durumu</label>
+          <div class="status-toggle-buttons">
+            <button
+              class="status-btn"
+              [class.active]="editingCommunity.status === 'Aktif'"
+              (click)="editingCommunity.status = 'Aktif'"
+            >
+              <span class="material-symbols-outlined">check_circle</span>
+              Aktif
+            </button>
+            <button
+              class="status-btn passive"
+              [class.active]="editingCommunity.status === 'Pasif'"
+              (click)="editingCommunity.status = 'Pasif'"
+            >
+              <span class="material-symbols-outlined">cancel</span>
+              Pasif
+            </button>
+          </div>
+        </div>
+
+        <!-- Form Alanları -->
+        <div class="form-section">
+          <h5 class="section-title">Temel Bilgiler</h5>
+          <div class="form-grid-2col">
+            <div class="form-group">
+              <label>Topluluk İsmi</label>
+              <input
+                type="text"
+                [(ngModel)]="editingCommunity.name"
+                class="modern-input"
+                placeholder="Topluluk adını girin"
+              />
+            </div>
+            <div class="form-group">
+              <label>Topluluk Kategorisi</label>
+              <select [(ngModel)]="editingCommunity.category" class="modern-input">
+                <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group full-width">
+            <label>Topluluk Hakkında</label>
+            <textarea
+              [(ngModel)]="editingCommunity.about"
+              class="modern-input"
+              rows="3"
+              placeholder="Topluluk hakkında kısa bir açıklama yazın..."
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h5 class="section-title">Konum Bilgileri</h5>
+          <div class="form-grid-2col">
+            <div class="form-group">
+              <label>Şehir</label>
+              <input
+                type="text"
+                [(ngModel)]="editingCommunity.city"
+                class="modern-input"
+                placeholder="Şehir"
+              />
+            </div>
+            <div class="form-group">
+              <label>Üniversite</label>
+              <input
+                type="text"
+                [(ngModel)]="editingCommunity.university"
+                class="modern-input"
+                placeholder="Üniversite adı"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h5 class="section-title">İletişim Bilgileri</h5>
+          <div class="form-grid-2col">
+            <div class="form-group">
+              <label>E-posta</label>
+              <input
+                type="email"
+                [(ngModel)]="editingCommunity.email"
+                class="modern-input"
+                placeholder="topluluk@mail.com"
+              />
+            </div>
+            <div class="form-group">
+              <label>Üye Sayısı</label>
+              <input
+                type="number"
+                [(ngModel)]="editingCommunity.memberCount"
+                class="modern-input"
+                placeholder="0"
+              />
+            </div>
+            <div class="form-group">
+              <label>Sosyal Medya Linki</label>
+              <input
+                type="url"
+                [(ngModel)]="editingCommunity.socialMedia"
+                class="modern-input"
+                placeholder="https://instagram.com/..."
+              />
+            </div>
+            <div class="form-group">
+              <label>Website (Opsiyonel)</label>
+              <input
+                type="url"
+                [(ngModel)]="editingCommunity.website"
+                class="modern-input"
+                placeholder="https://..."
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-danger" (click)="deleteCommunity()">
+            <span class="material-symbols-outlined">delete</span>
+            Topluluğu Sil
+          </button>
+          <button class="btn-primary" (click)="saveCommunity()">
+            <span class="material-symbols-outlined">save</span>
+            Topluluk Kaydet
+          </button>
+        </div>
       </div>
     </div>
   </div>
