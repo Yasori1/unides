@@ -15,7 +15,10 @@
       }
 
       .announcement-header {
+        display: flex; /* Flex eklendi ki başlık ve badge yan yana dursun */
+        justify-content: space-between;
         align-items: flex-start;
+        margin-bottom: 8px;
 
         .announcement-title {
           margin: 0;
@@ -39,6 +42,7 @@
           font-weight: 600;
           padding: 0.35em 0.6em;
           border-radius: 4px;
+          white-space: nowrap; /* Rozetin aşağı kaymasını engeller */
         }
       }
 
@@ -46,6 +50,8 @@
         color: #718096;
         font-size: 0.875rem;
         margin-bottom: 12px;
+        display: flex;
+        align-items: center;
       }
 
       p {
@@ -85,6 +91,8 @@
     margin: 0 2px;
     border-radius: 6px;
     padding: 0.4rem 0.8rem;
+    cursor: pointer;
+    text-decoration: none;
 
     &:hover {
       color: #3182ce;
@@ -101,13 +109,11 @@
   .page-item.disabled .page-link {
     color: #cbd5e0;
     pointer-events: none;
+    background-color: #f8f9fa;
   }
 }
 
-// Sidebar zaten ortak bileşenden geliyor, özel düzenleme yok
-// Ama istersen sidebar başlıklarını da özelleştirebiliriz
-
-// Responsive: mobilde sidebar altta görünsün (opsiyonel)
+// Responsive ayarlar
 @media (max-width: 992px) {
   .blog-details-area .container .row {
     flex-direction: column;
