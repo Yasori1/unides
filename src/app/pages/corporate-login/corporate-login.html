@@ -36,8 +36,8 @@
             </div>
             <input
               type="email"
-              (input)="validateStudentEmail($event)"
-              placeholder="Kurumsal E-Posta Adresi"
+              (input)="validateCorporateEmail($event)"
+              placeholder="Kurumsal E-Posta (xxx@gsb.gov.tr)"
               class="modern-input"
               [class.input-error]="emailError"
             />
@@ -45,7 +45,7 @@
 
           <!-- Hata Mesajı -->
           <div *ngIf="emailError" class="error-message">
-            <i class="bx bx-error-circle"></i> Geçerli bir kurumsal e-posta giriniz.
+            <i class="bx bx-error-circle"></i> Sadece <b>gsb.gov.tr</b> uzantılı kurumsal mailler kabul edilmektedir.
           </div>
 
           <!-- Şifre Input -->

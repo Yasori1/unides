@@ -257,41 +257,106 @@
         </p>
       </div>
 
-      <div class="grid-cards">
-        <div class="simple-card community-card-enhanced" *ngFor="let c of displayedCommunities">
-          <!-- Banner -->
-          <div class="card-banner" *ngIf="c.banner">
-            <img [src]="c.banner" alt="Banner" />
+      <!-- Communities-page ile aynı kart tasarımı -->
+      <div class="grid-container" *ngIf="displayedCommunities.length > 0">
+        <div
+          *ngFor="let item of displayedCommunities"
+          class="community-card"
+          (click)="openCommunityDetail(item)"
+        >
+          <div class="cover-area">
+            <img
+              [src]="item.coverImage || item.banner || 'assets/img/placeholder-cover.jpg'"
+              [alt]="item.name"
+              class="cover-img"
+              onerror="this.src='assets/img/placeholder-cover.jpg'"
+            />
+            <span class="category-badge">{{ item.category }}</span>
+            <span
+              class="status-badge"
+              [ngClass]="{ active: item.status === 'Aktif', passive: item.status === 'Pasif' }"
+            >
+              {{ item.status }}
+            </span>
           </div>
-          <div class="card-body-content">
-            <div class="card-head">
-              <img [src]="c.logo" alt="Logo" class="rounded-logo" />
-              <span
-                class="chip"
-                [ngClass]="{ green: c.status === 'Aktif', red: c.status === 'Pasif' }"
-              >
-                {{ c.status }}
-              </span>
-            </div>
-            <h4>{{ c.name }}</h4>
-            <p class="category-text">
-              <span class="material-symbols-outlined tiny">category</span> {{ c.category }}
-            </p>
-            <p class="role-text">
-              <span class="material-symbols-outlined tiny">school</span> {{ c.university }}
-            </p>
-            <p class="role-text">
-              <span class="material-symbols-outlined tiny">location_on</span> {{ c.city }}
-            </p>
 
-            <div class="card-stats-row">
-              <div class="mini-stat">
-                <span class="material-symbols-outlined">group</span> {{ c.memberCount }} Üye
+          <div class="card-content">
+            <div class="header-row">
+              <div class="logo-wrapper">
+                <img
+                  [src]="item.logo"
+                  [alt]="item.name"
+                  class="logo-img"
+                  onerror="this.src='assets/img/placeholder-logo.png'"
+                />
+              </div>
+              <div class="title-wrapper">
+                <h3 class="community-name">{{ item.name }}</h3>
+                <span class="university-name">{{ item.university }}</span>
+                <span class="city-tag" *ngIf="item.city">
+                  <i class="bx bxs-map"></i> {{ item.city }}
+                </span>
               </div>
             </div>
 
-            <div class="btn-row">
-              <button class="btn-outline full" (click)="openCommunityDetail(c)">Detaylar</button>
+            <p class="description">{{ item.description || item.about }}</p>
+
+            <!-- Sosyal Medya İkonları -->
+            <div
+              class="social-media-icons"
+              *ngIf="item.instagram || item.youtube || item.twitter || item.tiktok || item.socialMedia"
+            >
+              <a
+                *ngIf="item.instagram"
+                [href]="item.instagram"
+                target="_blank"
+                class="social-icon instagram"
+                (click)="$event.stopPropagation()"
+                title="Instagram"
+              >
+                <i class="bx bxl-instagram"></i>
+              </a>
+              <a
+                *ngIf="item.youtube"
+                [href]="item.youtube"
+                target="_blank"
+                class="social-icon youtube"
+                (click)="$event.stopPropagation()"
+                title="Youtube"
+              >
+                <i class="bx bxl-youtube"></i>
+              </a>
+              <a
+                *ngIf="item.twitter"
+                [href]="item.twitter"
+                target="_blank"
+                class="social-icon twitter"
+                (click)="$event.stopPropagation()"
+                title="Twitter"
+              >
+                <i class="bx bxl-twitter"></i>
+              </a>
+              <a
+                *ngIf="item.tiktok"
+                [href]="item.tiktok"
+                target="_blank"
+                class="social-icon tiktok"
+                (click)="$event.stopPropagation()"
+                title="TikTok"
+              >
+                <i class="bx bxl-tiktok"></i>
+              </a>
+            </div>
+
+            <div class="card-footer">
+              <div class="member-count">
+                <i class="bx bx-group"></i>
+                <span>{{ item.memberCount }} Üye</span>
+              </div>
+              <button class="detail-btn" (click)="openCommunityDetail(item); $event.stopPropagation()">
+                Detaylar
+                <i class="bx bx-right-arrow-alt"></i>
+              </button>
             </div>
           </div>
         </div>
@@ -672,14 +737,14 @@
           <div class="banner-upload-wrapper no-url-input">
             <app-image-upload
               label="Banner Görseli"
-              [previewUrl]="newCommunity.banner"
+              [previewUrl]="newCommunity.banner || null"
               (onImageSelected)="onNewBannerSelected($event)"
             ></app-image-upload>
           </div>
           <div class="logo-upload-wrapper no-url-input">
             <app-image-upload
               label="Logo"
-              [previewUrl]="newCommunity.logo"
+              [previewUrl]="newCommunity.logo || null"
               (onImageSelected)="onNewLogoSelected($event)"
             ></app-image-upload>
           </div>
@@ -851,14 +916,14 @@
           <div class="banner-upload-wrapper no-url-input">
             <app-image-upload
               label="Banner Görseli"
-              [previewUrl]="editingCommunity.banner"
+              [previewUrl]="editingCommunity.banner || null"
               (onImageSelected)="onBannerSelected($event)"
             ></app-image-upload>
           </div>
           <div class="logo-upload-wrapper no-url-input">
             <app-image-upload
               label="Logo"
-              [previewUrl]="editingCommunity.logo"
+              [previewUrl]="editingCommunity.logo || null"
               (onImageSelected)="onLogoSelected($event)"
             ></app-image-upload>
           </div>

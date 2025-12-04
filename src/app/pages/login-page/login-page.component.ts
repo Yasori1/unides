@@ -1,5 +1,5 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit, HostListener, OnDestroy } from '@angular/core';
+import { CommonModule, Location } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 // Servisler
 import { ToastService } from '../../services/toast.services';
@@ -19,14 +19,16 @@ import { HttpClientModule, HttpErrorResponse } from '@angular/common/http';
   styleUrls: ['./login-page.component.scss'],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class LoginPageComponent implements OnInit {
+export class LoginPageComponent implements OnInit, OnDestroy {
   emailError: boolean = false;
   isLoading: boolean = false;
+  private popStateListener?: (event: PopStateEvent) => void;
 
   constructor(
     private toastService: ToastService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private location: Location
   ) {}
 
   ngOnInit(): void {
@@ -39,6 +41,25 @@ export class LoginPageComponent implements OnInit {
       script.type = 'module';
       script.src = 'https://unpkg.com/@splinetool/viewer@1.9.59/build/spline-viewer.js';
       document.head.appendChild(script);
+    }
+
+    // Geri butonuna basıldığında anasayfaya yönlendir
+    this.popStateListener = (event: PopStateEvent) => {
+      // State kontrolü yap - eğer bizim eklediğimiz state ise veya login sayfasındaysak
+      if ((event.state && event.state.fromLogin) || this.router.url === '/login') {
+        // window.location kullanarak direkt anasayfaya yönlendir (Angular Router'ı bypass eder)
+        window.location.href = '/';
+      }
+    };
+    window.addEventListener('popstate', this.popStateListener);
+
+    // History'ye bir entry ekle ki geri butonuna basıldığında popstate tetiklensin
+    history.pushState({ fromLogin: true }, '', location.href);
+  }
+
+  ngOnDestroy(): void {
+    if (this.popStateListener) {
+      window.removeEventListener('popstate', this.popStateListener);
     }
   }
 

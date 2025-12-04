@@ -18,8 +18,8 @@
       <div class="visual-content">
         <div class="brand-badge"><i class="bx bxs-graduation"></i> ÜNİDES</div>
         <div class="quote-container">
-          <h1>Geleceğe<br />Hoş Geldin.</h1>
-          <p>Kampüs hayatını dijitalleştiren platforma tekrar bağlan.</p>
+          <h1>Topluluk<br />Yönetimi</h1>
+          <p>Topluluğunu yönet, etkinliklerini düzenle ve üyelerinle buluş.</p>
         </div>
       </div>
       <!-- DÜZELTME: Footer buradan kaldırıldı, sabit durması için sağ tarafa alındı. -->
@@ -31,28 +31,28 @@
         <div class="mobile-logo"><i class="bx bxs-graduation"></i> ÜNİDES</div>
 
         <div class="header-text">
-          <h3>Tekrar Merhaba! 👋</h3>
-          <p>Hesabın yok mu? <a routerLink="/register" class="register-link">Hemen Kayıt Ol</a></p>
+          <h3>Topluluk Girişi 👥</h3>
+          <p>Topluluk başkanı veya yöneticisi olarak giriş yapın</p>
         </div>
 
         <form (submit)="onSubmit($event)">
           <!-- E-Posta Input -->
           <div class="input-group">
             <div class="icon-wrapper" [class.error-icon]="emailError">
-              <i class="bx bx-envelope"></i>
+              <i class="bx bx-group"></i>
             </div>
             <input
               type="email"
-              (input)="validateStudentEmail($event)"
-              placeholder="Öğrenci E-Posta (xxx@univ.edu.tr)"
+              (input)="validateCommunityEmail($event)"
+              placeholder="Topluluk E-Posta (xxx@univ.edu.tr)"
               class="modern-input"
               [class.input-error]="emailError"
             />
           </div>
 
           <div *ngIf="emailError" class="error-message">
-            <i class="bx bx-error-circle"></i> Sadece <b>.edu.tr</b> uzantılı öğrenci mailleri kabul
-            edilmektedir.
+            <i class="bx bx-error-circle"></i> Sadece <b>.edu.tr</b> uzantılı topluluk mailleri
+            kabul edilmektedir.
           </div>
 
           <!-- Şifre Input -->
@@ -79,7 +79,7 @@
             [disabled]="isLoading"
           >
             <ng-container *ngIf="!isLoading">
-              Giriş Yap <i class="bx bx-right-arrow-alt"></i>
+              Topluluk Paneline Gir <i class="bx bx-right-arrow-alt"></i>
             </ng-container>
 
             <ng-container *ngIf="isLoading">
@@ -93,24 +93,24 @@
           </div>
 
           <div class="social-login-grid">
-            <!-- Yetkili Girişi -->
+            <!-- Öğrenci Girişi -->
+            <button type="button" class="btn-social" routerLink="/login">
+              <div class="btn-content">
+                <i class="bx bxs-graduation icon-official"></i>
+                <div class="text-col">
+                  <span class="btn-label">Standart</span>
+                  <span class="btn-title">Öğrenci Girişi</span>
+                </div>
+              </div>
+            </button>
+
+            <!-- Kurumsal Girişi -->
             <button type="button" class="btn-social btn-official" routerLink="/corporate-login">
               <div class="btn-content">
                 <i class="bx bxs-id-card icon-official"></i>
                 <div class="text-col">
                   <span class="btn-label">Kurumsal</span>
                   <span class="btn-title">Yetkili Girişi</span>
-                </div>
-              </div>
-            </button>
-
-            <!-- Topluluk Girişi -->
-            <button type="button" class="btn-social btn-community" routerLink="/community-login">
-              <div class="btn-content">
-                <span class="emoji-icon">👥</span>
-                <div class="text-col">
-                  <span class="btn-label">Sosyal</span>
-                  <span class="btn-title">Topluluk Girişi</span>
                 </div>
               </div>
             </button>

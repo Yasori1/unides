@@ -1,5 +1,5 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit, HostListener, OnDestroy } from '@angular/core';
+import { CommonModule, Location } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 // Servisler
 import { ToastService } from '../../services/toast.services';
@@ -11,7 +11,7 @@ import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.compo
 import { HttpClientModule, HttpErrorResponse } from '@angular/common/http';
 
 @Component({
-  selector: 'app-login-page',
+  selector: 'app-community-login',
   standalone: true,
   imports: [CommonModule, RouterLink, ToastComponent, HttpClientModule, LumaSpinComponent],
   templateUrl: './community-login.html',
@@ -19,14 +19,16 @@ import { HttpClientModule, HttpErrorResponse } from '@angular/common/http';
   // BU SATIR EKLENMELİ: Spline gibi custom element'leri tanıması için gereklidir
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class CommunityLoginComponent implements OnInit {
+export class CommunityLoginComponent implements OnInit, OnDestroy {
   emailError: boolean = false;
   isLoading: boolean = false;
+  private popStateListener?: (event: PopStateEvent) => void;
 
   constructor(
     private toastService: ToastService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private location: Location
   ) {}
 
   ngOnInit(): void {
@@ -41,9 +43,28 @@ export class CommunityLoginComponent implements OnInit {
       script.src = 'https://unpkg.com/@splinetool/viewer@1.9.59/build/spline-viewer.js';
       document.head.appendChild(script);
     }
+
+    // Geri butonuna basıldığında anasayfaya yönlendir
+    this.popStateListener = (event: PopStateEvent) => {
+      // State kontrolü yap - eğer bizim eklediğimiz state ise veya community-login sayfasındaysak
+      if ((event.state && event.state.fromCommunityLogin) || this.router.url === '/community-login') {
+        // window.location kullanarak direkt anasayfaya yönlendir (Angular Router'ı bypass eder)
+        window.location.href = '/';
+      }
+    };
+    window.addEventListener('popstate', this.popStateListener);
+    
+    // History'ye bir entry ekle ki geri butonuna basıldığında popstate tetiklensin
+    history.pushState({ fromCommunityLogin: true }, '', location.href);
   }
 
-  validateStudentEmail(event: any) {
+  ngOnDestroy(): void {
+    if (this.popStateListener) {
+      window.removeEventListener('popstate', this.popStateListener);
+    }
+  }
+
+  validateCommunityEmail(event: any) {
     const email = event.target.value;
 
     if (!email) {
@@ -77,18 +98,18 @@ export class CommunityLoginComponent implements OnInit {
     }
 
     if (this.emailError) {
-      this.toastService.show('Lütfen geçerli bir öğrenci e-postası (.edu.tr) giriniz.', 'error');
+      this.toastService.show('Lütfen geçerli bir topluluk e-postası (.edu.tr) giriniz.', 'error');
       return;
     }
 
     // 2. BACKEND SORGUSU BAŞLIYOR
     this.isLoading = true;
 
-    this.authService.loginStudent(email, password).subscribe({
+    this.authService.loginCommunity(email, password).subscribe({
       next: (response: LoginResponse) => {
         // --- BAŞARILI GİRİŞ ---
         this.isLoading = false;
-        this.toastService.show('Giriş başarılı! Anasayfaya yönlendiriliyorsunuz...', 'success');
+        this.toastService.show('Giriş başarılı! Topluluk paneline yönlendiriliyorsunuz...', 'success');
 
         setTimeout(() => {
           this.router.navigate(['/']);

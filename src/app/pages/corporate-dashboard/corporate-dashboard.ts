@@ -130,8 +130,9 @@ interface Stat {
 interface Community {
   id: number;
   name: string;
-  about: string;
-  city: string;
+  about?: string;
+  description?: string; // CommunityService'ten gelen veri için
+  city?: string;
   university: string;
   memberCount: number;
   socialMedia?: string; // Eski uyumluluk için
@@ -139,12 +140,13 @@ interface Community {
   youtube?: string;
   twitter?: string;
   tiktok?: string;
-  website: string;
-  email: string;
+  website?: string;
+  email?: string;
   category: string;
   logo: string;
-  banner: string;
-  status: 'Aktif' | 'Pasif';
+  banner?: string;
+  coverImage?: string; // CommunityService'ten gelen veri için
+  status?: 'Aktif' | 'Pasif';
 }
 interface Announcement {
   id: number;
@@ -650,24 +652,35 @@ Görüş ve önerilerinizi 15 Aralık 2025 tarihine kadar iletebilirsiniz.`,
   ) {}
 
   ngOnInit() {
-    this.communities = [...this.allCommunities];
-    this.filteredCommunities = [...this.communities];
-    this.initPagination();
-    
-    // Corporate Dashboard'daki tüm toplulukları CommunityService'e senkronize et
-    // Böylece communities-page'de de aynı topluluklar görünecek
-    const communitiesForService = this.allCommunities.map((c) => ({
-      ...c,
-      description: c.about || '',
-      coverImage: c.banner || '',
-    }));
-    
-    this.communityService.syncCommunitiesFromCorporate(communitiesForService).subscribe({
-      next: () => {
-        console.log('Topluluklar CommunityService\'e senkronize edildi');
+    // CommunityService'ten toplulukları çek (communities-page ile aynı kaynak)
+    this.loadCommunitiesFromService();
+  }
+
+  loadCommunitiesFromService() {
+    this.communityService.getAllCommunities().subscribe({
+      next: (data) => {
+        // CommunityService'ten gelen veriyi Corporate Dashboard formatına dönüştür
+        this.allCommunities = data.map((c) => ({
+          ...c,
+          about: c.description || c.about || '',
+          banner: c.coverImage || c.banner || '',
+          coverImage: c.coverImage || c.banner || '', // Her iki alanı da tut
+          description: c.description || c.about || '', // Her iki alanı da tut
+          city: c.city || '', // city undefined ise boş string
+          // Eğer status yoksa varsayılan olarak 'Aktif' yap
+          status: c.status || 'Aktif',
+        })) as Community[];
+        
+        this.communities = [...this.allCommunities];
+        this.filteredCommunities = [...this.communities];
+        this.initPagination();
       },
       error: (err) => {
-        console.error('Topluluklar senkronize edilirken hata:', err);
+        console.error('Topluluklar yüklenemedi:', err);
+        // Hata durumunda mock data kullan
+        this.communities = [...this.allCommunities];
+        this.filteredCommunities = [...this.communities];
+        this.initPagination();
       },
     });
   }
@@ -702,7 +715,7 @@ Görüş ve önerilerinizi 15 Aralık 2025 tarihine kadar iletebilirsiniz.`,
       temp = temp.filter(
         (c) =>
           c.name.toLowerCase().includes(term) ||
-          c.city.toLowerCase().includes(term) ||
+          (c.city && c.city.toLowerCase().includes(term)) ||
           c.university.toLowerCase().includes(term) ||
           c.category.toLowerCase().includes(term)
       );
@@ -748,31 +761,25 @@ Görüş ve önerilerinizi 15 Aralık 2025 tarihine kadar iletebilirsiniz.`,
 
   saveCommunity() {
     if (this.editingCommunity) {
-      const index = this.communities.findIndex((c) => c.id === this.editingCommunity!.id);
-      if (index !== -1) {
-        this.communities[index] = { ...this.editingCommunity };
-        this.applyFilters();
-        
-        // CommunityService'e de kaydet (communities-page'e otomatik eklenir)
-        // Service interface'i için description alanını about'tan oluştur
-        const communityForService = {
-          ...this.editingCommunity,
-          description: this.editingCommunity.about || '',
-          coverImage: this.editingCommunity.banner || '',
-        };
-        
-        this.communityService.addOrUpdateCommunity(communityForService).subscribe({
-          next: () => {
-            this.showToast('Topluluk başarıyla güncellendi', 'success');
-            this.closeModal();
-          },
-          error: (err) => {
-            console.error('Topluluk güncellenirken hata:', err);
-            this.showToast('Topluluk güncellendi ancak bir hata oluştu', 'error');
-            this.closeModal();
-          },
-        });
-      }
+      // CommunityService'e kaydet (communities-page'e otomatik eklenir)
+      const communityForService = {
+        ...this.editingCommunity,
+        description: this.editingCommunity.about || '',
+        coverImage: this.editingCommunity.banner || '',
+      };
+      
+      this.communityService.addOrUpdateCommunity(communityForService).subscribe({
+        next: () => {
+          // Service'ten güncel veriyi tekrar yükle
+          this.loadCommunitiesFromService();
+          this.showToast('Topluluk başarıyla güncellendi', 'success');
+          this.closeModal();
+        },
+        error: (err) => {
+          console.error('Topluluk güncellenirken hata:', err);
+          this.showToast('Topluluk güncellenirken bir hata oluştu', 'error');
+        },
+      });
     }
   }
 
@@ -785,24 +792,18 @@ Görüş ve önerilerinizi 15 Aralık 2025 tarihine kadar iletebilirsiniz.`,
         return;
       }
 
-      // Yeni ID oluştur
-      const maxId = Math.max(...this.allCommunities.map((c) => c.id), 0);
-      this.newCommunity.id = maxId + 1;
-
-      // Toplulukları listesine ekle
-      this.allCommunities.push({ ...this.newCommunity });
-      this.communities = [...this.allCommunities];
-      this.applyFilters();
-
-      // CommunityService'e de kaydet (communities-page'e otomatik eklenir)
+      // CommunityService'e kaydet (communities-page'e otomatik eklenir)
       const communityForService = {
         ...this.newCommunity,
+        id: 0, // Service otomatik ID atayacak
         description: this.newCommunity.about || '',
         coverImage: this.newCommunity.banner || '',
       };
 
       this.communityService.addOrUpdateCommunity(communityForService).subscribe({
         next: () => {
+          // Service'ten güncel veriyi tekrar yükle
+          this.loadCommunitiesFromService();
           this.showToast('Topluluk başarıyla eklendi', 'success');
           this.closeModal();
           this.newCommunity = null;
@@ -819,25 +820,21 @@ Görüş ve önerilerinizi 15 Aralık 2025 tarihine kadar iletebilirsiniz.`,
 
   deleteCommunity() {
     if (this.editingCommunity) {
-      const index = this.communities.findIndex((c) => c.id === this.editingCommunity!.id);
-      if (index !== -1) {
-        const communityId = this.editingCommunity.id;
-        this.communities.splice(index, 1);
-        this.applyFilters();
-        
-        // CommunityService'ten de sil (communities-page'den de kaldırılır)
-        this.communityService.deleteCommunity(communityId).subscribe({
-          next: () => {
-            this.showToast('Topluluk başarıyla silindi', 'success');
-            this.closeModal();
-          },
-          error: (err) => {
-            console.error('Topluluk silinirken hata:', err);
-            this.showToast('Topluluk silindi ancak bir hata oluştu', 'error');
-            this.closeModal();
-          },
-        });
-      }
+      const communityId = this.editingCommunity.id;
+      
+      // CommunityService'ten sil (communities-page'den de kaldırılır)
+      this.communityService.deleteCommunity(communityId).subscribe({
+        next: () => {
+          // Service'ten güncel veriyi tekrar yükle
+          this.loadCommunitiesFromService();
+          this.showToast('Topluluk başarıyla silindi', 'success');
+          this.closeModal();
+        },
+        error: (err) => {
+          console.error('Topluluk silinirken hata:', err);
+          this.showToast('Topluluk silinirken bir hata oluştu', 'error');
+        },
+      });
     }
   }
 
