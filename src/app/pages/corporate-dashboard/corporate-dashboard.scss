@@ -347,29 +347,81 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
   justify-content: space-between;
   align-items: center;
   margin-bottom: 25px;
+  gap: 20px;
+
   h2 {
     font-size: 1.5rem;
     font-weight: 700;
     margin: 0;
   }
+
   .header-controls {
     display: flex;
-    gap: 10px;
-  }
-  .search-input {
-    position: relative;
-    span {
-      position: absolute;
-      left: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: $text-muted;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+
+    .btn-primary {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: $primary;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      flex-shrink: 0;
+
+      &:hover {
+        background: $primary-hover;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba($primary, 0.3);
+      }
+
+      .material-symbols-outlined {
+        font-size: 1.2rem;
+      }
     }
-    input {
-      padding: 10px 10px 10px 35px;
+
+    .search-input {
+      position: relative;
+      min-width: 250px;
+      span {
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: $text-muted;
+        z-index: 1;
+      }
+      input {
+        width: 100%;
+        padding: 10px 10px 10px 35px;
+        border-radius: 8px;
+        border: 1px solid $border;
+        outline: none;
+        background: $surface;
+        font-size: 0.9rem;
+        &:focus {
+          border-color: $primary;
+        }
+      }
+    }
+
+    .status-filter {
+      padding: 10px 15px;
       border-radius: 8px;
       border: 1px solid $border;
+      background: $surface;
+      color: $text-main;
+      font-size: 0.9rem;
+      cursor: pointer;
       outline: none;
+      min-width: 150px;
       &:focus {
         border-color: $primary;
       }
@@ -944,6 +996,14 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
   background: #fcfcfc;
   font-family: inherit;
   font-size: 0.95rem;
+  box-sizing: border-box;
+  max-width: 100%;
+  
+  @media (max-width: 768px) {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+  }
+
   &:focus {
     outline: none;
     border-color: $primary;
@@ -1028,22 +1088,55 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow-x: hidden; // Sağa sola kaydırmayı önle
+
+  @media (max-width: 768px) {
+    padding: 0;
+    align-items: flex-end;
+  }
+
   .modal-content {
     background: white;
     padding: 30px;
     border-radius: 20px;
     width: 500px;
+    max-width: 95vw;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     animation: slideUp 0.3s;
+    overflow-x: hidden; // Sağa sola kaydırmayı önle
+    box-sizing: border-box;
+
+    @media (max-width: 768px) {
+      width: 100%;
+      max-width: 100vw;
+      border-radius: 20px 20px 0 0;
+      padding: 20px;
+      max-height: 90vh;
+    }
   }
   .modal-header {
     display: flex;
     justify-content: space-between;
     margin-bottom: 20px;
+    width: 100%;
+    box-sizing: border-box;
+    flex-shrink: 0;
+
+    @media (max-width: 768px) {
+      margin-bottom: 15px;
+    }
+
     h3 {
       font-size: 1.3rem;
       font-weight: 700;
       margin: 0;
+      flex: 1;
+      min-width: 0;
+      word-wrap: break-word;
+
+      @media (max-width: 768px) {
+        font-size: 1.1rem;
+      }
     }
     .close-btn {
       background: #f1f5f9;
@@ -1052,6 +1145,13 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
       height: 32px;
       border-radius: 50%;
       cursor: pointer;
+      flex-shrink: 0;
+      margin-left: 10px;
+
+      @media (max-width: 768px) {
+        width: 28px;
+        height: 28px;
+      }
     }
   }
 }
@@ -1221,12 +1321,29 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
   max-height: 90vh;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden; // Sağa sola kaydırmayı önle
+
+  @media (max-width: 768px) {
+    width: 100%;
+    max-width: 100vw;
+    max-height: 100vh;
+    border-radius: 0;
+    margin: 0;
+  }
 }
 
 .modal-body-scrollable {
   overflow-y: auto;
+  overflow-x: hidden; // Sağa sola kaydırmayı önle
   max-height: calc(90vh - 80px);
   padding-right: 10px;
+  width: 100%;
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    max-height: calc(100vh - 80px);
+    padding-right: 5px;
+  }
 
   &::-webkit-scrollbar {
     width: 6px;
@@ -1247,25 +1364,57 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
 // Image Uploads Section
 .image-uploads-section {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 1fr 1fr; // Banner ve logo eşit boyut
   gap: 20px;
   margin-bottom: 25px;
+  width: 100%;
+  box-sizing: border-box;
 
-  @media (max-width: 600px) {
+  @media (max-width: 768px) {
     grid-template-columns: 1fr;
+    gap: 15px;
   }
 }
 
 .banner-upload-wrapper,
 .logo-upload-wrapper {
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0; // Taşmayı önle
+
+  // URL input'u gizle
+  &.no-url-input {
+    ::ng-deep {
+      .url-input-wrapper {
+        display: none !important;
+      }
+    }
+  }
+
   ::ng-deep {
     .image-upload-container {
+      width: 100%;
+      box-sizing: border-box;
+
       .drop-zone {
-        min-height: 140px;
+        min-height: 180px; // Banner ve logo için aynı yükseklik
         padding: 20px;
+        width: 100%;
+        box-sizing: border-box;
+
+        @media (max-width: 768px) {
+          min-height: 150px;
+          padding: 15px;
+        }
       }
       .preview-zone .image-wrapper {
-        height: 140px;
+        height: 180px; // Banner ve logo için aynı yükseklik
+        width: 100%;
+        box-sizing: border-box;
+
+        @media (max-width: 768px) {
+          height: 150px;
+        }
       }
     }
   }
@@ -1304,6 +1453,12 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
 .status-toggle-buttons {
   display: flex;
   gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    gap: 8px;
+  }
 
   .status-btn {
     flex: 1;
@@ -1320,6 +1475,12 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
     font-family: inherit;
     color: $text-muted;
     transition: all 0.2s;
+    min-width: 0; // Taşmayı önle
+
+    @media (max-width: 768px) {
+      padding: 10px 15px;
+      font-size: 0.9rem;
+    }
 
     &:hover {
       border-color: $success;
@@ -1355,10 +1516,17 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
   margin-bottom: 25px;
   padding-bottom: 20px;
   border-bottom: 1px solid $border;
+  width: 100%;
+  box-sizing: border-box;
 
   &:last-of-type {
     border-bottom: none;
     margin-bottom: 15px;
+  }
+
+  @media (max-width: 768px) {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
   }
 }
 
@@ -1379,13 +1547,17 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 15px;
+  width: 100%;
+  box-sizing: border-box;
 
   .form-group {
     margin-bottom: 0;
+    min-width: 0; // Grid içinde taşmayı önle
   }
 
-  @media (max-width: 500px) {
+  @media (max-width: 768px) {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
 }
 
@@ -1396,6 +1568,15 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
   padding-top: 20px;
   border-top: 1px solid $border;
   margin-top: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  flex-shrink: 0;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 15px;
+  }
 
   .btn-danger {
     background: #fff1f2;

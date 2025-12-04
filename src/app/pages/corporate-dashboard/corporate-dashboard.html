@@ -229,6 +229,10 @@
       <div class="page-header">
         <h2>Bağlı Topluluklar</h2>
         <div class="header-controls">
+          <button class="btn-primary" (click)="openNewCommunityModal()">
+            <span class="material-symbols-outlined">add</span>
+            Yeni Topluluk Ekle
+          </button>
           <div class="search-input">
             <span class="material-symbols-outlined">search</span>
             <input
@@ -492,7 +496,6 @@
         </div>
       </div>
     </div>
-  </main>
 
   <!-- MODAL -->
   <div class="modal-backdrop" *ngIf="isModalOpen" (click)="closeModal()">
@@ -500,6 +503,7 @@
       class="modal-content"
       [class.wide]="
         modalType === 'edit-community' ||
+        modalType === 'new-community' ||
         modalType === 'new-announcement' ||
         modalType === 'edit-announcement'
       "
@@ -512,6 +516,8 @@
               ? 'Yeni Duyuru Oluştur'
               : modalType === 'edit-announcement'
               ? 'Duyuru Güncelle'
+              : modalType === 'new-community'
+              ? 'Yeni Topluluk Ekle'
               : modalType === 'edit-community'
               ? 'Topluluk Güncelle'
               : 'İşlem'
@@ -656,6 +662,185 @@
         </div>
       </div>
 
+      <!-- Yeni Topluluk Ekleme Modal -->
+      <div
+        class="modal-body modal-body-scrollable"
+        *ngIf="modalType === 'new-community' && newCommunity"
+      >
+        <!-- Banner ve Logo Upload Alanı -->
+        <div class="image-uploads-section">
+          <div class="banner-upload-wrapper no-url-input">
+            <app-image-upload
+              label="Banner Görseli"
+              [previewUrl]="newCommunity.banner"
+              (onImageSelected)="onNewBannerSelected($event)"
+            ></app-image-upload>
+          </div>
+          <div class="logo-upload-wrapper no-url-input">
+            <app-image-upload
+              label="Logo"
+              [previewUrl]="newCommunity.logo"
+              (onImageSelected)="onNewLogoSelected($event)"
+            ></app-image-upload>
+          </div>
+        </div>
+
+        <!-- Durum Seçimi -->
+        <div class="status-toggle-section">
+          <label class="section-title">Durum</label>
+          <div class="status-toggle-buttons">
+            <button
+              type="button"
+              class="status-btn"
+              [class.active]="newCommunity.status === 'Aktif'"
+              (click)="newCommunity.status = 'Aktif'"
+            >
+              Aktif
+            </button>
+            <button
+              type="button"
+              class="status-btn"
+              [class.active]="newCommunity.status === 'Pasif'"
+              (click)="newCommunity.status = 'Pasif'"
+            >
+              Pasif
+            </button>
+          </div>
+        </div>
+
+        <!-- Temel Bilgiler -->
+        <div class="form-section">
+          <h5 class="section-title">Temel Bilgiler</h5>
+          <div class="form-grid-2col">
+            <div class="form-group">
+              <label>Topluluk İsmi <span class="required">*</span></label>
+              <input
+                type="text"
+                [(ngModel)]="newCommunity.name"
+                class="modern-input"
+                placeholder="Topluluk adı..."
+              />
+            </div>
+            <div class="form-group">
+              <label>Kategori <span class="required">*</span></label>
+              <select [(ngModel)]="newCommunity.category" class="modern-input">
+                <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+              </select>
+            </div>
+            <div class="form-group full-width">
+              <label>Topluluk Hakkında</label>
+              <textarea
+                [(ngModel)]="newCommunity.about"
+                class="modern-input"
+                rows="4"
+                placeholder="Topluluğunuz hakkında bilgi verin..."
+              ></textarea>
+            </div>
+            <div class="form-group">
+              <label>Şehir <span class="required">*</span></label>
+              <input
+                type="text"
+                [(ngModel)]="newCommunity.city"
+                class="modern-input"
+                placeholder="İstanbul"
+              />
+            </div>
+            <div class="form-group">
+              <label>Üniversite <span class="required">*</span></label>
+              <input
+                type="text"
+                [(ngModel)]="newCommunity.university"
+                class="modern-input"
+                placeholder="Üniversite adı..."
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h5 class="section-title">İletişim Bilgileri</h5>
+          <div class="form-grid-2col">
+            <div class="form-group">
+              <label>E-posta</label>
+              <input
+                type="email"
+                [(ngModel)]="newCommunity.email"
+                class="modern-input"
+                placeholder="topluluk@mail.com"
+              />
+            </div>
+            <div class="form-group">
+              <label>Üye Sayısı</label>
+              <input
+                type="number"
+                [(ngModel)]="newCommunity.memberCount"
+                class="modern-input"
+                placeholder="0"
+              />
+            </div>
+            <div class="form-group">
+              <label>Website (Opsiyonel)</label>
+              <input
+                type="url"
+                [(ngModel)]="newCommunity.website"
+                class="modern-input"
+                placeholder="https://..."
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h5 class="section-title">Sosyal Medya Linkleri (Opsiyonel)</h5>
+          <div class="form-grid-2col">
+            <div class="form-group">
+              <label>Instagram</label>
+              <input
+                type="url"
+                [(ngModel)]="newCommunity.instagram"
+                class="modern-input"
+                placeholder="https://instagram.com/..."
+              />
+            </div>
+            <div class="form-group">
+              <label>Youtube</label>
+              <input
+                type="url"
+                [(ngModel)]="newCommunity.youtube"
+                class="modern-input"
+                placeholder="https://youtube.com/..."
+              />
+            </div>
+            <div class="form-group">
+              <label>Twitter</label>
+              <input
+                type="url"
+                [(ngModel)]="newCommunity.twitter"
+                class="modern-input"
+                placeholder="https://twitter.com/..."
+              />
+            </div>
+            <div class="form-group">
+              <label>TikTok</label>
+              <input
+                type="url"
+                [(ngModel)]="newCommunity.tiktok"
+                class="modern-input"
+                placeholder="https://tiktok.com/..."
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="closeModal()">İptal</button>
+          <button class="btn-primary" (click)="saveNewCommunity()">
+            <span class="material-symbols-outlined">save</span>
+            Topluluk Ekle
+          </button>
+        </div>
+      </div>
+
       <!-- Topluluk Düzenleme Modal -->
       <div
         class="modal-body modal-body-scrollable"
@@ -663,14 +848,14 @@
       >
         <!-- Banner ve Logo Upload Alanı -->
         <div class="image-uploads-section">
-          <div class="banner-upload-wrapper">
+          <div class="banner-upload-wrapper no-url-input">
             <app-image-upload
               label="Banner Görseli"
               [previewUrl]="editingCommunity.banner"
               (onImageSelected)="onBannerSelected($event)"
             ></app-image-upload>
           </div>
-          <div class="logo-upload-wrapper">
+          <div class="logo-upload-wrapper no-url-input">
             <app-image-upload
               label="Logo"
               [previewUrl]="editingCommunity.logo"
@@ -780,21 +965,54 @@
               />
             </div>
             <div class="form-group">
-              <label>Sosyal Medya Linki</label>
-              <input
-                type="url"
-                [(ngModel)]="editingCommunity.socialMedia"
-                class="modern-input"
-                placeholder="https://instagram.com/..."
-              />
-            </div>
-            <div class="form-group">
               <label>Website (Opsiyonel)</label>
               <input
                 type="url"
                 [(ngModel)]="editingCommunity.website"
                 class="modern-input"
                 placeholder="https://..."
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h5 class="section-title">Sosyal Medya Linkleri (Opsiyonel)</h5>
+          <div class="form-grid-2col">
+            <div class="form-group">
+              <label>Instagram</label>
+              <input
+                type="url"
+                [(ngModel)]="editingCommunity.instagram"
+                class="modern-input"
+                placeholder="https://instagram.com/..."
+              />
+            </div>
+            <div class="form-group">
+              <label>Youtube</label>
+              <input
+                type="url"
+                [(ngModel)]="editingCommunity.youtube"
+                class="modern-input"
+                placeholder="https://youtube.com/..."
+              />
+            </div>
+            <div class="form-group">
+              <label>Twitter</label>
+              <input
+                type="url"
+                [(ngModel)]="editingCommunity.twitter"
+                class="modern-input"
+                placeholder="https://twitter.com/..."
+              />
+            </div>
+            <div class="form-group">
+              <label>TikTok</label>
+              <input
+                type="url"
+                [(ngModel)]="editingCommunity.tiktok"
+                class="modern-input"
+                placeholder="https://tiktok.com/..."
               />
             </div>
           </div>
@@ -813,4 +1031,3 @@
       </div>
     </div>
   </div>
-</div>

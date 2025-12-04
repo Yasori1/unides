@@ -32,13 +32,6 @@ interface Event {
   status: 'upcoming' | 'completed' | 'cancelled';
 }
 
-interface Announcement {
-  id: number;
-  title: string;
-  shortDescription: string;
-  date: string;
-  image: string;
-}
 
 @Component({
   selector: 'app-student-profile',
@@ -48,14 +41,16 @@ interface Announcement {
   styleUrls: ['./student-profile.component.scss'],
 })
 export class StudentProfileComponent implements OnInit {
-  activeTab: 'overview' | 'communities' | 'events' | 'announcements' | 'settings' = 'overview';
+  activeTab: 'overview' | 'communities' | 'events' | 'settings' = 'overview';
   isSidebarCollapsed: boolean = false;
   
   // User Info
   userInfo: any = {
     name: 'Öğrenci Adı',
     email: 'ogrenci@university.edu.tr',
-    password: '',
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
   };
 
   // Stats
@@ -69,9 +64,6 @@ export class StudentProfileComponent implements OnInit {
 
   // Events from communities
   communityEvents: Event[] = [];
-
-  // Announcements
-  announcements: Announcement[] = [];
 
   constructor(
     public router: Router,
@@ -159,23 +151,13 @@ export class StudentProfileComponent implements OnInit {
       },
     ];
 
-    // Mock Announcements
-    this.announcements = [
-      {
-        id: 1,
-        title: 'Yeni Etkinlik Duyurusu',
-        shortDescription: 'Bu hafta sonu özel bir etkinlik düzenleniyor...',
-        date: '2024-12-10',
-        image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=300',
-      },
-    ];
 
     // Update stats
     this.stats[0].value = this.myCommunities.length;
     this.stats[1].value = this.communityEvents.length;
   }
 
-  switchTab(tab: 'overview' | 'communities' | 'events' | 'announcements' | 'settings'): void {
+  switchTab(tab: 'overview' | 'communities' | 'events' | 'settings'): void {
     this.activeTab = tab;
   }
 
@@ -217,11 +199,42 @@ export class StudentProfileComponent implements OnInit {
   }
 
   saveSettings(): void {
-    // Save user info to localStorage
+    // Save user info to localStorage (without password fields)
     if (isPlatformBrowser(this.platformId)) {
-      localStorage.setItem('user_info', JSON.stringify(this.userInfo));
+      const userInfoToSave = {
+        name: this.userInfo.name,
+        email: this.userInfo.email,
+      };
+      localStorage.setItem('user_info', JSON.stringify(userInfoToSave));
       this.toastService.show('Ayarlar başarıyla kaydedildi', 'success');
     }
+  }
+
+  changePassword(): void {
+    // Validate password change
+    if (!this.userInfo.currentPassword || !this.userInfo.newPassword || !this.userInfo.confirmPassword) {
+      this.toastService.show('Lütfen tüm alanları doldurunuz', 'error');
+      return;
+    }
+
+    if (this.userInfo.newPassword !== this.userInfo.confirmPassword) {
+      this.toastService.show('Yeni şifreler eşleşmiyor', 'error');
+      return;
+    }
+
+    if (this.userInfo.newPassword.length < 6) {
+      this.toastService.show('Şifre en az 6 karakter olmalıdır', 'error');
+      return;
+    }
+
+    // Here you would typically call an API to change the password
+    // For now, we'll just show a success message
+    this.toastService.show('Şifre başarıyla değiştirildi', 'success');
+    
+    // Clear password fields
+    this.userInfo.currentPassword = '';
+    this.userInfo.newPassword = '';
+    this.userInfo.confirmPassword = '';
   }
 }
 

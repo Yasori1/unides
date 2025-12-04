@@ -365,12 +365,83 @@
       color: var(--secondary-color);
       line-height: 1.6;
       margin-top: 10px;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
       flex-grow: 1;
       display: -webkit-box;
       -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow: hidden;
+    }
+
+    .social-media-icons {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+
+      .social-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-light);
+        border: 1px solid var(--border-color);
+        color: var(--secondary-color);
+        text-decoration: none;
+        transition: all 0.2s;
+        font-size: 1.1rem;
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        &.instagram {
+          color: #e4405f;
+          border-color: rgba(228, 64, 95, 0.2);
+          background: rgba(228, 64, 95, 0.05);
+
+          &:hover {
+            background: rgba(228, 64, 95, 0.1);
+            border-color: #e4405f;
+          }
+        }
+
+        &.youtube {
+          color: #ff0000;
+          border-color: rgba(255, 0, 0, 0.2);
+          background: rgba(255, 0, 0, 0.05);
+
+          &:hover {
+            background: rgba(255, 0, 0, 0.1);
+            border-color: #ff0000;
+          }
+        }
+
+        &.twitter {
+          color: #1da1f2;
+          border-color: rgba(29, 161, 242, 0.2);
+          background: rgba(29, 161, 242, 0.05);
+
+          &:hover {
+            background: rgba(29, 161, 242, 0.1);
+            border-color: #1da1f2;
+          }
+        }
+
+        &.tiktok {
+          color: #000000;
+          border-color: rgba(0, 0, 0, 0.2);
+          background: rgba(0, 0, 0, 0.05);
+
+          &:hover {
+            background: rgba(0, 0, 0, 0.1);
+            border-color: #000000;
+          }
+        }
+      }
     }
 
     .card-footer {

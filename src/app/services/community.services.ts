@@ -8,10 +8,20 @@ export interface Community {
   university: string;
   category: string;
   description: string;
-  coverImage: string;
+  coverImage?: string;
   logo: string;
   memberCount: number;
   city?: string;
+  about?: string;
+  banner?: string;
+  socialMedia?: string; // Eski uyumluluk için
+  instagram?: string;
+  youtube?: string;
+  twitter?: string;
+  tiktok?: string;
+  website?: string;
+  email?: string;
+  status?: 'Aktif' | 'Pasif';
 }
 
 @Injectable({
@@ -281,5 +291,51 @@ export class CommunityService {
   getCommunityById(id: number): Observable<Community | undefined> {
     const community = this.communities.find((c) => c.id === id);
     return of(community);
+  }
+
+  // Corporate dashboard'dan topluluk ekleme/güncelleme
+  addOrUpdateCommunity(community: Community): Observable<Community> {
+    const existingIndex = this.communities.findIndex((c) => c.id === community.id);
+    
+    if (existingIndex !== -1) {
+      // Güncelleme
+      this.communities[existingIndex] = { ...community };
+    } else {
+      // Yeni topluluk ekleme - ID yoksa yeni ID oluştur
+      if (!community.id || community.id === 0) {
+        const maxId = Math.max(...this.communities.map((c) => c.id), 0);
+        community.id = maxId + 1;
+      }
+      // Communities-page için gerekli alanları ekle
+      const communityForPage: Community = {
+        ...community,
+        coverImage: community.banner || community.coverImage || '',
+        description: community.about || community.description || '',
+      };
+      this.communities.push(communityForPage);
+    }
+    
+    return of(community);
+  }
+
+  // Topluluk silme
+  deleteCommunity(id: number): Observable<boolean> {
+    const index = this.communities.findIndex((c) => c.id === id);
+    if (index !== -1) {
+      this.communities.splice(index, 1);
+      return of(true);
+    }
+    return of(false);
+  }
+
+  // Corporate Dashboard'dan tüm toplulukları senkronize et
+  syncCommunitiesFromCorporate(communities: Community[]): Observable<boolean> {
+    // Mevcut toplulukları temizle ve yeni verilerle doldur
+    this.communities = communities.map((c) => ({
+      ...c,
+      coverImage: c.banner || c.coverImage || '',
+      description: c.about || c.description || '',
+    }));
+    return of(true);
   }
 }

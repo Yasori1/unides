@@ -56,6 +56,7 @@ import { AnnouncementsPageComponent } from './pages/announcements-page/announcem
 import { AnnouncementDetailComponent } from './pages/announcement-detail/announcement-detail.component';
 import { StudentLoginComponent } from './pages/student-login/student-login.component';
 import { StudentProfileComponent } from './pages/student-profile/student-profile.component';
+import { CommunityDetailComponent } from './pages/community-detail/community-detail.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -63,6 +64,7 @@ export const routes: Routes = [
   // Ana Sayfalar
   { path: 'developers', component: DevelopersPageComponent },
   { path: 'communities', component: CommunitiesPageComponent },
+  { path: 'communities/:id', component: CommunityDetailComponent },
   { path: 'events', component: EventsComponent },
   { path: 'announcements', component: AnnouncementsPageComponent },
   { path: 'announcements/:id', component: AnnouncementDetailComponent },

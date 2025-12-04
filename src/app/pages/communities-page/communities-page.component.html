@@ -120,6 +120,61 @@
 
           <p class="description">{{ item.description }}</p>
 
+          <!-- Sosyal Medya İkonları -->
+          <div class="social-media-icons" *ngIf="item.instagram || item.youtube || item.twitter || item.tiktok || item.socialMedia">
+            <a
+              *ngIf="item.instagram"
+              [href]="item.instagram"
+              target="_blank"
+              class="social-icon instagram"
+              (click)="$event.stopPropagation()"
+              title="Instagram"
+            >
+              <i class="bx bxl-instagram"></i>
+            </a>
+            <a
+              *ngIf="item.youtube"
+              [href]="item.youtube"
+              target="_blank"
+              class="social-icon youtube"
+              (click)="$event.stopPropagation()"
+              title="Youtube"
+            >
+              <i class="bx bxl-youtube"></i>
+            </a>
+            <a
+              *ngIf="item.twitter"
+              [href]="item.twitter"
+              target="_blank"
+              class="social-icon twitter"
+              (click)="$event.stopPropagation()"
+              title="Twitter"
+            >
+              <i class="bx bxl-twitter"></i>
+            </a>
+            <a
+              *ngIf="item.tiktok"
+              [href]="item.tiktok"
+              target="_blank"
+              class="social-icon tiktok"
+              (click)="$event.stopPropagation()"
+              title="TikTok"
+            >
+              <i class="bx bxl-tiktok"></i>
+            </a>
+            <!-- Eski uyumluluk için genel sosyal medya -->
+            <a
+              *ngIf="item.socialMedia && !item.instagram && !item.youtube && !item.twitter && !item.tiktok"
+              [href]="item.socialMedia"
+              target="_blank"
+              class="social-icon"
+              (click)="$event.stopPropagation()"
+              title="Sosyal Medya"
+            >
+              <i class="bx bxl-facebook"></i>
+            </a>
+          </div>
+
           <div class="card-footer">
             <div class="stat">
               <i class="bx bx-group"></i>

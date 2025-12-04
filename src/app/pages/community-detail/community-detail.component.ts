@@ -1,0 +1,82 @@
+import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { HeaderComponent } from '../../common/header/header.component';
+import { FooterComponent } from '../../common/footer/footer.component';
+import { CommunityService, Community } from '../../services/community.services';
+
+@Component({
+  selector: 'app-community-detail',
+  standalone: true,
+  imports: [CommonModule, RouterModule, HeaderComponent, FooterComponent],
+  templateUrl: './community-detail.component.html',
+  styleUrls: ['./community-detail.component.scss'],
+})
+export class CommunityDetailComponent implements OnInit {
+  community: Community | null = null;
+  isLoading: boolean = true;
+  communityId: number | null = null;
+
+  // Banner animation
+  heroMoveX = 0;
+  heroMoveY = 0;
+
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private communityService: CommunityService,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {}
+
+  ngOnInit(): void {
+    this.route.params.subscribe((params) => {
+      const id = +params['id'];
+      if (id) {
+        this.communityId = id;
+        this.loadCommunity(id);
+      } else {
+        this.router.navigate(['/communities']);
+      }
+    });
+  }
+
+  loadCommunity(id: number) {
+    this.isLoading = true;
+    this.communityService.getCommunityById(id).subscribe({
+      next: (data) => {
+        if (data) {
+          this.community = data;
+        } else {
+          // Topluluk bulunamadıysa listeye yönlendir
+          this.router.navigate(['/communities']);
+        }
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Topluluk yüklenemedi:', err);
+        this.router.navigate(['/communities']);
+        this.isLoading = false;
+      },
+    });
+  }
+
+  onHeroMouseMove(event: MouseEvent) {
+    if (isPlatformBrowser(this.platformId)) {
+      const x = event.clientX - window.innerWidth / 2;
+      const y = event.clientY - window.innerHeight / 2;
+      this.heroMoveX = x / 40;
+      this.heroMoveY = y / 40;
+    }
+  }
+
+  goBack() {
+    this.router.navigate(['/communities']);
+  }
+
+  openLink(url: string) {
+    if (isPlatformBrowser(this.platformId) && url) {
+      window.open(url, '_blank');
+    }
+  }
+}
+

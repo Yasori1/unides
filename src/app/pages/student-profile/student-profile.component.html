@@ -57,16 +57,6 @@
         <span *ngIf="!isSidebarCollapsed">Etkinliklerim</span>
       </button>
 
-      <button
-        class="menu-item"
-        [class.active]="activeTab === 'announcements'"
-        (click)="switchTab('announcements')"
-        title="Duyurular"
-      >
-        <span class="material-symbols-outlined">campaign</span>
-        <span *ngIf="!isSidebarCollapsed">Duyurular</span>
-      </button>
-
       <div class="menu-divider" *ngIf="!isSidebarCollapsed">HESAP</div>
 
       <button
@@ -113,7 +103,6 @@
             activeTab === 'overview' ? 'Genel Bakış' :
             activeTab === 'communities' ? 'Topluluklarım' :
             activeTab === 'events' ? 'Etkinliklerim' :
-            activeTab === 'announcements' ? 'Duyurular' :
             'Ayarlar'
           }}</span>
         </div>
@@ -308,45 +297,14 @@
       </div>
     </div>
 
-    <!-- 4. TAB: DUYURULAR -->
-    <div class="view-container" *ngIf="activeTab === 'announcements'">
-      <div class="page-header">
-        <h2>Duyurular</h2>
-      </div>
-
-      <div class="announcements-grid" *ngIf="announcements.length > 0">
-        <div class="announcement-card" *ngFor="let announcement of announcements">
-          <img [src]="announcement.image" [alt]="announcement.title" />
-          <div class="announcement-body">
-            <h3>{{ announcement.title }}</h3>
-            <p>{{ announcement.shortDescription }}</p>
-            <div class="announcement-footer">
-              <span class="date">{{ formatDate(announcement.date) }}</span>
-              <button class="btn-text" (click)="router.navigate(['/announcements', announcement.id])">
-                Devamını Oku
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="empty-state-large" *ngIf="announcements.length === 0">
-        <span class="material-symbols-outlined">campaign</span>
-        <h3>Henüz duyuru yok</h3>
-        <p>Yeni duyurular için duyurular sayfasını ziyaret edebilirsiniz</p>
-        <button class="btn-primary" (click)="router.navigate(['/announcements'])">
-          Duyuruları Görüntüle
-        </button>
-      </div>
-    </div>
-
-    <!-- 5. TAB: AYARLAR -->
+    <!-- 4. TAB: AYARLAR -->
     <div class="view-container" *ngIf="activeTab === 'settings'">
       <div class="page-header">
         <h2>Hesap Ayarları</h2>
       </div>
 
-      <div class="settings-card">
+      <div class="settings-grid">
+        <div class="settings-card">
         <h3>Hesap Ayarları</h3>
         <div class="form-group">
           <label>Ad Soyad</label>
@@ -370,21 +328,49 @@
           />
           <small>E-posta adresi değiştirilemez</small>
         </div>
-        <div class="form-group">
-          <label>Şifre</label>
-          <input 
-            type="password" 
-            [(ngModel)]="userInfo.password" 
-            placeholder="Yeni şifre giriniz" 
-            class="editable-input"
-          />
-          <small>Şifrenizi değiştirmek için yeni şifre giriniz</small>
-        </div>
         <div class="form-actions">
           <button class="btn-primary" (click)="saveSettings()">
             Değişiklikleri Kaydet
           </button>
         </div>
+      </div>
+
+        <div class="settings-card">
+          <h3>Şifre Değiştir</h3>
+        <div class="form-group">
+          <label>Mevcut Şifre</label>
+          <input 
+            type="password" 
+            [(ngModel)]="userInfo.currentPassword" 
+            placeholder="Mevcut şifrenizi giriniz" 
+            class="editable-input"
+          />
+        </div>
+        <div class="form-group">
+          <label>Yeni Şifre</label>
+          <input 
+            type="password" 
+            [(ngModel)]="userInfo.newPassword" 
+            placeholder="Yeni şifrenizi giriniz" 
+            class="editable-input"
+          />
+        </div>
+        <div class="form-group">
+          <label>Yeni Şifre (Tekrar)</label>
+          <input 
+            type="password" 
+            [(ngModel)]="userInfo.confirmPassword" 
+            placeholder="Yeni şifrenizi tekrar giriniz" 
+            class="editable-input"
+          />
+          <small>Şifrenizi değiştirmek için mevcut şifrenizi ve yeni şifrenizi giriniz</small>
+        </div>
+        <div class="form-actions">
+          <button class="btn-primary" (click)="changePassword()">
+            Şifreyi Değiştir
+          </button>
+        </div>
+      </div>
       </div>
     </div>
   </main>

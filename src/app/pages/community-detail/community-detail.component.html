@@ -1,0 +1,220 @@
+<app-header />
+
+<!-- Loading State -->
+<div *ngIf="isLoading" class="loading-container">
+  <div class="spinner"></div>
+  <p>Topluluk yükleniyor...</p>
+</div>
+
+<!-- Community Detail -->
+<div *ngIf="!isLoading && community" class="community-detail-page">
+  <!-- Hero Banner -->
+  <div class="hero-section" (mousemove)="onHeroMouseMove($event)">
+    <div class="background-wrapper" *ngIf="community.banner">
+      <img [src]="community.banner" [alt]="community.name" class="hero-image" />
+    </div>
+    <div class="background-wrapper" *ngIf="!community.banner">
+      <div
+        class="interactive-blob"
+        [style.transform]="'translate(' + -heroMoveX + 'px, ' + -heroMoveY + 'px)'"
+      ></div>
+    </div>
+    <div class="hero-overlay">
+      <div class="container">
+        <div class="breadcrumb">
+          <a routerLink="/communities">Topluluklar</a>
+          <i class="bx bx-chevron-right"></i>
+          <span>{{ community.name }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Section -->
+  <div class="content-section">
+    <div class="container">
+      <!-- Community Header -->
+      <div class="community-header">
+        <div class="logo-section">
+          <img
+            [src]="community.logo"
+            [alt]="community.name"
+            class="community-logo"
+            onerror="this.src='assets/img/placeholder-logo.png'"
+          />
+        </div>
+        <div class="header-info">
+          <div class="category-badge">{{ community.category }}</div>
+          <h1 class="community-title">{{ community.name }}</h1>
+          <div class="community-meta">
+            <div class="meta-item" *ngIf="community.university">
+              <i class="bx bx-buildings"></i>
+              <span>{{ community.university }}</span>
+            </div>
+            <div class="meta-item" *ngIf="community.city">
+              <i class="bx bxs-map"></i>
+              <span>{{ community.city }}</span>
+            </div>
+            <div class="meta-item">
+              <i class="bx bx-group"></i>
+              <span>{{ community.memberCount }} Üye</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- About Section -->
+      <div class="about-section" *ngIf="community.about || community.description">
+        <h2>Hakkında</h2>
+        <div class="about-content">
+          <p>{{ community.about || community.description }}</p>
+        </div>
+      </div>
+
+      <!-- Links Section -->
+      <div
+        class="links-section"
+        *ngIf="
+          community.website ||
+          community.email ||
+          community.instagram ||
+          community.youtube ||
+          community.twitter ||
+          community.tiktok ||
+          community.socialMedia
+        "
+      >
+        <h2>İletişim & Linkler</h2>
+        <div class="links-grid">
+          <!-- E-posta -->
+          <div *ngIf="community.email" class="link-card email-card">
+            <i class="bx bx-envelope"></i>
+            <div class="link-info">
+              <h3>E-posta</h3>
+              <p>{{ community.email }}</p>
+            </div>
+          </div>
+
+          <!-- Website -->
+          <a
+            *ngIf="community.website"
+            [href]="community.website"
+            target="_blank"
+            class="link-card"
+            (click)="openLink(community.website!)"
+          >
+            <i class="bx bx-globe"></i>
+            <div class="link-info">
+              <h3>Websitesi</h3>
+              <p>{{ community.website }}</p>
+            </div>
+            <i class="bx bx-right-arrow-alt"></i>
+          </a>
+
+          <!-- Instagram -->
+          <a
+            *ngIf="community.instagram"
+            [href]="community.instagram"
+            target="_blank"
+            class="link-card social-instagram"
+            (click)="openLink(community.instagram!)"
+          >
+            <i class="bx bxl-instagram"></i>
+            <div class="link-info">
+              <h3>Instagram</h3>
+              <p>{{ community.instagram }}</p>
+            </div>
+            <i class="bx bx-right-arrow-alt"></i>
+          </a>
+
+          <!-- Youtube -->
+          <a
+            *ngIf="community.youtube"
+            [href]="community.youtube"
+            target="_blank"
+            class="link-card social-youtube"
+            (click)="openLink(community.youtube!)"
+          >
+            <i class="bx bxl-youtube"></i>
+            <div class="link-info">
+              <h3>Youtube</h3>
+              <p>{{ community.youtube }}</p>
+            </div>
+            <i class="bx bx-right-arrow-alt"></i>
+          </a>
+
+          <!-- Twitter -->
+          <a
+            *ngIf="community.twitter"
+            [href]="community.twitter"
+            target="_blank"
+            class="link-card social-twitter"
+            (click)="openLink(community.twitter!)"
+          >
+            <i class="bx bxl-twitter"></i>
+            <div class="link-info">
+              <h3>Twitter</h3>
+              <p>{{ community.twitter }}</p>
+            </div>
+            <i class="bx bx-right-arrow-alt"></i>
+          </a>
+
+          <!-- TikTok -->
+          <a
+            *ngIf="community.tiktok"
+            [href]="community.tiktok"
+            target="_blank"
+            class="link-card social-tiktok"
+            (click)="openLink(community.tiktok!)"
+          >
+            <i class="bx bxl-tiktok"></i>
+            <div class="link-info">
+              <h3>TikTok</h3>
+              <p>{{ community.tiktok }}</p>
+            </div>
+            <i class="bx bx-right-arrow-alt"></i>
+          </a>
+
+          <!-- Eski uyumluluk için genel sosyal medya -->
+          <a
+            *ngIf="community.socialMedia && !community.instagram && !community.youtube && !community.twitter && !community.tiktok"
+            [href]="community.socialMedia"
+            target="_blank"
+            class="link-card"
+            (click)="openLink(community.socialMedia!)"
+          >
+            <i class="bx bxl-facebook"></i>
+            <div class="link-info">
+              <h3>Sosyal Medya</h3>
+              <p>{{ community.socialMedia }}</p>
+            </div>
+            <i class="bx bx-right-arrow-alt"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Back Button -->
+      <div class="back-section">
+        <a routerLink="/communities" class="back-button">
+          <i class="bx bx-arrow-back"></i>
+          Topluluklara Dön
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Not Found -->
+<div *ngIf="!isLoading && !community" class="not-found">
+  <div class="container">
+    <div class="not-found-content">
+      <i class="bx bx-error-circle"></i>
+      <h2>Topluluk Bulunamadı</h2>
+      <p>Aradığınız topluluk bulunamadı veya kaldırılmış olabilir.</p>
+      <a routerLink="/communities" class="back-button">Topluluklara Dön</a>
+    </div>
+  </div>
+</div>
+
+<app-footer />
+
