@@ -151,7 +151,13 @@ export function Navbar({ className }: { className?: string }) {
         </div>
 
         <MenuItem setActive={setActive} active={active} item="Sayfalar">
-          <div className="text-sm grid grid-cols-2 gap-5 p-4 bg-white rounded-xl w-[500px]">
+          <div className="text-sm grid grid-cols-3 gap-4 p-4 bg-white rounded-xl w-[600px]">
+            <ProductItem
+              title="Duyurular"
+              href="/announcements"
+              src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?ixlib=rb-4.0.3&auto=format&fit=crop&w=140&q=80"
+              description="Güncel haberler burada."
+            />
             <ProductItem
               title="Topluluklar"
               href="/communities"
@@ -163,18 +169,6 @@ export function Navbar({ className }: { className?: string }) {
               href="/events"
               src="https://images.unsplash.com/photo-1523580494863-6f3031224c94?ixlib=rb-4.0.3&auto=format&fit=crop&w=140&q=80"
               description="Kampüs etkinliklerini kaçırma."
-            />
-            <ProductItem
-              title="Duyurular"
-              href="/announcements"
-              src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?ixlib=rb-4.0.3&auto=format&fit=crop&w=140&q=80"
-              description="Güncel haberler burada."
-            />
-            <ProductItem
-              title="Fırsatlar"
-              href="/opportunities"
-              src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&auto=format&fit=crop&w=140&q=80"
-              description="Staj ve kariyer imkanları."
             />
           </div>
         </MenuItem>

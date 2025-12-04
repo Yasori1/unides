@@ -13,13 +13,13 @@ export class FooterComponent {
   // Footer Genel Bilgileri
   footerData = {
     logo: {
-      src: 'assets/img/logo.png',
-      alt: 'Unides Logo',
-      title: 'Unides',
+      src: 'images/logo.png',
+      alt: 'ÜNİDES Logo',
+      title: 'ÜNİDES',
     },
     description:
-      'Gençlik Hizmetleri Genel Müdürlüğünce ÜNİDES Projesi kapsamında desteklenmektedir.',
-    copyright: '© 2024 Unides. Tüm hakları saklıdır.',
+      'Bu Portal T.C. Gençlik ve Spor Bakanlığı Gençlik Hizmetleri Genel Müdürlüğünce desteklenmektedir.',
+    copyright: '© 2024 ÜNİDES. Tüm hakları saklıdır.',
   };
 
   // Sosyal Medya Linkleri
@@ -33,28 +33,10 @@ export class FooterComponent {
   // Footer Link Grupları
   sections = [
     {
-      title: 'Kurumsal',
-      links: [
-        { name: 'Hakkımızda', href: '/about' },
-        { name: 'Nasıl Çalışır?', href: '/how-it-works' },
-        { name: 'İletişim', href: '/contact' },
-        { name: 'Gizlilik Sözleşmesi', href: '/privacy-policy' },
-      ],
-    },
-    {
-      title: 'Kullanıcı',
-      links: [
-        { name: 'Giriş Yap', href: '/login' },
-        { name: 'Kayıt Ol', href: '/register' },
-        { name: 'Hesabım', href: '/profile' },
-        { name: 'Kullanım Şartları', href: '/terms-conditions' },
-      ],
-    },
-    {
       title: 'Destek & İletişim',
       links: [
         { name: 'Sıkça Sorulan Sorular', href: '/faq' },
-        { name: 'Yardım Merkezi', href: '/help' },
+        { name: 'İletişim', href: '/contact' },
         { name: 'info@unides.com', href: 'mailto:info@unides.com' },
         { name: '(0312) 551 70 00', href: 'tel:+903125517000' },
       ],

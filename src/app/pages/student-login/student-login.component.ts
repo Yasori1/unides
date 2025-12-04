@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
-import { BannerComponent } from './banner/banner.component';
-import { ListingsComponent } from '../../common/listings/listings.component';
+import { BannerComponent } from '../home/banner/banner.component';
 import { DestinationsComponent } from '../../common/destinations/destinations.component';
 import { HowItWorksComponent } from '../../common/how-it-works/how-it-works.component';
 import { PlacesComponent } from '../../common/places/places.component';
@@ -10,17 +9,17 @@ import { DownloadAppComponent } from '../../common/download-app/download-app.com
 import { FooterComponent } from '../../common/footer/footer.component';
 import { HeaderComponent } from '../../common/header/header.component';
 import { LatestCommunitiesComponent } from '../../common/latest-communities/latest-communities.component';
-import { PartnersComponent } from '../../pages/partners/partners.component';
+import { PartnersComponent } from '../partners/partners.component';
 import { CookieNoticeComponent } from '../../components/ui/cookie-notice/cookie-notice.component';
 
 @Component({
-  selector: 'app-home',
-  standalone: true, // Standalone modunu açıkça belirtiyoruz
+  selector: 'app-student-login',
+  standalone: true,
   imports: [
     HeaderComponent,
     BannerComponent,
     LatestCommunitiesComponent,
-    PartnersComponent, // <--- YENİ EKLENEN BİLEŞEN
+    PartnersComponent,
     DestinationsComponent,
     HowItWorksComponent,
     PlacesComponent,
@@ -30,7 +29,8 @@ import { CookieNoticeComponent } from '../../components/ui/cookie-notice/cookie-
     FooterComponent,
     CookieNoticeComponent,
   ],
-  templateUrl: './home.component.html',
-  styleUrl: './home.component.scss',
+  templateUrl: './student-login.component.html',
+  styleUrl: './student-login.component.scss',
 })
-export class HomeComponent {}
+export class StudentLoginComponent {}
+

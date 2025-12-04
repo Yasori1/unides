@@ -1,0 +1,73 @@
+<!-- Cookie Notice -->
+<div class="cookie-notice" *ngIf="visible">
+  <div class="cookie-card">
+    <div class="cookie-content">
+      <div class="cookie-header">
+        <h2 class="cookie-title">Çerez Bildirimi</h2>
+      </div>
+      <p class="cookie-text">
+        Web sitemizde size en iyi deneyimi sunabilmek için çerezler kullanıyoruz.
+        <a href="#" (click)="openPolicyModal(); $event.preventDefault()" class="cookie-link">
+          Çerez politikalarını oku.
+        </a>
+      </p>
+      <div class="cookie-actions">
+        <button class="accept-btn" (click)="acceptCookies()">Kabul Et</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Cookie Policy Modal -->
+<div class="cookie-modal-overlay" *ngIf="showPolicyModal" (click)="closePolicyModal()">
+  <div class="cookie-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">Çerez Politikası</h2>
+      <button class="close-btn" (click)="closePolicyModal()">
+        <i class="bx bx-x"></i>
+      </button>
+    </div>
+    <div class="modal-content">
+      <p>
+        Bu çerez politikası Gençlik ve Spor Bakanlığı tarafından yönetilen web siteleri içindir.
+        Gençlik ve Spor Bakanlığı tarafından yönetilen web sitelerini kullanarak, bu Çerez
+        Politikasını kabul etmiş olursunuz. Bu çerez politikası kullanmış olduğunuz teknolojilere
+        veya yöntemlere bağlı olmaksızın uygulanmaktadır.
+      </p>
+
+      <section class="policy-section">
+        <h3>1. Çerez Nedir?</h3>
+        <p>
+          Çerezler web sitelerinde dolaşırken bilgilerin, şifrelerin kaydedildiği, o web sitesine
+          tekrar girildiğinde bilgilerinizin hatırlanarak giriş yapıldığı, web sunucusu tarafından
+          tarayıcınız aracılığı ile bilgisayarınıza yerleştirilen küçük veri dosyalarıdır.
+          Tarayıcınız ve sunucu arasında bir bağlantı sağlandığında site, çerezeler aracılığıyla
+          sizi tanır.
+        </p>
+        <p>
+          Gençlik ve Spor Bakanlığı tarafından yönetilen web siteleri üzerinden erişilen platformlar
+          için sadece gerekli çerezler (Oturum Çerezleri) kullanılmaktadır. Bunlar rastgele erişimli
+          bellekte saklanır. Oturum sona erdiğinde oturum çerezleri otomatik olarak silinir. Bu
+          nedenle, geçici çerezler olarak da bilinirler.
+        </p>
+      </section>
+
+      <section class="policy-section">
+        <h3>2. Çerezlerin Kullanım Amaçları</h3>
+        <p>
+          Çerezlerin kullanılma amacı, web sitesini ziyaret eden kullanıcıya kolaylık sağlamaktır.
+          Çerezlerin ömrü, kullanıcının yapmış olduğu tarayıcı ayarlarına bağlı olarak değişiklik
+          gösterir. Genel olarak internet tarayıcıları, çerezleri otomatik olarak kabul edecek
+          şekilde ön tanımlıdır.
+        </p>
+        <p>
+          Çerezlerin tarafımızca kullanımı, 6698 sayılı Kişisel Verilerin Korunması Kanunu başta
+          olmak üzere ilgili mevzuata uygun şekilde gerçekleştirilmektedir.
+        </p>
+      </section>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-close-btn" (click)="closePolicyModal()">Kapat</button>
+    </div>
+  </div>
+</div>

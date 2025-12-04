@@ -49,9 +49,20 @@
     align-items: center;
     gap: 10px;
 
+    a {
+      display: inline-block;
+      text-decoration: none;
+      transition: opacity 0.2s;
+
+      &:hover {
+        opacity: 0.8;
+      }
+    }
+
     .footer-logo {
-      height: 32px;
+      height: 40px;
       width: auto;
+      display: block;
     }
 
     .logo-text {
@@ -120,14 +131,10 @@
   gap: 30px;
   width: 100%;
 
-  @media (min-width: 576px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
   @media (min-width: 992px) {
-    grid-template-columns: repeat(3, 1fr);
     width: auto;
     gap: 60px;
+    margin-left: auto;
   }
 
   .link-column {
@@ -136,6 +143,7 @@
       font-weight: 600;
       color: var(--text-main);
       margin-bottom: 20px;
+      text-align: left;
     }
 
     ul {

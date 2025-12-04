@@ -52,6 +52,10 @@ import { CorporateRegisterComponent } from './pages/corporate-register/corporate
 import { CommunityRegisterComponent } from './pages/community-register/community-register';
 import { DevelopersPageComponent } from './pages/developers-page/developers-page.component';
 import { CorporateDashboardComponent } from './pages/corporate-dashboard/corporate-dashboard';
+import { AnnouncementsPageComponent } from './pages/announcements-page/announcements-page.component';
+import { AnnouncementDetailComponent } from './pages/announcement-detail/announcement-detail.component';
+import { StudentLoginComponent } from './pages/student-login/student-login.component';
+import { StudentProfileComponent } from './pages/student-profile/student-profile.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -60,6 +64,8 @@ export const routes: Routes = [
   { path: 'developers', component: DevelopersPageComponent },
   { path: 'communities', component: CommunitiesPageComponent },
   { path: 'events', component: EventsComponent },
+  { path: 'announcements', component: AnnouncementsPageComponent },
+  { path: 'announcements/:id', component: AnnouncementDetailComponent },
 
   { path: 'about', component: AboutPageComponent },
   { path: 'team', component: TeamPageComponent },
@@ -79,6 +85,10 @@ export const routes: Routes = [
 
   // KURUMSAL DASHBOARD (ÖNEMLİ: Yönlendirme yapılacak rota)
   { path: 'corporate-dashboard', component: CorporateDashboardComponent },
+
+  // ÖĞRENCİ GİRİŞ SONRASI SAYFA
+  { path: 'student-login', component: StudentLoginComponent },
+  { path: 'profile', component: StudentProfileComponent },
 
   // Admin Dashboard (Eski/Mevcut)
   {

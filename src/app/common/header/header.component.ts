@@ -1,8 +1,9 @@
-import { Component, HostListener } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive, Router } from '@angular/router';
+import { Component, HostListener, Input, OnInit, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { HeadroomModule } from '@ctrl/ngx-headroom';
 import { trigger, transition, style, animate } from '@angular/animations';
+import { filter, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-header',
@@ -41,12 +42,59 @@ import { trigger, transition, style, animate } from '@angular/animations';
     ]),
   ],
 })
-export class HeaderComponent {
+export class HeaderComponent implements OnInit, OnDestroy {
+  @Input() showProfile?: boolean; // Optional input, eğer verilmezse localStorage'dan kontrol edilir
   activeItem: string | null = null;
   classApplied = false; // Mobil menü için
   isSticky: boolean = false;
+  private _showProfile: boolean = false;
+  private routerSubscription?: Subscription;
 
-  constructor(public router: Router) {}
+  constructor(
+    public router: Router,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {}
+
+  ngOnInit(): void {
+    // Eğer showProfile input olarak verilmediyse, localStorage'dan kontrol et
+    if (this.showProfile === undefined) {
+      this.checkLoginStatus();
+      
+      // Router events'i dinle, sayfa değiştiğinde tekrar kontrol et
+      this.routerSubscription = this.router.events
+        .pipe(filter(event => event instanceof NavigationEnd))
+        .subscribe(() => {
+          this.checkLoginStatus();
+        });
+    } else {
+      this._showProfile = this.showProfile;
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.routerSubscription) {
+      this.routerSubscription.unsubscribe();
+    }
+  }
+
+  private checkLoginStatus(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      const authToken = localStorage.getItem('auth_token');
+      const userType = localStorage.getItem('user_type');
+      
+      // Öğrenci girişi yapılmışsa (user_type === '1' veya 'student' ve token varsa)
+      if (authToken && (userType === '1' || userType === 'student')) {
+        this._showProfile = true;
+      } else {
+        this._showProfile = false;
+      }
+    }
+  }
+
+  get shouldShowProfile(): boolean {
+    // Input verilmişse onu kullan, yoksa localStorage kontrolünden gelen değeri kullan
+    return this.showProfile !== undefined ? this.showProfile : this._showProfile;
+  }
 
   // Menü üzerine gelince aktifleştir
   setActive(item: string | null) {

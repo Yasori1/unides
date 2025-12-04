@@ -16,19 +16,7 @@
       <div class="menu-dropdown" *ngIf="activeItem === 'Sayfalar'" [@dropdownAnim]>
         <div class="dropdown-card">
           <div class="grid-layout">
-            <!-- 1. Fırsatlar (Sol Üst) -->
-            <a routerLink="/opportunities" class="product-link">
-              <img
-                src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&auto=format&fit=crop&w=140&q=80"
-                alt="Fırsatlar"
-              />
-              <div class="info">
-                <h4>Fırsatlar</h4>
-                <p>Staj ve kariyer imkanları.</p>
-              </div>
-            </a>
-
-            <!-- 2. Duyurular (Sağ Üst) -->
+            <!-- 1. Duyurular -->
             <a routerLink="/announcements" class="product-link">
               <img
                 src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?ixlib=rb-4.0.3&auto=format&fit=crop&w=140&q=80"
@@ -40,7 +28,7 @@
               </div>
             </a>
 
-            <!-- 3. Topluluklar (Sol Alt) -->
+            <!-- 2. Topluluklar -->
             <a routerLink="/communities" class="product-link">
               <img
                 src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?ixlib=rb-4.0.3&auto=format&fit=crop&w=140&q=80"
@@ -52,7 +40,7 @@
               </div>
             </a>
 
-            <!-- 4. Etkinlikler (Sağ Alt) -->
+            <!-- 3. Etkinlikler -->
             <a routerLink="/events" class="product-link">
               <img
                 src="https://images.unsplash.com/photo-1523580494863-6f3031224c94?ixlib=rb-4.0.3&auto=format&fit=crop&w=140&q=80"
@@ -92,11 +80,14 @@
 
   <!-- 3. SAĞ TARAF -->
   <div class="actions-container">
-    <!-- GİRİŞ YAP BUTONU -->
-    <a routerLink="/login" class="get-started-btn d-none d-sm-inline-flex">
-      <span class="btn-text">Giriş Yap</span>
+    <!-- GİRİŞ YAP / PROFİLİM BUTONU -->
+    <a
+      [routerLink]="shouldShowProfile ? '/profile' : '/login'"
+      class="get-started-btn d-none d-sm-inline-flex"
+    >
+      <span class="btn-text">{{ shouldShowProfile ? 'Profilim' : 'Giriş Yap' }}</span>
       <div class="icon-container">
-        <i class="bx bx-chevron-right"></i>
+        <i [class]="shouldShowProfile ? 'bx bx-user' : 'bx bx-chevron-right'"></i>
       </div>
     </a>
 
@@ -132,7 +123,6 @@
         </button>
         <div class="accordion-collapse" [class.open]="isSectionOpen(1)">
           <ul class="mobile-sub-menu">
-            <li><a routerLink="/opportunities">Fırsatlar</a></li>
             <li><a routerLink="/announcements">Duyurular</a></li>
             <li><a routerLink="/communities">Topluluklar</a></li>
             <li><a routerLink="/events">Etkinlikler</a></li>
@@ -157,7 +147,12 @@
       </div>
 
       <div class="accordion-item">
-        <a routerLink="/login" class="accordion-button without-icon highlight-link">Giriş Yap</a>
+        <a
+          [routerLink]="shouldShowProfile ? '/profile' : '/login'"
+          class="accordion-button without-icon highlight-link"
+        >
+          {{ shouldShowProfile ? 'Profilim' : 'Giriş Yap' }}
+        </a>
       </div>
     </div>
   </div>

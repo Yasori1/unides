@@ -85,10 +85,8 @@ export class EventsComponent implements OnInit, AfterViewInit {
   sortCriteria: 'date' | 'name' | 'semester' = 'date';
   sortAscending: boolean = true;
 
-  // Detay Modal & Üyelik Kontrolü
+  // Detay Modal
   selectedEvent: EventCard | null = null;
-  isJoined: boolean = false;
-  isLoggedIn: boolean = false;
 
   // Sayfalama
   allEventsPool: EventCard[] = [];
@@ -402,21 +400,11 @@ export class EventsComponent implements OnInit, AfterViewInit {
   // --- MODAL İŞLEMLERİ ---
   openEventDetail(event: EventCard) {
     this.selectedEvent = event;
-    this.isJoined = false;
     document.body.style.overflow = 'hidden';
   }
 
   closeModal() {
     this.selectedEvent = null;
     document.body.style.overflow = 'auto';
-  }
-
-  handleJoinClick() {
-    if (!this.isLoggedIn) {
-      this.closeModal();
-      this.router.navigate(['/login']);
-    } else {
-      this.isJoined = true;
-    }
   }
 }

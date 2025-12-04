@@ -251,26 +251,11 @@
           <span class="value">{{ selectedEvent.quota }} Kişilik Yer Var</span>
         </div>
       </div>
-
-      <div class="divider"></div>
-
-      <p class="description">{{ selectedEvent.description }}</p>
-
-      <button
-        class="join-btn"
-        [class.success]="isJoined"
-        [class.login-required]="!isLoggedIn"
-        (click)="handleJoinClick()"
-      >
-        <span class="material-symbols-outlined" *ngIf="isLoggedIn && !isJoined">how_to_reg</span>
-        <span class="material-symbols-outlined" *ngIf="isLoggedIn && isJoined">check_circle</span>
-        <span class="material-symbols-outlined" *ngIf="!isLoggedIn">login</span>
-
-        <ng-container *ngIf="isLoggedIn">
-          {{ isJoined ? 'KAYIT ALINDI' : 'ETKİNLİĞE KATIL' }}
-        </ng-container>
-        <ng-container *ngIf="!isLoggedIn"> Önce Giriş Yapmalısın </ng-container>
-      </button>
+      
+      <div class="description-section">
+        <span class="label">AÇIKLAMA</span>
+        <p class="description">{{ selectedEvent.description }}</p>
+      </div>
     </div>
   </div>
 </div>

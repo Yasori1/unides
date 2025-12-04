@@ -1,0 +1,135 @@
+<app-header />
+
+<!-- YENİ BANNER (FAQ Sayfası Tarzı) -->
+<div class="page-spacer" (mousemove)="onHeroMouseMove($event)">
+  <div class="background-wrapper">
+    <div
+      class="interactive-blob"
+      [style.transform]="'translate(' + -heroMoveX + 'px, ' + -heroMoveY + 'px)'"
+    ></div>
+    <div class="noise-overlay"></div>
+  </div>
+
+  <div class="container relative-content">
+    <h1 class="page-title">ÜNİDES <span class="highlight-text">DUYURULAR</span></h1>
+    <p class="page-subtitle">
+      Güncel haberler, etkinlikler ve önemli duyuruları buradan takip edebilirsiniz.
+    </p>
+  </div>
+
+  <div class="scroll-indicator">
+    <span>Keşfet</span>
+    <div class="line"></div>
+  </div>
+</div>
+
+<!-- FİLTRELEME & GRID ALANI -->
+<section class="announcements-grid-section">
+  <div class="container">
+    <!-- FİLTRELEME ÇUBUĞU -->
+    <div class="filters-bar">
+      <!-- Arama -->
+      <div class="search-group">
+        <i class="bx bx-search"></i>
+        <input
+          type="text"
+          placeholder="Duyuru ara..."
+          [(ngModel)]="searchText"
+          (input)="applyFilters()"
+        />
+      </div>
+
+      <!-- Filtreler -->
+      <div class="filter-groups">
+        <div class="select-wrapper">
+          <select [(ngModel)]="sortOrder" (change)="applyFilters()">
+            <option value="default">Önerilen Sıralama</option>
+            <option value="date_desc">Tarih (Yeniden Eskiye)</option>
+            <option value="date_asc">Tarih (Eskiden Yeniye)</option>
+          </select>
+          <i class="bx bx-sort-alt-2"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- SONUÇ SAYISI -->
+    <div class="results-count" *ngIf="!isLoading">
+      <p>
+        Toplam <strong>{{ filteredAnnouncements.length }}</strong> duyuru bulundu.
+      </p>
+    </div>
+
+    <!-- Yükleniyor -->
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="spinner"></div>
+      <p>Duyurular yükleniyor...</p>
+    </div>
+
+    <!-- GRID YAPISI -->
+    <div class="grid-container" *ngIf="!isLoading && displayedAnnouncements.length > 0">
+      <a
+        *ngFor="let item of displayedAnnouncements"
+        [routerLink]="['/announcements', item.id]"
+        class="announcement-card"
+      >
+        <div class="cover-area">
+          <img
+            [src]="item.image"
+            [alt]="item.title"
+            class="cover-img"
+            onerror="this.src='assets/img/placeholder-cover.jpg'"
+          />
+          <span class="date-badge">{{ formatDate(item.date) }}</span>
+        </div>
+
+        <div class="card-content">
+          <h3 class="announcement-title">{{ item.title }}</h3>
+          <p class="description">{{ item.shortDescription }}</p>
+
+          <div class="card-footer">
+            <span class="action-text">Devamını Oku <i class="bx bx-right-arrow-alt"></i></span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Veri Yoksa -->
+    <div class="no-data" *ngIf="!isLoading && displayedAnnouncements.length === 0">
+      <div class="empty-icon"><i class="bx bx-search-alt"></i></div>
+      <h3>Sonuç Bulunamadı</h3>
+      <p>Aradığınız kriterlere uygun duyuru mevcut değil. Filtreleri temizlemeyi deneyin.</p>
+      <button class="reset-btn" (click)="resetFilters()">Filtreleri Temizle</button>
+    </div>
+
+    <!-- SAYFALAMA -->
+    <div class="pagination-area" *ngIf="!isLoading && totalPages > 1">
+      <button
+        class="page-btn prev"
+        [disabled]="currentPage === 1"
+        (click)="changePage(currentPage - 1)"
+      >
+        <i class="bx bx-chevron-left"></i>
+      </button>
+
+      <ng-container *ngFor="let page of pages">
+        <button
+          class="page-btn number"
+          [class.active]="page === currentPage"
+          (click)="changePage(page)"
+        >
+          {{ page }}
+        </button>
+      </ng-container>
+
+      <button
+        class="page-btn next"
+        [disabled]="currentPage === totalPages"
+        (click)="changePage(currentPage + 1)"
+      >
+        <i class="bx bx-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+</section>
+
+<app-footer />

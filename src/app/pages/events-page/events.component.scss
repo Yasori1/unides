@@ -647,6 +647,30 @@ $border-color: #e2e8f0;
       background: $border-color;
       margin: 24px 0;
     }
+    
+    .description-section {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid $border-color;
+      
+      .label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: $text-light-gray;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-bottom: 12px;
+        display: block;
+      }
+      
+      .description {
+        color: #475569;
+        line-height: 1.7;
+        margin: 0;
+        font-size: 1rem;
+      }
+    }
+    
     .description {
       color: #475569;
       line-height: 1.7;

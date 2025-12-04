@@ -1,61 +1,195 @@
 <app-header />
 
-<app-page-banner [pageTitle]="'Kullanım Şartları'" [backgroundImage]="'images/titles/uni-2.png'" />
+<!-- YENİ BANNER (FAQ Sayfası Tarzı) -->
+<div class="page-spacer" (mousemove)="onHeroMouseMove($event)">
+  <div class="background-wrapper">
+    <div
+      class="interactive-blob"
+      [style.transform]="'translate(' + -heroMoveX + 'px, ' + -heroMoveY + 'px)'"
+    ></div>
+    <div class="noise-overlay"></div>
+  </div>
 
-<!-- Terms & Conditions -->
-<div class="terms-conditions-area ptb-100">
-  <div class="container">
-    <div class="terms-conditions-content">
-      <h1>Kullanım Şartları</h1>
-      <p>Bu Kullanım Şartları ("Şartlar"), Üniversite Topluluğu ("Topluluk") tarafından sağlanan hizmetlerin kullanımını
-        düzenlemektedir. Topluluğa erişerek veya hizmetleri kullanarak bu Şartları kabul etmiş olursunuz.</p>
+  <div class="container relative-content">
+    <h1 class="page-title">ÜNİDES <span class="highlight-text">KULLANIM ŞARTLARI</span></h1>
+    <p class="page-subtitle">
+      Üyelik sözleşmesi ve platform kullanım koşulları hakkında detaylı bilgiler.
+    </p>
+  </div>
 
-
-      <h2>1. Hizmetin Amacı</h2>
-      <p>Topluluk, öğrenciler, personel ve mezunlar arasında iletişim, iş birliği ve bilgi paylaşımını desteklemek
-        amacıyla oluşturulmuştur.</p>
-
-
-      <h2>2. Kullanıcı Yükümlülükleri</h2>
-      <ul>
-        <li>Topluluğu yasalara uygun şekilde kullanmak.</li>
-        <li>Hesap bilgilerinin güvenliğini sağlamak.</li>
-        <li>Yanıltıcı, zararlı veya kötü amaçlı içerik paylaşmamak.</li>
-        <li>Diğer kullanıcıların hak ve gizliliğine saygı göstermek.</li>
-      </ul>
-
-
-      <h2>3. Yasaklı Kullanımlar</h2>
-      <ul>
-        <li>Spam, taciz, tehdit veya nefret söylemi içeren paylaşımlar.</li>
-        <li>Üçüncü şahıs haklarını ihlal eden içerikler.</li>
-        <li>Sistemi istismar edici davranışlar (bot kullanımı, hacking girişimleri vb.).</li>
-      </ul>
-
-
-      <h2>4. İçerik Paylaşımı</h2>
-      <p>Kullanıcılar tarafından paylaşılan içeriklerden kullanıcılar sorumludur. Topluluk, uygun görmediği içerikleri
-        kaldırma hakkını saklı tutar.</p>
-
-
-      <h2>5. Hesap Yönetimi</h2>
-      <p>Topluluk, kullanım şartlarını ihlal eden kullanıcıların hesaplarını askıya alma veya sonlandırma hakkına
-        sahiptir.</p>
-
-
-      <h2>6. Sorumluluk Reddi</h2>
-      <p>Topluluk, kullanıcılar tarafından paylaşılan içeriklerin doğruluğu veya güvenilirliği konusunda garanti vermez.
-      </p>
-
-
-      <h2>7. Değişiklikler</h2>
-      <p>Bu Şartlar güncellenebilir. Güncellemeler, kullanıcıların erişimine sunulduğu anda geçerli olur.</p>
-
-      <h2>8. İletişim</h2>
-      <p>Herhangi bir soru veya talebiniz için: <strong>info@unides.com</strong></p>
-    </div>
+  <div class="scroll-indicator">
+    <span>Keşfet</span>
+    <div class="line"></div>
   </div>
 </div>
-<!-- End Terms & Conditions -->
+
+<!-- İÇERİK ALANI -->
+<section class="terms-content-section">
+  <div class="container">
+    <div class="terms-content">
+      <div class="content-header">
+        <h1>ÜNIDES DİJİTAL PORTAL KULLANIM KOŞULLARI VE ÜYELİK SÖZLEŞMESİ</h1>
+        <p class="last-updated">Son Güncelleme Tarihi: 25 Kasım 2025</p>
+      </div>
+
+      <div class="content-body">
+        <section class="terms-section">
+          <h2>1. TARAFLAR VE KONU</h2>
+          <p>
+            1.1. İşbu Kullanım Koşulları ve Üyelik Sözleşmesi ("Sözleşme"), Ünides Dijital Portal
+            ("Portal" veya "Ünides") ile bu Portal'a üye olan veya Portal'ı ziyaret eden kullanıcı
+            ("Kullanıcı" veya "Topluluk Yöneticisi") arasında akdedilmiştir. Bu sözleşme, Portal'ın
+            kullanımı, topluluk sayfalarının oluşturulması, etkinlik paylaşımları ve sunulan diğer
+            hizmetlerden yararlanma şartlarını belirler.
+          </p>
+        </section>
+
+        <section class="terms-section">
+          <h2>2. TANIMLAR</h2>
+          <p><strong>Portal:</strong> Ünides Dijital Portal web sitesi ve mobil uygulamaları.</p>
+          <p>
+            <strong>Kullanıcı:</strong> Portal'a üye olan, etkinlikleri inceleyen veya profilleri
+            ziyaret eden gerçek kişi.
+          </p>
+          <p>
+            <strong>Topluluk Yöneticisi:</strong> Bir üniversite öğrenci topluluğunu temsil eden,
+            Portal üzerinde o topluluk adına profil oluşturan ve içerikleri yöneten yetkili üye.
+          </p>
+          <p>
+            <strong>İçerik:</strong> Kullanıcılar tarafından Portal'a yüklenen her türlü yazı,
+            fotoğraf, logo, etkinlik bilgisi, video, ses ve benzeri materyaller.
+          </p>
+        </section>
+
+        <section class="terms-section">
+          <h2>3. ÜYELİK VE HESAP GÜVENLİĞİ</h2>
+          <p>
+            3.1. Portal'a üyelik, Türkiye Cumhuriyeti sınırları içerisindeki üniversitelerde aktif
+            öğrenciliği bulunan kişilere açıktır.
+          </p>
+          <p>
+            3.2. Topluluk Yöneticisi, temsil ettiği topluluğun bağlı olduğu üniversiteden resmi veya
+            gayri resmi onay aldığını, topluluğu temsil etmeye yetkili olduğunu beyan ve taahhüt
+            eder. Yetkisiz işlemlerden doğacak hukuki sorumluluk tamamen kullanıcıya aittir.
+          </p>
+          <p>
+            3.3. Kullanıcı, hesap güvenliğinden (şifre koruma vb.) bizzat sorumludur. Hesabın
+            üçüncü kişiler tarafından kullanılması sonucu oluşabilecek zararlardan Ünides sorumlu
+            tutulamaz.
+          </p>
+        </section>
+
+        <section class="terms-section">
+          <h2>4. HİZMETİN KAPSAMI VE KULLANIMI</h2>
+          <p>
+            4.1. Ünides, öğrenci topluluklarının kendilerini tanıtmaları, etkinliklerini duyurmaları
+            ve destek bulmaları için bir "yer sağlayıcı platform" olarak hizmet verir.
+          </p>
+          <p>
+            4.2. Ünides, Portal üzerinde paylaşılan etkinliklerin organizatörü, düzenleyicisi veya
+            garantörü değildir. Etkinliklerin içeriği, güvenliği, saati veya iptali konusundaki tüm
+            sorumluluk ilgili Topluluk Yöneticisi 'ne aittir.
+          </p>
+          <p>
+            4.3. Kullanıcılar, Portal'ı kullanarak katılımcı veya destek (sponsorluk, bağış vb.)
+            arayışında bulunabilirler; ancak Ünides bu desteklerin sağlanacağını garanti etmez.
+          </p>
+        </section>
+
+        <section class="terms-section">
+          <h2>5. KULLANICI YÜKÜMLÜLÜKLERİ VE İÇERİK POLİTİKASI</h2>
+          <p>
+            <strong>5.1. Doğruluk Beyanı:</strong> Kullanıcı, sisteme girdiği üniversite, il,
+            topluluk adı ve etkinlik bilgilerinin doğru, güncel ve gerçekçi olduğunu taahhüt eder.
+            Yanıltıcı bilgi (örneğin; yapılmayacak bir etkinliğin duyurulması) hesabın askıya
+            alınmasına neden olur.
+          </p>
+          <p>
+            <strong>5.2. Yasadışı İçerik Yasağı:</strong> Portal üzerinde genel ahlaka aykırı, nefret
+            söylemi içeren, şiddeti teşvik eden, siyasi propaganda amacı taşıyan (üniversite
+            toplulukları tüzüklerine aykırı şekilde), telif haklarını ihlal eden veya suç teşkil
+            eden içerikler paylaşılamaz.
+          </p>
+          <p>
+            <strong>5.3. Üniversite İtibarı:</strong> Topluluklar, isimlerini kullandıkları
+            üniversitelerin kurumsal kimliğine ve itibarına zarar verecek beyan ve eylemlerden
+            kaçınmalıdır.
+          </p>
+        </section>
+
+        <section class="terms-section">
+          <h2>6. FİKRİ MÜLKİYET HAKLARI</h2>
+          <p>
+            6.1. Portal'ın tasarımı, yazılımı, veri tabanı ve "Ünides" markası üzerindeki tüm
+            haklar Ünides Dijital Portal yönetimine aittir.
+          </p>
+          <p>
+            6.2. Kullanıcılar, Portal'a yükledikleri içeriklerin (etkinlik fotoğrafları, logolar
+            vb.) telif haklarının kendilerine ait olduğunu veya kullanım iznine sahip olduklarını
+            kabul ederler. Kullanıcı, içeriği yükleyerek Ünides'e bu içeriği platformda yayınlama,
+            tanıtım materyallerinde kullanma ve farklı platformlarda dağıtma hakkını (lisansını)
+            verir.
+          </p>
+        </section>
+
+        <section class="terms-section">
+          <h2>7. KİŞİSEL VERİLERİN KORUNMASI (KVKK)</h2>
+          <p>
+            7.1. Ünides, kullanıcıların kişisel verilerini 6698 sayılı Kişisel Verilerin Korunması
+            Kanunu ("KVKK") ve ilgili mevzuata uygun olarak işler. Veri işleme süreçleri, Portal'da
+            yer alan Aydınlatma Metni ve Gizlilik Politikasında detaylandırılır. Kullanıcı, Portal'ı
+            kullanarak bu politikaları kabul etmiş sayılır.
+          </p>
+        </section>
+
+        <section class="terms-section">
+          <h2>8. SORUMLULUK REDDİ (DISCLAIMER)</h2>
+          <p>
+            8.1. Ünides, hizmetin kesintisiz, hatasız veya siber saldırılardan tamamen arındırılmış
+            olacağını garanti etmez.
+          </p>
+          <p>
+            8.2. Portal üzerinden link verilen üçüncü taraf web sitelerinin içeriğinden ve
+            güvenliğinden Ünides sorumlu değildir.
+          </p>
+          <p>
+            8.3. Fiziksel etkinliklerde yaşanabilecek kazalar, kayıplar veya hukuki anlaşmazlıklarda
+            Ünides taraf değildir ve herhangi bir tazminat yükümlülüğü bulunmamaktadır.
+          </p>
+        </section>
+
+        <section class="terms-section">
+          <h2>9. SÖZLEŞME DEĞİŞİKLİKLERİ VE FESİH</h2>
+          <p>
+            9.1. Ünides, işbu sözleşme şartlarını dilediği zaman tek taraflı olarak değiştirme
+            hakkını saklı tutar. Değişiklikler Portal'da yayınlandığı tarihte yürürlüğe girer.
+          </p>
+          <p>
+            9.2. Ünides, Kullanım Koşulları'na aykırı hareket eden, şüpheli işlem yapan veya
+            topluluk kurallarına uymayan kullanıcıların hesaplarını önceden bildirimde bulunmaksızın
+            gizleme, askıya alma veya kalıcı olarak silme hakkına sahiptir.
+          </p>
+        </section>
+
+        <section class="terms-section">
+          <h2>10. UYUŞMAZLIK ÇÖZÜMÜ</h2>
+          <p>
+            <strong>10.1. Dostane Çözüm:</strong> Taraflar, işbu sözleşmeden kaynaklanan sorunların
+            çözümünde öncelikle karşılıklı görüşme ve uzlaşma yolunu tercih edeceklerdir. Topluluklar
+            arası uyuşmazlıklarda veya kullanıcı şikayetlerinde, yargı yoluna gidilmeden önce Ünides
+            Genç Ofisleri arabulucu ve kolaylaştırıcı olarak görev alabilir. Gerekli görülen hallerde,
+            GSB Gençlik Hizmetleri Müdürlüğü birimlerinden süreçle ilgili rehberlik ve görüş talep
+            edilebilir.
+          </p>
+          <p>
+            <strong>10.2. Yetkili Mahkeme:</strong> Dostane çözüm yollarının tükenmesi veya sonuç
+            vermemesi halinde, işbu sözleşmeden doğabilecek her türlü uyuşmazlığın çözümünde Türkiye
+            Cumhuriyeti Kanunları uygulanacak olup, Ankara Mahkemeleri ve İcra Daireleri yetkilidir.
+          </p>
+        </section>
+      </div>
+    </div>
+  </div>
+</section>
 
 <app-footer />
