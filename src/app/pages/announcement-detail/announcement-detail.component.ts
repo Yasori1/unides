@@ -29,14 +29,27 @@ export class AnnouncementDetailComponent implements OnInit {
       const id = +params['id'];
       if (id) {
         this.announcementId = id;
-        this.loadAnnouncement(id);
+        // SSR sırasında HTTP istekleri yapma, sadece browser'da yap
+        if (isPlatformBrowser(this.platformId)) {
+          this.loadAnnouncement(id);
+        } else {
+          // SSR sırasında loading durumunu kapat
+          this.isLoading = false;
+        }
       } else {
-        this.router.navigate(['/announcements']);
+        if (isPlatformBrowser(this.platformId)) {
+          this.router.navigate(['/announcements']);
+        }
       }
     });
   }
 
   loadAnnouncement(id: number) {
+    // Sadece browser'da çalıştığından emin ol
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
     this.isLoading = true;
     this.announcementService.getAnnouncementById(id).subscribe({
       next: (data) => {
@@ -44,13 +57,17 @@ export class AnnouncementDetailComponent implements OnInit {
           this.announcement = data;
         } else {
           // Duyuru bulunamadıysa listeye yönlendir
-          this.router.navigate(['/announcements']);
+          if (isPlatformBrowser(this.platformId)) {
+            this.router.navigate(['/announcements']);
+          }
         }
         this.isLoading = false;
       },
       error: (err) => {
         console.error('Duyuru yüklenemedi:', err);
-        this.router.navigate(['/announcements']);
+        if (isPlatformBrowser(this.platformId)) {
+          this.router.navigate(['/announcements']);
+        }
         this.isLoading = false;
       },
     });
@@ -71,4 +88,3 @@ export class AnnouncementDetailComponent implements OnInit {
     }
   }
 }
-

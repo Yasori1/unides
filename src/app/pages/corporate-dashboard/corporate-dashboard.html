@@ -304,7 +304,9 @@
             <!-- Sosyal Medya İkonları -->
             <div
               class="social-media-icons"
-              *ngIf="item.instagram || item.youtube || item.twitter || item.tiktok || item.socialMedia"
+              *ngIf="
+                item.instagram || item.youtube || item.twitter || item.tiktok || item.socialMedia
+              "
             >
               <a
                 *ngIf="item.instagram"
@@ -353,7 +355,10 @@
                 <i class="bx bx-group"></i>
                 <span>{{ item.memberCount }} Üye</span>
               </div>
-              <button class="detail-btn" (click)="openCommunityDetail(item); $event.stopPropagation()">
+              <button
+                class="detail-btn"
+                (click)="openCommunityDetail(item); $event.stopPropagation()"
+              >
                 Detaylar
                 <i class="bx bx-right-arrow-alt"></i>
               </button>
@@ -471,11 +476,7 @@
                   <span class="material-symbols-outlined">close</span>
                   Reddet
                 </button>
-                <button
-                  class="detail-btn"
-                  (click)="$event.stopPropagation()"
-                  title="Detay"
-                >
+                <button class="detail-btn" (click)="$event.stopPropagation()" title="Detay">
                   Detaylar
                   <i class="bx bx-right-arrow-alt"></i>
                 </button>
@@ -574,537 +575,543 @@
       </div>
     </div>
 
-  <!-- MODAL -->
-  <div class="modal-backdrop" *ngIf="isModalOpen" (click)="closeModal()">
-    <div
-      class="modal-content"
-      [class.wide]="
-        modalType === 'edit-community' ||
-        modalType === 'new-community' ||
-        modalType === 'new-announcement' ||
-        modalType === 'edit-announcement'
-      "
-      (click)="$event.stopPropagation()"
-    >
-      <div class="modal-header">
-        <h3>
-          {{
-            modalType === 'new-announcement'
-              ? 'Yeni Duyuru Oluştur'
-              : modalType === 'edit-announcement'
-              ? 'Duyuru Güncelle'
-              : modalType === 'new-community'
-              ? 'Yeni Topluluk Ekle'
-              : modalType === 'edit-community'
-              ? 'Topluluk Güncelle'
-              : 'İşlem'
-          }}
-        </h3>
-        <button class="close-btn" (click)="closeModal()">✕</button>
-      </div>
-
-      <!-- Yeni Duyuru Modal -->
-      <div class="modal-body modal-body-scrollable" *ngIf="modalType === 'new-announcement'">
-        <!-- Görsel Upload (Sadece dosya yükleme) -->
-        <div class="single-image-upload no-url-input">
-          <app-image-upload
-            label="Duyuru Görseli"
-            [previewUrl]="newAnnouncement.image || null"
-            (onImageSelected)="onNewAnnouncementImageSelected($event)"
-          ></app-image-upload>
-        </div>
-
-        <div class="form-section">
-          <h5 class="section-title">Duyuru Bilgileri</h5>
-          <div class="form-group">
-            <label>Başlık</label>
-            <input
-              type="text"
-              [(ngModel)]="newAnnouncement.title"
-              class="modern-input"
-              placeholder="Duyuru başlığı..."
-            />
-          </div>
-          <div class="form-group">
-            <label>Kısa Açıklama</label>
-            <textarea
-              [(ngModel)]="newAnnouncement.shortDescription"
-              class="modern-input"
-              rows="2"
-              placeholder="Duyurunun kısa özeti..."
-            ></textarea>
-          </div>
-          <div class="form-group">
-            <label>Detaylı İçerik</label>
-            <textarea
-              [(ngModel)]="newAnnouncement.content"
-              class="modern-input"
-              rows="6"
-              placeholder="Duyurunun tam metnini buraya yazın..."
-            ></textarea>
-          </div>
-          <div class="form-group">
-            <label>Duyuru Linki (Opsiyonel)</label>
-            <input
-              type="url"
-              [(ngModel)]="newAnnouncement.link"
-              class="modern-input"
-              placeholder="https://..."
-            />
-          </div>
-        </div>
-
-        <div class="modal-actions">
-          <button class="btn-secondary" (click)="closeModal()">İptal</button>
-          <button class="btn-primary" (click)="saveAnnouncement()">
-            <span class="material-symbols-outlined">publish</span>
-            Yayınla
-          </button>
-        </div>
-      </div>
-
-      <!-- Duyuru Düzenleme Modal -->
+    <!-- MODAL -->
+    <div class="modal-backdrop" *ngIf="isModalOpen" (click)="closeModal()">
       <div
-        class="modal-body modal-body-scrollable"
-        *ngIf="modalType === 'edit-announcement' && editingAnnouncement"
+        class="modal-content"
+        [class.wide]="
+          modalType === 'edit-community' ||
+          modalType === 'new-community' ||
+          modalType === 'new-announcement' ||
+          modalType === 'edit-announcement'
+        "
+        (click)="$event.stopPropagation()"
       >
-        <!-- Görsel Upload (Sadece dosya yükleme) -->
-        <div class="single-image-upload no-url-input">
-          <app-image-upload
-            label="Duyuru Görseli"
-            [previewUrl]="editingAnnouncement.image"
-            (onImageSelected)="onAnnouncementImageSelected($event)"
-          ></app-image-upload>
+        <div class="modal-header">
+          <h3>
+            {{
+              modalType === 'new-announcement'
+                ? 'Yeni Duyuru Oluştur'
+                : modalType === 'edit-announcement'
+                ? 'Duyuru Güncelle'
+                : modalType === 'new-community'
+                ? 'Yeni Topluluk Ekle'
+                : modalType === 'edit-community'
+                ? 'Topluluk Güncelle'
+                : 'İşlem'
+            }}
+          </h3>
+          <button class="close-btn" (click)="closeModal()">✕</button>
         </div>
 
-        <div class="form-section">
-          <h5 class="section-title">Duyuru Bilgileri</h5>
-          <div class="form-group">
-            <label>Başlık</label>
-            <input
-              type="text"
-              [(ngModel)]="editingAnnouncement.title"
-              class="modern-input"
-              placeholder="Duyuru başlığı..."
-            />
-          </div>
-          <div class="form-group">
-            <label>Kısa Açıklama</label>
-            <textarea
-              [(ngModel)]="editingAnnouncement.shortDescription"
-              class="modern-input"
-              rows="2"
-              placeholder="Duyurunun kısa özeti..."
-            ></textarea>
-          </div>
-          <div class="form-group">
-            <label>Detaylı İçerik</label>
-            <textarea
-              [(ngModel)]="editingAnnouncement.content"
-              class="modern-input"
-              rows="8"
-              placeholder="Duyurunun tam metnini buraya yazın..."
-            ></textarea>
-          </div>
-          <div class="form-group">
-            <label>Duyuru Linki (Opsiyonel)</label>
-            <input
-              type="url"
-              [(ngModel)]="editingAnnouncement.link"
-              class="modern-input"
-              placeholder="https://..."
-            />
-          </div>
-        </div>
-
-        <div class="form-section">
-          <h5 class="section-title">Duyuru Bilgisi</h5>
-          <div class="announcement-stats">
-            <div class="stat-item">
-              <span class="material-symbols-outlined">calendar_today</span>
-              <span>{{ editingAnnouncement.date }}</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="modal-actions">
-          <button class="btn-danger" (click)="deleteAnnouncement()">
-            <span class="material-symbols-outlined">delete</span>
-            Duyuruyu Sil
-          </button>
-          <button class="btn-primary" (click)="updateAnnouncement()">
-            <span class="material-symbols-outlined">save</span>
-            Kaydet
-          </button>
-        </div>
-      </div>
-
-      <!-- Yeni Topluluk Ekleme Modal -->
-      <div
-        class="modal-body modal-body-scrollable"
-        *ngIf="modalType === 'new-community' && newCommunity"
-      >
-        <!-- Banner ve Logo Upload Alanı -->
-        <div class="image-uploads-section">
-          <div class="banner-upload-wrapper no-url-input">
+        <!-- Yeni Duyuru Modal -->
+        <div class="modal-body modal-body-scrollable" *ngIf="modalType === 'new-announcement'">
+          <!-- Görsel Upload (Sadece dosya yükleme) -->
+          <div class="single-image-upload no-url-input">
             <app-image-upload
-              label="Banner Görseli"
-              [previewUrl]="newCommunity.banner || null"
-              (onImageSelected)="onNewBannerSelected($event)"
+              label="Duyuru Görseli"
+              [previewUrl]="newAnnouncement.image || null"
+              [uploadToServer]="true"
+              (onFileSelected)="onNewAnnouncementFileSelected($event)"
+              (onImageSelected)="onNewAnnouncementImageSelected($event)"
             ></app-image-upload>
           </div>
-          <div class="logo-upload-wrapper no-url-input">
-            <app-image-upload
-              label="Logo"
-              [previewUrl]="newCommunity.logo || null"
-              (onImageSelected)="onNewLogoSelected($event)"
-            ></app-image-upload>
-          </div>
-        </div>
 
-        <!-- Durum Seçimi -->
-        <div class="status-toggle-section">
-          <label class="section-title">Durum</label>
-          <div class="status-toggle-buttons">
-            <button
-              type="button"
-              class="status-btn"
-              [class.active]="newCommunity.status === 'Aktif'"
-              (click)="newCommunity.status = 'Aktif'"
-            >
-              Aktif
-            </button>
-            <button
-              type="button"
-              class="status-btn"
-              [class.active]="newCommunity.status === 'Pasif'"
-              (click)="newCommunity.status = 'Pasif'"
-            >
-              Pasif
-            </button>
-          </div>
-        </div>
-
-        <!-- Temel Bilgiler -->
-        <div class="form-section">
-          <h5 class="section-title">Temel Bilgiler</h5>
-          <div class="form-grid-2col">
+          <div class="form-section">
+            <h5 class="section-title">Duyuru Bilgileri</h5>
             <div class="form-group">
-              <label>Topluluk İsmi <span class="required">*</span></label>
+              <label>Başlık</label>
               <input
                 type="text"
-                [(ngModel)]="newCommunity.name"
+                [(ngModel)]="newAnnouncement.title"
                 class="modern-input"
-                placeholder="Topluluk adı..."
+                placeholder="Duyuru başlığı..."
               />
             </div>
             <div class="form-group">
-              <label>Kategori <span class="required">*</span></label>
-              <select [(ngModel)]="newCommunity.category" class="modern-input">
-                <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
-              </select>
-            </div>
-            <div class="form-group full-width">
-              <label>Topluluk Hakkında</label>
+              <label>Kısa Açıklama</label>
               <textarea
-                [(ngModel)]="newCommunity.about"
+                [(ngModel)]="newAnnouncement.shortDescription"
                 class="modern-input"
-                rows="4"
-                placeholder="Topluluğunuz hakkında bilgi verin..."
+                rows="2"
+                placeholder="Duyurunun kısa özeti..."
               ></textarea>
             </div>
             <div class="form-group">
-              <label>Şehir <span class="required">*</span></label>
-              <input
-                type="text"
-                [(ngModel)]="newCommunity.city"
+              <label>Detaylı İçerik</label>
+              <textarea
+                [(ngModel)]="newAnnouncement.content"
                 class="modern-input"
-                placeholder="İstanbul"
-              />
+                rows="6"
+                placeholder="Duyurunun tam metnini buraya yazın..."
+              ></textarea>
             </div>
             <div class="form-group">
-              <label>Üniversite <span class="required">*</span></label>
-              <input
-                type="text"
-                [(ngModel)]="newCommunity.university"
-                class="modern-input"
-                placeholder="Üniversite adı..."
-              />
-            </div>
-          </div>
-        </div>
-
-        <div class="form-section">
-          <h5 class="section-title">İletişim Bilgileri</h5>
-          <div class="form-grid-2col">
-            <div class="form-group">
-              <label>E-posta</label>
-              <input
-                type="email"
-                [(ngModel)]="newCommunity.email"
-                class="modern-input"
-                placeholder="topluluk@mail.com"
-              />
-            </div>
-            <div class="form-group">
-              <label>Üye Sayısı</label>
-              <input
-                type="number"
-                [(ngModel)]="newCommunity.memberCount"
-                class="modern-input"
-                placeholder="0"
-              />
-            </div>
-            <div class="form-group">
-              <label>Website (Opsiyonel)</label>
+              <label>Duyuru Linki (Opsiyonel)</label>
               <input
                 type="url"
-                [(ngModel)]="newCommunity.website"
+                [(ngModel)]="newAnnouncement.link"
                 class="modern-input"
                 placeholder="https://..."
               />
             </div>
           </div>
-        </div>
 
-        <div class="form-section">
-          <h5 class="section-title">Sosyal Medya Linkleri (Opsiyonel)</h5>
-          <div class="form-grid-2col">
-            <div class="form-group">
-              <label>Instagram</label>
-              <input
-                type="url"
-                [(ngModel)]="newCommunity.instagram"
-                class="modern-input"
-                placeholder="https://instagram.com/..."
-              />
-            </div>
-            <div class="form-group">
-              <label>Youtube</label>
-              <input
-                type="url"
-                [(ngModel)]="newCommunity.youtube"
-                class="modern-input"
-                placeholder="https://youtube.com/..."
-              />
-            </div>
-            <div class="form-group">
-              <label>Twitter</label>
-              <input
-                type="url"
-                [(ngModel)]="newCommunity.twitter"
-                class="modern-input"
-                placeholder="https://twitter.com/..."
-              />
-            </div>
-            <div class="form-group">
-              <label>TikTok</label>
-              <input
-                type="url"
-                [(ngModel)]="newCommunity.tiktok"
-                class="modern-input"
-                placeholder="https://tiktok.com/..."
-              />
-            </div>
-          </div>
-        </div>
-
-        <div class="modal-actions">
-          <button class="btn-secondary" (click)="closeModal()">İptal</button>
-          <button class="btn-primary" (click)="saveNewCommunity()">
-            <span class="material-symbols-outlined">save</span>
-            Topluluk Ekle
-          </button>
-        </div>
-      </div>
-
-      <!-- Topluluk Düzenleme Modal -->
-      <div
-        class="modal-body modal-body-scrollable"
-        *ngIf="modalType === 'edit-community' && editingCommunity"
-      >
-        <!-- Banner ve Logo Upload Alanı -->
-        <div class="image-uploads-section">
-          <div class="banner-upload-wrapper no-url-input">
-            <app-image-upload
-              label="Banner Görseli"
-              [previewUrl]="editingCommunity.banner || null"
-              (onImageSelected)="onBannerSelected($event)"
-            ></app-image-upload>
-          </div>
-          <div class="logo-upload-wrapper no-url-input">
-            <app-image-upload
-              label="Logo"
-              [previewUrl]="editingCommunity.logo || null"
-              (onImageSelected)="onLogoSelected($event)"
-            ></app-image-upload>
-          </div>
-        </div>
-
-        <!-- Durum Seçimi -->
-        <div class="status-toggle-section">
-          <label>Topluluk Durumu</label>
-          <div class="status-toggle-buttons">
-            <button
-              class="status-btn"
-              [class.active]="editingCommunity.status === 'Aktif'"
-              (click)="editingCommunity.status = 'Aktif'"
-            >
-              <span class="material-symbols-outlined">check_circle</span>
-              Aktif
-            </button>
-            <button
-              class="status-btn passive"
-              [class.active]="editingCommunity.status === 'Pasif'"
-              (click)="editingCommunity.status = 'Pasif'"
-            >
-              <span class="material-symbols-outlined">cancel</span>
-              Pasif
+          <div class="modal-actions">
+            <button class="btn-secondary" (click)="closeModal()">İptal</button>
+            <button class="btn-primary" (click)="saveAnnouncement()">
+              <span class="material-symbols-outlined">publish</span>
+              Yayınla
             </button>
           </div>
         </div>
 
-        <!-- Form Alanları -->
-        <div class="form-section">
-          <h5 class="section-title">Temel Bilgiler</h5>
-          <div class="form-grid-2col">
-            <div class="form-group">
-              <label>Topluluk İsmi</label>
-              <input
-                type="text"
-                [(ngModel)]="editingCommunity.name"
-                class="modern-input"
-                placeholder="Topluluk adını girin"
-              />
-            </div>
-            <div class="form-group">
-              <label>Topluluk Kategorisi</label>
-              <select [(ngModel)]="editingCommunity.category" class="modern-input">
-                <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
-              </select>
-            </div>
+        <!-- Duyuru Düzenleme Modal -->
+        <div
+          class="modal-body modal-body-scrollable"
+          *ngIf="modalType === 'edit-announcement' && editingAnnouncement"
+        >
+          <!-- Görsel Upload (Sadece dosya yükleme) -->
+          <div class="single-image-upload no-url-input">
+            <app-image-upload
+              label="Duyuru Görseli"
+              [previewUrl]="editingAnnouncement.image"
+              [uploadToServer]="true"
+              (onFileSelected)="onAnnouncementFileSelected($event)"
+              (onImageSelected)="onAnnouncementImageSelected($event)"
+            ></app-image-upload>
           </div>
 
-          <div class="form-group full-width">
-            <label>Topluluk Hakkında</label>
-            <textarea
-              [(ngModel)]="editingCommunity.about"
-              class="modern-input"
-              rows="3"
-              placeholder="Topluluk hakkında kısa bir açıklama yazın..."
-            ></textarea>
-          </div>
-        </div>
-
-        <div class="form-section">
-          <h5 class="section-title">Konum Bilgileri</h5>
-          <div class="form-grid-2col">
+          <div class="form-section">
+            <h5 class="section-title">Duyuru Bilgileri</h5>
             <div class="form-group">
-              <label>Şehir</label>
+              <label>Başlık</label>
               <input
                 type="text"
-                [(ngModel)]="editingCommunity.city"
+                [(ngModel)]="editingAnnouncement.title"
                 class="modern-input"
-                placeholder="Şehir"
+                placeholder="Duyuru başlığı..."
               />
             </div>
             <div class="form-group">
-              <label>Üniversite</label>
-              <input
-                type="text"
-                [(ngModel)]="editingCommunity.university"
+              <label>Kısa Açıklama</label>
+              <textarea
+                [(ngModel)]="editingAnnouncement.shortDescription"
                 class="modern-input"
-                placeholder="Üniversite adı"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div class="form-section">
-          <h5 class="section-title">İletişim Bilgileri</h5>
-          <div class="form-grid-2col">
-            <div class="form-group">
-              <label>E-posta</label>
-              <input
-                type="email"
-                [(ngModel)]="editingCommunity.email"
-                class="modern-input"
-                placeholder="topluluk@mail.com"
-              />
+                rows="2"
+                placeholder="Duyurunun kısa özeti..."
+              ></textarea>
             </div>
             <div class="form-group">
-              <label>Üye Sayısı</label>
-              <input
-                type="number"
-                [(ngModel)]="editingCommunity.memberCount"
+              <label>Detaylı İçerik</label>
+              <textarea
+                [(ngModel)]="editingAnnouncement.content"
                 class="modern-input"
-                placeholder="0"
-              />
+                rows="8"
+                placeholder="Duyurunun tam metnini buraya yazın..."
+              ></textarea>
             </div>
             <div class="form-group">
-              <label>Website (Opsiyonel)</label>
+              <label>Duyuru Linki (Opsiyonel)</label>
               <input
                 type="url"
-                [(ngModel)]="editingCommunity.website"
+                [(ngModel)]="editingAnnouncement.link"
                 class="modern-input"
                 placeholder="https://..."
               />
             </div>
           </div>
-        </div>
 
-        <div class="form-section">
-          <h5 class="section-title">Sosyal Medya Linkleri (Opsiyonel)</h5>
-          <div class="form-grid-2col">
-            <div class="form-group">
-              <label>Instagram</label>
-              <input
-                type="url"
-                [(ngModel)]="editingCommunity.instagram"
-                class="modern-input"
-                placeholder="https://instagram.com/..."
-              />
+          <div class="form-section">
+            <h5 class="section-title">Duyuru Bilgisi</h5>
+            <div class="announcement-stats">
+              <div class="stat-item">
+                <span class="material-symbols-outlined">calendar_today</span>
+                <span>{{ editingAnnouncement.date }}</span>
+              </div>
             </div>
-            <div class="form-group">
-              <label>Youtube</label>
-              <input
-                type="url"
-                [(ngModel)]="editingCommunity.youtube"
-                class="modern-input"
-                placeholder="https://youtube.com/..."
-              />
-            </div>
-            <div class="form-group">
-              <label>Twitter</label>
-              <input
-                type="url"
-                [(ngModel)]="editingCommunity.twitter"
-                class="modern-input"
-                placeholder="https://twitter.com/..."
-              />
-            </div>
-            <div class="form-group">
-              <label>TikTok</label>
-              <input
-                type="url"
-                [(ngModel)]="editingCommunity.tiktok"
-                class="modern-input"
-                placeholder="https://tiktok.com/..."
-              />
-            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button class="btn-danger" (click)="deleteAnnouncement()">
+              <span class="material-symbols-outlined">delete</span>
+              Duyuruyu Sil
+            </button>
+            <button class="btn-primary" (click)="updateAnnouncement()">
+              <span class="material-symbols-outlined">save</span>
+              Kaydet
+            </button>
           </div>
         </div>
 
-        <div class="modal-actions">
-          <button class="btn-danger" (click)="deleteCommunity()">
-            <span class="material-symbols-outlined">delete</span>
-            Topluluğu Sil
-          </button>
-          <button class="btn-primary" (click)="saveCommunity()">
-            <span class="material-symbols-outlined">save</span>
-            Topluluk Kaydet
-          </button>
+        <!-- Yeni Topluluk Ekleme Modal -->
+        <div
+          class="modal-body modal-body-scrollable"
+          *ngIf="modalType === 'new-community' && newCommunity"
+        >
+          <!-- Banner ve Logo Upload Alanı -->
+          <div class="image-uploads-section">
+            <div class="banner-upload-wrapper no-url-input">
+              <app-image-upload
+                label="Banner Görseli"
+                [previewUrl]="newCommunity.banner || null"
+                (onImageSelected)="onNewBannerSelected($event)"
+              ></app-image-upload>
+            </div>
+            <div class="logo-upload-wrapper no-url-input">
+              <app-image-upload
+                label="Logo"
+                [previewUrl]="newCommunity.logo || null"
+                (onImageSelected)="onNewLogoSelected($event)"
+              ></app-image-upload>
+            </div>
+          </div>
+
+          <!-- Durum Seçimi -->
+          <div class="status-toggle-section">
+            <label class="section-title">Durum</label>
+            <div class="status-toggle-buttons">
+              <button
+                type="button"
+                class="status-btn"
+                [class.active]="newCommunity.status === 'Aktif'"
+                (click)="newCommunity.status = 'Aktif'"
+              >
+                Aktif
+              </button>
+              <button
+                type="button"
+                class="status-btn"
+                [class.active]="newCommunity.status === 'Pasif'"
+                (click)="newCommunity.status = 'Pasif'"
+              >
+                Pasif
+              </button>
+            </div>
+          </div>
+
+          <!-- Temel Bilgiler -->
+          <div class="form-section">
+            <h5 class="section-title">Temel Bilgiler</h5>
+            <div class="form-grid-2col">
+              <div class="form-group">
+                <label>Topluluk İsmi <span class="required">*</span></label>
+                <input
+                  type="text"
+                  [(ngModel)]="newCommunity.name"
+                  class="modern-input"
+                  placeholder="Topluluk adı..."
+                />
+              </div>
+              <div class="form-group">
+                <label>Kategori <span class="required">*</span></label>
+                <select [(ngModel)]="newCommunity.category" class="modern-input">
+                  <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+                </select>
+              </div>
+              <div class="form-group full-width">
+                <label>Topluluk Hakkında</label>
+                <textarea
+                  [(ngModel)]="newCommunity.about"
+                  class="modern-input"
+                  rows="4"
+                  placeholder="Topluluğunuz hakkında bilgi verin..."
+                ></textarea>
+              </div>
+              <div class="form-group">
+                <label>Şehir <span class="required">*</span></label>
+                <input
+                  type="text"
+                  [(ngModel)]="newCommunity.city"
+                  class="modern-input"
+                  placeholder="İstanbul"
+                />
+              </div>
+              <div class="form-group">
+                <label>Üniversite <span class="required">*</span></label>
+                <input
+                  type="text"
+                  [(ngModel)]="newCommunity.university"
+                  class="modern-input"
+                  placeholder="Üniversite adı..."
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h5 class="section-title">İletişim Bilgileri</h5>
+            <div class="form-grid-2col">
+              <div class="form-group">
+                <label>E-posta</label>
+                <input
+                  type="email"
+                  [(ngModel)]="newCommunity.email"
+                  class="modern-input"
+                  placeholder="topluluk@mail.com"
+                />
+              </div>
+              <div class="form-group">
+                <label>Üye Sayısı</label>
+                <input
+                  type="number"
+                  [(ngModel)]="newCommunity.memberCount"
+                  class="modern-input"
+                  placeholder="0"
+                />
+              </div>
+              <div class="form-group">
+                <label>Website (Opsiyonel)</label>
+                <input
+                  type="url"
+                  [(ngModel)]="newCommunity.website"
+                  class="modern-input"
+                  placeholder="https://..."
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h5 class="section-title">Sosyal Medya Linkleri (Opsiyonel)</h5>
+            <div class="form-grid-2col">
+              <div class="form-group">
+                <label>Instagram</label>
+                <input
+                  type="url"
+                  [(ngModel)]="newCommunity.instagram"
+                  class="modern-input"
+                  placeholder="https://instagram.com/..."
+                />
+              </div>
+              <div class="form-group">
+                <label>Youtube</label>
+                <input
+                  type="url"
+                  [(ngModel)]="newCommunity.youtube"
+                  class="modern-input"
+                  placeholder="https://youtube.com/..."
+                />
+              </div>
+              <div class="form-group">
+                <label>Twitter</label>
+                <input
+                  type="url"
+                  [(ngModel)]="newCommunity.twitter"
+                  class="modern-input"
+                  placeholder="https://twitter.com/..."
+                />
+              </div>
+              <div class="form-group">
+                <label>TikTok</label>
+                <input
+                  type="url"
+                  [(ngModel)]="newCommunity.tiktok"
+                  class="modern-input"
+                  placeholder="https://tiktok.com/..."
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button class="btn-secondary" (click)="closeModal()">İptal</button>
+            <button class="btn-primary" (click)="saveNewCommunity()">
+              <span class="material-symbols-outlined">save</span>
+              Topluluk Ekle
+            </button>
+          </div>
+        </div>
+
+        <!-- Topluluk Düzenleme Modal -->
+        <div
+          class="modal-body modal-body-scrollable"
+          *ngIf="modalType === 'edit-community' && editingCommunity"
+        >
+          <!-- Banner ve Logo Upload Alanı -->
+          <div class="image-uploads-section">
+            <div class="banner-upload-wrapper no-url-input">
+              <app-image-upload
+                label="Banner Görseli"
+                [previewUrl]="editingCommunity.banner || null"
+                (onImageSelected)="onBannerSelected($event)"
+              ></app-image-upload>
+            </div>
+            <div class="logo-upload-wrapper no-url-input">
+              <app-image-upload
+                label="Logo"
+                [previewUrl]="editingCommunity.logo || null"
+                (onImageSelected)="onLogoSelected($event)"
+              ></app-image-upload>
+            </div>
+          </div>
+
+          <!-- Durum Seçimi -->
+          <div class="status-toggle-section">
+            <label>Topluluk Durumu</label>
+            <div class="status-toggle-buttons">
+              <button
+                class="status-btn"
+                [class.active]="editingCommunity.status === 'Aktif'"
+                (click)="editingCommunity.status = 'Aktif'"
+              >
+                <span class="material-symbols-outlined">check_circle</span>
+                Aktif
+              </button>
+              <button
+                class="status-btn passive"
+                [class.active]="editingCommunity.status === 'Pasif'"
+                (click)="editingCommunity.status = 'Pasif'"
+              >
+                <span class="material-symbols-outlined">cancel</span>
+                Pasif
+              </button>
+            </div>
+          </div>
+
+          <!-- Form Alanları -->
+          <div class="form-section">
+            <h5 class="section-title">Temel Bilgiler</h5>
+            <div class="form-grid-2col">
+              <div class="form-group">
+                <label>Topluluk İsmi</label>
+                <input
+                  type="text"
+                  [(ngModel)]="editingCommunity.name"
+                  class="modern-input"
+                  placeholder="Topluluk adını girin"
+                />
+              </div>
+              <div class="form-group">
+                <label>Topluluk Kategorisi</label>
+                <select [(ngModel)]="editingCommunity.category" class="modern-input">
+                  <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group full-width">
+              <label>Topluluk Hakkında</label>
+              <textarea
+                [(ngModel)]="editingCommunity.about"
+                class="modern-input"
+                rows="3"
+                placeholder="Topluluk hakkında kısa bir açıklama yazın..."
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h5 class="section-title">Konum Bilgileri</h5>
+            <div class="form-grid-2col">
+              <div class="form-group">
+                <label>Şehir</label>
+                <input
+                  type="text"
+                  [(ngModel)]="editingCommunity.city"
+                  class="modern-input"
+                  placeholder="Şehir"
+                />
+              </div>
+              <div class="form-group">
+                <label>Üniversite</label>
+                <input
+                  type="text"
+                  [(ngModel)]="editingCommunity.university"
+                  class="modern-input"
+                  placeholder="Üniversite adı"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h5 class="section-title">İletişim Bilgileri</h5>
+            <div class="form-grid-2col">
+              <div class="form-group">
+                <label>E-posta</label>
+                <input
+                  type="email"
+                  [(ngModel)]="editingCommunity.email"
+                  class="modern-input"
+                  placeholder="topluluk@mail.com"
+                />
+              </div>
+              <div class="form-group">
+                <label>Üye Sayısı</label>
+                <input
+                  type="number"
+                  [(ngModel)]="editingCommunity.memberCount"
+                  class="modern-input"
+                  placeholder="0"
+                />
+              </div>
+              <div class="form-group">
+                <label>Website (Opsiyonel)</label>
+                <input
+                  type="url"
+                  [(ngModel)]="editingCommunity.website"
+                  class="modern-input"
+                  placeholder="https://..."
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h5 class="section-title">Sosyal Medya Linkleri (Opsiyonel)</h5>
+            <div class="form-grid-2col">
+              <div class="form-group">
+                <label>Instagram</label>
+                <input
+                  type="url"
+                  [(ngModel)]="editingCommunity.instagram"
+                  class="modern-input"
+                  placeholder="https://instagram.com/..."
+                />
+              </div>
+              <div class="form-group">
+                <label>Youtube</label>
+                <input
+                  type="url"
+                  [(ngModel)]="editingCommunity.youtube"
+                  class="modern-input"
+                  placeholder="https://youtube.com/..."
+                />
+              </div>
+              <div class="form-group">
+                <label>Twitter</label>
+                <input
+                  type="url"
+                  [(ngModel)]="editingCommunity.twitter"
+                  class="modern-input"
+                  placeholder="https://twitter.com/..."
+                />
+              </div>
+              <div class="form-group">
+                <label>TikTok</label>
+                <input
+                  type="url"
+                  [(ngModel)]="editingCommunity.tiktok"
+                  class="modern-input"
+                  placeholder="https://tiktok.com/..."
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button class="btn-danger" (click)="deleteCommunity()">
+              <span class="material-symbols-outlined">delete</span>
+              Topluluğu Sil
+            </button>
+            <button class="btn-primary" (click)="saveCommunity()">
+              <span class="material-symbols-outlined">save</span>
+              Topluluk Kaydet
+            </button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  </main>
+</div>

@@ -4,7 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 // Servisler
 import { ToastService } from '../../services/toast.services';
-import { AuthService, LoginResponse } from '../../services/auth.services';
+import { AuthService, AuthResponse } from '../../services/auth.services';
 // Bileşenler
 import { ToastComponent } from '../../components/ui/toast/toast.component';
 import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
@@ -112,8 +112,9 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
     this.isLoading = true;
 
     this.authService.loginCommunity(email, password).subscribe({
-      next: (response: LoginResponse) => {
+      next: (response: AuthResponse) => {
         // --- BAŞARILI GİRİŞ ---
+        // AuthService zaten token ve kullanıcı bilgilerini kaydediyor
         this.isLoading = false;
         this.toastService.show('Giriş başarılı! Topluluk paneline yönlendiriliyorsunuz...', 'success');
 

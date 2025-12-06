@@ -41,10 +41,21 @@ export class AnnouncementsPageComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.fetchAnnouncements();
+    // SSR sırasında HTTP istekleri yapma, sadece browser'da yap
+    if (isPlatformBrowser(this.platformId)) {
+      this.fetchAnnouncements();
+    } else {
+      // SSR sırasında boş liste göster
+      this.isLoading = false;
+    }
   }
 
   fetchAnnouncements() {
+    // Sadece browser'da çalıştığından emin ol
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
     this.isLoading = true;
     this.announcementService.getAllAnnouncements().subscribe({
       next: (data) => {

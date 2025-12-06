@@ -3,9 +3,19 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, tap, catchError, of } from 'rxjs';
 import { Router } from '@angular/router';
 
+// Backend AuthResponse formatı (PascalCase)
+export interface AuthResponse {
+  Id: number;
+  FullName: string;
+  Email: string;
+  RoleName: string;
+  AccessToken: string;
+  RefreshToken: string;
+}
+
+// Eski interface (geriye uyumluluk için)
 export interface LoginResponse {
   token: string;
-  // Swagger'da refresh endpoint'i olduğu için dönen cevapta refreshToken olabilir
   refreshToken?: string;
   user: {
     id: number;
@@ -16,35 +26,62 @@ export interface LoginResponse {
 }
 
 export interface RegisterRequest {
-  name: string;
-  email: string;
-  password: string;
+  FullName: string;
+  Email: string;
+  Password: string;
+  RoleId: number;
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  // Swagger görseline göre Base URL
-  // Endpointler /api/Auth/... şeklinde olduğu için base url:
-  private apiUrl = 'https://api.unides.com/api';
+  // Proxy üzerinden çalışacak şekilde /api kullanıyoruz
+  // proxy.conf.json /api isteklerini https://localhost:7069'a yönlendiriyor
+  private apiUrl = '/api';
 
   constructor(private http: HttpClient, private router: Router) {}
 
   // --- MERKEZİ GİRİŞ METODU (SWAGGER: POST /api/Auth/login) ---
   // Tüm kullanıcı tipleri aynı endpoint üzerinden giriş yapar,
   // Backend rolü response içinde döner veya token'a gömer.
-  private login(email: string, password: string): Observable<LoginResponse> {
-    const payload = { email, password };
-    return this.http.post<LoginResponse>(`${this.apiUrl}/Auth/login`, payload).pipe(
+  private login(email: string, password: string, roleId?: number): Observable<AuthResponse> {
+    // Backend LoginRequest formatı: { Email, Password, RoleId }
+    const payload: any = { 
+      Email: email, 
+      Password: password 
+    };
+    if (roleId !== undefined) {
+      payload.RoleId = roleId;
+    }
+    
+    return this.http.post<AuthResponse>(`${this.apiUrl}/Auth/login`, payload).pipe(
       tap((response) => {
-        if (response.token) {
-          this.saveToken(response.token);
-          this.saveUser(response.user);
-          // Eğer backend kullanıcı rolünü dönüyorsa onu kaydet
-          if (response.user && response.user.role) {
-            this.saveUserType(response.user.role);
+        if (response.AccessToken) {
+          // Backend'den gelen AuthResponse'u işle
+          this.saveToken(response.AccessToken);
+          if (response.RefreshToken) {
+            localStorage.setItem('refresh_token', response.RefreshToken);
           }
+          
+          // Kullanıcı bilgilerini kaydet
+          const userInfo = {
+            id: response.Id,
+            name: response.FullName,
+            email: response.Email,
+            role: response.RoleName
+          };
+          this.saveUser(userInfo);
+          
+          // Rol adını user_type olarak kaydet
+          const roleMap: { [key: string]: string } = {
+            'Student': 'student',
+            'Corporate': 'corporate',
+            'Community': 'community',
+            'Admin': 'admin'
+          };
+          const userType = roleMap[response.RoleName] || response.RoleName.toLowerCase();
+          this.saveUserType(userType);
         }
       })
     );
@@ -52,30 +89,32 @@ export class AuthService {
 
   // --- 1. ÖĞRENCİ GİRİŞİ ---
   // Componentlerdeki mevcut yapıyı bozmamak için wrapper kullanıyoruz.
-  loginStudent(email: string, password: string): Observable<LoginResponse> {
-    return this.login(email, password).pipe(
-      tap(() => {
-        // Frontend tarafında 'student' olduğunu garantiye alıyoruz
-        // (Backend response.role dönmezse varsayılan olarak set edilebilir)
-        this.saveUserType('student');
-      })
-    );
+  loginStudent(email: string, password: string): Observable<AuthResponse> {
+    return this.login(email, password, 1); // RoleId: 1 = Student
   }
 
   // --- 2. KURUMSAL GİRİŞ ---
-  loginCorporate(email: string, password: string): Observable<LoginResponse> {
-    return this.login(email, password).pipe(tap(() => this.saveUserType('corporate')));
+  loginCorporate(email: string, password: string): Observable<AuthResponse> {
+    // Backend email'den rolü anlıyor, ama RoleId gönderebiliriz (2 = Corporate)
+    return this.login(email, password, 2);
   }
 
   // --- 3. TOPLULUK GİRİŞİ ---
-  loginCommunity(email: string, password: string): Observable<LoginResponse> {
-    return this.login(email, password).pipe(tap(() => this.saveUserType('community')));
+  loginCommunity(email: string, password: string): Observable<AuthResponse> {
+    // Backend email'den rolü anlıyor, ama RoleId gönderebiliriz (3 = Community)
+    return this.login(email, password, 3);
   }
 
   // --- 4. KAYIT OL (REGISTER) ---
   // Swagger: POST /api/Auth/register
-  registerStudent(data: RegisterRequest): Observable<any> {
+  registerStudent(fullName: string, email: string, password: string, roleId: number = 1): Observable<any> {
     // Backend tek bir register noktası sunuyor.
+    const data: RegisterRequest = {
+      FullName: fullName,
+      Email: email,
+      Password: password,
+      RoleId: roleId
+    };
     return this.http.post(`${this.apiUrl}/Auth/register`, data);
   }
 

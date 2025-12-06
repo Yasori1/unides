@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable, map, catchError, of } from 'rxjs';
 
 export interface Announcement {
   id: number;
@@ -11,50 +12,203 @@ export interface Announcement {
   link: string;
 }
 
+// Backend'den gelen format (camelCase - API response)
+interface AnnouncementListItemDto {
+  annId: number;
+  title: string;
+  shortDescription: string;
+  annDate?: string; // List endpoint'inde annDate dönüyor (camelCase)
+  imagePath?: string;
+  link?: string;
+}
+
+interface AnnouncementDetailDto {
+  annId?: number;
+  AnnId?: number; // PascalCase fallback
+  title?: string;
+  Title?: string; // PascalCase fallback
+  shortDescription?: string;
+  ShortDescription?: string; // PascalCase fallback
+  eventDate?: string; // Detail endpoint'inde eventDate dönüyor (camelCase)
+  EventDate?: string; // PascalCase fallback
+  annDate?: string; // Bazen annDate de olabilir
+  AnnDate?: string; // PascalCase fallback
+  description?: string; // camelCase
+  Description?: string; // PascalCase fallback
+  link?: string;
+  Link?: string; // PascalCase fallback
+  imagePath?: string;
+  ImagePath?: string; // PascalCase fallback
+}
+
+// Backend'e gönderilecek format (Swagger'a göre camelCase)
+interface CreateAnnouncementRequest {
+  title: string;
+  shortDescription?: string;
+  annDate?: string;
+  description?: string;
+  link?: string;
+  imagePath?: string;
+}
+
+interface UpdateAnnouncementRequest {
+  annId?: number; // Backend body'de de bekliyor
+  title: string;
+  shortDescription?: string;
+  annDate?: string;
+  description?: string;
+  link?: string;
+  imagePath?: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class AnnouncementService {
-  // Mock data - Gerçek uygulamada API'den gelecek
-  private mockAnnouncements: Announcement[] = [
-    {
-      id: 1,
-      title: 'Yeni Dönem Başlangıç Etkinliği',
-      shortDescription: '2024-2025 akademik yılı açılış töreni ve tanışma etkinliği düzenlenecektir.',
-      content: 'Değerli öğrencilerimiz, yeni akademik yılın başlaması nedeniyle büyük bir açılış töreni düzenliyoruz. Tüm öğrencilerimizi bekliyoruz. Etkinlikte çeşitli aktiviteler ve tanışma fırsatları olacaktır.',
-      date: '2024-09-15',
-      image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      link: 'https://example.com/event1',
-    },
-    {
-      id: 2,
-      title: 'Kariyer Günleri 2024',
-      shortDescription: 'Büyük firmaların katılımıyla kariyer günleri düzenleniyor.',
-      content: 'Kariyer Günleri etkinliğimizde birçok önde gelen firma stant açacak ve iş imkanları sunacaktır. CV hazırlama ve mülakat teknikleri hakkında workshoplar da düzenlenecektir.',
-      date: '2024-10-20',
-      image: 'https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      link: 'https://example.com/career-days',
-    },
-    {
-      id: 3,
-      title: 'Teknoloji Semineri: Yapay Zeka',
-      shortDescription: 'Yapay zeka alanında uzman konuşmacılar ile seminer serisi.',
-      content: 'Yapay zeka teknolojilerinin güncel durumu ve geleceği hakkında kapsamlı bir seminer düzenleniyor. Alanında uzman konuşmacılar katılacak ve soru-cevap bölümü olacaktır.',
-      date: '2024-11-05',
-      image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      link: '',
-    },
-  ];
+  private apiUrl = '/api/Announcements';
+
+  constructor(private http: HttpClient) {}
+
+  // Backend formatını frontend formatına dönüştür
+  private mapToAnnouncement(dto: any): Announcement {
+    // Backend camelCase dönüyor, hem camelCase hem PascalCase destekle
+    const annId = dto.annId || dto.AnnId || dto.id || 0;
+    const title = dto.title || dto.Title || '';
+    const shortDescription = dto.shortDescription || dto.ShortDescription || '';
+
+    // Tarih alanı - hem camelCase hem PascalCase, hem annDate hem eventDate
+    const dateField = dto.annDate || dto.AnnDate || dto.eventDate || dto.EventDate;
+
+    // Description alanı (sadece detail endpoint'inde gelir)
+    const description = dto.description || dto.Description || null;
+
+    // Image ve Link alanları
+    const imagePath = dto.imagePath || dto.ImagePath || '';
+    const link = dto.link || dto.Link || '';
+
+    return {
+      id: annId,
+      title: title,
+      shortDescription: shortDescription,
+      // Description varsa onu kullan, yoksa ShortDescription kullan
+      content: description || shortDescription || '',
+      date: dateField || new Date().toISOString().split('T')[0],
+      image: imagePath,
+      link: link,
+    };
+  }
 
   getAllAnnouncements(): Observable<Announcement[]> {
-    // Gerçek uygulamada: return this.http.get<Announcement[]>('/api/announcements');
-    return of(this.mockAnnouncements);
+    return this.http.get<any[]>(`${this.apiUrl}/list`).pipe(
+      map((response) => {
+        // Backend camelCase dönüyor: { annId, title, shortDescription, annDate, imagePath }
+        return response.map((dto) => this.mapToAnnouncement(dto));
+      }),
+      catchError((error) => {
+        console.error('Duyurular yüklenemedi:', error);
+        return of([]);
+      })
+    );
   }
 
   getAnnouncementById(id: number): Observable<Announcement | undefined> {
-    // Gerçek uygulamada: return this.http.get<Announcement>(`/api/announcements/${id}`);
-    const announcement = this.mockAnnouncements.find((a) => a.id === id);
-    return of(announcement);
+    return this.http.get<any>(`${this.apiUrl}/detail/${id}`).pipe(
+      map((response) => this.mapToAnnouncement(response)),
+      catchError((error) => {
+        console.error('Duyuru detayı yüklenemedi:', error);
+        return of(undefined);
+      })
+    );
+  }
+
+  createAnnouncement(announcement: {
+    title: string;
+    shortDescription?: string;
+    content?: string;
+    date?: string;
+    image?: string;
+    link?: string;
+  }): Observable<number> {
+    // Swagger'a göre camelCase formatında gönderilmeli
+    const request: CreateAnnouncementRequest = {
+      title: announcement.title,
+      shortDescription: announcement.shortDescription,
+      description: announcement.content,
+      link: announcement.link,
+      imagePath: announcement.image,
+      // annDate ISO 8601 formatında olmalı: 2025-12-06T16:49:01.554Z
+      annDate: announcement.date
+        ? new Date(announcement.date).toISOString()
+        : new Date().toISOString(), // Eğer tarih verilmemişse şu anki tarihi kullan
+    };
+
+    // Backend ActionResult<int> dönüyor, JSON olarak number gelir
+    // Swagger'a göre camelCase formatında gönderilmeli
+    return this.http.post<number>(`${this.apiUrl}/create`, request).pipe(
+      catchError((error) => {
+        console.error('Duyuru oluşturulamadı:', error);
+        console.error('Hata detayı:', error.error);
+        console.error('Request body:', JSON.stringify(request, null, 2));
+        throw error;
+      })
+    );
+  }
+
+  updateAnnouncement(
+    id: number,
+    announcement: {
+      title: string;
+      shortDescription?: string;
+      content?: string;
+      date?: string;
+      image?: string;
+      link?: string;
+    }
+  ): Observable<void> {
+    // Backend camelCase formatında bekliyor: { annId, title, shortDescription, annDate, description, link, imagePath }
+    const request: UpdateAnnouncementRequest = {
+      annId: id, // Backend body'de de bekliyor
+      title: announcement.title.trim(),
+      shortDescription: announcement.shortDescription?.trim(),
+      description: announcement.content?.trim(),
+      link: announcement.link?.trim(),
+      imagePath: announcement.image?.trim(),
+      // annDate ISO 8601 formatında olmalı: 2025-12-06T17:42:28.785Z
+      annDate: announcement.date ? new Date(announcement.date).toISOString() : undefined,
+    };
+
+    // PUT /api/Announcements/update/{id} - NoContent döner
+    return this.http.put<void>(`${this.apiUrl}/update/${id}`, request).pipe(
+      catchError((error) => {
+        console.error('Duyuru güncellenemedi:', error);
+        console.error('Hata detayı:', error.error);
+        console.error('Request body:', JSON.stringify(request, null, 2));
+        throw error;
+      })
+    );
+  }
+
+  deleteAnnouncement(id: number): Observable<void> {
+    // DELETE /api/Announcements/delete/{id} - NoContent döner
+    return this.http.delete<void>(`${this.apiUrl}/delete/${id}`).pipe(
+      catchError((error) => {
+        console.error('Duyuru silinemedi:', error);
+        console.error('Hata detayı:', error.error);
+        throw error;
+      })
+    );
+  }
+
+  uploadImage(file: File): Observable<string> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.http.post<string>(`${this.apiUrl}/upload-image`, formData).pipe(
+      catchError((error) => {
+        console.error('Görsel yüklenemedi:', error);
+        console.error('Hata detayı:', error.error);
+        throw error;
+      })
+    );
   }
 }
-

@@ -1,5 +1,6 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { isPlatformBrowser } from '@angular/common';
 
 @Component({
   selector: 'app-banner',
@@ -10,7 +11,14 @@ import { RouterLink } from '@angular/router';
   schemas: [CUSTOM_ELEMENTS_SCHEMA], // Spline viewer etiketini tanimasi icin gerekli
 })
 export class BannerComponent implements OnInit {
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
+
   ngOnInit(): void {
+    // SSR sırasında document kullanma, sadece browser'da çalıştır
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
     // Spline Viewer scriptini dinamik olarak yukluyoruz
     // Bu islem React'teki import Spline mantiginin Angular karsiligidir.
     const script = document.createElement('script');

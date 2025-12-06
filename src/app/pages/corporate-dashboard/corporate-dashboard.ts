@@ -1,10 +1,11 @@
-import { Component, OnInit, HostListener, Injectable } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, HostListener, Injectable, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
 import { Router } from '@angular/router';
 import { ImageUploadComponent } from '../../components/ui/image-upload/image-upload';
 import { CommunityService } from '../../services/community.services';
+import { AnnouncementService } from '../../services/announcement.services';
 
 // NOT: ToastService ve ToastComponent'i normalde ayrı dosyalardan import edersiniz.
 // Burada örnek çalışabilsin diye aynı dosyada tuttum veya import edilmiş varsaydım.
@@ -516,81 +517,8 @@ export class CorporateDashboardComponent implements OnInit {
   communities: Community[] = [];
   filteredCommunities: Community[] = [];
 
-  announcements: Announcement[] = [
-    {
-      id: 1,
-      title: 'ÜNİDES 6. Dönem Başvuruları Başladı!',
-      shortDescription:
-        'Gençlik Hizmetleri Genel Müdürlüğü tarafından yürütülen Üniversite Öğrenci Toplulukları İş Birliği ve Destek Programı (ÜNİDES) başvuruları başladı.',
-      content: `Gençlik Hizmetleri Genel Müdürlüğü tarafından yürütülen Üniversite Öğrenci Toplulukları İş Birliği ve Destek Programı (ÜNİDES), gençlerin üniversite toplulukları aracılığıyla gelişimlerini desteklemek, genç ofislerle üniversite öğrenci kulüpleri arasındaki etkileşimi güçlendirmek ve gençlere yönelik faaliyetlerin niteliğini artırmak amacıyla hayata geçiriliyor.
-
-Türkiye genelinde üniversiteler tarafından onaylanan öğrenci kulüplerinin yararlanabildiği program kapsamında, bugüne kadar gerçekleştirilen 5 dönemde toplam 81 ilden 9043 başvuru alınırken, değerlendirmeler sonucunda 4444 proje desteklenerek hibeler topluluklara aktarıldı. Desteklenen kulüplerin toplam üye sayısı ise 1 milyon 155 bini geçerek rekor bir sayıya ulaştı.
-
-6. Dönem başvuruları 2 Aralık 2025 – 11 Şubat 2026 tarihleri arasında alınacak.`,
-      date: '2 Aralık 2025',
-      image: '',
-      link: 'https://gsb.gov.tr/unides',
-    },
-    {
-      id: 2,
-      title: 'KAMP+ Siber Güvenlik Kampı Başvuruları Başladı',
-      shortDescription:
-        'Gençlik Hizmetleri Genel Müdürlüğü tarafından, kurumların çalışma alanlarına ilişkin uzmanlıklarını genç gruplara aktarmalarını amaçlayan KAMP+ konseptiyle yeni bir program.',
-      content: `Gençlik Hizmetleri Genel Müdürlüğü tarafından, kurumların çalışma alanlarına ilişkin uzmanlıklarını genç gruplara aktarmalarını amaçlayan KAMP+ konseptiyle yeni bir program hayata geçirildi.
-
-KAMP+ Siber Güvenlik Kampı, gençlerin dijital dünyada kendilerini korumalarını sağlamak ve siber güvenlik alanında farkındalık oluşturmak amacıyla düzenleniyor.
-
-Kamp süresince katılımcılar:
-- Temel siber güvenlik kavramları
-- Etik hacking temelleri
-- Ağ güvenliği
-- Zararlı yazılım analizi
-- Sosyal mühendislik saldırıları
-
-konularında eğitim alacaklardır.
-
-Son başvuru tarihi: 15 Aralık 2025`,
-      date: '1 Aralık 2025',
-      image: '',
-      link: 'https://gsb.gov.tr/kamp-plus',
-    },
-    {
-      id: 3,
-      title: 'ÜNİDES Kapsayıcılık Ve Sosyal Katılım Kampı Başvuru Sonuçları Açıklandı',
-      shortDescription:
-        'Gençlik Hizmetleri Genel Müdürlüğü tarafından yürütülen ÜNİDES kapsamında, engelli bireylere yönelik faaliyetler için başvuru sonuçları açıklandı.',
-      content: `Gençlik Hizmetleri Genel Müdürlüğü tarafından yürütülen Üniversite Öğrenci Toplulukları İş Birliği ve Destek Programı (ÜNİDES) kapsamında, engelli bireylere yönelik faaliyetleri desteklemek amacıyla düzenlenen Kapsayıcılık ve Sosyal Katılım Kampı başvuru sonuçları açıklandı.
-
-Özel gereksinimli gruplara yönelik çalışan üniversite toplulukları bu kampta buluşuyor.
-
-Kabul edilen topluluklar e-posta yoluyla bilgilendirilecektir.
-
-Kamp tarihi: 15-20 Ocak 2026
-Kamp yeri: Antalya Gençlik Kampı`,
-      date: '27 Kasım 2025',
-      image: '',
-      link: 'https://gsb.gov.tr/kapsayicilik-kampi',
-    },
-    {
-      id: 4,
-      title: 'Yeni Sponsorluk Yönetmeliği Taslağı',
-      shortDescription:
-        'Toplulukların sponsor desteği alması ile ilgili yeni düzenlemeler hazırlanmaktadır.',
-      content: `Üniversite öğrenci topluluklarının sponsor desteği alması konusunda yeni düzenlemeler hazırlanmaktadır.
-
-Taslak yönetmelik şu konuları kapsamaktadır:
-- Sponsor kabul kriterleri
-- Sponsorluk sözleşme şartları
-- Logo kullanım hakları
-- Mali raporlama yükümlülükleri
-- Etik kurallar
-
-Görüş ve önerilerinizi 15 Aralık 2025 tarihine kadar iletebilirsiniz.`,
-      date: '20 Kasım 2025',
-      image: '',
-      link: '',
-    },
-  ];
+  // Duyurular API'den yüklenecek, mock data kaldırıldı
+  announcements: Announcement[] = [];
 
   newAnnouncement: Partial<Announcement> = {
     title: '',
@@ -644,19 +572,33 @@ Görüş ve önerilerinizi 15 Aralık 2025 tarihine kadar iletebilirsiniz.`,
     { text: 'AI Zirvesi bütçe onayı istiyor', time: '1 saat önce' },
   ];
 
-  // Router ve CommunityService inject ediyoruz
+  // Router ve Service'leri inject ediyoruz
   constructor(
     private toastService: ToastService,
     private router: Router,
-    private communityService: CommunityService
+    private communityService: CommunityService,
+    private announcementService: AnnouncementService,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
   ngOnInit() {
+    // SSR sırasında HTTP istekleri yapma, sadece browser'da yap
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
     // CommunityService'ten toplulukları çek (communities-page ile aynı kaynak)
     this.loadCommunitiesFromService();
+    // AnnouncementService'ten duyuruları çek (announcements-page ile aynı kaynak)
+    this.loadAnnouncementsFromService();
   }
 
   loadCommunitiesFromService() {
+    // Sadece browser'da çalıştığından emin ol
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
     this.communityService.getAllCommunities().subscribe({
       next: (data) => {
         // CommunityService'ten gelen veriyi Corporate Dashboard formatına dönüştür
@@ -670,7 +612,7 @@ Görüş ve önerilerinizi 15 Aralık 2025 tarihine kadar iletebilirsiniz.`,
           // Eğer status yoksa varsayılan olarak 'Aktif' yap
           status: c.status || 'Aktif',
         })) as Community[];
-        
+
         this.communities = [...this.allCommunities];
         this.filteredCommunities = [...this.communities];
         this.initPagination();
@@ -767,7 +709,7 @@ Görüş ve önerilerinizi 15 Aralık 2025 tarihine kadar iletebilirsiniz.`,
         description: this.editingCommunity.about || '',
         coverImage: this.editingCommunity.banner || '',
       };
-      
+
       this.communityService.addOrUpdateCommunity(communityForService).subscribe({
         next: () => {
           // Service'ten güncel veriyi tekrar yükle
@@ -821,7 +763,7 @@ Görüş ve önerilerinizi 15 Aralık 2025 tarihine kadar iletebilirsiniz.`,
   deleteCommunity() {
     if (this.editingCommunity) {
       const communityId = this.editingCommunity.id;
-      
+
       // CommunityService'ten sil (communities-page'den de kaldırılır)
       this.communityService.deleteCommunity(communityId).subscribe({
         next: () => {
@@ -945,56 +887,190 @@ Görüş ve önerilerinizi 15 Aralık 2025 tarihine kadar iletebilirsiniz.`,
   }
 
   saveAnnouncement() {
-    if (!this.newAnnouncement.title) return;
+    // Validasyon
+    if (!this.newAnnouncement.title || !this.newAnnouncement.title.trim()) {
+      this.showToast('Lütfen duyuru başlığını giriniz', 'error');
+      return;
+    }
 
-    const today = new Date();
-    const dateStr = today.toLocaleDateString('tr-TR', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
+    // API'ye istek at
+    // Swagger'a göre annDate ISO 8601 formatında olmalı: 2025-12-06T16:49:01.554Z
+    this.announcementService
+      .createAnnouncement({
+        title: this.newAnnouncement.title.trim(),
+        shortDescription: this.newAnnouncement.shortDescription?.trim(),
+        content: this.newAnnouncement.content?.trim(),
+        image: this.newAnnouncement.image?.trim(),
+        link: this.newAnnouncement.link?.trim(),
+        date: new Date().toISOString(), // ISO 8601 formatında tam tarih-saat
+      })
+      .subscribe({
+        next: (announcementId) => {
+          // Başarılı - Duyuruları yeniden yükle (announcements-page'e otomatik eklenir)
+          this.loadAnnouncementsFromService();
+          this.showToast('Duyuru başarıyla yayınlandı', 'success');
+
+          // Formu temizle
+          this.newAnnouncement = {
+            title: '',
+            shortDescription: '',
+            content: '',
+            image: '',
+            link: '',
+          };
+          this.closeModal();
+        },
+        error: (error) => {
+          console.error('Duyuru oluşturulurken hata:', error);
+          console.error('Hata response:', error.error);
+
+          // Daha detaylı hata mesajı
+          let errorMessage = 'Duyuru oluşturulurken bir hata oluştu';
+          if (error.error?.message) {
+            errorMessage = error.error.message;
+          } else if (error.error && typeof error.error === 'string') {
+            errorMessage = error.error;
+          } else if (error.status === 400) {
+            errorMessage = 'Geçersiz veri gönderildi. Lütfen tüm alanları kontrol ediniz.';
+          } else if (error.status === 401 || error.status === 403) {
+            errorMessage = 'Bu işlem için yetkiniz bulunmamaktadır.';
+          } else if (error.status === 0) {
+            errorMessage = 'Sunucuya bağlanılamadı. Lütfen internet bağlantınızı kontrol ediniz.';
+          }
+
+          this.showToast(errorMessage, 'error');
+        },
+      });
+  }
+
+  // Duyuruları API'den yükle
+  loadAnnouncementsFromService() {
+    // Sadece browser'da çalıştığından emin ol
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    this.announcementService.getAllAnnouncements().subscribe({
+      next: (data) => {
+        this.announcements = data;
+      },
+      error: (err) => {
+        console.error('Duyurular yüklenemedi:', err);
+        // Hata durumunda boş liste kullan
+        this.announcements = [];
+      },
     });
-
-    this.announcements.unshift({
-      id: Date.now(),
-      title: this.newAnnouncement.title || '',
-      shortDescription: this.newAnnouncement.shortDescription || '',
-      content: this.newAnnouncement.content || '',
-      date: dateStr,
-      image: this.newAnnouncement.image || '',
-      link: this.newAnnouncement.link || '',
-    });
-
-    this.newAnnouncement = {
-      title: '',
-      shortDescription: '',
-      content: '',
-      image: '',
-      link: '',
-    };
-    this.closeModal();
-    this.showToast('Duyuru yayınlandı', 'success');
   }
 
   updateAnnouncement() {
-    if (this.editingAnnouncement) {
-      const index = this.announcements.findIndex((a) => a.id === this.editingAnnouncement!.id);
-      if (index !== -1) {
-        this.announcements[index] = { ...this.editingAnnouncement };
-        this.showToast('Duyuru başarıyla güncellendi', 'success');
-        this.closeModal();
+    if (!this.editingAnnouncement) {
+      return;
+    }
+
+    // Validasyon
+    if (!this.editingAnnouncement.title || !this.editingAnnouncement.title.trim()) {
+      this.showToast('Lütfen duyuru başlığını giriniz', 'error');
+      return;
+    }
+
+    const announcementId = this.editingAnnouncement.id;
+
+    // API'ye istek at
+    // Tarih formatını kontrol et - eğer ISO formatında değilse dönüştür
+    let dateValue: string | undefined = undefined;
+    if (this.editingAnnouncement.date) {
+      // Eğer zaten ISO formatındaysa olduğu gibi kullan, değilse dönüştür
+      try {
+        const dateObj = new Date(this.editingAnnouncement.date);
+        if (!isNaN(dateObj.getTime())) {
+          dateValue = dateObj.toISOString();
+        }
+      } catch (e) {
+        // Tarih parse edilemezse undefined gönder
+        dateValue = undefined;
       }
     }
+
+    this.announcementService
+      .updateAnnouncement(announcementId, {
+        title: this.editingAnnouncement.title,
+        shortDescription: this.editingAnnouncement.shortDescription,
+        content: this.editingAnnouncement.content,
+        image: this.editingAnnouncement.image,
+        link: this.editingAnnouncement.link,
+        date: dateValue, // ISO formatında veya undefined
+      })
+      .subscribe({
+        next: () => {
+          // Başarılı - Duyuruları yeniden yükle (announcements-page'e otomatik güncellenir)
+          this.loadAnnouncementsFromService();
+          this.showToast('Duyuru başarıyla güncellendi', 'success');
+          this.closeModal();
+        },
+        error: (error) => {
+          console.error('Duyuru güncellenirken hata:', error);
+
+          // Daha detaylı hata mesajı
+          let errorMessage = 'Duyuru güncellenirken bir hata oluştu';
+          if (error.error?.message) {
+            errorMessage = error.error.message;
+          } else if (error.error && typeof error.error === 'string') {
+            errorMessage = error.error;
+          } else if (error.status === 400) {
+            errorMessage = 'Geçersiz veri gönderildi. Lütfen tüm alanları kontrol ediniz.';
+          } else if (error.status === 401 || error.status === 403) {
+            errorMessage = 'Bu işlem için yetkiniz bulunmamaktadır.';
+          } else if (error.status === 404) {
+            errorMessage = 'Duyuru bulunamadı.';
+          } else if (error.status === 0) {
+            errorMessage = 'Sunucuya bağlanılamadı. Lütfen internet bağlantınızı kontrol ediniz.';
+          }
+
+          this.showToast(errorMessage, 'error');
+        },
+      });
   }
 
   deleteAnnouncement() {
-    if (this.editingAnnouncement) {
-      const index = this.announcements.findIndex((a) => a.id === this.editingAnnouncement!.id);
-      if (index !== -1) {
-        this.announcements.splice(index, 1);
+    if (!this.editingAnnouncement) {
+      return;
+    }
+
+    // Onay iste
+    if (!confirm('Bu duyuruyu silmek istediğinize emin misiniz? Bu işlem geri alınamaz.')) {
+      return;
+    }
+
+    const announcementId = this.editingAnnouncement.id;
+
+    // API'ye istek at
+    this.announcementService.deleteAnnouncement(announcementId).subscribe({
+      next: () => {
+        // Başarılı - Duyuruları yeniden yükle (announcements-page'den de kaldırılır)
+        this.loadAnnouncementsFromService();
         this.showToast('Duyuru başarıyla silindi', 'success');
         this.closeModal();
-      }
-    }
+      },
+      error: (error) => {
+        console.error('Duyuru silinirken hata:', error);
+
+        // Daha detaylı hata mesajı
+        let errorMessage = 'Duyuru silinirken bir hata oluştu';
+        if (error.error?.message) {
+          errorMessage = error.error.message;
+        } else if (error.error && typeof error.error === 'string') {
+          errorMessage = error.error;
+        } else if (error.status === 401 || error.status === 403) {
+          errorMessage = 'Bu işlem için yetkiniz bulunmamaktadır.';
+        } else if (error.status === 404) {
+          errorMessage = 'Duyuru bulunamadı.';
+        } else if (error.status === 0) {
+          errorMessage = 'Sunucuya bağlanılamadı. Lütfen internet bağlantınızı kontrol ediniz.';
+        }
+
+        this.showToast(errorMessage, 'error');
+      },
+    });
   }
 
   onAnnouncementImageSelected(imageUrl: string) {
@@ -1005,6 +1081,36 @@ Görüş ve önerilerinizi 15 Aralık 2025 tarihine kadar iletebilirsiniz.`,
 
   onNewAnnouncementImageSelected(imageUrl: string) {
     this.newAnnouncement.image = imageUrl;
+  }
+
+  // Dosya yükleme handler'ları (backend'e upload için)
+  onNewAnnouncementFileSelected(file: File) {
+    this.uploadAnnouncementImage(file, (imagePath: string) => {
+      this.newAnnouncement.image = imagePath;
+    });
+  }
+
+  onAnnouncementFileSelected(file: File) {
+    this.uploadAnnouncementImage(file, (imagePath: string) => {
+      if (this.editingAnnouncement) {
+        this.editingAnnouncement.image = imagePath;
+      }
+    });
+  }
+
+  private uploadAnnouncementImage(file: File, callback: (imagePath: string) => void) {
+    this.announcementService.uploadImage(file).subscribe({
+      next: (imagePath) => {
+        callback(imagePath);
+        this.showToast('Görsel başarıyla yüklendi', 'success');
+      },
+      error: (err) => {
+        console.error('Görsel yüklenirken hata:', err);
+        const errorMessage =
+          err.error?.message || err.message || 'Görsel yüklenirken bir hata oluştu';
+        this.showToast(errorMessage, 'error');
+      },
+    });
   }
 
   showToast(msg: string, type: 'success' | 'error') {
