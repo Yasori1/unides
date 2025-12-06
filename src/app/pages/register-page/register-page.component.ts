@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { AuthService, RegisterRequest } from '../../services/auth.services';
+import { FormsModule } from '@angular/forms';
 
 // Servis ve UI Bileşenleri
 import { ToastService } from '../../services/toast.services';
@@ -11,7 +11,7 @@ import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.compo
 @Component({
   selector: 'app-register-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, ToastComponent, LumaSpinComponent],
+  imports: [CommonModule, RouterModule, ToastComponent, LumaSpinComponent, FormsModule],
   templateUrl: './register-page.component.html',
   styleUrls: ['./register-page.component.scss'],
 })
@@ -27,11 +27,7 @@ export class RegisterPageComponent {
   private password: string = '';
   private confirmPassword: string = '';
 
-  constructor(
-    private authService: AuthService,
-    private router: Router,
-    private toastService: ToastService
-  ) {}
+  constructor(private router: Router, private toastService: ToastService) {}
 
   updateName(event: any) {
     this.name = event.target.value;
@@ -60,7 +56,7 @@ export class RegisterPageComponent {
     this.passwordMismatch = !!this.confirmPassword && this.password !== this.confirmPassword;
   }
 
-  onSubmit(event: Event) {
+  async onSubmit(event: Event) {
     event.preventDefault();
 
     // Validasyon Kontrolleri
@@ -82,15 +78,37 @@ export class RegisterPageComponent {
     // Yükleniyor durumunu başlat (Spinner görünür)
     this.isLoading = true;
 
-    const requestData: RegisterRequest = {
-      name: this.name,
-      email: this.email,
-      password: this.password,
-    };
+    try {
+      const response = await fetch('/api/Auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          name: this.name,
+          email: this.email,
+          password: this.password,
+        }),
+      });
 
-    this.authService.registerStudent(requestData).subscribe({
-      next: (response) => {
-        console.log('Kayıt Başarılı:', response);
+      // Response'un JSON olup olmadığını kontrol et
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        console.error('Backend HTML döndü (Register):', text.substring(0, 200));
+        this.isLoading = false;
+        this.toastService.show(
+          "Backend'den beklenmeyen yanıt alındı. Lütfen backend servisinin çalıştığından emin olun.",
+          'error'
+        );
+        return;
+      }
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log('Kayıt Başarılı:', data);
 
         // BAŞARILI DURUM:
         // 1. Kullanıcıya bilgi ver
@@ -101,24 +119,20 @@ export class RegisterPageComponent {
 
         // 2. Yönlendirme yap (Kullanıcı mesajı okuyabilsin diye kısa bir gecikme ekledik)
         setTimeout(() => {
-          // isLoading false yapmaya gerek yok çünkü sayfa değişecek
           this.router.navigate(['/login']);
         }, 2000);
-      },
-      error: (error) => {
-        console.error('Kayıt Hatası:', error);
-
+      } else {
         // BAŞARISIZ DURUM:
-        // 1. Spinner'ı kapat, butonu geri getir
         this.isLoading = false;
-
-        // 2. Hatayı göster
-        const errorMessage = error.error?.message || 'Kayıt sırasında bir hata oluştu.';
+        const errorMessage = data?.message || 'Kayıt sırasında bir hata oluştu.';
         this.toastService.show(errorMessage, 'error');
-
-        // 3. Yönlendirme YAPMA (Kullanıcı sayfada kalır ve tekrar deneyebilir)
-      },
-    });
+      }
+    } catch (error: any) {
+      console.error('Kayıt Hatası:', error);
+      this.isLoading = false;
+      const message = error?.message || 'Kayıt sırasında bir hata oluştu.';
+      this.toastService.show(message, 'error');
+    }
   }
 
   openTermsModal() {

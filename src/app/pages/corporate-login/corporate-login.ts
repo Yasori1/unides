@@ -37,13 +37,16 @@ export class CorporateLoginComponent implements OnInit, OnDestroy {
     // Geri butonuna basıldığında anasayfaya yönlendir
     this.popStateListener = (event: PopStateEvent) => {
       // State kontrolü yap - eğer bizim eklediğimiz state ise veya corporate-login sayfasındaysak
-      if ((event.state && event.state.fromCorporateLogin) || this.router.url === '/corporate-login') {
+      if (
+        (event.state && event.state.fromCorporateLogin) ||
+        this.router.url === '/corporate-login'
+      ) {
         // window.location kullanarak direkt anasayfaya yönlendir (Angular Router'ı bypass eder)
         window.location.href = '/';
       }
     };
     window.addEventListener('popstate', this.popStateListener);
-    
+
     // History'ye bir entry ekle ki geri butonuna basıldığında popstate tetiklensin
     history.pushState({ fromCorporateLogin: true }, '', location.href);
   }
@@ -185,10 +188,7 @@ export class CorporateLoginComponent implements OnInit, OnDestroy {
 
       if (response.ok) {
         this.emailSent = true;
-        this.toastService.show(
-          'Şifre sıfırlama linki e-posta adresinize gönderildi.',
-          'success'
-        );
+        this.toastService.show('Şifre sıfırlama linki e-posta adresinize gönderildi.', 'success');
         setTimeout(() => {
           this.closeForgotPasswordModal();
         }, 3000);
@@ -196,7 +196,7 @@ export class CorporateLoginComponent implements OnInit, OnDestroy {
         // Mail bulunamadı kontrolü
         const errorMessage = data.message || '';
         const lowerMessage = errorMessage.toLowerCase();
-        
+
         if (
           response.status === 404 ||
           lowerMessage.includes('not found') ||

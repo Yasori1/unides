@@ -1,40 +1,41 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit, HostListener, OnDestroy } from '@angular/core';
-import { CommonModule, Location } from '@angular/common';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-import { FormsModule } from '@angular/forms';
 // Servisler
 import { ToastService } from '../../services/toast.services';
-import { AuthService, LoginResponse } from '../../services/auth.services';
 // Bileşenler
 import { ToastComponent } from '../../components/ui/toast/toast.component';
-import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component'; // YENİ: Luma Spin Eklendi
-// Http Client
-import { HttpClientModule, HttpErrorResponse } from '@angular/common/http';
+import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
+
+// Backend Response Interface
+interface AuthResponse {
+  id: number;
+  fullName: string;
+  email: string;
+  roleName: string;
+  accessToken: string;
+  refreshToken: string;
+}
 
 @Component({
   selector: 'app-login-page',
   standalone: true,
-  // LumaSpinComponent buraya eklendi
-  imports: [CommonModule, RouterLink, ToastComponent, HttpClientModule, LumaSpinComponent, FormsModule],
+  imports: [CommonModule, RouterLink, ToastComponent, LumaSpinComponent],
   templateUrl: './login-page.component.html',
   styleUrls: ['./login-page.component.scss'],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class LoginPageComponent implements OnInit, OnDestroy {
+export class LoginPageComponent implements OnInit {
   emailError: boolean = false;
+  email: string = '';
+  password: string = '';
+  roleId: number = 1; // öğrenci
   isLoading: boolean = false;
-  showForgotPasswordModal: boolean = false;
-  forgotPasswordEmail: string = '';
-  forgotEmailError: boolean = false;
-  isSendingEmail: boolean = false;
-  emailSent: boolean = false;
-  private popStateListener?: (event: PopStateEvent) => void;
+  loginError: string = '';
 
   constructor(
     private toastService: ToastService,
-    private authService: AuthService,
-    private router: Router,
-    private location: Location
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -48,35 +49,21 @@ export class LoginPageComponent implements OnInit, OnDestroy {
       script.src = 'https://unpkg.com/@splinetool/viewer@1.9.59/build/spline-viewer.js';
       document.head.appendChild(script);
     }
-
-    // Geri butonuna basıldığında anasayfaya yönlendir
-    this.popStateListener = (event: PopStateEvent) => {
-      // State kontrolü yap - eğer bizim eklediğimiz state ise veya login sayfasındaysak
-      if ((event.state && event.state.fromLogin) || this.router.url === '/login') {
-        // window.location kullanarak direkt anasayfaya yönlendir (Angular Router'ı bypass eder)
-        window.location.href = '/';
-      }
-    };
-    window.addEventListener('popstate', this.popStateListener);
-
-    // History'ye bir entry ekle ki geri butonuna basıldığında popstate tetiklensin
-    history.pushState({ fromLogin: true }, '', location.href);
-  }
-
-  ngOnDestroy(): void {
-    if (this.popStateListener) {
-      window.removeEventListener('popstate', this.popStateListener);
-    }
   }
 
   validateStudentEmail(event: any) {
     const email = event.target.value;
+    this.email = email;
 
+    // Eğer input boşsa hatayı temizle
     if (!email) {
       this.emailError = false;
       return;
     }
 
+    // E-posta format kontrolü:
+    // 1. İçinde @ işareti olmalı
+    // 2. Sonu .edu.tr ile bitmeli
     if (email.includes('@') && !email.endsWith('.edu.tr')) {
       this.emailError = true;
     } else {
@@ -89,170 +76,78 @@ export class LoginPageComponent implements OnInit, OnDestroy {
 
     if (this.isLoading) return;
 
+    // Form'dan değerleri al
     const form = event.target as HTMLFormElement;
     const emailInput = form.querySelector('input[type="email"]') as HTMLInputElement;
     const passwordInput = form.querySelector('input[type="password"]') as HTMLInputElement;
 
-    const email = emailInput.value.trim();
-    const password = passwordInput.value.trim();
+    this.email = emailInput?.value.trim() || this.email;
+    this.password = passwordInput?.value.trim() || this.password;
 
     // 1. Validasyonlar
-    if (!email || !password) {
-      this.toastService.show('Lütfen e-posta ve şifre alanlarını doldurunuz.', 'error');
-      return;
-    }
-
     if (this.emailError) {
       this.toastService.show('Lütfen geçerli bir öğrenci e-postası (.edu.tr) giriniz.', 'error');
       return;
     }
 
+    if (!this.email || !this.password) {
+      this.toastService.show('E-posta ve şifre zorunludur.', 'error');
+      return;
+    }
+
     // 2. BACKEND SORGUSU BAŞLIYOR
     this.isLoading = true;
+    this.loginError = '';
 
-    this.authService.loginStudent(email, password).subscribe({
-      next: (response: LoginResponse) => {
+    fetch('/api/Auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        Email: this.email,
+        Password: this.password,
+        RoleId: this.roleId
+      })
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          const message = err?.message || `HTTP ${res.status}`;
+          throw new Error(message);
+        }
+        return res.json();
+      })
+      .then((data: AuthResponse) => {
         // --- BAŞARILI GİRİŞ ---
-        this.isLoading = false;
+        // Token'ı localStorage'a kaydet
+        if (data.accessToken) {
+          localStorage.setItem('auth_token', data.accessToken);
+        }
+        if (data.refreshToken) {
+          localStorage.setItem('refresh_token', data.refreshToken);
+        }
+        // Kullanıcı bilgilerini kaydet
+        localStorage.setItem('user_info', JSON.stringify({
+          id: data.id,
+          name: data.fullName,
+          email: data.email,
+          role: data.roleName
+        }));
+        localStorage.setItem('user_type', 'student');
+
         this.toastService.show('Giriş başarılı! Anasayfaya yönlendiriliyorsunuz...', 'success');
 
         setTimeout(() => {
-          this.router.navigate(['/']);
+          this.router.navigateByUrl('/');
         }, 1500);
-      },
-      error: (error: HttpErrorResponse) => {
+      })
+      .catch((e: any) => {
         // --- HATALI GİRİŞ ---
+        this.loginError = e?.message || 'Giriş başarısız';
+        console.error('Giriş Hatası:', e);
+        this.toastService.show(this.loginError, 'error');
+      })
+      .finally(() => {
         this.isLoading = false;
-        console.error('Giriş Hatası:', error);
-
-        const message = error.error?.message || error.message || 'E-posta veya şifre hatalı!';
-        this.toastService.show(message, 'error');
-      },
-    });
-  }
-
-  openForgotPasswordModal() {
-    this.showForgotPasswordModal = true;
-    this.forgotPasswordEmail = '';
-    this.forgotEmailError = false;
-    this.emailSent = false;
-  }
-
-  closeForgotPasswordModal() {
-    this.showForgotPasswordModal = false;
-    this.forgotPasswordEmail = '';
-    this.forgotEmailError = false;
-    this.emailSent = false;
-  }
-
-  validateForgotEmail(event: any) {
-    const email = event.target.value.trim();
-
-    if (!email) {
-      this.forgotEmailError = false;
-      return;
-    }
-
-    // E-posta formatı kontrolü: @ işareti olmalı ve .edu.tr ile bitmeli
-    const emailParts = email.split('@');
-    if (emailParts.length !== 2 || !emailParts[0] || !emailParts[1]) {
-      // @ işareti yoksa veya @ işaretinden önce/sonra boşsa
-      this.forgotEmailError = true;
-      return;
-    }
-
-    // .edu.tr ile bitmeli
-    if (!email.endsWith('.edu.tr')) {
-      this.forgotEmailError = true;
-    } else {
-      this.forgotEmailError = false;
-    }
-  }
-
-  async sendPasswordResetEmail() {
-    const email = this.forgotPasswordEmail.trim();
-    
-    if (!email) {
-      this.toastService.show('Lütfen e-posta adresinizi giriniz.', 'error');
-      return;
-    }
-
-    // E-posta formatı kontrolü
-    const emailParts = email.split('@');
-    if (emailParts.length !== 2 || !emailParts[0] || !emailParts[1] || !email.endsWith('.edu.tr')) {
-      this.toastService.show('Lütfen geçerli bir öğrenci e-postası (.edu.tr) giriniz.', 'error');
-      this.forgotEmailError = true;
-      return;
-    }
-
-    if (this.forgotEmailError) {
-      this.toastService.show('Lütfen geçerli bir öğrenci e-postası (.edu.tr) giriniz.', 'error');
-      return;
-    }
-
-    this.isSendingEmail = true;
-    this.emailSent = false;
-
-    try {
-      const response = await fetch('/api/Auth/forgot-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: this.forgotPasswordEmail.trim(),
-        }),
       });
-
-      // Response'un JSON olup olmadığını kontrol et
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        this.toastService.show('Sunucuya Bağlanılamadı', 'error');
-        return;
-      }
-
-      const data = await response.json();
-
-      if (response.ok) {
-        this.emailSent = true;
-        this.toastService.show(
-          'Şifre sıfırlama linki e-posta adresinize gönderildi.',
-          'success'
-        );
-        // 3 saniye sonra modal'ı kapat
-        setTimeout(() => {
-          this.closeForgotPasswordModal();
-        }, 3000);
-      } else {
-        // Mail bulunamadı kontrolü
-        const errorMessage = data.message || '';
-        const lowerMessage = errorMessage.toLowerCase();
-        
-        if (
-          response.status === 404 ||
-          lowerMessage.includes('not found') ||
-          lowerMessage.includes('bulunamadı') ||
-          lowerMessage.includes('kullanıcı bulunamadı') ||
-          lowerMessage.includes('email not found') ||
-          lowerMessage.includes('e-posta bulunamadı')
-        ) {
-          this.toastService.show('Mail bulunamadı', 'error');
-        } else if (errorMessage) {
-          this.toastService.show(errorMessage, 'error');
-        } else {
-          this.toastService.show('Bir hata oluştu. Lütfen tekrar deneyiniz.', 'error');
-        }
-      }
-    } catch (error: any) {
-      console.error('Şifre sıfırlama hatası:', error);
-      // Network hatası veya fetch hatası
-      if (error.message && error.message.includes('fetch')) {
-        this.toastService.show('Sunucuya Bağlanılamadı', 'error');
-      } else {
-        this.toastService.show('Sunucuya Bağlanılamadı', 'error');
-      }
-    } finally {
-      this.isSendingEmail = false;
-    }
   }
 }

@@ -403,69 +403,92 @@
         </div>
       </div>
 
-      <div class="card">
-        <table class="data-table full">
-          <thead>
-            <tr>
-              <th>Etkinlik Adı</th>
-              <th>Topluluk</th>
-              <th>Tarih / Yer</th>
-              <th>Bütçe</th>
-              <th>Durum</th>
-              <th>İşlemler</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let e of allEvents">
-              <td>
-                <div class="project-name-cell">{{ e.eventName }}</div>
-              </td>
-              <td>{{ e.communityName }}</td>
-              <td>
-                <div class="date-loc">
-                  <span>{{ e.date }}</span>
-                  <small>{{ e.location }}</small>
+      <!-- Events kart tasarımı (Topluluklar gibi) -->
+      <div class="grid-container" *ngIf="allEvents.length > 0">
+        <div *ngFor="let e of allEvents" class="event-card">
+          <div class="cover-area">
+            <div class="event-placeholder">
+              <span class="material-symbols-outlined">event_available</span>
+            </div>
+            <span class="category-badge">ETKİNLİK</span>
+            <span
+              class="status-badge"
+              [ngClass]="{
+                active: e.status === 'Onaylandı',
+                warning: e.status === 'Beklemede',
+                passive: e.status === 'Reddedildi'
+              }"
+            >
+              {{ e.status }}
+            </span>
+          </div>
+
+          <div class="card-content">
+            <div class="header-row">
+              <div class="logo-wrapper">
+                <div class="event-icon">
+                  <span class="material-symbols-outlined">celebration</span>
                 </div>
-              </td>
-              <td>{{ e.budget | number }} ₺</td>
-              <td>
-                <span
-                  class="status-badge"
-                  [ngClass]="{
-                    success: e.status === 'Onaylandı',
-                    warning: e.status === 'Beklemede',
-                    danger: e.status === 'Reddedildi'
-                  }"
+              </div>
+              <div class="title-wrapper">
+                <h3 class="event-name">{{ e.eventName }}</h3>
+                <span class="community-name">{{ e.communityName }}</span>
+              </div>
+            </div>
+
+            <div class="event-details">
+              <div class="detail-item">
+                <i class="bx bx-calendar"></i>
+                <span>{{ e.date }}</span>
+              </div>
+              <div class="detail-item">
+                <i class="bx bx-map"></i>
+                <span>{{ e.location }}</span>
+              </div>
+              <div class="detail-item">
+                <i class="bx bx-money"></i>
+                <span>{{ e.budget | number }} ₺</span>
+              </div>
+            </div>
+
+            <div class="card-footer">
+              <div class="event-actions">
+                <button
+                  class="btn-success"
+                  *ngIf="e.status === 'Beklemede'"
+                  (click)="approveEvent(e.id); $event.stopPropagation()"
+                  title="Onayla"
                 >
-                  {{ e.status }}
-                </span>
-              </td>
-              <td>
-                <div class="actions">
-                  <button
-                    class="icon-btn-sm success"
-                    *ngIf="e.status === 'Beklemede'"
-                    (click)="approveEvent(e.id)"
-                    title="Onayla"
-                  >
-                    <span class="material-symbols-outlined">check</span>
-                  </button>
-                  <button
-                    class="icon-btn-sm delete"
-                    *ngIf="e.status === 'Beklemede'"
-                    (click)="rejectEvent(e.id)"
-                    title="Reddet"
-                  >
-                    <span class="material-symbols-outlined">close</span>
-                  </button>
-                  <button class="icon-btn-sm" title="Detay">
-                    <span class="material-symbols-outlined">visibility</span>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                  <span class="material-symbols-outlined">check</span>
+                  Onayla
+                </button>
+                <button
+                  class="btn-danger"
+                  *ngIf="e.status === 'Beklemede'"
+                  (click)="rejectEvent(e.id); $event.stopPropagation()"
+                  title="Reddet"
+                >
+                  <span class="material-symbols-outlined">close</span>
+                  Reddet
+                </button>
+                <button
+                  class="detail-btn"
+                  (click)="$event.stopPropagation()"
+                  title="Detay"
+                >
+                  Detaylar
+                  <i class="bx bx-right-arrow-alt"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Etkinlik yoksa -->
+      <div class="empty-state" *ngIf="allEvents.length === 0">
+        <span class="material-symbols-outlined">event_busy</span>
+        <p>Henüz etkinlik bulunmuyor.</p>
       </div>
     </div>
 
@@ -535,17 +558,6 @@
               <input
                 type="email"
                 [value]="corporateInfo.email"
-                class="modern-input disabled-input"
-                readonly
-                disabled
-                title="Bu alan değiştirilemez"
-              />
-            </div>
-            <div class="form-group">
-              <label>Kullanıcı Adı</label>
-              <input
-                type="text"
-                [value]="corporateInfo.username"
                 class="modern-input disabled-input"
                 readonly
                 disabled

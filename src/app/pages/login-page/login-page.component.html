@@ -67,7 +67,7 @@
               <input type="checkbox" />
               <span>Beni Hatırla</span>
             </label>
-            <a href="javascript:void(0)" class="forgot-link" (click)="openForgotPasswordModal()">Şifremi Unuttum?</a>
+            <a href="javascript:void(0)" class="forgot-link">Şifremi Unuttum?</a>
           </div>
 
           <!-- Giriş Yap Butonu (Animasyonlu) -->
@@ -124,55 +124,3 @@
 
 <!-- TOAST BİLEŞENİ -->
 <app-toast></app-toast>
-
-<!-- ŞİFREMİ UNUTTUM MODAL -->
-<div class="modal-backdrop" *ngIf="showForgotPasswordModal" (click)="closeForgotPasswordModal()">
-  <div class="modal-content-forgot" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h3>Şifremi Unuttum</h3>
-      <button class="close-btn" (click)="closeForgotPasswordModal()">
-        <i class="bx bx-x"></i>
-      </button>
-    </div>
-    <div class="modal-body-forgot">
-      <p class="modal-description">
-        Kayıtlı öğrenci e-posta adresinizi girin. Size şifre sıfırlama linki göndereceğiz.
-      </p>
-      <div class="input-group">
-        <div class="icon-wrapper" [class.error-icon]="forgotEmailError">
-          <i class="bx bx-envelope"></i>
-        </div>
-        <input
-          type="email"
-          [(ngModel)]="forgotPasswordEmail"
-          (input)="validateForgotEmail($event)"
-          placeholder="E-Posta Adresiniz (xxx@univ.edu.tr)"
-          class="modern-input"
-          [class.input-error]="forgotEmailError"
-        />
-      </div>
-      <div *ngIf="forgotEmailError" class="error-message">
-        <i class="bx bx-error-circle"></i> Sadece <b>.edu.tr</b> uzantılı öğrenci mailleri kabul edilmektedir.
-      </div>
-      <button
-        class="btn-primary"
-        (click)="sendPasswordResetEmail()"
-        [disabled]="isSendingEmail || forgotEmailError || !forgotPasswordEmail"
-        [style.opacity]="isSendingEmail || forgotEmailError || !forgotPasswordEmail ? '0.7' : '1'"
-      >
-        <ng-container *ngIf="!isSendingEmail">
-          Şifre Sıfırlama Linki Gönder <i class="bx bx-right-arrow-alt"></i>
-        </ng-container>
-        <ng-container *ngIf="isSendingEmail">
-          <app-luma-spin></app-luma-spin>
-        </ng-container>
-      </button>
-      <div *ngIf="emailSent" class="success-message">
-        <i class="bx bx-check-circle"></i>
-        <p>
-          Şifre sıfırlama linki e-posta adresinize gönderildi. Lütfen e-postanızı kontrol edin.
-        </p>
-      </div>
-    </div>
-  </div>
-</div>
