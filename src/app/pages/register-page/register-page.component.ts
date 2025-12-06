@@ -19,6 +19,8 @@ export class RegisterPageComponent {
   emailError: boolean = false;
   passwordMismatch: boolean = false;
   isLoading: boolean = false;
+  showTermsModal: boolean = false;
+  showKvkkModal: boolean = false;
 
   private name: string = '';
   private email: string = '';
@@ -117,5 +119,29 @@ export class RegisterPageComponent {
         // 3. Yönlendirme YAPMA (Kullanıcı sayfada kalır ve tekrar deneyebilir)
       },
     });
+  }
+
+  openTermsModal() {
+    this.showTermsModal = true;
+    // Modal açıldığında body scroll'unu engelle
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeTermsModal() {
+    this.showTermsModal = false;
+    // Modal kapandığında body scroll'unu tekrar etkinleştir
+    document.body.style.overflow = '';
+  }
+
+  openKvkkModal() {
+    this.showKvkkModal = true;
+    // Modal açıldığında body scroll'unu engelle
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeKvkkModal() {
+    this.showKvkkModal = false;
+    // Modal kapandığında body scroll'unu tekrar etkinleştir
+    document.body.style.overflow = '';
   }
 }

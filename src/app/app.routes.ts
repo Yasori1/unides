@@ -57,6 +57,7 @@ import { AnnouncementDetailComponent } from './pages/announcement-detail/announc
 import { StudentLoginComponent } from './pages/student-login/student-login.component';
 import { StudentProfileComponent } from './pages/student-profile/student-profile.component';
 import { CommunityDetailComponent } from './pages/community-detail/community-detail.component';
+import { ResetPasswordComponent } from './pages/reset-password/reset-password.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -84,6 +85,9 @@ export const routes: Routes = [
   { path: 'register', component: RegisterPageComponent },
   { path: 'corporate-register', component: CorporateRegisterComponent },
   { path: 'community-register', component: CommunityRegisterComponent },
+
+  // ŞİFRE SIFIRLAMA
+  { path: 'reset-password', component: ResetPasswordComponent },
 
   // KURUMSAL DASHBOARD (ÖNEMLİ: Yönlendirme yapılacak rota)
   { path: 'corporate-dashboard', component: CorporateDashboardComponent },

@@ -70,6 +70,7 @@
       <div class="menu-dropdown simple" *ngIf="activeItem === 'Bilgi'" [@dropdownAnim]>
         <div class="dropdown-card">
           <div class="simple-list">
+            <a routerLink="/developers" class="hover-link">Geliştiriciler</a>
             <a routerLink="/about" class="hover-link">Hakkımızda</a>
             <a routerLink="/faq" class="hover-link">Sıkça Sorulan Sorular</a>
           </div>
@@ -140,6 +141,7 @@
         </button>
         <div class="accordion-collapse" [class.open]="isSectionOpen(2)">
           <ul class="mobile-sub-menu">
+            <li><a routerLink="/developers">Geliştiriciler</a></li>
             <li><a routerLink="/about">Hakkımızda</a></li>
             <li><a routerLink="/faq">S.S.S.</a></li>
           </ul>

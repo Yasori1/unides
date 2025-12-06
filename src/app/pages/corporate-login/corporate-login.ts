@@ -1,6 +1,7 @@
 import { Component, HostListener, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 // Servis importları
 import { ToastService } from '../../services/toast.services';
 import { AuthService } from '../../services/auth.services';
@@ -11,13 +12,18 @@ import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.compo
 @Component({
   selector: 'app-corporate-login',
   standalone: true,
-  imports: [CommonModule, RouterModule, ToastComponent, LumaSpinComponent],
+  imports: [CommonModule, RouterModule, ToastComponent, LumaSpinComponent, FormsModule],
   templateUrl: './corporate-login.html',
   styleUrls: ['./corporate-login.scss'],
 })
 export class CorporateLoginComponent implements OnInit, OnDestroy {
   emailError: boolean = false;
   isLoading: boolean = false;
+  showForgotPasswordModal: boolean = false;
+  forgotPasswordEmail: string = '';
+  forgotEmailError: boolean = false;
+  isSendingEmail: boolean = false;
+  emailSent: boolean = false;
   private popStateListener?: (event: PopStateEvent) => void;
 
   constructor(
@@ -117,5 +123,105 @@ export class CorporateLoginComponent implements OnInit, OnDestroy {
         this.toastService.show(errorMessage, 'error');
       },
     });
+  }
+
+  openForgotPasswordModal() {
+    this.showForgotPasswordModal = true;
+    this.forgotPasswordEmail = '';
+    this.forgotEmailError = false;
+    this.emailSent = false;
+  }
+
+  closeForgotPasswordModal() {
+    this.showForgotPasswordModal = false;
+    this.forgotPasswordEmail = '';
+    this.forgotEmailError = false;
+    this.emailSent = false;
+  }
+
+  validateForgotEmail(event: any) {
+    const email = event.target.value;
+    if (!email) {
+      this.forgotEmailError = false;
+      return;
+    }
+    // Kurumsal giriş için gsb.gov.tr kontrolü
+    const emailParts = email.split('@');
+    if (emailParts.length !== 2 || emailParts[1] !== 'gsb.gov.tr') {
+      this.forgotEmailError = true;
+    } else {
+      this.forgotEmailError = false;
+    }
+  }
+
+  async sendPasswordResetEmail() {
+    if (!this.forgotPasswordEmail || this.forgotEmailError) {
+      this.toastService.show('Lütfen geçerli bir kurumsal e-posta (gsb.gov.tr) giriniz.', 'error');
+      return;
+    }
+
+    this.isSendingEmail = true;
+    this.emailSent = false;
+
+    try {
+      const response = await fetch('/api/Auth/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: this.forgotPasswordEmail.trim(),
+        }),
+      });
+
+      // Response'un JSON olup olmadığını kontrol et
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        this.toastService.show('Sunucuya Bağlanılamadı', 'error');
+        return;
+      }
+
+      const data = await response.json();
+
+      if (response.ok) {
+        this.emailSent = true;
+        this.toastService.show(
+          'Şifre sıfırlama linki e-posta adresinize gönderildi.',
+          'success'
+        );
+        setTimeout(() => {
+          this.closeForgotPasswordModal();
+        }, 3000);
+      } else {
+        // Mail bulunamadı kontrolü
+        const errorMessage = data.message || '';
+        const lowerMessage = errorMessage.toLowerCase();
+        
+        if (
+          response.status === 404 ||
+          lowerMessage.includes('not found') ||
+          lowerMessage.includes('bulunamadı') ||
+          lowerMessage.includes('kullanıcı bulunamadı') ||
+          lowerMessage.includes('email not found') ||
+          lowerMessage.includes('e-posta bulunamadı')
+        ) {
+          this.toastService.show('Mail bulunamadı', 'error');
+        } else if (errorMessage) {
+          this.toastService.show(errorMessage, 'error');
+        } else {
+          this.toastService.show('Bir hata oluştu. Lütfen tekrar deneyiniz.', 'error');
+        }
+      }
+    } catch (error: any) {
+      console.error('Şifre sıfırlama hatası:', error);
+      // Network hatası veya fetch hatası
+      if (error.message && error.message.includes('fetch')) {
+        this.toastService.show('Sunucuya Bağlanılamadı', 'error');
+      } else {
+        this.toastService.show('Sunucuya Bağlanılamadı', 'error');
+      }
+    } finally {
+      this.isSendingEmail = false;
+    }
   }
 }

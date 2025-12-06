@@ -90,7 +90,10 @@
           <div class="form-actions checkbox-area">
             <label class="terms-label">
               <input type="checkbox" required />
-              <span><a href="javascript:void(0)">Kullanıcı Sözleşmesi</a>'ni okudum.</span>
+              <span>
+                <a href="javascript:void(0)" (click)="openTermsModal()">Kullanıcı Sözleşmesi</a> ve
+                <a href="javascript:void(0)" (click)="openKvkkModal()">KVKK</a>'yı okudum.
+              </span>
             </label>
           </div>
 
@@ -111,6 +114,299 @@
         </form>
       </div>
       <footer class="simple-footer">© T.C Gençlik ve Spor Bakanlığı</footer>
+    </div>
+  </div>
+</div>
+
+<!-- KULLANICI SÖZLEŞMESİ MODAL -->
+<div class="modal-backdrop" *ngIf="showTermsModal" (click)="closeTermsModal()">
+  <div class="modal-content-terms" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Kullanıcı Sözleşmesi</h3>
+      <button class="close-btn" (click)="closeTermsModal()">
+        <i class="bx bx-x"></i>
+      </button>
+    </div>
+    <div class="modal-body-terms">
+      <div class="terms-content">
+        <h2>ÜNIDES DİJİTAL PORTAL KULLANIM KOŞULLARI VE ÜYELİK SÖZLEŞMESİ</h2>
+        <p class="update-date"><strong>Son Güncelleme Tarihi: 25 Kasım 2025</strong></p>
+
+        <h3>1. TARAFLAR VE KONU</h3>
+        <p>
+          1.1. İşbu Kullanım Koşulları ve Üyelik Sözleşmesi ("Sözleşme"), Ünides Dijital Portal
+          ("Portal" veya "Ünides") ile bu Portal'a üye olan veya Portal'ı ziyaret eden kullanıcı
+          ("Kullanıcı" veya "Topluluk Yöneticisi") arasında akdedilmiştir. Bu sözleşme, Portal'ın
+          kullanımı, topluluk sayfalarının oluşturulması, etkinlik paylaşımları ve sunulan diğer
+          hizmetlerden yararlanma şartlarını belirler.
+        </p>
+
+        <h3>2. TANIMLAR</h3>
+        <p><strong>Portal:</strong> Ünides Dijital Portal web sitesi ve mobil uygulamaları.</p>
+        <p>
+          <strong>Kullanıcı:</strong> Portal'a üye olan, etkinlikleri inceleyen veya profilleri
+          ziyaret eden gerçek kişi.
+        </p>
+        <p>
+          <strong>Topluluk Yöneticisi:</strong> Bir üniversite öğrenci topluluğunu temsil eden,
+          Portal üzerinde o topluluk adına profil oluşturan ve içerikleri yöneten yetkili üye.
+        </p>
+        <p>
+          <strong>İçerik:</strong> Kullanıcılar tarafından Portal'a yüklenen her türlü yazı,
+          fotoğraf, logo, etkinlik bilgisi, video, ses ve benzeri materyaller.
+        </p>
+
+        <h3>3. ÜYELİK VE HESAP GÜVENLİĞİ</h3>
+        <p>
+          3.1. Portal'a üyelik, Türkiye Cumhuriyeti sınırları içerisindeki üniversitelerde aktif
+          öğrenciliği bulunan kişilere açıktır.
+        </p>
+        <p>
+          3.2. Topluluk Yöneticisi, temsil ettiği topluluğun bağlı olduğu üniversiteden resmi veya
+          gayri resmi onay aldığını, topluluğu temsil etmeye yetkili olduğunu beyan ve taahhüt
+          eder. Yetkisiz işlemlerden doğacak hukuki sorumluluk tamamen kullanıcıya aittir.
+        </p>
+        <p>
+          3.3. Kullanıcı, hesap güvenliğinden (şifre koruma vb.) bizzat sorumludur. Hesabın üçüncü
+          kişiler tarafından kullanılması sonucu oluşabilecek zararlardan Ünides sorumlu tutulamaz.
+        </p>
+
+        <h3>4. HİZMETİN KAPSAMI VE KULLANIMI</h3>
+        <p>
+          4.1. Ünides, öğrenci topluluklarının kendilerini tanıtmaları, etkinliklerini duyurmaları
+          ve destek bulmaları için bir "yer sağlayıcı platform" olarak hizmet verir.
+        </p>
+        <p>
+          4.2. Ünides, Portal üzerinde paylaşılan etkinliklerin organizatörü, düzenleyicisi veya
+          garantörü değildir. Etkinliklerin içeriği, güvenliği, saati veya iptali konusundaki tüm
+          sorumluluk ilgili Topluluk Yöneticisi 'ne aittir.
+        </p>
+        <p>
+          4.3. Kullanıcılar, Portal'ı kullanarak katılımcı veya destek (sponsorluk, bağış vb.)
+          arayışında bulunabilirler; ancak Ünides bu desteklerin sağlanacağını garanti etmez.
+        </p>
+
+        <h3>5. KULLANICI YÜKÜMLÜLÜKLERİ VE İÇERİK POLİTİKASI</h3>
+        <p>
+          5.1. <strong>Doğruluk Beyanı:</strong> Kullanıcı, sisteme girdiği üniversite, il, topluluk
+          adı ve etkinlik bilgilerinin doğru, güncel ve gerçekçi olduğunu taahhüt eder. Yanıltıcı
+          bilgi (örneğin; yapılmayacak bir etkinliğin duyurulması) hesabın askıya alınmasına neden
+          olur.
+        </p>
+        <p>
+          5.2. <strong>Yasadışı İçerik Yasağı:</strong> Portal üzerinde genel ahlaka aykırı, nefret
+          söylemi içeren, şiddeti teşvik eden, siyasi propaganda amacı taşıyan (üniversite
+          toplulukları tüzüklerine aykırı şekilde), telif haklarını ihlal eden veya suç teşkil eden
+          içerikler paylaşılamaz.
+        </p>
+        <p>
+          5.3. <strong>Üniversite İtibarı:</strong> Topluluklar, isimlerini kullandıkları
+          üniversitelerin kurumsal kimliğine ve itibarına zarar verecek beyan ve eylemlerden
+          kaçınmalıdır.
+        </p>
+
+        <h3>6. FİKRİ MÜLKİYET HAKLARI</h3>
+        <p>
+          6.1. Portal'ın tasarımı, yazılımı, veri tabanı ve "Ünides" markası üzerindeki tüm haklar
+          Ünides Dijital Portal yönetimine aittir.
+        </p>
+        <p>
+          6.2. Kullanıcılar, Portal'a yükledikleri içeriklerin (etkinlik fotoğrafları, logolar vb.)
+          telif haklarının kendilerine ait olduğunu veya kullanım iznine sahip olduklarını kabul
+          ederler. Kullanıcı, içeriği yükleyerek Ünides'e bu içeriği platformda yayınlama, tanıtım
+          materyallerinde kullanma ve farklı platformlarda dağıtma hakkını (lisansını) verir.
+        </p>
+
+        <h3>7. KİŞİSEL VERİLERİN KORUNMASI (KVKK)</h3>
+        <p>
+          7.1. Ünides, kullanıcıların kişisel verilerini 6698 sayılı Kişisel Verilerin Korunması
+          Kanunu ("KVKK") ve ilgili mevzuata uygun olarak işler. Veri işleme süreçleri, Portal'da
+          yer alan Aydınlatma Metni ve Gizlilik Politikasında detaylandırılır. Kullanıcı, Portal'ı
+          kullanarak bu politikaları kabul etmiş sayılır.
+        </p>
+
+        <h3>8. SORUMLULUK REDDİ (DISCLAIMER)</h3>
+        <p>
+          8.1. Ünides, hizmetin kesintisiz, hatasız veya siber saldırılardan tamamen arındırılmış
+          olacağını garanti etmez.
+        </p>
+        <p>
+          8.2. Portal üzerinden link verilen üçüncü taraf web sitelerinin içeriğinden ve
+          güvenliğinden Ünides sorumlu değildir.
+        </p>
+        <p>
+          8.3. Fiziksel etkinliklerde yaşanabilecek kazalar, kayıplar veya hukuki anlaşmazlıklarda
+          Ünides taraf değildir ve herhangi bir tazminat yükümlülüğü bulunmamaktadır.
+        </p>
+
+        <h3>9. SÖZLEŞME DEĞİŞİKLİKLERİ VE FESİH</h3>
+        <p>
+          9.1. Ünides, işbu sözleşme şartlarını dilediği zaman tek taraflı olarak değiştirme
+          hakkını saklı tutar. Değişiklikler Portal'da yayınlandığı tarihte yürürlüğe girer.
+        </p>
+        <p>
+          9.2. Ünides, Kullanım Koşulları'na aykırı hareket eden, şüpheli işlem yapan veya topluluk
+          kurallarına uymayan kullanıcıların hesaplarını önceden bildirimde bulunmaksızın gizleme,
+          askıya alma veya kalıcı olarak silme hakkına sahiptir.
+        </p>
+
+        <h3>10. UYUŞMAZLIK ÇÖZÜMÜ</h3>
+        <p>
+          10.1. <strong>Dostane Çözüm:</strong> Taraflar, işbu sözleşmeden kaynaklanan sorunların
+          çözümünde öncelikle karşılıklı görüşme ve uzlaşma yolunu tercih edeceklerdir. Topluluklar
+          arası uyuşmazlıklarda veya kullanıcı şikayetlerinde, yargı yoluna gidilmeden önce Ünides
+          Genç Ofisleri arabulucu ve kolaylaştırıcı olarak görev alabilir. Gerekli görülen
+          hallerde, GSB Gençlik Hizmetleri Müdürlüğü birimlerinden süreçle ilgili rehberlik ve görüş
+          talep edilebilir.
+        </p>
+        <p>
+          10.2. <strong>Yetkili Mahkeme:</strong> Dostane çözüm yollarının tükenmesi veya sonuç
+          vermemesi halinde, işbu sözleşmeden doğabilecek her türlü uyuşmazlığın çözümünde Türkiye
+          Cumhuriyeti Kanunları uygulanacak olup, Ankara Mahkemeleri ve İcra Daireleri yetkilidir.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- KVKK MODAL -->
+<div class="modal-backdrop" *ngIf="showKvkkModal" (click)="closeKvkkModal()">
+  <div class="modal-content-terms" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>KVKK Aydınlatma Metni</h3>
+      <button class="close-btn" (click)="closeKvkkModal()">
+        <i class="bx bx-x"></i>
+      </button>
+    </div>
+    <div class="modal-body-terms">
+      <div class="terms-content">
+        <p>
+          T.C. GENÇLİK VE SPOR BAKANLIĞI olarak kişisel verilerin işlenmesinde başta özel hayatın
+          gizliliği olmak üzere ilgili kişilerin temel hak ve özgürlüklerini korumak ve kişisel
+          verileri işleyen gerçek ve tüzel kişilerin yükümlülükleri ile uyacakları usul ve esasları
+          düzenleyen 6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) hakkında sizleri
+          bilgilendirmek isteriz.
+        </p>
+
+        <h3>1. Veri Sorumlusu</h3>
+        <p>
+          6698 sayılı Kişisel Verilerin Korunması Kanunu ("6698 sayılı Kanun") uyarınca, kişisel
+          verileriniz; veri sorumlusu olarak T.C. GENÇLİK VE SPOR BAKANLIĞI ("Bakanlık") tarafından
+          aşağıda açıklanan kapsamda işlenebilecektir. "Kişisel Verilerinizin İşlenmesi" ise bu
+          verilerin elde edilmesi, kaydedilmesi, depolanması, muhafaza edilmesi, değiştirilmesi,
+          yeniden düzenlenmesi, açıklanması, aktarılması, devralınması, elde edilebilir hale
+          getirilmesi, sınıflandırılması ya da kullanılmasının engellenmesi gibi veriler üzerinde
+          gerçekleştirilen her türlü işlemi ifade etmektedir.
+        </p>
+
+        <h3>2. Kişisel Verilerinizin İşlenme Amaçları ve Hukuki Sebepleri</h3>
+        <p>
+          Bakanlığımızın bağlı bulunduğu kanun ve ilgili mevzuatları kapsamında sizlere sunulacak
+          hizmetlerde kullanılmak, bakanlık hizmetlerimizi gerçekleştirmek, bu kapsamda her türlü
+          iş ve işlemin sahibini ve muhatabını belirlemek üzere bilgilerini tespit için, KVKK
+          kapsamında kişisel veri olarak nitelendirilen kimlik bilgileriniz, adresiniz, telefon
+          numaranız, vergi numaranız ve diğer bilgilerinizi kaydetmek, kâğıt üzerinde ya da
+          elektronik ortamda gerçekleştirilecek iş ve işlemlere dayanak olacak bilgi ve belgeleri
+          düzenlemek, ilgili mevzuat uyarınca adli ve idari tüm yetkili makamlara öngörülen bilgi
+          saklama, raporlama ve bilgilendirme yükümlülüklerine uymak, bağlı bulunduğumuz kanunlar
+          kapsamındaki hizmetlerimizi yerine getirebilmek, Bakanlığımızca sunulan veya talep edilen
+          başka hizmetlerimizi sunabilmektir.
+        </p>
+        <p>
+          Ayrıca Kanunun "Kişisel verilerin işlenme şartları" başlığı altında, ilgili kişinin açık
+          rızası aranmaksızın kişisel verilerinin işlenmesini mümkün kılan şartlar şöyle
+          sıralanmıştır;
+        </p>
+        <ul>
+          <li>Kanunlarda açıkça öngörülmesi.</li>
+          <li>
+            Fiili imkânsızlık nedeniyle rızasını açıklayamayacak durumda bulunan veya rızasına
+            hukuki geçerlilik tanınmayan kişinin kendisinin ya da bir başkasının hayatı veya beden
+            bütünlüğünün korunması için zorunlu olması.
+          </li>
+          <li>
+            Bir sözleşmenin kurulması veya ifasıyla doğrudan doğruya ilgili olması kaydıyla,
+            sözleşmenin taraflarına ait kişisel verilerin işlenmesinin gerekli olması.
+          </li>
+          <li>Veri sorumlusunun hukuki yükümlülüğünü yerine getirebilmesi için zorunlu olması.</li>
+          <li>İlgili kişinin kendisi tarafından alenileştirilmiş olması.</li>
+          <li>
+            Bir hakkın tesisi, kullanılması veya korunması için veri işlemenin zorunlu olması.
+          </li>
+          <li>
+            İlgili kişinin temel hak ve özgürlüklerine zarar vermemek kaydıyla, veri sorumlusunun
+            meşru menfaatleri için veri işlenmesinin zorunlu olması.
+          </li>
+        </ul>
+
+        <h3>3. Kişisel Verilerin Toplanma Yöntemi</h3>
+        <p>
+          Kişisel verileriniz Bakanlığımız ve diğer ilgili mevzuatlar uyarınca onay ve/veya imzanızla
+          tanzim edilen bakanlık işlemlerine ilişkin tüm beyanname/ bilgilendirme formları ve sair
+          belgelerle, elektronik onay ve/veya imzanız ile yapacağınız bildirimlerle, Bakanlığımız,
+          yerel hizmet birimleri, Web Sayfaları, Mobil Uygulamalar, Çağrı Merkezi gibi kanallar
+          aracılığı ile sözlü, yazılı veya elektronik ortamda olmak kaydıyla çeşitli yöntemlerle
+          toplanmaktadır.
+        </p>
+
+        <h3>4. Kişisel Verilerinizin Aktarılması</h3>
+        <p>
+          Toplanan kişisel verileriniz; yukarıda belirtilen amaçların gerçekleştirilmesi doğrultusunda,
+          iştiraklerimize, işletmelerimize, kanunen yetkili kamu kurumu, kuruluşu ve özel kişilere,
+          yüklenicilerimize, adli makamlar ve kolluk kuvvetlerine 6698 sayılı Kanun'un 8. ve 9.
+          maddelerinde belirtilen kişisel veri işleme şartları çerçevesinde aktarılabilecektir.
+        </p>
+        <p>
+          Mevzuatta yer alan istisnai durumlar dışında, kişisel veriler ve özel nitelikli kişisel
+          veriler, veri sahibinin açık rızası olmadan, Bakanlığımız tarafından diğer gerçek veya
+          tüzel kişilere aktarılmamaktadır.
+        </p>
+
+        <h3>5. Kişisel Veri Sahibinin 6698 sayılı Kanun'un 11. maddesinde Sayılan Hakları</h3>
+        <p>
+          ''Kişisel veri sahipleri olarak, haklarınıza ilişkin taleplerinizi gsb.gov.tr internet
+          adresinde yer alan 'Bilgi Edinme Başvurusu' aracılığıyla Bakanlığımıza iletmeniz durumunda
+          Bakanlık talebin niteliğine göre talebi en geç otuz gün içinde sonuçlandıracaktır. Ancak,
+          işlemin ayrıca bir maliyet gerektirmesi hâlinde, Bakanlık tarafından Kişisel Verileri
+          Koruma Kurulunca belirlenen tarifedeki ücret alınacaktır. Bakanlık talebinizi kabul
+          edebilir veya gerekçesini açıklayarak reddedebilir ve cevabını ilgili kişiye yazılı olarak
+          veya elektronik ortamda bildirir. Başvuruda yer alan talebin kabul edilmesi hâlinde
+          Bakanlıkça gereği yerine getirilir. Başvurunun Bakanlığın hatasından kaynaklanması hâlinde
+          alınan ücret ilgiliye iade edilir.
+        </p>
+        <p>Bu kapsamda kişisel veri sahipleri;</p>
+        <ul>
+          <li>Kişisel veri işlenip işlenmediğini öğrenme,</li>
+          <li>Kişisel verileri işlenmişse buna ilişkin bilgi talep etme,</li>
+          <li>
+            Kişisel verilerin işlenme amacını ve amacına uygun kullanılıp kullanılmadığını öğrenme,
+          </li>
+          <li>Yurt içinde veya yurt dışında kişisel verilerin aktarıldığı üçüncü kişileri bilme,</li>
+          <li>
+            Kişisel verilerin eksik veya yanlış işlenmiş olması hâlinde bunların düzeltilmesini
+            isteme ve bu kapsamda yapılan işlemin kişisel verilerin aktarıldığı üçüncü kişilere
+            bildirilmesini isteme,
+          </li>
+          <li>
+            6698 sayılı Kanun ve ilgili diğer kanun hükümlerine uygun olarak işlenmiş olmasına rağmen,
+            işlenmesini gerektiren sebeplerin ortadan kalkması hâlinde kişisel verilerin silinmesini,
+            yok edilmesini veya anonim hale getirilmesini isteme ve bu kapsamda yapılan işlemin
+            kişisel verilerin aktarıldığı üçüncü kişilere bildirilmesini isteme,
+          </li>
+          <li>
+            İşlenen verilerin münhasıran otomatik sistemler vasıtasıyla analiz edilmesi suretiyle
+            kişinin kendisi aleyhine bir sonucun ortaya çıkmasına itiraz etme,
+          </li>
+          <li>
+            Kişisel verilerin kanuna aykırı olarak işlenmesi sebebiyle zarara uğraması hâlinde zararın
+            giderilmesini talep etme haklarına sahiptir.
+          </li>
+        </ul>
+        <p>
+          Başvurularınız, Bakanlığımız tarafından yapılacak incelemeler ve kimlik doğrulamasını takiben
+          belirtilen yasal süreler içerisinde yazılı veya elektronik ortamda cevaplanacaktır.
+        </p>
+      </div>
     </div>
   </div>
 </div>
