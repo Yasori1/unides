@@ -76,12 +76,12 @@ export class ImageUploadComponent {
       reader.readAsDataURL(file);
     } else {
       // Eski davranış: Base64 olarak gönder
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.previewUrl = e.target.result;
-        this.onImageSelected.emit(this.previewUrl || ''); // Veriyi dışarı aktar
-      };
-      reader.readAsDataURL(file);
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      this.previewUrl = e.target.result;
+      this.onImageSelected.emit(this.previewUrl || ''); // Veriyi dışarı aktar
+    };
+    reader.readAsDataURL(file);
     }
   }
 

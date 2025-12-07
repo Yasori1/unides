@@ -33,14 +33,27 @@ export class CommunityDetailComponent implements OnInit {
       const id = +params['id'];
       if (id) {
         this.communityId = id;
-        this.loadCommunity(id);
+        // SSR sırasında HTTP istekleri yapma, sadece browser'da yap
+        if (isPlatformBrowser(this.platformId)) {
+          this.loadCommunity(id);
+        } else {
+          // SSR sırasında loading durumunu kapat
+          this.isLoading = false;
+        }
       } else {
-        this.router.navigate(['/communities']);
+        if (isPlatformBrowser(this.platformId)) {
+          this.router.navigate(['/communities']);
+        }
       }
     });
   }
 
   loadCommunity(id: number) {
+    // Sadece browser'da çalıştığından emin ol
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
     this.isLoading = true;
     this.communityService.getCommunityById(id).subscribe({
       next: (data) => {
@@ -79,4 +92,3 @@ export class CommunityDetailComponent implements OnInit {
     }
   }
 }
-

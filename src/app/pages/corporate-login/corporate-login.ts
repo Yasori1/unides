@@ -1,5 +1,5 @@
-import { Component, HostListener, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule, Location } from '@angular/common';
+import { Component, HostListener, OnInit, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, Location, isPlatformBrowser } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 // Servis importları
@@ -30,10 +30,16 @@ export class CorporateLoginComponent implements OnInit, OnDestroy {
     private router: Router,
     private toastService: ToastService,
     private authService: AuthService,
-    private location: Location
+    private location: Location,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
   ngOnInit(): void {
+    // SSR sırasında window kullanma, sadece browser'da çalıştır
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
     // Geri butonuna basıldığında anasayfaya yönlendir
     this.popStateListener = (event: PopStateEvent) => {
       // State kontrolü yap - eğer bizim eklediğimiz state ise veya corporate-login sayfasındaysak
@@ -42,17 +48,23 @@ export class CorporateLoginComponent implements OnInit, OnDestroy {
         this.router.url === '/corporate-login'
       ) {
         // window.location kullanarak direkt anasayfaya yönlendir (Angular Router'ı bypass eder)
-        window.location.href = '/';
+        if (isPlatformBrowser(this.platformId)) {
+          window.location.href = '/';
+        }
       }
     };
-    window.addEventListener('popstate', this.popStateListener);
 
-    // History'ye bir entry ekle ki geri butonuna basıldığında popstate tetiklensin
-    history.pushState({ fromCorporateLogin: true }, '', location.href);
+    if (isPlatformBrowser(this.platformId)) {
+      window.addEventListener('popstate', this.popStateListener);
+
+      // History'ye bir entry ekle ki geri butonuna basıldığında popstate tetiklensin
+      window.history.pushState({ fromCorporateLogin: true }, '', window.location.href);
+    }
   }
 
   ngOnDestroy(): void {
-    if (this.popStateListener) {
+    // SSR sırasında window kullanma
+    if (isPlatformBrowser(this.platformId) && this.popStateListener) {
       window.removeEventListener('popstate', this.popStateListener);
     }
   }

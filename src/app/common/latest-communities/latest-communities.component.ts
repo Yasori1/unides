@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterModule } from '@angular/router';
 // Servisi ve Modeli import ediyoruz
 import { CommunityService, Community } from '../../services/community.services';
@@ -20,13 +20,27 @@ export class LatestCommunitiesComponent implements OnInit {
   thirdColumn: Community[] = [];
 
   // Servisi constructor'a ekliyoruz
-  constructor(private communityService: CommunityService) {}
+  constructor(
+    private communityService: CommunityService,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {}
 
   ngOnInit(): void {
-    this.loadTopCommunities();
+    // SSR sırasında HTTP istekleri yapma, sadece browser'da yap
+    if (isPlatformBrowser(this.platformId)) {
+      this.loadTopCommunities();
+    } else {
+      // SSR sırasında boş liste göster
+      this.isLoading = false;
+    }
   }
 
   loadTopCommunities() {
+    // Sadece browser'da çalıştığından emin ol
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
     this.isLoading = true;
 
     // Servisten en popüler 9 topluluğu istiyoruz

@@ -43,7 +43,7 @@ export class AnnouncementsPageComponent implements OnInit {
   ngOnInit(): void {
     // SSR sırasında HTTP istekleri yapma, sadece browser'da yap
     if (isPlatformBrowser(this.platformId)) {
-      this.fetchAnnouncements();
+    this.fetchAnnouncements();
     } else {
       // SSR sırasında boş liste göster
       this.isLoading = false;

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable, map, catchError, of, switchMap } from 'rxjs';
 
 // Community Interface
 export interface Community {
@@ -7,7 +8,7 @@ export interface Community {
   name: string;
   university: string;
   category: string;
-  description: string;
+  description?: string; // Optional yapıldı
   coverImage?: string;
   logo: string;
   memberCount: number;
@@ -22,14 +23,139 @@ export interface Community {
   website?: string;
   email?: string;
   status?: 'Aktif' | 'Pasif';
+  presidentEmail?: string; // Topluluk başkanı email (oluşturma/güncelleme için)
+}
+
+// Backend'den gelen format (PascalCase)
+interface CommunityDto {
+  id: number;
+  name?: string;
+  Name?: string;
+  about?: string;
+  About?: string;
+  city?: string;
+  City?: string;
+  university?: string;
+  University?: string;
+  logoUrl?: string;
+  LogoUrl?: string;
+  tags?: string[];
+  Tags?: string[];
+  contactEmail?: string;
+  ContactEmail?: string;
+  websiteUrl?: string;
+  WebsiteUrl?: string;
+  socialLinks?: string;
+  SocialLinks?: string;
+  userCommunities?: any[];
+  UserCommunities?: any[];
+}
+
+// Backend'e gönderilecek format (PascalCase - Backend DTO formatı)
+interface CreateCommunityRequest {
+  Name: string;
+  About?: string;
+  City: string;
+  University: string;
+  ContactEmail?: string;
+  WebsiteUrl?: string;
+  SocialLinks?: string;
+  LogoUrl?: string;
+  Tags?: string[];
+  Description?: string;
+  BannerUrl?: string;
+  LongDescription?: string;
+  Status?: string;
+  PresidentEmail: string; // Zorunlu: Topluluk başkanının email adresi
+}
+
+interface UpdateCommunityRequest {
+  Name?: string;
+  About?: string;
+  City?: string;
+  University?: string;
+  LogoUrl?: string;
+  ContactEmail?: string;
+  WebsiteUrl?: string;
+  SocialLinks?: string;
+  Tags?: string[];
+  Description?: string;
+  BannerUrl?: string;
+  LongDescription?: string;
+  Status?: string;
+  PresidentEmail?: string; // Başkan değişikliği için (sadece GSB)
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class CommunityService {
-  // Mock Veriler - Sayfalama testi için 20 adete çıkarıldı
-  private communities: Community[] = [
+  private apiUrl = '/api/Communities';
+
+  constructor(private http: HttpClient) {}
+
+  // Backend formatını frontend formatına dönüştür
+  private mapToCommunity(dto: any): Community {
+    const name = dto.name || dto.Name || '';
+    const about = dto.about || dto.About || '';
+    const city = dto.city || dto.City || '';
+    const university = dto.university || dto.University || '';
+    const logoUrl = dto.logoUrl || dto.LogoUrl || '';
+    const contactEmail = dto.contactEmail || dto.ContactEmail || '';
+    const websiteUrl = dto.websiteUrl || dto.WebsiteUrl || '';
+    const socialLinks = dto.socialLinks || dto.SocialLinks || '';
+    const tags = dto.tags || dto.Tags || [];
+    const userCommunities = dto.userCommunities || dto.UserCommunities || [];
+
+    // Tags'den category çıkar (ilk tag'i category olarak kullan)
+    const category = tags && tags.length > 0 ? tags[0] : 'Genel';
+
+    // SocialLinks'i parse et (JSON string olabilir)
+    let socialMedia = '';
+    let instagram = '';
+    let youtube = '';
+    let twitter = '';
+    let tiktok = '';
+
+    if (socialLinks) {
+      try {
+        const parsed = typeof socialLinks === 'string' ? JSON.parse(socialLinks) : socialLinks;
+        socialMedia = parsed.instagram || parsed.Instagram || '';
+        instagram = parsed.instagram || parsed.Instagram || '';
+        youtube = parsed.youtube || parsed.Youtube || '';
+        twitter = parsed.twitter || parsed.Twitter || '';
+        tiktok = parsed.tiktok || parsed.Tiktok || '';
+      } catch {
+        // JSON parse edilemezse direkt string olarak kullan
+        socialMedia = socialLinks;
+      }
+    }
+
+    return {
+      id: dto.id || dto.Id || 0,
+      name: name,
+      university: university,
+      category: category,
+      description: about || dto.description || dto.Description || undefined,
+      logo: logoUrl || '',
+      memberCount: userCommunities?.length || 0,
+      city: city,
+      about: about,
+      banner: logoUrl, // Backend'de coverImage yok, logoUrl kullan
+      coverImage: logoUrl,
+      socialMedia: socialMedia,
+      instagram: instagram,
+      youtube: youtube,
+      twitter: twitter,
+      tiktok: tiktok,
+      website: websiteUrl,
+      email: contactEmail,
+      status: (dto.status || dto.Status || 'Aktif') as 'Aktif' | 'Pasif',
+    };
+  }
+
+  // Mock Veriler - Fallback için (artık kullanılmayacak)
+  private mockCommunities: Community[] = [
     {
       id: 1,
       name: 'ODTÜ Yazılım Topluluğu',
@@ -271,71 +397,239 @@ export class CommunityService {
     },
   ];
 
-  constructor() {}
-
   // Tüm Toplulukları Getir
   getAllCommunities(): Observable<Community[]> {
-    return of(this.communities);
+    return this.http.get<CommunityDto[]>(this.apiUrl).pipe(
+      map((response) => {
+        return response.map((dto) => this.mapToCommunity(dto));
+      }),
+      catchError((error) => {
+        console.error('Topluluklar yüklenemedi:', error);
+        // Hata durumunda boş liste döndür
+        return of([]);
+      })
+    );
   }
 
-  // --- EKLENEN METOT: En Popüler Toplulukları Getir ---
-  // limit: Kaç adet topluluk getirileceğini belirler
+  // En Popüler Toplulukları Getir
   getTopCommunities(limit: number): Observable<Community[]> {
-    // Üye sayısına göre çoktan aza sırala ve limit kadarını al
-    const topCommunities = [...this.communities]
-      .sort((a, b) => b.memberCount - a.memberCount)
-      .slice(0, limit);
-    return of(topCommunities);
+    return this.getAllCommunities().pipe(
+      map((communities) => {
+        // Üye sayısına göre çoktan aza sırala ve limit kadarını al
+        return communities.sort((a, b) => b.memberCount - a.memberCount).slice(0, limit);
+      }),
+      catchError((error) => {
+        console.error('Popüler topluluklar yüklenemedi:', error);
+        return of([]);
+      })
+    );
   }
 
-  getCommunityById(id: number): Observable<Community | undefined> {
-    const community = this.communities.find((c) => c.id === id);
-    return of(community);
+  // Topluluk Detayı Getir
+  getCommunityById(id: number): Observable<Community> {
+    return this.http.get<CommunityDto>(`${this.apiUrl}/${id}`).pipe(
+      map((response) => this.mapToCommunity(response)),
+      catchError((error) => {
+        console.error('Topluluk detayı yüklenemedi:', error);
+        throw error;
+      })
+    );
   }
 
-  // Corporate dashboard'dan topluluk ekleme/güncelleme
-  addOrUpdateCommunity(community: Community): Observable<Community> {
-    const existingIndex = this.communities.findIndex((c) => c.id === community.id);
-    
-    if (existingIndex !== -1) {
-      // Güncelleme
-      this.communities[existingIndex] = { ...community };
-    } else {
-      // Yeni topluluk ekleme - ID yoksa yeni ID oluştur
-      if (!community.id || community.id === 0) {
-        const maxId = Math.max(...this.communities.map((c) => c.id), 0);
-        community.id = maxId + 1;
+  private buildSocialLinks(community: any): string | undefined {
+    const obj: any = {};
+    if (community.instagram) obj.instagram = community.instagram;
+    if (community.youtube) obj.youtube = community.youtube;
+    if (community.twitter) obj.twitter = community.twitter;
+    if (community.tiktok) obj.tiktok = community.tiktok;
+    if (community.website) obj.website = community.website;
+    if (community.socialMedia) obj.socialMedia = community.socialMedia;
+
+    // Eğer ayrı alanlar yoksa ve socialLinks string geldiyse onu JSON olarak sar
+    if (Object.keys(obj).length === 0 && community.socialLinks) {
+      try {
+        JSON.parse(community.socialLinks);
+        return community.socialLinks; // zaten JSON string
+      } catch {
+        return JSON.stringify({ link: community.socialLinks });
       }
-      // Communities-page için gerekli alanları ekle
-      const communityForPage: Community = {
-        ...community,
-        coverImage: community.banner || community.coverImage || '',
-        description: community.about || community.description || '',
-      };
-      this.communities.push(communityForPage);
     }
-    
-    return of(community);
+
+    if (Object.keys(obj).length === 0) return undefined;
+    return JSON.stringify(obj);
   }
 
-  // Topluluk silme
-  deleteCommunity(id: number): Observable<boolean> {
-    const index = this.communities.findIndex((c) => c.id === id);
-    if (index !== -1) {
-      this.communities.splice(index, 1);
-      return of(true);
-    }
-    return of(false);
+  // Topluluk Oluştur
+  createCommunity(community: {
+    name: string;
+    about?: string;
+    city: string;
+    university: string;
+    contactEmail?: string;
+    websiteUrl?: string;
+    socialLinks?: string;
+    logoUrl?: string;
+    tags?: string[];
+    description?: string;
+    bannerUrl?: string;
+    longDescription?: string;
+    status?: string;
+    presidentEmail: string; // Zorunlu
+  }): Observable<Community> {
+    // Backend PascalCase bekliyor
+    const socialLinksJson = this.buildSocialLinks(community);
+    const request: CreateCommunityRequest = {
+      Name: community.name,
+      About: community.about,
+      City: community.city,
+      University: community.university,
+      ContactEmail: community.contactEmail,
+      WebsiteUrl: community.websiteUrl,
+      SocialLinks: socialLinksJson,
+      LogoUrl: community.logoUrl,
+      Tags: community.tags,
+      Description: community.description,
+      BannerUrl: community.bannerUrl,
+      LongDescription: community.longDescription,
+      Status: community.status,
+      PresidentEmail: community.presidentEmail,
+    };
+
+    return this.http.post<{ id: number; message: string }>(this.apiUrl, request).pipe(
+      switchMap((response) => {
+        // Oluşturulan topluluğu getir
+        return this.getCommunityById(response.id);
+      }),
+      catchError((error) => {
+        console.error('Topluluk oluşturulamadı:', error);
+        console.error('Hata detayı:', error.error);
+        console.error('Request body:', JSON.stringify(request, null, 2));
+        throw error;
+      })
+    );
   }
 
-  // Corporate Dashboard'dan tüm toplulukları senkronize et
-  syncCommunitiesFromCorporate(communities: Community[]): Observable<boolean> {
-    // Mevcut toplulukları temizle ve yeni verilerle doldur
-    this.communities = communities.map((c) => ({
-      ...c,
-      coverImage: c.banner || c.coverImage || '',
-      description: c.about || c.description || '',
-    }));
-    return of(true);
+  // Topluluk Güncelle
+  updateCommunity(
+    id: number,
+    community: {
+      name?: string;
+      about?: string;
+      city?: string;
+      university?: string;
+      logoUrl?: string;
+      contactEmail?: string;
+      websiteUrl?: string;
+      socialLinks?: string;
+      tags?: string[];
+      description?: string;
+      bannerUrl?: string;
+      longDescription?: string;
+      status?: string;
+      presidentEmail?: string; // Başkan değişikliği için (sadece GSB)
+    }
+  ): Observable<Community> {
+    // Backend PascalCase bekliyor
+    // Boş string'leri null'a çevir (backend null kontrolü yapıyor)
+    const socialLinksJson = this.buildSocialLinks(community);
+    const request: UpdateCommunityRequest = {
+      Name: community.name && community.name.trim() ? community.name.trim() : undefined,
+      About: community.about && community.about.trim() ? community.about.trim() : undefined,
+      City: community.city && community.city.trim() ? community.city.trim() : undefined,
+      University:
+        community.university && community.university.trim()
+          ? community.university.trim()
+          : undefined,
+      LogoUrl: community.logoUrl && community.logoUrl.trim() ? community.logoUrl.trim() : undefined,
+      ContactEmail:
+        community.contactEmail && community.contactEmail.trim()
+          ? community.contactEmail.trim()
+          : undefined,
+      WebsiteUrl:
+        community.websiteUrl && community.websiteUrl.trim()
+          ? community.websiteUrl.trim()
+          : undefined,
+      SocialLinks: socialLinksJson,
+      Tags: community.tags,
+      Description:
+        community.description && community.description.trim()
+          ? community.description.trim()
+          : undefined,
+      BannerUrl:
+        community.bannerUrl && community.bannerUrl.trim() ? community.bannerUrl.trim() : undefined,
+      LongDescription:
+        community.longDescription && community.longDescription.trim()
+          ? community.longDescription.trim()
+          : undefined,
+      Status: community.status,
+      PresidentEmail:
+        community.presidentEmail && community.presidentEmail.trim()
+          ? community.presidentEmail.trim()
+          : undefined,
+    };
+
+    return this.http.put<{ message: string }>(`${this.apiUrl}/${id}`, request).pipe(
+      switchMap(() => {
+        // Güncellenen topluluğu getir
+        return this.getCommunityById(id);
+      }),
+      catchError((error) => {
+        console.error('Topluluk güncellenemedi:', error);
+        console.error('Hata detayı:', error.error);
+        console.error('Request body:', JSON.stringify(request, null, 2));
+        throw error;
+      })
+    );
+  }
+
+  // Topluluk Sil
+  deleteCommunity(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
+      catchError((error) => {
+        console.error('Topluluk silinemedi:', error);
+        console.error('Hata detayı:', error.error);
+        throw error;
+      })
+    );
+  }
+
+  // Corporate dashboard için uyumluluk metodu (eski interface ile çalışır)
+  addOrUpdateCommunity(community: Community & { presidentEmail?: string }): Observable<Community> {
+    if (community.id && community.id > 0) {
+      // Güncelleme
+      return this.updateCommunity(community.id, {
+        name: community.name,
+        about: community.about || community.description,
+        city: community.city,
+        university: community.university,
+        logoUrl: community.logo || community.banner,
+        contactEmail: community.email,
+        websiteUrl: community.website,
+        socialLinks: community.socialMedia,
+        description: community.description,
+        bannerUrl: community.banner,
+        status: community.status,
+        presidentEmail: community.presidentEmail,
+      });
+    } else {
+      // Yeni topluluk oluşturma - PresidentEmail zorunlu
+      if (!community.presidentEmail) {
+        throw new Error('Topluluk başkanı email adresi zorunludur.');
+      }
+      return this.createCommunity({
+        name: community.name,
+        about: community.about || community.description,
+        city: community.city || '',
+        university: community.university,
+        contactEmail: community.email,
+        websiteUrl: community.website,
+        socialLinks: community.socialMedia,
+        logoUrl: community.logo,
+        description: community.description,
+        bannerUrl: community.banner,
+        status: community.status,
+        presidentEmail: community.presidentEmail,
+      });
+    }
   }
 }

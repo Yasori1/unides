@@ -194,8 +194,8 @@ export class CorporateDashboardComponent implements OnInit {
 
   // Topluluk düzenleme için
   selectedCommunity: Community | null = null;
-  editingCommunity: Community | null = null;
-  newCommunity: Community | null = null;
+  editingCommunity: (Community & { presidentEmail?: string }) | null = null;
+  newCommunity: (Community & { presidentEmail?: string }) | null = null;
 
   // Duyuru düzenleme için
   selectedAnnouncement: Announcement | null = null;
@@ -696,7 +696,8 @@ export class CorporateDashboardComponent implements OnInit {
       logo: '',
       banner: '',
       status: 'Aktif',
-    };
+      presidentEmail: '', // Topluluk başkanının email adresi (zorunlu)
+    } as Community & { presidentEmail?: string };
     this.modalType = 'new-community';
     this.isModalOpen = true;
   }
@@ -719,7 +720,27 @@ export class CorporateDashboardComponent implements OnInit {
         },
         error: (err) => {
           console.error('Topluluk güncellenirken hata:', err);
-          this.showToast('Topluluk güncellenirken bir hata oluştu', 'error');
+          console.error('Hata detayı:', err.error);
+          let errorMessage = 'Topluluk güncellenirken bir hata oluştu';
+
+          if (err.status === 401) {
+            errorMessage = 'Oturum açmanız gerekiyor. Lütfen tekrar giriş yapın.';
+          } else if (err.status === 403) {
+            errorMessage = err.error?.message || 'Bu işlem için yetkiniz bulunmamaktadır.';
+          } else if (err.status === 500) {
+            // Backend'den gelen hata mesajını göster
+            const serverMessage = err.error?.message || err.error || 'Sunucu hatası oluştu.';
+            errorMessage =
+              typeof serverMessage === 'string'
+                ? serverMessage
+                : 'Sunucu hatası oluştu. Lütfen tekrar deneyin.';
+          } else if (err.error?.message) {
+            errorMessage = err.error.message;
+          } else if (err.message) {
+            errorMessage = err.message;
+          }
+
+          this.showToast(errorMessage, 'error');
         },
       });
     }
@@ -734,13 +755,28 @@ export class CorporateDashboardComponent implements OnInit {
         return;
       }
 
+      // PresidentEmail validasyonu
+      const presidentEmail = (this.newCommunity as any).presidentEmail;
+      if (!presidentEmail || !presidentEmail.trim()) {
+        this.showToast('Lütfen topluluk başkanının email adresini girin', 'error');
+        return;
+      }
+
+      // Email format validasyonu
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(presidentEmail.trim())) {
+        this.showToast('Geçerli bir email adresi girin', 'error');
+        return;
+      }
+
       // CommunityService'e kaydet (communities-page'e otomatik eklenir)
       const communityForService = {
         ...this.newCommunity,
         id: 0, // Service otomatik ID atayacak
-        description: this.newCommunity.about || '',
+        description: this.newCommunity.about || this.newCommunity.description || '',
         coverImage: this.newCommunity.banner || '',
-      };
+        presidentEmail: presidentEmail.trim(),
+      } as Community & { presidentEmail?: string };
 
       this.communityService.addOrUpdateCommunity(communityForService).subscribe({
         next: () => {
@@ -752,9 +788,19 @@ export class CorporateDashboardComponent implements OnInit {
         },
         error: (err) => {
           console.error('Topluluk eklenirken hata:', err);
-          this.showToast('Topluluk eklendi ancak bir hata oluştu', 'error');
-          this.closeModal();
-          this.newCommunity = null;
+          let errorMessage = 'Topluluk eklenirken bir hata oluştu';
+
+          if (err.status === 401) {
+            errorMessage = 'Oturum açmanız gerekiyor. Lütfen tekrar giriş yapın.';
+          } else if (err.status === 403) {
+            errorMessage = err.error?.message || 'Bu işlem için yetkiniz bulunmamaktadır.';
+          } else if (err.error?.message) {
+            errorMessage = err.error.message;
+          } else if (err.message) {
+            errorMessage = err.message;
+          }
+
+          this.showToast(errorMessage, 'error');
         },
       });
     }
@@ -764,7 +810,12 @@ export class CorporateDashboardComponent implements OnInit {
     if (this.editingCommunity) {
       const communityId = this.editingCommunity.id;
 
-      // CommunityService'ten sil (communities-page'den de kaldırılır)
+      // Kullanıcıdan onay al
+      if (!confirm('Bu topluluğu silmek istediğinizden emin misiniz?')) {
+        return;
+      }
+
+      // CommunityService'ten sil (backend'e istek atılır)
       this.communityService.deleteCommunity(communityId).subscribe({
         next: () => {
           // Service'ten güncel veriyi tekrar yükle
@@ -774,7 +825,19 @@ export class CorporateDashboardComponent implements OnInit {
         },
         error: (err) => {
           console.error('Topluluk silinirken hata:', err);
-          this.showToast('Topluluk silinirken bir hata oluştu', 'error');
+          let errorMessage = 'Topluluk silinirken bir hata oluştu';
+
+          if (err.status === 401) {
+            errorMessage = 'Oturum açmanız gerekiyor. Lütfen tekrar giriş yapın.';
+          } else if (err.status === 403) {
+            errorMessage = err.error?.message || 'Bu işlem için yetkiniz bulunmamaktadır.';
+          } else if (err.error?.message) {
+            errorMessage = err.error.message;
+          } else if (err.message) {
+            errorMessage = err.message;
+          }
+
+          this.showToast(errorMessage, 'error');
         },
       });
     }

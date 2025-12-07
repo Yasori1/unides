@@ -47,10 +47,21 @@ export class CommunitiesPageComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.fetchCommunities();
+    // SSR sırasında HTTP istekleri yapma, sadece browser'da yap
+    if (isPlatformBrowser(this.platformId)) {
+      this.fetchCommunities();
+    } else {
+      // SSR sırasında boş liste göster
+      this.isLoading = false;
+    }
   }
 
   fetchCommunities() {
+    // Sadece browser'da çalıştığından emin ol
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
     this.isLoading = true;
     this.communityService.getAllCommunities().subscribe({
       next: (data) => {
