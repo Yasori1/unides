@@ -91,6 +91,17 @@
         <i [class]="shouldShowProfile ? 'bx bx-user' : 'bx bx-chevron-right'"></i>
       </div>
     </a>
+    <button
+      *ngIf="shouldShowProfile"
+      class="logout-inline d-none d-sm-inline-flex"
+      (click)="logout()"
+      [disabled]="isLoggingOut"
+      [attr.data-loading]="isLoggingOut"
+    >
+      <span class="logout-text">Çıkış Yap</span>
+      <i class="bx bx-log-out"></i>
+      <div class="btn-spinner" *ngIf="isLoggingOut" aria-hidden="true"></div>
+    </button>
 
     <button class="mobile-toggle d-lg-none" (click)="toggleClass()">
       <i class="bx bx-menu"></i>
@@ -155,6 +166,18 @@
         >
           {{ shouldShowProfile ? 'Profilim' : 'Giriş Yap' }}
         </a>
+      </div>
+      <div class="accordion-item" *ngIf="shouldShowProfile">
+        <button
+          class="accordion-button without-icon danger-link"
+          (click)="logout()"
+          [disabled]="isLoggingOut"
+        >
+          <span *ngIf="!isLoggingOut">Çıkış Yap</span>
+          <span *ngIf="isLoggingOut" class="mobile-loading">
+            <i class="bx bx-loader-alt bx-spin"></i> Çıkılıyor...
+          </span>
+        </button>
       </div>
     </div>
   </div>

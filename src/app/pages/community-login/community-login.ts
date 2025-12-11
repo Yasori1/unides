@@ -4,7 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 // Servisler
 import { ToastService } from '../../services/toast.services';
-import { AuthService, AuthResponse } from '../../services/auth.services';
+import { AuthService, LoginResponse } from '../../services/auth.services';
 // Bileşenler
 import { ToastComponent } from '../../components/ui/toast/toast.component';
 import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
@@ -14,7 +14,14 @@ import { HttpClientModule, HttpErrorResponse } from '@angular/common/http';
 @Component({
   selector: 'app-community-login',
   standalone: true,
-  imports: [CommonModule, RouterLink, ToastComponent, HttpClientModule, LumaSpinComponent, FormsModule],
+  imports: [
+    CommonModule,
+    RouterLink,
+    ToastComponent,
+    HttpClientModule,
+    LumaSpinComponent,
+    FormsModule,
+  ],
   templateUrl: './community-login.html',
   styleUrls: ['./community-login.scss'],
   // BU SATIR EKLENMELİ: Spline gibi custom element'leri tanıması için gereklidir
@@ -53,13 +60,16 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
     // Geri butonuna basıldığında anasayfaya yönlendir
     this.popStateListener = (event: PopStateEvent) => {
       // State kontrolü yap - eğer bizim eklediğimiz state ise veya community-login sayfasındaysak
-      if ((event.state && event.state.fromCommunityLogin) || this.router.url === '/community-login') {
+      if (
+        (event.state && event.state.fromCommunityLogin) ||
+        this.router.url === '/community-login'
+      ) {
         // window.location kullanarak direkt anasayfaya yönlendir (Angular Router'ı bypass eder)
         window.location.href = '/';
       }
     };
     window.addEventListener('popstate', this.popStateListener);
-    
+
     // History'ye bir entry ekle ki geri butonuna basıldığında popstate tetiklensin
     history.pushState({ fromCommunityLogin: true }, '', location.href);
   }
@@ -112,14 +122,16 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
     this.isLoading = true;
 
     this.authService.loginCommunity(email, password).subscribe({
-      next: (response: AuthResponse) => {
+      next: (response: LoginResponse) => {
         // --- BAŞARILI GİRİŞ ---
-        // AuthService zaten token ve kullanıcı bilgilerini kaydediyor
         this.isLoading = false;
-        this.toastService.show('Giriş başarılı! Topluluk paneline yönlendiriliyorsunuz...', 'success');
+        this.toastService.show(
+          'Giriş başarılı! Topluluk paneline yönlendiriliyorsunuz...',
+          'success'
+        );
 
         setTimeout(() => {
-          this.router.navigate(['/']);
+          this.router.navigate(['/community-dashboard']);
         }, 1500);
       },
       error: (error: HttpErrorResponse) => {
@@ -173,7 +185,7 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
 
   async sendPasswordResetEmail() {
     const email = this.forgotPasswordEmail.trim();
-    
+
     if (!email) {
       this.toastService.show('Lütfen e-posta adresinizi giriniz.', 'error');
       return;
@@ -217,10 +229,7 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
 
       if (response.ok) {
         this.emailSent = true;
-        this.toastService.show(
-          'Şifre sıfırlama linki e-posta adresinize gönderildi.',
-          'success'
-        );
+        this.toastService.show('Şifre sıfırlama linki e-posta adresinize gönderildi.', 'success');
         setTimeout(() => {
           this.closeForgotPasswordModal();
         }, 3000);
@@ -228,7 +237,7 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
         // Mail bulunamadı kontrolü
         const errorMessage = data.message || '';
         const lowerMessage = errorMessage.toLowerCase();
-        
+
         if (
           response.status === 404 ||
           lowerMessage.includes('not found') ||

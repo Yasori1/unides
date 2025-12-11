@@ -1,0 +1,437 @@
+<div class="dashboard-container">
+  <aside class="sidebar" [class.collapsed]="isSidebarCollapsed">
+    <div class="brand" (click)="switchTab('overview')">
+      <div class="logo-square">
+        <span class="material-symbols-outlined">hub</span>
+      </div>
+      <div class="brand-text" *ngIf="!isSidebarCollapsed">
+        <h2>ÜNİDES</h2>
+        <span>Next Gen</span>
+      </div>
+    </div>
+
+    <nav class="menu">
+      <button
+        class="menu-item"
+        [class.active]="activeTab === 'overview'"
+        (click)="switchTab('overview')"
+      >
+        <span class="material-symbols-outlined">dashboard</span>
+        <span *ngIf="!isSidebarCollapsed">Genel Bakış</span>
+      </button>
+
+      <div class="menu-divider" *ngIf="!isSidebarCollapsed">ETKİNLİKLERİM</div>
+      <button
+        class="menu-item"
+        [class.active]="activeTab === 'projects'"
+        (click)="switchTab('projects')"
+      >
+        <span class="material-symbols-outlined">rocket_launch</span>
+        <span *ngIf="!isSidebarCollapsed">Etkinliklerim</span>
+      </button>
+
+      <div class="menu-divider" *ngIf="!isSidebarCollapsed">AĞ & İLETİŞİM</div>
+      <button
+        class="menu-item"
+        [class.active]="activeTab === 'network'"
+        (click)="switchTab('network')"
+      >
+        <span class="material-symbols-outlined">public</span>
+        <span *ngIf="!isSidebarCollapsed">Network</span>
+      </button>
+
+      <div class="menu-divider" *ngIf="!isSidebarCollapsed">YÖNETİM</div>
+      <button
+        class="menu-item"
+        [class.active]="activeTab === 'members'"
+        (click)="switchTab('members')"
+      >
+        <span class="material-symbols-outlined">diversity_3</span>
+        <span *ngIf="!isSidebarCollapsed">Üyeler</span>
+      </button>
+      <button
+        class="menu-item"
+        [class.active]="activeTab === 'settings'"
+        (click)="switchTab('settings')"
+      >
+        <span class="material-symbols-outlined">settings</span>
+        <span *ngIf="!isSidebarCollapsed">Ayarlar</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="logout-btn" (click)="logout()" title="Çıkış Yap">
+        <span class="material-symbols-outlined">logout</span>
+        <span *ngIf="!isSidebarCollapsed">Oturumu Kapat</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="top-header">
+      <div class="header-left">
+        <button class="icon-btn toggle-sidebar" (click)="toggleSidebar()">
+          <span class="material-symbols-outlined">menu_open</span>
+        </button>
+        <div class="breadcrumb">
+          <span class="material-symbols-outlined home-icon">domain</span>
+          <span class="sep">/</span>
+          <span>Topluluk Panel</span>
+          <span class="sep">/</span>
+          <span class="current">{{ currentTabTitle }}</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="icon-btn notification" (click)="toggleNotifications($event)">
+          <span class="material-symbols-outlined">notifications</span>
+          <span class="indicator" *ngIf="notifications.length"></span>
+        </button>
+        <div
+          class="dropdown-menu notifications"
+          *ngIf="showNotifications"
+          (click)="$event.stopPropagation()"
+        >
+          <div class="dd-header">Bildirimler</div>
+          <ul>
+            <li *ngFor="let n of notifications">
+              {{ n.text }} <small>{{ n.time }}</small>
+            </li>
+          </ul>
+        </div>
+
+        <div class="profile-wrapper">
+          <div class="profile-pic" (click)="toggleProfileDropdown($event)">
+            <img [src]="clubInfo.logo" alt="Logo" />
+          </div>
+          <div
+            class="dropdown-menu profile-dropdown"
+            *ngIf="isProfileOpen"
+            (click)="$event.stopPropagation()"
+          >
+            <div class="dd-header">{{ clubInfo.name }}</div>
+            <ul>
+              <li (click)="switchTab('settings')">
+                <span class="material-symbols-outlined small-icon">settings</span> Ayarlar
+              </li>
+              <li (click)="logout()" class="danger-item">
+                <span class="material-symbols-outlined small-icon">logout</span> Çıkış
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="toast-container-inline" *ngIf="toastMessage">
+      <div class="toast-notification" [class.error]="toastType === 'error'">
+        <span class="material-symbols-outlined">
+          {{ toastType === 'success' ? 'check_circle' : 'error' }}
+        </span>
+        <span>{{ toastMessage }}</span>
+      </div>
+    </div>
+
+    <!-- OVERVIEW -->
+    <div class="view-container" *ngIf="activeTab === 'overview'">
+      <div class="stats-grid-compact">
+        <div
+          class="stat-card-mini"
+          *ngFor="
+            let stat of [
+              { label: 'Toplam Üye', value: stats.totalMembers, icon: 'group', colorClass: 'cyan' },
+              {
+                label: 'Aktif Proje',
+                value: stats.activeProjects,
+                icon: 'rocket_launch',
+                colorClass: 'purple'
+              },
+              { label: 'Etkinlikler', value: stats.totalEvents, icon: 'event', colorClass: 'pink' },
+              {
+                label: 'Bekleyen',
+                value: stats.pendingRequests,
+                icon: 'hourglass_top',
+                colorClass: 'orange'
+              }
+            ]
+          "
+        >
+          <div class="icon-box" [ngClass]="stat.colorClass">
+            <span class="material-symbols-outlined">{{ stat.icon }}</span>
+          </div>
+          <div class="text">
+            <span>{{ stat.label }}</span>
+            <h3>{{ stat.value }}</h3>
+          </div>
+        </div>
+      </div>
+
+      <div class="split-grid">
+        <div class="card table-card">
+          <div class="card-header">
+            <h3>Son Projeler</h3>
+            <button class="btn-text" (click)="switchTab('projects')">Tümünü Gör</button>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Proje</th>
+                <th>Durum</th>
+                <th>Tarih</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let p of projects.slice(0, 3)">
+                <td>{{ p.name }}</td>
+                <td>
+                  <span class="status-badge" [ngClass]="p.status">{{ p.status }}</span>
+                </td>
+                <td>{{ p.deadline }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card quick-actions-card">
+          <h3>Hızlı İşlemler</h3>
+          <div class="actions-grid">
+            <button class="tile-btn" (click)="openModal('new-project')">
+              <span class="material-symbols-outlined">add_circle</span>
+              <span>Yeni Proje</span>
+            </button>
+            <button class="tile-btn" (click)="openModal('new-member')">
+              <span class="material-symbols-outlined">person_add</span>
+              <span>Üye Ekle</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROJECTS -->
+    <div class="view-container" *ngIf="activeTab === 'projects'">
+      <div class="page-header">
+        <h2>Etkinliklerim</h2>
+        <div class="header-controls">
+          <button class="btn-primary" (click)="openModal('new-project')">
+            <span class="material-symbols-outlined">add</span> Yeni Proje
+          </button>
+        </div>
+      </div>
+      <div class="card table-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Proje Adı</th>
+              <th>Bütçe</th>
+              <th>Durum</th>
+              <th>İlerleme</th>
+              <th>Tarih</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of projects">
+              <td>
+                <span
+                  class="material-symbols-outlined star-icon"
+                  [class.active]="p.isPromoted"
+                  (click)="togglePromote(p)"
+                  >star</span
+                >
+                {{ p.name }}
+              </td>
+              <td>{{ p.budget | number }}₺</td>
+              <td>
+                <span class="status-badge" [ngClass]="p.status">{{ p.status }}</span>
+              </td>
+              <td>
+                <div class="progress-bar">
+                  <div class="fill" [style.width.%]="p.progress"></div>
+                </div>
+                <span class="progress-text">%{{ p.progress }}</span>
+              </td>
+              <td>{{ p.deadline }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- NETWORK -->
+    <div class="view-container" *ngIf="activeTab === 'network'">
+      <div class="page-header">
+        <h2>Diğer Topluluklar</h2>
+        <p>Üniversite kulüpleriyle eşleş, projeler ve etkinlikler planla.</p>
+      </div>
+      <div class="grid-cards">
+        <div class="card collab-card" *ngFor="let c of collaborations">
+          <div class="collab-header">
+            <img [src]="c.logo" class="collab-avatar" />
+            <div class="uni-badge">{{ c.university }}</div>
+          </div>
+          <div class="collab-body">
+            <h3>{{ c.clubName }}</h3>
+            <p class="desc">{{ c.description }}</p>
+            <div class="match-score">
+              <span class="material-symbols-outlined">bolt</span> %95 Eşleşme
+            </div>
+            <div class="tags-container">
+              <span class="mini-tag">#AI</span>
+              <span class="mini-tag">#Robotik</span>
+            </div>
+            <button class="btn-outline" (click)="contactClub(c.clubName)">
+              <span class="material-symbols-outlined">chat</span> İletişime Geç
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MEMBERS -->
+    <div class="view-container" *ngIf="activeTab === 'members'">
+      <div class="page-header">
+        <h2>Üyeler</h2>
+        <div class="header-controls">
+          <div class="search-input">
+            <span class="material-symbols-outlined">search</span>
+            <input type="text" placeholder="Üye ara..." [(ngModel)]="memberSearchText" />
+          </div>
+          <button class="btn-primary" (click)="openModal('new-member')">Üye Ekle</button>
+        </div>
+      </div>
+      <div class="grid-cards members-grid">
+        <div class="card member-card" *ngFor="let m of filteredMembers">
+          <div class="member-top">
+            <img [src]="m.avatar" alt="" />
+            <span class="status-dot" [class.online]="m.status === 'Aktif'"></span>
+          </div>
+          <h4>{{ m.name }}</h4>
+          <p>{{ m.department }}</p>
+          <div class="tag-row">
+            <span class="role-tag">{{ m.role }}</span>
+            <span class="grade-tag">{{ m.grade }}</span>
+          </div>
+          <button class="icon-btn ghost danger" (click)="deleteMember(m.id)">
+            <span class="material-symbols-outlined">delete</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="view-container" *ngIf="activeTab === 'settings'">
+      <div class="card settings-card">
+        <div class="settings-banner">
+          <div class="banner-content">
+            <div>
+              <p class="eyebrow">Kulüp Profili</p>
+              <h3>Görsel ve iletişim bilgilerini güncelle</h3>
+              <p>Logo, iletişim ve sosyal alanlarını güncelleyerek üyelerine tutarlı bir profil göster.</p>
+            </div>
+            <label class="upload-chip" for="logoUpload">
+              <span class="material-symbols-outlined">upload</span>
+              Logo Yükle
+              <input
+                id="logoUpload"
+                class="upload-input"
+                type="file"
+                accept="image/*"
+                (change)="onLogoSelected($event)"
+              />
+            </label>
+          </div>
+          <div class="profile-edit-avatar">
+            <img [src]="clubInfo.logo" alt="Logo" />
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-section">
+            <h3>Kulüp Bilgileri</h3>
+            <div class="input-grid">
+              <label>
+                <span>Kulüp Adı</span>
+                <input type="text" [(ngModel)]="clubInfo.name" />
+              </label>
+              <label>
+                <span>Üniversite</span>
+                <input type="text" [(ngModel)]="clubInfo.university" disabled />
+              </label>
+            </div>
+            <label class="stacked">
+              <span>Hakkımızda</span>
+              <textarea rows="3" [(ngModel)]="clubInfo.description"></textarea>
+            </label>
+          </div>
+          <div class="form-section">
+            <h3>İletişim & Sosyal</h3>
+            <div class="input-grid">
+              <label>
+                <span>E-Posta</span>
+                <input type="email" [(ngModel)]="clubInfo.email" />
+              </label>
+              <label>
+                <span>Telefon</span>
+                <input type="text" [(ngModel)]="clubInfo.phone" />
+              </label>
+              <label>
+                <span>Instagram</span>
+                <input type="text" [(ngModel)]="clubInfo.instagram" placeholder="@kulup" />
+              </label>
+              <label>
+                <span>Website</span>
+                <input type="text" placeholder="https://..." />
+              </label>
+            </div>
+            <div class="divider"></div>
+            <h4>Tercihler</h4>
+            <div class="toggle-row">
+              <span>Herkese Açık Profil</span>
+              <label class="switch">
+                <input type="checkbox" checked />
+                <span class="slider round"></span>
+              </label>
+            </div>
+            <div class="toggle-row">
+              <span>Yeni Üye Bildirimleri</span>
+              <label class="switch">
+                <input type="checkbox" checked />
+                <span class="slider round"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="action-footer">
+          <button class="btn-primary ghost">İptal</button>
+          <button class="btn-primary" (click)="updateSettings()">Değişiklikleri Kaydet</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="modal-overlay" *ngIf="isModalOpen" (click)="closeModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <h3>{{ modalType === 'new-project' ? 'Yeni Proje Başlat' : 'Takıma Üye Ekle' }}</h3>
+        <button class="icon-btn ghost" (click)="closeModal()">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="modal-body" *ngIf="modalType === 'new-project'">
+        <input type="text" placeholder="Proje Adı" [(ngModel)]="newProjectData.name" />
+        <div class="row">
+          <input type="number" placeholder="Bütçe" [(ngModel)]="newProjectData.budget" />
+          <input type="date" [(ngModel)]="newProjectData.deadline" />
+        </div>
+        <button class="btn-primary full" (click)="saveProject()">Oluştur 🚀</button>
+      </div>
+      <div class="modal-body" *ngIf="modalType === 'new-member'">
+        <input type="text" placeholder="Ad Soyad" [(ngModel)]="newMemberData.name" />
+        <input type="text" placeholder="Bölüm" [(ngModel)]="newMemberData.department" />
+        <select [(ngModel)]="newMemberData.role">
+          <option>Üye</option>
+          <option>YK Üyesi</option>
+        </select>
+        <button class="btn-primary full" (click)="saveMember()">Kaydet ✨</button>
+      </div>
+    </div>
+  </div>
+</div>

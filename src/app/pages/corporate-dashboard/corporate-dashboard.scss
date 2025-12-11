@@ -202,6 +202,273 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
   position: relative;
 }
 
+// ================= EVENTS (Modern Cards) =================
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 18px;
+}
+
+.event-card-modern {
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: 16px;
+  box-shadow: $shadow-card;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s ease;
+
+  .event-cover {
+    width: 100%;
+    height: 180px;
+    border-radius: 16px 16px 0 0;
+    overflow: hidden;
+    background: #f4f4f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    &.placeholder {
+      color: $text-muted;
+      span {
+        font-size: 36px;
+      }
+    }
+  }
+
+  .event-card-top {
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &.Onaylandı {
+    border-color: rgba($success, 0.25);
+    box-shadow: 0 8px 20px rgba($success, 0.12);
+  }
+  &.Beklemede {
+    border-color: rgba($warning, 0.25);
+    box-shadow: 0 8px 20px rgba($warning, 0.12);
+  }
+  &.Reddedildi {
+    border-color: rgba($danger, 0.25);
+    box-shadow: 0 8px 20px rgba($danger, 0.12);
+  }
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
+  }
+
+  .event-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: $text-muted;
+
+    .event-date {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+      color: $text-main;
+      span {
+        font-size: 18px;
+      }
+    }
+
+    .status-chip {
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      &.Onaylandı {
+        background: rgba($success, 0.12);
+        color: $success;
+      }
+      &.Beklemede {
+        background: rgba($warning, 0.15);
+        color: $warning;
+      }
+      &.Reddedildi {
+        background: rgba($danger, 0.12);
+        color: $danger;
+      }
+    }
+  }
+
+  .event-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    margin: 0;
+    color: $text-main;
+    letter-spacing: -0.2px;
+  }
+
+  .event-subtitle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: $text-muted;
+    margin: 0;
+    font-weight: 600;
+  }
+
+  .event-location {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: $text-muted;
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
+  .event-actions-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+
+    .actions-left {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-success.ghost,
+    .btn-danger.ghost {
+      background: transparent;
+      border: 1px solid transparent;
+      color: inherit;
+      padding: 10px 12px;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-success.ghost {
+      color: $success;
+      border-color: rgba($success, 0.3);
+      &:hover {
+        background: rgba($success, 0.1);
+      }
+    }
+    .btn-danger.ghost {
+      color: $danger;
+      border-color: rgba($danger, 0.3);
+      &:hover {
+        background: rgba($danger, 0.08);
+      }
+    }
+  }
+}
+
+.events-filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  .chip.legend {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: $text-muted;
+    background: #f8fafc;
+    border: 1px solid $border;
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    &.approved .dot {
+      background: $success;
+    }
+    &.pending .dot {
+      background: $warning;
+    }
+    &.rejected .dot {
+      background: $danger;
+    }
+  }
+}
+
+// Modal Event Detail
+.event-detail-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.event-detail-cover {
+  width: 100%;
+  height: 220px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  &.placeholder {
+    color: $text-muted;
+    span {
+      font-size: 32px;
+    }
+  }
+}
+.event-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  .item {
+    background: #f8fafc;
+    border: 1px solid $border;
+    border-radius: 12px;
+    padding: 12px;
+    .label {
+      font-size: 0.75rem;
+      color: $text-muted;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .value {
+      margin: 4px 0 0;
+      color: $text-main;
+      font-weight: 700;
+    }
+    &.full {
+      grid-column: 1 / -1;
+    }
+  }
+}
+.modal-actions.spaced {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
 .top-header {
   height: 72px;
   background: rgba(255, 255, 255, 0.85);
@@ -998,7 +1265,7 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
   font-size: 0.95rem;
   box-sizing: border-box;
   max-width: 100%;
-  
+
   @media (max-width: 768px) {
     padding: 10px 12px;
     font-size: 0.9rem;

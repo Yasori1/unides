@@ -86,10 +86,9 @@ export class RegisterPageComponent {
           Accept: 'application/json',
         },
         body: JSON.stringify({
-          FullName: this.name,
-          Email: this.email,
-          Password: this.password,
-          RoleId: 1, // Öğrenci rolü
+          name: this.name,
+          email: this.email,
+          password: this.password,
         }),
       });
 

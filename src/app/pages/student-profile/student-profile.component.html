@@ -71,11 +71,7 @@
     </nav>
 
     <div class="sidebar-footer">
-      <button
-        class="menu-item home-btn"
-        (click)="router.navigate(['/student-login'])"
-        title="Anasayfaya Dön"
-      >
+      <button class="menu-item home-btn" (click)="router.navigate(['/'])" title="Anasayfaya Dön">
         <span class="material-symbols-outlined">home</span>
         <span *ngIf="!isSidebarCollapsed">Anasayfaya Dön</span>
       </button>
@@ -99,11 +95,14 @@
           <span class="sep">/</span>
           <span>Öğrenci Paneli</span>
           <span class="sep">/</span>
-          <span class="current">{{ 
-            activeTab === 'overview' ? 'Genel Bakış' :
-            activeTab === 'communities' ? 'Topluluklarım' :
-            activeTab === 'events' ? 'Etkinliklerim' :
-            'Ayarlar'
+          <span class="current">{{
+            activeTab === 'overview'
+              ? 'Genel Bakış'
+              : activeTab === 'communities'
+              ? 'Topluluklarım'
+              : activeTab === 'events'
+              ? 'Etkinliklerim'
+              : 'Ayarlar'
           }}</span>
         </div>
       </div>
@@ -173,12 +172,21 @@
               <div class="event-info">
                 <h4>{{ event.title }}</h4>
                 <p>{{ event.community }} • {{ event.location }}</p>
-                <span class="status-badge" [ngClass]="{
-                  'upcoming': event.status === 'upcoming',
-                  'completed': event.status === 'completed',
-                  'cancelled': event.status === 'cancelled'
-                }">
-                  {{ event.status === 'upcoming' ? 'Yaklaşan' : event.status === 'completed' ? 'Tamamlandı' : 'İptal' }}
+                <span
+                  class="status-badge"
+                  [ngClass]="{
+                    upcoming: event.status === 'upcoming',
+                    completed: event.status === 'completed',
+                    cancelled: event.status === 'cancelled'
+                  }"
+                >
+                  {{
+                    event.status === 'upcoming'
+                      ? 'Yaklaşan'
+                      : event.status === 'completed'
+                      ? 'Tamamlandı'
+                      : 'İptal'
+                  }}
                 </span>
               </div>
             </div>
@@ -254,12 +262,21 @@
               <span class="day">{{ event.date.split('-')[2] }}</span>
               <span class="month">{{ formatDate(event.date).split(' ')[1] }}</span>
             </div>
-            <span class="status-badge" [ngClass]="{
-              'upcoming': event.status === 'upcoming',
-              'completed': event.status === 'completed',
-              'cancelled': event.status === 'cancelled'
-            }">
-              {{ event.status === 'upcoming' ? 'Yaklaşan' : event.status === 'completed' ? 'Tamamlandı' : 'İptal' }}
+            <span
+              class="status-badge"
+              [ngClass]="{
+                upcoming: event.status === 'upcoming',
+                completed: event.status === 'completed',
+                cancelled: event.status === 'cancelled'
+              }"
+            >
+              {{
+                event.status === 'upcoming'
+                  ? 'Yaklaşan'
+                  : event.status === 'completed'
+                  ? 'Tamamlandı'
+                  : 'İptal'
+              }}
             </span>
           </div>
           <div class="event-body">
@@ -280,9 +297,7 @@
             </div>
           </div>
           <div class="event-actions" *ngIf="event.status === 'upcoming'">
-            <button class="btn-primary" (click)="viewEvent(event.id)">
-              Etkinliği Görüntüle
-            </button>
+            <button class="btn-primary" (click)="viewEvent(event.id)">Etkinliği Görüntüle</button>
           </div>
         </div>
       </div>
@@ -305,74 +320,69 @@
 
       <div class="settings-grid">
         <div class="settings-card">
-        <h3>Hesap Ayarları</h3>
-        <div class="form-group">
-          <label>Ad Soyad</label>
-          <input 
-            type="text" 
-            [(ngModel)]="userInfo.name" 
-            placeholder="Ad Soyad" 
-            class="editable-input"
-          />
-          <small>Ad ve soyadınızı düzenleyebilirsiniz</small>
+          <h3>Hesap Ayarları</h3>
+          <div class="form-group">
+            <label>Ad Soyad</label>
+            <input
+              type="text"
+              [(ngModel)]="userInfo.name"
+              placeholder="Ad Soyad"
+              class="editable-input"
+            />
+            <small>Ad ve soyadınızı düzenleyebilirsiniz</small>
+          </div>
+          <div class="form-group">
+            <label>Öğrenci E-posta</label>
+            <input
+              type="email"
+              [(ngModel)]="userInfo.email"
+              placeholder="E-posta"
+              readonly
+              disabled
+              class="readonly-input"
+            />
+            <small>E-posta adresi değiştirilemez</small>
+          </div>
+          <div class="form-actions">
+            <button class="btn-primary" (click)="saveSettings()">Değişiklikleri Kaydet</button>
+          </div>
         </div>
-        <div class="form-group">
-          <label>Öğrenci E-posta</label>
-          <input 
-            type="email" 
-            [(ngModel)]="userInfo.email" 
-            placeholder="E-posta" 
-            readonly 
-            disabled
-            class="readonly-input"
-          />
-          <small>E-posta adresi değiştirilemez</small>
-        </div>
-        <div class="form-actions">
-          <button class="btn-primary" (click)="saveSettings()">
-            Değişiklikleri Kaydet
-          </button>
-        </div>
-      </div>
 
         <div class="settings-card">
           <h3>Şifre Değiştir</h3>
-        <div class="form-group">
-          <label>Mevcut Şifre</label>
-          <input 
-            type="password" 
-            [(ngModel)]="userInfo.currentPassword" 
-            placeholder="Mevcut şifrenizi giriniz" 
-            class="editable-input"
-          />
+          <div class="form-group">
+            <label>Mevcut Şifre</label>
+            <input
+              type="password"
+              [(ngModel)]="userInfo.currentPassword"
+              placeholder="Mevcut şifrenizi giriniz"
+              class="editable-input"
+            />
+          </div>
+          <div class="form-group">
+            <label>Yeni Şifre</label>
+            <input
+              type="password"
+              [(ngModel)]="userInfo.newPassword"
+              placeholder="Yeni şifrenizi giriniz"
+              class="editable-input"
+            />
+          </div>
+          <div class="form-group">
+            <label>Yeni Şifre (Tekrar)</label>
+            <input
+              type="password"
+              [(ngModel)]="userInfo.confirmPassword"
+              placeholder="Yeni şifrenizi tekrar giriniz"
+              class="editable-input"
+            />
+            <small>Şifrenizi değiştirmek için mevcut şifrenizi ve yeni şifrenizi giriniz</small>
+          </div>
+          <div class="form-actions">
+            <button class="btn-primary" (click)="changePassword()">Şifreyi Değiştir</button>
+          </div>
         </div>
-        <div class="form-group">
-          <label>Yeni Şifre</label>
-          <input 
-            type="password" 
-            [(ngModel)]="userInfo.newPassword" 
-            placeholder="Yeni şifrenizi giriniz" 
-            class="editable-input"
-          />
-        </div>
-        <div class="form-group">
-          <label>Yeni Şifre (Tekrar)</label>
-          <input 
-            type="password" 
-            [(ngModel)]="userInfo.confirmPassword" 
-            placeholder="Yeni şifrenizi tekrar giriniz" 
-            class="editable-input"
-          />
-          <small>Şifrenizi değiştirmek için mevcut şifrenizi ve yeni şifrenizi giriniz</small>
-        </div>
-        <div class="form-actions">
-          <button class="btn-primary" (click)="changePassword()">
-            Şifreyi Değiştir
-          </button>
-        </div>
-      </div>
       </div>
     </div>
   </main>
 </div>
-

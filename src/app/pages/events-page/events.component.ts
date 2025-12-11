@@ -17,6 +17,7 @@ import { HeaderComponent } from '../../common/header/header.component';
 import { FooterComponent } from '../../common/footer/footer.component';
 // CommunityService import edildi
 import { CommunityService } from '../../services/community.services';
+import { EventService, EventItem } from '../../services/event.services';
 
 interface EventCard {
   id: number;
@@ -95,6 +96,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
   pageSize: number = 8;
   isLoadingMore: boolean = false;
   hasMoreData: boolean = true;
+  allCommunities: any[] = [];
 
   @ViewChildren('animItem') animItems!: QueryList<ElementRef>;
 
@@ -107,140 +109,98 @@ export class EventsComponent implements OnInit, AfterViewInit {
     'https://media.istockphoto.com/id/1486287149/tr/foto%C4%9Fraf/group-of-multiracial-asian-business-participants-casual-chat-after-successful-conference.jpg?s=612x612&w=0&k=20&c=UIA06kHeAHdKyPRyREEGmmkfyvi0RMyjbldymvolJiY=',
   ];
 
-  // Base Events
-  baseEvents: EventCard[] = [
-    {
-      id: 1,
-      title: 'Yapay Zeka Zirvesi',
-      description: 'Geleceğin teknolojilerini sektör liderlerinden dinleyin.',
-      category: 'Teknoloji',
-      date: '25 Ekim',
-      dateObj: new Date('2025-10-25'),
-      time: '14:00',
-      university: '',
-      club: 'Yapay Zeka Kulübü',
-      semester: '',
-      location: '',
-      quota: 150,
-      status: 'active',
-      imageUrl:
-        'https://images.unsplash.com/photo-1677442136019-21780ecad995?q=80&w=800&auto=format&fit=crop',
-      color: '#2563eb',
-    },
-    {
-      id: 2,
-      title: 'Bahar Festivali',
-      description: 'Dev sahne, sürpriz sanatçılar ve gün boyu eğlence.',
-      category: 'Müzik',
-      date: '15 Mayıs',
-      dateObj: new Date('2025-05-15'),
-      time: '16:00',
-      university: '',
-      club: 'Müzik Kulübü',
-      semester: '',
-      location: '',
-      quota: 5000,
-      status: 'upcoming',
-      imageUrl:
-        'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=800&auto=format&fit=crop',
-      color: '#4f46e5',
-    },
-    {
-      id: 3,
-      title: 'UI/UX Tasarım Atölyesi',
-      description: 'Figma ile mobil uygulama arayüzü tasarlamayı öğrenin.',
-      category: 'Sanat',
-      date: '12 Kasım',
-      dateObj: new Date('2025-11-12'),
-      time: '10:00',
-      university: '',
-      club: 'Tasarım Topluluğu',
-      semester: '',
-      location: '',
-      quota: 30,
-      status: 'active',
-      imageUrl:
-        'https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?q=80&w=800&auto=format&fit=crop',
-      color: '#0ea5e9',
-    },
-    {
-      id: 4,
-      title: 'Global Kariyer Fuarı',
-      description: 'Global şirketlerle tanışma ve mülakat simülasyonları.',
-      category: 'Kariyer',
-      date: '05 Aralık',
-      dateObj: new Date('2025-12-05'),
-      time: '09:00',
-      university: '',
-      club: 'Kariyer Kulübü',
-      semester: '',
-      location: '',
-      quota: 500,
-      status: 'upcoming',
-      imageUrl:
-        'https://images.unsplash.com/photo-1511376777868-611b54f68947?q=80&w=800&auto=format&fit=crop',
-      color: '#0f172a',
-    },
-    {
-      id: 5,
-      title: 'Valorant Turnuvası',
-      description: '5 kişilik takımını kur, büyük ödül için yarış.',
-      category: 'Spor',
-      date: '20 Şubat',
-      dateObj: new Date('2025-02-20'),
-      time: '12:00',
-      university: '',
-      club: 'E-Spor Kulübü',
-      semester: '',
-      location: '',
-      quota: 64,
-      status: 'active',
-      imageUrl:
-        'https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=800&auto=format&fit=crop',
-      color: '#ef4444',
-    },
-    {
-      id: 6,
-      title: 'Doğa Yürüyüşü',
-      description: "Belgrad Ormanı'nda trekking ve kahvaltı.",
-      category: 'Gezi',
-      date: '28 Eylül',
-      dateObj: new Date('2025-09-28'),
-      time: '07:30',
-      university: '',
-      club: 'Doğa Sporları',
-      semester: '',
-      location: '',
-      quota: 40,
-      status: 'upcoming',
-      imageUrl:
-        'https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=800&auto=format&fit=crop',
-      color: '#10b981',
-    },
-  ];
+  // Base Events (backend gelir; yoksa boş kalır)
+  baseEvents: EventCard[] = [];
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
     private router: Router,
-    private communityService: CommunityService
+    private communityService: CommunityService,
+    private eventService: EventService
   ) {}
 
   ngOnInit() {
-    this.communityService.getAllCommunities().subscribe((communities) => {
-      if (communities.length > 0) {
-        this.baseEvents.forEach((event, index) => {
-          const community = communities[index % communities.length];
+    if (!isPlatformBrowser(this.platformId)) return;
 
-          event.semester = community.name;
-          event.university = community.university;
-          event.city = community.city || 'İstanbul'; // Şehri kaydet
-          event.location = this.getVenueByCity(event.city);
-        });
-      }
-
-      this.allEventsPool = [...this.baseEvents];
-      this.applyFiltersAndLoadFirstPage();
+    // Toplulukları yükle, ardından etkinlikleri backend'den çek
+    this.communityService.getAllCommunities().subscribe({
+      next: (communities) => {
+        this.allCommunities = communities || [];
+        this.loadEventsFromBackend();
+      },
+      error: () => {
+        this.allCommunities = [];
+        this.loadEventsFromBackend();
+      },
     });
+  }
+
+  private loadEventsFromBackend() {
+    this.eventService.getAll().subscribe({
+      next: (data: EventItem[]) => {
+        if (data && data.length) {
+          this.baseEvents = data.map((e) => this.mapToCard(e));
+          this.attachCommunityNames();
+        }
+        this.allEventsPool = [...this.baseEvents];
+        this.applyFiltersAndLoadFirstPage();
+      },
+      error: (err) => {
+        console.error('Etkinlikler yüklenemedi:', err);
+        // fallback mevcut baseEvents mock ile devam
+        this.allEventsPool = [...this.baseEvents];
+        this.applyFiltersAndLoadFirstPage();
+      },
+    });
+  }
+
+  private attachCommunityNames() {
+    if (!this.allCommunities?.length || !this.baseEvents?.length) return;
+    this.baseEvents = this.baseEvents.map((ev) => {
+      if (!ev.club && (ev as any).communityId) {
+        const found = this.allCommunities.find((c) => c.id === (ev as any).communityId);
+        return {
+          ...ev,
+          club: found?.name || ev.club,
+          university: found?.university || ev.university,
+          city: found?.city || ev.city,
+          location: ev.location || this.getVenueByCity(found?.city || ''),
+        };
+      }
+      return ev;
+    });
+  }
+
+  private mapToCard(e: EventItem): EventCard {
+    const start = e.startDate ? new Date(e.startDate) : null;
+    const formattedDate = start
+      ? start.toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric' })
+      : '';
+    const formattedTime = start
+      ? start.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
+      : '';
+
+    return {
+      id: e.id,
+      title: e.title || '',
+      description: e.description || e.shortDescription || '',
+      category: 'Etkinlik',
+      date: formattedDate,
+      dateObj: start || new Date(),
+      time: formattedTime,
+      university: '',
+      club: e.communityName || '',
+      semester: '',
+      location: e.location || '',
+      quota: 0,
+      status: 'active',
+      imageUrl: e.imageUrl || '',
+      color: '#2563eb',
+      city: '',
+      // backend topluluk id'yi ileride kullanabilmek için taşıyalım
+      // @ts-ignore
+      communityId: e.communityId,
+    } as any;
   }
 
   getVenueByCity(city: string): string {

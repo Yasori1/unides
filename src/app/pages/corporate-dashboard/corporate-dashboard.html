@@ -401,92 +401,65 @@
     <div class="view-container" *ngIf="activeTab === 'events'">
       <div class="page-header">
         <h2>Etkinlik Yönetimi</h2>
-        <div class="header-controls">
-          <button class="btn-secondary">
-            <span class="material-symbols-outlined">calendar_month</span> Takvim Görünümü
-          </button>
+        <div class="header-controls events-filters">
+          <div class="chip legend approved"><span class="dot"></span>Onaylandı</div>
+          <div class="chip legend pending"><span class="dot"></span>Beklemede</div>
+          <div class="chip legend rejected"><span class="dot"></span>Reddedildi</div>
         </div>
       </div>
 
-      <!-- Events kart tasarımı (Topluluklar gibi) -->
-      <div class="grid-container" *ngIf="allEvents.length > 0">
-        <div *ngFor="let e of allEvents" class="event-card">
-          <div class="cover-area">
-            <div class="event-placeholder">
-              <span class="material-symbols-outlined">event_available</span>
+      <div class="events-grid" *ngIf="allEvents.length > 0">
+        <div *ngFor="let e of allEvents" class="event-card-modern" [ngClass]="e.status">
+          <div class="event-card-top">
+            <div class="event-meta">
+              <span class="event-date">
+                <span class="material-symbols-outlined">calendar_today</span>
+                {{ e.date }}
+              </span>
+              <span class="status-chip" [ngClass]="e.status">
+                {{ e.status }}
+              </span>
             </div>
-            <span class="category-badge">ETKİNLİK</span>
-            <span
-              class="status-badge"
-              [ngClass]="{
-                active: e.status === 'Onaylandı',
-                warning: e.status === 'Beklemede',
-                passive: e.status === 'Reddedildi'
-              }"
-            >
-              {{ e.status }}
-            </span>
+            <h3 class="event-title">{{ e.eventName }}</h3>
+            <p class="event-subtitle">
+              <span class="material-symbols-outlined">groups</span>
+              {{ e.communityName }}
+            </p>
+            <p class="event-location">
+              <span class="material-symbols-outlined">location_on</span>
+              {{ e.location }}
+            </p>
           </div>
 
-          <div class="card-content">
-            <div class="header-row">
-              <div class="logo-wrapper">
-                <div class="event-icon">
-                  <span class="material-symbols-outlined">celebration</span>
-                </div>
-              </div>
-              <div class="title-wrapper">
-                <h3 class="event-name">{{ e.eventName }}</h3>
-                <span class="community-name">{{ e.communityName }}</span>
-              </div>
+          <div class="event-actions-row">
+            <div class="actions-left">
+              <button
+                class="btn-success ghost"
+                *ngIf="e.status === 'Beklemede'"
+                (click)="approveEvent(e.id); $event.stopPropagation()"
+                title="Onayla"
+              >
+                <span class="material-symbols-outlined">check</span>
+                Onayla
+              </button>
+              <button
+                class="btn-danger ghost"
+                *ngIf="e.status === 'Beklemede'"
+                (click)="rejectEvent(e.id); $event.stopPropagation()"
+                title="Reddet"
+              >
+                <span class="material-symbols-outlined">close</span>
+                Reddet
+              </button>
             </div>
-
-            <div class="event-details">
-              <div class="detail-item">
-                <i class="bx bx-calendar"></i>
-                <span>{{ e.date }}</span>
-              </div>
-              <div class="detail-item">
-                <i class="bx bx-map"></i>
-                <span>{{ e.location }}</span>
-              </div>
-              <div class="detail-item">
-                <i class="bx bx-money"></i>
-                <span>{{ e.budget | number }} ₺</span>
-              </div>
-            </div>
-
-            <div class="card-footer">
-              <div class="event-actions">
-                <button
-                  class="btn-success"
-                  *ngIf="e.status === 'Beklemede'"
-                  (click)="approveEvent(e.id); $event.stopPropagation()"
-                  title="Onayla"
-                >
-                  <span class="material-symbols-outlined">check</span>
-                  Onayla
-                </button>
-                <button
-                  class="btn-danger"
-                  *ngIf="e.status === 'Beklemede'"
-                  (click)="rejectEvent(e.id); $event.stopPropagation()"
-                  title="Reddet"
-                >
-                  <span class="material-symbols-outlined">close</span>
-                  Reddet
-                </button>
-                <button class="detail-btn" (click)="$event.stopPropagation()" title="Detay">
-                  Detaylar
-                  <i class="bx bx-right-arrow-alt"></i>
-                </button>
-              </div>
-            </div>
+            <button class="detail-btn" (click)="$event.stopPropagation()" title="Detay">
+              Detaylar
+              <i class="bx bx-right-arrow-alt"></i>
+            </button>
           </div>
         </div>
       </div>
 
-      <!-- Etkinlik yoksa -->
       <div class="empty-state" *ngIf="allEvents.length === 0">
         <span class="material-symbols-outlined">event_busy</span>
         <p>Henüz etkinlik bulunmuyor.</p>
@@ -594,6 +567,10 @@
                 ? 'Yeni Duyuru Oluştur'
                 : modalType === 'edit-announcement'
                 ? 'Duyuru Güncelle'
+                : modalType === 'new-event'
+                ? 'Yeni Etkinlik'
+                : modalType === 'event-detail'
+                ? 'Etkinlik Detayı'
                 : modalType === 'new-community'
                 ? 'Yeni Topluluk Ekle'
                 : modalType === 'edit-community'
@@ -1122,6 +1099,107 @@
               <span class="material-symbols-outlined">save</span>
               Topluluk Kaydet
             </button>
+          </div>
+        </div>
+
+        <!-- Etkinlik Detay Modal -->
+        <div
+          class="modal-body modal-body-scrollable"
+          *ngIf="modalType === 'event-detail' && selectedEvent"
+        >
+          <div class="event-detail-wrapper">
+            <div class="event-detail-cover" *ngIf="selectedEvent.imageUrl; else evtCoverPh">
+              <img [src]="selectedEvent.imageUrl" [alt]="selectedEvent.eventName" />
+            </div>
+            <ng-template #evtCoverPh>
+              <div class="event-detail-cover placeholder">
+                <span class="material-symbols-outlined">photo</span>
+              </div>
+            </ng-template>
+
+            <div class="event-detail-grid">
+              <div class="item">
+                <span class="label">Kategori</span>
+                <p class="value">{{ selectedEvent.status || 'Beklemede' }}</p>
+              </div>
+              <div class="item">
+                <span class="label">Etkinlik</span>
+                <p class="value">{{ selectedEvent.eventName }}</p>
+              </div>
+              <div class="item">
+                <span class="label">Üniversite</span>
+                <p class="value">{{ selectedEvent.communityName || '—' }}</p>
+              </div>
+              <div class="item">
+                <span class="label">Kulüp</span>
+                <p class="value">{{ selectedEvent.communityName || '—' }}</p>
+              </div>
+              <div class="item">
+                <span class="label">Konum</span>
+                <p class="value">{{ selectedEvent.location || '—' }}</p>
+              </div>
+              <div class="item">
+                <span class="label">Tarih & Saat</span>
+                <p class="value">{{ selectedEvent.date || '—' }}</p>
+              </div>
+              <div class="item">
+                <span class="label">Kontenjan</span>
+                <p class="value">{{ selectedEvent.capacity || '—' }}</p>
+              </div>
+              <div class="item full">
+                <span class="label">Açıklama</span>
+                <p class="value">{{ selectedEvent.description || '—' }}</p>
+              </div>
+            </div>
+
+            <div class="modal-actions spaced">
+              <button class="btn-danger" (click)="deleteEvent(selectedEvent.id)">
+                <span class="material-symbols-outlined">delete</span> Etkinliği Sil
+              </button>
+              <button class="btn-secondary" (click)="closeModal()">Kapat</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Yeni Etkinlik Modal -->
+        <div class="modal-body modal-body-scrollable" *ngIf="modalType === 'new-event' && newEvent">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Etkinlik Adı</label>
+              <input type="text" [(ngModel)]="newEvent.eventName" />
+            </div>
+            <div class="form-group">
+              <label>Topluluk</label>
+              <select [(ngModel)]="newEvent.communityId">
+                <option *ngFor="let c of allCommunities" [value]="c.id">{{ c.name }}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Tarih & Saat</label>
+              <input type="text" placeholder="20 Şubat | 12:00" [(ngModel)]="newEvent.date" />
+            </div>
+            <div class="form-group">
+              <label>Konum</label>
+              <input type="text" [(ngModel)]="newEvent.location" />
+            </div>
+            <div class="form-group full">
+              <label>Görsel URL</label>
+              <input type="text" [(ngModel)]="newEvent.imageUrl" />
+            </div>
+            <div class="form-group full">
+              <label>Kontenjan</label>
+              <input type="text" [(ngModel)]="newEvent.capacity" />
+            </div>
+            <div class="form-group full">
+              <label>Açıklama</label>
+              <textarea rows="3" [(ngModel)]="newEvent.description"></textarea>
+            </div>
+          </div>
+          <div class="modal-actions">
+            <button class="btn-primary" (click)="saveNewEvent()">
+              <span class="material-symbols-outlined">save</span> Kaydet
+            </button>
+            <button class="btn-secondary" (click)="closeModal()">Vazgeç</button>
           </div>
         </div>
       </div>

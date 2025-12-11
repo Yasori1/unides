@@ -1,7 +1,23 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable, catchError, map, of } from 'rxjs';
 import { delay } from 'rxjs/operators';
 
+export interface EventItem {
+  id: number;
+  title: string;
+  shortDescription?: string;
+  description?: string;
+  startDate?: string;
+  endDate?: string;
+  location?: string;
+  communityId: number;
+  communityName?: string;
+  imageUrl?: string;
+  status?: 'Onaylandı' | 'Beklemede' | 'Reddedildi';
+}
+
+// Swipe/magic-card bileşenleri için kullanılan mock Project tipi
 export interface Project {
   id: number;
   title: string;
@@ -17,6 +33,8 @@ export interface Project {
   providedIn: 'root',
 })
 export class EventService {
+  private apiUrl = '/api/Events';
+  // Magic-card ve swipe-stack için mock veri havuzu
   private baseProjects: Project[] = [
     {
       id: 1,
@@ -87,16 +105,40 @@ export class EventService {
     },
   ];
 
-  constructor() {}
+  constructor(private http: HttpClient) {}
 
-  // Tüm etkinlikleri getir (Sayfalama testi için çoğaltılmış)
+  private mapToEvent(dto: any): EventItem {
+    return {
+      id: dto.etkinlikId || dto.EtkinlikId || dto.id || 0,
+      title: dto.etkinlikAdi || dto.EtkinlikAdi || dto.title || '',
+      shortDescription: dto.kisaAciklama || dto.KisaAciklama || '',
+      description: dto.detayliAciklama || dto.DetayliAciklama || '',
+      startDate: dto.baslangicTarihi || dto.BaslangicTarihi,
+      endDate: dto.bitisTarihi || dto.BitisTarihi,
+      location: dto.konum || dto.Konum || '',
+      communityId: dto.toplulukId || dto.ToplulukId || 0,
+      imageUrl: dto.resimUrl || dto.ResimUrl || '',
+      status: 'Beklemede',
+    };
+  }
+
+  getAll(): Observable<EventItem[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/all`).pipe(
+      map((list) => list.map((dto) => this.mapToEvent(dto))),
+      catchError((error) => {
+        console.error('Etkinlikler yüklenemedi:', error);
+        return of([]);
+      })
+    );
+  }
+
+  // --- Magic-card / swipe-stack mock veri kaynakları ---
   getEvents(): Observable<Project[]> {
     let bigData: Project[] = [];
-    // 15 katına çıkararak ~90 veri oluşturuyoruz
     for (let i = 0; i < 15; i++) {
       const batch = this.baseProjects.map((p) => ({
         ...p,
-        id: p.id + i * 100, // ID Çakışmasın
+        id: p.id + i * 100,
         title: i === 0 ? p.title : `${p.title} #${i}`,
       }));
       bigData = [...bigData, ...batch];
@@ -104,9 +146,7 @@ export class EventService {
     return of(bigData).pipe(delay(300));
   }
 
-  // Swipe alanı için rastgele ve benzersiz etkinlikler getir
   getRandomSwipeEvents(count: number, excludedIds: number[]): Observable<Project[]> {
-    // 1. Havuzu Oluştur (Normalde DB'den gelir)
     let bigData: Project[] = [];
     for (let i = 0; i < 15; i++) {
       const batch = this.baseProjects.map((p) => ({
@@ -117,15 +157,10 @@ export class EventService {
       bigData = [...bigData, ...batch];
     }
 
-    // 2. Daha önce gösterilenleri çıkar
     const available = bigData.filter((p) => !excludedIds.includes(p.id));
-
-    // 3. Karıştır
     const shuffled = available.sort(() => 0.5 - Math.random());
-
-    // 4. İstenen sayı kadarını al
     const selected = shuffled.slice(0, count);
 
-    return of(selected).pipe(delay(300)); // Hafif gecikme simülasyonu
+    return of(selected).pipe(delay(300));
   }
 }

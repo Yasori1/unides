@@ -58,6 +58,7 @@ import { StudentLoginComponent } from './pages/student-login/student-login.compo
 import { StudentProfileComponent } from './pages/student-profile/student-profile.component';
 import { CommunityDetailComponent } from './pages/community-detail/community-detail.component';
 import { ResetPasswordComponent } from './pages/reset-password/reset-password.component';
+import { CommunityDashboardComponent } from './pages/community-dashboard/community-dashboard.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -91,6 +92,8 @@ export const routes: Routes = [
 
   // KURUMSAL DASHBOARD (ÖNEMLİ: Yönlendirme yapılacak rota)
   { path: 'corporate-dashboard', component: CorporateDashboardComponent },
+  // TOPLULUK DASHBOARD
+  { path: 'community-dashboard', component: CommunityDashboardComponent },
 
   // ÖĞRENCİ GİRİŞ SONRASI SAYFA
   { path: 'student-login', component: StudentLoginComponent },

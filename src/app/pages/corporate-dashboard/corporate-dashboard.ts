@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { ImageUploadComponent } from '../../components/ui/image-upload/image-upload';
 import { CommunityService } from '../../services/community.services';
 import { AnnouncementService } from '../../services/announcement.services';
+import { EventService, EventItem } from '../../services/event.services';
 
 // NOT: ToastService ve ToastComponent'i normalde ayrı dosyalardan import edersiniz.
 // Burada örnek çalışabilsin diye aynı dosyada tuttum veya import edilmiş varsaydım.
@@ -160,12 +161,15 @@ interface Announcement {
 }
 interface EventRequest {
   id: number;
+  communityId?: number;
   communityName: string;
   eventName: string;
   date: string;
   location: string;
-  budget: number;
+  imageUrl?: string;
+  description?: string;
   status: 'Onaylandı' | 'Beklemede' | 'Reddedildi';
+  capacity?: string;
 }
 
 @Component({
@@ -528,44 +532,9 @@ export class CorporateDashboardComponent implements OnInit {
     link: '',
   };
 
-  allEvents: EventRequest[] = [
-    {
-      id: 1,
-      communityName: 'AI Club',
-      eventName: 'Yapay Zeka Zirvesi',
-      date: '12 Kasım 2023',
-      location: 'Konferans Salonu A',
-      budget: 15000,
-      status: 'Beklemede',
-    },
-    {
-      id: 2,
-      communityName: 'Dans Topluluğu',
-      eventName: 'Yıl Sonu Gösterisi',
-      date: '15 Kasım 2023',
-      location: 'Kültür Merkezi',
-      budget: 5000,
-      status: 'Onaylandı',
-    },
-    {
-      id: 3,
-      communityName: 'Girişimcilik',
-      eventName: 'Startup Weekend',
-      date: '20 Kasım 2023',
-      location: 'İnovasyon Merkezi',
-      budget: 25000,
-      status: 'Reddedildi',
-    },
-    {
-      id: 4,
-      communityName: 'Gezi Kulübü',
-      eventName: 'Uludağ Kampı',
-      date: '25 Kasım 2023',
-      location: 'Uludağ',
-      budget: 45000,
-      status: 'Beklemede',
-    },
-  ];
+  allEvents: EventRequest[] = [];
+  selectedEvent: EventRequest | null = null;
+  newEvent: Partial<EventRequest> | null = null;
 
   notifications = [
     { text: 'E-Spor topluluğu onay bekliyor', time: '10 dk önce' },
@@ -578,6 +547,7 @@ export class CorporateDashboardComponent implements OnInit {
     private router: Router,
     private communityService: CommunityService,
     private announcementService: AnnouncementService,
+    private eventService: EventService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -591,6 +561,8 @@ export class CorporateDashboardComponent implements OnInit {
     this.loadCommunitiesFromService();
     // AnnouncementService'ten duyuruları çek (announcements-page ile aynı kaynak)
     this.loadAnnouncementsFromService();
+    // Events'i backend'den çek
+    this.loadEventsFromService();
   }
 
   loadCommunitiesFromService() {
@@ -616,6 +588,8 @@ export class CorporateDashboardComponent implements OnInit {
         this.communities = [...this.allCommunities];
         this.filteredCommunities = [...this.communities];
         this.initPagination();
+        // Topluluk isimleri yüklendikten sonra etkinlikleri eşle
+        this.attachCommunityNamesToEvents();
       },
       error: (err) => {
         console.error('Topluluklar yüklenemedi:', err);
@@ -623,7 +597,40 @@ export class CorporateDashboardComponent implements OnInit {
         this.communities = [...this.allCommunities];
         this.filteredCommunities = [...this.communities];
         this.initPagination();
+        this.attachCommunityNamesToEvents();
       },
+    });
+  }
+
+  loadEventsFromService() {
+    if (!isPlatformBrowser(this.platformId)) return;
+    this.eventService.getAll().subscribe({
+      next: (data: EventItem[]) => {
+        this.allEvents = data.map((e) => ({
+          id: e.id,
+          communityId: e.communityId,
+          communityName: '',
+          eventName: e.title,
+          date: e.startDate || '',
+          location: e.location || '',
+          imageUrl: e.imageUrl || '',
+          description: e.description || e.shortDescription || '',
+          status: e.status || 'Beklemede',
+          capacity: '',
+        }));
+        this.attachCommunityNamesToEvents();
+      },
+      error: (err) => {
+        console.error('Etkinlikler yüklenemedi:', err);
+      },
+    });
+  }
+
+  attachCommunityNamesToEvents() {
+    if (!this.allCommunities?.length || !this.allEvents?.length) return;
+    this.allEvents = this.allEvents.map((ev) => {
+      const found = this.allCommunities.find((c) => c.id === ev.communityId);
+      return { ...ev, communityName: found?.name || ev.communityName };
     });
   }
 
@@ -928,6 +935,59 @@ export class CorporateDashboardComponent implements OnInit {
       event.status = 'Reddedildi';
       this.showToast('Etkinlik reddedildi', 'error');
     }
+  }
+
+  openEventDetail(ev: EventRequest) {
+    this.selectedEvent = ev;
+    this.modalType = 'event-detail';
+    this.isModalOpen = true;
+  }
+
+  openNewEventModal() {
+    this.newEvent = {
+      eventName: '',
+      date: '',
+      location: '',
+      communityId: this.allCommunities[0]?.id || undefined,
+      communityName: this.allCommunities[0]?.name || '',
+      imageUrl: '',
+      description: '',
+      status: 'Beklemede',
+      capacity: '',
+    };
+    this.modalType = 'new-event';
+    this.isModalOpen = true;
+  }
+
+  saveNewEvent() {
+    if (!this.newEvent?.eventName) {
+      this.showToast('Etkinlik adı zorunlu', 'error');
+      return;
+    }
+    const newItem: EventRequest = {
+      id: Date.now(),
+      eventName: this.newEvent.eventName,
+      date: this.newEvent.date || '',
+      location: this.newEvent.location || '',
+      communityId: this.newEvent.communityId,
+      communityName:
+        this.allCommunities.find((c) => c.id === this.newEvent?.communityId)?.name ||
+        this.newEvent.communityName ||
+        '',
+      imageUrl: this.newEvent.imageUrl || '',
+      description: this.newEvent.description || '',
+      status: this.newEvent.status || 'Beklemede',
+      capacity: this.newEvent.capacity || '',
+    };
+    this.allEvents = [newItem, ...this.allEvents];
+    this.showToast('Etkinlik eklendi (mock)', 'success');
+    this.closeModal();
+  }
+
+  deleteEvent(id: number) {
+    this.allEvents = this.allEvents.filter((e) => e.id !== id);
+    this.showToast('Etkinlik silindi (mock)', 'success');
+    this.closeModal();
   }
 
   openModal(type: string) {

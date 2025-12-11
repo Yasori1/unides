@@ -1,9 +1,18 @@
-import { Component, HostListener, Input, OnInit, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
+import {
+  Component,
+  HostListener,
+  Input,
+  OnInit,
+  OnDestroy,
+  Inject,
+  PLATFORM_ID,
+} from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { HeadroomModule } from '@ctrl/ngx-headroom';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { filter, Subscription } from 'rxjs';
+import { ToastService } from '../../services/toast.services';
 
 @Component({
   selector: 'app-header',
@@ -49,20 +58,22 @@ export class HeaderComponent implements OnInit, OnDestroy {
   isSticky: boolean = false;
   private _showProfile: boolean = false;
   private routerSubscription?: Subscription;
+  isLoggingOut = false;
 
   constructor(
     public router: Router,
-    @Inject(PLATFORM_ID) private platformId: Object
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
     // Eğer showProfile input olarak verilmediyse, localStorage'dan kontrol et
     if (this.showProfile === undefined) {
       this.checkLoginStatus();
-      
+
       // Router events'i dinle, sayfa değiştiğinde tekrar kontrol et
       this.routerSubscription = this.router.events
-        .pipe(filter(event => event instanceof NavigationEnd))
+        .pipe(filter((event) => event instanceof NavigationEnd))
         .subscribe(() => {
           this.checkLoginStatus();
         });
@@ -81,7 +92,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     if (isPlatformBrowser(this.platformId)) {
       const authToken = localStorage.getItem('auth_token');
       const userType = localStorage.getItem('user_type');
-      
+
       // Öğrenci girişi yapılmışsa (user_type === '1' veya 'student' ve token varsa)
       if (authToken && (userType === '1' || userType === 'student')) {
         this._showProfile = true;
@@ -118,5 +129,23 @@ export class HeaderComponent implements OnInit, OnDestroy {
   @HostListener('window:scroll', [])
   checkScroll() {
     this.isSticky = window.scrollY >= 50;
+  }
+
+  logout() {
+    if (this.isLoggingOut) return;
+    this.isLoggingOut = true;
+
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('user_type');
+    }
+    this._showProfile = false;
+    this.toastService.show('Çıkış yapıldı', 'success');
+
+    setTimeout(() => {
+      this.router.navigate(['/']);
+      this.isLoggingOut = false;
+    }, 1200); // spinnerı 1-1.2sn göstermek için
   }
 }

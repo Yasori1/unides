@@ -1,43 +1,44 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, tap, catchError, of } from 'rxjs';
 import { Router } from '@angular/router';
 
-// Backend AuthResponse formatı (PascalCase)
-export interface AuthResponse {
-  Id: number;
-  FullName: string;
-  Email: string;
-  RoleName: string;
-  AccessToken: string;
-  RefreshToken: string;
-}
-
-// Eski interface (geriye uyumluluk için)
 export interface LoginResponse {
-  token: string;
+  // Eski/varsayılan alanlar
+  token?: string;
   refreshToken?: string;
-  user: {
+  user?: {
     id: number;
     name: string;
     email: string;
     role: 'student' | 'corporate' | 'community' | 'admin';
   };
+  // Yeni alanlar (backend AuthResponse)
+  accessToken?: string;
+  AccessToken?: string;
+  RefreshToken?: string;
+  refresh?: string;
+  roleName?: string;
+  RoleName?: string;
+  id?: number;
+  fullName?: string;
+  email?: string;
 }
 
 export interface RegisterRequest {
-  FullName: string;
-  Email: string;
-  Password: string;
-  RoleId: number;
+  name: string;
+  email: string;
+  password: string;
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  // Proxy üzerinden çalışacak şekilde /api kullanıyoruz
-  // proxy.conf.json /api isteklerini https://localhost:7069'a yönlendiriyor
+  // Swagger görseline göre Base URL
+  // Endpointler /api/Auth/... şeklinde olduğu için base url:
+  // Lokal geliştirmede proxy.conf.json ile aynı origin üzerinden /api
+  // Canlıda domain reverse proxy de /api'yi backend'e yönlendirmeli.
   private apiUrl = '/api';
 
   constructor(private http: HttpClient, private router: Router) {}
@@ -45,43 +46,37 @@ export class AuthService {
   // --- MERKEZİ GİRİŞ METODU (SWAGGER: POST /api/Auth/login) ---
   // Tüm kullanıcı tipleri aynı endpoint üzerinden giriş yapar,
   // Backend rolü response içinde döner veya token'a gömer.
-  private login(email: string, password: string, roleId?: number): Observable<AuthResponse> {
-    // Backend LoginRequest formatı: { Email, Password, RoleId }
-    const payload: any = { 
-      Email: email, 
-      Password: password 
-    };
-    if (roleId !== undefined) {
-      payload.RoleId = roleId;
-    }
-    
-    return this.http.post<AuthResponse>(`${this.apiUrl}/Auth/login`, payload).pipe(
-      tap((response) => {
-        if (response.AccessToken) {
-          // Backend'den gelen AuthResponse'u işle
-          this.saveToken(response.AccessToken);
-          if (response.RefreshToken) {
-            localStorage.setItem('refresh_token', response.RefreshToken);
-          }
-          
-          // Kullanıcı bilgilerini kaydet
-          const userInfo = {
-            id: response.Id,
-            name: response.FullName,
-            email: response.Email,
-            role: response.RoleName
-          };
-          this.saveUser(userInfo);
-          
-          // Rol adını user_type olarak kaydet
-          const roleMap: { [key: string]: string } = {
-            'Student': 'student',
-            'Corporate': 'corporate',
-            'Community': 'community',
-            'Admin': 'admin'
-          };
-          const userType = roleMap[response.RoleName] || response.RoleName.toLowerCase();
-          this.saveUserType(userType);
+  private login(email: string, password: string): Observable<LoginResponse> {
+    const payload = { email, password };
+    return this.http.post<LoginResponse>(`${this.apiUrl}/Auth/login`, payload).pipe(
+      tap((response: any) => {
+        const token =
+          response?.accessToken ||
+          response?.AccessToken ||
+          response?.token ||
+          response?.Token ||
+          null;
+        const refresh =
+          response?.refreshToken || response?.RefreshToken || response?.refresh || null;
+        const roleName = response?.roleName || response?.RoleName || response?.user?.role;
+
+        if (token) {
+          this.saveToken(token);
+        }
+        if (refresh) {
+          localStorage.setItem('refresh_token', refresh);
+        }
+
+        const userObj = {
+          id: response?.id || response?.Id || response?.user?.id,
+          name: response?.fullName || response?.FullName || response?.user?.name,
+          email: response?.email || response?.Email || response?.user?.email,
+          role: roleName,
+        };
+        this.saveUser(userObj);
+
+        if (roleName) {
+          this.saveUserType(roleName);
         }
       })
     );
@@ -89,32 +84,30 @@ export class AuthService {
 
   // --- 1. ÖĞRENCİ GİRİŞİ ---
   // Componentlerdeki mevcut yapıyı bozmamak için wrapper kullanıyoruz.
-  loginStudent(email: string, password: string): Observable<AuthResponse> {
-    return this.login(email, password, 1); // RoleId: 1 = Student
+  loginStudent(email: string, password: string): Observable<LoginResponse> {
+    return this.login(email, password).pipe(
+      tap(() => {
+        // Frontend tarafında 'student' olduğunu garantiye alıyoruz
+        // (Backend response.role dönmezse varsayılan olarak set edilebilir)
+        this.saveUserType('student');
+      })
+    );
   }
 
   // --- 2. KURUMSAL GİRİŞ ---
-  loginCorporate(email: string, password: string): Observable<AuthResponse> {
-    // Backend email'den rolü anlıyor, ama RoleId gönderebiliriz (2 = Corporate)
-    return this.login(email, password, 2);
+  loginCorporate(email: string, password: string): Observable<LoginResponse> {
+    return this.login(email, password).pipe(tap(() => this.saveUserType('corporate')));
   }
 
   // --- 3. TOPLULUK GİRİŞİ ---
-  loginCommunity(email: string, password: string): Observable<AuthResponse> {
-    // Backend email'den rolü anlıyor, ama RoleId gönderebiliriz (3 = Community)
-    return this.login(email, password, 3);
+  loginCommunity(email: string, password: string): Observable<LoginResponse> {
+    return this.login(email, password).pipe(tap(() => this.saveUserType('community')));
   }
 
   // --- 4. KAYIT OL (REGISTER) ---
   // Swagger: POST /api/Auth/register
-  registerStudent(fullName: string, email: string, password: string, roleId: number = 1): Observable<any> {
+  registerStudent(data: RegisterRequest): Observable<any> {
     // Backend tek bir register noktası sunuyor.
-    const data: RegisterRequest = {
-      FullName: fullName,
-      Email: email,
-      Password: password,
-      RoleId: roleId
-    };
     return this.http.post(`${this.apiUrl}/Auth/register`, data);
   }
 
