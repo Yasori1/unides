@@ -16,9 +16,17 @@ interface Community {
   id: number;
   name: string;
   logo: string;
+  coverImage?: string;
+  university?: string;
   city: string;
   memberCount: number;
   category: string;
+  description?: string;
+  instagram?: string;
+  youtube?: string;
+  twitter?: string;
+  tiktok?: string;
+  socialMedia?: string;
   joinedDate: string;
 }
 
@@ -30,6 +38,14 @@ interface Event {
   location: string;
   community: string;
   status: 'upcoming' | 'completed' | 'cancelled';
+  imageUrl?: string;
+  category?: string;
+  university?: string;
+  description?: string;
+  color?: string;
+  club?: string;
+  semester?: string;
+  quota?: string | number;
 }
 
 
@@ -43,6 +59,11 @@ interface Event {
 export class StudentProfileComponent implements OnInit {
   activeTab: 'overview' | 'communities' | 'events' | 'settings' = 'overview';
   isSidebarCollapsed: boolean = false;
+  selectedCommunityForLeave: Community | null = null;
+  selectedEvent: Event | null = null;
+  showEventDates: boolean = false;
+  calendarMonth: Date = new Date();
+  calendarSelectedDate: string | null = null;
   
   // User Info
   userInfo: any = {
@@ -95,18 +116,26 @@ export class StudentProfileComponent implements OnInit {
         id: 1,
         name: 'Yazılım Geliştirme Kulübü',
         logo: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=100',
+        coverImage: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800',
+        university: 'İTÜ',
         city: 'Ankara',
         memberCount: 150,
         category: 'Teknoloji',
+        description: 'Kodlama kampları, hackathonlar ve proje geliştirme odaklı bir topluluk.',
+        instagram: 'https://instagram.com/ituai',
         joinedDate: '2024-01-15',
       },
       {
         id: 2,
         name: 'Girişimcilik Topluluğu',
         logo: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=100',
+        coverImage: 'https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?w=800',
+        university: 'Hacettepe',
         city: 'Ankara',
         memberCount: 89,
         category: 'İş Dünyası',
+        description: 'Start-up kültürü, yatırımcı buluşmaları ve pitch yarışmaları düzenler.',
+        instagram: 'https://instagram.com/hacettepegirisim',
         joinedDate: '2024-02-20',
       },
     ];
@@ -121,6 +150,14 @@ export class StudentProfileComponent implements OnInit {
         location: 'Kampüs Merkez',
         community: 'Yazılım Geliştirme Kulübü',
         status: 'upcoming',
+        imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=900&q=60',
+        category: 'Teknoloji',
+        university: 'İTÜ',
+        description: 'Uygulamalı AI oturumları ve canlı demo.',
+        color: '#2563eb',
+        club: 'Yazılım Geliştirme Kulübü',
+        semester: 'Yazılım Geliştirme Kulübü',
+        quota: '120',
       },
       {
         id: 2,
@@ -130,6 +167,14 @@ export class StudentProfileComponent implements OnInit {
         location: 'Bilgisayar Laboratuvarı',
         community: 'Yazılım Geliştirme Kulübü',
         status: 'upcoming',
+        imageUrl: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=900&q=60',
+        category: 'Eğitim',
+        university: 'İTÜ',
+        description: 'Frontend ve backend hızlandırma kampı.',
+        color: '#0ea5e9',
+        club: 'Yazılım Geliştirme Kulübü',
+        semester: 'Yazılım Geliştirme Kulübü',
+        quota: '80',
       },
       {
         id: 3,
@@ -139,6 +184,14 @@ export class StudentProfileComponent implements OnInit {
         location: 'Konferans Salonu',
         community: 'Girişimcilik Topluluğu',
         status: 'completed',
+        imageUrl: 'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=900&q=60',
+        category: 'İş Dünyası',
+        university: 'Hacettepe',
+        description: 'Startup panelleri ve yatırımcı sohbetleri.',
+        color: '#f59e0b',
+        club: 'Girişimcilik Topluluğu',
+        semester: 'Girişimcilik Topluluğu',
+        quota: '250',
       },
       {
         id: 4,
@@ -148,6 +201,14 @@ export class StudentProfileComponent implements OnInit {
         location: 'İnovasyon Merkezi',
         community: 'Girişimcilik Topluluğu',
         status: 'upcoming',
+        imageUrl: 'https://images.unsplash.com/photo-1545239351-46ef46aab2e1?auto=format&fit=crop&w=900&q=60',
+        category: 'Yarışma',
+        university: 'Hacettepe',
+        description: 'Takımlar 5 dakikada fikirlerini sunuyor.',
+        color: '#10b981',
+        club: 'Girişimcilik Topluluğu',
+        semester: 'Girişimcilik Topluluğu',
+        quota: '60',
       },
     ];
 
@@ -182,6 +243,77 @@ export class StudentProfileComponent implements OnInit {
     this.myCommunities = this.myCommunities.filter((c) => c.id !== communityId);
     this.toastService.show('Topluluktan ayrıldınız', 'success');
     this.stats[0].value = this.myCommunities.length;
+  }
+
+  openLeaveConfirm(community: Community): void {
+    this.selectedCommunityForLeave = community;
+  }
+
+  confirmLeave(): void {
+    if (!this.selectedCommunityForLeave) return;
+    this.leaveCommunity(this.selectedCommunityForLeave.id);
+    this.selectedCommunityForLeave = null;
+  }
+
+  cancelLeave(): void {
+    this.selectedCommunityForLeave = null;
+  }
+
+  openEventDetail(event: Event): void {
+    this.selectedEvent = event;
+  }
+
+  closeEventDetail(): void {
+    this.selectedEvent = null;
+  }
+
+  goCommunityDetail(community: Community): void {
+    this.router.navigate(['/communities', community.id]);
+  }
+
+  toggleEventCalendar(open?: boolean): void {
+    this.showEventDates = open !== undefined ? open : !this.showEventDates;
+    if (this.showEventDates && !this.calendarSelectedDate && this.communityEvents.length) {
+      this.calendarSelectedDate = this.communityEvents[0].date;
+    }
+  }
+
+  get eventCalendarList() {
+    return [...this.communityEvents].sort((a, b) => {
+      const da = new Date(a.date).getTime();
+      const db = new Date(b.date).getTime();
+      return da - db;
+    });
+  }
+
+  get calendarDays() {
+    const start = new Date(this.calendarMonth.getFullYear(), this.calendarMonth.getMonth(), 1);
+    const end = new Date(this.calendarMonth.getFullYear(), this.calendarMonth.getMonth() + 1, 0);
+    const days = [];
+    for (let d = 1; d <= end.getDate(); d++) {
+      const iso = this.toIso(new Date(this.calendarMonth.getFullYear(), this.calendarMonth.getMonth(), d));
+      const hasEvent = this.communityEvents.some((ev) => ev.date === iso);
+      const isToday = iso === this.toIso(new Date());
+      days.push({ label: d, iso, hasEvent, isToday });
+    }
+    return days;
+  }
+
+  changeCalendarMonth(offset: number) {
+    this.calendarMonth = new Date(this.calendarMonth.getFullYear(), this.calendarMonth.getMonth() + offset, 1);
+  }
+
+  selectCalendarDate(iso: string) {
+    this.calendarSelectedDate = iso;
+  }
+
+  get eventsOnSelectedDate() {
+    if (!this.calendarSelectedDate) return [];
+    return this.communityEvents.filter((ev) => ev.date === this.calendarSelectedDate);
+  }
+
+  private toIso(date: Date) {
+    return date.toISOString().split('T')[0];
   }
 
   viewEvent(eventId: number): void {

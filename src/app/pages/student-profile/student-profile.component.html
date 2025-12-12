@@ -15,12 +15,11 @@
   <!-- SIDEBAR -->
   <aside class="sidebar" [class.collapsed]="isSidebarCollapsed">
     <div class="brand" (click)="switchTab('overview')">
-      <div class="logo-square">
-        <span class="material-symbols-outlined">school</span>
+      <div class="logo-badge">
+        <img class="brand-logo" src="images/logo.png" alt="Ünides Dijital Portal" />
       </div>
       <div class="brand-text" *ngIf="!isSidebarCollapsed">
-        <h2>ÜNİDES</h2>
-        <span>ÖĞRENCİ</span>
+        <span class="brand-title">ÖĞRENCİ</span>
       </div>
     </div>
 
@@ -141,14 +140,97 @@
             <h3>Katıldığım Topluluklar</h3>
             <button class="btn-text" (click)="switchTab('communities')">Tümünü Gör</button>
           </div>
-          <div class="communities-list" *ngIf="myCommunities.length > 0">
-            <div class="community-item" *ngFor="let community of myCommunities.slice(0, 3)">
-              <img [src]="community.logo" [alt]="community.name" />
-              <div class="community-info">
-                <h4>{{ community.name }}</h4>
-                <p>{{ community.city }} • {{ community.category }}</p>
+          <div class="community-cards-mini" *ngIf="myCommunities.length > 0">
+            <div class="community-card" *ngFor="let community of myCommunities.slice(0, 3)">
+              <div class="cover-area">
+                <img
+                  [src]="community.coverImage || community.logo"
+                  [alt]="community.name"
+                  class="cover-img"
+                />
+                <span class="category-badge">{{ community.category }}</span>
               </div>
-              <span class="member-count">{{ community.memberCount }} üye</span>
+              <div class="card-content">
+                <div class="header-row">
+                  <div class="logo-wrapper">
+                    <img [src]="community.logo" [alt]="community.name" class="logo-img" />
+                  </div>
+                  <div class="title-wrapper">
+                    <h3 class="community-name">{{ community.name }}</h3>
+                    <span class="university-name">{{
+                      community.university || community.city
+                    }}</span>
+                    <span class="city-tag" *ngIf="community.city">
+                      <i class="bx bxs-map"></i> {{ community.city }}
+                    </span>
+                  </div>
+                </div>
+                <p class="description" *ngIf="community.description">{{ community.description }}</p>
+                <div
+                  class="social-media-icons"
+                  *ngIf="
+                    community.instagram ||
+                    community.youtube ||
+                    community.twitter ||
+                    community.tiktok ||
+                    community.socialMedia
+                  "
+                >
+                  <a
+                    *ngIf="community.instagram"
+                    [href]="community.instagram"
+                    target="_blank"
+                    class="social-icon instagram"
+                  >
+                    <i class="bx bxl-instagram"></i>
+                  </a>
+                  <a
+                    *ngIf="community.youtube"
+                    [href]="community.youtube"
+                    target="_blank"
+                    class="social-icon youtube"
+                  >
+                    <i class="bx bxl-youtube"></i>
+                  </a>
+                  <a
+                    *ngIf="community.twitter"
+                    [href]="community.twitter"
+                    target="_blank"
+                    class="social-icon twitter"
+                  >
+                    <i class="bx bxl-twitter"></i>
+                  </a>
+                  <a
+                    *ngIf="community.tiktok"
+                    [href]="community.tiktok"
+                    target="_blank"
+                    class="social-icon tiktok"
+                  >
+                    <i class="bx bxl-tiktok"></i>
+                  </a>
+                  <a
+                    *ngIf="
+                      community.socialMedia &&
+                      !community.instagram &&
+                      !community.youtube &&
+                      !community.twitter &&
+                      !community.tiktok
+                    "
+                    [href]="community.socialMedia"
+                    target="_blank"
+                    class="social-icon"
+                  >
+                    <i class="bx bxl-facebook"></i>
+                  </a>
+                </div>
+                <div class="card-footer">
+                  <div class="stat">
+                    <i class="bx bx-group"></i>
+                    <span>{{ community.memberCount }} Üye</span>
+                  </div>
+                  <span class="action-text">İncele <i class="bx bx-right-arrow-alt"></i></span>
+                </div>
+              </div>
             </div>
           </div>
           <div class="empty-state" *ngIf="myCommunities.length === 0">
@@ -163,23 +245,23 @@
             <h3>Topluluklarımın Etkinlikleri</h3>
             <button class="btn-text" (click)="switchTab('events')">Tümünü Gör</button>
           </div>
-          <div class="events-list" *ngIf="communityEvents.length > 0">
-            <div class="event-item" *ngFor="let event of communityEvents.slice(0, 3)">
-              <div class="event-date">
-                <span class="day">{{ event.date.split('-')[2] }}</span>
-                <span class="month">{{ formatDate(event.date).split(' ')[1] }}</span>
-              </div>
-              <div class="event-info">
-                <h4>{{ event.title }}</h4>
-                <p>{{ event.community }} • {{ event.location }}</p>
-                <span
-                  class="status-badge"
-                  [ngClass]="{
-                    upcoming: event.status === 'upcoming',
-                    completed: event.status === 'completed',
-                    cancelled: event.status === 'cancelled'
-                  }"
-                >
+
+          <div class="events-grid cards small" *ngIf="communityEvents.length > 0">
+            <div
+              class="event-card"
+              *ngFor="let event of communityEvents.slice(0, 3)"
+              (click)="openEventDetail(event)"
+            >
+              <div class="card-image">
+                <img
+                  [src]="event.imageUrl || 'assets/images/page-title1.jpg'"
+                  [alt]="event.title"
+                  loading="lazy"
+                />
+                <div class="date-badge">
+                  {{ event.date }}
+                </div>
+                <div class="status-chip" [ngClass]="event.status">
                   {{
                     event.status === 'upcoming'
                       ? 'Yaklaşan'
@@ -187,10 +269,44 @@
                       ? 'Tamamlandı'
                       : 'İptal'
                   }}
-                </span>
+                </div>
+                <div class="tap-hint">
+                  <span class="material-symbols-outlined">visibility</span> İncele
+                </div>
+              </div>
+
+              <div class="card-info">
+                <div class="tags-row">
+                  <span class="tag uni" *ngIf="event.university">{{ event.university }}</span>
+                  <span
+                    class="tag category"
+                    *ngIf="event.category"
+                    [style.color]="event.color || '#2563eb'"
+                  >
+                    {{ event.category }}
+                  </span>
+                </div>
+
+                <h3>{{ event.title }}</h3>
+                <p class="short-desc" *ngIf="event.description">{{ event.description }}</p>
+
+                <div class="bottom-meta">
+                  <span
+                    class="category"
+                    *ngIf="event.category"
+                    [style.color]="event.color || '#2563eb'"
+                  >
+                    {{ event.category }}
+                  </span>
+                  <div class="mini-location">
+                    <span class="material-symbols-outlined">location_on</span>
+                    {{ event.location }}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
+
           <div class="empty-state" *ngIf="communityEvents.length === 0">
             <span class="material-symbols-outlined">event_available</span>
             <p>Katıldığınız toplulukların henüz etkinliği yok</p>
@@ -205,36 +321,101 @@
         <h2>Katıldığım Topluluklar</h2>
       </div>
 
-      <div class="communities-grid" *ngIf="myCommunities.length > 0">
-        <div class="community-card" *ngFor="let community of myCommunities">
-          <div class="community-header">
-            <img [src]="community.logo" [alt]="community.name" />
-            <div class="community-title">
-              <h3>{{ community.name }}</h3>
-              <p>{{ community.category }}</p>
-            </div>
+      <div class="community-card-grid" *ngIf="myCommunities.length > 0">
+        <div
+          class="community-card"
+          *ngFor="let community of myCommunities"
+          (click)="goCommunityDetail(community)"
+        >
+          <button class="leave-btn" (click)="openLeaveConfirm(community); $event.stopPropagation()">
+            Topluluktan Ayrıl
+          </button>
+          <div class="cover-area">
+            <img
+              [src]="community.coverImage || community.logo"
+              [alt]="community.name"
+              class="cover-img"
+            />
+            <span class="category-badge">{{ community.category }}</span>
           </div>
-          <div class="community-details">
-            <div class="detail-item">
-              <span class="material-symbols-outlined">location_on</span>
-              <span>{{ community.city }}</span>
+          <div class="card-content">
+            <div class="header-row">
+              <div class="logo-wrapper">
+                <img [src]="community.logo" [alt]="community.name" class="logo-img" />
+              </div>
+              <div class="title-wrapper">
+                <h3 class="community-name">{{ community.name }}</h3>
+                <span class="university-name">{{ community.university || community.city }}</span>
+                <span class="city-tag" *ngIf="community.city">
+                  <i class="bx bxs-map"></i> {{ community.city }}
+                </span>
+              </div>
             </div>
-            <div class="detail-item">
-              <span class="material-symbols-outlined">people</span>
-              <span>{{ community.memberCount }} üye</span>
+            <p class="description" *ngIf="community.description">{{ community.description }}</p>
+            <div
+              class="social-media-icons"
+              *ngIf="
+                community.instagram ||
+                community.youtube ||
+                community.twitter ||
+                community.tiktok ||
+                community.socialMedia
+              "
+            >
+              <a
+                *ngIf="community.instagram"
+                [href]="community.instagram"
+                target="_blank"
+                class="social-icon instagram"
+              >
+                <i class="bx bxl-instagram"></i>
+              </a>
+              <a
+                *ngIf="community.youtube"
+                [href]="community.youtube"
+                target="_blank"
+                class="social-icon youtube"
+              >
+                <i class="bx bxl-youtube"></i>
+              </a>
+              <a
+                *ngIf="community.twitter"
+                [href]="community.twitter"
+                target="_blank"
+                class="social-icon twitter"
+              >
+                <i class="bx bxl-twitter"></i>
+              </a>
+              <a
+                *ngIf="community.tiktok"
+                [href]="community.tiktok"
+                target="_blank"
+                class="social-icon tiktok"
+              >
+                <i class="bx bxl-tiktok"></i>
+              </a>
+              <a
+                *ngIf="
+                  community.socialMedia &&
+                  !community.instagram &&
+                  !community.youtube &&
+                  !community.twitter &&
+                  !community.tiktok
+                "
+                [href]="community.socialMedia"
+                target="_blank"
+                class="social-icon"
+              >
+                <i class="bx bxl-facebook"></i>
+              </a>
             </div>
-            <div class="detail-item">
-              <span class="material-symbols-outlined">calendar_today</span>
-              <span>Katılım: {{ formatDate(community.joinedDate) }}</span>
+            <div class="card-footer">
+              <div class="stat">
+                <i class="bx bx-group"></i>
+                <span>{{ community.memberCount }} Üye</span>
+              </div>
+              <span class="action-text">İncele <i class="bx bx-right-arrow-alt"></i></span>
             </div>
-          </div>
-          <div class="community-actions">
-            <button class="btn-primary" (click)="router.navigate(['/communities'])">
-              Topluluğu Görüntüle
-            </button>
-            <button class="btn-danger" (click)="leaveCommunity(community.id)">
-              Topluluktan Ayrıl
-            </button>
           </div>
         </div>
       </div>
@@ -242,7 +423,7 @@
       <div class="empty-state-large" *ngIf="myCommunities.length === 0">
         <span class="material-symbols-outlined">groups</span>
         <h3>Henüz hiçbir topluluğa katılmadınız</h3>
-        <p>Topluluklar sayfasından ilginizi çeken topluluklara katılabilirsiniz</p>
+        <p>Topluluklar sayfasından ilginizi çeken toplulukları inceleyebilirsiniz</p>
         <button class="btn-primary" (click)="router.navigate(['/communities'])">
           Toplulukları Keşfet
         </button>
@@ -253,23 +434,27 @@
     <div class="view-container" *ngIf="activeTab === 'events'">
       <div class="page-header">
         <h2>Topluluklarımın Etkinlikleri</h2>
+        <button class="icon-btn ghost" (click)="toggleEventCalendar()" title="Etkinlik Takvimi">
+          <span class="material-symbols-outlined">calendar_month</span>
+        </button>
       </div>
 
-      <div class="events-grid" *ngIf="communityEvents.length > 0">
-        <div class="event-card" *ngFor="let event of communityEvents">
-          <div class="event-header">
-            <div class="event-date-badge">
-              <span class="day">{{ event.date.split('-')[2] }}</span>
-              <span class="month">{{ formatDate(event.date).split(' ')[1] }}</span>
+      <div class="events-grid cards" *ngIf="communityEvents.length > 0">
+        <div
+          class="event-card"
+          *ngFor="let event of communityEvents"
+          (click)="openEventDetail(event)"
+        >
+          <div class="card-image">
+            <img
+              [src]="event.imageUrl || 'assets/images/page-title1.jpg'"
+              [alt]="event.title"
+              loading="lazy"
+            />
+            <div class="date-badge">
+              {{ event.date }}
             </div>
-            <span
-              class="status-badge"
-              [ngClass]="{
-                upcoming: event.status === 'upcoming',
-                completed: event.status === 'completed',
-                cancelled: event.status === 'cancelled'
-              }"
-            >
+            <div class="status-chip" [ngClass]="event.status">
               {{
                 event.status === 'upcoming'
                   ? 'Yaklaşan'
@@ -277,27 +462,40 @@
                   ? 'Tamamlandı'
                   : 'İptal'
               }}
-            </span>
-          </div>
-          <div class="event-body">
-            <h3>{{ event.title }}</h3>
-            <div class="event-details">
-              <div class="detail-item">
-                <span class="material-symbols-outlined">schedule</span>
-                <span>{{ event.time }}</span>
-              </div>
-              <div class="detail-item">
-                <span class="material-symbols-outlined">location_on</span>
-                <span>{{ event.location }}</span>
-              </div>
-              <div class="detail-item">
-                <span class="material-symbols-outlined">groups</span>
-                <span>{{ event.community }}</span>
-              </div>
+            </div>
+            <div class="tap-hint">
+              <span class="material-symbols-outlined">visibility</span> İncele
             </div>
           </div>
-          <div class="event-actions" *ngIf="event.status === 'upcoming'">
-            <button class="btn-primary" (click)="viewEvent(event.id)">Etkinliği Görüntüle</button>
+
+          <div class="card-info">
+            <div class="tags-row">
+              <span class="tag uni" *ngIf="event.university">{{ event.university }}</span>
+              <span
+                class="tag category"
+                *ngIf="event.category"
+                [style.color]="event.color || '#2563eb'"
+              >
+                {{ event.category }}
+              </span>
+            </div>
+
+            <h3>{{ event.title }}</h3>
+            <p class="short-desc" *ngIf="event.description">{{ event.description }}</p>
+
+            <div class="bottom-meta">
+              <span
+                class="category"
+                *ngIf="event.category"
+                [style.color]="event.color || '#2563eb'"
+              >
+                {{ event.category }}
+              </span>
+              <div class="mini-location">
+                <span class="material-symbols-outlined">location_on</span>
+                {{ event.location }}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -385,4 +583,124 @@
       </div>
     </div>
   </main>
+</div>
+
+<div class="confirm-overlay" *ngIf="selectedCommunityForLeave" (click)="cancelLeave()">
+  <div class="confirm-modal" (click)="$event.stopPropagation()">
+    <div class="confirm-head">
+      <h3>Topluluktan Ayrıl</h3>
+      <button class="icon-btn ghost" (click)="cancelLeave()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <p class="confirm-text">
+      "{{ selectedCommunityForLeave?.name }}" topluluğundan ayrılmak istediğinizden emin misiniz?
+    </p>
+    <div class="confirm-actions">
+      <button class="btn-danger" (click)="confirmLeave()">Evet, Ayrıl</button>
+      <button class="btn-primary ghost" (click)="cancelLeave()">Hayır</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" *ngIf="selectedEvent" (click)="closeEventDetail()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <button class="close-btn" (click)="closeEventDetail()">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+    <div class="modal-header">
+      <img [src]="selectedEvent?.imageUrl || 'assets/images/page-title1.jpg'" class="modal-cover" />
+      <span class="modal-cat-badge" [style.background]="selectedEvent?.color || '#2563eb'">
+        {{ selectedEvent?.category || 'Etkinlik' }}
+      </span>
+    </div>
+    <div class="modal-body">
+      <h2 class="event-title">{{ selectedEvent?.title }}</h2>
+      <div class="info-card">
+        <div class="info-column">
+          <div class="info-item">
+            <span class="info-label">ÜNİVERSİTE</span>
+            <span class="info-value">{{ selectedEvent?.university || '-' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">KULÜP (DETAY)</span>
+            <span class="info-value">{{ selectedEvent?.club || selectedEvent?.community }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">KONUM</span>
+            <span class="info-value">{{ selectedEvent?.location }}</span>
+          </div>
+        </div>
+        <div class="info-column">
+          <div class="info-item">
+            <span class="info-label">TOPLULUK</span>
+            <span class="info-value">{{
+              selectedEvent?.semester || selectedEvent?.community
+            }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">TARİH & SAAT</span>
+            <span class="info-value">{{ selectedEvent?.date }} | {{ selectedEvent?.time }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">KONTENJAN</span>
+            <span class="info-value">{{ selectedEvent?.quota || '-' }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="description-section">
+        <span class="description-label">AÇIKLAMA</span>
+        <p class="description-text">{{ selectedEvent?.description }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="calendar-overlay" *ngIf="showEventDates" (click)="toggleEventCalendar(false)">
+  <div class="calendar-modal" (click)="$event.stopPropagation()">
+    <div class="calendar-head">
+      <button class="icon-btn ghost" (click)="changeCalendarMonth(-1)">
+        <span class="material-symbols-outlined">chevron_left</span>
+      </button>
+      <h3>
+        {{ calendarMonth | date : 'LLLL yyyy' }}
+      </h3>
+      <button class="icon-btn ghost" (click)="changeCalendarMonth(1)">
+        <span class="material-symbols-outlined">chevron_right</span>
+      </button>
+      <button class="icon-btn ghost" (click)="toggleEventCalendar(false)">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <div class="calendar-grid">
+      <div
+        class="calendar-day"
+        *ngFor="let day of calendarDays"
+        [class.today]="day.isToday"
+        [class.has-event]="day.hasEvent"
+        [class.selected]="day.iso === calendarSelectedDate"
+        (click)="selectCalendarDate(day.iso)"
+      >
+        <span>{{ day.label }}</span>
+      </div>
+    </div>
+
+    <div class="calendar-events" *ngIf="eventsOnSelectedDate.length > 0; else noEventsOnDay">
+      <div class="calendar-item" *ngFor="let ev of eventsOnSelectedDate">
+        <div class="calendar-date">
+          <span class="day">{{ ev.date.split('-')[2] }}</span>
+          <span class="month">{{ formatDate(ev.date).split(' ')[1] }}</span>
+        </div>
+        <div class="calendar-info">
+          <h4>{{ ev.title }}</h4>
+          <p>{{ ev.community }} • {{ ev.location }}</p>
+          <span class="time">{{ ev.time }}</span>
+        </div>
+      </div>
+    </div>
+    <ng-template #noEventsOnDay>
+      <p class="no-events">Bu tarihte etkinlik yok.</p>
+    </ng-template>
+  </div>
 </div>

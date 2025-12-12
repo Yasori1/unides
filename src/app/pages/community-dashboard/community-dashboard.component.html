@@ -140,14 +140,19 @@
             let stat of [
               { label: 'Toplam Üye', value: stats.totalMembers, icon: 'group', colorClass: 'cyan' },
               {
-                label: 'Aktif Proje',
+                label: 'Aktif Etkinlik',
                 value: stats.activeProjects,
                 icon: 'rocket_launch',
                 colorClass: 'purple'
               },
-              { label: 'Etkinlikler', value: stats.totalEvents, icon: 'event', colorClass: 'pink' },
               {
-                label: 'Bekleyen',
+                label: 'Düzenlenen Etkinlik Sayısı',
+                value: stats.totalEvents,
+                icon: 'event',
+                colorClass: 'pink'
+              },
+              {
+                label: 'Onay Bekleyen Etkinlikler',
                 value: stats.pendingRequests,
                 icon: 'hourglass_top',
                 colorClass: 'orange'
@@ -165,95 +170,142 @@
         </div>
       </div>
 
-      <div class="split-grid">
-        <div class="card table-card">
-          <div class="card-header">
-            <h3>Son Projeler</h3>
-            <button class="btn-text" (click)="switchTab('projects')">Tümünü Gör</button>
+      <!-- Etkinlik Durum Kartları -->
+      <div class="card events-status-card">
+        <div class="card-header">
+          <div>
+            <p class="eyebrow">Etkinlik Kartları</p>
+            <h3>Etkinlik Durumları</h3>
           </div>
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Proje</th>
-                <th>Durum</th>
-                <th>Tarih</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let p of projects.slice(0, 3)">
-                <td>{{ p.name }}</td>
-                <td>
-                  <span class="status-badge" [ngClass]="p.status">{{ p.status }}</span>
-                </td>
-                <td>{{ p.deadline }}</td>
-              </tr>
-            </tbody>
-          </table>
+          <div class="status-filters">
+            <button
+              class="filter-chip"
+              [class.active]="statusFilter === 'all'"
+              (click)="setStatusFilter('all')"
+            >
+              Tümü
+            </button>
+            <button
+              class="filter-chip"
+              [class.active]="statusFilter === 'approved'"
+              (click)="setStatusFilter('approved')"
+            >
+              Onaylanan
+            </button>
+            <button
+              class="filter-chip"
+              [class.active]="statusFilter === 'pending'"
+              (click)="setStatusFilter('pending')"
+            >
+              Onaya Gönderilen
+            </button>
+            <button
+              class="filter-chip"
+              [class.active]="statusFilter === 'rejected'"
+              (click)="setStatusFilter('rejected')"
+            >
+              Reddedilen
+            </button>
+          </div>
         </div>
 
-        <div class="card quick-actions-card">
-          <h3>Hızlı İşlemler</h3>
-          <div class="actions-grid">
-            <button class="tile-btn" (click)="openModal('new-project')">
-              <span class="material-symbols-outlined">add_circle</span>
-              <span>Yeni Proje</span>
-            </button>
-            <button class="tile-btn" (click)="openModal('new-member')">
-              <span class="material-symbols-outlined">person_add</span>
-              <span>Üye Ekle</span>
-            </button>
+        <div class="events-grid compact" *ngIf="filteredDashboardEvents.length; else emptyEvents">
+          <div class="event-card" *ngFor="let event of filteredDashboardEvents">
+            <div class="card-image">
+              <img [src]="event.imageUrl" [alt]="event.title" loading="lazy" />
+              <span class="date-badge">{{ event.date }}</span>
+              <span class="status-chip" [ngClass]="event.status">{{ statusLabels[event.status] }}</span>
+            </div>
+            <div class="card-info">
+              <div class="top-row">
+                <span class="tag">{{ event.category }}</span>
+                <span class="location">
+                  <span class="material-symbols-outlined">location_on</span>
+                  {{ event.location }}
+                </span>
+              </div>
+              <h4>{{ event.title }}</h4>
+              <p class="desc">{{ event.description }}</p>
+            </div>
           </div>
         </div>
+        <ng-template #emptyEvents>
+          <div class="empty-state">
+            <span class="material-symbols-outlined">event_busy</span>
+            <p>Henüz listelenecek etkinlik yok.</p>
+          </div>
+        </ng-template>
       </div>
+
     </div>
 
     <!-- PROJECTS -->
     <div class="view-container" *ngIf="activeTab === 'projects'">
-      <div class="page-header">
+      <div class="page-header projects-header">
         <h2>Etkinliklerim</h2>
         <div class="header-controls">
+          <div class="status-filters inline">
+            <button
+              class="filter-chip"
+              [class.active]="statusFilter === 'all'"
+              (click)="setStatusFilter('all')"
+            >
+              Tümü
+            </button>
+            <button
+              class="filter-chip"
+              [class.active]="statusFilter === 'approved'"
+              (click)="setStatusFilter('approved')"
+            >
+              Onaylanan
+            </button>
+            <button
+              class="filter-chip"
+              [class.active]="statusFilter === 'pending'"
+              (click)="setStatusFilter('pending')"
+            >
+              Onaya Gönderilen
+            </button>
+            <button
+              class="filter-chip"
+              [class.active]="statusFilter === 'rejected'"
+              (click)="setStatusFilter('rejected')"
+            >
+              Reddedilen
+            </button>
+          </div>
           <button class="btn-primary" (click)="openModal('new-project')">
-            <span class="material-symbols-outlined">add</span> Yeni Proje
+            <span class="material-symbols-outlined">add</span> Etkinlik Oluştur
           </button>
         </div>
       </div>
-      <div class="card table-card">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Proje Adı</th>
-              <th>Bütçe</th>
-              <th>Durum</th>
-              <th>İlerleme</th>
-              <th>Tarih</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let p of projects">
-              <td>
-                <span
-                  class="material-symbols-outlined star-icon"
-                  [class.active]="p.isPromoted"
-                  (click)="togglePromote(p)"
-                  >star</span
-                >
-                {{ p.name }}
-              </td>
-              <td>{{ p.budget | number }}₺</td>
-              <td>
-                <span class="status-badge" [ngClass]="p.status">{{ p.status }}</span>
-              </td>
-              <td>
-                <div class="progress-bar">
-                  <div class="fill" [style.width.%]="p.progress"></div>
-                </div>
-                <span class="progress-text">%{{ p.progress }}</span>
-              </td>
-              <td>{{ p.deadline }}</td>
-            </tr>
-          </tbody>
-        </table>
+
+      <div class="events-grid compact" *ngIf="filteredDashboardEvents.length; else emptyProjectEvents">
+        <div class="event-card" *ngFor="let event of filteredDashboardEvents">
+          <div class="card-image">
+            <img [src]="event.imageUrl" [alt]="event.title" loading="lazy" />
+            <span class="date-badge">{{ event.date }}</span>
+            <span class="status-chip" [ngClass]="event.status">{{ statusLabels[event.status] }}</span>
+          </div>
+          <div class="card-info">
+            <div class="top-row">
+              <span class="tag">{{ event.category }}</span>
+              <span class="location">
+                <span class="material-symbols-outlined">location_on</span>
+                {{ event.location }}
+              </span>
+            </div>
+            <h4>{{ event.title }}</h4>
+            <p class="desc">{{ event.description }}</p>
+          </div>
+        </div>
       </div>
+      <ng-template #emptyProjectEvents>
+        <div class="empty-state">
+          <span class="material-symbols-outlined">event_busy</span>
+          <p>Henüz listelenecek etkinlik yok.</p>
+        </div>
+      </ng-template>
     </div>
 
     <!-- NETWORK -->

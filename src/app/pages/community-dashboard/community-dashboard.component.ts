@@ -38,6 +38,16 @@ interface Collaboration {
   description: string;
   logo: string;
 }
+interface DashboardEvent {
+  id: number;
+  title: string;
+  status: 'approved' | 'pending' | 'rejected';
+  imageUrl: string;
+  date: string;
+  location: string;
+  category: string;
+  description: string;
+}
 @Component({
   selector: 'app-community-dashboard',
   standalone: true,
@@ -81,6 +91,64 @@ export class CommunityDashboardComponent implements OnInit {
     description: 'Geleceği kodlayanların buluşma noktası.',
   };
   stats = { totalMembers: 142, activeProjects: 4, pendingRequests: 2, totalEvents: 12 };
+  statusFilter: 'all' | 'approved' | 'pending' | 'rejected' = 'all';
+  statusLabels = {
+    approved: 'Onaylanan Etkinlik',
+    pending: 'Onaya Gönderilen',
+    rejected: 'Reddedilen Etkinlik',
+  };
+  dashboardEvents: DashboardEvent[] = [
+    {
+      id: 1,
+      title: 'Yapay Zeka Zirvesi',
+      status: 'approved',
+      imageUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800&q=60',
+      date: '12 Mayıs',
+      location: 'İTÜ Ayazağa',
+      category: 'Teknoloji',
+      description: 'Sektörden konuşmacılarla AI odaklı zirve.',
+    },
+    {
+      id: 2,
+      title: 'Robotik Atölye',
+      status: 'pending',
+      imageUrl: 'https://images.unsplash.com/photo-1581094288338-60f87c68fc9b?auto=format&fit=crop&w=800&q=60',
+      date: '25 Mayıs',
+      location: 'ODTÜ Kültür Merkezi',
+      category: 'Atölye',
+      description: 'Arduino ve sensörlerle uygulamalı robotik eğitimi.',
+    },
+    {
+      id: 3,
+      title: 'FinTech Günleri',
+      status: 'approved',
+      imageUrl: 'https://images.unsplash.com/photo-1556740749-887f6717d7e4?auto=format&fit=crop&w=800&q=60',
+      date: '2 Haziran',
+      location: 'Boğaziçi Garanti Kültür',
+      category: 'Finans',
+      description: 'Ödeme teknolojileri ve blokzincir seminerleri.',
+    },
+    {
+      id: 4,
+      title: 'Sosyal Sorumluluk Koşusu',
+      status: 'rejected',
+      imageUrl: 'https://images.unsplash.com/photo-1508609349937-5ec4ae374ebf?auto=format&fit=crop&w=800&q=60',
+      date: '8 Haziran',
+      location: 'Ankara Kampüsü',
+      category: 'Sosyal',
+      description: 'Bağış toplama koşusu için başvuru reddedildi.',
+    },
+    {
+      id: 5,
+      title: 'Hackathon 24',
+      status: 'pending',
+      imageUrl: 'https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?auto=format&fit=crop&w=800&q=60',
+      date: '15 Haziran',
+      location: 'Online',
+      category: 'Yarışma',
+      description: '48 saatlik ürün geliştirme maratonu.',
+    },
+  ];
   projects: Project[] = [
     {
       id: 1,
@@ -229,6 +297,10 @@ export class CommunityDashboardComponent implements OnInit {
         m.department.toLowerCase().includes(this.memberSearchText.toLowerCase())
     );
   }
+  get filteredDashboardEvents() {
+    if (this.statusFilter === 'all') return this.dashboardEvents;
+    return this.dashboardEvents.filter((e) => e.status === this.statusFilter);
+  }
   get currentTabTitle() {
     const titles: Record<string, string> = {
       overview: 'Genel Bakış',
@@ -266,6 +338,9 @@ export class CommunityDashboardComponent implements OnInit {
   togglePromote(project: Project) {
     project.isPromoted = !project.isPromoted;
     this.showToast(project.isPromoted ? 'Öne çıkarıldı.' : 'Normal.', 'success');
+  }
+  setStatusFilter(filter: 'all' | 'approved' | 'pending' | 'rejected') {
+    this.statusFilter = filter;
   }
   contactClub(clubName: string) {
     this.showToast(`${clubName} ile iletişim başlatıldı.`, 'success');
