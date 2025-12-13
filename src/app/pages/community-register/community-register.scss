@@ -1,5 +1,5 @@
 /* Topluluk için Login ile aynı tema */
-@import '../community-login/community-login.scss';
+@use '../community-login/community-login' as *;
 
 /* Ekstra Register Özellikleri */
 .form-side {

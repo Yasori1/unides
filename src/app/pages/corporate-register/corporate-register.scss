@@ -1,5 +1,5 @@
 /* Kurumsal için Login ile aynı tema */
-@import '../corporate-login/corporate-login.scss';
+@use '../corporate-login/corporate-login' as *;
 
 /* Ekstra Register Özellikleri */
 .form-side {

@@ -594,7 +594,7 @@
       </button>
     </div>
     <p class="confirm-text">
-      "{{ selectedCommunityForLeave?.name }}" topluluğundan ayrılmak istediğinizden emin misiniz?
+      "{{ selectedCommunityForLeave.name }}" topluluğundan ayrılmak istediğinizden emin misiniz?
     </p>
     <div class="confirm-actions">
       <button class="btn-danger" (click)="confirmLeave()">Evet, Ayrıl</button>
@@ -609,48 +609,46 @@
       <span class="material-symbols-outlined">close</span>
     </button>
     <div class="modal-header">
-      <img [src]="selectedEvent?.imageUrl || 'assets/images/page-title1.jpg'" class="modal-cover" />
-      <span class="modal-cat-badge" [style.background]="selectedEvent?.color || '#2563eb'">
-        {{ selectedEvent?.category || 'Etkinlik' }}
+      <img [src]="selectedEvent.imageUrl || 'assets/images/page-title1.jpg'" class="modal-cover" />
+      <span class="modal-cat-badge" [style.background]="selectedEvent.color || '#2563eb'">
+        {{ selectedEvent.category || 'Etkinlik' }}
       </span>
     </div>
     <div class="modal-body">
-      <h2 class="event-title">{{ selectedEvent?.title }}</h2>
+      <h2 class="event-title">{{ selectedEvent.title }}</h2>
       <div class="info-card">
         <div class="info-column">
           <div class="info-item">
             <span class="info-label">ÜNİVERSİTE</span>
-            <span class="info-value">{{ selectedEvent?.university || '-' }}</span>
+            <span class="info-value">{{ selectedEvent.university || '-' }}</span>
           </div>
           <div class="info-item">
             <span class="info-label">KULÜP (DETAY)</span>
-            <span class="info-value">{{ selectedEvent?.club || selectedEvent?.community }}</span>
+            <span class="info-value">{{ selectedEvent.club || selectedEvent.community }}</span>
           </div>
           <div class="info-item">
             <span class="info-label">KONUM</span>
-            <span class="info-value">{{ selectedEvent?.location }}</span>
+            <span class="info-value">{{ selectedEvent.location }}</span>
           </div>
         </div>
         <div class="info-column">
           <div class="info-item">
             <span class="info-label">TOPLULUK</span>
-            <span class="info-value">{{
-              selectedEvent?.semester || selectedEvent?.community
-            }}</span>
+            <span class="info-value">{{ selectedEvent.semester || selectedEvent.community }}</span>
           </div>
           <div class="info-item">
             <span class="info-label">TARİH & SAAT</span>
-            <span class="info-value">{{ selectedEvent?.date }} | {{ selectedEvent?.time }}</span>
+            <span class="info-value">{{ selectedEvent.date }} | {{ selectedEvent.time }}</span>
           </div>
           <div class="info-item">
             <span class="info-label">KONTENJAN</span>
-            <span class="info-value">{{ selectedEvent?.quota || '-' }}</span>
+            <span class="info-value">{{ selectedEvent.quota || '-' }}</span>
           </div>
         </div>
       </div>
       <div class="description-section">
         <span class="description-label">AÇIKLAMA</span>
-        <p class="description-text">{{ selectedEvent?.description }}</p>
+        <p class="description-text">{{ selectedEvent.description }}</p>
       </div>
     </div>
   </div>

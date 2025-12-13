@@ -1,3 +1,5 @@
+@use "sass:color";
+
 // ================= DEĞİŞKENLER =================
 $primary: #14d2cc;
 $primary-hover: #0fb9b4;
@@ -79,7 +81,7 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
     .logo-square {
       width: 40px;
       height: 40px;
-      background: linear-gradient(135deg, $primary, darken($primary, 10%));
+      background: linear-gradient(135deg, $primary, color.adjust($primary, $lightness: -10%));
       border-radius: 10px;
       display: flex;
       align-items: center;
@@ -143,12 +145,12 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
 
       &:hover {
         background: $primary-soft;
-        color: darken($primary, 10%);
+        color: color.adjust($primary, $lightness: -10%);
       }
 
       &.active {
         background: linear-gradient(90deg, $primary-soft, transparent);
-        color: darken($primary, 15%);
+        color: color.adjust($primary, $lightness: -15%);
         font-weight: 700;
         border-left: 3px solid $primary;
         border-radius: 4px 12px 12px 4px;
@@ -2120,7 +2122,7 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
             color: white;
 
             &:hover {
-              background: darken($success, 5%);
+              background: color.adjust($success, $lightness: -5%);
             }
           }
 
@@ -2129,7 +2131,7 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
             color: white;
 
             &:hover {
-              background: darken($danger, 5%);
+              background: color.adjust($danger, $lightness: -5%);
             }
           }
 

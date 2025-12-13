@@ -39,6 +39,7 @@ interface Collaboration {
   type: 'Partner Arıyor' | 'Konuşmacı Arıyor' | 'Turne';
   description: string;
   logo: string;
+  coverImage?: string;
 }
 interface DashboardEvent {
   id: number;

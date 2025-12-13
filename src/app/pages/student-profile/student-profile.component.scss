@@ -1,3 +1,5 @@
+@use 'sass:color';
+
 // ================= DEĞİŞKENLER =================
 $primary: #2563eb;
 $primary-hover: #1d4ed8;
@@ -133,12 +135,12 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
 
       &:hover {
         background: $primary-soft;
-        color: darken($primary, 10%);
+        color: color.adjust($primary, $lightness: -10%);
       }
 
       &.active {
         background: linear-gradient(90deg, $primary-soft, transparent);
-        color: darken($primary, 15%);
+        color: color.adjust($primary, $lightness: -15%);
         font-weight: 700;
         border-left: 3px solid $primary;
         border-radius: 4px 12px 12px 4px;
@@ -180,7 +182,7 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
       &:hover {
         background: rgba(37, 99, 235, 0.1);
         border-color: rgba(37, 99, 235, 0.2);
-        color: darken($primary, 10%);
+        color: color.adjust($primary, $lightness: -10%);
       }
     }
 
