@@ -310,31 +310,63 @@
     <!-- NETWORK -->
     <div class="view-container" *ngIf="activeTab === 'network'">
       <div class="page-header">
-        <h2>Diğer Topluluklar</h2>
-        <p>Üniversite kulüpleriyle eşleş, projeler ve etkinlikler planla.</p>
+        <div>
+          <h2>Diğer Topluluklar</h2>
+          <p class="page-subtitle">Üniversite kulüpleriyle eşleş, projeler ve etkinlikler planla.</p>
+        </div>
       </div>
-      <div class="grid-cards">
-        <div class="card collab-card" *ngFor="let c of collaborations">
-          <div class="collab-header">
-            <img [src]="c.logo" class="collab-avatar" />
-            <div class="uni-badge">{{ c.university }}</div>
+
+      <div class="network-grid" *ngIf="collaborations.length; else emptyNetwork">
+        <div class="community-card" *ngFor="let c of collaborations" (click)="contactClub(c.clubName)">
+          <div class="cover-area">
+            <img
+              [src]="c.coverImage || 'assets/img/placeholder-cover.jpg'"
+              [alt]="c.clubName"
+              class="cover-img"
+              loading="lazy"
+              onerror="this.src='assets/img/placeholder-cover.jpg'"
+            />
+            <span class="category-badge">{{ c.type || 'Topluluk' }}</span>
           </div>
-          <div class="collab-body">
-            <h3>{{ c.clubName }}</h3>
-            <p class="desc">{{ c.description }}</p>
-            <div class="match-score">
-              <span class="material-symbols-outlined">bolt</span> %95 Eşleşme
+
+          <div class="card-content">
+            <div class="header-row">
+              <div class="logo-wrapper">
+                <img
+                  [src]="c.logo"
+                  [alt]="c.clubName"
+                  class="logo-img"
+                  loading="lazy"
+                  onerror="this.src='assets/img/placeholder-logo.png'"
+                />
+              </div>
+              <div class="title-wrapper">
+                <h3 class="community-name">{{ c.clubName }}</h3>
+                <span class="university-name">{{ c.university }}</span>
+              </div>
             </div>
-            <div class="tags-container">
-              <span class="mini-tag">#AI</span>
-              <span class="mini-tag">#Robotik</span>
+
+            <p class="description">{{ c.description }}</p>
+
+            <div class="card-footer">
+              <div class="stat">
+                <i class="bx bx-bolt-circle"></i>
+                <span>%95 Eşleşme</span>
+              </div>
+              <button class="detail-btn" (click)="contactClub(c.clubName); $event.stopPropagation()">
+                İletişime Geç
+                <i class="bx bx-right-arrow-alt"></i>
+              </button>
             </div>
-            <button class="btn-outline" (click)="contactClub(c.clubName)">
-              <span class="material-symbols-outlined">chat</span> İletişime Geç
-            </button>
           </div>
         </div>
       </div>
+      <ng-template #emptyNetwork>
+        <div class="empty-state">
+          <span class="material-symbols-outlined">groups</span>
+          <p>Listelenecek topluluk bulunamadı.</p>
+        </div>
+      </ng-template>
     </div>
 
     <!-- MEMBERS -->
@@ -488,12 +520,24 @@
           ></app-image-upload>
         </div>
         <input type="text" placeholder="Etkinlik İsmi" [(ngModel)]="newEventData.title" />
-        <div class="row">
-          <input type="date" [(ngModel)]="newEventData.date" />
-          <input type="time" [(ngModel)]="newEventData.time" />
+        <div class="row two-cols">
+          <label class="stacked">
+            <span>Tarih</span>
+            <input type="date" [(ngModel)]="newEventData.date" />
+          </label>
+          <label class="stacked">
+            <span>Saat</span>
+            <input type="time" [(ngModel)]="newEventData.time" />
+          </label>
         </div>
-        <input type="text" placeholder="Konum" [(ngModel)]="newEventData.location" />
-        <input type="number" placeholder="Kontenjan" [(ngModel)]="newEventData.quota" />
+        <label class="stacked">
+          <span>Konum</span>
+          <input type="text" placeholder="Konum" [(ngModel)]="newEventData.location" />
+        </label>
+        <label class="stacked">
+          <span>Kontenjan</span>
+          <input type="number" placeholder="Kontenjan" [(ngModel)]="newEventData.quota" />
+        </label>
         <textarea rows="3" placeholder="Etkinlik Açıklaması" [(ngModel)]="newEventData.description"></textarea>
         <button class="btn-primary full" [disabled]="!isEventFormValid" (click)="saveEvent()">
           Kurumsal Tarafa Yönlendir

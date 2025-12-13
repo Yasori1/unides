@@ -49,6 +49,16 @@
 
       <button
         class="menu-item"
+        [class.active]="activeTab === 'collaboration'"
+        (click)="switchTab('collaboration')"
+        title="İşbirliği"
+      >
+        <span class="material-symbols-outlined">public</span>
+        <span *ngIf="!isSidebarCollapsed">İşbirliği</span>
+      </button>
+
+      <button
+        class="menu-item"
         [class.active]="activeTab === 'events'"
         (click)="switchTab('events')"
         title="Etkinlikler"
@@ -222,6 +232,129 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- İŞBİRLİĞİ: Tüm topluluklar (communities-page kart tasarımı) -->
+    <div class="view-container collaboration-view" *ngIf="activeTab === 'collaboration'">
+      <div class="page-header">
+        <div>
+          <h2>İşbirliği</h2>
+          <p class="page-subtitle">Bütün topluluklar — filtre ve sayfalama olmadan hızlı liste</p>
+        </div>
+      </div>
+
+      <div class="grid-container" *ngIf="allCommunities.length > 0; else emptyCollab">
+        <div
+          *ngFor="let item of allCommunities"
+          class="community-card"
+          (click)="openCommunityDetail(item)"
+        >
+          <div class="cover-area">
+            <img
+              [src]="item.coverImage || item.banner || 'assets/img/placeholder-cover.jpg'"
+              [alt]="item.name"
+              class="cover-img"
+              onerror="this.src='assets/img/placeholder-cover.jpg'"
+            />
+            <span class="category-badge">{{ item.category }}</span>
+          </div>
+
+          <div class="card-content">
+            <div class="header-row">
+              <div class="logo-wrapper">
+                <img
+                  [src]="item.logo"
+                  [alt]="item.name"
+                  class="logo-img"
+                  onerror="this.src='assets/img/placeholder-logo.png'"
+                />
+              </div>
+              <div class="title-wrapper">
+                <h3 class="community-name">{{ item.name }}</h3>
+                <span class="university-name">{{ item.university }}</span>
+                <span class="city-tag" *ngIf="item.city">
+                  <i class="bx bxs-map"></i> {{ item.city }}
+                </span>
+              </div>
+            </div>
+
+            <p class="description">{{ item.description || item.about }}</p>
+
+            <div
+              class="social-media-icons"
+              *ngIf="item.instagram || item.youtube || item.twitter || item.tiktok || item.socialMedia"
+            >
+              <a
+                *ngIf="item.instagram"
+                [href]="item.instagram"
+                target="_blank"
+                class="social-icon instagram"
+                (click)="$event.stopPropagation()"
+                title="Instagram"
+              >
+                <i class="bx bxl-instagram"></i>
+              </a>
+              <a
+                *ngIf="item.youtube"
+                [href]="item.youtube"
+                target="_blank"
+                class="social-icon youtube"
+                (click)="$event.stopPropagation()"
+                title="Youtube"
+              >
+                <i class="bx bxl-youtube"></i>
+              </a>
+              <a
+                *ngIf="item.twitter"
+                [href]="item.twitter"
+                target="_blank"
+                class="social-icon twitter"
+                (click)="$event.stopPropagation()"
+                title="Twitter"
+              >
+                <i class="bx bxl-twitter"></i>
+              </a>
+              <a
+                *ngIf="item.tiktok"
+                [href]="item.tiktok"
+                target="_blank"
+                class="social-icon tiktok"
+                (click)="$event.stopPropagation()"
+                title="TikTok"
+              >
+                <i class="bx bxl-tiktok"></i>
+              </a>
+              <a
+                *ngIf="item.socialMedia && !item.instagram && !item.youtube && !item.twitter && !item.tiktok"
+                [href]="item.socialMedia"
+                target="_blank"
+                class="social-icon"
+                (click)="$event.stopPropagation()"
+                title="Sosyal Medya"
+              >
+                <i class="bx bxl-facebook"></i>
+              </a>
+            </div>
+
+            <div class="card-footer">
+              <div class="stat">
+                <i class="bx bx-group"></i>
+                <span>{{ item.memberCount }} Üye</span>
+              </div>
+              <span class="action-text">
+                İncele
+                <i class="bx bx-right-arrow-alt"></i>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <ng-template #emptyCollab>
+        <div class="empty-state">
+          <span class="material-symbols-outlined">groups</span>
+          <p>Listelenecek topluluk bulunamadı.</p>
+        </div>
+      </ng-template>
     </div>
 
     <!-- 2. TAB: TOPLULUKLAR -->
