@@ -13,7 +13,6 @@
       </div>
       <div class="brand-text" *ngIf="!isSidebarCollapsed">
         <h2>ÜNİDES</h2>
-        <span class="subtitle">Next Gen</span>
       </div>
     </div>
 
@@ -26,32 +25,12 @@
         </button>
       </div>
 
-      <div class="menu-divider" *ngIf="!isSidebarCollapsed">PROJE & FON</div>
+      <div class="menu-divider" *ngIf="!isSidebarCollapsed">YÖNETİM</div>
       
       <button class="menu-item" [class.active]="activeTab === 'projects'" (click)="switchTab('projects')">
         <span class="material-symbols-outlined">rocket_launch</span>
         <span *ngIf="!isSidebarCollapsed">Projeler</span>
       </button>
-      
-      <button class="menu-item" [class.active]="activeTab === 'sponsors'" (click)="switchTab('sponsors')">
-        <span class="material-symbols-outlined">monetization_on</span>
-        <span *ngIf="!isSidebarCollapsed">Sponsorluk</span>
-      </button>
-
-      <div class="menu-divider" *ngIf="!isSidebarCollapsed">AĞ & İLETİŞİM</div>
-
-      <button class="menu-item" [class.active]="activeTab === 'network'" (click)="switchTab('network')">
-        <span class="material-symbols-outlined">public</span>
-        <span *ngIf="!isSidebarCollapsed">Network</span>
-      </button>
-      
-      <button class="menu-item" [class.active]="activeTab === 'messages'" (click)="switchTab('messages')">
-        <span class="material-symbols-outlined">chat_bubble</span>
-        <span *ngIf="!isSidebarCollapsed">Mesajlar</span>
-        <span class="badge" *ngIf="activeTab !== 'messages' && !isSidebarCollapsed">2</span>
-      </button>
-
-      <div class="menu-divider" *ngIf="!isSidebarCollapsed">YÖNETİM</div>
 
       <button class="menu-item" [class.active]="activeTab === 'documents'" (click)="switchTab('documents')">
         <span class="material-symbols-outlined">folder_open</span>
@@ -87,27 +66,38 @@
           <span class="material-symbols-outlined">menu</span>
         </button>
         <div class="page-title">
-          <h1>{{ activeTab === 'overview' ? 'Hoş Geldin, Ece! 👋' : (activeTab | titlecase) }}</h1>
+          <h1>{{ activeTab === 'overview' ? 'Hoş Geldin, Ece! 👋' : (getTabTitle(activeTab)) }}</h1>
         </div>
       </div>
 
       <div class="header-right">
-        <button class="icon-btn notification-btn" (click)="toggleNotifications($event)">
-          <span class="material-symbols-outlined">notifications</span>
-          <span class="indicator" *ngIf="notifications.length"></span>
-        </button>
-        
-        <div class="dropdown-menu glass-dropdown" *ngIf="showNotifications">
-          <div class="dd-header">Bildirimler</div>
-          <ul>
-            <li *ngFor="let n of notifications">
-              <div class="notif-dot"></div>
-              <div class="notif-content">
-                <p>{{ n.text }}</p>
-                <small>{{ n.time }}</small>
-              </div>
-            </li>
-          </ul>
+        <div class="notification-wrapper">
+            <button class="icon-btn notification-btn" (click)="toggleNotifications($event)">
+                <span class="material-symbols-outlined">notifications</span>
+                <span class="indicator" *ngIf="notifications.length"></span>
+            </button>
+            
+            <div class="dropdown-menu glass-dropdown" *ngIf="showNotifications" (click)="$event.stopPropagation()">
+                <div class="dd-header">
+                    <span>Bildirimler</span>
+                    <button class="clear-all" (click)="notifications = []">Temizle</button>
+                </div>
+                <ul class="notif-list">
+                    <li *ngFor="let n of notifications">
+                        <div class="notif-icon-circle">
+                            <span class="material-symbols-outlined">info</span>
+                        </div>
+                        <div class="notif-content">
+                            <p>{{ n.text }}</p>
+                            <small>{{ n.time }}</small>
+                        </div>
+                    </li>
+                    <li *ngIf="notifications.length === 0" class="empty-state">
+                        <span class="material-symbols-outlined">done_all</span>
+                        <p>Hiç bildirim yok.</p>
+                    </li>
+                </ul>
+            </div>
         </div>
 
         <div class="profile-wrapper" (click)="toggleProfileDropdown($event)">
@@ -117,7 +107,7 @@
             <span class="club-role">Yönetici</span>
           </div>
           
-          <div class="dropdown-menu glass-dropdown" *ngIf="isProfileOpen">
+          <div class="dropdown-menu glass-dropdown profile-dd" *ngIf="isProfileOpen">
              <ul>
                <li (click)="switchTab('settings')"><span class="material-symbols-outlined">settings</span> Ayarlar</li>
                <li (click)="logout()" class="danger"><span class="material-symbols-outlined">logout</span> Çıkış</li>
@@ -159,13 +149,25 @@
           <div class="glass-panel table-panel">
             <div class="panel-header">
               <h3>Son Projeler</h3>
-              <button class="btn-text" (click)="switchTab('projects')">Tümünü Gör</button>
+              <button class="btn-view-all" (click)="switchTab('projects')">
+                Tümünü Gör <span class="material-symbols-outlined">arrow_forward</span>
+              </button>
             </div>
             <table class="modern-table">
               <thead><tr><th>Proje</th><th>Durum</th><th>Tarih</th></tr></thead>
               <tbody>
                 <tr *ngFor="let p of projects.slice(0,3)">
-                  <td><span class="fw-bold">{{ p.name }}</span></td>
+                  <td>
+                    <div class="flex-align">
+                        <button class="star-btn" 
+                                [class.active]="p.isPromoted" 
+                                (click)="togglePromote(p, $event)" 
+                                title="Favorilere Ekle">
+                            <span class="material-symbols-outlined">star</span>
+                        </button>
+                        <span class="fw-bold">{{ p.name }}</span>
+                    </div>
+                  </td>
                   <td><span class="status-pill" [attr.data-status]="p.status">{{ p.status }}</span></td>
                   <td>{{ p.deadline }}</td>
                 </tr>
@@ -176,14 +178,14 @@
           <div class="glass-panel quick-actions">
             <h3>Hızlı Erişim</h3>
             <div class="action-grid">
-              <button class="action-tile" (click)="openModal('new-project')">
-                <span class="material-symbols-outlined">add_circle</span> Yeni Proje
-              </button>
               <button class="action-tile" (click)="openModal('new-member')">
                 <span class="material-symbols-outlined">person_add</span> Üye Ekle
               </button>
-              <button class="action-tile" (click)="switchTab('sponsors')">
-                <span class="material-symbols-outlined">diamond</span> Sponsor
+              <button class="action-tile" (click)="switchTab('documents')">
+                <span class="material-symbols-outlined">upload_file</span> Belge Yükle
+              </button>
+              <button class="action-tile" (click)="switchTab('settings')">
+                <span class="material-symbols-outlined">settings_suggest</span> Profil Düzenle
               </button>
             </div>
           </div>
@@ -193,7 +195,6 @@
       <div class="view-section fade-in" *ngIf="activeTab === 'projects'">
         <div class="section-header">
           <button class="btn-glass" (click)="exportData('excel')"><span class="material-symbols-outlined">download</span> Raporla</button>
-          <button class="btn-gradient" (click)="openModal('new-project')"><span class="material-symbols-outlined">add</span> Yeni Proje</button>
         </div>
         <div class="glass-panel">
           <table class="modern-table full">
@@ -202,7 +203,12 @@
               <tr *ngFor="let p of projects">
                 <td>
                   <div class="flex-align">
-                    <span class="material-symbols-outlined star-icon" [class.active]="p.isPromoted" (click)="togglePromote(p)">star</span>
+                    <button class="star-btn" 
+                            [class.active]="p.isPromoted" 
+                            (click)="togglePromote(p, $event)" 
+                            title="Favorilere Ekle">
+                      <span class="material-symbols-outlined">star</span>
+                    </button>
                     {{ p.name }}
                   </div>
                 </td>
@@ -221,67 +227,6 @@
         </div>
       </div>
 
-      <div class="view-section fade-in" *ngIf="activeTab === 'sponsors'">
-        <div class="page-header-glass">
-          <h2>Sponsorluk Fırsatları 💎</h2>
-          <p>Kulübün için aktif hibe ve destek programları.</p>
-        </div>
-        
-        <div class="sponsor-grid">
-          <div class="glass-card sponsor-card" *ngFor="let s of sponsors">
-            <div class="card-badge" [class.open]="s.status === 'Açık'">{{ s.status }}</div>
-            <div class="sponsor-logo-area">
-              <img [src]="s.logo" alt="logo">
-            </div>
-            <div class="sponsor-content">
-              <span class="type-tag">{{ s.type }}</span>
-              <h3>{{ s.name }}</h3>
-              <div class="detail-row">
-                <span class="material-symbols-outlined">payments</span>
-                <strong>{{ s.amount }}</strong>
-              </div>
-              <div class="detail-row">
-                <span class="material-symbols-outlined">event</span>
-                <span>Son: {{ s.deadline }}</span>
-              </div>
-              <button class="btn-glow full" (click)="applySponsor(s.name)">
-                Hemen Başvur <span class="material-symbols-outlined">arrow_forward</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="view-section fade-in" *ngIf="activeTab === 'network'">
-        <div class="page-header-glass">
-          <h2>İş Birliği Ağı 🌐</h2>
-          <p>Diğer üniversite kulüpleriyle eşleş ve proje üret.</p>
-        </div>
-
-        <div class="network-grid">
-          <div class="glass-card collab-card" *ngFor="let c of collaborations">
-            <div class="collab-header">
-              <img [src]="c.logo" class="collab-avatar">
-              <div class="uni-badge">{{ c.university }}</div>
-            </div>
-            <div class="collab-body">
-              <h3>{{ c.clubName }}</h3>
-              <p class="desc">{{ c.description }}</p>
-              <div class="match-score">
-                <span class="material-symbols-outlined">bolt</span> %95 Eşleşme
-              </div>
-              <div class="tags-container">
-                <span class="mini-tag">#AI</span>
-                <span class="mini-tag">#Robotik</span>
-              </div>
-              <button class="btn-outline-modern" (click)="contactClub(c.clubName)">
-                <span class="material-symbols-outlined">chat</span> İletişime Geç
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div class="view-section fade-in" *ngIf="activeTab === 'members'">
         <div class="section-header">
           <div class="search-glass">
@@ -292,81 +237,65 @@
         </div>
         <div class="member-grid">
           <div class="member-card glass-panel" *ngFor="let m of filteredMembers">
-            <div class="member-header">
-               <img [src]="m.avatar" alt="">
-               <span class="status-dot" [class.online]="m.status === 'Aktif'"></span>
+            <div class="member-cover"></div>
+            <div class="member-content">
+                <div class="avatar-box">
+                    <img [src]="m.avatar" alt="">
+                    <span class="status-dot" [class.online]="m.status === 'Aktif'"></span>
+                </div>
+                <h4>{{ m.name }}</h4>
+                <p class="dept">{{ m.department }}</p>
+                <div class="member-badges">
+                    <span class="role-badge" [class.admin]="m.role === 'Başkan' || m.role === 'Başkan Yrd.'">{{ m.role }}</span>
+                    <span class="grade-badge">{{ m.grade }}</span>
+                </div>
             </div>
-            <h4>{{ m.name }}</h4>
-            <p>{{ m.department }}</p>
-            <div class="tags">
-              <span class="role-tag">{{ m.role }}</span>
-              <span class="grade-tag">{{ m.grade }}</span>
-            </div>
-            <button class="btn-icon-only delete" (click)="deleteMember(m.id)"><span class="material-symbols-outlined">delete</span></button>
           </div>
         </div>
       </div>
 
       <div class="view-section fade-in" *ngIf="activeTab === 'documents'">
         
-        <div class="glass-panel storage-banner">
-          <div class="storage-info">
-            <div class="icon-circle big cyan"><span class="material-symbols-outlined">cloud_queue</span></div>
-            <div>
-              <h3>Bulut Depolama</h3>
-              <p>5GB / 15GB Kullanılıyor</p>
-            </div>
-          </div>
-          <div class="storage-bar-wrapper">
-            <div class="storage-bar-fill" style="width: 33%"></div>
-          </div>
+        <div class="page-header-glass">
+            <h2>Doküman Yönetimi 📂</h2>
+            <p>Kulüp dosyalarına hızlı ve güvenli erişim.</p>
         </div>
 
-        <div class="upload-zone glass-panel">
-          <span class="material-symbols-outlined">cloud_upload</span>
-          <p>Dosyaları buraya sürükleyin veya <strong>Gözatın</strong></p>
+        <div class="upload-zone-compact glass-panel">
+            <div class="uz-icon"><span class="material-symbols-outlined">cloud_upload</span></div>
+            <div class="uz-text">
+                <h3>Dosya Yükle</h3>
+                <p>PDF, DOCX, ZIP (Max 25MB)</p>
+            </div>
+            <button class="btn-glass">Gözat</button>
         </div>
 
-        <h3 class="section-title">Son Dosyalar</h3>
-        <div class="docs-grid">
-          <div class="glass-card doc-card" *ngFor="let d of documents">
-            <div class="doc-icon-box" [class.pdf]="d.type === 'PDF'" [class.word]="d.type === 'DOCX'" [class.zip]="d.type === 'ZIP'">
-              <span class="material-symbols-outlined">{{ d.icon }}</span>
+        <div class="glass-panel no-padding">
+            <div class="doc-list-header">
+                <span>Dosya Adı</span>
+                <span>Tür</span>
+                <span>Boyut</span>
+                <span>Tarih</span>
+                <span>İşlem</span>
             </div>
-            <div class="doc-info">
-              <h4>{{ d.name }}</h4>
-              <span class="meta">2.4 MB • Bugün</span>
+            <div class="doc-list-body">
+                <div class="doc-row" *ngFor="let d of documents">
+                    <div class="d-name">
+                        <div class="d-icon" [class.pdf]="d.type === 'PDF'" [class.word]="d.type === 'DOCX'" [class.zip]="d.type === 'ZIP'">
+                            <span class="material-symbols-outlined">{{ d.icon }}</span>
+                        </div>
+                        <span>{{ d.name }}</span>
+                    </div>
+                    <div class="d-type"><span class="chip">{{ d.type }}</span></div>
+                    <div class="d-size">2.4 MB</div>
+                    <div class="d-date">Bugün</div>
+                    <div class="d-action">
+                        <button class="icon-btn-sm" (click)="downloadDoc(d.name)">
+                            <span class="material-symbols-outlined">download</span>
+                        </button>
+                    </div>
+                </div>
             </div>
-            <button class="icon-btn-ghost" (click)="downloadDoc(d.name)">
-              <span class="material-symbols-outlined">download</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div class="view-section no-pad fade-in" *ngIf="activeTab === 'messages'">
-        <div class="glass-panel chat-layout">
-          <div class="chat-list">
-            <div class="list-header">Sohbetler</div>
-            <div class="contact" *ngFor="let c of chatContacts" [class.active]="activeContactId === c.id" (click)="selectContact(c.id)">
-              <img [src]="c.avatar">
-              <div class="info">
-                <span class="name">{{ c.name }}</span>
-                <span class="msg">{{ c.lastMsg }}</span>
-              </div>
-            </div>
-          </div>
-          <div class="chat-area">
-             <div class="messages" #scrollMe>
-               <div class="bubble" *ngFor="let msg of activeChatMessages" [class.me]="msg.sender === 'me'">
-                 {{ msg.text }}
-               </div>
-             </div>
-             <div class="input-zone">
-               <input type="text" placeholder="Bir şeyler yaz..." [(ngModel)]="newMessageText" (keyup.enter)="sendMessage()">
-               <button class="send-btn" (click)="sendMessage()"><span class="material-symbols-outlined">send</span></button>
-             </div>
-          </div>
         </div>
       </div>
 
@@ -374,75 +303,130 @@
         <div class="settings-container">
           
           <div class="glass-panel settings-menu">
-            <div class="menu-header">Ayarlar</div>
-            <button class="s-menu-item active"><span class="material-symbols-outlined">manage_accounts</span> Genel Bilgiler</button>
-            <button class="s-menu-item"><span class="material-symbols-outlined">notifications</span> Bildirimler</button>
-            <button class="s-menu-item"><span class="material-symbols-outlined">lock</span> Güvenlik</button>
-            <button class="s-menu-item danger"><span class="material-symbols-outlined">delete</span> Hesabı Sil</button>
+            <div class="menu-header">Hesap Ayarları</div>
+            
+            <button class="s-menu-item" [class.active]="activeSettingsTab === 'general'" (click)="activeSettingsTab = 'general'">
+                <span class="material-symbols-outlined">manage_accounts</span> Genel Bilgiler
+            </button>
+            
+            <button class="s-menu-item" [class.active]="activeSettingsTab === 'notifications'" (click)="activeSettingsTab = 'notifications'">
+                <span class="material-symbols-outlined">notifications</span> Bildirimler
+            </button>
+            
+            <button class="s-menu-item" [class.active]="activeSettingsTab === 'security'" (click)="activeSettingsTab = 'security'">
+                <span class="material-symbols-outlined">lock</span> Güvenlik & Gizlilik
+            </button>
           </div>
       
           <div class="glass-panel settings-content">
             
-            <div class="profile-banner-area">
-              <div class="banner-bg"></div>
-              <div class="profile-edit-avatar">
-                <img [src]="clubInfo.logo" alt="Logo">
-                <button class="edit-btn"><span class="material-symbols-outlined">photo_camera</span></button>
-              </div>
-            </div>
-      
-            <div class="form-section">
-              <h3>Kulüp Profili</h3>
-              <div class="grid-2">
-                <div class="input-group-modern">
-                  <label>Kulüp Adı</label>
-                  <input type="text" [(ngModel)]="clubInfo.name">
+            <div class="settings-view fade-in" *ngIf="activeSettingsTab === 'general'">
+                <div class="profile-banner-area">
+                <div class="banner-bg"></div>
+                <div class="profile-edit-avatar">
+                    <img [src]="clubInfo.logo" alt="Logo">
+                    <button class="edit-btn"><span class="material-symbols-outlined">photo_camera</span></button>
                 </div>
-                <div class="input-group-modern">
-                  <label>Üniversite</label>
-                  <input type="text" [(ngModel)]="clubInfo.university" disabled> </div>
-              </div>
-              
-              <div class="input-group-modern">
-                <label>Hakkımızda (Bio)</label>
-                <textarea rows="3" [(ngModel)]="clubInfo.description"></textarea>
-              </div>
-      
-              <div class="grid-2">
-                <div class="input-group-modern">
-                  <label>E-Posta</label>
-                  <input type="email" [(ngModel)]="clubInfo.email">
                 </div>
-                <div class="input-group-modern">
-                  <label>Instagram</label>
-                  <input type="text" [(ngModel)]="clubInfo.instagram">
+        
+                <div class="form-section">
+                <h3>Kulüp Profili</h3>
+                <div class="grid-2">
+                    <div class="input-group-modern">
+                    <label>Kulüp Adı</label>
+                    <input type="text" [(ngModel)]="clubInfo.name">
+                    </div>
+                    <div class="input-group-modern">
+                    <label>Üniversite</label>
+                    <input type="text" [(ngModel)]="clubInfo.university" disabled>
+                    </div>
                 </div>
-              </div>
+                
+                <div class="input-group-modern">
+                    <label>Hakkımızda (Bio)</label>
+                    <textarea rows="3" [(ngModel)]="clubInfo.description"></textarea>
+                </div>
+        
+                <div class="grid-2">
+                    <div class="input-group-modern">
+                    <label>E-Posta</label>
+                    <input type="email" [(ngModel)]="clubInfo.email">
+                    </div>
+                    <div class="input-group-modern">
+                    <label>Instagram</label>
+                    <input type="text" [(ngModel)]="clubInfo.instagram">
+                    </div>
+                </div>
+                </div>
+                <div class="action-footer">
+                    <button class="btn-glow" (click)="updateSettings()">Kaydet</button>
+                </div>
             </div>
-      
-            <div class="form-section">
-              <h3>Tercihler</h3>
-              <div class="toggle-row">
-                <span>Herkese Açık Profil</span>
-                <label class="switch">
-                  <input type="checkbox" checked>
-                  <span class="slider round"></span>
-                </label>
-              </div>
-              <div class="toggle-row">
-                <span>Yeni Üye Bildirimleri</span>
-                <label class="switch">
-                  <input type="checkbox" checked>
-                  <span class="slider round"></span>
-                </label>
-              </div>
+
+            <div class="settings-view fade-in" *ngIf="activeSettingsTab === 'notifications'">
+                <div class="form-section pt-30">
+                    <h3>Bildirim Tercihleri</h3>
+                    <p class="text-muted mb-20">Hangi durumlarda bildirim almak istediğinizi seçin.</p>
+                    
+                    <div class="toggle-row">
+                        <div class="tr-info">
+                            <span>Yeni Üye Başvurusu</span>
+                            <small>Biri kulübe katılmak istediğinde.</small>
+                        </div>
+                        <label class="switch"><input type="checkbox" checked><span class="slider round"></span></label>
+                    </div>
+                    <div class="toggle-row">
+                        <div class="tr-info">
+                            <span>Proje Durum Güncellemeleri</span>
+                            <small>Projeleriniz onaylandığında veya reddedildiğinde.</small>
+                        </div>
+                        <label class="switch"><input type="checkbox" checked><span class="slider round"></span></label>
+                    </div>
+                    <div class="toggle-row">
+                        <div class="tr-info">
+                            <span>E-Posta Bülteni</span>
+                            <small>Haftalık özet raporları.</small>
+                        </div>
+                        <label class="switch"><input type="checkbox"><span class="slider round"></span></label>
+                    </div>
+                </div>
+                <div class="action-footer">
+                    <button class="btn-glow" (click)="updateSettings()">Tercihleri Güncelle</button>
+                </div>
             </div>
-      
-            <div class="action-footer">
-              <button class="btn-ghost">İptal</button>
-              <button class="btn-glow" (click)="updateSettings()">Değişiklikleri Kaydet</button>
+
+            <div class="settings-view fade-in" *ngIf="activeSettingsTab === 'security'">
+                <div class="form-section pt-30">
+                    <h3>Şifre ve Güvenlik</h3>
+                    
+                    <div class="input-group-modern">
+                        <label>Mevcut Şifre</label>
+                        <input type="password" placeholder="••••••••">
+                    </div>
+                    <div class="grid-2">
+                        <div class="input-group-modern">
+                            <label>Yeni Şifre</label>
+                            <input type="password">
+                        </div>
+                        <div class="input-group-modern">
+                            <label>Yeni Şifre (Tekrar)</label>
+                            <input type="password">
+                        </div>
+                    </div>
+
+                    <div class="toggle-row">
+                        <div class="tr-info">
+                            <span>İki Faktörlü Doğrulama (2FA)</span>
+                            <small>Giriş yaparken SMS kodu iste.</small>
+                        </div>
+                        <label class="switch"><input type="checkbox"><span class="slider round"></span></label>
+                    </div>
+                </div>
+                <div class="action-footer">
+                    <button class="btn-glow" (click)="updateSettings()">Güvenlik Ayarlarını Kaydet</button>
+                </div>
             </div>
-      
+
           </div>
         </div>
       </div>
@@ -453,20 +437,11 @@
   <div class="modal-overlay" *ngIf="isModalOpen" (click)="closeModal()">
     <div class="glass-modal" (click)="$event.stopPropagation()">
       <div class="modal-head">
-        <h3>{{ modalType === 'new-project' ? 'Yeni Proje Başlat' : 'Takıma Üye Ekle' }}</h3>
+        <h3>Takıma Üye Ekle</h3>
         <button class="close" (click)="closeModal()">✕</button>
       </div>
       
-      <div class="modal-body" *ngIf="modalType === 'new-project'">
-         <input type="text" placeholder="Proje Adı" [(ngModel)]="newProjectData.name" class="glass-input">
-         <div class="row">
-           <input type="number" placeholder="Bütçe" [(ngModel)]="newProjectData.budget" class="glass-input">
-           <input type="date" [(ngModel)]="newProjectData.deadline" class="glass-input">
-         </div>
-         <button class="btn-gradient full" (click)="saveProject()">Oluştur 🚀</button>
-      </div>
-
-      <div class="modal-body" *ngIf="modalType === 'new-member'">
+      <div class="modal-body">
         <input type="text" placeholder="Ad Soyad" [(ngModel)]="newMemberData.name" class="glass-input">
         <input type="text" placeholder="Bölüm" [(ngModel)]="newMemberData.department" class="glass-input">
         <select [(ngModel)]="newMemberData.role" class="glass-input">
