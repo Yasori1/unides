@@ -1,6 +1,8 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { ImageUploadComponent } from '../../components/ui/image-upload/image-upload';
 
 // --- Interfaces ---
 interface Project {
@@ -51,7 +53,7 @@ interface DashboardEvent {
 @Component({
   selector: 'app-community-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ImageUploadComponent],
   templateUrl: './community-dashboard.component.html',
   styleUrls: ['./community-dashboard.component.scss'],
 })
@@ -64,7 +66,17 @@ export class CommunityDashboardComponent implements OnInit {
   isProfileOpen: boolean = false;
   showNotifications: boolean = false;
   activeRowMenuId: number | null = null;
-  modalType: 'new-project' | 'new-member' | null = null;
+  modalType: 'new-event' | 'new-project' | 'new-member' | null = null;
+  // Event creation modal
+  newEventData = {
+    title: '',
+    date: '',
+    time: '',
+    location: '',
+    quota: '',
+    description: '',
+    image: '',
+  };
   // Form Data
   newProjectData = { name: '', category: 'Teknoloji', budget: 0, deadline: '' };
   newMemberData = {
@@ -278,7 +290,7 @@ export class CommunityDashboardComponent implements OnInit {
       logo: 'https://ui-avatars.com/api/?name=YTU&background=f59e0b&color=fff',
     },
   ];
-  constructor() {}
+  constructor(private router: Router) {}
   ngOnInit(): void {}
   @HostListener('document:click', ['$event'])
   clickout(event: any) {
@@ -367,6 +379,15 @@ export class CommunityDashboardComponent implements OnInit {
   openModal(type: any) {
     this.modalType = type;
     this.isModalOpen = true;
+    this.newEventData = {
+      title: '',
+      date: '',
+      time: '',
+      location: '',
+      quota: '',
+      description: '',
+      image: '',
+    };
     this.newProjectData = { name: '', category: 'Teknoloji', budget: 0, deadline: '' };
     this.newMemberData = {
       name: '',
@@ -398,6 +419,56 @@ export class CommunityDashboardComponent implements OnInit {
       this.showToast('Proje eklendi.', 'success');
       this.closeModal();
     }
+  }
+
+  saveEvent() {
+    if (!this.isEventFormValid) {
+      this.showToast('Lütfen tüm alanları doldurun.', 'error');
+      return;
+    }
+    this.showToast('Kurumsal girişe yönlendiriliyorsunuz...', 'success');
+    setTimeout(() => {
+      this.router.navigate(['/corporate-dashboard'], {
+        queryParams: { from: 'community-dashboard', draftEvent: this.newEventData.title },
+      });
+      this.closeModal();
+    }, 600);
+  }
+
+  get isEventFormValid() {
+    const { title, date, time, location, quota, description, image } = this.newEventData;
+    return (
+      !!title.trim() &&
+      !!date &&
+      !!time &&
+      !!location.trim() &&
+      !!quota &&
+      !!description.trim() &&
+      !!image
+    );
+  }
+
+  onEventImageSelected(image: string | Event) {
+    // image-upload component string base64/url gönderir
+    if (typeof image === 'string') {
+      this.newEventData.image = image;
+      return;
+    }
+    // fallback: native input event
+    const file = (image.target as HTMLInputElement).files?.[0];
+    if (file) this.readFileToBase64(file);
+  }
+
+  onEventFileSelected(file: File) {
+    if (file) this.readFileToBase64(file);
+  }
+
+  private readFileToBase64(file: File) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.newEventData.image = reader.result as string;
+    };
+    reader.readAsDataURL(file);
   }
 
   saveMember() {

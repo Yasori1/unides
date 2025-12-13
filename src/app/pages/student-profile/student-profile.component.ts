@@ -141,16 +141,25 @@ export class StudentProfileComponent implements OnInit {
     ];
 
     // Mock Events from communities (toplulukların etkinlikleri)
+    // Tarihler bugüne göre ayarlanıyor ki takvimde hemen görülsün
+    const isoInDays = (offset: number) => {
+      const d = new Date();
+      d.setHours(12, 0, 0, 0); // timezone kaymasını önlemek için
+      d.setDate(d.getDate() + offset);
+      return this.toIso(d);
+    };
+
     this.communityEvents = [
       {
         id: 1,
         title: 'Yapay Zeka Workshop',
-        date: '2024-12-20',
+        date: isoInDays(2),
         time: '14:00',
         location: 'Kampüs Merkez',
         community: 'Yazılım Geliştirme Kulübü',
         status: 'upcoming',
-        imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=900&q=60',
+        imageUrl:
+          'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=900&q=60',
         category: 'Teknoloji',
         university: 'İTÜ',
         description: 'Uygulamalı AI oturumları ve canlı demo.',
@@ -162,12 +171,13 @@ export class StudentProfileComponent implements OnInit {
       {
         id: 2,
         title: 'Web Geliştirme Bootcamp',
-        date: '2024-12-25',
+        date: isoInDays(5),
         time: '09:00',
         location: 'Bilgisayar Laboratuvarı',
         community: 'Yazılım Geliştirme Kulübü',
         status: 'upcoming',
-        imageUrl: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=900&q=60',
+        imageUrl:
+          'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=900&q=60',
         category: 'Eğitim',
         university: 'İTÜ',
         description: 'Frontend ve backend hızlandırma kampı.',
@@ -179,12 +189,13 @@ export class StudentProfileComponent implements OnInit {
       {
         id: 3,
         title: 'Girişimcilik Zirvesi',
-        date: '2024-11-15',
+        date: isoInDays(12),
         time: '10:00',
         location: 'Konferans Salonu',
         community: 'Girişimcilik Topluluğu',
-        status: 'completed',
-        imageUrl: 'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=900&q=60',
+        status: 'upcoming',
+        imageUrl:
+          'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=900&q=60',
         category: 'İş Dünyası',
         university: 'Hacettepe',
         description: 'Startup panelleri ve yatırımcı sohbetleri.',
@@ -196,12 +207,13 @@ export class StudentProfileComponent implements OnInit {
       {
         id: 4,
         title: 'Startup Pitch Yarışması',
-        date: '2025-01-10',
+        date: isoInDays(25),
         time: '15:00',
         location: 'İnovasyon Merkezi',
         community: 'Girişimcilik Topluluğu',
         status: 'upcoming',
-        imageUrl: 'https://images.unsplash.com/photo-1545239351-46ef46aab2e1?auto=format&fit=crop&w=900&q=60',
+        imageUrl:
+          'https://images.unsplash.com/photo-1545239351-46ef46aab2e1?auto=format&fit=crop&w=900&q=60',
         category: 'Yarışma',
         university: 'Hacettepe',
         description: 'Takımlar 5 dakikada fikirlerini sunuyor.',
@@ -209,6 +221,24 @@ export class StudentProfileComponent implements OnInit {
         club: 'Girişimcilik Topluluğu',
         semester: 'Girişimcilik Topluluğu',
         quota: '60',
+      },
+      {
+        id: 5,
+        title: 'Yeni Yıl Hackathon',
+        date: isoInDays(35), // bir sonraki ayı görmek için
+        time: '11:00',
+        location: 'Ar-Ge Merkezi',
+        community: 'Yazılım Geliştirme Kulübü',
+        status: 'upcoming',
+        imageUrl:
+          'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=900&q=60',
+        category: 'Hackathon',
+        university: 'İTÜ',
+        description: '48 saatlik ekip hackathonu.',
+        color: '#a855f7',
+        club: 'Yazılım Geliştirme Kulübü',
+        semester: 'Yazılım Geliştirme Kulübü',
+        quota: '150',
       },
     ];
 

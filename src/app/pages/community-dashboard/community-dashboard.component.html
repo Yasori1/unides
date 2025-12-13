@@ -1,12 +1,11 @@
 <div class="dashboard-container">
   <aside class="sidebar" [class.collapsed]="isSidebarCollapsed">
     <div class="brand" (click)="switchTab('overview')">
-      <div class="logo-square">
-        <span class="material-symbols-outlined">hub</span>
+      <div class="logo-badge">
+        <img class="brand-logo" src="images/logo.png" alt="Ünides Dijital Portal" />
       </div>
       <div class="brand-text" *ngIf="!isSidebarCollapsed">
-        <h2>ÜNİDES</h2>
-        <span>Next Gen</span>
+        <span class="brand-title">TOPLULUK</span>
       </div>
     </div>
 
@@ -30,14 +29,14 @@
         <span *ngIf="!isSidebarCollapsed">Etkinliklerim</span>
       </button>
 
-      <div class="menu-divider" *ngIf="!isSidebarCollapsed">AĞ & İLETİŞİM</div>
+      <div class="menu-divider" *ngIf="!isSidebarCollapsed">İŞBİRLİĞİ</div>
       <button
         class="menu-item"
         [class.active]="activeTab === 'network'"
         (click)="switchTab('network')"
       >
         <span class="material-symbols-outlined">public</span>
-        <span *ngIf="!isSidebarCollapsed">Network</span>
+        <span *ngIf="!isSidebarCollapsed">İşbirliği</span>
       </button>
 
       <div class="menu-divider" *ngIf="!isSidebarCollapsed">YÖNETİM</div>
@@ -274,7 +273,7 @@
               Reddedilen
             </button>
           </div>
-          <button class="btn-primary" (click)="openModal('new-project')">
+          <button class="btn-primary" (click)="openModal('new-event')">
             <span class="material-symbols-outlined">add</span> Etkinlik Oluştur
           </button>
         </div>
@@ -462,9 +461,42 @@
   <div class="modal-overlay" *ngIf="isModalOpen" (click)="closeModal()">
     <div class="modal-card" (click)="$event.stopPropagation()">
       <div class="modal-head">
-        <h3>{{ modalType === 'new-project' ? 'Yeni Proje Başlat' : 'Takıma Üye Ekle' }}</h3>
-        <button class="icon-btn ghost" (click)="closeModal()">
+        <h3>
+          {{
+            modalType === 'new-event'
+              ? 'Etkinlik Oluştur'
+              : modalType === 'new-project'
+              ? 'Yeni Proje Başlat'
+              : 'Takıma Üye Ekle'
+          }}
+        </h3>
+        <button class="icon-btn ghost close-modern" (click)="closeModal()">
           <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="modal-body" *ngIf="modalType === 'new-event'">
+        <div class="single-image-upload no-url-input">
+          <div class="upload-header">
+            <span class="upload-title">Etkinlik Fotoğrafı</span>
+            <span class="upload-hint">Önerilen: 1200×600px (2:1)</span>
+          </div>
+          <app-image-upload
+            label="Fotoğraf seç / sürükle"
+            [previewUrl]="newEventData.image || null"
+            (onImageSelected)="onEventImageSelected($event)"
+            (onFileSelected)="onEventFileSelected($event)"
+          ></app-image-upload>
+        </div>
+        <input type="text" placeholder="Etkinlik İsmi" [(ngModel)]="newEventData.title" />
+        <div class="row">
+          <input type="date" [(ngModel)]="newEventData.date" />
+          <input type="time" [(ngModel)]="newEventData.time" />
+        </div>
+        <input type="text" placeholder="Konum" [(ngModel)]="newEventData.location" />
+        <input type="number" placeholder="Kontenjan" [(ngModel)]="newEventData.quota" />
+        <textarea rows="3" placeholder="Etkinlik Açıklaması" [(ngModel)]="newEventData.description"></textarea>
+        <button class="btn-primary full" [disabled]="!isEventFormValid" (click)="saveEvent()">
+          Kurumsal Tarafa Yönlendir
         </button>
       </div>
       <div class="modal-body" *ngIf="modalType === 'new-project'">
