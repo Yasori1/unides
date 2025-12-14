@@ -960,8 +960,6 @@ export class CorporateDashboardComponent implements OnInit {
         return 'Genel Bakış';
       case 'communities':
         return 'Topluluk Yönetimi';
-      case 'collaboration':
-        return 'İşbirliği';
       case 'events':
         return 'Etkinlik Takvimi';
       case 'announcements':

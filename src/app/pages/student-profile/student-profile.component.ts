@@ -48,7 +48,6 @@ interface Event {
   quota?: string | number;
 }
 
-
 @Component({
   selector: 'app-student-profile',
   standalone: true,
@@ -64,7 +63,7 @@ export class StudentProfileComponent implements OnInit {
   showEventDates: boolean = false;
   calendarMonth: Date = new Date();
   calendarSelectedDate: string | null = null;
-  
+
   // User Info
   userInfo: any = {
     name: 'Öğrenci Adı',
@@ -242,7 +241,6 @@ export class StudentProfileComponent implements OnInit {
       },
     ];
 
-
     // Update stats
     this.stats[0].value = this.myCommunities.length;
     this.stats[1].value = this.communityEvents.length;
@@ -321,7 +319,9 @@ export class StudentProfileComponent implements OnInit {
     const end = new Date(this.calendarMonth.getFullYear(), this.calendarMonth.getMonth() + 1, 0);
     const days = [];
     for (let d = 1; d <= end.getDate(); d++) {
-      const iso = this.toIso(new Date(this.calendarMonth.getFullYear(), this.calendarMonth.getMonth(), d));
+      const iso = this.toIso(
+        new Date(this.calendarMonth.getFullYear(), this.calendarMonth.getMonth(), d)
+      );
       const hasEvent = this.communityEvents.some((ev) => ev.date === iso);
       const isToday = iso === this.toIso(new Date());
       days.push({ label: d, iso, hasEvent, isToday });
@@ -330,7 +330,11 @@ export class StudentProfileComponent implements OnInit {
   }
 
   changeCalendarMonth(offset: number) {
-    this.calendarMonth = new Date(this.calendarMonth.getFullYear(), this.calendarMonth.getMonth() + offset, 1);
+    this.calendarMonth = new Date(
+      this.calendarMonth.getFullYear(),
+      this.calendarMonth.getMonth() + offset,
+      1
+    );
   }
 
   selectCalendarDate(iso: string) {
@@ -374,7 +378,11 @@ export class StudentProfileComponent implements OnInit {
 
   changePassword(): void {
     // Validate password change
-    if (!this.userInfo.currentPassword || !this.userInfo.newPassword || !this.userInfo.confirmPassword) {
+    if (
+      !this.userInfo.currentPassword ||
+      !this.userInfo.newPassword ||
+      !this.userInfo.confirmPassword
+    ) {
       this.toastService.show('Lütfen tüm alanları doldurunuz', 'error');
       return;
     }
@@ -392,11 +400,10 @@ export class StudentProfileComponent implements OnInit {
     // Here you would typically call an API to change the password
     // For now, we'll just show a success message
     this.toastService.show('Şifre başarıyla değiştirildi', 'success');
-    
+
     // Clear password fields
     this.userInfo.currentPassword = '';
     this.userInfo.newPassword = '';
     this.userInfo.confirmPassword = '';
   }
 }
-

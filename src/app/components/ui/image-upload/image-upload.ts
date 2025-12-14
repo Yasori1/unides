@@ -13,6 +13,7 @@ export class ImageUploadComponent {
   @Input() label: string = 'Resim Yükle';
   @Input() previewUrl: string | null = null; // Mevcut resim varsa göster
   @Input() uploadToServer: boolean = false; // Backend'e yükleme yapılacak mı?
+  @Input() allowUrl: boolean = true; // URL ile ekleme izni
   @Output() onImageSelected = new EventEmitter<string>(); // Parent'a image path/url gönder
   @Output() onFileSelected = new EventEmitter<File>(); // Parent'a File objesi gönder (upload için)
 
@@ -76,12 +77,12 @@ export class ImageUploadComponent {
       reader.readAsDataURL(file);
     } else {
       // Eski davranış: Base64 olarak gönder
-    const reader = new FileReader();
-    reader.onload = (e: any) => {
-      this.previewUrl = e.target.result;
-      this.onImageSelected.emit(this.previewUrl || ''); // Veriyi dışarı aktar
-    };
-    reader.readAsDataURL(file);
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.previewUrl = e.target.result;
+        this.onImageSelected.emit(this.previewUrl || ''); // Veriyi dışarı aktar
+      };
+      reader.readAsDataURL(file);
     }
   }
 

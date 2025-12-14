@@ -47,6 +47,14 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
     .brand .brand-text {
       display: none;
     }
+    .brand {
+      padding: 14px;
+      justify-content: center;
+      .logo-badge .brand-logo {
+        height: 48px;
+        max-width: 96px;
+      }
+    }
     .menu-divider {
       display: none;
     }
@@ -66,23 +74,25 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
     padding: 24px;
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 12px;
     cursor: pointer;
 
     .logo-badge {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      background: linear-gradient(145deg, rgba(37, 99, 235, 0.14), rgba(37, 99, 235, 0.08));
-      border: 1px solid rgba(37, 99, 235, 0.2);
+      width: auto;
+      height: auto;
+      border-radius: 0;
+      background: transparent;
+      border: none;
       display: grid;
       place-items: center;
-      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.12);
+      box-shadow: none;
 
       .brand-logo {
-        height: 30px;
+        height: 90px;
         width: auto;
+        max-width: 220px;
         display: block;
+        object-fit: contain;
       }
     }
 
@@ -90,13 +100,14 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
       display: flex;
       flex-direction: column;
       justify-content: center;
-      gap: 0;
+      gap: 2px;
 
       .brand-title {
-        font-size: 1.05rem;
+        font-size: 18px;
         font-weight: 800;
-        letter-spacing: 0.5px;
-        color: $primary;
+        letter-spacing: 0.08em;
+        color: #0f172a;
+        text-transform: uppercase;
       }
     }
   }

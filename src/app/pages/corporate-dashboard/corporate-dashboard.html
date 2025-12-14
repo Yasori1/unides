@@ -15,12 +15,8 @@
   <!-- SIDEBAR -->
   <aside class="sidebar" [class.collapsed]="isSidebarCollapsed">
     <div class="brand" (click)="switchTab('overview')">
-      <div class="logo-square">
-        <span class="material-symbols-outlined">apartment</span>
-      </div>
-      <div class="brand-text" *ngIf="!isSidebarCollapsed">
-        <h2>ÜNİDES</h2>
-        <span>KURUMSAL</span>
+      <div class="logo-badge">
+        <img class="brand-logo" src="images/logo.png" alt="Ünides Dijital Portal" />
       </div>
     </div>
 
@@ -45,16 +41,6 @@
       >
         <span class="material-symbols-outlined">groups</span>
         <span *ngIf="!isSidebarCollapsed">Topluluklar</span>
-      </button>
-
-      <button
-        class="menu-item"
-        [class.active]="activeTab === 'collaboration'"
-        (click)="switchTab('collaboration')"
-        title="İşbirliği"
-      >
-        <span class="material-symbols-outlined">public</span>
-        <span *ngIf="!isSidebarCollapsed">İşbirliği</span>
       </button>
 
       <button
@@ -234,131 +220,8 @@
       </div>
     </div>
 
-    <!-- İŞBİRLİĞİ: Tüm topluluklar (communities-page kart tasarımı) -->
-    <div class="view-container collaboration-view" *ngIf="activeTab === 'collaboration'">
-      <div class="page-header">
-        <div>
-          <h2>İşbirliği</h2>
-          <p class="page-subtitle">Bütün topluluklar — filtre ve sayfalama olmadan hızlı liste</p>
-        </div>
-      </div>
-
-      <div class="grid-container" *ngIf="allCommunities.length > 0; else emptyCollab">
-        <div
-          *ngFor="let item of allCommunities"
-          class="community-card"
-          (click)="openCommunityDetail(item)"
-        >
-          <div class="cover-area">
-            <img
-              [src]="item.coverImage || item.banner || 'assets/img/placeholder-cover.jpg'"
-              [alt]="item.name"
-              class="cover-img"
-              onerror="this.src='assets/img/placeholder-cover.jpg'"
-            />
-            <span class="category-badge">{{ item.category }}</span>
-          </div>
-
-          <div class="card-content">
-            <div class="header-row">
-              <div class="logo-wrapper">
-                <img
-                  [src]="item.logo"
-                  [alt]="item.name"
-                  class="logo-img"
-                  onerror="this.src='assets/img/placeholder-logo.png'"
-                />
-              </div>
-              <div class="title-wrapper">
-                <h3 class="community-name">{{ item.name }}</h3>
-                <span class="university-name">{{ item.university }}</span>
-                <span class="city-tag" *ngIf="item.city">
-                  <i class="bx bxs-map"></i> {{ item.city }}
-                </span>
-              </div>
-            </div>
-
-            <p class="description">{{ item.description || item.about }}</p>
-
-            <div
-              class="social-media-icons"
-              *ngIf="item.instagram || item.youtube || item.twitter || item.tiktok || item.socialMedia"
-            >
-              <a
-                *ngIf="item.instagram"
-                [href]="item.instagram"
-                target="_blank"
-                class="social-icon instagram"
-                (click)="$event.stopPropagation()"
-                title="Instagram"
-              >
-                <i class="bx bxl-instagram"></i>
-              </a>
-              <a
-                *ngIf="item.youtube"
-                [href]="item.youtube"
-                target="_blank"
-                class="social-icon youtube"
-                (click)="$event.stopPropagation()"
-                title="Youtube"
-              >
-                <i class="bx bxl-youtube"></i>
-              </a>
-              <a
-                *ngIf="item.twitter"
-                [href]="item.twitter"
-                target="_blank"
-                class="social-icon twitter"
-                (click)="$event.stopPropagation()"
-                title="Twitter"
-              >
-                <i class="bx bxl-twitter"></i>
-              </a>
-              <a
-                *ngIf="item.tiktok"
-                [href]="item.tiktok"
-                target="_blank"
-                class="social-icon tiktok"
-                (click)="$event.stopPropagation()"
-                title="TikTok"
-              >
-                <i class="bx bxl-tiktok"></i>
-              </a>
-              <a
-                *ngIf="item.socialMedia && !item.instagram && !item.youtube && !item.twitter && !item.tiktok"
-                [href]="item.socialMedia"
-                target="_blank"
-                class="social-icon"
-                (click)="$event.stopPropagation()"
-                title="Sosyal Medya"
-              >
-                <i class="bx bxl-facebook"></i>
-              </a>
-            </div>
-
-            <div class="card-footer">
-              <div class="stat">
-                <i class="bx bx-group"></i>
-                <span>{{ item.memberCount }} Üye</span>
-              </div>
-              <span class="action-text">
-                İncele
-                <i class="bx bx-right-arrow-alt"></i>
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <ng-template #emptyCollab>
-        <div class="empty-state">
-          <span class="material-symbols-outlined">groups</span>
-          <p>Listelenecek topluluk bulunamadı.</p>
-        </div>
-      </ng-template>
-    </div>
-
     <!-- 2. TAB: TOPLULUKLAR -->
-    <div class="view-container" *ngIf="activeTab === 'communities'">
+    <div class="view-container communities-view" *ngIf="activeTab === 'communities'">
       <div class="page-header">
         <h2>Bağlı Topluluklar</h2>
         <div class="header-controls">
@@ -405,12 +268,6 @@
               onerror="this.src='assets/img/placeholder-cover.jpg'"
             />
             <span class="category-badge">{{ item.category }}</span>
-            <span
-              class="status-badge"
-              [ngClass]="{ active: item.status === 'Aktif', passive: item.status === 'Pasif' }"
-            >
-              {{ item.status }}
-            </span>
           </div>
 
           <div class="card-content">
@@ -481,20 +338,33 @@
               >
                 <i class="bx bxl-tiktok"></i>
               </a>
+              <a
+                *ngIf="
+                  item.socialMedia &&
+                  !item.instagram &&
+                  !item.youtube &&
+                  !item.twitter &&
+                  !item.tiktok
+                "
+                [href]="item.socialMedia"
+                target="_blank"
+                class="social-icon"
+                (click)="$event.stopPropagation()"
+                title="Sosyal Medya"
+              >
+                <i class="bx bxl-facebook"></i>
+              </a>
             </div>
 
             <div class="card-footer">
-              <div class="member-count">
+              <div class="stat">
                 <i class="bx bx-group"></i>
                 <span>{{ item.memberCount }} Üye</span>
               </div>
-              <button
-                class="detail-btn"
-                (click)="openCommunityDetail(item); $event.stopPropagation()"
-              >
-                Detaylar
+              <span class="action-text">
+                İncele
                 <i class="bx bx-right-arrow-alt"></i>
-              </button>
+              </span>
             </div>
           </div>
         </div>
@@ -543,6 +413,21 @@
 
       <div class="events-grid" *ngIf="allEvents.length > 0">
         <div *ngFor="let e of allEvents" class="event-card-modern" [ngClass]="e.status">
+          <div class="card-image">
+            <img
+              [src]="e.imageUrl || 'assets/images/page-title1.jpg'"
+              [alt]="e.eventName"
+              loading="lazy"
+              onerror="this.src='assets/images/page-title1.jpg'"
+            />
+            <div class="date-badge">
+              {{ e.date }}
+            </div>
+            <div class="tap-hint">
+              <span class="material-symbols-outlined">visibility</span> İncele
+            </div>
+          </div>
+
           <div class="event-card-top">
             <div class="event-meta">
               <span class="event-date">
@@ -553,42 +438,50 @@
                 {{ e.status }}
               </span>
             </div>
-            <h3 class="event-title">{{ e.eventName }}</h3>
-            <p class="event-subtitle">
-              <span class="material-symbols-outlined">groups</span>
-              {{ e.communityName }}
-            </p>
-            <p class="event-location">
-              <span class="material-symbols-outlined">location_on</span>
-              {{ e.location }}
-            </p>
-          </div>
 
-          <div class="event-actions-row">
-            <div class="actions-left">
-              <button
-                class="btn-success ghost"
-                *ngIf="e.status === 'Beklemede'"
-                (click)="approveEvent(e.id); $event.stopPropagation()"
-                title="Onayla"
-              >
-                <span class="material-symbols-outlined">check</span>
-                Onayla
-              </button>
-              <button
-                class="btn-danger ghost"
-                *ngIf="e.status === 'Beklemede'"
-                (click)="rejectEvent(e.id); $event.stopPropagation()"
-                title="Reddet"
-              >
-                <span class="material-symbols-outlined">close</span>
-                Reddet
-              </button>
+            <div class="card-info">
+              <div class="tags-row">
+                <span class="tag uni" title="{{ e.communityName }}">{{ e.communityName }}</span>
+                <span class="tag semester" *ngIf="e.status">
+                  <i class="bx bx-group"></i> {{ e.status }}
+                </span>
+              </div>
+
+              <h3 class="event-title">{{ e.eventName }}</h3>
+              <p class="short-desc">{{ e.description || 'Açıklama bulunmuyor.' }}</p>
+
+              <div class="bottom-meta">
+                <span class="category">{{ e.status }}</span>
+                <div class="mini-location">
+                  <span class="material-symbols-outlined">location_on</span>
+                  {{ e.location }}
+                </div>
+              </div>
             </div>
-            <button class="detail-btn" (click)="$event.stopPropagation()" title="Detay">
-              Detaylar
-              <i class="bx bx-right-arrow-alt"></i>
-            </button>
+
+            <div class="event-actions-row">
+              <div class="actions-left">
+                <button
+                  class="btn-success ghost"
+                  *ngIf="e.status === 'Beklemede'"
+                  (click)="approveEvent(e.id); $event.stopPropagation()"
+                  title="Onayla"
+                >
+                  <span class="material-symbols-outlined">check</span>
+                  Onayla
+                </button>
+                <button
+                  class="btn-danger ghost"
+                  *ngIf="e.status === 'Beklemede'"
+                  (click)="rejectEvent(e.id); $event.stopPropagation()"
+                  title="Reddet"
+                >
+                  <span class="material-symbols-outlined">close</span>
+                  Reddet
+                </button>
+              </div>
+              <span class="category-label">ETKİNLİK</span>
+            </div>
           </div>
         </div>
       </div>

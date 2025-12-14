@@ -173,7 +173,6 @@
       <div class="card events-status-card">
         <div class="card-header">
           <div>
-            <p class="eyebrow">Etkinlik Kartları</p>
             <h3>Etkinlik Durumları</h3>
           </div>
           <div class="status-filters">
@@ -208,12 +207,14 @@
           </div>
         </div>
 
-        <div class="events-grid compact" *ngIf="filteredDashboardEvents.length; else emptyEvents">
-          <div class="event-card" *ngFor="let event of filteredDashboardEvents">
+        <div class="events-grid compact" *ngIf="displayedDashboardEvents.length; else emptyEvents">
+          <div class="event-card" *ngFor="let event of displayedDashboardEvents">
             <div class="card-image">
               <img [src]="event.imageUrl" [alt]="event.title" loading="lazy" />
               <span class="date-badge">{{ event.date }}</span>
-              <span class="status-chip" [ngClass]="event.status">{{ statusLabels[event.status] }}</span>
+              <span class="status-chip" [ngClass]="event.status">{{
+                statusLabels[event.status]
+              }}</span>
             </div>
             <div class="card-info">
               <div class="top-row">
@@ -235,7 +236,6 @@
           </div>
         </ng-template>
       </div>
-
     </div>
 
     <!-- PROJECTS -->
@@ -279,12 +279,17 @@
         </div>
       </div>
 
-      <div class="events-grid compact" *ngIf="filteredDashboardEvents.length; else emptyProjectEvents">
+      <div
+        class="events-grid compact"
+        *ngIf="filteredDashboardEvents.length; else emptyProjectEvents"
+      >
         <div class="event-card" *ngFor="let event of filteredDashboardEvents">
           <div class="card-image">
             <img [src]="event.imageUrl" [alt]="event.title" loading="lazy" />
             <span class="date-badge">{{ event.date }}</span>
-            <span class="status-chip" [ngClass]="event.status">{{ statusLabels[event.status] }}</span>
+            <span class="status-chip" [ngClass]="event.status">{{
+              statusLabels[event.status]
+            }}</span>
           </div>
           <div class="card-info">
             <div class="top-row">
@@ -312,12 +317,66 @@
       <div class="page-header">
         <div>
           <h2>Diğer Topluluklar</h2>
-          <p class="page-subtitle">Üniversite kulüpleriyle eşleş, projeler ve etkinlikler planla.</p>
+          <p class="page-subtitle">
+            Toplulukları keşfet ve detay sayfalarına giderek iletişime geç.
+          </p>
         </div>
       </div>
 
-      <div class="network-grid" *ngIf="collaborations.length; else emptyNetwork">
-        <div class="community-card" *ngFor="let c of collaborations" (click)="contactClub(c.clubName)">
+      <!-- Filter bar (Communities page parity) -->
+      <div class="filters-bar network-filters" *ngIf="!isLoading">
+        <div class="search-group">
+          <i class="bx bx-search"></i>
+          <input
+            type="text"
+            placeholder="Topluluk ara..."
+            [(ngModel)]="searchText"
+            (input)="applyFilters()"
+          />
+        </div>
+
+        <div class="filter-groups">
+          <div class="select-wrapper">
+            <select [(ngModel)]="selectedCity" (change)="applyFilters()">
+              <option value="">Tüm Şehirler</option>
+              <option *ngFor="let city of cities" [value]="city">{{ city }}</option>
+            </select>
+            <i class="bx bx-chevron-down"></i>
+          </div>
+
+          <div class="select-wrapper">
+            <select [(ngModel)]="selectedCategory" (change)="applyFilters()">
+              <option value="">Tüm Kategoriler</option>
+              <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+            </select>
+            <i class="bx bx-chevron-down"></i>
+          </div>
+
+          <div class="select-wrapper">
+            <select [(ngModel)]="sortOrder" (change)="applyFilters()">
+              <option value="default">Önerilen Sıralama</option>
+              <option value="member_desc">Üye Sayısı (Çoktan Az)</option>
+              <option value="member_asc">Üye Sayısı (Azdan Çok)</option>
+            </select>
+            <i class="bx bx-sort-alt-2"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="loading-state" *ngIf="isLoading">
+        <div class="spinner"></div>
+        <p>Topluluklar yükleniyor...</p>
+      </div>
+
+      <div
+        class="network-grid"
+        *ngIf="!isLoading && filteredCollaborations.length; else emptyNetwork"
+      >
+        <div
+          class="community-card"
+          *ngFor="let c of pagedCollaborations"
+          (click)="goToCommunity(c)"
+        >
           <div class="cover-area">
             <img
               [src]="c.coverImage || 'assets/img/placeholder-cover.jpg'"
@@ -326,7 +385,6 @@
               loading="lazy"
               onerror="this.src='assets/img/placeholder-cover.jpg'"
             />
-            <span class="category-badge">{{ c.type || 'Topluluk' }}</span>
           </div>
 
           <div class="card-content">
@@ -349,17 +407,38 @@
             <p class="description">{{ c.description }}</p>
 
             <div class="card-footer">
-              <div class="stat">
-                <i class="bx bx-bolt-circle"></i>
-                <span>%95 Eşleşme</span>
-              </div>
-              <button class="detail-btn" (click)="contactClub(c.clubName); $event.stopPropagation()">
-                İletişime Geç
+              <button class="detail-btn" (click)="goToCommunity(c); $event.stopPropagation()">
+                İncele
                 <i class="bx bx-right-arrow-alt"></i>
               </button>
             </div>
           </div>
         </div>
+      </div>
+      <div class="pagination-area" *ngIf="!isLoading && collabTotalPages > 1">
+        <button
+          class="page-btn prev"
+          [disabled]="collabCurrentPage === 1"
+          (click)="setCollabPage(collabCurrentPage - 1)"
+        >
+          ‹
+        </button>
+        <ng-container *ngFor="let page of [].constructor(collabTotalPages); let idx = index">
+          <button
+            class="page-btn number"
+            [class.active]="idx + 1 === collabCurrentPage"
+            (click)="setCollabPage(idx + 1)"
+          >
+            {{ idx + 1 }}
+          </button>
+        </ng-container>
+        <button
+          class="page-btn next"
+          [disabled]="collabCurrentPage === collabTotalPages"
+          (click)="setCollabPage(collabCurrentPage + 1)"
+        >
+          ›
+        </button>
       </div>
       <ng-template #emptyNetwork>
         <div class="empty-state">
@@ -376,54 +455,80 @@
         <div class="header-controls">
           <div class="search-input">
             <span class="material-symbols-outlined">search</span>
-            <input type="text" placeholder="Üye ara..." [(ngModel)]="memberSearchText" />
+            <input
+              type="text"
+              placeholder="Üye ara..."
+              [(ngModel)]="memberSearchText"
+              (ngModelChange)="onMemberSearchChange()"
+            />
           </div>
           <button class="btn-primary" (click)="openModal('new-member')">Üye Ekle</button>
         </div>
       </div>
-      <div class="grid-cards members-grid">
-        <div class="card member-card" *ngFor="let m of filteredMembers">
+      <div *ngIf="pagedMembers.length; else noMembers" class="grid-cards members-grid">
+        <div class="card member-card" *ngFor="let m of pagedMembers">
           <div class="member-top">
-            <img [src]="m.avatar" alt="" />
-            <span class="status-dot" [class.online]="m.status === 'Aktif'"></span>
+            <div class="initial-avatar">{{ getInitials(m.name) }}</div>
           </div>
-          <h4>{{ m.name }}</h4>
-          <p>{{ m.department }}</p>
-          <div class="tag-row">
-            <span class="role-tag">{{ m.role }}</span>
-            <span class="grade-tag">{{ m.grade }}</span>
+          <h4 class="member-name">{{ m.name }}</h4>
+          <p class="member-email">{{ m.email }}</p>
+          <div class="member-actions">
+            <button class="member-delete-btn" (click)="openDeleteConfirm(m.id)">
+              <span class="material-symbols-outlined">delete</span>
+              Üyeyi Sil
+            </button>
           </div>
-          <button class="icon-btn ghost danger" (click)="deleteMember(m.id)">
-            <span class="material-symbols-outlined">delete</span>
-          </button>
         </div>
+      </div>
+      <ng-template #noMembers>
+        <div class="empty-state">
+          <span class="material-symbols-outlined">group_off</span>
+          <p>Listelenecek üye bulunamadı.</p>
+        </div>
+      </ng-template>
+      <div class="member-pagination" *ngIf="memberTotalPages > 1">
+        <button
+          class="page-btn"
+          [disabled]="memberCurrentPage === 1"
+          (click)="setMemberPage(memberCurrentPage - 1)"
+        >
+          ‹
+        </button>
+        <span class="page-info">Sayfa {{ memberCurrentPage }} / {{ memberTotalPages }}</span>
+        <button
+          class="page-btn"
+          [disabled]="memberCurrentPage === memberTotalPages"
+          (click)="setMemberPage(memberCurrentPage + 1)"
+        >
+          ›
+        </button>
       </div>
     </div>
 
     <!-- SETTINGS -->
     <div class="view-container" *ngIf="activeTab === 'settings'">
       <div class="card settings-card">
-        <div class="settings-banner">
-          <div class="banner-content">
-            <div>
-              <p class="eyebrow">Kulüp Profili</p>
-              <h3>Görsel ve iletişim bilgilerini güncelle</h3>
-              <p>Logo, iletişim ve sosyal alanlarını güncelleyerek üyelerine tutarlı bir profil göster.</p>
-            </div>
-            <label class="upload-chip" for="logoUpload">
-              <span class="material-symbols-outlined">upload</span>
-              Logo Yükle
-              <input
-                id="logoUpload"
-                class="upload-input"
-                type="file"
-                accept="image/*"
-                (change)="onLogoSelected($event)"
-              />
-            </label>
+        <div class="settings-hero">
+          <div class="hero-banner" [style.background-image]="'url(' + clubInfo.banner + ')'">
+            <button class="edit-btn" (click)="showBannerModal = true">
+              <span class="material-symbols-outlined">edit</span>
+            </button>
           </div>
-          <div class="profile-edit-avatar">
-            <img [src]="clubInfo.logo" alt="Logo" />
+          <div class="hero-profile">
+            <div class="avatar-wrapper">
+              <img [src]="clubInfo.logo" alt="Logo" />
+              <button class="edit-btn small" (click)="showAvatarModal = true">
+                <span class="material-symbols-outlined">edit</span>
+              </button>
+            </div>
+            <div class="hero-text">
+              <p class="eyebrow">Topluluk Profili</p>
+              <h3>{{ clubInfo.name }}</h3>
+              <p class="muted">
+                Görsel, iletişim ve sosyal alanlarını güncelleyerek üyelerine tutarlı bir profil
+                göster.
+              </p>
+            </div>
           </div>
         </div>
         <div class="form-grid">
@@ -432,11 +537,19 @@
             <div class="input-grid">
               <label>
                 <span>Kulüp Adı</span>
-                <input type="text" [(ngModel)]="clubInfo.name" />
+                <input type="text" [(ngModel)]="clubInfo.name" disabled />
               </label>
               <label>
                 <span>Üniversite</span>
                 <input type="text" [(ngModel)]="clubInfo.university" disabled />
+              </label>
+              <label>
+                <span>Şehir</span>
+                <input type="text" [(ngModel)]="clubInfo.city" disabled />
+              </label>
+              <label>
+                <span>Kategori</span>
+                <input type="text" [(ngModel)]="clubInfo.category" disabled />
               </label>
             </div>
             <label class="stacked">
@@ -452,39 +565,86 @@
                 <input type="email" [(ngModel)]="clubInfo.email" />
               </label>
               <label>
-                <span>Telefon</span>
-                <input type="text" [(ngModel)]="clubInfo.phone" />
+                <span>Website (opsiyonel)</span>
+                <input type="text" placeholder="https://..." [(ngModel)]="clubInfo.website" />
               </label>
               <label>
                 <span>Instagram</span>
                 <input type="text" [(ngModel)]="clubInfo.instagram" placeholder="@kulup" />
               </label>
               <label>
-                <span>Website</span>
-                <input type="text" placeholder="https://..." />
+                <span>Youtube</span>
+                <input
+                  type="text"
+                  [(ngModel)]="clubInfo.youtube"
+                  placeholder="https://youtube.com/..."
+                />
               </label>
-            </div>
-            <div class="divider"></div>
-            <h4>Tercihler</h4>
-            <div class="toggle-row">
-              <span>Herkese Açık Profil</span>
-              <label class="switch">
-                <input type="checkbox" checked />
-                <span class="slider round"></span>
+              <label>
+                <span>Twitter</span>
+                <input
+                  type="text"
+                  [(ngModel)]="clubInfo.twitter"
+                  placeholder="https://twitter.com/..."
+                />
               </label>
-            </div>
-            <div class="toggle-row">
-              <span>Yeni Üye Bildirimleri</span>
-              <label class="switch">
-                <input type="checkbox" checked />
-                <span class="slider round"></span>
+              <label>
+                <span>TikTok</span>
+                <input
+                  type="text"
+                  [(ngModel)]="clubInfo.tiktok"
+                  placeholder="https://www.tiktok.com/@..."
+                />
               </label>
             </div>
           </div>
         </div>
         <div class="action-footer">
-          <button class="btn-primary ghost">İptal</button>
-          <button class="btn-primary" (click)="updateSettings()">Değişiklikleri Kaydet</button>
+          <button
+            class="btn-primary"
+            [disabled]="!isSettingsValid || !isSettingsChanged"
+            (click)="updateSettings()"
+          >
+            Değişiklikleri Kaydet
+          </button>
+        </div>
+      </div>
+
+      <!-- Banner modal -->
+      <div class="simple-modal-overlay" *ngIf="showBannerModal" (click)="showBannerModal = false">
+        <div class="simple-modal-card" (click)="$event.stopPropagation()">
+          <div class="modal-head">
+            <h3>Banner Güncelle</h3>
+            <button class="icon-btn ghost close-modern" (click)="showBannerModal = false">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
+          <p class="modal-hint">Önerilen ölçü: 1200 x 400 px</p>
+          <app-image-upload
+            label="Banner seç / sürükle"
+            [previewUrl]="clubInfo.banner"
+            [allowUrl]="false"
+            (onImageSelected)="onBannerSelected($event)"
+          ></app-image-upload>
+        </div>
+      </div>
+
+      <!-- Avatar modal -->
+      <div class="simple-modal-overlay" *ngIf="showAvatarModal" (click)="showAvatarModal = false">
+        <div class="simple-modal-card" (click)="$event.stopPropagation()">
+          <div class="modal-head">
+            <h3>Profil Fotoğrafı Güncelle</h3>
+            <button class="icon-btn ghost close-modern" (click)="showAvatarModal = false">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
+          <p class="modal-hint">Önerilen ölçü: 400 x 400 px</p>
+          <app-image-upload
+            label="Fotoğraf seç / sürükle"
+            [previewUrl]="clubInfo.logo"
+            [allowUrl]="false"
+            (onImageSelected)="onLogoSelected($event)"
+          ></app-image-upload>
         </div>
       </div>
     </div>
@@ -499,7 +659,7 @@
               ? 'Etkinlik Oluştur'
               : modalType === 'new-project'
               ? 'Yeni Proje Başlat'
-              : 'Takıma Üye Ekle'
+              : 'Topluluğa Üye Ekle'
           }}
         </h3>
         <button class="icon-btn ghost close-modern" (click)="closeModal()">
@@ -538,7 +698,11 @@
           <span>Kontenjan</span>
           <input type="number" placeholder="Kontenjan" [(ngModel)]="newEventData.quota" />
         </label>
-        <textarea rows="3" placeholder="Etkinlik Açıklaması" [(ngModel)]="newEventData.description"></textarea>
+        <textarea
+          rows="3"
+          placeholder="Etkinlik Açıklaması"
+          [(ngModel)]="newEventData.description"
+        ></textarea>
         <button class="btn-primary full" [disabled]="!isEventFormValid" (click)="saveEvent()">
           Kurumsal Tarafa Yönlendir
         </button>
@@ -552,13 +716,52 @@
         <button class="btn-primary full" (click)="saveProject()">Oluştur 🚀</button>
       </div>
       <div class="modal-body" *ngIf="modalType === 'new-member'">
-        <input type="text" placeholder="Ad Soyad" [(ngModel)]="newMemberData.name" />
-        <input type="text" placeholder="Bölüm" [(ngModel)]="newMemberData.department" />
-        <select [(ngModel)]="newMemberData.role">
-          <option>Üye</option>
-          <option>YK Üyesi</option>
-        </select>
-        <button class="btn-primary full" (click)="saveMember()">Kaydet ✨</button>
+        <div class="member-search-box">
+          <span class="material-symbols-outlined search-icon">search</span>
+          <input
+            type="text"
+            placeholder="Ad veya e-posta ile ara"
+            [(ngModel)]="memberSearchQuery"
+            (input)="onMemberSearch()"
+          />
+          <span class="spinner" *ngIf="isSearchingMembers"></span>
+        </div>
+        <ul class="member-search-results" *ngIf="memberSearchResults.length">
+          <li *ngFor="let u of memberSearchResults" (click)="selectMemberSuggestion(u)">
+            <div class="avatar-chip">{{ getInitials(u.name) }}</div>
+            <div class="meta">
+              <strong>{{ u.name }}</strong>
+              <span>{{ u.email }}</span>
+            </div>
+          </li>
+        </ul>
+        <button
+          class="btn-primary full"
+          [disabled]="!newMemberData.name || !newMemberData.email"
+          (click)="saveMember()"
+        >
+          Kaydet
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete confirm modal -->
+  <div
+    class="confirm-overlay"
+    *ngIf="confirmVisible"
+    [class.hiding]="confirmHiding"
+    (click)="cancelDelete()"
+  >
+    <div class="confirm-card" [class.hiding]="confirmHiding" (click)="$event.stopPropagation()">
+      <div class="confirm-icon">
+        <span class="material-symbols-outlined">warning</span>
+      </div>
+      <h3>Silmek istediğinize emin misiniz?</h3>
+      <p>Bu üye topluluktan kaldırılacak.</p>
+      <div class="confirm-actions">
+        <button class="btn ghost" (click)="cancelDelete()">Vazgeç</button>
+        <button class="btn danger" (click)="deleteMemberConfirmed()">Evet, Sil</button>
       </div>
     </div>
   </div>
