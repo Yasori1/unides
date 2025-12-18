@@ -109,7 +109,7 @@
       </div>
 
       <div class="header-right">
-        <button class="icon-btn notification" (click)="toggleNotifications($event)">
+        <button class="icon-btn notification notification-btn" (click)="toggleNotifications($event)">
           <span class="material-symbols-outlined">notifications</span>
           <span class="indicator" *ngIf="notifications.length"></span>
         </button>
@@ -121,11 +121,20 @@
           (click)="$event.stopPropagation()"
         >
           <div class="dd-header">Bildirimler</div>
-          <ul>
+          <ul *ngIf="notifications.length > 0; else noNotifications">
             <li *ngFor="let n of notifications">
-              {{ n.text }} <small>{{ n.time }}</small>
+              <div>
+                {{ n.text }}
+                <small>{{ n.time }}</small>
+              </div>
             </li>
           </ul>
+          <ng-template #noNotifications>
+            <div class="empty-notifications">
+              <span class="material-symbols-outlined">notifications_off</span>
+              <p>Henüz bildirim yok</p>
+            </div>
+          </ng-template>
         </div>
 
         <div class="profile-wrapper">

@@ -58,6 +58,7 @@ interface Event {
 export class StudentProfileComponent implements OnInit {
   activeTab: 'overview' | 'communities' | 'events' | 'settings' = 'overview';
   isSidebarCollapsed: boolean = false;
+  isProfileOpen: boolean = false;
   selectedCommunityForLeave: Community | null = null;
   selectedEvent: Event | null = null;
   showEventDates: boolean = false;
@@ -248,6 +249,7 @@ export class StudentProfileComponent implements OnInit {
 
   switchTab(tab: 'overview' | 'communities' | 'events' | 'settings'): void {
     this.activeTab = tab;
+    this.isProfileOpen = false;
   }
 
   toggleSidebar(): void {
@@ -260,10 +262,10 @@ export class StudentProfileComponent implements OnInit {
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('user_info');
       localStorage.removeItem('user_type');
-      this.toastService.show('Çıkış yapıldı', 'success');
+      this.toastService.show('Çıkış yapılıyor...', 'success');
       setTimeout(() => {
         this.router.navigate(['/']);
-      }, 1000);
+      }, 1500);
     }
   }
 
@@ -405,5 +407,20 @@ export class StudentProfileComponent implements OnInit {
     this.userInfo.currentPassword = '';
     this.userInfo.newPassword = '';
     this.userInfo.confirmPassword = '';
+  }
+
+  toggleProfileDropdown(event?: MouseEvent): void {
+    if (event) event.stopPropagation();
+    this.isProfileOpen = !this.isProfileOpen;
+  }
+
+  @HostListener('document:click', ['$event'])
+  clickout(event: any): void {
+    const target = event.target as HTMLElement;
+    
+    // Profil dropdown kontrolü
+    if (!target.closest('.profile-wrapper') && !target.closest('.profile-dropdown')) {
+      this.isProfileOpen = false;
+    }
   }
 }

@@ -621,10 +621,19 @@ export class CorporateDashboardComponent implements OnInit {
     this.showNotifications = false;
   }
 
-  @HostListener('document:click')
-  closeDropdowns() {
-    this.showNotifications = false;
-    this.isProfileOpen = false;
+  @HostListener('document:click', ['$event'])
+  closeDropdowns(event: any) {
+    const target = event.target as HTMLElement;
+    
+    // Profil dropdown kontrolü
+    if (!target.closest('.profile-wrapper') && !target.closest('.profile-dropdown')) {
+      this.isProfileOpen = false;
+    }
+    
+    // Bildirimler dropdown kontrolü
+    if (!target.closest('.notification-btn') && !target.closest('.dropdown-menu.notifications')) {
+      this.showNotifications = false;
+    }
   }
 
   logout() {

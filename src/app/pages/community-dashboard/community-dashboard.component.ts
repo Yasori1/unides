@@ -357,12 +357,17 @@ export class CommunityDashboardComponent implements OnInit {
   }
   @HostListener('document:click', ['$event'])
   clickout(event: any) {
-    if (!event.target.closest('.profile-wrapper')) {
+    const target = event.target as HTMLElement;
+    
+    // Profil dropdown kontrolü
+    if (!target.closest('.profile-wrapper') && !target.closest('.profile-dropdown')) {
       this.isProfileOpen = false;
     }
-    if (!event.target.closest('.notification-btn')) {
+    
+    // Bildirimler dropdown kontrolü
+    if (!target.closest('.notification-btn') && !target.closest('.dropdown-menu.notifications')) {
       this.showNotifications = false;
-    } // Class name updated
+    }
   }
   get filteredMembers() {
     if (!this.memberSearchText) return this.members;

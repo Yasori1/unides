@@ -276,14 +276,19 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
   }
 
   .header-right {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 15px;
+    z-index: 100;
 
     .profile-wrapper {
+      position: relative;
       display: flex;
       align-items: center;
       gap: 12px;
+      z-index: 101;
+      
       .profile-pic {
         width: 42px;
         height: 42px;
@@ -293,6 +298,15 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
         align-items: center;
         justify-content: center;
         color: $primary;
+        cursor: pointer;
+        position: relative;
+        z-index: 101;
+        transition: all 0.2s ease;
+        
+        &:hover {
+          background: rgba($primary, 0.2);
+        }
+        
         span {
           font-size: 24px;
         }
@@ -310,7 +324,86 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
           color: $text-muted;
         }
       }
+
+      .dropdown-menu {
+        position: absolute !important;
+        top: calc(100% + 10px) !important;
+        right: 0 !important;
+        width: 280px !important;
+        min-width: 280px;
+        background: $surface !important;
+        border: 1px solid $border !important;
+        border-radius: 16px !important;
+        box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1) !important;
+        z-index: 10000 !important;
+        overflow: hidden;
+        animation: slideUp 0.2s ease-out;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+
+        &.profile-dropdown {
+          right: 0 !important;
+          top: calc(100% + 8px) !important;
+        }
+
+        .dd-header {
+          padding: 15px 20px;
+          background: $bg-body;
+          border-bottom: 1px solid $border;
+          font-weight: 700;
+          font-size: 0.95rem;
+          color: $text-main;
+        }
+
+        ul {
+          list-style: none;
+          padding: 5px 0;
+          margin: 0;
+        }
+
+        li {
+          padding: 12px 20px;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          cursor: pointer;
+          color: $text-main;
+          transition: all 0.2s ease;
+          font-size: 0.9rem;
+
+          &:hover {
+            background: $primary-soft;
+            color: $primary;
+          }
+
+          &.danger-item {
+            color: $danger;
+            
+            &:hover {
+              background: rgba($danger, 0.1);
+              color: color.adjust($danger, $lightness: -10%);
+            }
+          }
+
+          .small-icon {
+            font-size: 1.2rem;
+          }
+        }
+      }
     }
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
