@@ -122,7 +122,7 @@
         >
           <div class="dd-header">Bildirimler</div>
           <ul *ngIf="notifications.length > 0; else noNotifications">
-            <li *ngFor="let n of notifications">
+            <li *ngFor="let n of notifications" (click)="handleNotificationClick(n)" class="notification-item">
               <div>
                 {{ n.text }}
                 <small>{{ n.time }}</small>

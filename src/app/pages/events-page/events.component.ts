@@ -109,8 +109,126 @@ export class EventsComponent implements OnInit, AfterViewInit {
     'https://media.istockphoto.com/id/1486287149/tr/foto%C4%9Fraf/group-of-multiracial-asian-business-participants-casual-chat-after-successful-conference.jpg?s=612x612&w=0&k=20&c=UIA06kHeAHdKyPRyREEGmmkfyvi0RMyjbldymvolJiY=',
   ];
 
-  // Base Events (backend gelir; yoksa boş kalır)
+  // Base Events (backend gelir; yoksa mock data kullanılır)
   baseEvents: EventCard[] = [];
+
+  // Mock events getter
+  private getMockEvents(): EventCard[] {
+    const formatDate = (date: Date) => {
+      return date.toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric' });
+    };
+
+    return [
+      {
+        id: 1,
+        title: 'Yapay Zeka Workshop',
+        description: 'Uygulamalı AI oturumları ve canlı demo. Makine öğrenmesi ve derin öğrenme temelleri.',
+        category: 'Teknoloji',
+        date: formatDate(new Date(Date.now() + 2 * 24 * 60 * 60 * 1000)),
+        dateObj: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
+        time: '14:00',
+        location: 'Kampüs Merkez',
+        university: 'İTÜ',
+        club: 'Yazılım Geliştirme Kulübü',
+        semester: 'Yazılım Geliştirme Kulübü',
+        quota: 120,
+        imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=900&q=60',
+        color: '#2563eb',
+        status: 'upcoming',
+        city: 'İstanbul',
+      },
+      {
+        id: 2,
+        title: 'Web Geliştirme Bootcamp',
+        description: 'Frontend ve backend hızlandırma kampı. React, Node.js ve modern web teknolojileri.',
+        category: 'Teknoloji',
+        date: formatDate(new Date(Date.now() + 5 * 24 * 60 * 60 * 1000)),
+        dateObj: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+        time: '09:00',
+        location: 'Bilgisayar Laboratuvarı',
+        university: 'İTÜ',
+        club: 'Yazılım Geliştirme Kulübü',
+        semester: 'Yazılım Geliştirme Kulübü',
+        quota: 80,
+        imageUrl: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=900&q=60',
+        color: '#0ea5e9',
+        status: 'upcoming',
+        city: 'İstanbul',
+      },
+      {
+        id: 3,
+        title: 'Girişimcilik Zirvesi',
+        description: 'Startup panelleri ve yatırımcı sohbetleri. Başarılı girişimcilerden ilham alın.',
+        category: 'Kariyer',
+        date: formatDate(new Date(Date.now() + 12 * 24 * 60 * 60 * 1000)),
+        dateObj: new Date(Date.now() + 12 * 24 * 60 * 60 * 1000),
+        time: '10:00',
+        location: 'Konferans Salonu',
+        university: 'Hacettepe',
+        club: 'Girişimcilik Topluluğu',
+        semester: 'Girişimcilik Topluluğu',
+        quota: 250,
+        imageUrl: 'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=900&q=60',
+        color: '#f59e0b',
+        status: 'upcoming',
+        city: 'Ankara',
+      },
+      {
+        id: 4,
+        title: 'Mobil Uygulama Geliştirme Semineri',
+        description: 'React Native ve Flutter ile mobil uygulama geliştirme teknikleri. Pratik örnekler ve workshop.',
+        category: 'Teknoloji',
+        date: formatDate(new Date(Date.now() + 8 * 24 * 60 * 60 * 1000)),
+        dateObj: new Date(Date.now() + 8 * 24 * 60 * 60 * 1000),
+        time: '16:00',
+        location: 'Teknoloji Fakültesi',
+        university: 'İTÜ',
+        club: 'Yazılım Geliştirme Kulübü',
+        semester: 'Yazılım Geliştirme Kulübü',
+        quota: 100,
+        imageUrl: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=900&q=60',
+        color: '#ec4899',
+        status: 'upcoming',
+        city: 'İstanbul',
+      },
+      {
+        id: 5,
+        title: 'Startup Pitch Yarışması',
+        description: 'Takımlar 5 dakikada fikirlerini sunuyor. En iyi fikir ödül kazanıyor!',
+        category: 'Kariyer',
+        date: formatDate(new Date(Date.now() + 25 * 24 * 60 * 60 * 1000)),
+        dateObj: new Date(Date.now() + 25 * 24 * 60 * 60 * 1000),
+        time: '15:00',
+        location: 'İnovasyon Merkezi',
+        university: 'Hacettepe',
+        club: 'Girişimcilik Topluluğu',
+        semester: 'Girişimcilik Topluluğu',
+        quota: 60,
+        imageUrl: 'https://images.unsplash.com/photo-1545239351-46ef46aab2e1?auto=format&fit=crop&w=900&q=60',
+        color: '#10b981',
+        status: 'upcoming',
+        city: 'Ankara',
+      },
+      {
+        id: 6,
+        title: 'Yeni Yıl Hackathon',
+        description: '48 saatlik ekip hackathonu. Yeni yıla özel temalar ve ödüller!',
+        category: 'Teknoloji',
+        date: formatDate(new Date(Date.now() + 35 * 24 * 60 * 60 * 1000)),
+        dateObj: new Date(Date.now() + 35 * 24 * 60 * 60 * 1000),
+        time: '11:00',
+        location: 'Ar-Ge Merkezi',
+        university: 'İTÜ',
+        club: 'Yazılım Geliştirme Kulübü',
+        semester: 'Yazılım Geliştirme Kulübü',
+        quota: 150,
+        imageUrl: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=900&q=60',
+        color: '#a855f7',
+        status: 'upcoming',
+        city: 'İstanbul',
+      },
+    ];
+  }
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
@@ -141,18 +259,23 @@ export class EventsComponent implements OnInit, AfterViewInit {
         if (data && data.length) {
           this.baseEvents = data.map((e) => this.mapToCard(e));
           this.attachCommunityNames();
+        } else {
+          // Backend'den veri gelmezse mock data kullan
+          this.baseEvents = this.getMockEvents();
         }
         this.allEventsPool = [...this.baseEvents];
         this.applyFiltersAndLoadFirstPage();
       },
       error: (err) => {
         console.error('Etkinlikler yüklenemedi:', err);
-        // fallback mevcut baseEvents mock ile devam
+        // Hata durumunda mock data kullan
+        this.baseEvents = this.getMockEvents();
         this.allEventsPool = [...this.baseEvents];
         this.applyFiltersAndLoadFirstPage();
       },
     });
   }
+
 
   private attachCommunityNames() {
     if (!this.allCommunities?.length || !this.baseEvents?.length) return;
@@ -341,20 +464,46 @@ export class EventsComponent implements OnInit, AfterViewInit {
     return event.id;
   }
 
-  // --- KART EFEKTLERİ ---
+  // --- KART EFEKTLERİ (Bend Effect) ---
   cardTilt(event: MouseEvent, cardElement: HTMLElement) {
     const rect = cardElement.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
-    const rotateX = ((y - centerY) / centerY) * -5;
-    const rotateY = ((x - centerX) / centerX) * 5;
-    cardElement.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.01)`;
+    
+    // Mouse pozisyonuna göre normalize edilmiş değerler (-1 ile 1 arası)
+    const rotateXValue = ((y - centerY) / centerY) * -1;
+    const rotateYValue = ((x - centerX) / centerX) * 1;
+    
+    // Bend efektini daha belirgin yapmak için değerleri artırıyoruz
+    const rotateX = rotateXValue * 8; // Dikey bükülme (daha fazla)
+    const rotateY = rotateYValue * 8; // Yatay bükülme (daha fazla)
+    
+    // Hafif scale efekti ekliyoruz
+    const scale = 1.02;
+    
+    // Transform uygula
+    cardElement.style.transform = `perspective(1200px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(${scale}) translateZ(20px)`;
+    
+    // Kartın içindeki görsel için de parallax efekti (opsiyonel)
+    const cardImage = cardElement.querySelector('.card-image img') as HTMLElement;
+    if (cardImage) {
+      const imageTranslateX = rotateYValue * 10;
+      const imageTranslateY = rotateXValue * 10;
+      cardImage.style.transform = `translate(${imageTranslateX}px, ${imageTranslateY}px) scale(1.05)`;
+    }
   }
 
   cardReset(cardElement: HTMLElement) {
-    cardElement.style.transform = `perspective(1000px) rotateX(0) rotateY(0) scale(1)`;
+    // Smooth bir şekilde reset et
+    cardElement.style.transform = `perspective(1200px) rotateX(0deg) rotateY(0deg) scale(1) translateZ(0px)`;
+    
+    // Görseli de reset et
+    const cardImage = cardElement.querySelector('.card-image img') as HTMLElement;
+    if (cardImage) {
+      cardImage.style.transform = `translate(0px, 0px) scale(1)`;
+    }
   }
 
   // --- MODAL İŞLEMLERİ ---

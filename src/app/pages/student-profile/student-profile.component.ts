@@ -86,6 +86,10 @@ export class StudentProfileComponent implements OnInit {
   // Events from communities
   communityEvents: Event[] = [];
 
+  // Carousel scroll positions
+  eventsScrollPosition: number = 0;
+  communitiesScrollPosition: number = 0;
+
   constructor(
     public router: Router,
     public toastService: ToastService,
@@ -239,6 +243,24 @@ export class StudentProfileComponent implements OnInit {
         club: 'Yazılım Geliştirme Kulübü',
         semester: 'Yazılım Geliştirme Kulübü',
         quota: '150',
+      },
+      {
+        id: 6,
+        title: 'Mobil Uygulama Geliştirme Semineri',
+        date: isoInDays(8),
+        time: '16:00',
+        location: 'Teknoloji Fakültesi',
+        community: 'Yazılım Geliştirme Kulübü',
+        status: 'upcoming',
+        imageUrl:
+          'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=900&q=60',
+        category: 'Eğitim',
+        university: 'İTÜ',
+        description: 'React Native ve Flutter ile mobil uygulama geliştirme teknikleri.',
+        color: '#ec4899',
+        club: 'Yazılım Geliştirme Kulübü',
+        semester: 'Yazılım Geliştirme Kulübü',
+        quota: '100',
       },
     ];
 
@@ -422,5 +444,92 @@ export class StudentProfileComponent implements OnInit {
     if (!target.closest('.profile-wrapper') && !target.closest('.profile-dropdown')) {
       this.isProfileOpen = false;
     }
+  }
+
+  // Carousel navigation methods
+  scrollEvents(direction: 'left' | 'right'): void {
+    setTimeout(() => {
+      const container = document.querySelector('.events-carousel-container') as HTMLElement;
+      if (!container) return;
+      
+      const scrollAmount = 367; // Scroll amount in pixels (card width + gap)
+      const currentScroll = container.scrollLeft;
+      const newPosition = direction === 'left' 
+        ? currentScroll - scrollAmount 
+        : currentScroll + scrollAmount;
+      
+      container.scrollTo({
+        left: newPosition,
+        behavior: 'smooth'
+      });
+    }, 0);
+  }
+
+  scrollCommunities(direction: 'left' | 'right'): void {
+    setTimeout(() => {
+      const container = document.querySelector('.communities-carousel-container') as HTMLElement;
+      if (!container) return;
+      
+      const scrollAmount = 425; // Scroll amount in pixels (card width + gap)
+      const currentScroll = container.scrollLeft;
+      const newPosition = direction === 'left' 
+        ? currentScroll - scrollAmount 
+        : currentScroll + scrollAmount;
+      
+      container.scrollTo({
+        left: newPosition,
+        behavior: 'smooth'
+      });
+    }, 0);
+  }
+
+  onEventsScroll(event: any): void {
+    const target = event.target as HTMLElement;
+    this.eventsScrollPosition = target.scrollLeft;
+    // Force change detection to update button states
+    if (isPlatformBrowser(this.platformId)) {
+      setTimeout(() => {
+        // Trigger change detection
+      }, 0);
+    }
+  }
+
+  onCommunitiesScroll(event: any): void {
+    const target = event.target as HTMLElement;
+    this.communitiesScrollPosition = target.scrollLeft;
+    // Force change detection to update button states
+    if (isPlatformBrowser(this.platformId)) {
+      setTimeout(() => {
+        // Trigger change detection
+      }, 0);
+    }
+  }
+
+  canScrollEventsLeft(): boolean {
+    if (!isPlatformBrowser(this.platformId)) return false;
+    const container = document.querySelector('.events-carousel-container') as HTMLElement;
+    if (!container) return false;
+    return container.scrollLeft > 10;
+  }
+
+  canScrollEventsRight(): boolean {
+    if (!isPlatformBrowser(this.platformId)) return false;
+    const container = document.querySelector('.events-carousel-container') as HTMLElement;
+    if (!container) return false;
+    return container.scrollLeft < (container.scrollWidth - container.clientWidth - 10);
+  }
+
+  canScrollCommunitiesLeft(): boolean {
+    if (!isPlatformBrowser(this.platformId)) return false;
+    const container = document.querySelector('.communities-carousel-container') as HTMLElement;
+    if (!container) return false;
+    return container.scrollLeft > 10;
+  }
+
+  canScrollCommunitiesRight(): boolean {
+    if (!isPlatformBrowser(this.platformId)) return false;
+    const container = document.querySelector('.communities-carousel-container') as HTMLElement;
+    if (!container) return false;
+    return container.scrollLeft < (container.scrollWidth - container.clientWidth - 10);
   }
 }

@@ -171,6 +171,12 @@ interface EventRequest {
   status: 'Onaylandı' | 'Beklemede' | 'Reddedildi';
   capacity?: string;
 }
+interface Notification {
+  text: string;
+  time: string;
+  type?: 'community' | 'event' | 'announcement' | 'other';
+  action?: 'communities' | 'events' | 'announcements' | 'overview';
+}
 
 @Component({
   selector: 'app-corporate-dashboard',
@@ -250,9 +256,19 @@ export class CorporateDashboardComponent implements OnInit {
   selectedEvent: EventRequest | null = null;
   newEvent: Partial<EventRequest> | null = null;
 
-  notifications = [
-    { text: 'E-Spor topluluğu onay bekliyor', time: '10 dk önce' },
-    { text: 'AI Zirvesi bütçe onayı istiyor', time: '1 saat önce' },
+  notifications: Notification[] = [
+    { 
+      text: 'E-Spor topluluğu onay bekliyor', 
+      time: '10 dk önce',
+      type: 'community',
+      action: 'communities'
+    },
+    { 
+      text: 'AI Zirvesi bütçe onayı istiyor', 
+      time: '1 saat önce',
+      type: 'event',
+      action: 'events'
+    },
   ];
 
   // Router ve Service'leri inject ediyoruz
@@ -614,6 +630,69 @@ export class CorporateDashboardComponent implements OnInit {
     e.stopPropagation();
     this.showNotifications = !this.showNotifications;
     this.isProfileOpen = false;
+  }
+
+  handleNotificationClick(notification: Notification) {
+    // Bildirim dropdown'ını kapat
+    this.showNotifications = false;
+    
+    // Eğer action belirtilmemişse, bildirim metnini analiz ederek otomatik belirle
+    let action = notification.action;
+    if (!action) {
+      action = this.determineNotificationAction(notification.text);
+    }
+    
+    // Bildirim tipine göre ilgili sayfaya yönlendir
+    if (action) {
+      this.switchTab(action);
+    }
+  }
+
+  /**
+   * Bildirim metnini analiz ederek otomatik olarak yönlendirme action'ını belirler
+   */
+  private determineNotificationAction(notificationText: string): 'communities' | 'events' | 'announcements' | 'overview' | undefined {
+    const text = notificationText.toLowerCase();
+    
+    // Topluluk ile ilgili anahtar kelimeler
+    const communityKeywords = [
+      'topluluk', 'topluluğu', 'topluluklar', 
+      'kulüp', 'kulübü', 'kulüpler',
+      'onay bekliyor', 'onay', 'topluluk onay'
+    ];
+    
+    // Etkinlik ile ilgili anahtar kelimeler
+    const eventKeywords = [
+      'etkinlik', 'etkinliği', 'etkinlikler',
+      'zirve', 'konferans', 'seminer', 'workshop', 'atölye',
+      'bütçe onayı', 'etkinlik onay', 'etkinlik onayı',
+      'takvim', 'tarih', 'event'
+    ];
+    
+    // Duyuru ile ilgili anahtar kelimeler
+    const announcementKeywords = [
+      'duyuru', 'duyurusu', 'duyurular',
+      'haber', 'haberi', 'haberler',
+      'ilan', 'ilanı', 'ilanlar'
+    ];
+    
+    // Topluluk kontrolü
+    if (communityKeywords.some(keyword => text.includes(keyword))) {
+      return 'communities';
+    }
+    
+    // Etkinlik kontrolü
+    if (eventKeywords.some(keyword => text.includes(keyword))) {
+      return 'events';
+    }
+    
+    // Duyuru kontrolü
+    if (announcementKeywords.some(keyword => text.includes(keyword))) {
+      return 'announcements';
+    }
+    
+    // Eğer hiçbir eşleşme yoksa undefined döndür (yönlendirme yapılmaz)
+    return undefined;
   }
   toggleProfileDropdown(e: Event) {
     e.stopPropagation();

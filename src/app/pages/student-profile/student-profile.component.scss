@@ -412,6 +412,12 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
   flex: 1;
   overflow-y: auto;
   padding: 30px;
+  
+  &.overview-container {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
 }
 
 .page-header {
@@ -1805,10 +1811,502 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
   }
 }
 
+// ================= CAROUSEL SECTIONS =================
+.carousel-section {
+  width: 100%;
+  margin-bottom: 50px;
+  
+  &.events-section {
+    margin-top: 0;
+    margin-bottom: 40px;
+  }
+  
+  &.communities-section {
+    margin-top: 0;
+  }
+  
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    
+    h2 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin: 0;
+      color: $text-main;
+    }
+    
+    .btn-text {
+      color: $primary;
+      font-weight: 600;
+      font-size: 0.95rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px 16px;
+      border-radius: 8px;
+      transition: all 0.2s;
+      
+      &:hover {
+        background: $primary-soft;
+      }
+    }
+  }
+  
+  .carousel-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .carousel-container {
+    flex: 1;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    scrollbar-width: none; // Firefox
+    -ms-overflow-style: none; // IE/Edge
+    
+    &::-webkit-scrollbar {
+      display: none; // Chrome/Safari
+    }
+  }
+  
+  .carousel-content {
+    display: flex;
+    gap: 25px;
+    padding: 10px 0;
+  }
+  
+  .carousel-nav-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: $surface;
+    border: 2px solid $border;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    flex-shrink: 0;
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    
+    span {
+      font-size: 28px;
+      color: $text-main;
+    }
+    
+    &:hover:not(.disabled) {
+      background: $primary;
+      border-color: $primary;
+      transform: scale(1.1);
+      
+      span {
+        color: white;
+      }
+    }
+    
+    &.disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+  }
+}
+
+// Event Cards in Carousel
+.events-carousel {
+  .event-card-large {
+    min-width: 342px;
+    max-width: 342px;
+    background: $surface;
+    border: 1px solid $border;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: $shadow-card;
+    display: flex;
+    flex-direction: column;
+    height: 450px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    position: relative;
+    
+    &:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+      border-color: $primary;
+    }
+    
+    .card-image {
+      width: 100%;
+      height: 45%;
+      position: relative;
+      overflow: hidden;
+      
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s;
+      }
+      
+      &:hover img {
+        transform: scale(1.05);
+      }
+      
+      .date-badge {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 8px 14px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: $text-main;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      
+      .status-chip {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        background: rgba(255, 255, 255, 0.95);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        
+        &.upcoming {
+          color: $success;
+        }
+        &.completed {
+          color: $text-muted;
+        }
+        &.cancelled {
+          color: $danger;
+        }
+      }
+      
+      .tap-hint {
+        position: absolute;
+        bottom: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 25px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        opacity: 0;
+        transition: opacity 0.3s;
+        
+        span {
+          font-size: 18px;
+        }
+      }
+      
+      &:hover .tap-hint {
+        opacity: 1;
+      }
+    }
+    
+    .card-info {
+      flex: 1;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      
+      .tags-row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        
+        .tag {
+          padding: 4px 10px;
+          border-radius: 6px;
+          font-size: 0.75rem;
+          font-weight: 600;
+          
+          &.uni {
+            background: rgba($primary, 0.1);
+            color: $primary;
+          }
+          
+          &.category {
+            background: rgba($text-muted, 0.1);
+          }
+        }
+      }
+      
+      h3 {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin: 0;
+        color: $text-main;
+        line-height: 1.3;
+      }
+      
+      .short-desc {
+        font-size: 0.9rem;
+        color: $text-muted;
+        line-height: 1.5;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        flex: 1;
+      }
+      
+      .bottom-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: auto;
+        padding-top: 12px;
+        border-top: 1px solid $border;
+        
+        .category {
+          font-size: 0.8rem;
+          font-weight: 600;
+        }
+        
+        .mini-location {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 0.85rem;
+          color: $text-muted;
+          
+          span {
+            font-size: 18px;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Community Cards in Carousel
+.communities-carousel {
+  .community-card-large {
+    min-width: 400px;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    background: $surface;
+    border: 1px solid $border;
+    border-radius: 24px;
+    overflow: hidden;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    height: 520px;
+    box-shadow: $shadow-card;
+    position: relative;
+    cursor: pointer;
+    
+    &:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+      border-color: $primary;
+      
+      .action-text {
+        color: $primary;
+        i {
+          transform: translateX(5px);
+        }
+      }
+    }
+    
+    .cover-area {
+      width: 100%;
+      height: 180px;
+      position: relative;
+      overflow: hidden;
+      
+      .cover-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s;
+      }
+      
+      &:hover .cover-img {
+        transform: scale(1.05);
+      }
+      
+      .category-badge {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: $text-main;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+    }
+    
+    .card-content {
+      flex: 1;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      
+      .header-row {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        
+        .logo-wrapper {
+          flex-shrink: 0;
+          width: 60px;
+          height: 60px;
+          border-radius: 12px;
+          overflow: hidden;
+          border: 2px solid $border;
+          background: white;
+          
+          .logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+        }
+        
+        .title-wrapper {
+          flex: 1;
+          min-width: 0;
+          
+          .community-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin: 0 0 4px 0;
+            color: $text-main;
+            line-height: 1.3;
+          }
+          
+          .university-name {
+            font-size: 0.85rem;
+            color: $text-muted;
+            display: block;
+            margin-bottom: 4px;
+          }
+          
+          .city-tag {
+            font-size: 0.8rem;
+            color: $text-muted;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+          }
+        }
+      }
+      
+      .description {
+        font-size: 0.9rem;
+        color: $text-muted;
+        line-height: 1.5;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        margin: 8px 0;
+      }
+      
+      .social-media-icons {
+        display: flex;
+        gap: 8px;
+        margin: 8px 0;
+        
+        .social-icon {
+          width: 32px;
+          height: 32px;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba($text-muted, 0.1);
+          color: $text-muted;
+          transition: all 0.2s;
+          text-decoration: none;
+          
+          &:hover {
+            transform: translateY(-2px);
+            background: $primary-soft;
+            color: $primary;
+          }
+        }
+      }
+      
+      .card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: auto;
+        padding-top: 12px;
+        border-top: 1px solid $border;
+        
+        .stat {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 0.85rem;
+          color: $text-muted;
+          
+          i {
+            font-size: 18px;
+          }
+        }
+        
+        .action-text {
+          font-size: 0.9rem;
+          font-weight: 600;
+          color: $text-muted;
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          transition: color 0.2s;
+          
+          i {
+            transition: transform 0.2s;
+          }
+        }
+      }
+    }
+  }
+}
+
 // ================= RESPONSIVE =================
 @media (max-width: 1024px) {
   .split-grid {
     grid-template-columns: 1fr;
+  }
+  
+  .carousel-section {
+    .events-carousel .event-card-large {
+      min-width: 288px;
+      max-width: 288px;
+      height: 405px;
+    }
+    .communities-carousel .community-card-large {
+      min-width: 320px;
+      max-width: 320px;
+    }
   }
 }
 
@@ -1827,6 +2325,10 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
   }
   .view-container {
     padding: 20px;
+    
+    &.overview-container {
+      gap: 30px;
+    }
   }
   .stats-grid-compact {
     grid-template-columns: 1fr;
@@ -1838,5 +2340,43 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
   }
   .settings-grid {
     grid-template-columns: 1fr;
+  }
+  
+  .carousel-section {
+    .section-header {
+      h2 {
+        font-size: 1.4rem;
+      }
+    }
+    
+    .carousel-nav-btn {
+      width: 40px;
+      height: 40px;
+      
+      span {
+        font-size: 24px;
+      }
+    }
+    
+    .events-carousel .event-card-large,
+    .communities-carousel .community-card-large {
+      min-width: 280px;
+      max-width: 280px;
+      height: 450px;
+    }
+    
+    .events-carousel .event-card-large {
+      height: 378px;
+      
+      .card-image {
+        height: 40%;
+      }
+    }
+    
+    .communities-carousel .community-card-large {
+      .cover-area {
+        height: 150px;
+      }
+    }
   }
 }
