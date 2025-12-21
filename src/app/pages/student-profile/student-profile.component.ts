@@ -63,6 +63,20 @@ export class StudentProfileComponent implements OnInit {
   showEventDates: boolean = false;
   calendarMonth: Date = new Date();
   calendarSelectedDate: string | null = null;
+  showNotifications: boolean = false;
+  isProfileOpen: boolean = false;
+  notifications: Array<{ 
+    id: number;
+    text: string; 
+    time: string;
+    read: boolean;
+    type?: 'event' | 'community' | 'general';
+    link?: string;
+    tab?: string;
+  }> = [
+    { id: 1, text: 'Yeni etkinlik duyurusu', time: '10 dk önce', read: false, type: 'event', tab: 'events' },
+    { id: 2, text: 'Topluluk güncellemesi', time: '1 saat önce', read: false, type: 'community', tab: 'communities' },
+  ];
 
   // User Info
   userInfo: any = {
@@ -252,6 +266,49 @@ export class StudentProfileComponent implements OnInit {
 
   toggleSidebar(): void {
     this.isSidebarCollapsed = !this.isSidebarCollapsed;
+  }
+
+  toggleNotifications(event?: MouseEvent): void {
+    if (event) event.stopPropagation();
+    this.showNotifications = !this.showNotifications;
+    this.isProfileOpen = false;
+  }
+
+  toggleProfileDropdown(event?: MouseEvent): void {
+    if (event) event.stopPropagation();
+    this.isProfileOpen = !this.isProfileOpen;
+    this.showNotifications = false;
+  }
+
+  @HostListener('document:click', ['$event'])
+  closeDropdowns(event: any): void {
+    if (!event.target.closest('.profile-wrapper') && !event.target.closest('.notification')) {
+      this.isProfileOpen = false;
+      this.showNotifications = false;
+    }
+  }
+
+  handleNotificationClick(notification: any) {
+    this.showNotifications = false;
+    
+    if (notification.tab) {
+      this.switchTab(notification.tab as 'overview' | 'communities' | 'events' | 'settings');
+    } else if (notification.link) {
+      this.router.navigate([notification.link]);
+    }
+    
+    // Bildirimi okundu olarak işaretle
+    notification.read = true;
+  }
+
+  handleSettingsClick() {
+    this.isProfileOpen = false;
+    this.switchTab('settings');
+  }
+
+  handleLogoutClick() {
+    this.isProfileOpen = false;
+    this.logout();
   }
 
   logout(): void {

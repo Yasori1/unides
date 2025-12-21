@@ -78,13 +78,43 @@
         </div>
       </div>
       <div class="header-right">
+        <div class="notification-wrapper" style="position: relative;">
+          <button class="icon-btn notification" (click)="toggleNotifications($event)">
+            <span class="material-symbols-outlined">notifications</span>
+            <span class="indicator" *ngIf="unreadNotificationsCount > 0"></span>
+          </button>
+          <div
+            class="dropdown-menu notifications"
+            *ngIf="showNotifications"
+            (click)="$event.stopPropagation()"
+          >
+            <div class="dd-header">Bildirimler</div>
+            <ul>
+              <li *ngFor="let n of notifications" (click)="handleNotificationClick(n)" [class.read]="n.read">
+                {{ n.text }} <small>{{ n.time }}</small>
+              </li>
+            </ul>
+          </div>
+        </div>
+
         <div class="profile-wrapper">
-          <div class="profile-pic">
+          <div class="profile-pic" (click)="toggleProfileDropdown($event)">
             <img [src]="clubInfo.logo" alt="Logo" />
           </div>
-          <div class="profile-info" *ngIf="!isSidebarCollapsed">
-            <span class="profile-name">{{ clubInfo.name }}</span>
-            <span class="profile-email">{{ clubInfo.email || 'topluluk@university.edu.tr' }}</span>
+          <div
+            class="dropdown-menu profile-dropdown"
+            *ngIf="isProfileOpen"
+            (click)="$event.stopPropagation()"
+          >
+            <div class="dd-header">{{ clubInfo.name }}</div>
+            <ul>
+              <li (click)="handleSettingsClick()">
+                <span class="material-symbols-outlined small-icon">settings</span> Ayarlar
+              </li>
+              <li (click)="handleLogoutClick()" class="danger-item">
+                <span class="material-symbols-outlined small-icon">logout</span> Çıkış
+              </li>
+            </ul>
           </div>
         </div>
       </div>

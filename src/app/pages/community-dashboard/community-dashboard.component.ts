@@ -36,6 +36,9 @@ interface Notification {
   text: string;
   time: string;
   read: boolean;
+  type?: 'event' | 'member' | 'project' | 'general';
+  link?: string;
+  tab?: string;
 }
 interface Collaboration {
   id: number;
@@ -294,8 +297,9 @@ export class CommunityDashboardComponent implements OnInit {
     },
   ];
   notifications: Notification[] = [
-    { id: 1, text: 'Yeni üye başvurusu', time: '10 dk önce', read: false },
-    { id: 2, text: 'TÜBİTAK onayı', time: '2 saat önce', read: false },
+    { id: 1, text: 'Yeni üye başvurusu', time: '10 dk önce', read: false, type: 'member', tab: 'members' },
+    { id: 2, text: 'TÜBİTAK onayı', time: '2 saat önce', read: false, type: 'project', tab: 'projects' },
+    { id: 3, text: 'Etkinlik onaylandı', time: '1 gün önce', read: false, type: 'event', tab: 'projects' },
   ];
   collaborations: Collaboration[] = [];
   filteredCollaborations: Collaboration[] = [];
@@ -357,12 +361,12 @@ export class CommunityDashboardComponent implements OnInit {
   }
   @HostListener('document:click', ['$event'])
   clickout(event: any) {
-    if (!event.target.closest('.profile-wrapper')) {
+    if (!event.target.closest('.profile-wrapper') && !event.target.closest('.profile-dropdown')) {
       this.isProfileOpen = false;
     }
-    if (!event.target.closest('.notification-btn')) {
+    if (!event.target.closest('.notification-wrapper') && !event.target.closest('.dropdown-menu.notifications')) {
       this.showNotifications = false;
-    } // Class name updated
+    }
   }
   get filteredMembers() {
     if (!this.memberSearchText) return this.members;
@@ -405,6 +409,9 @@ export class CommunityDashboardComponent implements OnInit {
     };
     return titles[this.activeTab] || 'Panel';
   }
+  get unreadNotificationsCount() {
+    return this.notifications.filter(n => !n.read).length;
+  }
   // Functions
   toggleSidebar() {
     this.isSidebarCollapsed = !this.isSidebarCollapsed;
@@ -420,10 +427,34 @@ export class CommunityDashboardComponent implements OnInit {
     this.showNotifications = !this.showNotifications;
     this.isProfileOpen = false;
   }
+
   toggleProfileDropdown(event?: MouseEvent) {
     if (event) event.stopPropagation();
     this.isProfileOpen = !this.isProfileOpen;
     this.showNotifications = false;
+  }
+
+  handleNotificationClick(notification: Notification) {
+    this.showNotifications = false;
+    
+    if (notification.tab) {
+      this.switchTab(notification.tab);
+    } else if (notification.link) {
+      this.router.navigate([notification.link]);
+    }
+    
+    // Bildirimi okundu olarak işaretle
+    notification.read = true;
+  }
+
+  handleSettingsClick() {
+    this.isProfileOpen = false;
+    this.switchTab('settings');
+  }
+
+  handleLogoutClick() {
+    this.isProfileOpen = false;
+    this.logout();
   }
   toggleRowMenu(id: number, event: MouseEvent) {
     event.stopPropagation();
@@ -516,7 +547,16 @@ export class CommunityDashboardComponent implements OnInit {
     reader.readAsDataURL(file);
   }
   logout() {
-    this.showToast('Çıkış yapılıyor...', 'success');
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('user_info');
+      localStorage.removeItem('user_type');
+      this.showToast('Çıkış yapıldı', 'success');
+      setTimeout(() => {
+        this.router.navigate(['/']);
+      }, 1000);
+    }
   }
   updateSettings() {
     if (!this.isSettingsValid) {

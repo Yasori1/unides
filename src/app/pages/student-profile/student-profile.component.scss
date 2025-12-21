@@ -278,37 +278,152 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
   .header-right {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 12px;
+    position: relative;
 
-    .profile-wrapper {
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      border: 1px solid $border;
+      background: white;
       display: flex;
       align-items: center;
-      gap: 12px;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: $text-muted;
+      position: relative;
+
+      &:hover {
+        background: $bg-body;
+        border-color: $primary;
+        color: $primary;
+      }
+
+      &.notification {
+        .indicator {
+          position: absolute;
+          top: 8px;
+          right: 8px;
+          width: 8px;
+          height: 8px;
+          background: $danger;
+          border-radius: 50%;
+          border: 2px solid white;
+        }
+      }
+
+      .material-symbols-outlined {
+        font-size: 20px;
+      }
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      background: white;
+      border: 1px solid $border;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      min-width: 280px;
+      z-index: 1000;
+      overflow: hidden;
+
+      &.notifications {
+        max-height: 400px;
+        overflow-y: auto;
+      }
+
+      .dd-header {
+        padding: 16px 20px;
+        border-bottom: 1px solid $border;
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: $text-main;
+        background: $bg-body;
+      }
+
+      ul {
+        list-style: none;
+        margin: 0;
+        padding: 8px 0;
+
+      li {
+        padding: 12px 20px;
+        cursor: pointer;
+        transition: background 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.9rem;
+        color: $text-main;
+        justify-content: space-between;
+
+        &:hover {
+          background: $bg-body;
+        }
+
+        &.read {
+          opacity: 0.6;
+        }
+
+        &.danger-item {
+          color: $danger;
+
+          &:hover {
+            background: rgba($danger, 0.1);
+          }
+        }
+
+        small {
+          font-size: 0.75rem;
+          color: $text-muted;
+          margin-left: auto;
+        }
+
+        .small-icon {
+          font-size: 18px;
+        }
+      }
+      }
+    }
+
+    .profile-wrapper {
+      position: relative;
+
       .profile-pic {
-        width: 42px;
-        height: 42px;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
         background: $primary-soft;
         display: flex;
         align-items: center;
         justify-content: center;
         color: $primary;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 2px solid transparent;
+
+        &:hover {
+          border-color: $primary;
+        }
+
+        img {
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          object-fit: cover;
+        }
+
         span {
           font-size: 24px;
         }
       }
-      .profile-info {
-        display: flex;
-        flex-direction: column;
-        .profile-name {
-          font-weight: 600;
-          font-size: 0.9rem;
-          color: $text-main;
-        }
-        .profile-email {
-          font-size: 0.8rem;
-          color: $text-muted;
-        }
+
+      .profile-dropdown {
+        right: 0;
       }
     }
   }

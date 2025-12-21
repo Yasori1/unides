@@ -104,13 +104,41 @@
       </div>
 
       <div class="header-right">
+        <button class="icon-btn notification" (click)="toggleNotifications($event)">
+          <span class="material-symbols-outlined">notifications</span>
+          <span class="indicator" *ngIf="notifications.length"></span>
+        </button>
+        <div
+          class="dropdown-menu notifications"
+          *ngIf="showNotifications"
+          (click)="$event.stopPropagation()"
+        >
+          <div class="dd-header">Bildirimler</div>
+          <ul>
+            <li *ngFor="let n of notifications" (click)="handleNotificationClick(n)" [class.read]="n.read">
+              {{ n.text }} <small>{{ n.time }}</small>
+            </li>
+          </ul>
+        </div>
+
         <div class="profile-wrapper">
-          <div class="profile-pic">
+          <div class="profile-pic" (click)="toggleProfileDropdown($event)">
             <span class="material-symbols-outlined">account_circle</span>
           </div>
-          <div class="profile-info" *ngIf="!isSidebarCollapsed">
-            <span class="profile-name">{{ userInfo.name || 'Öğrenci' }}</span>
-            <span class="profile-email">{{ userInfo.email || 'ogrenci@university.edu.tr' }}</span>
+          <div
+            class="dropdown-menu profile-dropdown"
+            *ngIf="isProfileOpen"
+            (click)="$event.stopPropagation()"
+          >
+            <div class="dd-header">{{ userInfo.name || 'Öğrenci' }}</div>
+            <ul>
+              <li (click)="handleSettingsClick()">
+                <span class="material-symbols-outlined small-icon">settings</span> Ayarlar
+              </li>
+              <li (click)="handleLogoutClick()" class="danger-item">
+                <span class="material-symbols-outlined small-icon">logout</span> Çıkış
+              </li>
+            </ul>
           </div>
         </div>
       </div>
