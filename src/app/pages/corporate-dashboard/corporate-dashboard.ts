@@ -148,7 +148,7 @@ interface Community {
   logo: string;
   banner?: string;
   coverImage?: string; // CommunityService'ten gelen veri için
-  status?: 'Aktif' | 'Pasif';
+  status?: 'Aktif' | 'Pasif' | 'Onay Bekliyor';
 }
 interface Announcement {
   id: number;
@@ -187,7 +187,12 @@ export class CorporateDashboardComponent implements OnInit {
   isModalOpen = false;
   modalType = '';
   searchText = '';
-  statusFilter: string = ''; // Aktif/Pasif filtre
+  statusFilter: string = ''; // Aktif/Pasif/Onay Bekliyor filtre
+  announcementSearchText = ''; // Duyuru arama metni
+  filteredAnnouncements: Announcement[] = []; // Filtrelenmiş duyurular
+  eventSearchText = ''; // Etkinlik arama metni
+  eventStatusFilter: string = ''; // Etkinlik durum filtresi
+  filteredEvents: EventRequest[] = []; // Filtrelenmiş etkinlikler
 
   // Pagination için değişkenler
   currentPage = 1;
@@ -271,6 +276,19 @@ export class CorporateDashboardComponent implements OnInit {
       return;
     }
 
+    // Query parametrelerini kontrol et
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get('tab');
+    const statusParam = urlParams.get('status');
+    
+    if (tabParam) {
+      this.switchTab(tabParam);
+    }
+    
+    if (statusParam) {
+      this.statusFilter = statusParam;
+    }
+
     // CommunityService'ten toplulukları çek (communities-page ile aynı kaynak)
     this.loadCommunitiesFromService();
     // AnnouncementService'ten duyuruları çek (announcements-page ile aynı kaynak)
@@ -333,9 +351,11 @@ export class CorporateDashboardComponent implements OnInit {
           capacity: '',
         }));
         this.attachCommunityNamesToEvents();
+        this.filteredEvents = [...this.allEvents]; // Başlangıçta tüm etkinlikleri göster
       },
       error: (err) => {
         console.error('Etkinlikler yüklenemedi:', err);
+        this.filteredEvents = [];
       },
     });
   }
@@ -386,12 +406,73 @@ export class CorporateDashboardComponent implements OnInit {
 
     // Durum filtresi
     if (this.statusFilter) {
-      temp = temp.filter((c) => c.status === this.statusFilter);
+      if (this.statusFilter === 'Onay Bekliyor') {
+        // Onay bekleyen topluluklar için özel kontrol
+        temp = temp.filter((c) => !c.status || c.status === 'Onay Bekliyor');
+      } else {
+        temp = temp.filter((c) => c.status === this.statusFilter);
+      }
     }
 
     this.filteredCommunities = temp;
     this.currentPage = 1;
     this.initPagination();
+  }
+
+  // Duyuru filtreleme
+  filterAnnouncements() {
+    if (!this.announcementSearchText.trim()) {
+      this.filteredAnnouncements = [...this.announcements];
+      return;
+    }
+
+    const term = this.announcementSearchText.toLowerCase();
+    this.filteredAnnouncements = this.announcements.filter(
+      (a) =>
+        a.title.toLowerCase().includes(term) ||
+        a.shortDescription.toLowerCase().includes(term) ||
+        (a.content && a.content.toLowerCase().includes(term))
+    );
+  }
+
+  // Etkinlik filtreleme
+  filterEvents() {
+    let temp = [...this.allEvents];
+
+    // Metin araması
+    if (this.eventSearchText.trim()) {
+      const term = this.eventSearchText.toLowerCase();
+      temp = temp.filter(
+        (e) =>
+          e.eventName.toLowerCase().includes(term) ||
+          e.communityName.toLowerCase().includes(term) ||
+          (e.description && e.description.toLowerCase().includes(term)) ||
+          (e.location && e.location.toLowerCase().includes(term))
+      );
+    }
+
+    // Durum filtresi
+    if (this.eventStatusFilter) {
+      temp = temp.filter((e) => e.status === this.eventStatusFilter);
+    }
+
+    this.filteredEvents = temp;
+  }
+
+  // Etkinlik durum filtresi ayarla
+  setEventStatusFilter(status: string) {
+    this.eventStatusFilter = status;
+    this.filterEvents();
+  }
+
+  // Topluluklar sayfasına onay bekleyen filtresiyle yönlendir
+  goToCommunitiesWithPendingFilter() {
+    this.router.navigate(['/corporate-dashboard'], {
+      queryParams: { tab: 'communities', status: 'Onay Bekliyor' },
+    });
+    this.switchTab('communities');
+    this.statusFilter = 'Onay Bekliyor';
+    this.applyFilters();
   }
 
   // Topluluk detay ve güncelleme
@@ -790,11 +871,13 @@ export class CorporateDashboardComponent implements OnInit {
     this.announcementService.getAllAnnouncements().subscribe({
       next: (data) => {
         this.announcements = data;
+        this.filteredAnnouncements = [...data]; // Başlangıçta tüm duyuruları göster
       },
       error: (err) => {
         console.error('Duyurular yüklenemedi:', err);
         // Hata durumunda boş liste kullan
         this.announcements = [];
+        this.filteredAnnouncements = [];
       },
     });
   }

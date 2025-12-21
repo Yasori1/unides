@@ -71,6 +71,43 @@
         </div>
       </div>
 
+      <!-- Events Section -->
+      <div class="events-section" *ngIf="communityEvents.length > 0 || isLoadingEvents">
+        <h2>Topluluk Etkinlikleri</h2>
+        <div *ngIf="isLoadingEvents" class="loading-state">
+          <div class="spinner"></div>
+          <p>Etkinlikler yükleniyor...</p>
+        </div>
+        <div class="events-grid" *ngIf="!isLoadingEvents && communityEvents.length > 0">
+          <div class="event-card" *ngFor="let event of communityEvents">
+            <div class="event-image" *ngIf="event.imageUrl">
+              <img [src]="event.imageUrl" [alt]="event.title" />
+            </div>
+            <div class="event-content">
+              <h3>{{ event.title }}</h3>
+              <p *ngIf="event.shortDescription">{{ event.shortDescription }}</p>
+              <p *ngIf="event.description && !event.shortDescription">{{ event.description }}</p>
+              <div class="event-meta">
+                <span *ngIf="event.startDate" class="event-date">
+                  <i class="bx bx-calendar"></i>
+                  {{ formatDate(event.startDate) }}
+                </span>
+                <span *ngIf="event.location" class="event-location">
+                  <i class="bx bx-map"></i>
+                  {{ event.location }}
+                </span>
+                <span *ngIf="event.status" class="event-status" [ngClass]="event.status.toLowerCase()">
+                  {{ event.status }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="!isLoadingEvents && communityEvents.length === 0" class="no-events">
+          <p>Bu topluluk için henüz etkinlik bulunmamaktadır.</p>
+        </div>
+      </div>
+
       <!-- Links Section -->
       <div
         class="links-section"

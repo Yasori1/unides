@@ -22,7 +22,7 @@ export interface Community {
   tiktok?: string;
   website?: string;
   email?: string;
-  status?: 'Aktif' | 'Pasif';
+  status?: 'Aktif' | 'Pasif' | 'Onay Bekliyor';
   presidentEmail?: string; // Topluluk başkanı email (oluşturma/güncelleme için)
 }
 
@@ -150,7 +150,7 @@ export class CommunityService {
       tiktok: tiktok,
       website: websiteUrl,
       email: contactEmail,
-      status: (dto.status || dto.Status || 'Aktif') as 'Aktif' | 'Pasif',
+      status: (dto.status || dto.Status || 'Aktif') as 'Aktif' | 'Pasif' | 'Onay Bekliyor',
     };
   }
 

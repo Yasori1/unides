@@ -206,13 +206,9 @@
               <span class="material-symbols-outlined">campaign</span>
               <span>Duyuru Yap</span>
             </button>
-            <button class="tile-btn" (click)="switchTab('communities')">
+            <button class="tile-btn" (click)="goToCommunitiesWithPendingFilter()">
               <span class="material-symbols-outlined">add_business</span>
               <span>Topluluk Onayla</span>
-            </button>
-            <button class="tile-btn" (click)="switchTab('events')">
-              <span class="material-symbols-outlined">event</span>
-              <span>Takvim</span>
             </button>
             <!-- Mesajlar (Destek) Butonu Silindi -->
           </div>
@@ -242,6 +238,7 @@
             <option value="">Tüm Durumlar</option>
             <option value="Aktif">Aktif</option>
             <option value="Pasif">Pasif</option>
+            <option value="Onay Bekliyor">Onay Bekliyor</option>
           </select>
         </div>
       </div>
@@ -260,6 +257,12 @@
           class="community-card"
           (click)="openCommunityDetail(item)"
         >
+          <!-- Status Badge - Sol Üst -->
+          <div class="community-status-badge">
+            <span class="status-indicator" [class.active]="item.status === 'Aktif'" [class.passive]="item.status === 'Pasif'"></span>
+            <span class="status-text">{{ item.status || 'Aktif' }}</span>
+          </div>
+
           <div class="cover-area">
             <img
               [src]="item.coverImage || item.banner || 'assets/img/placeholder-cover.jpg'"
@@ -404,15 +407,51 @@
     <div class="view-container" *ngIf="activeTab === 'events'">
       <div class="page-header">
         <h2>Etkinlik Yönetimi</h2>
-        <div class="header-controls events-filters">
-          <div class="chip legend approved"><span class="dot"></span>Onaylandı</div>
-          <div class="chip legend pending"><span class="dot"></span>Beklemede</div>
-          <div class="chip legend rejected"><span class="dot"></span>Reddedildi</div>
+        <div class="header-controls">
+          <div class="search-input">
+            <span class="material-symbols-outlined">search</span>
+            <input
+              type="text"
+              placeholder="Etkinlik Ara..."
+              [(ngModel)]="eventSearchText"
+              (input)="filterEvents()"
+            />
+          </div>
+          <div class="events-filters">
+            <button
+              class="filter-chip"
+              [class.active]="eventStatusFilter === ''"
+              (click)="setEventStatusFilter('')"
+            >
+              Tümü
+            </button>
+            <button
+              class="filter-chip"
+              [class.active]="eventStatusFilter === 'Onaylandı'"
+              (click)="setEventStatusFilter('Onaylandı')"
+            >
+              <span class="dot approved"></span>Onaylandı
+            </button>
+            <button
+              class="filter-chip"
+              [class.active]="eventStatusFilter === 'Beklemede'"
+              (click)="setEventStatusFilter('Beklemede')"
+            >
+              <span class="dot pending"></span>Beklemede
+            </button>
+            <button
+              class="filter-chip"
+              [class.active]="eventStatusFilter === 'Reddedildi'"
+              (click)="setEventStatusFilter('Reddedildi')"
+            >
+              <span class="dot rejected"></span>Reddedildi
+            </button>
+          </div>
         </div>
       </div>
 
-      <div class="events-grid" *ngIf="allEvents.length > 0">
-        <div *ngFor="let e of allEvents" class="event-card-modern" [ngClass]="e.status">
+      <div class="events-grid" *ngIf="filteredEvents.length > 0">
+        <div *ngFor="let e of filteredEvents" class="event-card-modern" [ngClass]="e.status">
           <div class="card-image">
             <img
               [src]="e.imageUrl || 'assets/images/page-title1.jpg'"
@@ -486,7 +525,7 @@
         </div>
       </div>
 
-      <div class="empty-state" *ngIf="allEvents.length === 0">
+      <div class="empty-state" *ngIf="filteredEvents.length === 0">
         <span class="material-symbols-outlined">event_busy</span>
         <p>Henüz etkinlik bulunmuyor.</p>
       </div>
@@ -496,13 +535,24 @@
     <div class="view-container" *ngIf="activeTab === 'announcements'">
       <div class="page-header">
         <h2>Duyuru Merkezi</h2>
-        <button class="btn-primary" (click)="openModal('new-announcement')">
-          <span class="material-symbols-outlined">add</span> Yeni Duyuru
-        </button>
+        <div class="header-controls">
+          <div class="search-input">
+            <span class="material-symbols-outlined">search</span>
+            <input
+              type="text"
+              placeholder="Duyuru Ara..."
+              [(ngModel)]="announcementSearchText"
+              (input)="filterAnnouncements()"
+            />
+          </div>
+          <button class="btn-primary" (click)="openModal('new-announcement')">
+            <span class="material-symbols-outlined">add</span> Yeni Duyuru
+          </button>
+        </div>
       </div>
 
-      <div class="announcements-grid">
-        <div class="announcement-card-enhanced" *ngFor="let a of announcements">
+      <div class="announcements-grid" *ngIf="filteredAnnouncements.length > 0">
+        <div class="announcement-card-enhanced" *ngFor="let a of filteredAnnouncements">
           <!-- Duyuru Görseli -->
           <div class="announcement-image" *ngIf="a.image">
             <img [src]="a.image" [alt]="a.title" />
@@ -780,14 +830,16 @@
                 [class.active]="newCommunity.status === 'Aktif'"
                 (click)="newCommunity.status = 'Aktif'"
               >
+                <span class="material-symbols-outlined">check_circle</span>
                 Aktif
               </button>
               <button
                 type="button"
-                class="status-btn"
+                class="status-btn passive"
                 [class.active]="newCommunity.status === 'Pasif'"
                 (click)="newCommunity.status = 'Pasif'"
               >
+                <span class="material-symbols-outlined">cancel</span>
                 Pasif
               </button>
             </div>

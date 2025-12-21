@@ -4,6 +4,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { HeaderComponent } from '../../common/header/header.component';
 import { FooterComponent } from '../../common/footer/footer.component';
 import { CommunityService, Community } from '../../services/community.services';
+import { EventService, EventItem } from '../../services/event.services';
 
 @Component({
   selector: 'app-community-detail',
@@ -16,6 +17,8 @@ export class CommunityDetailComponent implements OnInit {
   community: Community | null = null;
   isLoading: boolean = true;
   communityId: number | null = null;
+  communityEvents: EventItem[] = [];
+  isLoadingEvents: boolean = false;
 
   // Banner animation
   heroMoveX = 0;
@@ -25,6 +28,7 @@ export class CommunityDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private communityService: CommunityService,
+    private eventService: EventService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -59,6 +63,9 @@ export class CommunityDetailComponent implements OnInit {
       next: (data) => {
         if (data) {
           this.community = data;
+          this.communityId = id;
+          // Topluluk yüklendikten sonra etkinlikleri yükle
+          this.loadCommunityEvents(id);
         } else {
           // Topluluk bulunamadıysa listeye yönlendir
           this.router.navigate(['/communities']);
@@ -69,6 +76,26 @@ export class CommunityDetailComponent implements OnInit {
         console.error('Topluluk yüklenemedi:', err);
         this.router.navigate(['/communities']);
         this.isLoading = false;
+      },
+    });
+  }
+
+  loadCommunityEvents(communityId: number) {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    this.isLoadingEvents = true;
+    this.eventService.getAll().subscribe({
+      next: (events) => {
+        // Bu topluluğa ait etkinlikleri filtrele
+        this.communityEvents = events.filter((e) => e.communityId === communityId);
+        this.isLoadingEvents = false;
+      },
+      error: (err) => {
+        console.error('Etkinlikler yüklenemedi:', err);
+        this.communityEvents = [];
+        this.isLoadingEvents = false;
       },
     });
   }
@@ -89,6 +116,23 @@ export class CommunityDetailComponent implements OnInit {
   openLink(url: string) {
     if (isPlatformBrowser(this.platformId) && url) {
       window.open(url, '_blank');
+    }
+  }
+
+  formatDate(dateString: string | undefined): string {
+    if (!dateString) return '';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return dateString;
+      }
+      return date.toLocaleDateString('tr-TR', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      });
+    } catch {
+      return dateString;
     }
   }
 }

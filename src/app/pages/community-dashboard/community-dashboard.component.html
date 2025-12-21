@@ -78,41 +78,13 @@
         </div>
       </div>
       <div class="header-right">
-        <button class="icon-btn notification" (click)="toggleNotifications($event)">
-          <span class="material-symbols-outlined">notifications</span>
-          <span class="indicator" *ngIf="notifications.length"></span>
-        </button>
-        <div
-          class="dropdown-menu notifications"
-          *ngIf="showNotifications"
-          (click)="$event.stopPropagation()"
-        >
-          <div class="dd-header">Bildirimler</div>
-          <ul>
-            <li *ngFor="let n of notifications">
-              {{ n.text }} <small>{{ n.time }}</small>
-            </li>
-          </ul>
-        </div>
-
         <div class="profile-wrapper">
-          <div class="profile-pic" (click)="toggleProfileDropdown($event)">
+          <div class="profile-pic">
             <img [src]="clubInfo.logo" alt="Logo" />
           </div>
-          <div
-            class="dropdown-menu profile-dropdown"
-            *ngIf="isProfileOpen"
-            (click)="$event.stopPropagation()"
-          >
-            <div class="dd-header">{{ clubInfo.name }}</div>
-            <ul>
-              <li (click)="switchTab('settings')">
-                <span class="material-symbols-outlined small-icon">settings</span> Ayarlar
-              </li>
-              <li (click)="logout()" class="danger-item">
-                <span class="material-symbols-outlined small-icon">logout</span> Çıkış
-              </li>
-            </ul>
+          <div class="profile-info" *ngIf="!isSidebarCollapsed">
+            <span class="profile-name">{{ clubInfo.name }}</span>
+            <span class="profile-email">{{ clubInfo.email || 'topluluk@university.edu.tr' }}</span>
           </div>
         </div>
       </div>
