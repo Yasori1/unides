@@ -158,184 +158,215 @@
         </div>
       </div>
 
-      <div class="split-grid">
-        <!-- Son Topluluklar -->
-        <div class="card table-card">
-          <div class="card-header">
-            <h3>Katıldığım Topluluklar</h3>
-            <button class="btn-text" (click)="switchTab('communities')">Tümünü Gör</button>
-          </div>
-          <div class="community-cards-mini" *ngIf="myCommunities.length > 0">
-            <div class="community-card" *ngFor="let community of myCommunities.slice(0, 3)">
-              <div class="cover-area">
-                <img
-                  [src]="community.coverImage || community.logo"
-                  [alt]="community.name"
-                  class="cover-img"
-                />
-                <span class="category-badge">{{ community.category }}</span>
-              </div>
-              <div class="card-content">
-                <div class="header-row">
-                  <div class="logo-wrapper">
-                    <img [src]="community.logo" [alt]="community.name" class="logo-img" />
-                  </div>
-                  <div class="title-wrapper">
-                    <h3 class="community-name">{{ community.name }}</h3>
-                    <span class="university-name">{{
-                      community.university || community.city
-                    }}</span>
-                    <span class="city-tag" *ngIf="community.city">
-                      <i class="bx bxs-map"></i> {{ community.city }}
-                    </span>
-                  </div>
-                </div>
-                <p class="description" *ngIf="community.description">{{ community.description }}</p>
-                <div
-                  class="social-media-icons"
-                  *ngIf="
-                    community.instagram ||
-                    community.youtube ||
-                    community.twitter ||
-                    community.tiktok ||
-                    community.socialMedia
-                  "
-                >
-                  <a
-                    *ngIf="community.instagram"
-                    [href]="community.instagram"
-                    target="_blank"
-                    class="social-icon instagram"
-                  >
-                    <i class="bx bxl-instagram"></i>
-                  </a>
-                  <a
-                    *ngIf="community.youtube"
-                    [href]="community.youtube"
-                    target="_blank"
-                    class="social-icon youtube"
-                  >
-                    <i class="bx bxl-youtube"></i>
-                  </a>
-                  <a
-                    *ngIf="community.twitter"
-                    [href]="community.twitter"
-                    target="_blank"
-                    class="social-icon twitter"
-                  >
-                    <i class="bx bxl-twitter"></i>
-                  </a>
-                  <a
-                    *ngIf="community.tiktok"
-                    [href]="community.tiktok"
-                    target="_blank"
-                    class="social-icon tiktok"
-                  >
-                    <i class="bx bxl-tiktok"></i>
-                  </a>
-                  <a
-                    *ngIf="
-                      community.socialMedia &&
-                      !community.instagram &&
-                      !community.youtube &&
-                      !community.twitter &&
-                      !community.tiktok
-                    "
-                    [href]="community.socialMedia"
-                    target="_blank"
-                    class="social-icon"
-                  >
-                    <i class="bx bxl-facebook"></i>
-                  </a>
-                </div>
-                <div class="card-footer">
-                  <div class="stat">
-                    <i class="bx bx-group"></i>
-                    <span>{{ community.memberCount }} Üye</span>
-                  </div>
-                  <span class="action-text">İncele <i class="bx bx-right-arrow-alt"></i></span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="empty-state" *ngIf="myCommunities.length === 0">
-            <span class="material-symbols-outlined">groups</span>
-            <p>Henüz hiçbir topluluğa katılmadınız</p>
-          </div>
+      <!-- Topluluklarımın Etkinlikleri -->
+      <div class="card table-card">
+        <div class="card-header">
+          <h3>Topluluklarımın Etkinlikleri</h3>
+          <button class="btn-text" (click)="switchTab('events')">Tümünü Gör</button>
         </div>
 
-        <!-- Topluluklarımın Etkinlikleri -->
-        <div class="card table-card">
-          <div class="card-header">
-            <h3>Topluluklarımın Etkinlikleri</h3>
-            <button class="btn-text" (click)="switchTab('events')">Tümünü Gör</button>
-          </div>
-
-          <div class="events-grid cards small" *ngIf="communityEvents.length > 0">
-            <div
-              class="event-card"
-              *ngFor="let event of communityEvents.slice(0, 3)"
-              (click)="openEventDetail(event)"
-            >
-              <div class="card-image">
-                <img
-                  [src]="event.imageUrl || 'assets/images/page-title1.jpg'"
-                  [alt]="event.title"
-                  loading="lazy"
-                />
-                <div class="date-badge">
-                  {{ event.date }}
+        <div class="events-carousel-wrapper" *ngIf="communityEvents.length > 0">
+          <!-- Gradient Fade Overlays -->
+          <div class="carousel-fade left-fade" *ngIf="canScrollEventsLeft()"></div>
+          <div class="carousel-fade right-fade" *ngIf="canScrollEventsRight()"></div>
+          
+          <button
+            class="carousel-nav-btn left"
+            (click)="scrollEvents('left')"
+            [disabled]="!canScrollEventsLeft()"
+            title="Önceki"
+          >
+            <span class="material-symbols-outlined">chevron_left</span>
+          </button>
+          <div
+            class="events-carousel-container"
+            (scroll)="onEventsScroll($event)"
+          >
+            <div class="events-grid cards small">
+              <div
+                class="event-card modern-card"
+                *ngFor="let event of communityEvents; let i = index"
+                (click)="openEventDetail(event)"
+                [style.animation-delay]="i * 0.1 + 's'"
+              >
+                <div class="card-image">
+                  <img
+                    [src]="event.imageUrl || 'assets/images/page-title1.jpg'"
+                    [alt]="event.title"
+                    loading="lazy"
+                  />
+                  <div class="date-badge">
+                    {{ event.date }}
+                  </div>
+                  <div class="status-chip" [ngClass]="event.status">
+                    {{
+                      event.status === 'upcoming'
+                        ? 'Yaklaşan'
+                        : event.status === 'completed'
+                        ? 'Tamamlandı'
+                        : 'İptal'
+                    }}
+                  </div>
+                  <div class="tap-hint">
+                    <span class="material-symbols-outlined">visibility</span> İncele
+                  </div>
                 </div>
-                <div class="status-chip" [ngClass]="event.status">
-                  {{
-                    event.status === 'upcoming'
-                      ? 'Yaklaşan'
-                      : event.status === 'completed'
-                      ? 'Tamamlandı'
-                      : 'İptal'
-                  }}
-                </div>
-                <div class="tap-hint">
-                  <span class="material-symbols-outlined">visibility</span> İncele
-                </div>
-              </div>
 
-              <div class="card-info">
-                <div class="tags-row">
-                  <span class="tag uni" *ngIf="event.university">{{ event.university }}</span>
-                  <span
-                    class="tag category"
-                    *ngIf="event.category"
-                    [style.color]="event.color || '#2563eb'"
-                  >
-                    {{ event.category }}
-                  </span>
-                </div>
+                <div class="card-info">
+                  <div class="tags-row">
+                    <span class="tag uni" *ngIf="event.university">{{ event.university }}</span>
+                    <span
+                      class="tag category"
+                      *ngIf="event.category"
+                      [style.color]="event.color || '#2563eb'"
+                    >
+                      {{ event.category }}
+                    </span>
+                  </div>
 
-                <h3>{{ event.title }}</h3>
-                <p class="short-desc" *ngIf="event.description">{{ event.description }}</p>
+                  <h3>{{ event.title }}</h3>
+                  <p class="short-desc" *ngIf="event.description">{{ event.description }}</p>
 
-                <div class="bottom-meta">
-                  <span
-                    class="category"
-                    *ngIf="event.category"
-                    [style.color]="event.color || '#2563eb'"
-                  >
-                    {{ event.category }}
-                  </span>
-                  <div class="mini-location">
-                    <span class="material-symbols-outlined">location_on</span>
-                    {{ event.location }}
+                  <div class="bottom-meta">
+                    <span
+                      class="category"
+                      *ngIf="event.category"
+                      [style.color]="event.color || '#2563eb'"
+                    >
+                      {{ event.category }}
+                    </span>
+                    <div class="mini-location">
+                      <span class="material-symbols-outlined">location_on</span>
+                      {{ event.location }}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
+          <button
+            class="carousel-nav-btn right"
+            (click)="scrollEvents('right')"
+            [disabled]="!canScrollEventsRight()"
+            title="Sonraki"
+          >
+            <span class="material-symbols-outlined">chevron_right</span>
+          </button>
+        </div>
 
-          <div class="empty-state" *ngIf="communityEvents.length === 0">
-            <span class="material-symbols-outlined">event_available</span>
-            <p>Katıldığınız toplulukların henüz etkinliği yok</p>
+        <div class="empty-state" *ngIf="communityEvents.length === 0">
+          <span class="material-symbols-outlined">event_available</span>
+          <p>Katıldığınız toplulukların henüz etkinliği yok</p>
+        </div>
+      </div>
+
+      <!-- Katıldığım Topluluklar -->
+      <div class="card table-card">
+        <div class="card-header">
+          <h3>Katıldığım Topluluklar</h3>
+          <button class="btn-text" (click)="switchTab('communities')">Tümünü Gör</button>
+        </div>
+        <div class="community-cards-mini" *ngIf="myCommunities.length > 0">
+          <div class="community-card" *ngFor="let community of myCommunities.slice(0, 3)" (click)="goCommunityDetail(community)">
+            <div class="cover-area">
+              <img
+                [src]="community.coverImage || community.logo"
+                [alt]="community.name"
+                class="cover-img"
+              />
+              <span class="category-badge">{{ community.category }}</span>
+            </div>
+            <div class="card-content">
+              <div class="header-row">
+                <div class="logo-wrapper">
+                  <img [src]="community.logo" [alt]="community.name" class="logo-img" />
+                </div>
+                <div class="title-wrapper">
+                  <h3 class="community-name">{{ community.name }}</h3>
+                  <span class="university-name">{{
+                    community.university || community.city
+                  }}</span>
+                  <span class="city-tag" *ngIf="community.city">
+                    <i class="bx bxs-map"></i> {{ community.city }}
+                  </span>
+                </div>
+              </div>
+              <p class="description" *ngIf="community.description">{{ community.description }}</p>
+              <div
+                class="social-media-icons"
+                *ngIf="
+                  community.instagram ||
+                  community.youtube ||
+                  community.twitter ||
+                  community.tiktok ||
+                  community.socialMedia
+                "
+              >
+                <a
+                  *ngIf="community.instagram"
+                  [href]="community.instagram"
+                  target="_blank"
+                  class="social-icon instagram"
+                  (click)="$event.stopPropagation()"
+                >
+                  <i class="bx bxl-instagram"></i>
+                </a>
+                <a
+                  *ngIf="community.youtube"
+                  [href]="community.youtube"
+                  target="_blank"
+                  class="social-icon youtube"
+                  (click)="$event.stopPropagation()"
+                >
+                  <i class="bx bxl-youtube"></i>
+                </a>
+                <a
+                  *ngIf="community.twitter"
+                  [href]="community.twitter"
+                  target="_blank"
+                  class="social-icon twitter"
+                  (click)="$event.stopPropagation()"
+                >
+                  <i class="bx bxl-twitter"></i>
+                </a>
+                <a
+                  *ngIf="community.tiktok"
+                  [href]="community.tiktok"
+                  target="_blank"
+                  class="social-icon tiktok"
+                  (click)="$event.stopPropagation()"
+                >
+                  <i class="bx bxl-tiktok"></i>
+                </a>
+                <a
+                  *ngIf="
+                    community.socialMedia &&
+                    !community.instagram &&
+                    !community.youtube &&
+                    !community.twitter &&
+                    !community.tiktok
+                  "
+                  [href]="community.socialMedia"
+                  target="_blank"
+                  class="social-icon"
+                  (click)="$event.stopPropagation()"
+                >
+                  <i class="bx bxl-facebook"></i>
+                </a>
+              </div>
+              <div class="card-footer">
+                <div class="stat">
+                  <i class="bx bx-group"></i>
+                  <span>{{ community.memberCount }} Üye</span>
+                </div>
+                <span class="action-text">İncele <i class="bx bx-right-arrow-alt"></i></span>
+              </div>
+            </div>
           </div>
+        </div>
+        <div class="empty-state" *ngIf="myCommunities.length === 0">
+          <span class="material-symbols-outlined">groups</span>
+          <p>Henüz hiçbir topluluğa katılmadınız</p>
         </div>
       </div>
     </div>
