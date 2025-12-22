@@ -1,6 +1,5 @@
 <app-header></app-header>
 
-<!-- HERO / HEADER ALANI -->
 <div class="page-spacer" (mousemove)="onHeroMouseMove($event)">
   <div class="background-wrapper">
     <div
@@ -23,10 +22,8 @@
   </div>
 </div>
 
-<!-- İÇERİK BÖLÜMÜ -->
 <section class="events-content-section">
   <div class="container">
-    <!-- ARAMA -->
     <div class="search-container" #animItem>
       <div class="search-box">
         <span class="material-symbols-outlined search-icon">search</span>
@@ -38,7 +35,6 @@
       </div>
     </div>
 
-    <!-- ANA FİLTRELER -->
     <div class="events-filter-menu text-center mb-5" #animItem>
       <button
         class="filter-btn"
@@ -63,7 +59,6 @@
       </button>
     </div>
 
-    <!-- DETAYLI FİLTRE & SIRALAMA BAR -->
     <div class="filter-bar-container" #animItem>
       <div class="filter-scroll">
         <button
@@ -101,13 +96,11 @@
       </div>
     </div>
 
-    <!-- SECTION HEADER -->
     <div class="section-header" #animItem>
       <h2>Yaklaşan <span class="highlight">Etkinlikler</span></h2>
       <p>{{ activeCategory }} kategorisi listeleniyor.</p>
     </div>
 
-    <!-- BOŞ DURUM -->
     <div class="col-12 text-center" *ngIf="displayedEvents.length === 0 && !isLoadingMore">
       <div class="empty-state">
         <span
@@ -119,7 +112,6 @@
       </div>
     </div>
 
-    <!-- GRID -->
     <div class="events-grid" #animItem [@listAnimation]="displayedEvents.length">
       <div
         class="event-card"
@@ -134,7 +126,7 @@
             [src]="event.imageUrl"
             [alt]="event.title"
             loading="lazy"
-            onerror="this.src='assets/images/page-title1.jpg'"
+            onerror="this.src='assets/images/placeholder.jpg'"
           />
           <div class="date-badge">
             {{ event.date }}
@@ -147,9 +139,9 @@
         <div class="card-info">
           <div class="tags-row">
             <span class="tag uni" title="{{ event.university }}">{{ event.university }}</span>
-            <!-- BURASI GÜNCELLENDİ: Artık Topluluk İsmi Gösteriliyor -->
             <span class="tag semester" *ngIf="event.semester">
-              <i class="bx bx-group"></i> {{ event.semester }}
+              <span class="material-symbols-outlined" style="font-size: 14px;">groups</span> 
+              {{ event.semester }}
             </span>
           </div>
 
@@ -167,7 +159,6 @@
       </div>
     </div>
 
-    <!-- YÜKLEME BUTONU -->
     <div class="load-more-container" *ngIf="hasMoreData && displayedEvents.length > 0">
       <button class="load-more-btn" (click)="loadMoreEvents()" [disabled]="isLoadingMore">
         <span *ngIf="!isLoadingMore">Daha Fazla Göster</span>
@@ -182,7 +173,6 @@
       Tüm etkinlikleri görüntülediniz 🎉
     </div>
 
-    <!-- SLIDER -->
     <div class="slider-section" #animItem>
       <h3 class="slider-title">Geçmişten Kareler</h3>
       <div class="slider-container">
@@ -201,33 +191,26 @@
 
 <app-footer></app-footer>
 
-<!-- DETAY MODALI -->
 <div class="modal-backdrop" *ngIf="selectedEvent" (click)="closeModal()">
   <div class="modal-content" (click)="$event.stopPropagation()">
-    <!-- Kapatma Butonu (Sağ Üst) -->
     <button class="close-btn" (click)="closeModal()">
       <span class="material-symbols-outlined">close</span>
     </button>
 
-    <!-- Header Görseli -->
     <div class="modal-header">
       <img
         [src]="selectedEvent.imageUrl"
         class="modal-cover"
-        onerror="this.src='assets/images/page-title1.jpg'"
+        onerror="this.src='assets/images/placeholder.jpg'"
       />
-      <!-- Kategori Badge (Sol Alt) -->
       <span class="modal-cat-badge" [style.background]="selectedEvent.color">
         {{ selectedEvent.category }}
       </span>
     </div>
 
-    <!-- Modal Body -->
     <div class="modal-body">
-      <!-- Başlık -->
       <h2 class="event-title">{{ selectedEvent.title }}</h2>
 
-      <!-- Bilgi Kartı (İki Sütun) -->
       <div class="info-card">
         <div class="info-column">
           <div class="info-item">
@@ -235,7 +218,7 @@
             <span class="info-value">{{ selectedEvent.university }}</span>
           </div>
           <div class="info-item">
-            <span class="info-label">KULÜP (DETAY)</span>
+            <span class="info-label">KULÜP</span>
             <span class="info-value">{{ selectedEvent.club }}</span>
           </div>
           <div class="info-item">
@@ -259,7 +242,6 @@
         </div>
       </div>
 
-      <!-- Açıklama Bölümü -->
       <div class="description-section">
         <span class="description-label">AÇIKLAMA</span>
         <p class="description-text">{{ selectedEvent.description }}</p>
