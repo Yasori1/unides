@@ -499,6 +499,7 @@
   margin-bottom: 4px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -517,6 +518,7 @@
   flex-grow: 1;
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -1432,8 +1434,6 @@
   justify-content: flex-end;
   gap: 10px;
 }
-<<<<<<< Updated upstream
-=======
 
 /* Header Right - Profile & Notifications */
 .top-header .header-right {
@@ -1601,4 +1601,3 @@
     transform: translateY(0);
   }
 }
->>>>>>> Stashed changes

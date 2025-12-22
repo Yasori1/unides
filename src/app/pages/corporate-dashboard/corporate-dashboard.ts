@@ -148,11 +148,7 @@ interface Community {
   logo: string;
   banner?: string;
   coverImage?: string; // CommunityService'ten gelen veri için
-<<<<<<< Updated upstream
-  status?: 'Aktif' | 'Pasif' | 'Onay Bekliyor';
-=======
   status?: 'Aktif' | 'Pasif' | 'Onay Bekleyen';
->>>>>>> Stashed changes
 }
 interface Announcement {
   id: number;
@@ -176,6 +172,17 @@ interface EventRequest {
   capacity?: string;
 }
 
+interface Notification {
+  id: number;
+  text: string;
+  time: string;
+  read: boolean;
+  targetTab?: string; // 'overview', 'communities', 'events', 'announcements', 'settings'
+  targetRoute?: string; // '/some-route/id'
+  type?: 'community' | 'event' | 'announcement' | 'other';
+  action?: 'communities' | 'events' | 'announcements' | 'overview';
+}
+
 @Component({
   selector: 'app-corporate-dashboard',
   standalone: true,
@@ -191,17 +198,11 @@ export class CorporateDashboardComponent implements OnInit {
   isModalOpen = false;
   modalType = '';
   searchText = '';
-<<<<<<< Updated upstream
-  statusFilter: string = ''; // Aktif/Pasif/Onay Bekliyor filtre
+  statusFilter: string = ''; // Aktif/Pasif filtre
   announcementSearchText = ''; // Duyuru arama metni
-  filteredAnnouncements: Announcement[] = []; // Filtrelenmiş duyurular
   eventSearchText = ''; // Etkinlik arama metni
   eventStatusFilter: string = ''; // Etkinlik durum filtresi
   filteredEvents: EventRequest[] = []; // Filtrelenmiş etkinlikler
-=======
-  statusFilter: string = ''; // Aktif/Pasif filtre
-  announcementSearchText = ''; // Duyuru arama metni
->>>>>>> Stashed changes
 
   // Pagination için değişkenler
   currentPage = 1;
@@ -265,9 +266,9 @@ export class CorporateDashboardComponent implements OnInit {
   selectedEvent: EventRequest | null = null;
   newEvent: Partial<EventRequest> | null = null;
 
-  notifications = [
-    { text: 'E-Spor topluluğu onay bekliyor', time: '10 dk önce' },
-    { text: 'AI Zirvesi bütçe onayı istiyor', time: '1 saat önce' },
+  notifications: Notification[] = [
+    { id: 1, text: 'E-Spor topluluğu onay bekliyor', time: '10 dk önce', read: false, targetTab: 'communities' },
+    { id: 2, text: 'AI Zirvesi bütçe onayı istiyor', time: '1 saat önce', read: false, targetTab: 'events' },
   ];
 
   // Router ve Service'leri inject ediyoruz
@@ -416,9 +417,9 @@ export class CorporateDashboardComponent implements OnInit {
 
     // Durum filtresi
     if (this.statusFilter) {
-      if (this.statusFilter === 'Onay Bekliyor') {
+      if (this.statusFilter === 'Onay Bekleyen') {
         // Onay bekleyen topluluklar için özel kontrol
-        temp = temp.filter((c) => !c.status || c.status === 'Onay Bekliyor');
+        temp = temp.filter((c) => !c.status || c.status === 'Onay Bekleyen');
       } else {
         temp = temp.filter((c) => c.status === this.statusFilter);
       }
@@ -701,21 +702,69 @@ export class CorporateDashboardComponent implements OnInit {
     this.activeTab = tab;
     this.isSidebarCollapsed = window.innerWidth < 768 ? true : this.isSidebarCollapsed;
   }
-  toggleNotifications(e: Event) {
-    e.stopPropagation();
+  toggleNotifications(event?: MouseEvent) {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
     this.showNotifications = !this.showNotifications;
     this.isProfileOpen = false;
   }
-  toggleProfileDropdown(e: Event) {
-    e.stopPropagation();
+
+  handleNotificationClick(notification: Notification) {
+    // Bildirimi okundu olarak işaretle
+    notification.read = true;
+    
+    // Dropdown'u kapat
+    this.showNotifications = false;
+    
+    // Eğer targetTab varsa, o tab'a geç
+    if (notification.targetTab) {
+      this.switchTab(notification.targetTab);
+    }
+    // Eğer targetRoute varsa, o route'a git
+    else if (notification.targetRoute) {
+      this.router.navigate([notification.targetRoute]);
+    }
+  }
+  
+  toggleProfileDropdown(event?: MouseEvent) {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
     this.isProfileOpen = !this.isProfileOpen;
     this.showNotifications = false;
   }
 
-  @HostListener('document:click')
-  closeDropdowns() {
-    this.showNotifications = false;
+  handleSettingsClick() {
     this.isProfileOpen = false;
+    this.switchTab('settings');
+  }
+
+  handleLogoutClick() {
+    this.isProfileOpen = false;
+    this.logout();
+  }
+
+  @HostListener('document:click', ['$event'])
+  clickout(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    
+    // Buton tıklaması ise işlem yapma
+    if (target.closest('.icon-btn.notification') || target.closest('.notification-btn') || target.closest('.profile-pic')) {
+      return;
+    }
+    
+    // Profil dropdown kontrolü
+    if (!target.closest('.profile-wrapper') && !target.closest('.profile-dropdown')) {
+      this.isProfileOpen = false;
+    }
+    
+    // Bildirimler dropdown kontrolü
+    if (!target.closest('.dropdown-menu.notifications')) {
+      this.showNotifications = false;
+    }
   }
 
   logout() {
@@ -881,12 +930,8 @@ export class CorporateDashboardComponent implements OnInit {
     this.announcementService.getAllAnnouncements().subscribe({
       next: (data) => {
         this.announcements = data;
-<<<<<<< Updated upstream
-        this.filteredAnnouncements = [...data]; // Başlangıçta tüm duyuruları göster
-=======
         this.filteredAnnouncements = [...data];
         this.applyAnnouncementFilters();
->>>>>>> Stashed changes
       },
       error: (err) => {
         console.error('Duyurular yüklenemedi:', err);

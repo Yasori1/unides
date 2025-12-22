@@ -78,25 +78,6 @@
         </div>
       </div>
       <div class="header-right">
-<<<<<<< Updated upstream
-        <div class="notification-wrapper" style="position: relative;">
-          <button class="icon-btn notification" (click)="toggleNotifications($event)">
-            <span class="material-symbols-outlined">notifications</span>
-            <span class="indicator" *ngIf="unreadNotificationsCount > 0"></span>
-          </button>
-          <div
-            class="dropdown-menu notifications"
-            *ngIf="showNotifications"
-            (click)="$event.stopPropagation()"
-          >
-            <div class="dd-header">Bildirimler</div>
-            <ul>
-              <li *ngFor="let n of notifications" (click)="handleNotificationClick(n)" [class.read]="n.read">
-                {{ n.text }} <small>{{ n.time }}</small>
-              </li>
-            </ul>
-          </div>
-=======
         <button class="icon-btn notification notification-btn" (click)="toggleNotifications($event)">
           <span class="material-symbols-outlined">notifications</span>
           <span class="indicator" *ngIf="notifications.length"></span>
@@ -121,7 +102,6 @@
               <p>Henüz bildirim yok</p>
             </div>
           </ng-template>
->>>>>>> Stashed changes
         </div>
 
         <div class="profile-wrapper">

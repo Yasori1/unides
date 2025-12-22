@@ -22,11 +22,7 @@ export interface Community {
   tiktok?: string;
   website?: string;
   email?: string;
-<<<<<<< Updated upstream
-  status?: 'Aktif' | 'Pasif' | 'Onay Bekliyor';
-=======
   status?: 'Aktif' | 'Pasif' | 'Onay Bekleyen';
->>>>>>> Stashed changes
   presidentEmail?: string; // Topluluk başkanı email (oluşturma/güncelleme için)
 }
 
@@ -154,11 +150,7 @@ export class CommunityService {
       tiktok: tiktok,
       website: websiteUrl,
       email: contactEmail,
-<<<<<<< Updated upstream
-      status: (dto.status || dto.Status || 'Aktif') as 'Aktif' | 'Pasif' | 'Onay Bekliyor',
-=======
       status: (dto.status || dto.Status || 'Aktif') as 'Aktif' | 'Pasif' | 'Onay Bekleyen',
->>>>>>> Stashed changes
     };
   }
 

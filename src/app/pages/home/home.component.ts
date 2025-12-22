@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { BannerComponent } from './banner/banner.component';
 import { ListingsComponent } from '../../common/listings/listings.component';
-import { VideoComponent } from '../../common/video/video.component';
 import { FooterComponent } from '../../common/footer/footer.component';
 import { HeaderComponent } from '../../common/header/header.component';
 import { LatestCommunitiesComponent } from '../../common/latest-communities/latest-communities.component';
@@ -16,7 +15,6 @@ import { CookieNoticeComponent } from '../../components/ui/cookie-notice/cookie-
     BannerComponent,
     LatestCommunitiesComponent,
     PartnersComponent, // <--- YENİ EKLENEN BİLEŞEN
-    VideoComponent,
     FooterComponent,
     CookieNoticeComponent,
   ],

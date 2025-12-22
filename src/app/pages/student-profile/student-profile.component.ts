@@ -101,6 +101,10 @@ export class StudentProfileComponent implements OnInit {
   // Events from communities
   communityEvents: Event[] = [];
 
+  // Scroll positions for carousels
+  eventsScrollPosition: number = 0;
+  communitiesScrollPosition: number = 0;
+
   constructor(
     public router: Router,
     public toastService: ToastService,
@@ -262,14 +266,9 @@ export class StudentProfileComponent implements OnInit {
     this.stats[1].value = this.communityEvents.length;
   }
 
-<<<<<<< Updated upstream
-  switchTab(tab: 'overview' | 'communities' | 'events' | 'settings'): void {
-    this.activeTab = tab;
-=======
   switchTab(tab: string): void {
     this.activeTab = tab as 'overview' | 'communities' | 'events' | 'settings';
     this.isProfileOpen = false;
->>>>>>> Stashed changes
   }
 
   toggleSidebar(): void {
@@ -282,11 +281,6 @@ export class StudentProfileComponent implements OnInit {
     this.isProfileOpen = false;
   }
 
-  toggleProfileDropdown(event?: MouseEvent): void {
-    if (event) event.stopPropagation();
-    this.isProfileOpen = !this.isProfileOpen;
-    this.showNotifications = false;
-  }
 
   @HostListener('document:click', ['$event'])
   closeDropdowns(event: any): void {
@@ -471,8 +465,6 @@ export class StudentProfileComponent implements OnInit {
     this.userInfo.newPassword = '';
     this.userInfo.confirmPassword = '';
   }
-<<<<<<< Updated upstream
-=======
 
   toggleProfileDropdown(event?: MouseEvent): void {
     if (event) event.stopPropagation();
@@ -586,5 +578,4 @@ export class StudentProfileComponent implements OnInit {
       .slice(0, 2);
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=14d2cc&color=fff&size=128&font-size=0.4`;
   }
->>>>>>> Stashed changes
 }

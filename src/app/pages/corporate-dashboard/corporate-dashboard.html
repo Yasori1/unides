@@ -109,31 +109,36 @@
       </div>
 
       <div class="header-right">
-        <button class="icon-btn notification" (click)="toggleNotifications($event)">
+        <button class="icon-btn notification notification-btn" (click)="toggleNotifications($event)">
           <span class="material-symbols-outlined">notifications</span>
           <span class="indicator" *ngIf="notifications.length"></span>
         </button>
-
-        <!-- Bildirim Dropdown -->
         <div
           class="dropdown-menu notifications"
           *ngIf="showNotifications"
           (click)="$event.stopPropagation()"
         >
           <div class="dd-header">Bildirimler</div>
-          <ul>
-            <li *ngFor="let n of notifications">
-              {{ n.text }} <small>{{ n.time }}</small>
+          <ul *ngIf="notifications.length > 0; else noNotifications">
+            <li *ngFor="let n of notifications" (click)="handleNotificationClick(n)" [class.read]="n.read">
+              <div>
+                {{ n.text }}
+                <small>{{ n.time }}</small>
+              </div>
             </li>
           </ul>
+          <ng-template #noNotifications>
+            <div class="empty-notifications">
+              <span class="material-symbols-outlined">notifications_off</span>
+              <p>Henüz bildirim yok</p>
+            </div>
+          </ng-template>
         </div>
 
         <div class="profile-wrapper">
           <div class="profile-pic" (click)="toggleProfileDropdown($event)">
             <img [src]="corporateInfo.logo" alt="Logo" />
           </div>
-
-          <!-- Profil Dropdown -->
           <div
             class="dropdown-menu profile-dropdown"
             *ngIf="isProfileOpen"
@@ -141,10 +146,10 @@
           >
             <div class="dd-header">{{ corporateInfo.name }}</div>
             <ul>
-              <li (click)="switchTab('settings')">
+              <li (click)="handleSettingsClick()">
                 <span class="material-symbols-outlined small-icon">settings</span> Ayarlar
               </li>
-              <li (click)="logout()" class="danger-item">
+              <li (click)="handleLogoutClick()" class="danger-item">
                 <span class="material-symbols-outlined small-icon">logout</span> Çıkış
               </li>
             </ul>
@@ -238,11 +243,7 @@
             <option value="">Tüm Durumlar</option>
             <option value="Aktif">Aktif</option>
             <option value="Pasif">Pasif</option>
-<<<<<<< Updated upstream
-            <option value="Onay Bekliyor">Onay Bekliyor</option>
-=======
             <option value="Onay Bekleyen">Onay Bekleyen</option>
->>>>>>> Stashed changes
           </select>
         </div>
       </div>
@@ -546,11 +547,7 @@
               type="text"
               placeholder="Duyuru Ara..."
               [(ngModel)]="announcementSearchText"
-<<<<<<< Updated upstream
-              (input)="filterAnnouncements()"
-=======
               (input)="applyAnnouncementFilters()"
->>>>>>> Stashed changes
             />
           </div>
           <button class="btn-primary" (click)="openModal('new-announcement')">

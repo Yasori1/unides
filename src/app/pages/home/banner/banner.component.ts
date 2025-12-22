@@ -1,11 +1,10 @@
 import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit, Inject, PLATFORM_ID } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
 
 @Component({
   selector: 'app-banner',
   standalone: true,
-  imports: [RouterLink],
+  imports: [],
   templateUrl: './banner.component.html',
   styleUrl: './banner.component.scss',
   schemas: [CUSTOM_ELEMENTS_SCHEMA], // Spline viewer etiketini tanimasi icin gerekli
