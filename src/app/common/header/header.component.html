@@ -8,61 +8,22 @@
 
   <!-- 2. YÜZEN MENÜ -->
   <nav class="floating-menu d-none d-lg-flex" (mouseleave)="setActive(null)">
-    <!-- SAYFALAR (Sıralama Güncellendi) -->
-    <div class="menu-item" (mouseenter)="setActive('Sayfalar')">
-      <span class="item-label">Sayfalar</span>
-      <div class="hover-pill" *ngIf="activeItem === 'Sayfalar'" [@pillAnim]></div>
-
-      <div class="menu-dropdown" *ngIf="activeItem === 'Sayfalar'" [@dropdownAnim]>
-        <div class="dropdown-card">
-          <div class="grid-layout">
-            <!-- 1. Duyurular -->
-            <a routerLink="/announcements" class="product-link">
-              <img
-                src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?ixlib=rb-4.0.3&auto=format&fit=crop&w=140&q=80"
-                alt="Duyurular"
-              />
-              <div class="info">
-                <h4>Duyurular</h4>
-                <p>Güncel haberler burada.</p>
-              </div>
-            </a>
-
-            <!-- 2. Topluluklar -->
-            <a routerLink="/communities" class="product-link">
-              <img
-                src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?ixlib=rb-4.0.3&auto=format&fit=crop&w=140&q=80"
-                alt="Topluluklar"
-              />
-              <div class="info">
-                <h4>Topluluklar</h4>
-                <p>Kulüpleri keşfet ve katıl.</p>
-              </div>
-            </a>
-
-            <!-- 3. Etkinlikler -->
-            <a routerLink="/events" class="product-link">
-              <img
-                src="https://images.unsplash.com/photo-1523580494863-6f3031224c94?ixlib=rb-4.0.3&auto=format&fit=crop&w=140&q=80"
-                alt="Etkinlikler"
-              />
-              <div class="info">
-                <h4>Etkinlikler</h4>
-                <p>Kampüs etkinliklerini kaçırma.</p>
-              </div>
-            </a>
-          </div>
-        </div>
-      </div>
+    <!-- DUYURULAR (Doğrudan link) -->
+    <div class="menu-item">
+      <a routerLink="/announcements" class="item-label">Duyurular</a>
     </div>
 
-    <!-- İLETİŞİM (Kurumsal yerine geldi, dropdown kaldırıldı) -->
-    <div class="menu-item" (mouseenter)="setActive('İletişim')">
-      <a routerLink="/contact" class="item-label">İletişim</a>
-      <div class="hover-pill" *ngIf="activeItem === 'İletişim'" [@pillAnim]></div>
+    <!-- TOPLULUKLAR (Doğrudan link) -->
+    <div class="menu-item">
+      <a routerLink="/communities" class="item-label">Topluluklar</a>
     </div>
 
-    <!-- BİLGİ (İçerik sadeleştirildi) -->
+    <!-- ETKİNLİKLER (Doğrudan link) -->
+    <div class="menu-item">
+      <a routerLink="/events" class="item-label">Etkinlikler</a>
+    </div>
+
+    <!-- BİLGİ (İletişim dahil) -->
     <div class="menu-item" (mouseenter)="setActive('Bilgi')">
       <span class="item-label">Bilgi</span>
       <div class="hover-pill" *ngIf="activeItem === 'Bilgi'" [@pillAnim]></div>
@@ -73,6 +34,7 @@
             <a routerLink="/developers" class="hover-link">Geliştiriciler</a>
             <a routerLink="/about" class="hover-link">Hakkımızda</a>
             <a routerLink="/faq" class="hover-link">Sıkça Sorulan Sorular</a>
+            <a routerLink="/contact" class="hover-link">İletişim</a>
           </div>
         </div>
       </div>
@@ -129,23 +91,22 @@
         <a routerLink="/" class="accordion-button without-icon">Ana Sayfa</a>
       </div>
 
+      <!-- Duyurular (Doğrudan link) -->
       <div class="accordion-item">
-        <button (click)="toggleSection(1)" [class.open]="isSectionOpen(1)" class="accordion-button">
-          Sayfalar
-        </button>
-        <div class="accordion-collapse" [class.open]="isSectionOpen(1)">
-          <ul class="mobile-sub-menu">
-            <li><a routerLink="/announcements">Duyurular</a></li>
-            <li><a routerLink="/communities">Topluluklar</a></li>
-            <li><a routerLink="/events">Etkinlikler</a></li>
-          </ul>
+        <a routerLink="/announcements" class="accordion-button without-icon">Duyurular</a>
         </div>
-      </div>
 
+      <!-- Topluluklar (Doğrudan link) -->
       <div class="accordion-item">
-        <a routerLink="/contact" class="accordion-button without-icon">İletişim</a>
+        <a routerLink="/communities" class="accordion-button without-icon">Topluluklar</a>
       </div>
 
+      <!-- Etkinlikler (Doğrudan link) -->
+      <div class="accordion-item">
+        <a routerLink="/events" class="accordion-button without-icon">Etkinlikler</a>
+      </div>
+
+      <!-- Bilgi (İletişim dahil) -->
       <div class="accordion-item">
         <button (click)="toggleSection(2)" [class.open]="isSectionOpen(2)" class="accordion-button">
           Bilgi
@@ -155,6 +116,7 @@
             <li><a routerLink="/developers">Geliştiriciler</a></li>
             <li><a routerLink="/about">Hakkımızda</a></li>
             <li><a routerLink="/faq">S.S.S.</a></li>
+            <li><a routerLink="/contact">İletişim</a></li>
           </ul>
         </div>
       </div>
