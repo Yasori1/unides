@@ -48,6 +48,7 @@ interface Event {
   quota?: string | number;
 }
 
+
 @Component({
   selector: 'app-student-profile',
   standalone: true,
@@ -82,6 +83,7 @@ export class StudentProfileComponent implements OnInit {
   userInfo: any = {
     name: 'Öğrenci Adı',
     email: 'ogrenci@university.edu.tr',
+    avatar: '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
@@ -260,8 +262,14 @@ export class StudentProfileComponent implements OnInit {
     this.stats[1].value = this.communityEvents.length;
   }
 
+<<<<<<< Updated upstream
   switchTab(tab: 'overview' | 'communities' | 'events' | 'settings'): void {
     this.activeTab = tab;
+=======
+  switchTab(tab: string): void {
+    this.activeTab = tab as 'overview' | 'communities' | 'events' | 'settings';
+    this.isProfileOpen = false;
+>>>>>>> Stashed changes
   }
 
   toggleSidebar(): void {
@@ -463,4 +471,120 @@ export class StudentProfileComponent implements OnInit {
     this.userInfo.newPassword = '';
     this.userInfo.confirmPassword = '';
   }
+<<<<<<< Updated upstream
+=======
+
+  toggleProfileDropdown(event?: MouseEvent): void {
+    if (event) event.stopPropagation();
+    this.isProfileOpen = !this.isProfileOpen;
+  }
+
+  @HostListener('document:click', ['$event'])
+  clickout(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    
+    // Profil dropdown kontrolü
+    if (!target.closest('.profile-wrapper') && !target.closest('.profile-dropdown')) {
+      this.isProfileOpen = false;
+    }
+  }
+
+  // Carousel navigation methods
+  scrollEvents(direction: 'left' | 'right'): void {
+    setTimeout(() => {
+      const container = document.querySelector('.events-carousel-container') as HTMLElement;
+      if (!container) return;
+      
+      const scrollAmount = 367; // Scroll amount in pixels (card width + gap)
+      const currentScroll = container.scrollLeft;
+      const newPosition = direction === 'left' 
+        ? currentScroll - scrollAmount 
+        : currentScroll + scrollAmount;
+      
+      container.scrollTo({
+        left: newPosition,
+        behavior: 'smooth'
+      });
+    }, 0);
+  }
+
+  scrollCommunities(direction: 'left' | 'right'): void {
+    setTimeout(() => {
+      const container = document.querySelector('.communities-carousel-container') as HTMLElement;
+      if (!container) return;
+      
+      const scrollAmount = 425; // Scroll amount in pixels (card width + gap)
+      const currentScroll = container.scrollLeft;
+      const newPosition = direction === 'left' 
+        ? currentScroll - scrollAmount 
+        : currentScroll + scrollAmount;
+      
+      container.scrollTo({
+        left: newPosition,
+        behavior: 'smooth'
+      });
+    }, 0);
+  }
+
+  onEventsScroll(event: any): void {
+    const target = event.target as HTMLElement;
+    this.eventsScrollPosition = target.scrollLeft;
+    // Force change detection to update button states
+    if (isPlatformBrowser(this.platformId)) {
+      setTimeout(() => {
+        // Trigger change detection
+      }, 0);
+    }
+  }
+
+  onCommunitiesScroll(event: any): void {
+    const target = event.target as HTMLElement;
+    this.communitiesScrollPosition = target.scrollLeft;
+    // Force change detection to update button states
+    if (isPlatformBrowser(this.platformId)) {
+      setTimeout(() => {
+        // Trigger change detection
+      }, 0);
+    }
+  }
+
+  canScrollEventsLeft(): boolean {
+    if (!isPlatformBrowser(this.platformId)) return false;
+    const container = document.querySelector('.events-carousel-container') as HTMLElement;
+    if (!container) return false;
+    return container.scrollLeft > 10;
+  }
+
+  canScrollEventsRight(): boolean {
+    if (!isPlatformBrowser(this.platformId)) return false;
+    const container = document.querySelector('.events-carousel-container') as HTMLElement;
+    if (!container) return false;
+    return container.scrollLeft < (container.scrollWidth - container.clientWidth - 10);
+  }
+
+  canScrollCommunitiesLeft(): boolean {
+    if (!isPlatformBrowser(this.platformId)) return false;
+    const container = document.querySelector('.communities-carousel-container') as HTMLElement;
+    if (!container) return false;
+    return container.scrollLeft > 10;
+  }
+
+  canScrollCommunitiesRight(): boolean {
+    if (!isPlatformBrowser(this.platformId)) return false;
+    const container = document.querySelector('.communities-carousel-container') as HTMLElement;
+    if (!container) return false;
+    return container.scrollLeft < (container.scrollWidth - container.clientWidth - 10);
+  }
+
+  getDefaultAvatar(): string {
+    const name = this.userInfo.name || 'Öğrenci';
+    const initials = name
+      .split(' ')
+      .map((n: string) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=14d2cc&color=fff&size=128&font-size=0.4`;
+  }
+>>>>>>> Stashed changes
 }

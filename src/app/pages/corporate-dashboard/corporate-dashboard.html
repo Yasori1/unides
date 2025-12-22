@@ -238,7 +238,11 @@
             <option value="">Tüm Durumlar</option>
             <option value="Aktif">Aktif</option>
             <option value="Pasif">Pasif</option>
+<<<<<<< Updated upstream
             <option value="Onay Bekliyor">Onay Bekliyor</option>
+=======
+            <option value="Onay Bekleyen">Onay Bekleyen</option>
+>>>>>>> Stashed changes
           </select>
         </div>
       </div>
@@ -542,7 +546,11 @@
               type="text"
               placeholder="Duyuru Ara..."
               [(ngModel)]="announcementSearchText"
+<<<<<<< Updated upstream
               (input)="filterAnnouncements()"
+=======
+              (input)="applyAnnouncementFilters()"
+>>>>>>> Stashed changes
             />
           </div>
           <button class="btn-primary" (click)="openModal('new-announcement')">
@@ -583,6 +591,12 @@
             </div>
           </div>
         </div>
+      </div>
+
+      <div class="empty-state" *ngIf="filteredAnnouncements.length === 0">
+        <span class="material-symbols-outlined">campaign</span>
+        <p *ngIf="announcementSearchText.trim()">Arama sonucu bulunamadı.</p>
+        <p *ngIf="!announcementSearchText.trim()">Henüz duyuru bulunmuyor.</p>
       </div>
     </div>
 

@@ -148,7 +148,11 @@ interface Community {
   logo: string;
   banner?: string;
   coverImage?: string; // CommunityService'ten gelen veri için
+<<<<<<< Updated upstream
   status?: 'Aktif' | 'Pasif' | 'Onay Bekliyor';
+=======
+  status?: 'Aktif' | 'Pasif' | 'Onay Bekleyen';
+>>>>>>> Stashed changes
 }
 interface Announcement {
   id: number;
@@ -187,12 +191,17 @@ export class CorporateDashboardComponent implements OnInit {
   isModalOpen = false;
   modalType = '';
   searchText = '';
+<<<<<<< Updated upstream
   statusFilter: string = ''; // Aktif/Pasif/Onay Bekliyor filtre
   announcementSearchText = ''; // Duyuru arama metni
   filteredAnnouncements: Announcement[] = []; // Filtrelenmiş duyurular
   eventSearchText = ''; // Etkinlik arama metni
   eventStatusFilter: string = ''; // Etkinlik durum filtresi
   filteredEvents: EventRequest[] = []; // Filtrelenmiş etkinlikler
+=======
+  statusFilter: string = ''; // Aktif/Pasif filtre
+  announcementSearchText = ''; // Duyuru arama metni
+>>>>>>> Stashed changes
 
   // Pagination için değişkenler
   currentPage = 1;
@@ -242,6 +251,7 @@ export class CorporateDashboardComponent implements OnInit {
 
   // Duyurular API'den yüklenecek, mock data kaldırıldı
   announcements: Announcement[] = [];
+  filteredAnnouncements: Announcement[] = [];
 
   newAnnouncement: Partial<Announcement> = {
     title: '',
@@ -871,7 +881,12 @@ export class CorporateDashboardComponent implements OnInit {
     this.announcementService.getAllAnnouncements().subscribe({
       next: (data) => {
         this.announcements = data;
+<<<<<<< Updated upstream
         this.filteredAnnouncements = [...data]; // Başlangıçta tüm duyuruları göster
+=======
+        this.filteredAnnouncements = [...data];
+        this.applyAnnouncementFilters();
+>>>>>>> Stashed changes
       },
       error: (err) => {
         console.error('Duyurular yüklenemedi:', err);
@@ -880,6 +895,23 @@ export class CorporateDashboardComponent implements OnInit {
         this.filteredAnnouncements = [];
       },
     });
+  }
+
+  applyAnnouncementFilters() {
+    let temp = [...this.announcements];
+
+    // Metin araması
+    if (this.announcementSearchText.trim()) {
+      const term = this.announcementSearchText.toLowerCase();
+      temp = temp.filter(
+        (a) =>
+          a.title.toLowerCase().includes(term) ||
+          (a.shortDescription && a.shortDescription.toLowerCase().includes(term)) ||
+          (a.content && a.content.toLowerCase().includes(term))
+      );
+    }
+
+    this.filteredAnnouncements = temp;
   }
 
   updateAnnouncement() {

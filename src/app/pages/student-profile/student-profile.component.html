@@ -123,7 +123,11 @@
 
         <div class="profile-wrapper">
           <div class="profile-pic" (click)="toggleProfileDropdown($event)">
+<<<<<<< Updated upstream
             <span class="material-symbols-outlined">account_circle</span>
+=======
+            <img [src]="userInfo.avatar || getDefaultAvatar()" alt="Profile" />
+>>>>>>> Stashed changes
           </div>
           <div
             class="dropdown-menu profile-dropdown"

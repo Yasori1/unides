@@ -36,9 +36,14 @@ interface Notification {
   text: string;
   time: string;
   read: boolean;
+<<<<<<< Updated upstream
   type?: 'event' | 'member' | 'project' | 'general';
   link?: string;
   tab?: string;
+=======
+  targetTab?: string; // Hangi tab'a yönlendirileceği
+  targetRoute?: string; // Veya hangi route'a yönlendirileceği
+>>>>>>> Stashed changes
 }
 interface Collaboration {
   id: number;
@@ -297,9 +302,14 @@ export class CommunityDashboardComponent implements OnInit {
     },
   ];
   notifications: Notification[] = [
+<<<<<<< Updated upstream
     { id: 1, text: 'Yeni üye başvurusu', time: '10 dk önce', read: false, type: 'member', tab: 'members' },
     { id: 2, text: 'TÜBİTAK onayı', time: '2 saat önce', read: false, type: 'project', tab: 'projects' },
     { id: 3, text: 'Etkinlik onaylandı', time: '1 gün önce', read: false, type: 'event', tab: 'projects' },
+=======
+    { id: 1, text: 'Yeni üye başvurusu', time: '10 dk önce', read: false, targetTab: 'members' },
+    { id: 2, text: 'TÜBİTAK onayı', time: '2 saat önce', read: false, targetTab: 'projects' },
+>>>>>>> Stashed changes
   ];
   collaborations: Collaboration[] = [];
   filteredCollaborations: Collaboration[] = [];
@@ -360,11 +370,29 @@ export class CommunityDashboardComponent implements OnInit {
     });
   }
   @HostListener('document:click', ['$event'])
+<<<<<<< Updated upstream
   clickout(event: any) {
     if (!event.target.closest('.profile-wrapper') && !event.target.closest('.profile-dropdown')) {
       this.isProfileOpen = false;
     }
     if (!event.target.closest('.notification-wrapper') && !event.target.closest('.dropdown-menu.notifications')) {
+=======
+  clickout(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    
+    // Buton tıklaması ise işlem yapma
+    if (target.closest('.icon-btn.notification') || target.closest('.profile-pic')) {
+      return;
+    }
+    
+    // Profil dropdown kontrolü
+    if (!target.closest('.profile-wrapper') && !target.closest('.profile-dropdown')) {
+      this.isProfileOpen = false;
+    }
+    
+    // Bildirimler dropdown kontrolü
+    if (!target.closest('.notification-wrapper') && !target.closest('.dropdown-menu.notifications')) {
+>>>>>>> Stashed changes
       this.showNotifications = false;
     }
   }
@@ -423,13 +451,39 @@ export class CommunityDashboardComponent implements OnInit {
     this.isProfileOpen = false;
   }
   toggleNotifications(event?: MouseEvent) {
-    if (event) event.stopPropagation();
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
     this.showNotifications = !this.showNotifications;
     this.isProfileOpen = false;
   }
 
+<<<<<<< Updated upstream
+=======
+  handleNotificationClick(notification: Notification) {
+    // Bildirimi okundu olarak işaretle
+    notification.read = true;
+    
+    // Dropdown'u kapat
+    this.showNotifications = false;
+    
+    // Eğer targetTab varsa, o tab'a geç
+    if (notification.targetTab) {
+      this.switchTab(notification.targetTab);
+    }
+    // Eğer targetRoute varsa, o route'a git
+    else if (notification.targetRoute) {
+      this.router.navigate([notification.targetRoute]);
+    }
+  }
+  
+>>>>>>> Stashed changes
   toggleProfileDropdown(event?: MouseEvent) {
-    if (event) event.stopPropagation();
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
     this.isProfileOpen = !this.isProfileOpen;
     this.showNotifications = false;
   }
