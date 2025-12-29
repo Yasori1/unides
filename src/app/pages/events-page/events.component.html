@@ -1,4 +1,4 @@
-<app-header></app-header>
+<app-site-navbar />
 
 <div class="page-spacer" (mousemove)="onHeroMouseMove($event)">
   <div class="background-wrapper">
@@ -189,7 +189,7 @@
   </div>
 </section>
 
-<app-footer></app-footer>
+<app-site-footer />
 
 <div class="modal-backdrop" *ngIf="selectedEvent" (click)="closeModal()">
   <div class="modal-content" (click)="$event.stopPropagation()">

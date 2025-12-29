@@ -3,6 +3,8 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterModule, Router } from '@angular/router'; 
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
+import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
 
 // --- Veri Tipleri (Interfaces) ---
 interface Community { 
@@ -40,7 +42,7 @@ interface Announcement {
 @Component({
   selector: 'app-home', // DÜZELTİLDİ
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, SiteNavbarComponent, SiteFooterComponent],
   templateUrl: './home.component.html', // DÜZELTİLDİ
   styleUrls: ['./home.component.scss']  // DÜZELTİLDİ
 })

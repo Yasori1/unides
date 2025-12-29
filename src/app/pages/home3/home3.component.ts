@@ -3,6 +3,8 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterModule, Router } from '@angular/router'; 
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
+import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
 
 // Veri Tipleri
 interface Community { id: number; name: string; image: string; category: string; memberCount: number; eventCount: number; }
@@ -21,7 +23,7 @@ interface NewCommunity { id: number; name: string; university: string; image: st
 @Component({
   selector: 'app-home3',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, SiteNavbarComponent, SiteFooterComponent],
   templateUrl: './home3.component.html',
   styleUrls: ['./home3.component.scss']
 })

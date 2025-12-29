@@ -1,7 +1,7 @@
 import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HeaderComponent } from '../../common/header/header.component';
-import { FooterComponent } from '../../common/footer/footer.component';
+import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
+import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
 import { AvatarGroupComponent, AvatarUser } from '../../components/ui/avatar-group/avatar-group';
 import { ProfileCardComponent } from '../../components/ui/profile-card/profile-card';
 import { WavesComponent } from '../../components/ui/waves/waves';
@@ -20,8 +20,8 @@ interface Developer {
   standalone: true,
   imports: [
     CommonModule,
-    HeaderComponent,
-    FooterComponent,
+    SiteNavbarComponent,
+    SiteFooterComponent,
     AvatarGroupComponent,
     ProfileCardComponent,
     WavesComponent,

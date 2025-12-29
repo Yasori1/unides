@@ -1,8 +1,8 @@
 import { Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 
-import { HeaderComponent } from '../../common/header/header.component';
-import { FooterComponent } from '../../common/footer/footer.component';
+import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
+import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
 
 interface PolicyItem {
   id: number;
@@ -16,7 +16,7 @@ interface PolicyItem {
 @Component({
   selector: 'app-privacy-policy-page',
   standalone: true,
-  imports: [CommonModule, HeaderComponent, FooterComponent],
+  imports: [CommonModule, SiteNavbarComponent, SiteFooterComponent],
   templateUrl: './privacy-policy-page.component.html',
   styleUrls: ['./privacy-policy-page.component.scss'],
 })

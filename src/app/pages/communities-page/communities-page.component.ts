@@ -2,14 +2,14 @@ import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router'; // ActivatedRoute eklendi
 import { FormsModule } from '@angular/forms';
-import { HeaderComponent } from '../../common/header/header.component';
-import { FooterComponent } from '../../common/footer/footer.component';
+import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
+import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
 import { CommunityService, Community } from '../../services/community.services';
 
 @Component({
   selector: 'app-communities-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, HeaderComponent, FooterComponent],
+  imports: [CommonModule, RouterModule, FormsModule, SiteNavbarComponent, SiteFooterComponent],
   templateUrl: './communities-page.component.html',
   styleUrls: ['./communities-page.component.scss'],
 })

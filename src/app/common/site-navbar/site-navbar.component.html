@@ -1,0 +1,32 @@
+<nav class="navbar glass-transparent">
+  <div class="container nav-content">
+    <div class="brand">
+      <a routerLink="/">
+        <img src="assets/unides1.png" alt="ÜNİDES Logosu" class="logo-transparent" />
+      </a>
+    </div>
+
+    <ul class="nav-links">
+      <li><a routerLink="/communities">Topluluklar</a></li>
+      <li><a routerLink="/events">Etkinlikler</a></li>
+      <li><a routerLink="/announcements">Duyurular</a></li>
+
+      <li class="dropdown-parent">
+        <a href="javascript:void(0)">Bilgi <i class="icon-arrow-down"></i></a>
+        <ul class="dropdown-content">
+          <li><a routerLink="/developers">Geliştiriciler</a></li>
+          <li><a routerLink="/about">Hakkımızda</a></li>
+          <li><a routerLink="/faq">S.S.S.</a></li>
+          <li><a routerLink="/contact">İletişim</a></li>
+        </ul>
+      </li>
+    </ul>
+
+    <div class="auth-buttons">
+      <a routerLink="/register" class="btn-outline-custom small static-btn"
+        ><span>Kayıt Ol</span></a
+      >
+      <a routerLink="/login" class="btn-outline-custom small"><span>Giriş Yap</span></a>
+    </div>
+  </div>
+</nav>

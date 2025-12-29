@@ -1,14 +1,14 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { HeaderComponent } from '../../common/header/header.component';
+import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
 import { PageBannerComponent } from '../../common/page-banner/page-banner.component';
-import { FooterComponent } from '../../common/footer/footer.component';
+import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
 import { NgClass } from '@angular/common';
 import { QuantityCounterComponent } from './quantity-counter/quantity-counter.component';
 
 @Component({
     selector: 'app-product-details-page',
-    imports: [RouterLink, NgClass, QuantityCounterComponent, HeaderComponent, PageBannerComponent, FooterComponent],
+    imports: [RouterLink, NgClass, QuantityCounterComponent, SiteNavbarComponent, PageBannerComponent, SiteFooterComponent],
     templateUrl: './product-details-page.component.html',
     styleUrl: './product-details-page.component.scss'
 })

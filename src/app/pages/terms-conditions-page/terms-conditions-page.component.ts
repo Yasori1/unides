@@ -1,12 +1,12 @@
 import { Component, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { HeaderComponent } from '../../common/header/header.component';
-import { FooterComponent } from '../../common/footer/footer.component';
+import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
+import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
 
 @Component({
   selector: 'app-terms-conditions-page',
   standalone: true,
-  imports: [CommonModule, HeaderComponent, FooterComponent],
+  imports: [CommonModule, SiteNavbarComponent, SiteFooterComponent],
   templateUrl: './terms-conditions-page.component.html',
   styleUrls: ['./terms-conditions-page.component.scss'],
 })

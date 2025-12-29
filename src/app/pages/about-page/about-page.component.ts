@@ -10,13 +10,13 @@ import {
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 
-import { HeaderComponent } from '../../common/header/header.component';
-import { FooterComponent } from '../../common/footer/footer.component';
+import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
+import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
 
 @Component({
   selector: 'app-about-page',
   standalone: true,
-  imports: [CommonModule, HeaderComponent, FooterComponent],
+  imports: [CommonModule, SiteNavbarComponent, SiteFooterComponent],
   templateUrl: './about-page.component.html',
   styleUrls: ['./about-page.component.scss'],
 })

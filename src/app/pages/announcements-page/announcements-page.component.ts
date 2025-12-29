@@ -2,8 +2,8 @@ import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { HeaderComponent } from '../../common/header/header.component';
-import { FooterComponent } from '../../common/footer/footer.component';
+import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
+import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
 import { AnnouncementService, Announcement } from '../../services/announcement.services';
 
 // Arayüzü genişletiyoruz (Category alanı ekledik)
@@ -14,7 +14,7 @@ export interface ExtendedAnnouncement extends Announcement {
 @Component({
   selector: 'app-announcements-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, HeaderComponent, FooterComponent],
+  imports: [CommonModule, RouterModule, FormsModule, SiteNavbarComponent, SiteFooterComponent],
   templateUrl: './announcements-page.component.html',
   styleUrls: ['./announcements-page.component.scss'],
 })

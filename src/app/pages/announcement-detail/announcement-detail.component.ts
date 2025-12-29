@@ -1,14 +1,14 @@
 import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { HeaderComponent } from '../../common/header/header.component';
-import { FooterComponent } from '../../common/footer/footer.component';
+import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
+import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
 import { AnnouncementService, Announcement } from '../../services/announcement.services';
 
 @Component({
   selector: 'app-announcement-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, HeaderComponent, FooterComponent],
+  imports: [CommonModule, RouterModule, SiteNavbarComponent, SiteFooterComponent],
   templateUrl: './announcement-detail.component.html',
   styleUrls: ['./announcement-detail.component.scss'],
 })

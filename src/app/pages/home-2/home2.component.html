@@ -1,22 +1,4 @@
-<nav class="navbar glass-white">
-  <div class="container nav-content">
-    <div class="brand">
-      <img src="assets/unides.jpg" alt="ÜNİDES Logosu">
-    </div>
-    <ul class="nav-links">
-      <li><a routerLink="/" class="active">Anasayfa</a></li>
-      <li><a routerLink="/communities">Topluluklar</a></li>
-      <li><a routerLink="/events">Etkinlikler</a></li>
-      <li><a routerLink="/announcements">Duyurular</a></li>
-      <li><a routerLink="/about">Kurumsal</a></li>
-      <li><a routerLink="/contact">İletişim</a></li>
-    </ul>
-    <div class="auth-buttons">
-      <a routerLink="/login" class="btn-auth-modern outline"><span>Giriş Yap</span></a>
-      <a routerLink="/register" class="btn-auth-modern solid"><span>Kayıt Ol</span></a>
-    </div>
-  </div>
-</nav>
+<app-site-navbar />
 
 <div class="interactive-background">
   <div class="tech-grid"></div>
@@ -45,6 +27,8 @@
     <span *ngFor="let s of slides; let i = index" [class.active]="i === currentSlide" (click)="setSlide(i)"></span>
   </div>
 </section>
+
+<app-site-footer />
 
 <div class="search-overlay-container">
   <div class="container">

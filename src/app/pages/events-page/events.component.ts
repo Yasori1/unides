@@ -13,8 +13,8 @@ import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate, query, stagger, group } from '@angular/animations';
 
-import { HeaderComponent } from '../../common/header/header.component';
-import { FooterComponent } from '../../common/footer/footer.component';
+import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
+import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
 import { CommunityService } from '../../services/community.services';
 import { EventService, EventItem } from '../../services/event.services';
 
@@ -40,7 +40,7 @@ interface EventCard {
 @Component({
   selector: 'app-events',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, HeaderComponent, FooterComponent],
+  imports: [CommonModule, RouterModule, FormsModule, SiteNavbarComponent, SiteFooterComponent],
   templateUrl: './events.component.html',
   styleUrls: ['./events.component.scss'],
   animations: [

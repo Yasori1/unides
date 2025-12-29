@@ -2,6 +2,8 @@ import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID, ElementRef, HostList
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterModule, Router } from '@angular/router'; 
 import { FormsModule } from '@angular/forms';
+import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
+import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
 
 interface Slide { subtitle: string; title: string; description: string; image: string; }
 interface Community { id: number; name: string; image: string; category: string; memberCount: number; eventCount: number; isFeatured: boolean; }
@@ -9,7 +11,7 @@ interface Community { id: number; name: string; image: string; category: string;
 @Component({
   selector: 'app-home2',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, SiteNavbarComponent, SiteFooterComponent],
   templateUrl: './home2.component.html',
   styleUrls: ['./home2.component.scss']
 })

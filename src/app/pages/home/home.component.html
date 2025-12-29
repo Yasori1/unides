@@ -13,36 +13,7 @@
   </div>
 </div>
 
-<nav class="navbar glass-transparent">
-  <div class="container nav-content">
-    <div class="brand">
-      <a routerLink="/">
-        <img src="assets/unides1.png" alt="ÜNİDES Logosu" class="logo-transparent">
-      </a>
-    </div>
-
-    <ul class="nav-links">
-      <li><a routerLink="/communities">Topluluklar</a></li>
-      <li><a routerLink="/events">Etkinlikler</a></li>
-      <li><a routerLink="/announcements">Duyurular</a></li>
-
-      <li class="dropdown-parent">
-        <a href="javascript:void(0)">Bilgi <i class="icon-arrow-down"></i></a>
-        <ul class="dropdown-content">
-          <li><a routerLink="/developers">Geliştiriciler</a></li>
-          <li><a routerLink="/about">Hakkımızda</a></li>
-          <li><a routerLink="/faq">S.S.S.</a></li>
-          <li><a routerLink="/contact">İletişim</a></li>
-        </ul>
-      </li>
-    </ul>
-
-    <div class="auth-buttons">
-      <a routerLink="/register" class="btn-outline-custom small static-btn"><span>Kayıt Ol</span></a>
-      <a routerLink="/login" class="btn-outline-custom small"><span>Giriş Yap</span></a>
-    </div>
-  </div>
-</nav>
+<app-site-navbar />
 
 <header class="hero-louise">
   <div class="container hero-content">
@@ -264,59 +235,4 @@
   </div>
 </section>
 
-<footer class="final-footer">
-  <div class="container">
-    
-    <div class="footer-layout">
-      
-      <div class="footer-col brand-side">
-        <img src="assets/unides.jpg" alt="ÜNİDES" class="footer-logo">
-        <p class="footer-desc">
-          Bu Portal T.C. Gençlik ve Spor Bakanlığı Gençlik Hizmetleri Genel Müdürlüğünce desteklenmektedir.
-        </p>
-        <div class="address-box">
-          <i class="icon-location">📍</i>
-          <span>Ön Cebeci, Kıbrıs Caddesi No:4 Kurtuluş, <br>Çankaya/Ankara</span>
-        </div>
-        <div class="social-icons">
-          <a href="#"><i class="icon-instagram">📷</i></a>
-          <a href="#"><i class="icon-twitter">🐦</i></a>
-          <a href="#"><i class="icon-linkedin">💼</i></a>
-          <a href="#"><i class="icon-youtube">▶️</i></a>
-        </div>
-      </div>
-
-      <div class="footer-col links-side">
-        <h4 class="col-title">Hızlı Erişim</h4>
-        <ul class="link-list">
-          <li><a routerLink="/communities">Topluluklar</a></li>
-          <li><a routerLink="/events">Etkinlik Takvimi</a></li>
-          <li><a routerLink="/announcements">Duyurular</a></li>
-        </ul>
-      </div>
-
-      <div class="footer-col contact-side">
-        <h4 class="col-title">Destek & İletişim</h4>
-        <ul class="link-list">
-          <li><a routerLink="/faq">Sıkça Sorulan Sorular</a></li>
-          <li><a routerLink="/contact">İletişim</a></li>
-          <li><a href="mailto:info@unides.com.tr">info@unides.com.tr</a></li>
-          <li><a href="tel:03125517000">(0312) 551 70 00</a></li>
-        </ul>
-      </div>
-
-    </div>
-
-    <div class="footer-bottom">
-      <div class="copyright">
-        © 2025 ÜNİDES. Tüm hakları saklıdır.
-      </div>
-      <div class="policy-links">
-        <a routerLink="/terms">Kullanım Şartları</a>
-        <a routerLink="/privacy">Gizlilik Politikası</a>
-        <a routerLink="/kvkk">KVKK Aydınlatma Metni</a>
-      </div>
-    </div>
-
-  </div>
-</footer>
+<app-site-footer />

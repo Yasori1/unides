@@ -11,8 +11,8 @@ import {
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-import { HeaderComponent } from '../../common/header/header.component';
-import { FooterComponent } from '../../common/footer/footer.component';
+import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
+import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
 
 interface FaqItem {
   question: string;
@@ -30,7 +30,7 @@ interface FaqCategory {
 @Component({
   selector: 'app-faq-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, HeaderComponent, FooterComponent],
+  imports: [CommonModule, FormsModule, SiteNavbarComponent, SiteFooterComponent],
   templateUrl: './faq-page.component.html',
   styleUrls: ['./faq-page.component.scss'],
 })

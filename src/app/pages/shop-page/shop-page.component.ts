@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { HeaderComponent } from '../../common/header/header.component';
+import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
 import { PageBannerComponent } from '../../common/page-banner/page-banner.component';
-import { FooterComponent } from '../../common/footer/footer.component';
+import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
 
 @Component({
     selector: 'app-shop-page',
-    imports: [RouterLink, HeaderComponent, PageBannerComponent, FooterComponent],
+    imports: [RouterLink, SiteNavbarComponent, PageBannerComponent, SiteFooterComponent],
     templateUrl: './shop-page.component.html',
     styleUrl: './shop-page.component.scss'
 })

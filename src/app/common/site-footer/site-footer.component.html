@@ -1,0 +1,51 @@
+<footer class="final-footer">
+  <div class="container">
+    <div class="footer-layout">
+      <div class="footer-col brand-side">
+        <img src="assets/unides.jpg" alt="ÜNİDES" class="footer-logo" />
+        <p class="footer-desc">
+          Bu Portal T.C. Gençlik ve Spor Bakanlığı Gençlik Hizmetleri Genel Müdürlüğünce
+          desteklenmektedir.
+        </p>
+        <div class="address-box">
+          <i class="icon-location">📍</i>
+          <span>Ön Cebeci, Kıbrıs Caddesi No:4 Kurtuluş, <br />Çankaya/Ankara</span>
+        </div>
+        <div class="social-icons">
+          <a href="#" aria-label="Instagram"><i class="icon-instagram">📷</i></a>
+          <a href="#" aria-label="Twitter"><i class="icon-twitter">🐦</i></a>
+          <a href="#" aria-label="LinkedIn"><i class="icon-linkedin">💼</i></a>
+          <a href="#" aria-label="YouTube"><i class="icon-youtube">▶️</i></a>
+        </div>
+      </div>
+
+      <div class="footer-col links-side">
+        <h4 class="col-title">Hızlı Erişim</h4>
+        <ul class="link-list">
+          <li><a routerLink="/communities">Topluluklar</a></li>
+          <li><a routerLink="/events">Etkinlik Takvimi</a></li>
+          <li><a routerLink="/announcements">Duyurular</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col contact-side">
+        <h4 class="col-title">Destek & İletişim</h4>
+        <ul class="link-list">
+          <li><a routerLink="/faq">Sıkça Sorulan Sorular</a></li>
+          <li><a routerLink="/contact">İletişim</a></li>
+          <li><a href="mailto:info@unides.com.tr">info@unides.com.tr</a></li>
+          <li><a href="tel:03125517000">(0312) 551 70 00</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="copyright">© 2025 ÜNİDES. Tüm hakları saklıdır.</div>
+      <div class="policy-links">
+        <a routerLink="/terms-conditions">Kullanım Şartları</a>
+        <a routerLink="/privacy-policy">Gizlilik Politikası</a>
+        <a [routerLink]="'/terms-conditions'" [fragment]="'kvkk'">KVKK Aydınlatma Metni</a>
+      </div>
+    </div>
+  </div>
+</footer>

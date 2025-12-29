@@ -1,14 +1,14 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { HeaderComponent } from '../../common/header/header.component';
+import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
 import { PageBannerComponent } from '../../common/page-banner/page-banner.component';
-import { FooterComponent } from '../../common/footer/footer.component';
+import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
 import { CarouselModule, OwlOptions } from 'ngx-owl-carousel-o';
 import { QuantityCounterComponent } from './quantity-counter/quantity-counter.component';
 
 @Component({
     selector: 'app-listing-details',
-    imports: [RouterLink, CarouselModule, QuantityCounterComponent, HeaderComponent, PageBannerComponent, FooterComponent],
+    imports: [RouterLink, CarouselModule, QuantityCounterComponent, SiteNavbarComponent, PageBannerComponent, SiteFooterComponent],
     templateUrl: './listing-details.component.html',
     styleUrl: './listing-details.component.scss'
 })
