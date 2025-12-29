@@ -3,26 +3,27 @@ import { ViewportScroller } from '@angular/common';
 import { RouterOutlet, Router, Event, NavigationEnd } from '@angular/router';
 
 @Component({
-    selector: 'app-root',
-    standalone: true,
-    imports: [RouterOutlet],
-    templateUrl: './app.component.html',
-    styleUrl: './app.component.scss'
+  selector: 'app-root',
+  standalone: true,
+  imports: [RouterOutlet],
+  templateUrl: './app.component.html',
+  styleUrl: './app.component.scss'
 })
 export class AppComponent {
 
-    title = 'Louise - Directory Listing Angular 19 Template + Admin Panel';
+  title = 'ÜNİDES - Gençlik ve Spor Bakanlığı';
 
-    constructor (
-        private router: Router,
-        private viewportScroller: ViewportScroller
-    ) {
-        this.router.events.subscribe((event: Event) => {
-            if (event instanceof NavigationEnd) {
-                // Scroll to the top after each navigation end
-                this.viewportScroller.scrollToPosition([0, 0]);
-            }
-        });
-    }
-
+  constructor (
+    private router: Router,
+    private viewportScroller: ViewportScroller
+  ) {
+    // Router olaylarını dinle
+    this.router.events.subscribe((event: Event) => {
+      // Navigasyon bittiğinde (sayfa değiştiğinde)
+      if (event instanceof NavigationEnd) {
+        // Sayfayı en üste kaydır (Scroll to top)
+        this.viewportScroller.scrollToPosition([0, 0]);
+      }
+    });
+  }
 }

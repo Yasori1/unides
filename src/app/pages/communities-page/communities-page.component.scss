@@ -122,7 +122,6 @@
   gap: 20px;
   background: white;
   padding: 20px;
-  /* Navbar dropdown'larıyla uyumlu olması için 24px yapıldı */
   border-radius: 24px;
   border: 1px solid var(--border-color);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
@@ -145,7 +144,6 @@
       width: 100%;
       padding: 12px 15px 12px 45px;
       border: 1px solid var(--border-color);
-      /* Inputlar da uyumlu olsun */
       border-radius: 12px;
       font-size: 0.95rem;
       outline: none;
@@ -179,7 +177,6 @@
         width: 100%;
         padding: 12px 35px 12px 15px;
         border: 1px solid var(--border-color);
-        /* Selectler de uyumlu olsun */
         border-radius: 12px;
         font-size: 0.95rem;
         color: var(--primary-color);
@@ -240,7 +237,6 @@
   flex-direction: column;
   background: var(--card-bg);
   border: 1px solid var(--border-color);
-  /* Navbar ile uyumlu olması için 24px yapıldı */
   border-radius: 24px;
   overflow: hidden;
   text-decoration: none;
@@ -312,7 +308,7 @@
     .logo-wrapper {
       width: 76px;
       height: 76px;
-      border-radius: 20px; /* Logo çerçevesi de yumuşatıldı */
+      border-radius: 20px;
       background: white;
       padding: 4px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -519,7 +515,7 @@
   .page-btn {
     width: 40px;
     height: 40px;
-    border-radius: 12px; /* Butonlar da yumuşatıldı */
+    border-radius: 12px;
     border: 1px solid var(--border-color);
     background: white;
     color: var(--secondary-color);

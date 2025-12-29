@@ -1,6 +1,5 @@
 <app-header />
 
-<!-- YENİ BANNER (FAQ Sayfası Tarzı) -->
 <div class="page-spacer" (mousemove)="onHeroMouseMove($event)">
   <div class="background-wrapper">
     <div
@@ -13,7 +12,7 @@
   <div class="container relative-content">
     <h1 class="page-title">ÜNİDES <span class="highlight-text">DUYURULAR</span></h1>
     <p class="page-subtitle">
-      Güncel haberler, etkinlikler ve önemli duyuruları buradan takip edebilirsiniz.
+      Üniversitemizden ve Bakanlıklardan güncel haberler, etkinlikler ve önemli duyurular.
     </p>
   </div>
 
@@ -23,24 +22,29 @@
   </div>
 </div>
 
-<!-- FİLTRELEME & GRID ALANI -->
 <section class="announcements-grid-section">
   <div class="container">
-    <!-- FİLTRELEME ÇUBUĞU -->
     <div class="filters-bar">
-      <!-- Arama -->
       <div class="search-group">
         <i class="bx bx-search"></i>
         <input
           type="text"
-          placeholder="Duyuru ara..."
+          placeholder="Duyuru veya Bakanlık haberi ara..."
           [(ngModel)]="searchText"
           (input)="applyFilters()"
         />
       </div>
 
-      <!-- Filtreler -->
       <div class="filter-groups">
+        <div class="select-wrapper category-select">
+            <select [(ngModel)]="selectedCategory" (change)="applyFilters()">
+              <option value="all">Tüm Kategoriler</option>
+              <option value="Bakanlık">Bakanlık Duyuruları</option>
+              <option value="Genel">Genel Duyurular</option>
+            </select>
+            <i class="bx bx-filter-alt"></i>
+        </div>
+
         <div class="select-wrapper">
           <select [(ngModel)]="sortOrder" (change)="applyFilters()">
             <option value="default">Önerilen Sıralama</option>
@@ -52,25 +56,23 @@
       </div>
     </div>
 
-    <!-- SONUÇ SAYISI -->
     <div class="results-count" *ngIf="!isLoading">
       <p>
-        Toplam <strong>{{ filteredAnnouncements.length }}</strong> duyuru bulundu.
+        Toplam <strong>{{ filteredAnnouncements.length }}</strong> duyuru listeleniyor.
       </p>
     </div>
 
-    <!-- Yükleniyor -->
     <div *ngIf="isLoading" class="loading-state">
       <div class="spinner"></div>
       <p>Duyurular yükleniyor...</p>
     </div>
 
-    <!-- GRID YAPISI -->
     <div class="grid-container" *ngIf="!isLoading && displayedAnnouncements.length > 0">
       <a
         *ngFor="let item of displayedAnnouncements"
         [routerLink]="['/announcements', item.id]"
         class="announcement-card"
+        [class.ministry-card]="item.category === 'Bakanlık'"
       >
         <div class="cover-area">
           <img
@@ -79,7 +81,15 @@
             class="cover-img"
             onerror="this.src='assets/img/placeholder-cover.jpg'"
           />
+          
           <span class="date-badge">{{ formatDate(item.date) }}</span>
+
+          <span 
+            class="category-badge" 
+            [ngClass]="item.category === 'Bakanlık' ? 'badge-ministry' : 'badge-general'"
+          >
+            {{ item.category || 'GENEL' }}
+          </span>
         </div>
 
         <div class="card-content">
@@ -93,15 +103,13 @@
       </a>
     </div>
 
-    <!-- Veri Yoksa -->
     <div class="no-data" *ngIf="!isLoading && displayedAnnouncements.length === 0">
       <div class="empty-icon"><i class="bx bx-search-alt"></i></div>
       <h3>Sonuç Bulunamadı</h3>
-      <p>Aradığınız kriterlere uygun duyuru mevcut değil. Filtreleri temizlemeyi deneyin.</p>
+      <p>Aradığınız kriterlere uygun duyuru mevcut değil.</p>
       <button class="reset-btn" (click)="resetFilters()">Filtreleri Temizle</button>
     </div>
 
-    <!-- SAYFALAMA -->
     <div class="pagination-area" *ngIf="!isLoading && totalPages > 1">
       <button
         class="page-btn prev"

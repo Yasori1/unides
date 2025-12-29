@@ -6,7 +6,7 @@
   --primary-color: #09090b;
   --secondary-color: #71717a;
   --accent-color: #2563eb;
-  --hover-color: #1d4ed8;
+  --ministry-color: #dc2626; /* Bakanlık kırmızısı */
   --bg-light: #f8fafc;
 }
 
@@ -245,19 +245,28 @@
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
   position: relative;
 
+  // BAKANLIK KART ÖZELLEŞTİRMESİ
+  &.ministry-card {
+    border-color: rgba(220, 38, 38, 0.2); // Hafif kırmızı border
+    &:hover {
+        border-color: var(--ministry-color);
+        .action-text { color: var(--ministry-color); }
+    }
+  }
+
   &:hover {
     transform: translateY(-8px);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
-    border-color: var(--accent-color);
+    // Varsayılan hover border
+    &:not(.ministry-card) {
+        border-color: var(--accent-color);
+    }
+
     .action-text {
       color: var(--accent-color);
-      i {
-        transform: translateX(5px);
-      }
+      i { transform: translateX(5px); }
     }
-    .cover-img {
-      transform: scale(1.05);
-    }
+    .cover-img { transform: scale(1.05); }
   }
 
   .cover-area {
@@ -286,6 +295,29 @@
       padding: 6px 14px;
       border-radius: 20px;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      z-index: 2;
+    }
+
+    // YENİ: Kategori Badge
+    .category-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        padding: 5px 12px;
+        border-radius: 20px;
+        color: white;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        z-index: 2;
+
+        &.badge-general {
+            background-color: var(--accent-color);
+        }
+        &.badge-ministry {
+            background-color: var(--ministry-color);
+        }
     }
   }
 
@@ -333,9 +365,7 @@
         align-items: center;
         gap: 4px;
         transition: color 0.3s;
-        i {
-          transition: transform 0.3s;
-        }
+        i { transition: transform 0.3s; }
       }
     }
   }
@@ -409,35 +439,19 @@
       cursor: not-allowed;
       background-color: #f4f4f5;
     }
-    i {
-      font-size: 1.2rem;
-    }
+    i { font-size: 1.2rem; }
   }
 }
 
 // Animations
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
 @keyframes dropLine {
-  0% {
-    transform: scaleY(0);
-    transform-origin: top;
-  }
-  50% {
-    transform: scaleY(1);
-    transform-origin: top;
-  }
-  51% {
-    transform: scaleY(1);
-    transform-origin: bottom;
-  }
-  100% {
-    transform: scaleY(0);
-    transform-origin: bottom;
-  }
+  0% { transform: scaleY(0); transform-origin: top; }
+  50% { transform: scaleY(1); transform-origin: top; }
+  51% { transform: scaleY(1); transform-origin: bottom; }
+  100% { transform: scaleY(0); transform-origin: bottom; }
 }
 
 @media (max-width: 768px) {
@@ -448,12 +462,7 @@
     flex-direction: column;
     align-items: stretch;
     .search-group,
-    .filter-groups {
-      flex: 1;
-    }
-    .filter-groups {
-      flex-direction: column;
-    }
+    .filter-groups { flex: 1; }
+    .filter-groups { flex-direction: column; }
   }
 }
-

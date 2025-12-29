@@ -1,0 +1,327 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Nunito+Sans:wght@300;400;600;700;800&family=Outfit:wght@300;400;600;800&display=swap');
+
+$font-ui: 'Outfit', sans-serif;       
+$font-content: 'Nunito Sans', sans-serif; 
+$font-nav: 'Inter', sans-serif;       
+
+$primary: #00f2ea;        
+$primary-dark: #00bfb8;   
+$navy-start: #0f172a;     
+$navy-end: #1e3a8a;       
+$dark-text: #0f172a;   
+$light-text: #475569;  
+
+:host {
+  display: block;
+  font-family: $font-ui; 
+}
+
+// --- INTERACTIVE BACKGROUND (DÜZELTİLDİ: DAHA BELİRGİN) ---
+.interactive-background {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  z-index: -1; // EN ARKADA
+  background-color: #f1f5f9; // Temel gri arka plan (beyaz değil)
+  overflow: hidden;
+
+  // 1. Tech Grid (Izgara daha belirgin)
+  .tech-grid {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-image: radial-gradient(rgba(148, 163, 184, 0.4) 1.5px, transparent 1.5px);
+    background-size: 40px 40px;
+    opacity: 0.5;
+  }
+
+  // 2. Mouse Follower Orb (Daha büyük ve renkli)
+  .gradient-orb {
+    position: absolute;
+    top: 0; left: 0;
+    width: 800px; height: 800px; // Büyük orb
+    // Turkuaz ve mavi karışımı güçlü bir gradient
+    background: radial-gradient(circle, rgba(0, 242, 234, 0.3) 0%, rgba(30, 58, 138, 0.1) 40%, transparent 70%);
+    border-radius: 50%;
+    filter: blur(60px); // Blur
+    pointer-events: none;
+    will-change: transform; // Performans için
+    z-index: 1;
+  }
+
+  // 3. Secondary Orb (Sabit dekor)
+  .secondary-orb {
+    position: absolute;
+    bottom: -10%; right: -10%;
+    width: 900px; height: 900px;
+    background: radial-gradient(circle, rgba(15, 23, 42, 0.05) 0%, transparent 60%);
+    border-radius: 50%;
+    filter: blur(80px);
+    z-index: 0;
+  }
+}
+
+// --- NAVBAR ---
+.navbar {
+  position: fixed; top: 0; left: 0; width: 100%; height: 80px; z-index: 1000;
+  background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(15px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5); box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+  .nav-content { display: flex; justify-content: space-between; align-items: center; height: 100%; padding: 0 5%; }
+  .brand img { height: 45px; width: auto; }
+  .nav-links {
+    list-style: none; display: flex; gap: 30px; margin: 0; padding: 0;
+    li a {
+      text-decoration: none; color: $dark-text; font-family: $font-nav; font-weight: 500; font-size: 0.95rem; position: relative; transition: color 0.3s;
+      &::after { content: ''; position: absolute; bottom: -5px; left: 0; width: 0%; height: 2px; background-color: $primary; transition: width 0.3s ease-in-out; }
+      &:hover, &.active { color: $navy-start; font-weight: 600; &::after { width: 100%; } }
+    }
+  }
+  .auth-buttons {
+    display: flex; gap: 12px; align-items: center;
+    .btn-auth-modern {
+      text-decoration: none; font-family: $font-nav; font-weight: 600; font-size: 0.9rem; padding: 10px 26px; border-radius: 50px; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: inline-block;
+      &.outline { border: 2px solid $navy-start; color: $navy-start; background: transparent; &:hover { transform: translateY(-3px); background: $navy-start; color: #fff; box-shadow: 0 8px 20px rgba(15, 23, 42, 0.2); } }
+      &.solid { border: 2px solid transparent; background: linear-gradient(135deg, $navy-start, $navy-end); color: #fff; &:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(15, 23, 42, 0.3); } }
+    }
+  }
+}
+
+// --- SLIDER ---
+.split-slider { position: relative; width: 100%; height: 92vh; overflow: hidden; background-color: #000; }
+.bg-layer {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; visibility: hidden;
+  transition: opacity 1s ease-in-out, visibility 1s; z-index: 1;
+  &.active { opacity: 1; visibility: visible; z-index: 2; .bg-img { transform: scale(1.1); } }
+  .bg-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; transform: scale(1); transition: transform 6s ease-out; }
+  .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.5) 100%); z-index: 2; }
+}
+.slider-content-wrapper { position: relative; z-index: 10; height: 100%; display: flex; align-items: center; justify-content: center; padding: 0 5%; }
+.text-content {
+  color: #fff; max-width: 900px; text-align: center; margin-top: 50px;
+  .text-inner { display: none; &.active { display: block; } }
+  .slide-subtitle { font-family: $font-content; font-size: 1.1rem; font-weight: 700; letter-spacing: 4px; color: $primary; margin-bottom: 20px; text-transform: uppercase; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+  .slide-title { font-family: $font-content; font-size: 4rem; font-weight: 800; line-height: 1.1; margin-bottom: 30px; color: #ffffff; text-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+  .slide-desc { font-family: $font-content; font-size: 1.25rem; font-weight: 600; color: #f1f5f9; line-height: 1.6; margin-bottom: 40px; text-shadow: 0 2px 5px rgba(0,0,0,0.5); max-width: 800px; margin-left: auto; margin-right: auto; }
+}
+.shiny-btn {
+  position: relative; overflow: hidden; transition: all 0.3s ease;
+  &::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.4), transparent); transition: all 0.5s; }
+  &:hover::before { left: 100%; }
+}
+.btn-explore {
+  padding: 16px 50px; font-family: $font-content; text-transform: uppercase; font-size: 0.95rem; font-weight: 800; letter-spacing: 1px; color: $dark-text; background: #fff; border: none; border-radius: 50px; cursor: pointer; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  &:hover { background: $primary; color: $dark-text; transform: translateY(-3px); box-shadow: 0 15px 35px rgba(0, 242, 234, 0.4); }
+}
+.slider-dots {
+  position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%); z-index: 20; display: flex; gap: 12px;
+  span { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.4); cursor: pointer; transition: all 0.3s; &.active { width: 40px; border-radius: 20px; background: $primary; } }
+}
+
+// --- ARAMA KUTUSU ---
+.search-overlay-container { position: relative; z-index: 50; margin-top: -60px; padding-bottom: 50px; }
+.modern-search-container {
+  background: rgba(255, 255, 255, 0.98); border-radius: 20px; padding: 30px 40px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15); border: 1px solid rgba($primary, 0.3);
+  max-width: 1100px; margin: 0 auto; font-family: $font-nav;
+  .search-wrapper { display: flex; align-items: flex-end; justify-content: space-between; gap: 25px; }
+}
+.input-group { flex: 1; display: flex; flex-direction: column; gap: 10px; .animated-label { font-family: $font-nav; font-size: 0.85rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; } }
+.search-input-group { flex: 2; }
+.input-box, .dropdown-box {
+    background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 16px; transition: all 0.3s; position: relative;
+    display: flex; align-items: center; justify-content: space-between; height: 50px; 
+    &:hover, &.active { border-color: $primary; background: #fff; box-shadow: 0 0 0 3px rgba(0, 242, 234, 0.1); }
+}
+.input-box input { width: 100%; border: none; background: transparent; font-family: $font-nav; font-size: 1rem; font-weight: 600; color: $dark-text; outline: none; padding-right: 40px; }
+.char-count { position: absolute; right: 15px; font-size: 0.75rem; color: #94a3b8; pointer-events: none; font-family: $font-nav; }
+.dropdown-group { position: relative; }
+.dropdown-menu {
+    position: absolute; top: 110%; left: 0; width: 100%; background: #fff; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    padding: 8px; z-index: 100; list-style: none; max-height: 250px; overflow-y: auto; border: 1px solid #f1f5f9;
+    li { padding: 10px 15px; border-radius: 8px; cursor: pointer; font-size: 0.95rem; font-family: $font-nav; font-weight: 500; color: $dark-text; transition: all 0.2s; &:hover { background: rgba($primary, 0.1); color: $primary-dark; padding-left: 20px; } }
+    &::-webkit-scrollbar { width: 5px; } &::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+}
+.dropdown-icon { width: 8px; height: 8px; border-right: 2px solid $dark-text; border-bottom: 2px solid $dark-text; transform: rotate(45deg) translateY(-2px); transition: transform 0.3s; }
+.dropdown-box.active .dropdown-icon { transform: rotate(225deg) translateY(2px); }
+.btn-search-gradient {
+  padding: 0 40px; height: 50px; font-family: $font-nav; font-size: 1.1rem; font-weight: 800; color: #fff; background: linear-gradient(135deg, $primary, $primary-dark);
+  border: none; border-radius: 12px; cursor: pointer; box-shadow: 0 10px 20px rgba(0, 242, 234, 0.3); display: flex; align-items: center; justify-content: center;
+  &:hover { transform: translateY(-2px); box-shadow: 0 15px 30px rgba(0, 242, 234, 0.5); }
+}
+
+// --- ABOUT SECTION (GÜNCELLENDİ: Glassmorphism & Şeffaflık) ---
+.about-preview-section {
+  padding: 95px 0; 
+  // ÖNEMLİ: Arkaplan rengini neredeyse şeffaf yaptık
+  background: rgba(255, 255, 255, 0.1); 
+  backdrop-filter: blur(5px); // Arkadaki grid hafifçe görünsün
+  position: relative; // Z-index bağlamı için
+  z-index: 1; 
+  
+  .container {
+    max-width: 1390px; 
+    padding: 0 20px;
+  }
+
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 75px; 
+    align-items: center;
+  }
+
+  // SOL SÜTUN
+  .about-image-col {
+    .image-wrapper {
+      position: relative; border-radius: 30px; overflow: visible; 
+      img { width: 100%; height: 560px; object-fit: cover; border-radius: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+      .floating-stat-card {
+        position: absolute; bottom: 45px; right: -35px; background: #fff; padding: 32px 40px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 175px; 
+        .stat-number {
+          font-family: $font-ui; font-size: 2.8rem; font-weight: 800; color: $dark-text; line-height: 1;
+          &::after { content: '+'; color: $primary; vertical-align: super; font-size: 1.7rem; }
+        }
+        .stat-text { font-family: $font-nav; font-size: 1rem; color: #64748b; margin-top: 7px; font-weight: 500; }
+      }
+    }
+  }
+
+  // SAĞ SÜTUN
+  .about-content-col {
+    padding-left: 25px;
+    .sub-title { font-family: $font-nav; color: $primary-dark; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; font-size: 14px; margin-bottom: 18px; display: flex; align-items: center; gap: 9px; }
+    .main-title { font-family: $font-content; font-size: 3rem; color: $dark-text; line-height: 1.1; margin-bottom: 25px; font-weight: 800; }
+    .description { font-family: $font-content; font-weight: 400; color: #64748b; font-size: 1rem; line-height: 1.7; margin-bottom: 35px; }
+    .video-preview-wrapper {
+      position: relative; width: 100%; height: 340px; border-radius: 24px; overflow: hidden; margin-bottom: 40px; box-shadow: 0 15px 40px rgba(0,0,0,0.08); cursor: pointer;
+      img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+      .play-button-overlay {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; transition: background 0.3s;
+        .play-icon { width: 70px; height: 70px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: $primary; font-size: 1.8rem; box-shadow: 0 10px 20px rgba(0,0,0,0.2); transition: transform 0.3s, color 0.3s; }
+      }
+      &:hover { img { transform: scale(1.05); } .play-button-overlay { background: rgba(0,0,0,0.1); } .play-icon { transform: scale(1.1); color: $primary-dark; } }
+    }
+    .btn-about {
+      padding: 15px 48px; font-family: $font-nav; font-weight: 600; font-size: 1.05rem; color: #fff; background: $primary-dark; border: none; border-radius: 12px; cursor: pointer; box-shadow: 0 8px 20px rgba(0, 191, 184, 0.3);
+      &:hover { background: $dark-text; color: #fff; transform: translateY(-3px); }
+    }
+  }
+}
+
+// --- FEATURED COMMUNITIES (GÜNCELLENDİ: Glass Effect) ---
+.featured-communities-section {
+  padding: 95px 0 125px 0;
+  // ÖNEMLİ: Arkaplanı şeffaflaştırdık
+  background: rgba(255, 255, 255, 0.2); 
+  backdrop-filter: blur(10px);
+  position: relative;
+  z-index: 1;
+  
+  .container { max-width: 1390px; padding: 0 20px; }
+  
+  .section-header {
+    text-align: center; max-width: 850px; margin: 0 auto 75px auto;
+    .sub-title { font-family: $font-nav; color: $primary-dark; font-weight: 700; letter-spacing: 1px; font-size: 0.9rem; margin-bottom: 12px; }
+    .section-title { font-family: $font-ui; font-size: 3rem; font-weight: 800; color: $dark-text; margin-bottom: 20px; }
+    .section-desc { font-family: $font-content; font-size: 1.1rem; color: $light-text; line-height: 1.6; }
+  }
+
+  .communities-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 45px; }
+
+  // Topluluk Kartları (Beyaz olmalı ki şeffaf zeminde öne çıksın)
+  .community-card {
+    background: #fff; // Kartlar beyaz kalıyor
+    border-radius: 26px; overflow: hidden; box-shadow: 0 12px 35px rgba(0,0,0,0.06);
+    border: 1px solid #f1f5f9; cursor: pointer; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; top: 0;
+    &:hover {
+      top: -12px; box-shadow: 0 25px 50px rgba(0,0,0,0.12); border-color: rgba($primary, 0.4);
+      .card-image-wrapper img { transform: scale(1.1); } .overlay-hover { opacity: 1; }
+    }
+    .card-image-wrapper {
+      position: relative; height: 250px; overflow: hidden;
+      img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; }
+      .badge-featured {
+        position: absolute; top: 22px; left: 22px; background: linear-gradient(135deg, $primary, $primary-dark);
+        color: #fff; font-family: $font-nav; font-size: 0.8rem; font-weight: 700; padding: 7px 16px;
+        border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 6px; z-index: 2;
+      }
+      .overlay-hover {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba($navy-start, 0.6);
+        display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s;
+        span { color: #fff; font-family: $font-nav; font-weight: 600; font-size: 1rem; border: 2px solid #fff; padding: 10px 24px; border-radius: 30px; }
+      }
+    }
+    .card-content {
+      padding: 30px;
+      .comm-name { font-family: $font-ui; font-size: 1.35rem; font-weight: 800; color: $dark-text; margin-bottom: 8px; }
+      .comm-category { font-family: $font-nav; font-size: 0.9rem; color: $primary-dark; font-weight: 600; text-transform: uppercase; margin-bottom: 22px; display: block; }
+      .comm-stats {
+        display: flex; justify-content: space-between; padding-top: 22px; border-top: 1px solid #f1f5f9;
+        .stat-item { display: flex; align-items: center; gap: 7px; font-family: $font-nav; font-size: 0.95rem; color: $light-text; font-weight: 500; .icon { font-size: 1.2rem; } }
+      }
+    }
+  }
+
+  // --- SKELETON ---
+  .skeleton-card {
+    background: #fff; border-radius: 26px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #eee;
+    .skeleton-img {
+      height: 250px; background: #f0f0f0; position: relative; overflow: hidden;
+      &::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent); animation: shimmer 1.5s infinite; }
+    }
+    .skeleton-body {
+      padding: 30px;
+      .skeleton-title { height: 26px; width: 70%; background: #f0f0f0; margin-bottom: 12px; border-radius: 4px; }
+      .skeleton-text { height: 18px; width: 40%; background: #f0f0f0; margin-bottom: 25px; border-radius: 4px; }
+      .skeleton-meta { height: 22px; width: 100%; background: #f0f0f0; border-radius: 4px; }
+    }
+  }
+  
+  @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+
+  .view-all-wrapper {
+    margin-top: 75px; display: flex; justify-content: center;
+    .btn-view-all {
+      padding: 16px 64px; font-family: $font-nav; font-size: 1.1rem; font-weight: 700;
+      color: #fff; background: linear-gradient(135deg, $primary, $primary-dark); 
+      border: none; border-radius: 12px; cursor: pointer; box-shadow: 0 10px 20px rgba(0, 242, 234, 0.3);
+      &:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(0, 242, 234, 0.5); }
+    }
+  }
+}
+
+// --- ANIMASYONLAR ---
+.fade-in-down { animation: fadeInDown 1s ease forwards; opacity: 0; }
+.fade-in-up { animation: fadeInUp 1s ease forwards; opacity: 0; }
+.scale-in { animation: scaleIn 1s ease forwards; opacity: 0; }
+.delay-200 { animation-delay: 0.2s; }
+@keyframes fadeInDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+// --- RESPONSIVE ---
+@media (max-width: 1024px) {
+    .navbar .nav-links { display: none; }
+    .split-slider { height: 75vh; }
+    .text-content .slide-title { font-size: 2.5rem; }
+    .modern-search-container { padding: 20px; }
+    .search-wrapper { flex-direction: column; }
+    .btn-search-gradient { width: 100%; margin-top: 10px; }
+    
+    // About Section Responsive
+    .about-preview-section {
+      padding: 60px 0;
+      .container { max-width: 100%; padding: 0 20px; } 
+      .about-grid { grid-template-columns: 1fr; gap: 50px; }
+      .about-image-col .image-wrapper { img { height: 400px; } .floating-stat-card { right: 0; bottom: -20px; } }
+      .about-content-col { padding-left: 0; text-align: center; .sub-title { justify-content: center; } .main-title { font-size: 2.5rem; } .description { font-size: 1.1rem; } .video-preview-wrapper { height: 300px; } }
+    }
+
+    // Featured Communities Responsive
+    .featured-communities-section {
+      padding: 70px 0;
+      .container { max-width: 100%; padding: 0 20px; } 
+      .communities-grid { grid-template-columns: 1fr; gap: 30px; } 
+      .section-title { font-size: 2.2rem; }
+    }
+}

@@ -4,16 +4,8 @@ import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
-// --- Veri Tipleri (Interfaces) ---
-interface Community { 
-  id: number; 
-  name: string; 
-  image: string; 
-  category: string; 
-  memberCount: number; 
-  eventCount: number; 
-}
-
+// Veri Tipleri
+interface Community { id: number; name: string; image: string; category: string; memberCount: number; eventCount: number; }
 interface UpcomingEvent { 
   id: number; 
   title: string; 
@@ -24,29 +16,17 @@ interface UpcomingEvent {
   communityName: string; 
   communityLogo: string; 
 }
-
-interface NewCommunity { 
-  id: number; 
-  name: string; 
-  university: string; 
-  image: string; 
-}
-
-interface Announcement {
-  title: string;
-  content: string;
-}
+interface NewCommunity { id: number; name: string; university: string; image: string; }
 
 @Component({
-  selector: 'app-home', // DÜZELTİLDİ
+  selector: 'app-home3',
   standalone: true,
   imports: [CommonModule, RouterModule, FormsModule],
-  templateUrl: './home.component.html', // DÜZELTİLDİ
-  styleUrls: ['./home.component.scss']  // DÜZELTİLDİ
+  templateUrl: './home3.component.html',
+  styleUrls: ['./home3.component.scss']
 })
-export class HomeComponent implements OnInit, OnDestroy { // DÜZELTİLDİ (Home3Component -> HomeComponent)
+export class Home3Component implements OnInit, OnDestroy {
 
-  // --- Animasyon Değişkenleri ---
   typingText: string = 'Toplulukları'; 
   words: string[] = ['Toplulukları', 'Etkinlikleri', 'Duyuruları', 'Fırsatları'];
   wordIndex = 0;
@@ -55,7 +35,6 @@ export class HomeComponent implements OnInit, OnDestroy { // DÜZELTİLDİ (Home
   typingSpeed = 100;
   typewriterInterval: any;
 
-  // --- Arama ve UI Değişkenleri ---
   searchText: string = '';
   isLoading: boolean = true;
   videoThumbnail: string = 'https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=1000';
@@ -63,13 +42,12 @@ export class HomeComponent implements OnInit, OnDestroy { // DÜZELTİLDİ (Home
   showVideo: boolean = false;
   safeVideoUrl: SafeResourceUrl;
 
-  // --- Veri Listeleri ---
   featuredCommunities: Community[] = [];
   upcomingEvents: UpcomingEvent[] = [];
   newestCommunities: NewCommunity[] = [];
 
-  // Arama için Mock Duyuru Verileri
-  mockAnnouncements: Announcement[] = [
+  // Mock Duyurular (Tübitak eklendi)
+  mockAnnouncements = [
     { title: 'TÜBİTAK Proje Çağrısı', content: '2209-A Öğrenci projeleri başvuruları başladı.' },
     { title: 'Burs Başvuruları', content: '2025 dönemi bursları' },
     { title: 'Staj Programı', content: 'Yaz stajı başvuruları' },
@@ -95,14 +73,11 @@ export class HomeComponent implements OnInit, OnDestroy { // DÜZELTİLDİ (Home
     if (this.typewriterInterval) clearTimeout(this.typewriterInterval);
   }
 
-  // --- Video İşlemleri ---
   openVideo() { this.showVideo = true; }
   closeVideo() { this.showVideo = false; }
 
-  // --- Typewriter (Yazı Yazma) Efekti ---
   startTypewriter() {
     const currentWord = this.words[this.wordIndex];
-    
     if (this.isDeleting) {
       this.typingText = currentWord.substring(0, this.charIndex - 1);
       this.charIndex--;
@@ -112,27 +87,23 @@ export class HomeComponent implements OnInit, OnDestroy { // DÜZELTİLDİ (Home
       this.charIndex++;
       this.typingSpeed = 150; 
     }
-
     if (!this.isDeleting && this.charIndex === currentWord.length) {
       this.isDeleting = true;
       this.typingSpeed = 2000; 
     } else if (this.isDeleting && this.charIndex === 0) {
       this.isDeleting = false;
       this.wordIndex = (this.wordIndex + 1) % this.words.length;
-      this.typingSpeed = 500; 
+      this.typingSpeed = 500;
     }
-
     this.typewriterInterval = setTimeout(() => this.startTypewriter(), this.typingSpeed);
   }
 
-  // --- Tarih Formatlama ---
   formatDateTr(date: Date): string {
     const months = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
     const d = new Date(date);
     return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
   }
 
-  // --- Veri Yükleme (Simülasyon) ---
   loadData() {
     this.isLoading = true;
     setTimeout(() => {
@@ -191,7 +162,7 @@ export class HomeComponent implements OnInit, OnDestroy { // DÜZELTİLDİ (Home
     }, 1000);
   }
 
-  // --- GELİŞMİŞ AKILLI ARAMA ALGORİTMASI ---
+  // --- AKILLI ARAMA ALGORİTMASI ---
   onSearch() {
     if (!this.searchText || !this.searchText.trim()) return;
 
@@ -225,12 +196,8 @@ export class HomeComponent implements OnInit, OnDestroy { // DÜZELTİLDİ (Home
     let communityScore = 0;
     const allCommunities = [...this.featuredCommunities, ...this.newestCommunities];
     allCommunities.forEach(c => {
-      if (c.name.toLocaleLowerCase('tr-TR').includes(query)) {
-        communityScore += 10;
-      }
-      else if ('category' in c && (c as Community).category.toLocaleLowerCase('tr-TR').includes(query)) {
-        communityScore += 2;
-      }
+      if (c.name.toLocaleLowerCase('tr-TR').includes(query)) communityScore += 10;
+      else if ('category' in c && (c as Community).category.toLocaleLowerCase('tr-TR').includes(query)) communityScore += 2;
     });
 
     // -- Duyuru Puanı --
@@ -251,11 +218,11 @@ export class HomeComponent implements OnInit, OnDestroy { // DÜZELTİLDİ (Home
       this.router.navigate(['/announcements'], { queryParams: { search: query } });
     } 
     else {
+      // Hiçbir şey bulunamazsa varsayılan topluluklara git
       this.router.navigate(['/communities'], { queryParams: { search: query } });
     }
   }
 
-  // --- Yönlendirme Yardımcıları ---
   goToCommunityDetail(id: number) { this.router.navigate(['/communities', id]); }
   goToEventDetail(id: number) { this.router.navigate(['/events', id]); }
 

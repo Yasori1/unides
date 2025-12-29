@@ -1,6 +1,8 @@
 import { Routes } from '@angular/router';
 import { ErrorPageComponent } from './pages/error-page/error-page.component';
 import { HomeComponent } from './pages/home/home.component';
+import { Home2Component } from './pages/home-2/home2.component';
+import { Home3Component } from './pages/home3/home3.component'; // YENİ EKLENDİ
 import { HomeDemoTwoComponent } from './demos/home-demo-two/home-demo-two.component';
 import { HomeDemoThreeComponent } from './demos/home-demo-three/home-demo-three.component';
 import { HomeDemoFourComponent } from './demos/home-demo-four/home-demo-four.component';
@@ -62,6 +64,12 @@ import { CommunityDashboardComponent } from './pages/community-dashboard/communi
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
+  
+  // YENİ EKLENEN V2 ROTASI
+  { path: 'v2', component: Home2Component },
+
+  // YENİ EKLENEN V3 ROTASI
+  { path: 'v3', component: Home3Component },
 
   // Ana Sayfalar
   { path: 'developers', component: DevelopersPageComponent },
@@ -90,7 +98,7 @@ export const routes: Routes = [
   // ŞİFRE SIFIRLAMA
   { path: 'reset-password', component: ResetPasswordComponent },
 
-  // KURUMSAL DASHBOARD (ÖNEMLİ: Yönlendirme yapılacak rota)
+  // KURUMSAL DASHBOARD
   { path: 'corporate-dashboard', component: CorporateDashboardComponent },
   // TOPLULUK DASHBOARD
   { path: 'community-dashboard', component: CommunityDashboardComponent },

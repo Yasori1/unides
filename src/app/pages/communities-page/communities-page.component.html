@@ -1,6 +1,5 @@
 <app-header />
 
-<!-- YENİ BANNER (FAQ Sayfası Tarzı) -->
 <div class="page-spacer" (mousemove)="onHeroMouseMove($event)">
   <div class="background-wrapper">
     <div
@@ -23,12 +22,9 @@
   </div>
 </div>
 
-<!-- FİLTRELEME & GRID ALANI -->
 <section class="communities-grid-section">
   <div class="container">
-    <!-- FİLTRELEME ÇUBUĞU -->
     <div class="filters-bar">
-      <!-- Arama -->
       <div class="search-group">
         <i class="bx bx-search"></i>
         <input
@@ -39,7 +35,6 @@
         />
       </div>
 
-      <!-- Filtreler -->
       <div class="filter-groups">
         <div class="select-wrapper">
           <select [(ngModel)]="selectedCity" (change)="applyFilters()">
@@ -68,20 +63,17 @@
       </div>
     </div>
 
-    <!-- SONUÇ SAYISI -->
     <div class="results-count" *ngIf="!isLoading">
       <p>
         Toplam <strong>{{ filteredCommunities.length }}</strong> topluluk bulundu.
       </p>
     </div>
 
-    <!-- Yükleniyor -->
     <div *ngIf="isLoading" class="loading-state">
       <div class="spinner"></div>
       <p>Topluluklar yükleniyor...</p>
     </div>
 
-    <!-- GRID YAPISI -->
     <div class="grid-container" *ngIf="!isLoading && displayedCommunities.length > 0">
       <a
         *ngFor="let item of displayedCommunities"
@@ -111,66 +103,28 @@
             <div class="title-wrapper">
               <h3 class="community-name">{{ item.name }}</h3>
               <span class="university-name">{{ item.university }}</span>
-              <!-- Şehir bilgisi varsa gösterelim, yoksa gizli kalsın -->
-              <span class="city-tag" *ngIf="item.city"
-                ><i class="bx bxs-map"></i> {{ item.city }}</span
-              >
+              <span class="city-tag" *ngIf="item.city">
+                <i class="bx bxs-map"></i> {{ item.city }}
+              </span>
             </div>
           </div>
 
           <p class="description">{{ item.description }}</p>
 
-          <!-- Sosyal Medya İkonları -->
           <div class="social-media-icons" *ngIf="item.instagram || item.youtube || item.twitter || item.tiktok || item.socialMedia">
-            <a
-              *ngIf="item.instagram"
-              [href]="item.instagram"
-              target="_blank"
-              class="social-icon instagram"
-              (click)="$event.stopPropagation()"
-              title="Instagram"
-            >
+            <a *ngIf="item.instagram" [href]="item.instagram" target="_blank" class="social-icon instagram" (click)="$event.stopPropagation()" title="Instagram">
               <i class="bx bxl-instagram"></i>
             </a>
-            <a
-              *ngIf="item.youtube"
-              [href]="item.youtube"
-              target="_blank"
-              class="social-icon youtube"
-              (click)="$event.stopPropagation()"
-              title="Youtube"
-            >
+            <a *ngIf="item.youtube" [href]="item.youtube" target="_blank" class="social-icon youtube" (click)="$event.stopPropagation()" title="Youtube">
               <i class="bx bxl-youtube"></i>
             </a>
-            <a
-              *ngIf="item.twitter"
-              [href]="item.twitter"
-              target="_blank"
-              class="social-icon twitter"
-              (click)="$event.stopPropagation()"
-              title="Twitter"
-            >
+            <a *ngIf="item.twitter" [href]="item.twitter" target="_blank" class="social-icon twitter" (click)="$event.stopPropagation()" title="Twitter">
               <i class="bx bxl-twitter"></i>
             </a>
-            <a
-              *ngIf="item.tiktok"
-              [href]="item.tiktok"
-              target="_blank"
-              class="social-icon tiktok"
-              (click)="$event.stopPropagation()"
-              title="TikTok"
-            >
+            <a *ngIf="item.tiktok" [href]="item.tiktok" target="_blank" class="social-icon tiktok" (click)="$event.stopPropagation()" title="TikTok">
               <i class="bx bxl-tiktok"></i>
             </a>
-            <!-- Eski uyumluluk için genel sosyal medya -->
-            <a
-              *ngIf="item.socialMedia && !item.instagram && !item.youtube && !item.twitter && !item.tiktok"
-              [href]="item.socialMedia"
-              target="_blank"
-              class="social-icon"
-              (click)="$event.stopPropagation()"
-              title="Sosyal Medya"
-            >
+            <a *ngIf="item.socialMedia && !item.instagram && !item.youtube && !item.twitter && !item.tiktok" [href]="item.socialMedia" target="_blank" class="social-icon" (click)="$event.stopPropagation()" title="Sosyal Medya">
               <i class="bx bxl-facebook"></i>
             </a>
           </div>
@@ -186,7 +140,6 @@
       </a>
     </div>
 
-    <!-- Veri Yoksa -->
     <div class="no-data" *ngIf="!isLoading && displayedCommunities.length === 0">
       <div class="empty-icon"><i class="bx bx-search-alt"></i></div>
       <h3>Sonuç Bulunamadı</h3>
@@ -194,7 +147,6 @@
       <button class="reset-btn" (click)="resetFilters()">Filtreleri Temizle</button>
     </div>
 
-    <!-- SAYFALAMA -->
     <div class="pagination-area" *ngIf="!isLoading && totalPages > 1">
       <button
         class="page-btn prev"
