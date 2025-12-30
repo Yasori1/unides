@@ -68,11 +68,12 @@
     </div>
 
     <div class="grid-container" *ngIf="!isLoading && displayedAnnouncements.length > 0">
-      <a
+      <div
         *ngFor="let item of displayedAnnouncements"
-        [routerLink]="['/announcements', item.id]"
         class="announcement-card"
         [class.ministry-card]="item.category === 'Bakanlık'"
+        (click)="goToDetail(item.id)"
+        style="cursor: pointer;"
       >
         <div class="cover-area">
           <img
@@ -100,7 +101,7 @@
             <span class="action-text">Devamını Oku <i class="bx bx-right-arrow-alt"></i></span>
           </div>
         </div>
-      </a>
+      </div>
     </div>
 
     <div class="no-data" *ngIf="!isLoading && displayedAnnouncements.length === 0">

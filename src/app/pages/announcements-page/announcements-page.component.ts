@@ -1,6 +1,6 @@
 import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router'; // Router eklendi
 import { FormsModule } from '@angular/forms';
 import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
 import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
@@ -43,6 +43,7 @@ export class AnnouncementsPageComponent implements OnInit {
 
   constructor(
     private announcementService: AnnouncementService,
+    private router: Router, // Inject edildi
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -182,6 +183,10 @@ export class AnnouncementsPageComponent implements OnInit {
       this.heroMoveX = x / 40;
       this.heroMoveY = y / 40;
     }
+  }
+
+  goToDetail(id: number) {
+    this.router.navigate(['/announcements', id]);
   }
 
   formatDate(dateString: string): string {

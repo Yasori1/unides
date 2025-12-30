@@ -75,10 +75,11 @@
     </div>
 
     <div class="grid-container" *ngIf="!isLoading && displayedCommunities.length > 0">
-      <a
+      <div
         *ngFor="let item of displayedCommunities"
-        [routerLink]="['/communities', item.id]"
         class="community-card"
+        (click)="goToDetail(item.id)"
+        style="cursor: pointer;"
       >
         <div class="cover-area">
           <img
@@ -137,7 +138,7 @@
             <span class="action-text">İncele <i class="bx bx-right-arrow-alt"></i></span>
           </div>
         </div>
-      </a>
+      </div>
     </div>
 
     <div class="no-data" *ngIf="!isLoading && displayedCommunities.length === 0">

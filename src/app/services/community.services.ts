@@ -92,6 +92,166 @@ interface UpdateCommunityRequest {
 export class CommunityService {
   private apiUrl = '/api/Communities';
 
+  // --- DEMO VERİSİ (Static Fallback) ---
+  // CommunitiesPageComponent içindeki verinin aynısı/genişletilmiş hali
+  private demoCommunities: Community[] = [
+    {
+      id: 1,
+      name: 'Marmara Bilişim Kulübü',
+      university: 'Marmara Üniversitesi',
+      city: 'İstanbul',
+      category: 'Teknoloji',
+      description: 'Yazılım, siber güvenlik ve girişimcilik alanlarında etkinlikler düzenleyen, sektörün önde gelen isimlerini öğrencilerle buluşturan aktif bir topluluk.',
+      coverImage: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+      logo: 'https://ui-avatars.com/api/?name=M+B&background=2563eb&color=fff&size=128',
+      memberCount: 450,
+      instagram: 'https://instagram.com',
+      twitter: 'https://twitter.com'
+    },
+    {
+      id: 2,
+      name: 'İTÜ IEEE Öğrenci Kolu',
+      university: 'İstanbul Teknik Üniversitesi',
+      city: 'İstanbul',
+      category: 'Mühendislik',
+      description: 'Dünyanın en büyük teknik organizasyonu IEEE\'nin İTÜ ayağı. Robotik, enerji ve bilgisayar komiteleri ile dev projelere imza atıyoruz.',
+      coverImage: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+      logo: 'https://ui-avatars.com/api/?name=I+E&background=09090b&color=fff&size=128',
+      memberCount: 1200,
+      instagram: 'https://instagram.com',
+      youtube: 'https://youtube.com',
+      socialMedia: 'https://linkedin.com'
+    },
+    {
+      id: 3,
+      name: 'ODTÜ Caz Topluluğu',
+      university: 'Orta Doğu Teknik Üniversitesi',
+      city: 'Ankara',
+      category: 'Sanat & Müzik',
+      description: 'Kampüsün ritmini tutan, doğaçlama geceleri ve konserler düzenleyen müzik tutkunlarının buluşma noktası.',
+      coverImage: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+      logo: 'https://ui-avatars.com/api/?name=O+C&background=e4405f&color=fff&size=128',
+      memberCount: 320,
+      instagram: 'https://instagram.com',
+      tiktok: 'https://tiktok.com'
+    },
+    {
+      id: 4,
+      name: 'Boğaziçi Radyo Kulübü',
+      university: 'Boğaziçi Üniversitesi',
+      city: 'İstanbul',
+      category: 'Medya',
+      description: 'Üniversitenin sesi! Yayıncılık eğitimleri, DJ atölyeleri ve canlı yayınlarla kampüs hayatının kalbi burada atıyor.',
+      coverImage: 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+      logo: 'https://ui-avatars.com/api/?name=B+R&background=71717a&color=fff&size=128',
+      memberCount: 600,
+      instagram: 'https://instagram.com',
+      twitter: 'https://twitter.com'
+    },
+    {
+      id: 5,
+      name: 'Yıldız Teknik Dans Kulübü',
+      university: 'Yıldız Teknik Üniversitesi',
+      city: 'İstanbul',
+      category: 'Sanat & Dans',
+      description: 'Salsadan Hip-Hop\'a, tangodan modern dansa kadar geniş bir yelpazede eğitimler ve gösteriler sunan dans ailesi.',
+      coverImage: 'https://images.unsplash.com/photo-1504609773096-104ff2c73ba4?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+      logo: 'https://ui-avatars.com/api/?name=Y+D&background=f59e0b&color=fff&size=128',
+      memberCount: 280,
+      instagram: 'https://instagram.com',
+      youtube: 'https://youtube.com'
+    },
+    {
+      id: 6,
+      name: 'Ege Üniversitesi Havacılık',
+      university: 'Ege Üniversitesi',
+      city: 'İzmir',
+      category: 'Spor',
+      description: 'Gökyüzüne aşık olanlar için yamaç paraşütü eğitimleri ve havacılık seminerleri düzenliyoruz.',
+      coverImage: 'https://images.unsplash.com/photo-1464039397811-476f652a343b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+      logo: 'https://ui-avatars.com/api/?name=E+H&background=3b82f6&color=fff&size=128',
+      memberCount: 150,
+      instagram: 'https://instagram.com'
+    },
+    {
+      id: 7,
+      name: 'Hacettepe E-Spor',
+      university: 'Hacettepe Üniversitesi',
+      city: 'Ankara',
+      category: 'Oyun',
+      description: 'League of Legends, Valorant ve CS:GO turnuvaları düzenleyen, üniversiteler arası liglerde okulumuzu temsil eden topluluk.',
+      coverImage: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+      logo: 'https://ui-avatars.com/api/?name=H+E&background=8b5cf6&color=fff&size=128',
+      memberCount: 850,
+      instagram: 'https://instagram.com',
+      tiktok: 'https://tiktok.com',
+      youtube: 'https://youtube.com'
+    },
+    {
+      id: 8,
+      name: 'Koç Girişimcilik Kulübü',
+      university: 'Koç Üniversitesi',
+      city: 'İstanbul',
+      category: 'İş Dünyası',
+      description: 'Yarınların liderlerini bugünden yetiştiriyoruz. Startup dünyası, vaka analizleri ve networking etkinlikleri.',
+      coverImage: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+      logo: 'https://ui-avatars.com/api/?name=K+G&background=10b981&color=fff&size=128',
+      memberCount: 550,
+      instagram: 'https://instagram.com',
+      twitter: 'https://twitter.com'
+    },
+    {
+      id: 9,
+      name: 'Sakarya Yapay Zeka',
+      university: 'Sakarya Üniversitesi',
+      city: 'Sakarya',
+      category: 'Teknoloji',
+      description: 'Derin öğrenme, makine öğrenmesi ve veri bilimi üzerine projeler geliştiren araştırma odaklı öğrenci topluluğu.',
+      coverImage: 'https://images.unsplash.com/photo-1555255707-c07966088b7b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+      logo: 'https://ui-avatars.com/api/?name=S+Y&background=ef4444&color=fff&size=128',
+      memberCount: 300,
+      socialMedia: 'https://github.com'
+    },
+    {
+      id: 10,
+      name: 'Akdeniz Sualtı Sporları',
+      university: 'Akdeniz Üniversitesi',
+      city: 'Antalya',
+      category: 'Spor',
+      description: 'Mavilikleri keşfet! Dalış eğitimleri, sualtı fotoğrafçılığı ve deniz temizliği etkinlikleri.',
+      coverImage: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+      logo: 'https://ui-avatars.com/api/?name=A+S&background=06b6d4&color=fff&size=128',
+      memberCount: 180,
+      instagram: 'https://instagram.com'
+    },
+    {
+      id: 11,
+      name: 'GTÜ Rover Takımı',
+      university: 'Gebze Teknik Üniversitesi',
+      city: 'Kocaeli',
+      category: 'Mühendislik',
+      description: 'Uluslararası yarışmalar için Mars gezgini (Rover) tasarlayan ve üreten disiplinlerarası mühendislik takımı.',
+      coverImage: 'https://images.unsplash.com/photo-1581092921461-eab62e97a785?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+      logo: 'https://ui-avatars.com/api/?name=G+R&background=d97706&color=fff&size=128',
+      memberCount: 60,
+      instagram: 'https://instagram.com',
+      twitter: 'https://twitter.com',
+      youtube: 'https://youtube.com'
+    },
+    {
+      id: 12,
+      name: 'GSÜ Münazara',
+      university: 'Galatasaray Üniversitesi',
+      city: 'İstanbul',
+      category: 'Sosyal',
+      description: 'Fikirlerin çarpıştığı arena. Ulusal turnuvalara katılım ve etkili konuşma eğitimleri.',
+      coverImage: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+      logo: 'https://ui-avatars.com/api/?name=G+M&background=881337&color=fff&size=128',
+      memberCount: 220,
+      instagram: 'https://instagram.com'
+    }
+  ];
+
   constructor(private http: HttpClient) {}
 
   // Backend formatını frontend formatına dönüştür
@@ -399,6 +559,10 @@ export class CommunityService {
 
   // Tüm Toplulukları Getir
   getAllCommunities(): Observable<Community[]> {
+    // Önce statik veri döndür (Backend çalışmıyor)
+    return of(this.demoCommunities);
+
+    /* Backend kapalı olduğu için devre dışı bırakıldı
     return this.http.get<CommunityDto[]>(this.apiUrl).pipe(
       map((response) => {
         return response.map((dto) => this.mapToCommunity(dto));
@@ -409,24 +573,28 @@ export class CommunityService {
         return of([]);
       })
     );
+    */
   }
 
   // En Popüler Toplulukları Getir
   getTopCommunities(limit: number): Observable<Community[]> {
-    return this.getAllCommunities().pipe(
+    // Statik veriden hesapla
+    return of(this.demoCommunities).pipe(
       map((communities) => {
-        // Üye sayısına göre çoktan aza sırala ve limit kadarını al
         return communities.sort((a, b) => b.memberCount - a.memberCount).slice(0, limit);
-      }),
-      catchError((error) => {
-        console.error('Popüler topluluklar yüklenemedi:', error);
-        return of([]);
       })
     );
   }
 
   // Topluluk Detayı Getir
   getCommunityById(id: number): Observable<Community> {
+    // Önce statik veride ara
+    const demoItem = this.demoCommunities.find(c => c.id === id);
+    if (demoItem) {
+      return of(demoItem);
+    }
+
+    // Bulunamazsa backend'e sor (şu an çalışmayacak ama kod kalsın)
     return this.http.get<CommunityDto>(`${this.apiUrl}/${id}`).pipe(
       map((response) => this.mapToCommunity(response)),
       catchError((error) => {

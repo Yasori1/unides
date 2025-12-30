@@ -3,6 +3,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterModule, Router } from '@angular/router'; 
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { NgxTypedWriterModule } from 'ngx-typed-writer';
 import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
 import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
 
@@ -40,22 +41,26 @@ interface Announcement {
 }
 
 @Component({
-  selector: 'app-home', // DÜZELTİLDİ
+  selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, SiteNavbarComponent, SiteFooterComponent],
-  templateUrl: './home.component.html', // DÜZELTİLDİ
-  styleUrls: ['./home.component.scss']  // DÜZELTİLDİ
+  imports: [CommonModule, RouterModule, FormsModule, NgxTypedWriterModule, SiteNavbarComponent, SiteFooterComponent],
+  templateUrl: './home.component.html',
+  styleUrls: ['./home.component.scss']
 })
-export class HomeComponent implements OnInit, OnDestroy { // DÜZELTİLDİ (Home3Component -> HomeComponent)
+export class HomeComponent implements OnInit, OnDestroy {
 
-  // --- Animasyon Değişkenleri ---
-  typingText: string = 'Toplulukları'; 
-  words: string[] = ['Toplulukları', 'Etkinlikleri', 'Duyuruları', 'Fırsatları'];
-  wordIndex = 0;
-  charIndex = 0;
-  isDeleting = false;
-  typingSpeed = 100;
-  typewriterInterval: any;
+  // --- Typewriter Değişkenleri ---
+  // ngx-typed-writer kütüphanesi kullanılıyor
+  typedStrings: string[] = ['Toplulukları', 'Etkinlikleri', 'Duyuruları', 'Fırsatları'];
+
+  // Eski typewriter değişkenleri (kaldırılabilir ama şimdilik yorum satırına alalım)
+  // typingText: string = 'Toplulukları'; 
+  // words: string[] = ['Toplulukları', 'Etkinlikleri', 'Duyuruları', 'Fırsatları'];
+  // wordIndex = 0;
+  // charIndex = 0;
+  // isDeleting = false;
+  // typingSpeed = 100;
+  // typewriterInterval: any;
 
   // --- Arama ve UI Değişkenleri ---
   searchText: string = '';
@@ -87,45 +92,23 @@ export class HomeComponent implements OnInit, OnDestroy { // DÜZELTİLDİ (Home
   }
 
   ngOnInit() {
-    if (isPlatformBrowser(this.platformId)) {
-      this.startTypewriter();
-    }
+    // Eski typewriter metodunu çağırmıyoruz, kütüphane otomatik çalışacak
+    // if (isPlatformBrowser(this.platformId)) {
+    //   this.startTypewriter();
+    // }
     this.loadData();
   }
 
   ngOnDestroy() {
-    if (this.typewriterInterval) clearTimeout(this.typewriterInterval);
+    // if (this.typewriterInterval) clearTimeout(this.typewriterInterval);
   }
 
   // --- Video İşlemleri ---
   openVideo() { this.showVideo = true; }
   closeVideo() { this.showVideo = false; }
 
-  // --- Typewriter (Yazı Yazma) Efekti ---
-  startTypewriter() {
-    const currentWord = this.words[this.wordIndex];
-    
-    if (this.isDeleting) {
-      this.typingText = currentWord.substring(0, this.charIndex - 1);
-      this.charIndex--;
-      this.typingSpeed = 50; 
-    } else {
-      this.typingText = currentWord.substring(0, this.charIndex + 1);
-      this.charIndex++;
-      this.typingSpeed = 150; 
-    }
-
-    if (!this.isDeleting && this.charIndex === currentWord.length) {
-      this.isDeleting = true;
-      this.typingSpeed = 2000; 
-    } else if (this.isDeleting && this.charIndex === 0) {
-      this.isDeleting = false;
-      this.wordIndex = (this.wordIndex + 1) % this.words.length;
-      this.typingSpeed = 500; 
-    }
-
-    this.typewriterInterval = setTimeout(() => this.startTypewriter(), this.typingSpeed);
-  }
+  // Eski manuel typewriter değişkenleri (kaldırıldı)
+  // wordIndex, charIndex, isDeleting, typingSpeed, typewriterInterval gibi değişkenler artık kullanılmıyor.
 
   // --- Tarih Formatlama ---
   formatDateTr(date: Date): string {

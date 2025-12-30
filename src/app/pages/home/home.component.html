@@ -15,37 +15,37 @@
 
 <app-site-navbar />
 
-<header class="hero-louise">
-  <div class="container hero-content">
-
-    <div class="hero-text text-center">
-      <h1 class="main-title">
-        Üniversite Hayatını ve <br>
-        <span class="typewriter-text">{{ typingText }}</span>
-        <br>Burada Keşfet
-      </h1>
-      <p class="sub-text">
-        Türkiye'nin 81 ilindeki tüm öğrenci toplulukları, etkinlikler ve fırsatlar tek bir platformda.
-      </p>
-    </div>
-
-    <div class="hero-search-box glass-white fade-in-up">
-      <div class="search-inner">
-        <div class="input-block grow">
-          <i class="icon-search"></i>
-          <input type="text"
-                 placeholder="Ne arıyorsun? (Yapay Zeka Zirvesi, Bilgisayar Kulübü...)"
-                 [(ngModel)]="searchText"
-                 (keydown.enter)="onSearch()">
+<div class="main-banner-wrapper" style="background-image: url('assets/images/banner-bg1.jpg');">
+    <div class="container">
+        <div class="banner-wrapper-content">
+            <h1>
+                Üniversite Hayatını ve
+                <ngx-typed-writer
+                    [strings]="typedStrings"
+                    [cursorChar]="'|'"
+                    [showCursor]="true"
+                    [backSpeed]="50"
+                    [typeSpeed]="100"
+                /> <br>Burada Keşfet
+            </h1>
+            <p>
+                Türkiye'nin 81 ilindeki tüm öğrenci toplulukları, etkinlikler ve fırsatlar tek bir platformda. Aradığınız her şeye kolayca ulaşın.
+            </p>
+            <div class="search-form">
+                <input 
+                    type="text" 
+                    class="input-search" 
+                    placeholder="Ne arıyorsun? (Yapay Zeka Zirvesi, Bilgisayar Kulübü...)"
+                    [(ngModel)]="searchText"
+                    (keydown.enter)="onSearch()"
+                >
+                <button type="button" (click)="onSearch()">
+                    ARA
+                </button>
+            </div>
         </div>
-        <button class="btn-hero-search" (click)="onSearch()">
-          ARA
-        </button>
-      </div>
     </div>
-
-  </div>
-</header>
+</div>
 
 <section class="section-communities">
   <div class="container">
