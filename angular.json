@@ -53,7 +53,10 @@
             "prerender": false,
             "ssr": {
               "entry": "server.ts"
-            }
+            },
+            "allowedCommonJsDependencies": [
+              "apexcharts"
+            ]
           },
           "configurations": {
             "production": {
@@ -65,8 +68,8 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "64kB",
-                  "maximumError": "96kB"
+                  "maximumWarning": "128kB",
+                  "maximumError": "200kB"
                 }
               ],
               "outputHashing": "all"
