@@ -244,6 +244,7 @@
   height: 100%;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
   position: relative;
+  cursor: pointer; // Tıklanabilir olduğunu göster
 
   &:hover {
     transform: translateY(-8px);

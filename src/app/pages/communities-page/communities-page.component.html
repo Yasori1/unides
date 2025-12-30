@@ -77,8 +77,8 @@
     <div class="grid-container" *ngIf="!isLoading && displayedCommunities.length > 0">
       <div
         *ngFor="let item of displayedCommunities"
+        (click)="navigateToDetail(item.id)"
         class="community-card"
-        (click)="goToDetail(item.id)"
         style="cursor: pointer;"
       >
         <div class="cover-area">

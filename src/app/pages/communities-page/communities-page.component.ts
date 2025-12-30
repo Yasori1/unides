@@ -43,8 +43,8 @@ export class CommunitiesPageComponent implements OnInit {
 
   constructor(
     private communityService: CommunityService,
-    private route: ActivatedRoute, // Route servisi inject edildi
-    private router: Router,
+    private route: ActivatedRoute,
+    private router: Router, // Router servisi inject edildi
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -63,29 +63,45 @@ export class CommunitiesPageComponent implements OnInit {
 
     this.isLoading = true;
 
-    // Servisten (artık statik) veri çek
+    // Servisten verileri çek (API yoksa Mock döner)
     this.communityService.getAllCommunities().subscribe({
       next: (data) => {
-        this.allCommunities = data;
-        
+        // Eğer API'den veri gelmezse veya boş gelirse ve mock veri kullanmak istersek:
+        if (data.length === 0) {
+          this.allCommunities = this.communityService.getMockCommunities();
+        } else {
+          this.allCommunities = data;
+        }
+
         // Filtre dropdownlarını doldur
-        this.cities = [...new Set(data.map(c => c.city || 'Belirsiz'))].sort();
-        this.categories = [...new Set(data.map(c => c.category))].sort();
-        
-        // URL Parametrelerini Kontrol Et
+        this.cities = [...new Set(this.allCommunities.map(c => c.city || 'Belirsiz'))].sort();
+        this.categories = [...new Set(this.allCommunities.map(c => c.category))].sort();
+
+        // --- ÖNEMLİ: URL Parametrelerini Kontrol Et ---
         const queryParams = this.route.snapshot.queryParams;
+
         if (queryParams['search']) {
           this.searchText = queryParams['search'];
         }
-        if (queryParams['city'] && this.cities.includes(queryParams['city'])) {
-           this.selectedCity = queryParams['city'];
+
+        if (queryParams['city']) {
+          // Gelen şehir verimizde varsa seçili hale getir
+          if (this.cities.includes(queryParams['city'])) {
+            this.selectedCity = queryParams['city'];
+          }
         }
 
+        // Filtreleri uygula
         this.applyFilters();
         this.isLoading = false;
       },
       error: (err) => {
-        console.error(err);
+        console.error('Topluluklar yüklenirken hata oluştu:', err);
+        // Hata durumunda mock veriyi kullan
+        this.allCommunities = this.communityService.getMockCommunities();
+        this.cities = [...new Set(this.allCommunities.map(c => c.city || 'Belirsiz'))].sort();
+        this.categories = [...new Set(this.allCommunities.map(c => c.category))].sort();
+        this.applyFilters();
         this.isLoading = false;
       }
     });
@@ -158,6 +174,11 @@ export class CommunitiesPageComponent implements OnInit {
     }
   }
 
+  // Detay sayfasına yönlendirme
+  navigateToDetail(id: number) {
+    this.router.navigate(['/communities', id]);
+  }
+
   // --- Banner Mouse Efekti ---
   onHeroMouseMove(event: MouseEvent) {
     if (isPlatformBrowser(this.platformId)) {
@@ -166,9 +187,5 @@ export class CommunitiesPageComponent implements OnInit {
       this.heroMoveX = x / 40;
       this.heroMoveY = y / 40;
     }
-  }
-
-  goToDetail(id: number) {
-    this.router.navigate(['/communities', id]);
   }
 }
