@@ -65,9 +65,10 @@ export class AnnouncementDetailComponent implements OnInit {
       },
       error: (err) => {
         console.error('Duyuru yüklenemedi:', err);
-        if (isPlatformBrowser(this.platformId)) {
-          this.router.navigate(['/announcements']);
-        }
+        // Hata durumunda hemen yönlendirme yapma, belki geçici bir hatadır.
+        // if (isPlatformBrowser(this.platformId)) {
+        //   this.router.navigate(['/announcements']);
+        // }
         this.isLoading = false;
       },
     });

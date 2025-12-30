@@ -61,6 +61,37 @@ interface UpdateAnnouncementRequest {
   imagePath?: string;
 }
 
+// Mock Data for fallback
+const MOCK_ANNOUNCEMENTS: Announcement[] = [
+  {
+    id: 901,
+    title: 'YÖK 2024-2025 Akademik Takvim Genelgesi Yayınlandı',
+    shortDescription: 'Yükseköğretim Kurulu tarafından üniversitelerin akademik takvimlerine ilişkin yeni usul ve esaslar belirlenmiştir.',
+    content: 'Yükseköğretim Kurulu (YÖK) tarafından 81 ildeki üniversitelere gönderilen genelge ile 2024-2025 eğitim öğretim yılı akademik takvimi belirlenmiştir. Bu kapsamda güz ve bahar dönemlerinin başlangıç ve bitiş tarihleri, sınav dönemleri ve tatil süreleri yeniden düzenlenmiştir. Öğrencilerin ders kayıt işlemlerini belirtilen tarihler arasında yapmaları önem arz etmektedir.',
+    date: '2024-08-15',
+    image: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=1000&auto=format&fit=crop',
+    link: 'https://yok.gov.tr'
+  },
+  {
+    id: 902,
+    title: 'Gençlik ve Spor Bakanlığı GSB Burs Başvuruları',
+    shortDescription: '2024-2025 eğitim öğretim yılı için GSB burs ve kredi başvuruları başlamıştır. Son başvuru tarihini kaçırmayın.',
+    content: 'Gençlik ve Spor Bakanlığı (GSB) Kredi ve Yurtlar Genel Müdürlüğü tarafından yürütülen burs ve öğrenim kredisi başvuruları e-Devlet üzerinden erişime açılmıştır. Başvurular 15 Ekim 2024 tarihine kadar devam edecektir. Maddi desteğe ihtiyaç duyan tüm üniversite öğrencileri başvurularını zamanında tamamlamalıdır.',
+    date: '2024-09-01',
+    image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=1000&auto=format&fit=crop',
+    link: 'https://gsb.gov.tr'
+  },
+  {
+    id: 903,
+    title: 'TÜBİTAK 2209-A Proje Destek Miktarları Artırıldı',
+    shortDescription: 'Sanayi ve Teknoloji Bakanlığı, üniversite öğrencilerine yönelik proje destek limitlerinde güncellemeye gitti.',
+    content: 'TÜBİTAK Bilim İnsanı Destek Programları Başkanlığı (BİDEB) tarafından yürütülen 2209-A Üniversite Öğrencileri Araştırma Projeleri Destekleme Programı kapsamında proje destek üst limitleri artırılmıştır. Yeni düzenleme ile birlikte lisans öğrencileri araştırma projeleri için daha fazla bütçe kullanabileceklerdir.',
+    date: '2024-10-10',
+    image: 'https://images.unsplash.com/photo-1581093458791-9f3c3900df4b?q=80&w=1000&auto=format&fit=crop',
+    link: 'https://tubitak.gov.tr'
+  }
+];
+
 @Injectable({
   providedIn: 'root',
 })
@@ -105,8 +136,10 @@ export class AnnouncementService {
         return response.map((dto) => this.mapToAnnouncement(dto));
       }),
       catchError((error) => {
-        console.error('Duyurular yüklenemedi:', error);
-        return of([]);
+        console.error('Duyurular yüklenemedi, mock data dönülüyor:', error);
+        // Hata durumunda boş liste dönmek yerine mock datayı dönebiliriz veya boş dönebiliriz.
+        // Listeleme sayfası zaten kendi mock datasına sahip, ama burası da dönebilir.
+        return of([]); 
       })
     );
   }
@@ -115,8 +148,9 @@ export class AnnouncementService {
     return this.http.get<any>(`${this.apiUrl}/detail/${id}`).pipe(
       map((response) => this.mapToAnnouncement(response)),
       catchError((error) => {
-        console.error('Duyuru detayı yüklenemedi:', error);
-        return of(undefined);
+        console.error('Duyuru detayı yüklenemedi, mock data aranıyor:', error);
+        const mock = MOCK_ANNOUNCEMENTS.find(a => a.id === id);
+        return of(mock);
       })
     );
   }

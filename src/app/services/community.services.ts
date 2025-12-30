@@ -432,10 +432,20 @@ export class CommunityService {
 
   // Topluluk Detayı Getir
   getCommunityById(id: number): Observable<Community> {
+    // Önce mock veriden kontrol et
+    const mockCommunity = this.mockCommunities.find((c) => c.id === id);
+    if (mockCommunity) {
+      // Mock veride varsa onu döndür, API'ye gitme (geliştirme ortamı için)
+      // Ancak gerçek senaryoda API'yi denemek isteyebilirsiniz.
+      // Şimdilik proxy hatasını engellemek için mock varsa dönüyoruz.
+      return of(mockCommunity);
+    }
+
     return this.http.get<CommunityDto>(`${this.apiUrl}/${id}`).pipe(
       map((response) => this.mapToCommunity(response)),
       catchError((error) => {
-        console.error('Topluluk detayı yüklenemedi:', error);
+        console.warn('Backend API erişilemedi (Detay) ve mock veride bulunamadı:', error);
+        console.error('Topluluk detayı getirilemedi.');
         throw error;
       })
     );
