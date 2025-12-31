@@ -25,10 +25,11 @@ $dark-text: #0f172a;
     align-items: center;
     height: 100%;
     padding: 0 5%;
+    position: relative;
   }
 
   .brand {
-    margin-left: -60px; /* Logoyu sola çektik */
+    margin-left: 0;
   }
 
   .brand img.logo-transparent {
@@ -39,14 +40,16 @@ $dark-text: #0f172a;
   }
 
   .nav-links {
-    flex: 1;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
     justify-content: center;
     gap: 35px;
     list-style: none;
     margin: 0;
     padding: 0;
-    margin-left: -220px;
+    flex: 0 0 auto;
 
     li {
       position: relative;
@@ -164,6 +167,36 @@ $dark-text: #0f172a;
       color: $primary;
       box-shadow: none;
     }
+  }
+}
+
+.btn-solid-custom {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 30px;
+  border: 2px solid $primary;
+  border-radius: 50px;
+  background: $primary;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: $primary-dark;
+    border-color: $primary-dark;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba($primary, 0.25);
+  }
+
+  &.small {
+    padding: 8px 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-width: 1.5px;
   }
 }
 

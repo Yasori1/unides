@@ -3,43 +3,44 @@
 <div class="video-modal-overlay" *ngIf="showVideo" (click)="closeVideo()">
   <div class="video-modal-content" (click)="$event.stopPropagation()">
     <button class="close-btn" (click)="closeVideo()">✖</button>
-    <iframe 
-      [src]="safeVideoUrl" 
-      title="Tanıtım Videosu" 
-      frameborder="0" 
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-      allowfullscreen>
+    <iframe
+      [src]="safeVideoUrl"
+      title="Tanıtım Videosu"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen
+    >
     </iframe>
   </div>
 </div>
 
 <app-site-navbar />
 
-<div class="main-banner-wrapper" style="background-image: url('assets/images/banner-bg1.jpg');">
-    <div class="container">
-        <div class="banner-wrapper-content">
-            <h1>
-                Üniversite Hayatını ve <br>
-                <span class="highlight-text">{{ typingText }}<span class="cursor">|</span></span> <br>Burada Keşfet
-            </h1>
-            <p>
-                Türkiye'nin 81 ilindeki tüm öğrenci toplulukları, etkinlikler ve fırsatlar tek bir platformda. Aradığınız her şeye kolayca ulaşın.
-            </p>
-            
-            <form (submit)="onSearch(); $event.preventDefault()">
-                <input 
-                    type="text" 
-                    class="input-search" 
-                    placeholder="Ne arıyorsun? (Yapay Zeka, Kampüs Etkinliği...)"
-                    [(ngModel)]="searchText"
-                    name="searchText"
-                >
-                <button type="button" (click)="onSearch()">
-                    ARA
-                </button>
-            </form>
-        </div>
+<div class="main-banner-wrapper" style="background-image: url('assets/images/banner-bg1.jpg')">
+  <div class="container">
+    <div class="banner-wrapper-content">
+      <h1>
+        Üniversite Hayatını ve <br />
+        <span class="highlight-text">{{ typingText }}<span class="cursor">|</span></span>
+        <br />Burada Keşfet
+      </h1>
+      <p>
+        Türkiye'nin 81 ilindeki tüm öğrenci toplulukları, etkinlikler ve fırsatlar tek bir
+        platformda. Aradığınız her şeye kolayca ulaşın.
+      </p>
+
+      <form (submit)="onSearch(); $event.preventDefault()">
+        <input
+          type="text"
+          class="input-search"
+          placeholder="Ne arıyorsun? (Yapay Zeka, Kampüs Etkinliği...)"
+          [(ngModel)]="searchText"
+          name="searchText"
+        />
+        <button type="button" (click)="onSearch()">ARA</button>
+      </form>
     </div>
+  </div>
 </div>
 
 <section class="section-communities">
@@ -51,11 +52,13 @@
     </div>
 
     <div class="communities-grid" *ngIf="!isLoading">
-      <div class="community-card compact fade-in-up"
-           *ngFor="let comm of featuredCommunities"
-           (click)="goToCommunityDetail(comm.id)">
+      <div
+        class="community-card compact fade-in-up"
+        *ngFor="let comm of featuredCommunities"
+        (click)="goToCommunityDetail(comm.id)"
+      >
         <div class="card-image-wrapper">
-          <img [src]="comm.image" [alt]="comm.name">
+          <img [src]="comm.image" [alt]="comm.name" />
           <div class="card-overlay"></div>
         </div>
         <div class="card-content">
@@ -85,29 +88,32 @@
     </div>
 
     <div class="events-grid-modern">
-      <div class="event-card-modern fade-in-up"
-           *ngFor="let event of upcomingEvents"
-           (click)="goToEventDetail(event.id)">
-
-        <div class="countdown-badge">
-          ⏳ {{ getRemainingTime(event.date) }}
-        </div>
+      <div
+        class="event-card-modern fade-in-up"
+        *ngFor="let event of upcomingEvents"
+        (click)="goToEventDetail(event.id)"
+      >
+        <div class="countdown-badge">⏳ {{ getRemainingTime(event.date) }}</div>
 
         <div class="logo-box-modern">
           <img
             [src]="event.communityLogo || 'assets/img/placeholder-avatar.svg'"
             alt="Logo"
             onerror="this.src='assets/img/placeholder-avatar.svg'"
-          >
+          />
         </div>
 
         <div class="info-box-modern">
           <span class="host-community">{{ event.communityName }}</span>
 
           <h4 class="event-title">{{ event.title }}</h4>
-          
+
           <p class="event-desc-short">
-            {{ event.description.length > 75 ? (event.description | slice:0:75) + '...' : event.description }}
+            {{
+              event.description.length > 75
+                ? (event.description | slice : 0 : 75) + '...'
+                : event.description
+            }}
           </p>
 
           <div class="event-meta">
@@ -115,11 +121,10 @@
             <span class="location">📍 {{ event.location }}</span>
           </div>
         </div>
-
       </div>
     </div>
 
-    <div class="view-all-wrapper" style="margin-top: 40px;">
+    <div class="view-all-wrapper" style="margin-top: 40px">
       <button class="btn-outline-custom" routerLink="/events">Daha Fazlası</button>
     </div>
   </div>
@@ -171,31 +176,46 @@
       <div class="cube">
         <div class="cube-face cube-front">
           <div class="nc-item" *ngFor="let nc of newestCommunities.slice(0, 4)">
-            <img [src]="nc.image || 'assets/img/placeholder-avatar.svg'" alt="" onerror="this.src='assets/img/placeholder-avatar.svg'">
+            <img
+              [src]="nc.image || 'assets/img/placeholder-avatar.svg'"
+              alt=""
+              onerror="this.src='assets/img/placeholder-avatar.svg'"
+            />
             <span>{{ nc.name }}</span>
           </div>
         </div>
         <div class="cube-face cube-back">
           <div class="nc-item" *ngFor="let nc of newestCommunities.slice(4, 8)">
-             <img [src]="nc.image || 'assets/img/placeholder-avatar.svg'" alt="" onerror="this.src='assets/img/placeholder-avatar.svg'">
-             <span>{{ nc.name }}</span>
+            <img
+              [src]="nc.image || 'assets/img/placeholder-avatar.svg'"
+              alt=""
+              onerror="this.src='assets/img/placeholder-avatar.svg'"
+            />
+            <span>{{ nc.name }}</span>
           </div>
         </div>
         <div class="cube-face cube-bottom">
-           <div class="nc-item" *ngFor="let nc of newestCommunities.slice(8, 12)">
-             <img [src]="nc.image || 'assets/img/placeholder-avatar.svg'" alt="" onerror="this.src='assets/img/placeholder-avatar.svg'">
-             <span>{{ nc.name }}</span>
-           </div>
+          <div class="nc-item" *ngFor="let nc of newestCommunities.slice(8, 12)">
+            <img
+              [src]="nc.image || 'assets/img/placeholder-avatar.svg'"
+              alt=""
+              onerror="this.src='assets/img/placeholder-avatar.svg'"
+            />
+            <span>{{ nc.name }}</span>
+          </div>
         </div>
         <div class="cube-face cube-top">
-            <div class="nc-item" *ngFor="let nc of newestCommunities.slice(0, 4)">
-                <img [src]="nc.image || 'assets/img/placeholder-avatar.svg'" alt="" onerror="this.src='assets/img/placeholder-avatar.svg'">
-                <span>{{ nc.name }}</span>
-            </div>
+          <div class="nc-item" *ngFor="let nc of newestCommunities.slice(0, 4)">
+            <img
+              [src]="nc.image || 'assets/img/placeholder-avatar.svg'"
+              alt=""
+              onerror="this.src='assets/img/placeholder-avatar.svg'"
+            />
+            <span>{{ nc.name }}</span>
+          </div>
         </div>
       </div>
     </div>
-
   </div>
   <div class="marquee-border bottom"></div>
 </section>
@@ -205,13 +225,18 @@
     <div class="about-grid-modern">
       <div class="visual-side fade-in-left">
         <div class="video-container-tall" (click)="openVideo()">
-          <img [src]="videoThumbnail" class="cover-img" alt="Tanıtım Videosu">
+          <img
+            [src]="videoThumbnail"
+            class="cover-img"
+            alt="Tanıtım Videosu"
+            onerror="this.src='assets/unides_video_gorsel.jpg'"
+          />
           <div class="play-overlay">
             <div class="play-btn-pulse"><div class="triangle"></div></div>
           </div>
           <div class="floating-badge">
             <span class="big-num">81</span>
-            <span class="small-text">İlde<br>Hep Birlikteyiz</span>
+            <span class="small-text">İlde<br />Hep Birlikteyiz</span>
           </div>
         </div>
       </div>
@@ -220,16 +245,16 @@
         <h6 class="sub-head"><i class="icon-star">★</i> HAKKIMIZDA</h6>
 
         <h2 class="big-head">
-          Üniversite Topluluklarının<br>
+          Üniversite Topluluklarının<br />
           <span class="text-primary">Dijital Dönüşümü.</span>
         </h2>
         <p class="paragraph">
-          ÜNİDES, Türkiye'nin dört bir yanındaki üniversite topluluklarını dijital bir çatı altında birleştiren, performans odaklı ve sürdürülebilir bir ekosistemdir. Gençlerin potansiyelini açığa çıkarmak için yenilikçi çözümler sunuyoruz.
+          ÜNİDES, Türkiye'nin dört bir yanındaki üniversite topluluklarını dijital bir çatı altında
+          birleştiren, performans odaklı ve sürdürülebilir bir ekosistemdir. Gençlerin potansiyelini
+          açığa çıkarmak için yenilikçi çözümler sunuyoruz.
         </p>
 
-        <button class="btn-outline-custom" routerLink="/about">
-            Daha Fazlası
-        </button>
+        <button class="btn-outline-custom" routerLink="/about">Daha Fazlası</button>
       </div>
     </div>
   </div>

@@ -13,7 +13,7 @@ $light-text: #475569;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   border-top: 1px solid rgba(226, 232, 240, 0.8);
-  padding: 30px 0 10px 0;
+  padding: 50px 0 20px 0;
   margin-top: 40px;
   position: relative;
   z-index: 10;
@@ -22,7 +22,7 @@ $light-text: #475569;
     display: grid;
     grid-template-columns: 2fr 1fr 1fr;
     gap: 40px;
-    padding-bottom: 15px;
+    padding-bottom: 25px;
 
     .footer-col {
       display: flex;
@@ -50,19 +50,13 @@ $light-text: #475569;
 
       .address-box {
         display: flex;
-        gap: 10px;
+        gap: 0;
         align-items: flex-start;
         margin-bottom: 12px;
         font-size: 13px;
         color: $light-text;
         line-height: 1.4;
         font-weight: 400;
-
-        i {
-          color: $primary;
-          font-style: normal;
-          margin-top: 2px;
-        }
       }
 
       .social-icons {

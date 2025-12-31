@@ -5,8 +5,7 @@ import { AboutPageComponent } from './pages/about-page/about-page.component';
 import { TeamPageComponent } from './pages/team-page/team-page.component';
 import { ContactPageComponent } from './pages/contact-page/contact-page.component';
 import { FaqPageComponent } from './pages/faq-page/faq-page.component';
-import { LoginPageComponent } from './pages/login-page/login-page.component';
-import { RegisterPageComponent } from './pages/register-page/register-page.component';
+import { ComingSoonComponent } from './pages/coming-soon/coming-soon.component';
 import { PrivacyPolicyPageComponent } from './pages/privacy-policy-page/privacy-policy-page.component';
 import { TermsConditionsPageComponent } from './pages/terms-conditions-page/terms-conditions-page.component';
 import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.component';
@@ -58,13 +57,15 @@ export const routes: Routes = [
   { path: 'terms-conditions', component: TermsConditionsPageComponent },
 
   // --- LOGIN & REGISTER ROTALARI ---
-  { path: 'login', component: LoginPageComponent },
+  { path: 'login', component: ComingSoonComponent, data: { title: 'Giriş Yap' } },
   { path: 'corporate-login', component: CorporateLoginComponent },
   { path: 'community-login', component: CommunityLoginComponent },
 
-  { path: 'register', component: RegisterPageComponent },
+  { path: 'register', component: ComingSoonComponent, data: { title: 'Kayıt Ol' } },
   { path: 'corporate-register', component: CorporateRegisterComponent },
   { path: 'community-register', component: CommunityRegisterComponent },
+
+  { path: 'coming-soon', component: ComingSoonComponent, data: { title: 'Bu Sayfa' } },
 
   // ŞİFRE SIFIRLAMA
   { path: 'reset-password', component: ResetPasswordComponent },

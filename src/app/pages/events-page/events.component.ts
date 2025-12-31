@@ -147,7 +147,8 @@ export class EventsComponent implements OnInit, AfterViewInit {
       club: 'Güzel Sanatlar Kulübü',
       semester: 'Kültür Topluluğu',
       quota: 300,
-      imageUrl: 'https://images.unsplash.com/photo-1518998053901-5348d3969105?q=80&w=800&auto=format&fit=crop',
+      imageUrl:
+        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSFBbo43qexwVoJjVSXp85WZuIEqVlu-_j0Yw&s',
       color: '#db2777',
       status: 'upcoming',
       city: 'İstanbul'

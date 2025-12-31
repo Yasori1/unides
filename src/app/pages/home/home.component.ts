@@ -63,8 +63,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   // --- Arama ve UI Değişkenleri ---
   searchText: string = '';
   isLoading: boolean = true;
-  videoThumbnail: string =
-    'https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=1000';
+  // Video açılmadan önce görünen kapak görseli
+  videoThumbnail: string = 'assets/unides_video_gorsel.jpg';
 
   showVideo: boolean = false;
   safeVideoUrl: SafeResourceUrl;
