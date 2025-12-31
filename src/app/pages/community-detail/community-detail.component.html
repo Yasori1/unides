@@ -10,14 +10,14 @@
 <div *ngIf="!isLoading && community" class="community-detail-page">
   <!-- Hero Banner -->
   <div class="hero-section" (mousemove)="onHeroMouseMove($event)">
-    <div class="background-wrapper" *ngIf="community.banner">
-      <img [src]="community.banner" [alt]="community.name" class="hero-image" />
-    </div>
-    <div class="background-wrapper" *ngIf="!community.banner">
-      <div
-        class="interactive-blob"
-        [style.transform]="'translate(' + -heroMoveX + 'px, ' + -heroMoveY + 'px)'"
-      ></div>
+    <div class="background-wrapper">
+      <img
+        [src]="community.banner || community.coverImage || 'assets/img/placeholder-cover.svg'"
+        [alt]="community.name"
+        class="hero-image"
+        loading="lazy"
+        onerror="this.src='assets/img/placeholder-cover.svg'"
+      />
     </div>
     <div class="hero-overlay">
       <div class="container">
@@ -54,6 +54,10 @@
             <div class="meta-item" *ngIf="community.city">
               <i class="bx bxs-map"></i>
               <span>{{ community.city }}</span>
+            </div>
+            <div class="meta-item" *ngIf="community.email">
+              <i class="bx bx-envelope"></i>
+              <span>{{ community.email }}</span>
             </div>
             <div class="meta-item">
               <i class="bx bx-group"></i>

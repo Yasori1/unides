@@ -96,6 +96,36 @@ export class AnnouncementsPageComponent implements OnInit {
             image: 'https://images.unsplash.com/photo-1581093458791-9f3c3900df4b?q=80&w=1000&auto=format&fit=crop',
             category: 'Bakanlık',
             link: 'tubitak-destek-artisi' // Eklendi
+          },
+          {
+            id: 904,
+            title: 'ÜNİDES 2025 Destek Programı Başvuruları Açıldı',
+            shortDescription: 'Üniversite topluluklarının proje ve etkinliklerine yönelik destek programı için başvurular başladı.',
+            content: '',
+            date: '2024-11-05',
+            image: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?q=80&w=1000&auto=format&fit=crop',
+            category: 'Bakanlık',
+            link: 'unides-destek-programi-2025'
+          },
+          {
+            id: 905,
+            title: 'Genç Ofis Etkinlik Takvimi Güncellendi',
+            shortDescription: '81 ildeki Genç Ofis etkinlikleri için yeni takvim duyuruldu. Takvim üzerinden takip edebilirsiniz.',
+            content: '',
+            date: '2024-11-18',
+            image: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=1000&auto=format&fit=crop',
+            category: 'Bakanlık',
+            link: 'genc-ofis-etkinlik-takvimi'
+          },
+          {
+            id: 906,
+            title: 'Topluluklar Arası İş Birliği Çağrısı',
+            shortDescription: 'Üniversite toplulukları için ortak proje ve etkinlik çağrısı yayınlandı. Detaylar duyuruda.',
+            content: '',
+            date: '2024-12-02',
+            image: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?q=80&w=1000&auto=format&fit=crop',
+            category: 'Bakanlık',
+            link: 'topluluk-isbirligi-cagrisi'
           }
         ];
 

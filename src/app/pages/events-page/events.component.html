@@ -11,8 +11,7 @@
   <div class="container relative-content">
     <h1 class="page-title">ÜNİDES <span class="highlight-text">ETKİNLİKLER</span></h1>
     <p class="page-subtitle">
-      Kampüsün tüm renkleri tek bir platformda. Aktif olarak devam eden projelerimize katılabilir
-      veya gelecek etkinlikleri takvimine ekleyebilirsin.
+      Kampüs sınırlarını aş, dilediğin etkinliği keşfet. Sana uygun olanı bul ve hemen katıl.
     </p>
   </div>
 
@@ -101,7 +100,7 @@
       <p>{{ activeCategory }} kategorisi listeleniyor.</p>
     </div>
 
-    <div class="col-12 text-center" *ngIf="displayedEvents.length === 0 && !isLoadingMore">
+    <div class="col-12 text-center" *ngIf="displayedEvents.length === 0">
       <div class="empty-state">
         <span
           class="material-symbols-outlined"
@@ -140,7 +139,7 @@
           <div class="tags-row">
             <span class="tag uni" title="{{ event.university }}">{{ event.university }}</span>
             <span class="tag semester" *ngIf="event.semester">
-              <span class="material-symbols-outlined" style="font-size: 14px;">groups</span> 
+              <span class="material-symbols-outlined" style="font-size: 14px">groups</span>
               {{ event.semester }}
             </span>
           </div>
@@ -159,18 +158,32 @@
       </div>
     </div>
 
-    <div class="load-more-container" *ngIf="hasMoreData && displayedEvents.length > 0">
-      <button class="load-more-btn" (click)="loadMoreEvents()" [disabled]="isLoadingMore">
-        <span *ngIf="!isLoadingMore">Daha Fazla Göster</span>
-        <span *ngIf="isLoadingMore" class="loading-content">
-          <div class="spinner-ring"></div>
-          Yükleniyor...
-        </span>
+    <div class="pagination-area" *ngIf="totalPages > 1 && displayedEvents.length > 0">
+      <button
+        class="page-btn prev"
+        [disabled]="currentPage === 1"
+        (click)="changePage(currentPage - 1)"
+      >
+        <i class="bx bx-chevron-left"></i>
       </button>
-    </div>
 
-    <div class="end-of-list" *ngIf="!hasMoreData && displayedEvents.length > 0">
-      Tüm etkinlikleri görüntülediniz 🎉
+      <ng-container *ngFor="let page of pages">
+        <button
+          class="page-btn number"
+          [class.active]="page === currentPage"
+          (click)="changePage(page)"
+        >
+          {{ page }}
+        </button>
+      </ng-container>
+
+      <button
+        class="page-btn next"
+        [disabled]="currentPage === totalPages"
+        (click)="changePage(currentPage + 1)"
+      >
+        <i class="bx bx-chevron-right"></i>
+      </button>
     </div>
 
     <div class="slider-section" #animItem>

@@ -11,9 +11,7 @@
 
   <div class="container relative-content">
     <h1 class="page-title">ÜNİDES <span class="highlight-text">TOPLULUKLAR</span></h1>
-    <p class="page-subtitle">
-      İlgi alanına uygun topluluğu bul, aramıza katıl ve üniversite hayatını renklendir.
-    </p>
+    <p class="page-subtitle">İlgi alanına uygun topluluğu bul ve aramıza katıl.</p>
   </div>
 
   <div class="scroll-indicator">
@@ -79,14 +77,14 @@
         *ngFor="let item of displayedCommunities"
         (click)="navigateToDetail(item.id)"
         class="community-card"
-        style="cursor: pointer;"
+        style="cursor: pointer"
       >
         <div class="cover-area">
           <img
             [src]="item.coverImage"
             [alt]="item.name"
             class="cover-img"
-            onerror="this.src='assets/img/placeholder-cover.jpg'"
+            onerror="this.src='assets/img/placeholder-cover.svg'"
           />
           <span class="category-badge">{{ item.category }}</span>
         </div>
@@ -98,12 +96,15 @@
                 [src]="item.logo"
                 [alt]="item.name"
                 class="logo-img"
-                onerror="this.src='assets/img/placeholder-logo.png'"
+                onerror="this.src='assets/img/placeholder-logo.svg'"
               />
             </div>
             <div class="title-wrapper">
               <h3 class="community-name">{{ item.name }}</h3>
               <span class="university-name">{{ item.university }}</span>
+              <span class="email-tag" *ngIf="item.email">
+                <i class="bx bx-envelope"></i> {{ item.email }}
+              </span>
               <span class="city-tag" *ngIf="item.city">
                 <i class="bx bxs-map"></i> {{ item.city }}
               </span>
@@ -112,20 +113,66 @@
 
           <p class="description">{{ item.description }}</p>
 
-          <div class="social-media-icons" *ngIf="item.instagram || item.youtube || item.twitter || item.tiktok || item.socialMedia">
-            <a *ngIf="item.instagram" [href]="item.instagram" target="_blank" class="social-icon instagram" (click)="$event.stopPropagation()" title="Instagram">
+          <div
+            class="social-media-icons"
+            *ngIf="
+              item.instagram || item.youtube || item.twitter || item.tiktok || item.socialMedia
+            "
+          >
+            <a
+              *ngIf="item.instagram"
+              [href]="item.instagram"
+              target="_blank"
+              class="social-icon instagram"
+              (click)="$event.stopPropagation()"
+              title="Instagram"
+            >
               <i class="bx bxl-instagram"></i>
             </a>
-            <a *ngIf="item.youtube" [href]="item.youtube" target="_blank" class="social-icon youtube" (click)="$event.stopPropagation()" title="Youtube">
+            <a
+              *ngIf="item.youtube"
+              [href]="item.youtube"
+              target="_blank"
+              class="social-icon youtube"
+              (click)="$event.stopPropagation()"
+              title="Youtube"
+            >
               <i class="bx bxl-youtube"></i>
             </a>
-            <a *ngIf="item.twitter" [href]="item.twitter" target="_blank" class="social-icon twitter" (click)="$event.stopPropagation()" title="Twitter">
+            <a
+              *ngIf="item.twitter"
+              [href]="item.twitter"
+              target="_blank"
+              class="social-icon twitter"
+              (click)="$event.stopPropagation()"
+              title="Twitter"
+            >
               <i class="bx bxl-twitter"></i>
             </a>
-            <a *ngIf="item.tiktok" [href]="item.tiktok" target="_blank" class="social-icon tiktok" (click)="$event.stopPropagation()" title="TikTok">
+            <a
+              *ngIf="item.tiktok"
+              [href]="item.tiktok"
+              target="_blank"
+              class="social-icon tiktok"
+              (click)="$event.stopPropagation()"
+              title="TikTok"
+            >
               <i class="bx bxl-tiktok"></i>
             </a>
-            <a *ngIf="item.socialMedia && !item.instagram && !item.youtube && !item.twitter && !item.tiktok" [href]="item.socialMedia" target="_blank" class="social-icon" (click)="$event.stopPropagation()" title="Sosyal Medya">
+            <a
+              *ngIf="
+                item.socialMedia &&
+                !item.instagram &&
+                !item.youtube &&
+                !item.twitter &&
+                !item.tiktok
+              "
+              [href]="item.socialMedia"
+              target="_blank"
+              class="social-icon"
+              (click)="$event.stopPropagation()"
+              title="Sosyal Medya"
+            >
               <i class="bx bxl-facebook"></i>
             </a>
           </div>

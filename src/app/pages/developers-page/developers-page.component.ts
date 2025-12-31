@@ -2,7 +2,6 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
 import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
-import { AvatarGroupComponent, AvatarUser } from '../../components/ui/avatar-group/avatar-group';
 import { ProfileCardComponent } from '../../components/ui/profile-card/profile-card';
 import { WavesComponent } from '../../components/ui/waves/waves';
 
@@ -22,7 +21,6 @@ interface Developer {
     CommonModule,
     SiteNavbarComponent,
     SiteFooterComponent,
-    AvatarGroupComponent,
     ProfileCardComponent,
     WavesComponent,
   ],
@@ -31,35 +29,6 @@ interface Developer {
   schemas: [CUSTOM_ELEMENTS_SCHEMA], // Bu satır 'spline-viewer' hatasını çözer
 })
 export class DevelopersPageComponent implements OnInit {
-  // Lider Kadro
-  leadDevelopers: AvatarUser[] = [
-    {
-      name: 'Safa G.',
-      role: 'Lead Architect',
-      image: 'https://randomuser.me/api/portraits/men/32.jpg',
-    },
-    {
-      name: 'Elif Y.',
-      role: 'Product Manager',
-      image: 'https://randomuser.me/api/portraits/women/44.jpg',
-    },
-    {
-      name: 'Caner K.',
-      role: 'Senior Backend',
-      image: 'https://randomuser.me/api/portraits/men/86.jpg',
-    },
-    {
-      name: 'Zeynep S.',
-      role: 'Senior Frontend',
-      image: 'https://randomuser.me/api/portraits/women/68.jpg',
-    },
-    {
-      name: 'Murat D.',
-      role: 'DevOps Engineer',
-      image: 'https://randomuser.me/api/portraits/men/46.jpg',
-    },
-  ];
-
   // Geliştiriciler
   developers: Developer[] = [
     {

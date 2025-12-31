@@ -343,6 +343,22 @@
         font-weight: 500;
         display: block;
       }
+      .email-tag {
+        font-size: 0.75rem;
+        color: var(--secondary-color);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 6px;
+        background: rgba(15, 23, 42, 0.03);
+        padding: 3px 10px;
+        border-radius: 6px;
+        font-weight: 600;
+        i {
+          color: var(--accent-color);
+          font-size: 0.95rem;
+        }
+      }
       .city-tag {
         font-size: 0.75rem;
         color: var(--accent-color);

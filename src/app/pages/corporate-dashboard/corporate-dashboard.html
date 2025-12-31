@@ -270,10 +270,10 @@
 
           <div class="cover-area">
             <img
-              [src]="item.coverImage || item.banner || 'assets/img/placeholder-cover.jpg'"
+              [src]="item.coverImage || item.banner || 'assets/img/placeholder-cover.svg'"
               [alt]="item.name"
               class="cover-img"
-              onerror="this.src='assets/img/placeholder-cover.jpg'"
+              onerror="this.src='assets/img/placeholder-cover.svg'"
             />
             <span class="category-badge">{{ item.category }}</span>
           </div>
@@ -285,7 +285,7 @@
                   [src]="item.logo"
                   [alt]="item.name"
                   class="logo-img"
-                  onerror="this.src='assets/img/placeholder-logo.png'"
+                  onerror="this.src='assets/img/placeholder-logo.svg'"
                 />
               </div>
               <div class="title-wrapper">

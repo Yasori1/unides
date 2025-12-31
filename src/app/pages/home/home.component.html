@@ -61,6 +61,7 @@
         <div class="card-content">
           <h3 class="comm-name">{{ comm.name }}</h3>
           <span class="comm-category">{{ comm.category }}</span>
+          <span class="comm-email">{{ comm.email }}</span>
           <div class="comm-stats">
             <span class="stat">👥 {{ comm.memberCount }} Üye</span>
             <span class="stat">📅 {{ comm.eventCount }} Etkinlik</span>
@@ -93,7 +94,11 @@
         </div>
 
         <div class="logo-box-modern">
-          <img [src]="event.communityLogo" alt="Logo">
+          <img
+            [src]="event.communityLogo || 'assets/img/placeholder-avatar.svg'"
+            alt="Logo"
+            onerror="this.src='assets/img/placeholder-avatar.svg'"
+          >
         </div>
 
         <div class="info-box-modern">
@@ -166,25 +171,25 @@
       <div class="cube">
         <div class="cube-face cube-front">
           <div class="nc-item" *ngFor="let nc of newestCommunities.slice(0, 4)">
-            <img [src]="nc.image" alt="">
+            <img [src]="nc.image || 'assets/img/placeholder-avatar.svg'" alt="" onerror="this.src='assets/img/placeholder-avatar.svg'">
             <span>{{ nc.name }}</span>
           </div>
         </div>
         <div class="cube-face cube-back">
           <div class="nc-item" *ngFor="let nc of newestCommunities.slice(4, 8)">
-             <img [src]="nc.image" alt="">
+             <img [src]="nc.image || 'assets/img/placeholder-avatar.svg'" alt="" onerror="this.src='assets/img/placeholder-avatar.svg'">
              <span>{{ nc.name }}</span>
           </div>
         </div>
         <div class="cube-face cube-bottom">
            <div class="nc-item" *ngFor="let nc of newestCommunities.slice(8, 12)">
-             <img [src]="nc.image" alt="">
+             <img [src]="nc.image || 'assets/img/placeholder-avatar.svg'" alt="" onerror="this.src='assets/img/placeholder-avatar.svg'">
              <span>{{ nc.name }}</span>
            </div>
         </div>
         <div class="cube-face cube-top">
             <div class="nc-item" *ngFor="let nc of newestCommunities.slice(0, 4)">
-                <img [src]="nc.image" alt="">
+                <img [src]="nc.image || 'assets/img/placeholder-avatar.svg'" alt="" onerror="this.src='assets/img/placeholder-avatar.svg'">
                 <span>{{ nc.name }}</span>
             </div>
         </div>

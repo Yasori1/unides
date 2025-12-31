@@ -456,6 +456,52 @@ $border-color: #e2e8f0;
   padding-bottom: 40px;
 }
 
+// --- PAGINATION (Communities page ile aynı tasarım) ---
+.pagination-area {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 60px;
+  flex-wrap: wrap;
+
+  .page-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    border: 1px solid $border-color;
+    background: $white;
+    color: $text-gray;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+
+    &:hover:not([disabled]) {
+      border-color: $primary-blue;
+      color: $primary-blue;
+    }
+
+    &.active {
+      background-color: $primary-blue;
+      color: $white;
+      border-color: $primary-blue;
+    }
+
+    &[disabled] {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background-color: #f4f4f5;
+    }
+
+    i {
+      font-size: 1.2rem;
+    }
+  }
+}
+
 .slider-section {
   padding: 30px 0 80px;
   overflow: hidden;

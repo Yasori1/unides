@@ -121,7 +121,7 @@ export class CommunityDashboardComponent implements OnInit {
     city: 'İstanbul',
     category: 'Teknoloji',
     logo: 'https://ui-avatars.com/api/?name=AI&background=14d2cc&color=fff&size=128&font-size=0.4',
-    banner: 'assets/img/placeholder-cover.jpg',
+    banner: 'assets/img/placeholder-cover.svg',
     balance: 18500,
     email: 'ai@itu.edu.tr',
     website: '',

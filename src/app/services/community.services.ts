@@ -91,8 +91,26 @@ interface UpdateCommunityRequest {
 })
 export class CommunityService {
   private apiUrl = '/api/Communities';
+  private readonly placeholderLogo = 'assets/img/placeholder-logo.svg';
+  private readonly placeholderCover = 'assets/img/placeholder-cover.svg';
 
   constructor(private http: HttpClient) {}
+
+  private ensureCommunityAssets(c: Community): Community {
+    const logo = c.logo && String(c.logo).trim() ? c.logo : this.placeholderLogo;
+    const coverCandidate = c.coverImage && String(c.coverImage).trim() ? c.coverImage : '';
+    const bannerCandidate = c.banner && String(c.banner).trim() ? c.banner : '';
+
+    const banner = bannerCandidate || coverCandidate || this.placeholderCover;
+    const coverImage = coverCandidate || bannerCandidate || this.placeholderCover;
+
+    return {
+      ...c,
+      logo,
+      banner,
+      coverImage,
+    };
+  }
 
   // Backend formatını frontend formatına dönüştür
   private mapToCommunity(dto: any): Community {
@@ -100,12 +118,24 @@ export class CommunityService {
     const about = dto.about || dto.About || '';
     const city = dto.city || dto.City || '';
     const university = dto.university || dto.University || '';
-    const logoUrl = dto.logoUrl || dto.LogoUrl || '';
+    const logoUrl = dto.logoUrl || dto.LogoUrl || dto.logo || dto.Logo || '';
     const contactEmail = dto.contactEmail || dto.ContactEmail || '';
     const websiteUrl = dto.websiteUrl || dto.WebsiteUrl || '';
     const socialLinks = dto.socialLinks || dto.SocialLinks || '';
     const tags = dto.tags || dto.Tags || [];
     const userCommunities = dto.userCommunities || dto.UserCommunities || [];
+
+    // Banner/Cover için olası alanlar (backend farklı isim dönebilir)
+    const bannerUrl =
+      dto.bannerUrl ||
+      dto.BannerUrl ||
+      dto.banner ||
+      dto.Banner ||
+      dto.coverImage ||
+      dto.CoverImage ||
+      dto.coverImageUrl ||
+      dto.CoverImageUrl ||
+      '';
 
     // Tags'den category çıkar (ilk tag'i category olarak kullan)
     const category = tags && tags.length > 0 ? tags[0] : 'Genel';
@@ -137,12 +167,22 @@ export class CommunityService {
       university: university,
       category: category,
       description: about || dto.description || dto.Description || undefined,
-      logo: logoUrl || '',
+      logo: logoUrl && String(logoUrl).trim() ? logoUrl : this.placeholderLogo,
       memberCount: userCommunities?.length || 0,
       city: city,
       about: about,
-      banner: logoUrl, // Backend'de coverImage yok, logoUrl kullan
-      coverImage: logoUrl,
+      banner:
+        bannerUrl && String(bannerUrl).trim()
+          ? bannerUrl
+          : logoUrl && String(logoUrl).trim()
+          ? logoUrl
+          : this.placeholderCover,
+      coverImage:
+        bannerUrl && String(bannerUrl).trim()
+          ? bannerUrl
+          : logoUrl && String(logoUrl).trim()
+          ? logoUrl
+          : this.placeholderCover,
       socialMedia: socialMedia,
       instagram: instagram,
       youtube: youtube,
@@ -165,8 +205,11 @@ export class CommunityService {
       coverImage:
         'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1000&q=80',
       logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      banner:
+        'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=1600&q=80',
       memberCount: 450,
       city: 'Ankara',
+      email: 'odtu-yazilim@uni.edu.tr',
     },
     {
       id: 2,
@@ -177,8 +220,10 @@ export class CommunityService {
       coverImage:
         'https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&w=1000&q=80',
       logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      banner: 'assets/img/placeholder-cover.svg',
       memberCount: 1200,
       city: 'İstanbul',
+      email: 'itu-girisimcilik@uni.edu.tr',
     },
     {
       id: 3,
@@ -189,8 +234,11 @@ export class CommunityService {
       coverImage:
         'https://images.unsplash.com/photo-1547153760-18fc86324498?auto=format&fit=crop&w=1000&q=80',
       logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      banner:
+        'https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=1600&q=80',
       memberCount: 300,
       city: 'Ankara',
+      email: 'hacettepe-dans@uni.edu.tr',
     },
     {
       id: 4,
@@ -201,8 +249,10 @@ export class CommunityService {
       coverImage:
         'https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=1000&q=80',
       logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      banner: 'assets/img/placeholder-cover.svg',
       memberCount: 800,
       city: 'İstanbul',
+      email: 'bogazici-muzik@uni.edu.tr',
     },
     {
       id: 5,
@@ -213,8 +263,11 @@ export class CommunityService {
       coverImage:
         'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1000&q=80',
       logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      banner:
+        'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1600&q=80',
       memberCount: 150,
       city: 'İzmir',
+      email: 'ege-sinema@uni.edu.tr',
     },
     {
       id: 6,
@@ -225,8 +278,11 @@ export class CommunityService {
       coverImage:
         'https://images.unsplash.com/photo-1581092160562-40aa08e78837?auto=format&fit=crop&w=1000&q=80',
       logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      banner:
+        'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1600&q=80',
       memberCount: 600,
       city: 'İstanbul',
+      email: 'ytu-robotik@uni.edu.tr',
     },
     {
       id: 7,
@@ -237,8 +293,11 @@ export class CommunityService {
       coverImage:
         'https://esenler.bel.tr/wp-content/uploads/2021/08/144438347-1600775959586-gfhfghfgh.jpg', // Tiyatro Sahnesi
       logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      banner:
+        'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=1600&q=80',
       memberCount: 220,
       city: 'Ankara',
+      email: 'gazi-tiyatro@uni.edu.tr',
     },
     {
       id: 8,
@@ -249,8 +308,10 @@ export class CommunityService {
       coverImage:
         'https://images.unsplash.com/photo-1552168324-d612d77725e3?auto=format&fit=crop&w=1000&q=80',
       logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      banner: 'assets/img/placeholder-cover.svg',
       memberCount: 340,
       city: 'İstanbul',
+      email: 'marmara-fotograf@uni.edu.tr',
     },
     {
       id: 9,
@@ -261,8 +322,11 @@ export class CommunityService {
       coverImage:
         'https://images.unsplash.com/photo-1483304528321-0674f0040030?auto=format&fit=crop&w=1000&q=80',
       logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      banner:
+        'https://images.unsplash.com/photo-1483304528321-0674f0040030?auto=format&fit=crop&w=1600&q=80',
       memberCount: 550,
       city: 'Eskişehir',
+      email: 'anadolu-havacilik@uni.edu.tr',
     },
     {
       id: 10,
@@ -273,8 +337,11 @@ export class CommunityService {
       coverImage:
         'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1000&q=80',
       logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      banner:
+        'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1600&q=80',
       memberCount: 180,
       city: 'Antalya',
+      email: 'akdeniz-sualti@uni.edu.tr',
     },
     {
       id: 11,
@@ -285,8 +352,11 @@ export class CommunityService {
       coverImage:
         'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1000&q=80',
       logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      banner:
+        'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1600&q=80',
       memberCount: 210,
       city: 'İzmir',
+      email: 'deu-yelken@uni.edu.tr',
     },
     {
       id: 12,
@@ -297,8 +367,11 @@ export class CommunityService {
       coverImage:
         'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=1000&q=80',
       logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      banner:
+        'https://images.unsplash.com/photo-1505664194779-8beaceb93744?auto=format&fit=crop&w=1600&q=80',
       memberCount: 400,
       city: 'Ankara',
+      email: 'bilkent-munazara@uni.edu.tr',
     },
     {
       id: 13,
@@ -309,8 +382,11 @@ export class CommunityService {
       coverImage:
         'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1000&q=80',
       logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      banner:
+        'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1600&q=80',
       memberCount: 320,
       city: 'İstanbul',
+      email: 'sabanci-veribilimi@uni.edu.tr',
     },
     {
       id: 14,
@@ -321,8 +397,11 @@ export class CommunityService {
       coverImage:
         'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1000&q=80',
       logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      banner:
+        'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1600&q=80',
       memberCount: 500,
       city: 'İstanbul',
+      email: 'koc-pazarlama@uni.edu.tr',
     },
     {
       id: 15,
@@ -333,8 +412,11 @@ export class CommunityService {
       coverImage:
         'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1000&q=80',
       logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      banner:
+        'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1600&q=80',
       memberCount: 850,
       city: 'Adana',
+      email: 'cukurova-espor@uni.edu.tr',
     },
     {
       id: 16,
@@ -345,8 +427,11 @@ export class CommunityService {
       coverImage:
         'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1000&q=80', // Karlı Dağ
       logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      banner:
+        'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1600&q=80',
       memberCount: 190,
       city: 'Kayseri',
+      email: 'erciyes-dagcilik@uni.edu.tr',
     },
     {
       id: 17,
@@ -357,8 +442,11 @@ export class CommunityService {
       coverImage:
         'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1000&q=80',
       logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      banner:
+        'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1600&q=80',
       memberCount: 420,
       city: 'Trabzon',
+      email: 'ktu-mimarlik@uni.edu.tr',
     },
     {
       id: 18,
@@ -369,8 +457,11 @@ export class CommunityService {
       coverImage:
         'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1000&q=80',
       logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      banner:
+        'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1600&q=80',
       memberCount: 360,
       city: 'Bursa',
+      email: 'uludag-otomotiv@uni.edu.tr',
     },
     {
       id: 19,
@@ -380,8 +471,11 @@ export class CommunityService {
       description: 'Tarihin izinde, kültürel mirasımızı koruyan ve tanıtan topluluk.',
       coverImage: 'https://www.antiktarih.com/wp-content/uploads/2018/07/indi4-750x445.jpg', // Antik Harabeler
       logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      banner:
+        'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=1600&q=80',
       memberCount: 140,
       city: 'Konya',
+      email: 'selcuk-arkeoloji@uni.edu.tr',
     },
     {
       id: 20,
@@ -392,14 +486,17 @@ export class CommunityService {
       coverImage:
         'https://images.unsplash.com/photo-1505664194779-8beaceb93744?auto=format&fit=crop&w=1000&q=80', // Adalet Heykeli
       logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
+      banner:
+        'https://images.unsplash.com/photo-1505664194779-8beaceb93744?auto=format&fit=crop&w=1600&q=80',
       memberCount: 650,
       city: 'İstanbul',
+      email: 'gsu-hukuk@uni.edu.tr',
     },
   ];
 
   // Mock verileri getir
   getMockCommunities(): Community[] {
-    return this.mockCommunities;
+    return this.mockCommunities.map((c) => this.ensureCommunityAssets(c));
   }
 
   // Tüm Toplulukları Getir
@@ -438,7 +535,7 @@ export class CommunityService {
       // Mock veride varsa onu döndür, API'ye gitme (geliştirme ortamı için)
       // Ancak gerçek senaryoda API'yi denemek isteyebilirsiniz.
       // Şimdilik proxy hatasını engellemek için mock varsa dönüyoruz.
-      return of(mockCommunity);
+      return of(this.ensureCommunityAssets(mockCommunity));
     }
 
     return this.http.get<CommunityDto>(`${this.apiUrl}/${id}`).pipe(

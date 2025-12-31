@@ -167,7 +167,8 @@ $border-color: #e2e8f0; // Slate 200
 
   .hero-visual-side {
     position: relative;
-    height: 400px;
+    height: 460px;
+    width: 560px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -181,17 +182,30 @@ $border-color: #e2e8f0; // Slate 200
 
       // Pozisyonlandırma
       &.pos-1 {
-        top: 10%;
-        right: 5%;
+        top: 4%;
+        right: -2%;
       }
       &.pos-2 {
-        bottom: 20%;
-        left: 5%;
+        top: 30%;
+        left: 0%;
       }
       &.pos-3 {
-        top: 40%;
-        right: -5%;
+        top: 46%;
+        right: 6%;
         z-index: 2;
+      }
+      &.pos-4 {
+        top: 10%;
+        left: 20%;
+        z-index: 2;
+      }
+      &.pos-5 {
+        top: 70%;
+        left: 10%;
+      }
+      &.pos-6 {
+        top: 72%;
+        right: 8%;
       }
     }
 
@@ -199,7 +213,7 @@ $border-color: #e2e8f0; // Slate 200
     .glass-card {
       background: rgba(255, 255, 255, 0.8);
       backdrop-filter: blur(12px);
-      padding: 18px 24px;
+      padding: 14px 18px;
       border-radius: 20px;
       border: 1px solid rgba(255, 255, 255, 0.9);
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
@@ -208,7 +222,8 @@ $border-color: #e2e8f0; // Slate 200
       gap: 15px;
       font-weight: 700;
       color: $text-dark;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
+      max-width: 240px;
 
       // Sürekli Süzülme Animasyonu
       animation: float 6s ease-in-out infinite;
@@ -234,6 +249,15 @@ $border-color: #e2e8f0; // Slate 200
       }
       &.float-anim-3 {
         animation-delay: 4s;
+      }
+      &.float-anim-4 {
+        animation-delay: 1s;
+      }
+      &.float-anim-5 {
+        animation-delay: 3s;
+      }
+      &.float-anim-6 {
+        animation-delay: 5s;
       }
     }
   }

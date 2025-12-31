@@ -80,10 +80,10 @@ export class EventsComponent implements OnInit, AfterViewInit {
   // Sayfalama
   allEventsPool: EventCard[] = [];
   displayedEvents: EventCard[] = [];
-  currentPage: number = 0;
-  pageSize: number = 8;
-  isLoadingMore: boolean = false;
-  hasMoreData: boolean = true;
+  currentPage: number = 1;
+  itemsPerPage: number = 8;
+  totalPages: number = 0;
+  pages: number[] = [];
   allCommunities: any[] = [];
 
   @ViewChildren('animItem') animItems!: QueryList<ElementRef>;
@@ -187,6 +187,60 @@ export class EventsComponent implements OnInit, AfterViewInit {
       color: '#16a34a',
       status: 'upcoming',
       city: 'Bursa'
+    },
+    {
+      id: 106,
+      title: 'Siber Güvenlik Bootcamp',
+      description: 'Uygulamalı laboratuvarlarla siber güvenliğin temellerini öğren. CTF mini yarışması da var.',
+      category: 'Teknoloji',
+      date: '10 Ocak 2026',
+      dateObj: new Date('2026-01-10'),
+      time: '13:00',
+      location: 'Teknopark Eğitim Salonu',
+      university: 'İstanbul Teknik Üniversitesi',
+      club: 'Siber Güvenlik Kulübü',
+      semester: 'Teknoloji Topluluğu',
+      quota: 200,
+      imageUrl: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=800&auto=format&fit=crop',
+      color: '#2563eb',
+      status: 'upcoming',
+      city: 'İstanbul'
+    },
+    {
+      id: 107,
+      title: 'Fotoğrafçılık Şehir Turu',
+      description: 'Şehir turunda sokak fotoğrafçılığı teknikleri, kompozisyon ve ışık kullanımı üzerine pratik.',
+      category: 'Sanat',
+      date: '18 Ocak 2026',
+      dateObj: new Date('2026-01-18'),
+      time: '09:30',
+      location: 'Merkez Kampüs Buluşma Noktası',
+      university: 'Marmara Üniversitesi',
+      club: 'Fotoğrafçılık Kulübü',
+      semester: 'Kültür Topluluğu',
+      quota: 80,
+      imageUrl: 'https://images.unsplash.com/photo-1552168324-d612d77725e3?q=80&w=800&auto=format&fit=crop',
+      color: '#db2777',
+      status: 'upcoming',
+      city: 'İstanbul'
+    },
+    {
+      id: 108,
+      title: 'Kariyer CV Atölyesi',
+      description: 'CV ve LinkedIn profilini güçlendirmek için uygulamalı atölye. Örnek mülakat simülasyonu da yapılacak.',
+      category: 'Kariyer',
+      date: '28 Ocak 2026',
+      dateObj: new Date('2026-01-28'),
+      time: '16:00',
+      location: 'Konferans Salonu',
+      university: 'Orta Doğu Teknik Üniversitesi',
+      club: 'Kariyer Kulübü',
+      semester: 'Kariyer Topluluğu',
+      quota: 300,
+      imageUrl: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?q=80&w=800&auto=format&fit=crop',
+      color: '#ea580c',
+      status: 'upcoming',
+      city: 'Ankara'
     }
   ];
 
@@ -223,13 +277,13 @@ export class EventsComponent implements OnInit, AfterViewInit {
           this.attachCommunityNames();
         }
         this.allEventsPool = [...this.baseEvents];
-        this.applyFiltersAndLoadFirstPage();
+        this.applyFiltersAndGoFirstPage();
       },
       error: (err) => {
         console.error('Etkinlikler yüklenemedi, mock data kullanılıyor:', err);
         // Hata durumunda sadece Mock Data göster
         this.allEventsPool = [...this.baseEvents];
-        this.applyFiltersAndLoadFirstPage();
+        this.applyFiltersAndGoFirstPage();
       },
     });
   }
@@ -360,48 +414,49 @@ export class EventsComponent implements OnInit, AfterViewInit {
     });
   }
 
-  applyFiltersAndLoadFirstPage() {
-    this.currentPage = 0;
-    this.displayedEvents = [];
-    this.hasMoreData = true;
-    this.loadMoreEvents();
+  applyFiltersAndGoFirstPage() {
+    this.currentPage = 1;
+    this.initPagination();
   }
 
-  loadMoreEvents() {
-    if (this.isLoadingMore || !this.hasMoreData) return;
+  initPagination() {
+    const filteredPool = this.getFilteredAndSortedPool();
+    this.totalPages = Math.ceil(filteredPool.length / this.itemsPerPage);
+    this.pages = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+    this.updateDisplayedData();
+  }
 
-    this.isLoadingMore = true;
+  updateDisplayedData() {
+    const filteredPool = this.getFilteredAndSortedPool();
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.displayedEvents = filteredPool.slice(startIndex, endIndex);
+    if (isPlatformBrowser(this.platformId)) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
 
-    setTimeout(() => {
-      const filteredPool = this.getFilteredAndSortedPool();
-      const startIndex = this.currentPage * this.pageSize;
-      const endIndex = startIndex + this.pageSize;
-      const nextBatch = filteredPool.slice(startIndex, endIndex);
-
-      this.displayedEvents = [...this.displayedEvents, ...nextBatch];
-      this.currentPage++;
-      this.isLoadingMore = false;
-
-      if (this.displayedEvents.length >= filteredPool.length) {
-        this.hasMoreData = false;
-      }
-    }, 600);
+  changePage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.updateDisplayedData();
+    }
   }
 
   setFilter(filter: 'all' | 'active' | 'upcoming') {
     this.currentFilter = filter;
-    this.applyFiltersAndLoadFirstPage();
+    this.applyFiltersAndGoFirstPage();
   }
 
   setCategory(cat: string) {
     this.activeCategory = cat;
-    this.applyFiltersAndLoadFirstPage();
+    this.applyFiltersAndGoFirstPage();
   }
 
   onSearch(event: Event) {
     const inputElement = event.target as HTMLInputElement;
     this.searchQuery = inputElement.value;
-    this.applyFiltersAndLoadFirstPage();
+    this.applyFiltersAndGoFirstPage();
   }
 
   changeSortCriteria(criteria: 'date' | 'name' | 'semester') {
@@ -411,7 +466,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
       this.sortCriteria = criteria;
       this.sortAscending = true;
     }
-    this.applyFiltersAndLoadFirstPage();
+    this.applyFiltersAndGoFirstPage();
   }
 
   trackByEventId(index: number, event: EventCard): number {
