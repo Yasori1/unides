@@ -36,8 +36,8 @@ interface Notification {
   text: string;
   time: string;
   read: boolean;
-  targetTab?: string; // Hangi tab'a yönlendirileceği
-  targetRoute?: string; // Veya hangi route'a yönlendirileceği
+  targetTab?: string; 
+  targetRoute?: string; 
 }
 interface Collaboration {
   id: number;
@@ -62,6 +62,7 @@ interface DashboardEvent {
   time?: string;
   quota?: number;
 }
+
 @Component({
   selector: 'app-community-dashboard',
   standalone: true,
@@ -93,6 +94,7 @@ export class CommunityDashboardComponent implements OnInit {
   showBannerModal = false;
   showAvatarModal = false;
   initialClubInfo: any = {};
+
   // Event creation modal
   newEventData = {
     title: '',
@@ -104,6 +106,9 @@ export class CommunityDashboardComponent implements OnInit {
     image: '',
     category: '',
   };
+<<<<<<< HEAD
+
+=======
   eventCategories: string[] = [
     'Afet Yönetimi ve Dayanıklılık',
     'Aile ve Değerler',
@@ -117,6 +122,7 @@ export class CommunityDashboardComponent implements OnInit {
     'Sosyal Kapsayıcılık',
     'Uluslararası Gençlik Çalışmaları',
   ];
+>>>>>>> 88593ac1445976c15bb5431c71a3ca9e3fba9f1d
   // Form Data
   newProjectData = { name: '', category: 'Teknoloji', budget: 0, deadline: '' };
   newMemberData = {
@@ -128,9 +134,11 @@ export class CommunityDashboardComponent implements OnInit {
     grade: '1. Sınıf',
   };
   memberSearchText: string = '';
+
   // Toast
   toastMessage: string | null = null;
   toastType: 'success' | 'error' = 'success';
+
   // --- DATA ---
   clubInfo = {
     name: 'Yapay Zeka ve Robotik Kulübü',
@@ -141,14 +149,12 @@ export class CommunityDashboardComponent implements OnInit {
     banner: 'assets/img/placeholder-cover.svg',
     balance: 18500,
     email: 'ai@itu.edu.tr',
-    website: '',
     phone: '+90 555 123 45 67',
     instagram: '@itu_ai_official',
-    youtube: '',
-    twitter: '',
-    tiktok: '',
+    // GÜNCELLEME: Youtube, Twitter, Tiktok ve Website alanları kaldırıldı.
     description: 'Geleceği kodlayanların buluşma noktası.',
   };
+
   stats = { totalMembers: 142, activeProjects: 4, pendingRequests: 2, totalEvents: 12 };
   statusFilter: 'all' | 'approved' | 'pending' | 'rejected' = 'all';
   statusLabels = {
@@ -156,13 +162,13 @@ export class CommunityDashboardComponent implements OnInit {
     pending: 'Onaya Gönderilen',
     rejected: 'Reddedilen Etkinlik',
   };
+
   dashboardEvents: DashboardEvent[] = [
     {
       id: 1,
       title: 'Yapay Zeka Zirvesi',
       status: 'approved',
-      imageUrl:
-        'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800&q=60',
+      imageUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800&q=60',
       date: '12 Mayıs',
       location: 'İTÜ Ayazağa',
       category: 'Teknoloji',
@@ -174,8 +180,7 @@ export class CommunityDashboardComponent implements OnInit {
       id: 2,
       title: 'Robotik Atölye',
       status: 'pending',
-      imageUrl:
-        'https://images.unsplash.com/photo-1581094288338-60f87c68fc9b?auto=format&fit=crop&w=800&q=60',
+      imageUrl: 'https://images.unsplash.com/photo-1581094288338-60f87c68fc9b?auto=format&fit=crop&w=800&q=60',
       date: '25 Mayıs',
       location: 'ODTÜ Kültür Merkezi',
       category: 'Atölye',
@@ -187,8 +192,7 @@ export class CommunityDashboardComponent implements OnInit {
       id: 3,
       title: 'FinTech Günleri',
       status: 'approved',
-      imageUrl:
-        'https://images.unsplash.com/photo-1556740749-887f6717d7e4?auto=format&fit=crop&w=800&q=60',
+      imageUrl: 'https://images.unsplash.com/photo-1556740749-887f6717d7e4?auto=format&fit=crop&w=800&q=60',
       date: '2 Haziran',
       location: 'Boğaziçi Garanti Kültür',
       category: 'Finans',
@@ -200,8 +204,7 @@ export class CommunityDashboardComponent implements OnInit {
       id: 4,
       title: 'Sosyal Sorumluluk Koşusu',
       status: 'rejected',
-      imageUrl:
-        'https://images.unsplash.com/photo-1508609349937-5ec4ae374ebf?auto=format&fit=crop&w=800&q=60',
+      imageUrl: 'https://images.unsplash.com/photo-1508609349937-5ec4ae374ebf?auto=format&fit=crop&w=800&q=60',
       date: '8 Haziran',
       location: 'Ankara Kampüsü',
       category: 'Sosyal',
@@ -213,8 +216,7 @@ export class CommunityDashboardComponent implements OnInit {
       id: 5,
       title: 'Hackathon 24',
       status: 'pending',
-      imageUrl:
-        'https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?auto=format&fit=crop&w=800&q=60',
+      imageUrl: 'https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?auto=format&fit=crop&w=800&q=60',
       date: '15 Haziran',
       location: 'Online',
       category: 'Yarışma',
@@ -223,6 +225,7 @@ export class CommunityDashboardComponent implements OnInit {
       quota: 100,
     },
   ];
+
   projects: Project[] = [
     {
       id: 1,
@@ -265,6 +268,7 @@ export class CommunityDashboardComponent implements OnInit {
       isPromoted: false,
     },
   ];
+
   members: Member[] = [
     {
       id: 1,
@@ -322,14 +326,17 @@ export class CommunityDashboardComponent implements OnInit {
       status: 'Aktif',
     },
   ];
+
   notifications: Notification[] = [
     { id: 1, text: 'Yeni üye başvurusu', time: '10 dk önce', read: false, targetTab: 'members' },
     { id: 2, text: 'TÜBİTAK onayı', time: '2 saat önce', read: false, targetTab: 'projects' },
   ];
+
   collaborations: Collaboration[] = [];
   filteredCollaborations: Collaboration[] = [];
   collabCurrentPage = 1;
   collabPerPage = 15;
+
   // Filters (Communities page parity)
   searchText: string = '';
   selectedCity: string = '';
@@ -338,6 +345,7 @@ export class CommunityDashboardComponent implements OnInit {
   cities: string[] = [];
   categories: string[] = [];
   isLoading = true;
+
   constructor(
     private router: Router,
     private communityService: CommunityService,
@@ -384,6 +392,7 @@ export class CommunityDashboardComponent implements OnInit {
       },
     });
   }
+
   @HostListener('document:click', ['$event'])
   clickout(event: MouseEvent) {
     const target = event.target as HTMLElement;
@@ -403,6 +412,7 @@ export class CommunityDashboardComponent implements OnInit {
       this.showNotifications = false;
     }
   }
+
   get filteredMembers() {
     if (!this.memberSearchText) return this.members;
     const term = this.memberSearchText.toLowerCase();
@@ -413,50 +423,62 @@ export class CommunityDashboardComponent implements OnInit {
         m.email.toLowerCase().includes(term)
     );
   }
+
   get pagedMembers() {
     const start = (this.memberCurrentPage - 1) * this.membersPerPage;
     return this.filteredMembers.slice(start, start + this.membersPerPage);
   }
+
   get memberTotalPages() {
     return Math.max(1, Math.ceil(this.filteredMembers.length / this.membersPerPage));
   }
+
   get filteredDashboardEvents() {
     if (this.statusFilter === 'all') return this.dashboardEvents;
     return this.dashboardEvents.filter((e) => e.status === this.statusFilter);
   }
+
   get displayedDashboardEvents() {
     return this.filteredDashboardEvents.slice(0, 5);
   }
+
   get pagedCollaborations() {
     const start = (this.collabCurrentPage - 1) * this.collabPerPage;
     return this.filteredCollaborations.slice(start, start + this.collabPerPage);
   }
+
   get collabTotalPages() {
     return Math.max(1, Math.ceil(this.filteredCollaborations.length / this.collabPerPage));
   }
+  
+  // GÜNCELLEME: Breadcrumb başlığı 'Profil' olarak ayarlandı
   get currentTabTitle() {
     const titles: Record<string, string> = {
       overview: 'Genel Bakış',
       projects: 'Etkinliklerim',
       network: 'Diğer Topluluklar',
       members: 'Üyeler',
-      settings: 'Ayarlar',
+      settings: 'Profil', 
     };
     return titles[this.activeTab] || 'Panel';
   }
+
   get unreadNotificationsCount() {
     return this.notifications.filter(n => !n.read).length;
   }
+
   // Functions
   toggleSidebar() {
     this.isSidebarCollapsed = !this.isSidebarCollapsed;
   }
+
   switchTab(tab: string) {
     this.clearToast();
     this.activeTab = tab;
     this.showNotifications = false;
     this.isProfileOpen = false;
   }
+
   toggleNotifications(event?: MouseEvent) {
     if (event) {
       event.stopPropagation();
@@ -501,6 +523,7 @@ export class CommunityDashboardComponent implements OnInit {
     this.isProfileOpen = false;
     this.logout();
   }
+
   toggleRowMenu(id: number, event: MouseEvent) {
     event.stopPropagation();
     this.activeRowMenuId = this.activeRowMenuId === id ? null : id;
@@ -510,9 +533,11 @@ export class CommunityDashboardComponent implements OnInit {
     project.isPromoted = !project.isPromoted;
     this.showToast(project.isPromoted ? 'Öne çıkarıldı.' : 'Normal.', 'success');
   }
+
   setStatusFilter(filter: 'all' | 'approved' | 'pending' | 'rejected') {
     this.statusFilter = filter;
   }
+
   goToCommunity(community: Collaboration) {
     this.router.navigate(['/communities', community.id]);
   }
@@ -549,13 +574,16 @@ export class CommunityDashboardComponent implements OnInit {
       this.collabCurrentPage = this.collabTotalPages;
     }
   }
+
   setCollabPage(page: number) {
     if (page < 1 || page > this.collabTotalPages) return;
     this.collabCurrentPage = page;
   }
+
   exportData(type: string) {
     this.showToast(`${type.toUpperCase()} indiriliyor...`, 'success');
   }
+
   onLogoSelected(event: string | Event) {
     if (typeof event === 'string') {
       this.clubInfo.logo = event;
@@ -591,6 +619,7 @@ export class CommunityDashboardComponent implements OnInit {
     };
     reader.readAsDataURL(file);
   }
+
   logout() {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.removeItem('auth_token');
@@ -603,6 +632,7 @@ export class CommunityDashboardComponent implements OnInit {
       }, 1000);
     }
   }
+
   updateSettings() {
     if (!this.isSettingsValid) {
       this.showToast('Zorunlu alanları doldurun.', 'error');
@@ -618,20 +648,18 @@ export class CommunityDashboardComponent implements OnInit {
     return emailOk && aboutOk;
   }
 
+  // GÜNCELLEME: Kontrol listesi sadeleştirildi (Website, Youtube vs. çıkarıldı)
   get isSettingsChanged() {
     const fields = [
       'description',
       'email',
-      'website',
       'instagram',
-      'youtube',
-      'twitter',
-      'tiktok',
       'banner',
       'logo',
     ];
     return fields.some((f) => (this.clubInfo as any)[f] !== this.initialClubInfo[f]);
   }
+
   openModal(type: any) {
     this.clearToast();
     this.modalType = type;
@@ -659,6 +687,7 @@ export class CommunityDashboardComponent implements OnInit {
     this.memberSearchResults = [];
     this.isSearchingMembers = false;
   }
+
   closeModal() {
     this.isModalOpen = false;
     this.modalType = null;
@@ -756,6 +785,7 @@ export class CommunityDashboardComponent implements OnInit {
       this.showToast('Ad Soyad ve e-posta zorunludur.', 'error');
     }
   }
+
   onMemberSearch() {
     const term = this.memberSearchQuery.trim();
     if (!term || term.length < 2) {
@@ -774,6 +804,7 @@ export class CommunityDashboardComponent implements OnInit {
       .map((m) => ({ name: m.name, email: m.email }));
     this.isSearchingMembers = false;
   }
+
   selectMemberSuggestion(user: UserSearchResult) {
     this.newMemberData.name = user.name;
     this.newMemberData.email = user.email;
@@ -781,6 +812,7 @@ export class CommunityDashboardComponent implements OnInit {
     this.memberSearchResults = [];
     this.memberCurrentPage = 1;
   }
+
   openDeleteConfirm(id: number) {
     this.clearToast();
     this.clearConfirmTimer();
@@ -788,9 +820,11 @@ export class CommunityDashboardComponent implements OnInit {
     this.confirmVisible = true;
     this.confirmHiding = false;
   }
+
   cancelDelete() {
     this.startCloseConfirm();
   }
+
   deleteMemberConfirmed() {
     if (this.confirmDeleteId === null) return;
     this.members = this.members.filter((m) => m.id !== this.confirmDeleteId);
@@ -801,13 +835,16 @@ export class CommunityDashboardComponent implements OnInit {
     }
     this.startCloseConfirm();
   }
+
   setMemberPage(page: number) {
     if (page < 1 || page > this.memberTotalPages) return;
     this.memberCurrentPage = page;
   }
+
   onMemberSearchChange() {
     this.memberCurrentPage = 1;
   }
+
   private startCloseConfirm() {
     this.confirmHiding = true;
     this.clearConfirmTimer();
@@ -817,6 +854,7 @@ export class CommunityDashboardComponent implements OnInit {
       this.confirmHiding = false;
     }, 220);
   }
+
   private clearConfirmTimer() {
     if (this.confirmTimer) {
       clearTimeout(this.confirmTimer);
@@ -840,6 +878,7 @@ export class CommunityDashboardComponent implements OnInit {
     this.toastType = type;
     this.toastTimer = setTimeout(() => (this.toastMessage = null), 1800);
   }
+
   clearToast() {
     if (this.toastTimer) {
       clearTimeout(this.toastTimer);
@@ -847,6 +886,9 @@ export class CommunityDashboardComponent implements OnInit {
     }
     this.toastMessage = null;
   }
+<<<<<<< HEAD
+}
+=======
 
   openEventDetail(event: DashboardEvent) {
     this.selectedEvent = event;
@@ -862,3 +904,4 @@ export class CommunityDashboardComponent implements OnInit {
     }
   }
 }
+>>>>>>> 88593ac1445976c15bb5431c71a3ca9e3fba9f1d

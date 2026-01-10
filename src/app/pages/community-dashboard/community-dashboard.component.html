@@ -45,13 +45,14 @@
         <span class="material-symbols-outlined">diversity_3</span>
         <span *ngIf="!isSidebarCollapsed">Üyeler</span>
       </button>
+      
       <button
         class="menu-item"
         [class.active]="activeTab === 'settings'"
         (click)="switchTab('settings')"
       >
         <span class="material-symbols-outlined">settings</span>
-        <span *ngIf="!isSidebarCollapsed">Ayarlar</span>
+        <span *ngIf="!isSidebarCollapsed">Profil</span>
       </button>
     </nav>
 
@@ -77,33 +78,8 @@
           <span class="current">{{ currentTabTitle }}</span>
         </div>
       </div>
+      
       <div class="header-right">
-        <button class="icon-btn notification notification-btn" (click)="toggleNotifications($event)">
-          <span class="material-symbols-outlined">notifications</span>
-          <span class="indicator" *ngIf="notifications.length"></span>
-        </button>
-        <div
-          class="dropdown-menu notifications"
-          *ngIf="showNotifications"
-          (click)="$event.stopPropagation()"
-        >
-          <div class="dd-header">Bildirimler</div>
-          <ul *ngIf="notifications.length > 0; else noNotifications">
-            <li *ngFor="let n of notifications" (click)="handleNotificationClick(n)" [class.read]="n.read">
-              <div>
-                {{ n.text }}
-                <small>{{ n.time }}</small>
-              </div>
-            </li>
-          </ul>
-          <ng-template #noNotifications>
-            <div class="empty-notifications">
-              <span class="material-symbols-outlined">notifications_off</span>
-              <p>Henüz bildirim yok</p>
-            </div>
-          </ng-template>
-        </div>
-
         <div class="profile-wrapper">
           <div class="profile-pic" (click)="toggleProfileDropdown($event)">
             <img [src]="clubInfo.logo" alt="Logo" />
@@ -116,7 +92,7 @@
             <div class="dd-header">{{ clubInfo.name }}</div>
             <ul>
               <li (click)="handleSettingsClick()">
-                <span class="material-symbols-outlined small-icon">settings</span> Ayarlar
+                <span class="material-symbols-outlined small-icon">settings</span> Profil
               </li>
               <li (click)="handleLogoutClick()" class="danger-item">
                 <span class="material-symbols-outlined small-icon">logout</span> Çıkış
@@ -135,10 +111,9 @@
         <span>{{ toastMessage }}</span>
       </div>
     </div>
-
-    <!-- OVERVIEW -->
+    
     <div class="view-container" *ngIf="activeTab === 'overview'">
-      <div class="stats-grid-compact">
+       <div class="stats-grid-compact">
         <div
           class="stat-card-mini"
           *ngFor="
@@ -175,7 +150,6 @@
         </div>
       </div>
 
-      <!-- Etkinlik Durum Kartları -->
       <div class="card events-status-card">
         <div class="card-header">
           <div>
@@ -244,7 +218,6 @@
       </div>
     </div>
 
-    <!-- PROJECTS -->
     <div class="view-container" *ngIf="activeTab === 'projects'">
       <div class="page-header projects-header">
         <h2>Etkinliklerim</h2>
@@ -318,7 +291,6 @@
       </ng-template>
     </div>
 
-    <!-- NETWORK -->
     <div class="view-container" *ngIf="activeTab === 'network'">
       <div class="page-header">
         <div>
@@ -329,7 +301,6 @@
         </div>
       </div>
 
-      <!-- Filter bar (Communities page parity) -->
       <div class="filters-bar network-filters" *ngIf="!isLoading">
         <div class="search-group">
           <i class="bx bx-search"></i>
@@ -454,7 +425,6 @@
       </ng-template>
     </div>
 
-    <!-- MEMBERS -->
     <div class="view-container" *ngIf="activeTab === 'members'">
       <div class="page-header">
         <h2>Üyeler</h2>
@@ -511,7 +481,6 @@
       </div>
     </div>
 
-    <!-- SETTINGS -->
     <div class="view-container" *ngIf="activeTab === 'settings'">
       <div class="card settings-card">
         <div class="settings-hero">
@@ -528,7 +497,7 @@
               </button>
             </div>
             <div class="hero-text">
-              <p class="eyebrow">Topluluk Profili</p>
+              <p class="eyebrow">Profil</p>
               <h3>{{ clubInfo.name }}</h3>
               <p class="muted">
                 Görsel, iletişim ve sosyal alanlarını güncelleyerek üyelerine tutarlı bir profil
@@ -559,10 +528,21 @@
               </label>
             </div>
             <label class="stacked">
-              <span>Hakkımızda</span>
-              <textarea rows="3" [(ngModel)]="clubInfo.description"></textarea>
+              <div class="label-header">
+                <span>Hakkımızda</span>
+                <span class="char-counter" [class.limit-near]="clubInfo.description.length > 450">
+                  {{ clubInfo.description.length }} / 500
+                </span>
+              </div>
+              <textarea 
+                rows="4" 
+                maxlength="500" 
+                [(ngModel)]="clubInfo.description"
+                placeholder="Topluluğunuzu anlatan kısa bir yazı yazın..."
+              ></textarea>
             </label>
           </div>
+          
           <div class="form-section">
             <h3>İletişim & Sosyal</h3>
             <div class="input-grid">
@@ -571,36 +551,8 @@
                 <input type="email" [(ngModel)]="clubInfo.email" />
               </label>
               <label>
-                <span>Website (opsiyonel)</span>
-                <input type="text" placeholder="https://..." [(ngModel)]="clubInfo.website" />
-              </label>
-              <label>
                 <span>Instagram</span>
                 <input type="text" [(ngModel)]="clubInfo.instagram" placeholder="@kulup" />
-              </label>
-              <label>
-                <span>Youtube</span>
-                <input
-                  type="text"
-                  [(ngModel)]="clubInfo.youtube"
-                  placeholder="https://youtube.com/..."
-                />
-              </label>
-              <label>
-                <span>Twitter</span>
-                <input
-                  type="text"
-                  [(ngModel)]="clubInfo.twitter"
-                  placeholder="https://twitter.com/..."
-                />
-              </label>
-              <label>
-                <span>TikTok</span>
-                <input
-                  type="text"
-                  [(ngModel)]="clubInfo.tiktok"
-                  placeholder="https://www.tiktok.com/@..."
-                />
               </label>
             </div>
           </div>
@@ -616,7 +568,6 @@
         </div>
       </div>
 
-      <!-- Banner modal -->
       <div class="simple-modal-overlay" *ngIf="showBannerModal" (click)="showBannerModal = false">
         <div class="simple-modal-card" (click)="$event.stopPropagation()">
           <div class="modal-head">
@@ -635,7 +586,6 @@
         </div>
       </div>
 
-      <!-- Avatar modal -->
       <div class="simple-modal-overlay" *ngIf="showAvatarModal" (click)="showAvatarModal = false">
         <div class="simple-modal-card" (click)="$event.stopPropagation()">
           <div class="modal-head">
@@ -759,7 +709,6 @@
     </div>
   </div>
 
-  <!-- Delete confirm modal -->
   <div
     class="confirm-overlay"
     *ngIf="confirmVisible"
@@ -778,6 +727,9 @@
       </div>
     </div>
   </div>
+<<<<<<< HEAD
+</div>
+=======
 </div>
 
 <div class="modal-backdrop" *ngIf="selectedEvent" (click)="closeEventDetail()">
@@ -838,3 +790,4 @@
     </div>
   </div>
 </div>
+>>>>>>> 88593ac1445976c15bb5431c71a3ca9e3fba9f1d
