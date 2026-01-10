@@ -1,0 +1,6 @@
+@Unides.WebAPI_HostAddress = http://localhost:5199
+
+GET {{Unides.WebAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
