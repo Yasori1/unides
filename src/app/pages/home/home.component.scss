@@ -261,7 +261,23 @@ $card-shadow: 0 10px 30px rgba(0,0,0,0.06);
         .blue-divider { width: 50px; height: 4px; background: $primary; margin: 10px auto; border-radius: 2px; }
     }
 }
-.section-communities { background-color: transparent; border-top: none; }
+.section-communities { background-color: transparent; border-top: none; 
+    /* Add divider to communities as requested */
+    .section-header-center {
+        position: relative;
+        padding-bottom: 15px; /* Space for pseudo-element */
+        
+        &::after {
+            content: '';
+            display: block;
+            width: 50px;
+            height: 4px;
+            background: $primary;
+            margin: 15px auto 0; /* Position below text */
+            border-radius: 2px;
+        }
+    }
+}
 .section-upcoming-events { background: transparent; }
 .section-why-unides { background-color: transparent; }
 .section-about-final { background: transparent; } 
@@ -278,10 +294,49 @@ $card-shadow: 0 10px 30px rgba(0,0,0,0.06);
   &:hover { transform: translateY(-8px); box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
   .card-image-wrapper { height: 180px; position: relative; img { width: 100%; height: 100%; object-fit: cover; } }
   .card-content { 
-    padding: 20px; 
-    .comm-name { font-size: 1.1rem; font-weight: 700; margin-bottom: 2px; } 
-    .comm-category { font-size: 0.85rem; color: $primary; font-weight: 600; text-transform: uppercase; margin-bottom: 6px; display: block; } 
-    .comm-stats { display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 500; color: $light-text; } 
+    padding: 16px; 
+    display: flex;
+    flex-direction: column;
+    
+    .comm-name { 
+        font-size: 1.1rem; 
+        font-weight: 700; 
+        margin-bottom: 2px;
+        line-height: 1.3;
+    } 
+    .comm-category { 
+        font-size: 0.75rem; 
+        color: $primary; 
+        font-weight: 700; 
+        text-transform: uppercase; 
+        margin-bottom: 4px; 
+        display: block; 
+    } 
+    .comm-stats { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: flex-end; /* Align bottom to push items down */
+        font-size: 0.75rem; 
+        font-weight: 500; 
+        color: $light-text; 
+        margin-top: auto; /* Push stats to the bottom of card content area */
+        padding-top: 8px; /* Add some space above */
+        
+        .comm-email-display {
+            font-family: inherit; 
+            color: $light-text;
+            margin-right: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 160px;
+        }
+
+        .stat {
+            margin-left: auto; 
+            white-space: nowrap;
+        }
+    } 
   }
 }
 
@@ -385,4 +440,104 @@ $card-shadow: 0 10px 30px rgba(0,0,0,0.06);
 @media (max-width: 1024px) {
   .communities-grid, .events-grid-modern, .why-grid, .about-grid-modern { grid-template-columns: 1fr; gap: 30px; }
   .cube-scene { width: 100%; }
+}
+
+// Utility classes for visibility
+.desktop-only { display: block; }
+.mobile-only { display: none; }
+
+@media (max-width: 768px) {
+  .desktop-only { display: none !important; }
+  .mobile-only { display: block !important; }
+
+  .section-3d-marquee {
+    overflow: visible; // Allow scrolling behavior inside
+
+    .marquee-content-wrapper {
+      flex-direction: column;
+      gap: 20px;
+      width: 100%;
+      padding: 20px 0;
+      perspective: none;
+      align-items: stretch; // Ensure children take full width
+    }
+    
+    .marquee-label {
+      width: 100%;
+      text-align: center;
+      border-right: none;
+      border-bottom: 3px solid $primary;
+      padding-right: 0;
+      padding-bottom: 15px;
+      margin-bottom: 10px;
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+
+    // Mobile Horizontal Slider Styles
+    .mobile-slider-container {
+      width: 100%;
+      overflow-x: auto;
+      padding-bottom: 15px;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x mandatory; // Snap effect for better control
+      
+      // Hide scrollbar but keep functionality
+      &::-webkit-scrollbar {
+        display: none;
+      }
+      scrollbar-width: none; // Firefox
+
+      .mobile-slider-track {
+        display: flex;
+        gap: 15px;
+        padding: 0 20px; // Padding on sides
+        width: max-content; 
+      }
+
+      .mobile-slider-item {
+        // Calculate width to show exactly 2 items with gap + padding consideration
+        // Screen width - padding (40px) - gap (15px) / 2 approx
+        // Or fixed width: 45vw is safe for 2 items
+        width: 42vw; 
+        max-width: 180px;
+        flex-shrink: 0;
+        scroll-snap-align: start;
+        
+        .mobile-card {
+          background: #fff;
+          border: 1px solid #e2e8f0;
+          border-radius: 16px;
+          padding: 15px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 10px;
+          height: 100%;
+          text-align: center;
+          box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+
+          img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid $primary;
+            padding: 2px;
+          }
+
+          .mobile-name {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: $dark-text;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+          }
+        }
+      }
+    }
+  }
 }

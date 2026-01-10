@@ -63,8 +63,8 @@
         <div class="card-content">
           <h3 class="comm-name">{{ comm.name }}</h3>
           <span class="comm-category">{{ comm.category }}</span>
-          <span class="comm-email">{{ comm.email }}</span>
           <div class="comm-stats">
+            <span class="comm-email-display">{{ comm.email }}</span>
             <span class="stat">📅 {{ comm.eventCount }} Etkinlik</span>
           </div>
         </div>
@@ -170,7 +170,7 @@
       <span>ARAMIZA YENİ KATILANLAR</span>
     </div>
 
-    <div class="cube-scene">
+    <div class="cube-scene desktop-only">
       <div class="cube">
         <div class="cube-face cube-front">
           <div class="nc-item" *ngFor="let nc of newestCommunities.slice(0, 4)">
@@ -210,6 +210,22 @@
               onerror="this.src='assets/img/placeholder-avatar.svg'"
             />
             <span>{{ nc.name }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Slider View (2 items visible at a time) -->
+    <div class="mobile-slider-container mobile-only">
+      <div class="mobile-slider-track">
+        <div class="mobile-slider-item" *ngFor="let nc of newestCommunities">
+          <div class="mobile-card">
+            <img
+              [src]="nc.image || 'assets/img/placeholder-avatar.svg'"
+              alt=""
+              onerror="this.src='assets/img/placeholder-avatar.svg'"
+            />
+            <span class="mobile-name">{{ nc.name }}</span>
           </div>
         </div>
       </div>

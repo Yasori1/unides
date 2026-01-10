@@ -106,9 +106,7 @@ export class CommunityDashboardComponent implements OnInit {
     image: '',
     category: '',
   };
-<<<<<<< HEAD
 
-=======
   eventCategories: string[] = [
     'Afet Yönetimi ve Dayanıklılık',
     'Aile ve Değerler',
@@ -122,7 +120,6 @@ export class CommunityDashboardComponent implements OnInit {
     'Sosyal Kapsayıcılık',
     'Uluslararası Gençlik Çalışmaları',
   ];
->>>>>>> 88593ac1445976c15bb5431c71a3ca9e3fba9f1d
   // Form Data
   newProjectData = { name: '', category: 'Teknoloji', budget: 0, deadline: '' };
   newMemberData = {
@@ -886,9 +883,6 @@ export class CommunityDashboardComponent implements OnInit {
     }
     this.toastMessage = null;
   }
-<<<<<<< HEAD
-}
-=======
 
   openEventDetail(event: DashboardEvent) {
     this.selectedEvent = event;
@@ -904,4 +898,3 @@ export class CommunityDashboardComponent implements OnInit {
     }
   }
 }
->>>>>>> 88593ac1445976c15bb5431c71a3ca9e3fba9f1d

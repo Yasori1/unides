@@ -35,6 +35,7 @@ import { AnnouncementDetailComponent } from './pages/announcement-detail/announc
 import { StudentLoginComponent } from './pages/student-login/student-login.component';
 import { StudentProfileComponent } from './pages/student-profile/student-profile.component';
 import { CommunityDetailComponent } from './pages/community-detail/community-detail.component';
+import { EventsDetailComponent } from './pages/events-detail/events-detail.component';
 import { ResetPasswordComponent } from './pages/reset-password/reset-password.component';
 import { CommunityDashboardComponent } from './pages/community-dashboard/community-dashboard.component';
 
@@ -46,6 +47,7 @@ export const routes: Routes = [
   { path: 'communities', component: CommunitiesPageComponent },
   { path: 'communities/:id', component: CommunityDetailComponent },
   { path: 'events', component: EventsComponent },
+  { path: 'events/:id', component: EventsDetailComponent },
   { path: 'announcements', component: AnnouncementsPageComponent },
   { path: 'announcements/:id', component: AnnouncementDetailComponent },
 
