@@ -991,9 +991,30 @@
   font-weight: 700;
   color: #0f172a;
   font-size: 0.9rem;
-}
-.stacked input {
-  background: #f8fafc;
+
+  
+  .label-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+
+  
+  .char-counter {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #94a3b8;
+    transition: color 0.2s ease;
+
+    &.limit-near {
+      color: #f59e0b;
+    }
+  }
+
+  input {
+    background: #f8fafc;
+  }
 }
 .modal-card input,
 .modal-card select,
