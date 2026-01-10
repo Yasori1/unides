@@ -47,7 +47,7 @@ interface EventCard {
     trigger('listAnimation', [
       transition('* <=> *', [
         group([
-          query(':leave', [animate('300ms ease-out', style({ opacity: 0, transform: 'scale(0.95)' }))], { optional: true }),
+          // REMOVED :leave animation to prevent items from fading out when navigating away
           query(':enter', [
             style({ opacity: 0, transform: 'translateY(20px)' }),
             stagger('40ms', [
@@ -66,7 +66,20 @@ export class EventsComponent implements OnInit, AfterViewInit {
 
   // Filtreleme
   activeCategory: string = 'Tümü';
-  categories: string[] = ['Tümü', 'Teknoloji', 'Sanat', 'Müzik', 'Kariyer', 'Spor', 'Gezi'];
+  categories: string[] = [
+    'Tümü',
+    'Afet Yönetimi ve Dayanıklılık',
+    'Aile ve Değerler',
+    'Bilim ve Teknoloji',
+    'Çevre ve İklim',
+    'Eğitim ve Hayat Boyu Öğrenme',
+    'Gençlik Bilgilendirmesi',
+    'Gençlik Sağlığı ve Spor',
+    'Gönüllülük, Gençlik Katılımı ve Sivil Toplum',
+    'İstihdam ve Girişimcilik',
+    'Sosyal Kapsayıcılık',
+    'Uluslararası Gençlik Çalışmaları'
+  ];
   searchQuery: string = '';
   currentFilter: 'all' | 'active' | 'upcoming' = 'all';
 
@@ -75,7 +88,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
   // Removed old sort vars
 
   // Detay Modal
-  selectedEvent: EventCard | null = null;
+  // selectedEvent removed
 
   // Sayfalama
   allEventsPool: EventCard[] = [];
@@ -102,7 +115,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 101,
       title: 'Geleceğin Teknolojileri ve Yapay Zeka Zirvesi',
       description: 'Yapay zeka, blok zincir ve geleceğin teknolojilerinin tartışılacağı dev bir zirveye hazır olun. Sektörün öncüleri ile tanışma fırsatı.',
-      category: 'Teknoloji',
+      category: 'Bilim ve Teknoloji',
       date: '25 Ekim 2025',
       dateObj: new Date('2025-10-25'),
       time: '10:00',
@@ -120,7 +133,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 102,
       title: 'Kampüs Caz Festivali',
       description: 'Sonbaharın renkleri cazın büyüleyici ritimleriyle buluşuyor. Açık hava konserleri ve workshoplar sizi bekliyor.',
-      category: 'Müzik',
+      category: 'Eğitim ve Hayat Boyu Öğrenme',
       date: '15 Kasım 2025',
       dateObj: new Date('2025-11-15'),
       time: '18:30',
@@ -138,7 +151,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 103,
       title: 'Modern Sanat ve Tasarım Bienali',
       description: 'Genç sanatçıların eserlerinin sergileneceği, interaktif enstalasyonların yer aldığı sanat dolu bir hafta.',
-      category: 'Sanat',
+      category: 'Aile ve Değerler',
       date: '01 Aralık 2025',
       dateObj: new Date('2025-12-01'),
       time: '09:00',
@@ -157,7 +170,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 104,
       title: 'Kariyer ve Networking Günleri',
       description: 'Türkiye\'nin önde gelen firmalarının İK yöneticileri ile birebir görüşme şansı. Staj ve iş imkanlarını kaçırmayın.',
-      category: 'Kariyer',
+      category: 'İstihdam ve Girişimcilik',
       date: '20 Eylül 2025',
       dateObj: new Date('2025-09-20'),
       time: '11:00',
@@ -175,7 +188,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 105,
       title: 'Doğa Yürüyüşü ve Kamp',
       description: 'Şehrin gürültüsünden uzaklaşıp doğayla iç içe bir hafta sonu. Çadırını kap gel!',
-      category: 'Spor',
+      category: 'Gençlik Sağlığı ve Spor',
       date: '05 Ekim 2025',
       dateObj: new Date('2025-10-05'),
       time: '07:00',
@@ -193,7 +206,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 106,
       title: 'Siber Güvenlik Bootcamp',
       description: 'Uygulamalı laboratuvarlarla siber güvenliğin temellerini öğren. CTF mini yarışması da var.',
-      category: 'Teknoloji',
+      category: 'Bilim ve Teknoloji',
       date: '10 Ocak 2026',
       dateObj: new Date('2026-01-10'),
       time: '13:00',
@@ -211,7 +224,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 107,
       title: 'Fotoğrafçılık Şehir Turu',
       description: 'Şehir turunda sokak fotoğrafçılığı teknikleri, kompozisyon ve ışık kullanımı üzerine pratik.',
-      category: 'Sanat',
+      category: 'Aile ve Değerler',
       date: '18 Ocak 2026',
       dateObj: new Date('2026-01-18'),
       time: '09:30',
@@ -229,7 +242,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 108,
       title: 'Kariyer CV Atölyesi',
       description: 'CV ve LinkedIn profilini güçlendirmek için uygulamalı atölye. Örnek mülakat simülasyonu da yapılacak.',
-      category: 'Kariyer',
+      category: 'İstihdam ve Girişimcilik',
       date: '28 Ocak 2026',
       dateObj: new Date('2026-01-28'),
       time: '16:00',
@@ -247,7 +260,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 109,
       title: 'Veri Bilimi ve R Atölyesi',
       description: 'Veri analizine giriş yapmak isteyenler için kapsamlı bir atölye. R dili ile uygulama yapılacak.',
-      category: 'Teknoloji',
+      category: 'Bilim ve Teknoloji',
       date: '05 Şubat 2026',
       dateObj: new Date('2026-02-05'),
       time: '14:00',
@@ -265,7 +278,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 110,
       title: 'Klasik Müzik Akşamı',
       description: 'Üniversite orkestrasından unutulmaz bir klasik müzik dinletisi.',
-      category: 'Müzik',
+      category: 'Eğitim ve Hayat Boyu Öğrenme',
       date: '12 Şubat 2026',
       dateObj: new Date('2026-02-12'),
       time: '19:30',
@@ -283,7 +296,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 111,
       title: 'Modern Dans Gösterisi',
       description: 'Dans topluluğunun hazırladığı modern dans koreografileri sahneleniyor.',
-      category: 'Sanat',
+      category: 'Aile ve Değerler',
       date: '20 Şubat 2026',
       dateObj: new Date('2026-02-20'),
       time: '18:00',
@@ -301,7 +314,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 112,
       title: 'Startup Pitching Day',
       description: 'Girişim fikirlerini yatırımcılara sunmak isteyen öğrenciler için büyük fırsat.',
-      category: 'Kariyer',
+      category: 'İstihdam ve Girişimcilik',
       date: '25 Şubat 2026',
       dateObj: new Date('2026-02-25'),
       time: '10:00',
@@ -319,7 +332,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 113,
       title: 'Kampüs Koşusu',
       description: 'Sağlıklı yaşam için kampüste 5K koşusu düzenliyoruz. Herkes davetli!',
-      category: 'Spor',
+      category: 'Gençlik Sağlığı ve Spor',
       date: '01 Mart 2026',
       dateObj: new Date('2026-03-01'),
       time: '08:00',
@@ -337,7 +350,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 114,
       title: 'Ege Köyleri Gezisi',
       description: 'Ege\'nin saklı kalmış köylerini keşfetmeye gidiyoruz. Fotoğraf makinenizi unutmayın.',
-      category: 'Gezi',
+      category: 'Uluslararası Gençlik Çalışmaları',
       date: '10 Mart 2026',
       dateObj: new Date('2026-03-10'),
       time: '07:30',
@@ -355,7 +368,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 115,
       title: 'Blockchain 101',
       description: 'Blokzincir teknolojisinin temelleri ve kripto varlıklar üzerine seminer.',
-      category: 'Teknoloji',
+      category: 'Bilim ve Teknoloji',
       date: '15 Mart 2026',
       dateObj: new Date('2026-03-15'),
       time: '13:00',
@@ -373,7 +386,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 116,
       title: 'Rock Festivali',
       description: 'Amatör ve profesyonel rock gruplarının sahne alacağı müzik şöleni.',
-      category: 'Müzik',
+      category: 'Eğitim ve Hayat Boyu Öğrenme',
       date: '22 Mart 2026',
       dateObj: new Date('2026-03-22'),
       time: '15:00',
@@ -391,7 +404,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 117,
       title: 'Seramik Atölyesi',
       description: 'Kendi seramik kupanı tasarla ve üret. Malzemeler bizden!',
-      category: 'Sanat',
+      category: 'Aile ve Değerler',
       date: '28 Mart 2026',
       dateObj: new Date('2026-03-28'),
       time: '11:00',
@@ -409,7 +422,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 118,
       title: 'Staj Fuarı 2026',
       description: 'Yaz dönemi stajı için firmalarla buluşma noktası.',
-      category: 'Kariyer',
+      category: 'İstihdam ve Girişimcilik',
       date: '05 Nisan 2026',
       dateObj: new Date('2026-04-05'),
       time: '10:00',
@@ -427,7 +440,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 119,
       title: 'Voleybol Turnuvası',
       description: 'Fakülteler arası voleybol turnuvası final maçı.',
-      category: 'Spor',
+      category: 'Gençlik Sağlığı ve Spor',
       date: '12 Nisan 2026',
       dateObj: new Date('2026-04-12'),
       time: '17:00',
@@ -445,7 +458,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 120,
       title: 'Kapadokya Turu',
       description: 'Peribacaları ve balon turu ile eşsiz bir hafta sonu gezisi.',
-      category: 'Gezi',
+      category: 'Uluslararası Gençlik Çalışmaları',
       date: '20 Nisan 2026',
       dateObj: new Date('2026-04-20'),
       time: '06:00',
@@ -733,11 +746,5 @@ export class EventsComponent implements OnInit, AfterViewInit {
   // --- MODAL İŞLEMLERİ YERİNE DETAY SAYFASINA GİT ---
   openEventDetail(event: EventCard) {
     this.router.navigate(['/events', event.id]);
-  }
-
-  // Remove old modal methods if unused, or keep for safety but unused
-  closeModal() {
-    this.selectedEvent = null;
-    document.body.style.overflow = 'auto';
   }
 }
