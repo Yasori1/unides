@@ -392,7 +392,15 @@ $card-shadow: 0 10px 30px rgba(0,0,0,0.06);
   
   .cube-scene { width: 1100px; height: $cube-height; position: relative; }
   
-  .cube { width: 100%; height: 100%; position: absolute; transform-style: preserve-3d; animation: rotateCube 12s infinite cubic-bezier(0.25, 1, 0.5, 1); }
+  .cube { 
+    width: 100%; 
+    height: 100%; 
+    position: absolute; 
+    transform-style: preserve-3d; 
+    animation: rotateCube 12s infinite cubic-bezier(0.25, 1, 0.5, 1);
+    /* GPU Optimization */
+    will-change: transform;
+  }
   .cube-face { position: absolute; width: 100%; height: $cube-height; background: rgba(248, 250, 252, 0.9); border-radius: 12px; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-around; backface-visibility: hidden; .nc-item { display: flex; flex-direction: column; align-items: center; gap: 8px; img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; } span { font-size: 0.9rem; font-weight: 700; } } }
   .cube-front { transform: rotateX(0deg) translateZ($cube-translate); } .cube-top { transform: rotateX(90deg) translateZ($cube-translate); } .cube-back { transform: rotateX(180deg) translateZ($cube-translate); } .cube-bottom { transform: rotateX(-90deg) translateZ($cube-translate); }
 }
@@ -491,20 +499,29 @@ $card-shadow: 0 10px 30px rgba(0,0,0,0.06);
       .mobile-slider-track {
         display: flex;
         gap: 15px;
-        padding: 0 20px; // Padding on sides
-        width: max-content; 
+        padding: 0 20px;
+        width: max-content;
+        /* Infinite Animation */
+        animation: scrollMobile 20s linear infinite;
+        /* GPU Optimization */
+        will-change: transform;
+        transform: translateZ(0);
+      }
+
+      // Pause on hover/touch
+      &:hover .mobile-slider-track, 
+      &:active .mobile-slider-track {
+        animation-play-state: paused;
       }
 
       .mobile-slider-item {
-        // Calculate width to show exactly 2 items with gap + padding consideration
-        // Screen width - padding (40px) - gap (15px) / 2 approx
-        // Or fixed width: 45vw is safe for 2 items
-        width: 42vw; 
-        max-width: 180px;
+        width: 160px; // Fixed width for consistent animation logic
+        max-width: none;
         flex-shrink: 0;
-        scroll-snap-align: start;
+        // Snap removed for smooth continuous scroll
         
         .mobile-card {
+          // ... existing styles ...
           background: #fff;
           border: 1px solid #e2e8f0;
           border-radius: 16px;
@@ -540,4 +557,10 @@ $card-shadow: 0 10px 30px rgba(0,0,0,0.06);
       }
     }
   }
+}
+
+// Mobile Scroll Keyframes
+@keyframes scrollMobile {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); } 
 }

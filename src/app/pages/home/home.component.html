@@ -218,6 +218,18 @@
     <!-- Mobile Slider View (2 items visible at a time) -->
     <div class="mobile-slider-container mobile-only">
       <div class="mobile-slider-track">
+        <!-- Original List -->
+        <div class="mobile-slider-item" *ngFor="let nc of newestCommunities">
+          <div class="mobile-card">
+            <img
+              [src]="nc.image || 'assets/img/placeholder-avatar.svg'"
+              alt=""
+              onerror="this.src='assets/img/placeholder-avatar.svg'"
+            />
+            <span class="mobile-name">{{ nc.name }}</span>
+          </div>
+        </div>
+        <!-- Duplicated List for Infinite Scroll -->
         <div class="mobile-slider-item" *ngFor="let nc of newestCommunities">
           <div class="mobile-card">
             <img
