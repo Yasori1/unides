@@ -71,8 +71,8 @@ export class EventsComponent implements OnInit, AfterViewInit {
   currentFilter: 'all' | 'active' | 'upcoming' = 'all';
 
   // Sıralama
-  sortCriteria: 'date' | 'name' | 'semester' = 'date';
-  sortAscending: boolean = true;
+  sortOrder: 'date_asc' | 'date_desc' | 'name_asc' | 'name_desc' = 'date_asc';
+  // Removed old sort vars
 
   // Detay Modal
   selectedEvent: EventCard | null = null;
@@ -81,7 +81,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
   allEventsPool: EventCard[] = [];
   displayedEvents: EventCard[] = [];
   currentPage: number = 1;
-  itemsPerPage: number = 8;
+  itemsPerPage: number = 12;
   totalPages: number = 0;
   pages: number[] = [];
   allCommunities: any[] = [];
@@ -242,6 +242,222 @@ export class EventsComponent implements OnInit, AfterViewInit {
       color: '#ea580c',
       status: 'upcoming',
       city: 'Ankara'
+    },
+    {
+      id: 109,
+      title: 'Veri Bilimi ve R Atölyesi',
+      description: 'Veri analizine giriş yapmak isteyenler için kapsamlı bir atölye. R dili ile uygulama yapılacak.',
+      category: 'Teknoloji',
+      date: '05 Şubat 2026',
+      dateObj: new Date('2026-02-05'),
+      time: '14:00',
+      location: 'Bilkent Kütüphane',
+      university: 'Bilkent Üniversitesi',
+      club: 'Veri Bilimi Topluluğu',
+      semester: 'Teknoloji Topluluğu',
+      quota: 50,
+      imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800&auto=format&fit=crop',
+      color: '#2563eb',
+      status: 'upcoming',
+      city: 'Ankara'
+    },
+    {
+      id: 110,
+      title: 'Klasik Müzik Akşamı',
+      description: 'Üniversite orkestrasından unutulmaz bir klasik müzik dinletisi.',
+      category: 'Müzik',
+      date: '12 Şubat 2026',
+      dateObj: new Date('2026-02-12'),
+      time: '19:30',
+      location: 'AKM Büyük Salon',
+      university: 'İstanbul Üniversitesi',
+      club: 'Müzik Kulübü',
+      semester: 'Sanat Topluluğu',
+      quota: 400,
+      imageUrl: 'https://images.unsplash.com/photo-1507838153414-b4b713384ebd?q=80&w=800&auto=format&fit=crop',
+      color: '#9333ea',
+      status: 'upcoming',
+      city: 'İstanbul'
+    },
+    {
+      id: 111,
+      title: 'Modern Dans Gösterisi',
+      description: 'Dans topluluğunun hazırladığı modern dans koreografileri sahneleniyor.',
+      category: 'Sanat',
+      date: '20 Şubat 2026',
+      dateObj: new Date('2026-02-20'),
+      time: '18:00',
+      location: 'Ege Üniversitesi Kültür Merkezi',
+      university: 'Ege Üniversitesi',
+      club: 'Dans Topluluğu',
+      semester: 'Sanat Topluluğu',
+      quota: 350,
+      imageUrl: 'https://images.unsplash.com/photo-1508700929628-666bc8bd84ea?q=80&w=800&auto=format&fit=crop',
+      color: '#db2777',
+      status: 'upcoming',
+      city: 'İzmir'
+    },
+    {
+      id: 112,
+      title: 'Startup Pitching Day',
+      description: 'Girişim fikirlerini yatırımcılara sunmak isteyen öğrenciler için büyük fırsat.',
+      category: 'Kariyer',
+      date: '25 Şubat 2026',
+      dateObj: new Date('2026-02-25'),
+      time: '10:00',
+      location: 'Kolektif House',
+      university: 'Boğaziçi Üniversitesi',
+      club: 'Girişimcilik Kulübü',
+      semester: 'Kariyer Topluluğu',
+      quota: 150,
+      imageUrl: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=800&auto=format&fit=crop',
+      color: '#ea580c',
+      status: 'upcoming',
+      city: 'İstanbul'
+    },
+    {
+      id: 113,
+      title: 'Kampüs Koşusu',
+      description: 'Sağlıklı yaşam için kampüste 5K koşusu düzenliyoruz. Herkes davetli!',
+      category: 'Spor',
+      date: '01 Mart 2026',
+      dateObj: new Date('2026-03-01'),
+      time: '08:00',
+      location: 'Anadolu Üniversitesi Stadyumu',
+      university: 'Anadolu Üniversitesi',
+      club: 'Spor Kulübü',
+      semester: 'Spor Topluluğu',
+      quota: 1000,
+      imageUrl: 'https://images.unsplash.com/photo-1552674605-469523cc7043?q=80&w=800&auto=format&fit=crop',
+      color: '#16a34a',
+      status: 'upcoming',
+      city: 'Eskişehir'
+    },
+    {
+      id: 114,
+      title: 'Ege Köyleri Gezisi',
+      description: 'Ege\'nin saklı kalmış köylerini keşfetmeye gidiyoruz. Fotoğraf makinenizi unutmayın.',
+      category: 'Gezi',
+      date: '10 Mart 2026',
+      dateObj: new Date('2026-03-10'),
+      time: '07:30',
+      location: 'Bornova Metro Hareket',
+      university: 'Dokuz Eylül Üniversitesi',
+      club: 'Gezi Kulübü',
+      semester: 'Kültür Topluluğu',
+      quota: 45,
+      imageUrl: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=800&auto=format&fit=crop',
+      color: '#0891b2',
+      status: 'upcoming',
+      city: 'İzmir'
+    },
+    {
+      id: 115,
+      title: 'Blockchain 101',
+      description: 'Blokzincir teknolojisinin temelleri ve kripto varlıklar üzerine seminer.',
+      category: 'Teknoloji',
+      date: '15 Mart 2026',
+      dateObj: new Date('2026-03-15'),
+      time: '13:00',
+      location: 'Bahçeşehir Üniversitesi Güney Kampüs',
+      university: 'Bahçeşehir Üniversitesi',
+      club: 'Blockchain Kulübü',
+      semester: 'Teknoloji Topluluğu',
+      quota: 200,
+      imageUrl: 'https://images.unsplash.com/photo-1621504450168-b8c4375c2b80?q=80&w=800&auto=format&fit=crop',
+      color: '#2563eb',
+      status: 'upcoming',
+      city: 'İstanbul'
+    },
+    {
+      id: 116,
+      title: 'Rock Festivali',
+      description: 'Amatör ve profesyonel rock gruplarının sahne alacağı müzik şöleni.',
+      category: 'Müzik',
+      date: '22 Mart 2026',
+      dateObj: new Date('2026-03-22'),
+      time: '15:00',
+      location: 'Hacettepe Beytepe Kampüsü',
+      university: 'Hacettepe Üniversitesi',
+      club: 'Rock Topluluğu',
+      semester: 'Sanat Topluluğu',
+      quota: 1500,
+      imageUrl: 'https://images.unsplash.com/photo-1459749411177-0473ef7161a8?q=80&w=800&auto=format&fit=crop',
+      color: '#9333ea',
+      status: 'upcoming',
+      city: 'Ankara'
+    },
+    {
+      id: 117,
+      title: 'Seramik Atölyesi',
+      description: 'Kendi seramik kupanı tasarla ve üret. Malzemeler bizden!',
+      category: 'Sanat',
+      date: '28 Mart 2026',
+      dateObj: new Date('2026-03-28'),
+      time: '11:00',
+      location: 'Uludağ Üniversitesi Atölyeler',
+      university: 'Bursa Uludağ Üniversitesi',
+      club: 'El Sanatları Kulübü',
+      semester: 'Sanat Topluluğu',
+      quota: 20,
+      imageUrl: 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?q=80&w=800&auto=format&fit=crop',
+      color: '#db2777',
+      status: 'upcoming',
+      city: 'Bursa'
+    },
+    {
+      id: 118,
+      title: 'Staj Fuarı 2026',
+      description: 'Yaz dönemi stajı için firmalarla buluşma noktası.',
+      category: 'Kariyer',
+      date: '05 Nisan 2026',
+      dateObj: new Date('2026-04-05'),
+      time: '10:00',
+      location: 'Kocaeli Üniversitesi Kongre Merkezi',
+      university: 'Kocaeli Üniversitesi',
+      club: 'Kariyer Merkezi',
+      semester: 'Kariyer Topluluğu',
+      quota: 600,
+      imageUrl: 'https://images.unsplash.com/photo-1558222218-b7b54eede3f3?q=80&w=800&auto=format&fit=crop',
+      color: '#ea580c',
+      status: 'upcoming',
+      city: 'Kocaeli'
+    },
+    {
+      id: 119,
+      title: 'Voleybol Turnuvası',
+      description: 'Fakülteler arası voleybol turnuvası final maçı.',
+      category: 'Spor',
+      date: '12 Nisan 2026',
+      dateObj: new Date('2026-04-12'),
+      time: '17:00',
+      location: 'Burhan Felek Spor Salonu',
+      university: 'Marmara Üniversitesi',
+      club: 'Spor Birliği',
+      semester: 'Spor Topluluğu',
+      quota: 800,
+      imageUrl: 'https://images.unsplash.com/photo-1612872087720-48ca556cd852?q=80&w=800&auto=format&fit=crop',
+      color: '#16a34a',
+      status: 'upcoming',
+      city: 'İstanbul'
+    },
+    {
+      id: 120,
+      title: 'Kapadokya Turu',
+      description: 'Peribacaları ve balon turu ile eşsiz bir hafta sonu gezisi.',
+      category: 'Gezi',
+      date: '20 Nisan 2026',
+      dateObj: new Date('2026-04-20'),
+      time: '06:00',
+      location: 'Kampüs Ana Kapı',
+      university: 'Nevşehir Hacı Bektaş Veli Üniversitesi',
+      club: 'Gezi ve Kamp Kulübü',
+      semester: 'Kültür Topluluğu',
+      quota: 50,
+      imageUrl: 'https://images.unsplash.com/photo-1641128324972-af3212f0f6bd?q=80&w=800&auto=format&fit=crop',
+      color: '#0891b2',
+      status: 'upcoming',
+      city: 'Nevşehir'
     }
   ];
 
@@ -403,15 +619,16 @@ export class EventsComponent implements OnInit, AfterViewInit {
     }
 
     return filtered.sort((a, b) => {
-      let comparison = 0;
-      if (this.sortCriteria === 'date') {
-        comparison = a.dateObj.getTime() - b.dateObj.getTime();
-      } else if (this.sortCriteria === 'name') {
-        comparison = a.title.localeCompare(b.title, 'tr');
-      } else if (this.sortCriteria === 'semester') {
-        comparison = a.semester.localeCompare(b.semester, 'tr');
+      if (this.sortOrder === 'date_asc') {
+        return a.dateObj.getTime() - b.dateObj.getTime();
+      } else if (this.sortOrder === 'date_desc') {
+        return b.dateObj.getTime() - a.dateObj.getTime();
+      } else if (this.sortOrder === 'name_asc') {
+        return a.title.localeCompare(b.title, 'tr');
+      } else if (this.sortOrder === 'name_desc') {
+        return b.title.localeCompare(a.title, 'tr');
       }
-      return this.sortAscending ? comparison : -comparison;
+      return 0;
     });
   }
 
@@ -460,16 +677,8 @@ export class EventsComponent implements OnInit, AfterViewInit {
     this.applyFiltersAndGoFirstPage();
   }
 
-  changeSortCriteria(criteria: 'date' | 'name' | 'semester') {
-    if (this.sortCriteria === criteria) {
-      this.sortAscending = !this.sortAscending;
-    } else {
-      this.sortCriteria = criteria;
-      this.sortAscending = true;
-    }
-    this.applyFiltersAndGoFirstPage();
-  }
-
+  // Old changeSortCriteria removed
+  
   trackByEventId(index: number, event: EventCard): number {
     return event.id;
   }

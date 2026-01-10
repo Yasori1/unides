@@ -265,10 +265,21 @@
 
 .events-grid.compact {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
   margin-top: 12px;
-  justify-content: stretch;
+  
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  @media (min-width: 1400px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 .event-card {
@@ -281,8 +292,8 @@
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  height: 100%;
-  min-height: 260px;
+  height: 380px;
+  max-height: 380px;
 
   &:hover {
     transform: translateY(-2px);
@@ -340,6 +351,7 @@
     flex-direction: column;
     gap: 8px;
     flex: 1;
+    min-height: 0;
     .top-row {
       display: flex;
       align-items: center;
@@ -375,6 +387,12 @@
       line-height: 1.5;
       font-weight: 500;
       font-size: 0.9rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 }
@@ -991,6 +1009,7 @@
   font-weight: 700;
   color: #0f172a;
   font-size: 0.9rem;
+<<<<<<< HEAD
 
   
   .label-header {
@@ -1015,6 +1034,12 @@
   input {
     background: #f8fafc;
   }
+=======
+}
+.stacked input,
+.stacked select {
+  background: #f8fafc;
+>>>>>>> 88593ac1445976c15bb5431c71a3ca9e3fba9f1d
 }
 .modal-card input,
 .modal-card select,
@@ -1607,6 +1632,161 @@
         margin: 0;
         font-size: 0.9rem;
         font-weight: 500;
+      }
+    }
+  }
+}
+
+// Event Detail Modal Styles (BİREBİR Events Page ile aynı)
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(5px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-content {
+  background: #fff;
+  width: 100%;
+  max-width: 1100px;
+  border-radius: 24px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+
+  .close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    background: rgba(0, 0, 0, 0.6);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s;
+    backdrop-filter: blur(4px);
+    .material-symbols-outlined {
+      font-size: 24px;
+    }
+    &:hover {
+      background: rgba(0, 0, 0, 0.8);
+      transform: rotate(90deg);
+    }
+  }
+
+  .modal-header {
+    height: 220px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 24px 24px 0 0;
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .modal-cat-badge {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      padding: 8px 16px;
+      color: white;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  }
+
+  .modal-body {
+    padding: 30px 40px;
+    .event-title {
+      font-size: 2rem;
+      margin-bottom: 24px;
+      color: #0f172a;
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -0.5px;
+      text-align: center;
+    }
+    .info-card {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      .info-column {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+      .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        .info-label {
+          font-size: 0.7rem;
+          font-weight: 700;
+          color: #94a3b8;
+          text-transform: uppercase;
+          letter-spacing: 0.8px;
+        }
+        .info-value {
+          font-size: 1rem;
+          font-weight: 600;
+          color: #0f172a;
+          line-height: 1.4;
+        }
+      }
+    }
+    .description-section {
+      margin-top: 24px;
+      .description-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-bottom: 12px;
+        display: block;
+      }
+      .description-text {
+        color: #475569;
+        line-height: 1.7;
+        margin: 0;
+        font-size: 1rem;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .modal-content {
+    max-width: 95%;
+    .modal-body {
+      padding: 30px 20px;
+      .event-title {
+        font-size: 1.8rem;
+      }
+      .info-card {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 20px;
       }
     }
   }

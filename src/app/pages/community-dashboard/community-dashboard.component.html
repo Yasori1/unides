@@ -188,7 +188,7 @@
         </div>
 
         <div class="events-grid compact" *ngIf="displayedDashboardEvents.length; else emptyEvents">
-          <div class="event-card" *ngFor="let event of displayedDashboardEvents">
+          <div class="event-card" *ngFor="let event of displayedDashboardEvents" (click)="openEventDetail(event)">
             <div class="card-image">
               <img [src]="event.imageUrl" [alt]="event.title" loading="lazy" />
               <span class="date-badge">{{ event.date }}</span>
@@ -262,7 +262,7 @@
         class="events-grid compact"
         *ngIf="filteredDashboardEvents.length; else emptyProjectEvents"
       >
-        <div class="event-card" *ngFor="let event of filteredDashboardEvents">
+        <div class="event-card" *ngFor="let event of filteredDashboardEvents" (click)="openEventDetail(event)">
           <div class="card-image">
             <img [src]="event.imageUrl" [alt]="event.title" loading="lazy" />
             <span class="date-badge">{{ event.date }}</span>
@@ -636,6 +636,13 @@
           ></app-image-upload>
         </div>
         <input type="text" placeholder="Etkinlik İsmi" [(ngModel)]="newEventData.title" />
+        <label class="stacked">
+          <span>Kategori</span>
+          <select [(ngModel)]="newEventData.category">
+            <option value="">Kategori Seçin</option>
+            <option *ngFor="let cat of eventCategories" [value]="cat">{{ cat }}</option>
+          </select>
+        </label>
         <div class="row two-cols">
           <label class="stacked">
             <span>Tarih</span>
@@ -720,4 +727,67 @@
       </div>
     </div>
   </div>
+<<<<<<< HEAD
 </div>
+=======
+</div>
+
+<div class="modal-backdrop" *ngIf="selectedEvent" (click)="closeEventDetail()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <button class="close-btn" (click)="closeEventDetail()">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+
+    <div class="modal-header">
+      <img
+        [src]="selectedEvent.imageUrl"
+        class="modal-cover"
+        onerror="this.src='assets/images/placeholder.jpg'"
+      />
+      <span class="modal-cat-badge" [style.background]="'#2563eb'">
+        {{ selectedEvent.category }}
+      </span>
+    </div>
+
+    <div class="modal-body">
+      <h2 class="event-title">{{ selectedEvent.title }}</h2>
+
+      <div class="info-card">
+        <div class="info-column">
+          <div class="info-item">
+            <span class="info-label">ÜNİVERSİTE</span>
+            <span class="info-value">{{ clubInfo.university }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">TARİH</span>
+            <span class="info-value">{{ selectedEvent.date }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">KONUM</span>
+            <span class="info-value">{{ selectedEvent.location }}</span>
+          </div>
+        </div>
+        <div class="info-column">
+          <div class="info-item">
+            <span class="info-label">TOPLULUK</span>
+            <span class="info-value">{{ clubInfo.name }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">SAAT</span>
+            <span class="info-value">{{ selectedEvent.time || '10:00' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">KONTENJAN</span>
+            <span class="info-value">{{ selectedEvent.quota || 100 }} Kişilik Yer Var</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="description-section">
+        <span class="description-label">AÇIKLAMA</span>
+        <p class="description-text">{{ selectedEvent.description }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+>>>>>>> 88593ac1445976c15bb5431c71a3ca9e3fba9f1d

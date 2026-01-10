@@ -59,6 +59,8 @@ interface DashboardEvent {
   location: string;
   category: string;
   description: string;
+  time?: string;
+  quota?: number;
 }
 
 @Component({
@@ -78,6 +80,7 @@ export class CommunityDashboardComponent implements OnInit {
   showNotifications: boolean = false;
   activeRowMenuId: number | null = null;
   modalType: 'new-event' | 'new-project' | 'new-member' | null = null;
+  selectedEvent: DashboardEvent | null = null;
   isSearchingMembers = false;
   memberSearchQuery = '';
   memberSearchResults: UserSearchResult[] = [];
@@ -101,8 +104,25 @@ export class CommunityDashboardComponent implements OnInit {
     quota: '',
     description: '',
     image: '',
+    category: '',
   };
+<<<<<<< HEAD
 
+=======
+  eventCategories: string[] = [
+    'Afet Yönetimi ve Dayanıklılık',
+    'Aile ve Değerler',
+    'Bilim ve Teknoloji',
+    'Çevre ve İklim',
+    'Eğitim ve Hayat Boyu Öğrenme',
+    'Gençlik Bilgilendirmesi',
+    'Gençlik Sağlığı ve Spor',
+    'Gönüllülük, Gençlik Katılımı ve Sivil Toplum',
+    'İstihdam ve Girişimcilik',
+    'Sosyal Kapsayıcılık',
+    'Uluslararası Gençlik Çalışmaları',
+  ];
+>>>>>>> 88593ac1445976c15bb5431c71a3ca9e3fba9f1d
   // Form Data
   newProjectData = { name: '', category: 'Teknoloji', budget: 0, deadline: '' };
   newMemberData = {
@@ -153,6 +173,8 @@ export class CommunityDashboardComponent implements OnInit {
       location: 'İTÜ Ayazağa',
       category: 'Teknoloji',
       description: 'Sektörden konuşmacılarla AI odaklı zirve.',
+      time: '10:00',
+      quota: 500,
     },
     {
       id: 2,
@@ -163,6 +185,8 @@ export class CommunityDashboardComponent implements OnInit {
       location: 'ODTÜ Kültür Merkezi',
       category: 'Atölye',
       description: 'Arduino ve sensörlerle uygulamalı robotik eğitimi.',
+      time: '14:00',
+      quota: 50,
     },
     {
       id: 3,
@@ -173,6 +197,8 @@ export class CommunityDashboardComponent implements OnInit {
       location: 'Boğaziçi Garanti Kültür',
       category: 'Finans',
       description: 'Ödeme teknolojileri ve blokzincir seminerleri.',
+      time: '09:30',
+      quota: 300,
     },
     {
       id: 4,
@@ -183,6 +209,8 @@ export class CommunityDashboardComponent implements OnInit {
       location: 'Ankara Kampüsü',
       category: 'Sosyal',
       description: 'Bağış toplama koşusu için başvuru reddedildi.',
+      time: '08:00',
+      quota: 200,
     },
     {
       id: 5,
@@ -193,6 +221,8 @@ export class CommunityDashboardComponent implements OnInit {
       location: 'Online',
       category: 'Yarışma',
       description: '48 saatlik ürün geliştirme maratonu.',
+      time: '10:00',
+      quota: 100,
     },
   ];
 
@@ -642,6 +672,7 @@ export class CommunityDashboardComponent implements OnInit {
       quota: '',
       description: '',
       image: '',
+      category: '',
     };
     this.newProjectData = { name: '', category: 'Teknoloji', budget: 0, deadline: '' };
     this.newMemberData = {
@@ -695,7 +726,7 @@ export class CommunityDashboardComponent implements OnInit {
   }
 
   get isEventFormValid() {
-    const { title, date, time, location, quota, description, image } = this.newEventData;
+    const { title, date, time, location, quota, description, image, category } = this.newEventData;
     return (
       !!title.trim() &&
       !!date &&
@@ -703,7 +734,8 @@ export class CommunityDashboardComponent implements OnInit {
       !!location.trim() &&
       !!quota &&
       !!description.trim() &&
-      !!image
+      !!image &&
+      !!category
     );
   }
 
@@ -854,4 +886,22 @@ export class CommunityDashboardComponent implements OnInit {
     }
     this.toastMessage = null;
   }
+<<<<<<< HEAD
 }
+=======
+
+  openEventDetail(event: DashboardEvent) {
+    this.selectedEvent = event;
+    if (isPlatformBrowser(this.platformId)) {
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  closeEventDetail() {
+    this.selectedEvent = null;
+    if (isPlatformBrowser(this.platformId)) {
+      document.body.style.overflow = 'auto';
+    }
+  }
+}
+>>>>>>> 88593ac1445976c15bb5431c71a3ca9e3fba9f1d

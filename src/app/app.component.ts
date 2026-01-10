@@ -1,17 +1,18 @@
 import { Component } from '@angular/core';
-import { ViewportScroller } from '@angular/common';
+import { ViewportScroller, CommonModule } from '@angular/common';
 import { RouterOutlet, Router, Event, NavigationEnd } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, CommonModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
 
   title = 'ÜNİDES - Gençlik ve Spor Bakanlığı';
+  showGlobalBackground = true;
 
   constructor (
     private router: Router,
@@ -23,6 +24,10 @@ export class AppComponent {
       if (event instanceof NavigationEnd) {
         // Sayfayı en üste kaydır (Scroll to top)
         this.viewportScroller.scrollToPosition([0, 0]);
+
+        // Dashboard sayfalarında global arka planı gizle
+        // "dashboard" kelimesini içeren URL'lerde arkaplan gizlenir
+        this.showGlobalBackground = !event.url.includes('dashboard');
       }
     });
   }

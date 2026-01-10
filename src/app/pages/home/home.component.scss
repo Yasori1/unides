@@ -48,14 +48,8 @@ $card-shadow: 0 10px 30px rgba(0,0,0,0.06);
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 // --- ARKA PLAN (AURORA / AKIŞKAN) ---
-.global-background {
-  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-  z-index: -1; 
-  /* Opaque gradient: Left Turquoise (#e0fbfc) -> Right White (#ffffff) */
-  background: linear-gradient(to right, #e0fbfc 0%, #ffffff 100%);
-  overflow: hidden; 
-  pointer-events: none;
-}
+// .global-background moved to global styles.scss
+
 
 // --- BUTTONS ---
 .btn-outline-custom {

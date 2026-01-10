@@ -76,8 +76,8 @@ export const routes: Routes = [
   { path: 'community-dashboard', component: CommunityDashboardComponent },
 
   // ÖĞRENCİ GİRİŞ SONRASI SAYFA
-  // { path: 'student-login', component: StudentLoginComponent },
-  // { path: 'profile', component: StudentProfileComponent },
+  { path: 'student-login', component: StudentLoginComponent },
+  { path: 'profile', component: StudentProfileComponent },
 
   // Admin Dashboard (Eski/Mevcut)
   {
