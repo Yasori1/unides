@@ -569,6 +569,33 @@ export class EventsComponent implements OnInit, AfterViewInit {
     return venues[city] || 'Merkez Kampüs Etkinlik Alanı';
   }
 
+  getUniversityAbbreviation(universityName: string): string {
+    const abbreviations: { [key: string]: string } = {
+      'Yıldız Teknik Üniversitesi': 'YTÜ',
+      'İstanbul Teknik Üniversitesi': 'İTÜ',
+      'Orta Doğu Teknik Üniversitesi': 'ODTÜ',
+      'Boğaziçi Üniversitesi': 'BOUN',
+      'Mimar Sinan Güzel Sanatlar Üniversitesi': 'MSGSÜ',
+      'İstanbul Üniversitesi': 'İÜ',
+      'Marmara Üniversitesi': 'MÜ',
+      'Ege Üniversitesi': 'EÜ',
+      'Dokuz Eylül Üniversitesi': 'DEÜ',
+      'Hacettepe Üniversitesi': 'Hacettepe',
+      'Bilkent Üniversitesi': 'Bilkent',
+      'Koç Üniversitesi': 'Koç',
+      'Sabancı Üniversitesi': 'Sabancı',
+      'Galatasaray Üniversitesi': 'GSÜ',
+      'Gebze Teknik Üniversitesi': 'GTÜ',
+      'İzmir Yüksek Teknoloji Enstitüsü': 'İYTE',
+      'Bursa Uludağ Üniversitesi': 'Uludağ',
+      'Anadolu Üniversitesi': 'Anadolu',
+      'Kocaeli Üniversitesi': 'KOÜ',
+      'Nevşehir Hacı Bektaş Veli Üniversitesi': 'NEVÜ',
+      'Bahçeşehir Üniversitesi': 'BAU',
+    };
+    return abbreviations[universityName] || universityName;
+  }
+
   ngAfterViewInit() {
     if (isPlatformBrowser(this.platformId)) {
       const revealObserver = new IntersectionObserver(
@@ -703,12 +730,12 @@ export class EventsComponent implements OnInit, AfterViewInit {
     cardElement.style.transform = `perspective(1000px) rotateX(0) rotateY(0) scale(1)`;
   }
 
-  // --- MODAL İŞLEMLERİ ---
+  // --- MODAL İŞLEMLERİ YERİNE DETAY SAYFASINA GİT ---
   openEventDetail(event: EventCard) {
-    this.selectedEvent = event;
-    document.body.style.overflow = 'hidden';
+    this.router.navigate(['/events', event.id]);
   }
 
+  // Remove old modal methods if unused, or keep for safety but unused
   closeModal() {
     this.selectedEvent = null;
     document.body.style.overflow = 'auto';

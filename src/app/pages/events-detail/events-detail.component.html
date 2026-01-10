@@ -1,0 +1,132 @@
+<app-site-navbar />
+
+<!-- Loading State -->
+<div *ngIf="isLoading" class="loading-container">
+  <div class="spinner"></div>
+  <p>Etkinlik yükleniyor...</p>
+</div>
+
+<!-- Event Detail -->
+<div *ngIf="!isLoading && event" class="event-detail-page">
+  <!-- Hero Banner -->
+  <div class="hero-section" (mousemove)="onHeroMouseMove($event)">
+    <div class="background-wrapper">
+      <img
+        [src]="event.imageUrl"
+        [alt]="event.title"
+        class="hero-image"
+        loading="lazy"
+        onerror="this.src='assets/images/placeholder.jpg'"
+      />
+      <div
+        class="interactive-blob"
+        [style.transform]="'translate(' + -heroMoveX + 'px, ' + -heroMoveY + 'px)'"
+      ></div>
+    </div>
+    <div class="hero-overlay">
+      <div class="container">
+        <div class="breadcrumb">
+          <a routerLink="/events">Etkinlikler</a>
+          <i class="bx bx-chevron-right"></i>
+          <span>{{ event.title }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Section -->
+  <div class="content-section">
+    <div class="container-wide">
+      <!-- Back Button - Top Left -->
+      <div class="back-button-top">
+        <a routerLink="/events" class="back-button">
+          <i class="bx bx-arrow-back"></i>
+          Etkinliklere Dön
+        </a>
+      </div>
+
+      <div class="layout-grid">
+        <!-- Main Content (Left Column) -->
+        <main class="main-content">
+          <!-- Event Header -->
+          <div class="event-header">
+            <h1 class="event-title">{{ event.title }}</h1>
+          </div>
+
+          <!-- Description Section -->
+          <div class="description-section">
+            <h2>Etkinlik Hakkında</h2>
+            <p>{{ event.description }}</p>
+          </div>
+        </main>
+
+        <!-- Right Sidebar -->
+        <aside class="sidebar">
+          <div class="sidebar-content sticky-sidebar">
+            
+            <!-- Event Info Card -->
+            <div class="info-card">
+              <h3 class="card-title">Etkinlik Detayları</h3>
+              <div class="info-content-wrapper">
+                
+                <div class="info-section">
+                  <div class="info-label">TARİH & SAAT</div>
+                  <div class="info-text">
+                    <i class="bx bx-time"></i>
+                    {{ event.date }} - {{ event.time }}
+                  </div>
+                </div>
+
+                <div class="info-section">
+                  <div class="info-label">KONUM</div>
+                  <div class="info-text">
+                    <i class="bx bx-map"></i>
+                    {{ event.location }}
+                  </div>
+                </div>
+
+                <div class="info-section">
+                  <div class="info-label">ORGANİZATÖR</div>
+                  <div class="info-text">
+                    <i class="bx bxs-institution"></i>
+                    {{ event.university }} - {{ event.club }}
+                  </div>
+                </div>
+
+                <div class="info-section">
+                  <div class="info-label">KATEGORİ</div>
+                  <div class="info-text">
+                     <i class="bx bx-category"></i>
+                     {{ event.category }}
+                  </div>
+                </div>
+
+                <div class="info-section">
+                    <div class="info-label">KONTENJAN</div>
+                    <div class="info-text">
+                       <i class="bx bx-group"></i>
+                       {{ event.quota > 0 ? event.quota + ' Kişi' : 'Sınırsız' }}
+                    </div>
+                  </div>
+
+              </div>
+            </div>
+
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Not Found -->
+<div *ngIf="!isLoading && !event" class="not-found">
+  <div class="not-found-content">
+    <i class="bx bx-error-circle"></i>
+    <h2>Etkinlik Bulunamadı</h2>
+    <p>Aradığınız etkinlik bulunamadı veya süresi dolmuş olabilir.</p>
+    <a routerLink="/events" class="back-button">Etkinliklere Dön</a>
+  </div>
+</div>
+
+<app-site-footer />

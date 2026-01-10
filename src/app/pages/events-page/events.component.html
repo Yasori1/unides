@@ -109,7 +109,7 @@
           <div class="tags-row">
             <span class="tag semester" *ngIf="event.semester">
               <span class="material-symbols-outlined" style="font-size: 14px">groups</span>
-              {{ event.club }}
+              {{ getUniversityAbbreviation(event.university) }} {{ event.club }}
             </span>
             <span class="category" [style.color]="event.color" style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">{{ event.category }}</span>
           </div>
@@ -172,65 +172,6 @@
 </section>
 
 <app-site-footer />
-
-<div class="modal-backdrop" *ngIf="selectedEvent" (click)="closeModal()">
-  <div class="modal-content" (click)="$event.stopPropagation()">
-    <button class="close-btn" (click)="closeModal()">
-      <span class="material-symbols-outlined">close</span>
-    </button>
-
-    <div class="modal-header">
-      <img
-        [src]="selectedEvent.imageUrl"
-        class="modal-cover"
-        onerror="this.src='assets/images/placeholder.jpg'"
-      />
-      <span class="modal-cat-badge" [style.background]="selectedEvent.color">
-        {{ selectedEvent.category }}
-      </span>
-    </div>
-
-    <div class="modal-body">
-      <h2 class="event-title">{{ selectedEvent.title }}</h2>
-
-      <div class="info-card">
-        <div class="info-column">
-          <div class="info-item">
-            <span class="info-label">ÜNİVERSİTE</span>
-            <span class="info-value">{{ selectedEvent.university }}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">TARİH</span>
-            <span class="info-value">{{ selectedEvent.date }}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">KONUM</span>
-            <span class="info-value">{{ selectedEvent.location }}</span>
-          </div>
-        </div>
-        <div class="info-column">
-          <div class="info-item">
-            <span class="info-label">TOPLULUK</span>
-            <span class="info-value">{{ selectedEvent.semester }}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">SAAT</span>
-            <span class="info-value">{{ selectedEvent.time }}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">KONTENJAN</span>
-            <span class="info-value">{{ selectedEvent.quota }} Kişilik Yer Var</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="description-section">
-        <span class="description-label">AÇIKLAMA</span>
-        <p class="description-text">{{ selectedEvent.description }}</p>
-      </div>
-    </div>
-  </div>
-</div>
 
 <link
   rel="stylesheet"
