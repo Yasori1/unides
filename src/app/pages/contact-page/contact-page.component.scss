@@ -13,16 +13,16 @@ $border-color: #e2e8f0;
   display: block;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   color: $text-dark;
-  background-color: $white;
+  background-color: transparent; /* Transparent */
 }
 
 // --- HERO / PAGE SPACER ---
 .page-spacer {
   padding-top: 140px;
   padding-bottom: 70px;
-  background-color: $bg-light;
+  background-color: transparent; /* Transparent */
   text-align: center;
-  border-bottom: 1px solid $border-color;
+  border-bottom: 1px solid rgba($border-color, 0.5);
   position: relative;
   overflow: hidden;
 
@@ -200,7 +200,8 @@ $border-color: #e2e8f0;
 // --- FORM SECTION ---
 .form-section {
   padding: 60px 0 100px;
-  background: linear-gradient(to bottom, $white, $bg-light);
+  /* Transparent gradient or transparent background to blend with global */
+  background: transparent; 
 
   .section-text {
     opacity: 0;
@@ -337,7 +338,7 @@ $border-color: #e2e8f0;
 // --- SOCIAL SECTION ---
 .social-connect-section {
   padding: 80px 0;
-  background: $white;
+  background: transparent; /* Transparent */
   .social-title {
     font-size: 1.5rem;
     font-weight: 700;

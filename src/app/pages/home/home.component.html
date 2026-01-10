@@ -1,4 +1,4 @@
-<div class="global-background"></div>
+<!-- .global-background moved to app.component.html -->
 
 <div class="video-modal-overlay" *ngIf="showVideo" (click)="closeVideo()">
   <div class="video-modal-content" (click)="$event.stopPropagation()">
@@ -42,14 +42,12 @@
     </div>
   </div>
 </div>
-
 <section class="section-communities">
   <div class="container">
     <div class="section-header-center fade-in-up">
       <h6 class="sub-title">KEŞFET</h6>
       <h2 class="section-title">Öne Çıkan Topluluklar</h2>
       <p class="section-desc">Kampüsün en aktif topluluklarıyla tanışın.</p>
-      <div class="blue-divider"></div>
     </div>
 
     <div class="communities-grid" *ngIf="!isLoading">
@@ -65,9 +63,8 @@
         <div class="card-content">
           <h3 class="comm-name">{{ comm.name }}</h3>
           <span class="comm-category">{{ comm.category }}</span>
-          
+          <span class="comm-email">{{ comm.email }}</span>
           <div class="comm-stats">
-            <span class="stat">{{ comm.email }}</span>
             <span class="stat">📅 {{ comm.eventCount }} Etkinlik</span>
           </div>
         </div>

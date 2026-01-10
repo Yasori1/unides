@@ -160,62 +160,83 @@
 
     <!-- 1. TAB: GENEL BAKIŞ -->
     <div class="view-container" *ngIf="activeTab === 'overview'">
-      <div class="stats-grid-compact">
-        <div class="stat-card-mini" *ngFor="let stat of stats">
-          <div class="icon-box" [ngClass]="stat.colorClass">
-            <span class="material-symbols-outlined">{{ stat.icon }}</span>
-          </div>
-          <div class="text">
-            <span>{{ stat.label }}</span>
-            <h3>{{ stat.value }}</h3>
-          </div>
+      <!-- Hızlı İşlemler -->
+      <div class="quick-actions-section">
+        <h2 class="section-title">Hızlı İşlemler</h2>
+        <div class="quick-actions-grid">
+          <button class="quick-action-card" (click)="openModal('new-announcement')">
+            <div class="action-icon">
+              <span class="material-symbols-outlined">campaign</span>
+            </div>
+            <span class="action-label">Yeni Duyuru Ekle</span>
+          </button>
+          <button class="quick-action-card" (click)="switchTab('communities')">
+            <div class="action-icon">
+              <span class="material-symbols-outlined">groups</span>
+            </div>
+            <span class="action-label">Toplulukları Görüntüle</span>
+          </button>
+          <button class="quick-action-card" (click)="switchTab('events')">
+            <div class="action-icon">
+              <span class="material-symbols-outlined">event_available</span>
+            </div>
+            <span class="action-label">Etkinlikleri Görüntüle</span>
+          </button>
+          <button class="quick-action-card" (click)="switchTab('settings')">
+            <div class="action-icon">
+              <span class="material-symbols-outlined">settings</span>
+            </div>
+            <span class="action-label">Ayarları Güncelle</span>
+          </button>
         </div>
       </div>
 
-      <div class="split-grid">
-        <!-- Bekleyen Onaylar -->
-        <div class="card table-card">
+      <!-- Bekleyen Onaylar -->
+      <div class="pending-approvals-section">
+        <div class="card pending-approvals-card">
           <div class="card-header">
-            <h3>Bekleyen Etkinlik Onayları</h3>
-            <button class="btn-text" (click)="switchTab('events')">Tümünü Gör</button>
+            <h3>Bekleyen Onaylar</h3>
           </div>
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Topluluk</th>
-                <th>Etkinlik</th>
-                <th>Tarih</th>
-                <th>Durum</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let req of pendingEvents.slice(0, 4)">
-                <td>
-                  <span class="p-name">{{ req.communityName }}</span>
-                </td>
-                <td>{{ req.eventName }}</td>
-                <td>{{ req.date }}</td>
-                <td>
-                  <span class="status-badge warning">Onay Bekliyor</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Hızlı Erişim -->
-        <div class="card quick-actions-card">
-          <h3>Hızlı İşlemler</h3>
-          <div class="actions-grid">
-            <button class="tile-btn" (click)="openModal('new-announcement')">
-              <span class="material-symbols-outlined">campaign</span>
-              <span>Duyuru Yap</span>
-            </button>
-            <button class="tile-btn" (click)="goToCommunitiesWithPendingFilter()">
-              <span class="material-symbols-outlined">add_business</span>
-              <span>Topluluk Onayla</span>
-            </button>
-            <!-- Mesajlar (Destek) Butonu Silindi -->
+          <div class="approvals-table-wrapper">
+            <table class="approvals-table">
+              <thead>
+                <tr>
+                  <th>Başvuru Tipi</th>
+                  <th>Adı</th>
+                  <th>Başvuru Tarihi</th>
+                  <th>Durum</th>
+                  <th>İşlem</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let approval of pendingApprovals">
+                  <td>
+                    <span class="type-badge" [ngClass]="approval.type === 'Topluluk' ? 'community' : 'event'">
+                      {{ approval.type }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="approval-name">{{ approval.name }}</span>
+                  </td>
+                  <td>
+                    <span class="approval-date">{{ approval.requestDate }}</span>
+                  </td>
+                  <td>
+                    <span class="status-badge waiting">{{ approval.status }}</span>
+                  </td>
+                  <td>
+                    <button
+                      class="btn-inspect"
+                      (click)="handleApprovalInspect(approval)"
+                      [title]="'İncele: ' + approval.name"
+                    >
+                      <span class="material-symbols-outlined">visibility</span>
+                      İncele
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
