@@ -1,6 +1,6 @@
 import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { RouterModule, ActivatedRoute, Router } from '@angular/router'; // Router eklendi
+import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
 import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
@@ -23,8 +23,18 @@ export class CommunitiesPageComponent implements OnInit {
   filteredCommunities: Community[] = [];
   displayedCommunities: Community[] = [];
 
-  // Filtre Seçenekleri
-  cities: string[] = [];
+  // --- GÜNCELLEME: 81 İL LİSTESİ SABİT OLARAK EKLENDİ ---
+  cities: string[] = [
+    'Adana', 'Adıyaman', 'Afyonkarahisar', 'Ağrı', 'Aksaray', 'Amasya', 'Ankara', 'Antalya', 'Ardahan', 'Artvin', 'Aydın',
+    'Balıkesir', 'Bartın', 'Batman', 'Bayburt', 'Bilecik', 'Bingöl', 'Bitlis', 'Bolu', 'Burdur', 'Bursa',
+    'Çanakkale', 'Çankırı', 'Çorum', 'Denizli', 'Diyarbakır', 'Düzce', 'Edirne', 'Elazığ', 'Erzincan', 'Erzurum', 'Eskişehir',
+    'Gaziantep', 'Giresun', 'Gümüşhane', 'Hakkari', 'Hatay', 'Iğdır', 'Isparta', 'İstanbul', 'İzmir',
+    'Kahramanmaraş', 'Karabük', 'Karaman', 'Kars', 'Kastamonu', 'Kayseri', 'Kırıkkale', 'Kırklareli', 'Kırşehir', 'Kilis', 'Kocaeli', 'Konya', 'Kütahya',
+    'Malatya', 'Manisa', 'Mardin', 'Mersin', 'Muğla', 'Muş', 'Nevşehir', 'Niğde', 'Ordu', 'Osmaniye',
+    'Rize', 'Sakarya', 'Samsun', 'Siirt', 'Sinop', 'Sivas', 'Şanlıurfa', 'Şırnak',
+    'Tekirdağ', 'Tokat', 'Trabzon', 'Tunceli', 'Uşak', 'Van', 'Yalova', 'Yozgat', 'Zonguldak'
+  ];
+  
   categories: string[] = [];
 
   // Filtreleme Değişkenleri
@@ -44,7 +54,7 @@ export class CommunitiesPageComponent implements OnInit {
   constructor(
     private communityService: CommunityService,
     private route: ActivatedRoute,
-    private router: Router, // Router servisi inject edildi
+    private router: Router,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -63,21 +73,19 @@ export class CommunitiesPageComponent implements OnInit {
 
     this.isLoading = true;
 
-    // Servisten verileri çek (API yoksa Mock döner)
     this.communityService.getAllCommunities().subscribe({
       next: (data) => {
-        // Eğer API'den veri gelmezse veya boş gelirse ve mock veri kullanmak istersek:
         if (data.length === 0) {
           this.allCommunities = this.communityService.getMockCommunities();
         } else {
           this.allCommunities = data;
         }
 
-        // Filtre dropdownlarını doldur
-        this.cities = [...new Set(this.allCommunities.map(c => c.city || 'Belirsiz'))].sort();
+        // --- GÜNCELLEME: Şehirleri artık dinamik çekmiyoruz, yukarıdaki sabit listeyi kullanıyoruz. ---
+        // Sadece kategorileri dinamik olarak veriden çekmeye devam ediyoruz.
         this.categories = [...new Set(this.allCommunities.map(c => c.category))].sort();
 
-        // --- ÖNEMLİ: URL Parametrelerini Kontrol Et ---
+        // URL Parametrelerini Kontrol Et
         const queryParams = this.route.snapshot.queryParams;
 
         if (queryParams['search']) {
@@ -85,21 +93,19 @@ export class CommunitiesPageComponent implements OnInit {
         }
 
         if (queryParams['city']) {
-          // Gelen şehir verimizde varsa seçili hale getir
+          // Gelen şehir bizim 81 il listemizde var mı diye bakıyoruz
           if (this.cities.includes(queryParams['city'])) {
             this.selectedCity = queryParams['city'];
           }
         }
 
-        // Filtreleri uygula
         this.applyFilters();
         this.isLoading = false;
       },
       error: (err) => {
         console.error('Topluluklar yüklenirken hata oluştu:', err);
-        // Hata durumunda mock veriyi kullan
         this.allCommunities = this.communityService.getMockCommunities();
-        this.cities = [...new Set(this.allCommunities.map(c => c.city || 'Belirsiz'))].sort();
+        // Hata olsa bile 81 il listemiz sabit olduğu için bozulmaz
         this.categories = [...new Set(this.allCommunities.map(c => c.category))].sort();
         this.applyFilters();
         this.isLoading = false;
@@ -111,7 +117,7 @@ export class CommunitiesPageComponent implements OnInit {
   applyFilters() {
     let temp = [...this.allCommunities];
 
-    // 1. Arama Metni (Ad veya Üniversite içinde)
+    // 1. Arama Metni
     if (this.searchText.trim()) {
       const term = this.searchText.toLowerCase();
       temp = temp.filter(
@@ -139,7 +145,7 @@ export class CommunitiesPageComponent implements OnInit {
     }
 
     this.filteredCommunities = temp;
-    this.currentPage = 1; // Filtre değişince ilk sayfaya dön
+    this.currentPage = 1;
     this.initPagination();
   }
 
@@ -174,12 +180,10 @@ export class CommunitiesPageComponent implements OnInit {
     }
   }
 
-  // Detay sayfasına yönlendirme
   navigateToDetail(id: number) {
     this.router.navigate(['/communities', id]);
   }
 
-  // --- Banner Mouse Efekti ---
   onHeroMouseMove(event: MouseEvent) {
     if (isPlatformBrowser(this.platformId)) {
       const x = event.clientX - window.innerWidth / 2;

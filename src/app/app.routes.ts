@@ -80,7 +80,6 @@ export const routes: Routes = [
   { path: 'profile', component: StudentProfileComponent },
 
   // Admin Dashboard (Eski/Mevcut)
-  /*
   {
     path: 'dashboard',
     component: AdminDashboardComponent,
@@ -100,7 +99,6 @@ export const routes: Routes = [
       { path: 'my-profile', component: MyProfileComponent },
     ],
   },
-  */
 
   { path: '**', component: ErrorPageComponent },
 ];
