@@ -71,16 +71,15 @@ export const routes: Routes = [
   { path: 'reset-password', component: ResetPasswordComponent },
 
   // KURUMSAL DASHBOARD
-  // { path: 'corporate-dashboard', component: CorporateDashboardComponent },
+  { path: 'corporate-dashboard', component: CorporateDashboardComponent },
   // TOPLULUK DASHBOARD
-  // { path: 'community-dashboard', component: CommunityDashboardComponent },
+  { path: 'community-dashboard', component: CommunityDashboardComponent },
 
   // ÖĞRENCİ GİRİŞ SONRASI SAYFA
   // { path: 'student-login', component: StudentLoginComponent },
   // { path: 'profile', component: StudentProfileComponent },
 
   // Admin Dashboard (Eski/Mevcut)
-  /*
   {
     path: 'dashboard',
     component: AdminDashboardComponent,
@@ -100,7 +99,6 @@ export const routes: Routes = [
       { path: 'my-profile', component: MyProfileComponent },
     ],
   },
-  */
 
   { path: '**', component: ErrorPageComponent },
 ];

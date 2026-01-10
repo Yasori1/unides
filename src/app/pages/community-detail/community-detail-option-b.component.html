@@ -1,0 +1,258 @@
+<!-- OPTION B: MASONRY/CARD GRID LAYOUT (3-Column Responsive Grid) -->
+<!-- To use this layout, replace the content-section in community-detail.component.html with this code -->
+
+<app-site-navbar />
+
+<!-- Loading State -->
+<div *ngIf="isLoading" class="loading-container">
+  <div class="spinner"></div>
+  <p>Topluluk yükleniyor...</p>
+</div>
+
+<!-- Community Detail -->
+<div *ngIf="!isLoading && community" class="community-detail-page">
+  <!-- Hero Banner -->
+  <div class="hero-section" (mousemove)="onHeroMouseMove($event)">
+    <div class="background-wrapper">
+      <img
+        [src]="community.banner || community.coverImage || 'assets/img/placeholder-cover.svg'"
+        [alt]="community.name"
+        class="hero-image"
+        loading="lazy"
+        onerror="this.src='assets/img/placeholder-cover.svg'"
+      />
+    </div>
+    <div class="hero-overlay">
+      <div class="container">
+        <div class="breadcrumb">
+          <a routerLink="/communities">Topluluklar</a>
+          <i class="bx bx-chevron-right"></i>
+          <span>{{ community.name }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Section - OPTION B: Masonry/Card Grid Layout -->
+  <div class="content-section layout-option-b">
+    <div class="container-wide">
+      <!-- Community Header Card -->
+      <div class="card-grid">
+        <!-- About Card (Spans 2 columns) -->
+        <div class="info-card about-card" *ngIf="community.about || community.description">
+          <div class="card-header">
+            <i class="bx bx-info-circle"></i>
+            <h2>Hakkında</h2>
+          </div>
+          <div class="card-content">
+            <div class="community-header-info">
+              <img
+                [src]="community.logo"
+                [alt]="community.name"
+                class="community-logo-small"
+                onerror="this.src='assets/img/placeholder-logo.png'"
+              />
+              <div class="header-text">
+                <div class="category-badge">{{ community.category }}</div>
+                <h1 class="community-title">{{ community.name }}</h1>
+                <div class="community-meta">
+                  <div class="meta-item" *ngIf="community.university">
+                    <i class="bx bx-buildings"></i>
+                    <span>{{ community.university }}</span>
+                  </div>
+                  <div class="meta-item" *ngIf="community.city">
+                    <i class="bx bxs-map"></i>
+                    <span>{{ community.city }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="about-text">
+              <p>{{ community.about || community.description }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats Card -->
+        <div class="info-card stats-card">
+          <div class="card-header">
+            <i class="bx bx-bar-chart-alt-2"></i>
+            <h2>İstatistikler</h2>
+          </div>
+          <div class="card-content">
+            <div class="stat-grid">
+              <div class="stat-box">
+                <i class="bx bx-group"></i>
+                <div class="stat-details">
+                  <span class="stat-value">{{ community.memberCount }}</span>
+                  <span class="stat-label">Üye</span>
+                </div>
+              </div>
+              <div class="stat-box" *ngIf="upcomingEvents.length > 0">
+                <i class="bx bx-calendar-event"></i>
+                <div class="stat-details">
+                  <span class="stat-value">{{ upcomingEvents.length }}</span>
+                  <span class="stat-label">Yaklaşan Etkinlik</span>
+                </div>
+              </div>
+            </div>
+            <!-- Join Button - POSTPONED: Hidden for future implementation -->
+            <!--
+            <button class="join-button-card" (click)="joinCommunity()">
+              <i class="bx bx-user-plus"></i>
+              Topluluğa Katıl
+            </button>
+            -->
+          </div>
+        </div>
+
+        <!-- Social Links Card -->
+        <div
+          class="info-card social-card"
+          *ngIf="
+            community.website ||
+            community.email ||
+            community.instagram ||
+            community.youtube ||
+            community.twitter ||
+            community.tiktok ||
+            community.socialMedia
+          "
+        >
+          <div class="card-header">
+            <i class="bx bx-link"></i>
+            <h2>İletişim & Linkler</h2>
+          </div>
+          <div class="card-content">
+            <div class="social-grid">
+              <a
+                *ngIf="community.website"
+                [href]="community.website"
+                target="_blank"
+                class="social-item"
+                (click)="openLink(community.website!)"
+              >
+                <i class="bx bx-globe"></i>
+                <span>Websitesi</span>
+              </a>
+              <!-- Email Contact - Non-clickable with copy functionality -->
+              <div *ngIf="community.email" class="email-contact-item">
+                <i class="bx bx-envelope"></i>
+                <div class="email-info">
+                  <span class="email-label">E-posta</span>
+                  <div class="email-value-wrapper">
+                    <span class="email-value">{{ community.email }}</span>
+                    <button
+                      class="copy-email-btn"
+                      (click)="copyToClipboard(community.email!)"
+                      [title]="copyEmailSuccess ? 'Kopyalandı!' : 'E-postayı kopyala'"
+                      [class.copied]="copyEmailSuccess"
+                    >
+                      <i class="bx" [class.bx-copy]="!copyEmailSuccess" [class.bx-check]="copyEmailSuccess"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <a
+                *ngIf="community.instagram"
+                [href]="community.instagram"
+                target="_blank"
+                class="social-item social-instagram"
+                (click)="openLink(community.instagram!)"
+              >
+                <i class="bx bxl-instagram"></i>
+                <span>Instagram</span>
+              </a>
+              <a
+                *ngIf="community.youtube"
+                [href]="community.youtube"
+                target="_blank"
+                class="social-item social-youtube"
+                (click)="openLink(community.youtube!)"
+              >
+                <i class="bx bxl-youtube"></i>
+                <span>Youtube</span>
+              </a>
+              <a
+                *ngIf="community.twitter"
+                [href]="community.twitter"
+                target="_blank"
+                class="social-item social-twitter"
+                (click)="openLink(community.twitter!)"
+              >
+                <i class="bx bxl-twitter"></i>
+                <span>Twitter</span>
+              </a>
+              <a
+                *ngIf="community.tiktok"
+                [href]="community.tiktok"
+                target="_blank"
+                class="social-item social-tiktok"
+                (click)="openLink(community.tiktok!)"
+              >
+                <i class="bx bxl-tiktok"></i>
+                <span>TikTok</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upcoming Events Card (Spans full width) -->
+        <div class="info-card events-card" *ngIf="upcomingEvents.length > 0">
+          <div class="card-header">
+            <i class="bx bx-calendar"></i>
+            <h2>Yaklaşan Etkinlikler</h2>
+          </div>
+          <div class="card-content">
+            <div class="events-grid">
+              <div class="event-card" *ngFor="let event of upcomingEvents">
+                <div class="event-image" *ngIf="event.imageUrl">
+                  <img [src]="event.imageUrl" [alt]="event.title" />
+                </div>
+                <div class="event-content">
+                  <h3>{{ event.title }}</h3>
+                  <p>{{ event.description }}</p>
+                  <div class="event-meta">
+                    <span class="event-date">
+                      <i class="bx bx-calendar"></i>
+                      {{ formatEventDate(event.date) }}
+                    </span>
+                    <span class="event-location" *ngIf="event.location">
+                      <i class="bx bx-map"></i>
+                      {{ event.location }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Back Button Card -->
+        <div class="info-card back-card">
+          <div class="card-content">
+            <a routerLink="/communities" class="back-button">
+              <i class="bx bx-arrow-back"></i>
+              Topluluklara Dön
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Not Found -->
+<div *ngIf="!isLoading && !community" class="not-found">
+  <div class="container">
+    <div class="not-found-content">
+      <i class="bx bx-error-circle"></i>
+      <h2>Topluluk Bulunamadı</h2>
+      <p>Aradığınız topluluk bulunamadı veya kaldırılmış olabilir.</p>
+      <a routerLink="/communities" class="back-button">Topluluklara Dön</a>
+    </div>
+  </div>
+</div>
+
+<app-site-footer />
+
