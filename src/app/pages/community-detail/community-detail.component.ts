@@ -6,6 +6,16 @@ import { SiteFooterComponent } from '../../common/site-footer/site-footer.compon
 import { CommunityService, Community } from '../../services/community.services';
 import { EventService, EventItem } from '../../services/event.services';
 
+// CommunityEvent interface for mock data
+export interface CommunityEvent {
+  id: number;
+  title: string;
+  date: string;
+  location: string;
+  description: string;
+  imageUrl?: string;
+}
+
 @Component({
   selector: 'app-community-detail',
   standalone: true,
@@ -19,6 +29,46 @@ export class CommunityDetailComponent implements OnInit {
   communityId: number | null = null;
   communityEvents: EventItem[] = [];
   isLoadingEvents: boolean = false;
+
+  // Mock data for upcoming events
+  upcomingEvents: CommunityEvent[] = [
+    {
+      id: 1,
+      title: 'Networking Meetup',
+      date: '2024-03-15',
+      location: 'Kampüs Merkez Binası, Konferans Salonu',
+      description:
+        'Topluluk üyeleri ve mezunlarla tanışma, networking fırsatları ve kariyer paylaşımları.',
+      imageUrl: 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=800',
+    },
+    {
+      id: 2,
+      title: 'Tech Workshop: Web Development',
+      date: '2024-03-22',
+      location: 'Bilgisayar Laboratuvarı A',
+      description:
+        'Modern web geliştirme teknolojileri, React ve Angular workshop. Pratik uygulamalar ve proje örnekleri.',
+      imageUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800',
+    },
+    {
+      id: 3,
+      title: 'Kariyer Günleri',
+      date: '2024-04-05',
+      location: 'Spor Salonu',
+      description:
+        'Şirket temsilcileriyle buluşma, staj ve iş fırsatları, CV değerlendirme ve mülakat simülasyonları.',
+      imageUrl: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800',
+    },
+    {
+      id: 4,
+      title: 'Hackathon 2024',
+      date: '2024-04-12',
+      location: 'Teknoloji Merkezi',
+      description:
+        '48 saatlik kodlama maratonu. Takımlar halinde yarışın, ödüller kazanın ve network kurun.',
+      imageUrl: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800',
+    },
+  ];
 
   // Banner animation
   heroMoveX = 0;
@@ -134,5 +184,79 @@ export class CommunityDetailComponent implements OnInit {
     } catch {
       return dateString;
     }
+  }
+
+  formatEventDate(dateString: string): string {
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return dateString;
+      }
+      return date.toLocaleDateString('tr-TR', {
+        day: 'numeric',
+        month: 'short',
+      });
+    } catch {
+      return dateString;
+    }
+  }
+
+  joinCommunity() {
+    // TODO: Implement join community functionality
+    console.log('Join community:', this.community?.id);
+    // This can be connected to a service method later
+  }
+
+  copyEmailSuccess: boolean = false;
+
+  copyToClipboard(text: string) {
+    if (!isPlatformBrowser(this.platformId) || !text) {
+      return;
+    }
+
+    // Use Clipboard API if available
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard
+        .writeText(text)
+        .then(() => {
+          this.showCopySuccess();
+        })
+        .catch((err) => {
+          console.error('Failed to copy:', err);
+          this.fallbackCopyToClipboard(text);
+        });
+    } else {
+      // Fallback for older browsers
+      this.fallbackCopyToClipboard(text);
+    }
+  }
+
+  private fallbackCopyToClipboard(text: string) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+
+    try {
+      const successful = document.execCommand('copy');
+      if (successful) {
+        this.showCopySuccess();
+      }
+    } catch (err) {
+      console.error('Fallback copy failed:', err);
+    } finally {
+      document.body.removeChild(textArea);
+    }
+  }
+
+  private showCopySuccess() {
+    this.copyEmailSuccess = true;
+    setTimeout(() => {
+      this.copyEmailSuccess = false;
+    }, 2000);
   }
 }
