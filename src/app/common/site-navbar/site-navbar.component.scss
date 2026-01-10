@@ -15,9 +15,10 @@ $dark-text: #0f172a;
   width: 100%;
   height: 75px;
   z-index: 1000;
-  /* Fixed gradient matching global background: Left Turquoise -> Right White */
-  background: linear-gradient(to right, #e0fbfc 0%, #ffffff 100%) fixed;
-  backdrop-filter: blur(15px);
+  /* Blurred milky white background */
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-bottom: none;
 
   .nav-content {
