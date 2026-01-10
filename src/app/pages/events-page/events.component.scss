@@ -72,10 +72,18 @@ $border-color: #e2e8f0;
     letter-spacing: -1px;
     line-height: 1.1;
     .highlight-text {
+      background: linear-gradient(135deg, $primary-blue 0%, #60a5fa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
       color: transparent;
-      -webkit-text-stroke: 1.5px $primary-blue;
       display: inline-block;
       margin-left: 10px;
+      letter-spacing: 1px;
+      font-weight: 900;
+      /* Remove stroke to fix visual artifacts */
+      -webkit-text-stroke: 0; 
+      filter: drop-shadow(0 2px 10px rgba(37, 99, 235, 0.3));
     }
   }
 
