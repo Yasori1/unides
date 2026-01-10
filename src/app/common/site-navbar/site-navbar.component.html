@@ -6,23 +6,37 @@
       </a>
     </div>
 
-    <ul class="nav-links">
-      <li><a routerLink="/communities">Topluluklar</a></li>
-      <li><a routerLink="/events">Etkinlikler</a></li>
-      <li><a routerLink="/announcements">Duyurular</a></li>
+    <!-- Mobile Toggle Button -->
+    <button class="mobile-toggle" (click)="toggleMobileMenu()" [class.active]="isMobileMenuOpen">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </button>
+
+    <ul class="nav-links" [class.active]="isMobileMenuOpen">
+      <li><a routerLink="/communities" (click)="closeMobileMenu()">Topluluklar</a></li>
+      <li><a routerLink="/events" (click)="closeMobileMenu()">Etkinlikler</a></li>
+      <li><a routerLink="/announcements" (click)="closeMobileMenu()">Duyurular</a></li>
 
       <li class="dropdown-parent">
         <a href="javascript:void(0)">Bilgi <i class="icon-arrow-down"></i></a>
         <ul class="dropdown-content">
-          <li><a routerLink="/about">Hakkımızda</a></li>
-          <li><a routerLink="/faq">SSS</a></li>
-          <li><a routerLink="/contact">İletişim</a></li>
-          <li><a routerLink="/developers">Geliştiriciler</a></li>
+          <li><a routerLink="/about" (click)="closeMobileMenu()">Hakkımızda</a></li>
+          <li><a routerLink="/faq" (click)="closeMobileMenu()">SSS</a></li>
+          <li><a routerLink="/contact" (click)="closeMobileMenu()">İletişim</a></li>
+          <li><a routerLink="/developers" (click)="closeMobileMenu()">Geliştiriciler</a></li>
         </ul>
+      </li>
+
+      <!-- Mobile Auth Buttons (Visible inside menu on mobile) -->
+      <li class="mobile-auth">
+        <a routerLink="/login" class="btn-outline-custom small static-btn" (click)="closeMobileMenu()">Giriş Yap</a>
+        <a routerLink="/register" class="btn-solid-custom small" (click)="closeMobileMenu()">Kayıt Ol</a>
       </li>
     </ul>
 
-    <div class="auth-buttons">
+    <!-- Desktop Auth Buttons -->
+    <div class="auth-buttons desktop-auth">
       <a routerLink="/login" class="btn-outline-custom small static-btn"><span>Giriş Yap</span></a>
       <a routerLink="/register" class="btn-solid-custom small"><span>Kayıt Ol</span></a>
     </div>
