@@ -23,25 +23,9 @@ export class CommunitiesPageComponent implements OnInit {
   filteredCommunities: Community[] = [];
   displayedCommunities: Community[] = [];
 
-<<<<<<< HEAD
   // Filtre Seçenekleri
   cities: string[] = [];
   // categories removed
-=======
-  // --- GÜNCELLEME: 81 İL LİSTESİ SABİT OLARAK EKLENDİ ---
-  cities: string[] = [
-    'Adana', 'Adıyaman', 'Afyonkarahisar', 'Ağrı', 'Aksaray', 'Amasya', 'Ankara', 'Antalya', 'Ardahan', 'Artvin', 'Aydın',
-    'Balıkesir', 'Bartın', 'Batman', 'Bayburt', 'Bilecik', 'Bingöl', 'Bitlis', 'Bolu', 'Burdur', 'Bursa',
-    'Çanakkale', 'Çankırı', 'Çorum', 'Denizli', 'Diyarbakır', 'Düzce', 'Edirne', 'Elazığ', 'Erzincan', 'Erzurum', 'Eskişehir',
-    'Gaziantep', 'Giresun', 'Gümüşhane', 'Hakkari', 'Hatay', 'Iğdır', 'Isparta', 'İstanbul', 'İzmir',
-    'Kahramanmaraş', 'Karabük', 'Karaman', 'Kars', 'Kastamonu', 'Kayseri', 'Kırıkkale', 'Kırklareli', 'Kırşehir', 'Kilis', 'Kocaeli', 'Konya', 'Kütahya',
-    'Malatya', 'Manisa', 'Mardin', 'Mersin', 'Muğla', 'Muş', 'Nevşehir', 'Niğde', 'Ordu', 'Osmaniye',
-    'Rize', 'Sakarya', 'Samsun', 'Siirt', 'Sinop', 'Sivas', 'Şanlıurfa', 'Şırnak',
-    'Tekirdağ', 'Tokat', 'Trabzon', 'Tunceli', 'Uşak', 'Van', 'Yalova', 'Yozgat', 'Zonguldak'
-  ];
-  
-  categories: string[] = [];
->>>>>>> 50c4f7db179d97a8dff5c725da8c95bd381bd34f
 
   // Filtreleme Değişkenleri
   searchText: string = '';
@@ -87,15 +71,9 @@ export class CommunitiesPageComponent implements OnInit {
           this.allCommunities = data;
         }
 
-<<<<<<< HEAD
         // Filtre dropdownlarını doldur
         this.cities = [...new Set(this.allCommunities.map(c => c.city || 'Belirsiz'))].sort();
         // categories removed
-=======
-        // --- GÜNCELLEME: Şehirleri artık dinamik çekmiyoruz, yukarıdaki sabit listeyi kullanıyoruz. ---
-        // Sadece kategorileri dinamik olarak veriden çekmeye devam ediyoruz.
-        this.categories = [...new Set(this.allCommunities.map(c => c.category))].sort();
->>>>>>> 50c4f7db179d97a8dff5c725da8c95bd381bd34f
 
         // URL Parametrelerini Kontrol Et
         const queryParams = this.route.snapshot.queryParams;
@@ -117,13 +95,8 @@ export class CommunitiesPageComponent implements OnInit {
       error: (err) => {
         console.error('Topluluklar yüklenirken hata oluştu:', err);
         this.allCommunities = this.communityService.getMockCommunities();
-<<<<<<< HEAD
         this.cities = [...new Set(this.allCommunities.map(c => c.city || 'Belirsiz'))].sort();
         // this.categories removed
-=======
-        // Hata olsa bile 81 il listemiz sabit olduğu için bozulmaz
-        this.categories = [...new Set(this.allCommunities.map(c => c.category))].sort();
->>>>>>> 50c4f7db179d97a8dff5c725da8c95bd381bd34f
         this.applyFilters();
         this.isLoading = false;
       }
