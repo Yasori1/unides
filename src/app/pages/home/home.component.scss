@@ -50,27 +50,11 @@ $card-shadow: 0 10px 30px rgba(0,0,0,0.06);
 // --- ARKA PLAN (AURORA / AKIŞKAN) ---
 .global-background {
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-  z-index: -50; 
-  background-color: #fcfdfe; 
+  z-index: -1; 
+  /* Opaque gradient: Left Turquoise (#e0fbfc) -> Right White (#ffffff) */
+  background: linear-gradient(to right, #e0fbfc 0%, #ffffff 100%);
   overflow: hidden; 
   pointer-events: none;
-
-  &::before, &::after {
-    content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-    filter: blur(80px); opacity: 0.12; will-change: transform;
-  }
-  &::before {
-    background: conic-gradient(from 0deg at 50% 50%, $primary 0deg, transparent 120deg, rgba($primary, 0.5) 240deg, $primary 360deg);
-    animation: auroraSpin 60s linear infinite; 
-  }
-  &::after {
-    background: conic-gradient(from 180deg at 50% 50%, $accent 0deg, transparent 120deg, rgba($accent, 0.5) 240deg, $accent 360deg);
-    opacity: 0.1;
-    animation: auroraSpin 80s linear infinite reverse; 
-  }
-}
-@keyframes auroraSpin {
-  from { transform: rotate(0deg); } to { transform: rotate(360deg); }
 }
 
 // --- BUTTONS ---
@@ -90,7 +74,7 @@ $card-shadow: 0 10px 30px rgba(0,0,0,0.06);
 
 // --- MAIN BANNER WRAPPER (İSTENEN YENİ TASARIM) ---
 .main-banner-wrapper {
-    background-color: #ffffff;
+    background-color: transparent;
     position: relative;
     z-index: 1;
     // Yükseklik azaltıldı (eskiden bottom 400px idi)
@@ -101,7 +85,7 @@ $card-shadow: 0 10px 30px rgba(0,0,0,0.06);
     /* background-image removed, using img tag instead */
 
     /* Yeni Mavi-Beyaz Geçişli Arka Plan */
-    background: linear-gradient(135deg, #ffffff 0%, rgba($primary, 0.1) 100%);
+    background: transparent;
 
     .banner-bottom-image {
         display: none; /* Arka plan resmi kaldırıldı */
@@ -282,10 +266,10 @@ $card-shadow: 0 10px 30px rgba(0,0,0,0.06);
         .blue-divider { width: 50px; height: 4px; background: $primary; margin: 10px auto; border-radius: 2px; }
     }
 }
-.section-communities { background-color: rgba(255, 255, 255, 0.3); backdrop-filter: blur(5px); }
-.section-upcoming-events { background: rgba(255, 255, 255, 0.5); }
-.section-why-unides { background-color: rgba(255, 255, 255, 0.4); }
-.section-about-final { background: rgba(255, 255, 255, 0.3); border-bottom: none; } 
+.section-communities { background-color: transparent; border-top: none; border-bottom: none; }
+.section-upcoming-events { background: transparent; }
+.section-why-unides { background-color: transparent; }
+.section-about-final { background: transparent; border-bottom: none; } 
 
 .communities-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; margin-bottom: 40px; }
 .events-grid-modern { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; }

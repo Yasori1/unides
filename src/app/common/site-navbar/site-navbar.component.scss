@@ -15,9 +15,10 @@ $dark-text: #0f172a;
   width: 100%;
   height: 75px;
   z-index: 1000;
-  background: rgba(255, 255, 255, 0.9);
+  /* Fixed gradient matching global background: Left Turquoise -> Right White */
+  background: linear-gradient(to right, #e0fbfc 0%, #ffffff 100%) fixed;
   backdrop-filter: blur(15px);
-  border-bottom: 1px solid rgba(203, 213, 225, 0.6);
+  border-bottom: none;
 
   .nav-content {
     display: flex;
