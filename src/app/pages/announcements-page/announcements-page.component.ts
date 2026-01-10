@@ -31,7 +31,7 @@ export class AnnouncementsPageComponent implements OnInit {
   // Filtreleme
   searchText: string = '';
   sortOrder: 'default' | 'date_desc' | 'date_asc' = 'default';
-  selectedCategory: 'all' | 'Genel' | 'Bakanlık' = 'all'; 
+  selectedCategory: 'all' | 'Genel' | 'Bakanlık' = 'all';
 
   // Sayfalama
   currentPage: number = 1;
@@ -62,20 +62,28 @@ export class AnnouncementsPageComponent implements OnInit {
     // Gerçek servis çağrısı
     this.announcementService.getAllAnnouncements().subscribe({
       next: (data) => {
-        // Mevcut verilere 'Genel' kategorisi atayalım
-        const generalData: ExtendedAnnouncement[] = data.map(item => ({ ...item, category: 'Genel' }));
-        
-        // --- DEMO BAKANLIK VERİLERİ (Hata Düzeltildi: 'link' alanı eklendi) ---
+        // --- AYNI GÖRSEL YOLU ---
+        const commonImage = 'assets/img/announcements/common-banner.jpg';
+
+        // Mevcut verilere 'Genel' kategorisi ve ortak resmi atayalım
+        const generalData: ExtendedAnnouncement[] = data.map((item) => ({
+          ...item,
+          category: 'Genel',
+          // Eğer genel duyuruların da resmi aynı olsun isterseniz:
+          // image: commonImage 
+        }));
+
+        // --- DEMO BAKANLIK VERİLERİ (Hepsi aynı statik görseli kullanıyor) ---
         const ministryData: ExtendedAnnouncement[] = [
           {
             id: 901,
             title: 'YÖK 2024-2025 Akademik Takvim Genelgesi Yayınlandı',
             shortDescription: 'Yükseköğretim Kurulu tarafından üniversitelerin akademik takvimlerine ilişkin yeni usul ve esaslar belirlenmiştir.',
-            content: '', 
+            content: '',
             date: '2024-08-15',
-            image: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=1000&auto=format&fit=crop',
+            image: commonImage, // <--- Ortak Görsel
             category: 'Bakanlık',
-            link: 'yok-akademik-takvim-2024' // Eklendi
+            link: 'yok-akademik-takvim-2024',
           },
           {
             id: 902,
@@ -83,9 +91,9 @@ export class AnnouncementsPageComponent implements OnInit {
             shortDescription: '2024-2025 eğitim öğretim yılı için GSB burs ve kredi başvuruları başlamıştır. Son başvuru tarihini kaçırmayın.',
             content: '',
             date: '2024-09-01',
-            image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=1000&auto=format&fit=crop',
+            image: commonImage, // <--- Ortak Görsel
             category: 'Bakanlık',
-            link: 'gsb-burs-basvurulari' // Eklendi
+            link: 'gsb-burs-basvurulari',
           },
           {
             id: 903,
@@ -93,9 +101,9 @@ export class AnnouncementsPageComponent implements OnInit {
             shortDescription: 'Sanayi ve Teknoloji Bakanlığı, üniversite öğrencilerine yönelik proje destek limitlerinde güncellemeye gitti.',
             content: '',
             date: '2024-10-10',
-            image: 'https://images.unsplash.com/photo-1581093458791-9f3c3900df4b?q=80&w=1000&auto=format&fit=crop',
+            image: commonImage, // <--- Ortak Görsel
             category: 'Bakanlık',
-            link: 'tubitak-destek-artisi' // Eklendi
+            link: 'tubitak-destek-artisi',
           },
           {
             id: 904,
@@ -103,9 +111,9 @@ export class AnnouncementsPageComponent implements OnInit {
             shortDescription: 'Üniversite topluluklarının proje ve etkinliklerine yönelik destek programı için başvurular başladı.',
             content: '',
             date: '2024-11-05',
-            image: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?q=80&w=1000&auto=format&fit=crop',
+            image: commonImage, // <--- Ortak Görsel
             category: 'Bakanlık',
-            link: 'unides-destek-programi-2025'
+            link: 'unides-destek-programi-2025',
           },
           {
             id: 905,
@@ -113,9 +121,9 @@ export class AnnouncementsPageComponent implements OnInit {
             shortDescription: '81 ildeki Genç Ofis etkinlikleri için yeni takvim duyuruldu. Takvim üzerinden takip edebilirsiniz.',
             content: '',
             date: '2024-11-18',
-            image: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=1000&auto=format&fit=crop',
+            image: commonImage, // <--- Ortak Görsel
             category: 'Bakanlık',
-            link: 'genc-ofis-etkinlik-takvimi'
+            link: 'genc-ofis-etkinlik-takvimi',
           },
           {
             id: 906,
@@ -123,15 +131,15 @@ export class AnnouncementsPageComponent implements OnInit {
             shortDescription: 'Üniversite toplulukları için ortak proje ve etkinlik çağrısı yayınlandı. Detaylar duyuruda.',
             content: '',
             date: '2024-12-02',
-            image: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?q=80&w=1000&auto=format&fit=crop',
+            image: commonImage, // <--- Ortak Görsel
             category: 'Bakanlık',
-            link: 'topluluk-isbirligi-cagrisi'
-          }
+            link: 'topluluk-isbirligi-cagrisi',
+          },
         ];
 
         // Verileri birleştir
         this.allAnnouncements = [...ministryData, ...generalData];
-        
+
         this.applyFilters();
         this.isLoading = false;
       },
@@ -151,13 +159,14 @@ export class AnnouncementsPageComponent implements OnInit {
       const term = this.searchText.toLowerCase();
       temp = temp.filter(
         (a) =>
-          a.title.toLowerCase().includes(term) || a.shortDescription.toLowerCase().includes(term)
+          a.title.toLowerCase().includes(term) ||
+          a.shortDescription.toLowerCase().includes(term)
       );
     }
 
     // 2. Kategori Filtresi
     if (this.selectedCategory !== 'all') {
-      temp = temp.filter(a => a.category === this.selectedCategory);
+      temp = temp.filter((a) => a.category === this.selectedCategory);
     }
 
     // 3. Sıralama
@@ -166,8 +175,8 @@ export class AnnouncementsPageComponent implements OnInit {
     } else if (this.sortOrder === 'date_asc') {
       temp.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     } else {
-       // Varsayılan: Tarihe göre sırala
-       temp.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      // Varsayılan: Tarihe göre sırala
+      temp.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     }
 
     this.filteredAnnouncements = temp;
