@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, map, catchError, of } from 'rxjs';
+import { AuthService } from './auth.services';
 
 export interface Announcement {
   id: number;
@@ -98,7 +99,10 @@ const MOCK_ANNOUNCEMENTS: Announcement[] = [
 export class AnnouncementService {
   private apiUrl = '/api/Announcements';
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService
+  ) {}
 
   // Backend formatını frontend formatına dönüştür
   private mapToAnnouncement(dto: any): Announcement {
@@ -217,7 +221,14 @@ export class AnnouncementService {
 
     // Backend ActionResult<int> dönüyor, JSON olarak number gelir
     // Swagger'a göre camelCase formatında gönderilmeli
-    return this.http.post<number>(`${this.apiUrl}/create`, request).pipe(
+    // Authorization header'ını manuel olarak ekle
+    const token = this.authService.getToken();
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    });
+
+    return this.http.post<number>(`${this.apiUrl}/create`, request, { headers }).pipe(
       catchError((error) => {
         console.error('Duyuru oluşturulamadı:', error);
         console.error('Hata detayı:', error.error);
@@ -251,7 +262,19 @@ export class AnnouncementService {
     };
 
     // PUT /api/Announcements/update/{id} - NoContent döner
-    return this.http.put<void>(`${this.apiUrl}/update/${id}`, request).pipe(
+    // Authorization header'ını manuel olarak ekle
+    const token = this.authService.getToken();
+    
+    if (!token) {
+      throw new Error('Oturum bilgisi bulunamadı. Lütfen tekrar giriş yapın.');
+    }
+    
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    });
+
+    return this.http.put<void>(`${this.apiUrl}/update/${id}`, request, { headers }).pipe(
       catchError((error) => {
         console.error('Duyuru güncellenemedi:', error);
         console.error('Hata detayı:', error.error);
@@ -263,7 +286,18 @@ export class AnnouncementService {
 
   deleteAnnouncement(id: number): Observable<void> {
     // DELETE /api/Announcements/delete/{id} - NoContent döner
-    return this.http.delete<void>(`${this.apiUrl}/delete/${id}`).pipe(
+    // Authorization header'ını manuel olarak ekle
+    const token = this.authService.getToken();
+    
+    if (!token) {
+      throw new Error('Oturum bilgisi bulunamadı. Lütfen tekrar giriş yapın.');
+    }
+    
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+
+    return this.http.delete<void>(`${this.apiUrl}/delete/${id}`, { headers }).pipe(
       catchError((error) => {
         console.error('Duyuru silinemedi:', error);
         console.error('Hata detayı:', error.error);
@@ -276,7 +310,14 @@ export class AnnouncementService {
     const formData = new FormData();
     formData.append('file', file);
 
-    return this.http.post<string>(`${this.apiUrl}/upload-image`, formData).pipe(
+    // Authorization header'ını manuel olarak ekle
+    // FormData kullanıldığında Content-Type header'ını eklemeyiz (browser otomatik ekler)
+    const token = this.authService.getToken();
+    const headers = new HttpHeaders({
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    });
+
+    return this.http.post<string>(`${this.apiUrl}/upload-image`, formData, { headers }).pipe(
       catchError((error) => {
         console.error('Görsel yüklenemedi:', error);
         console.error('Hata detayı:', error.error);

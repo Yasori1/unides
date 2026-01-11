@@ -36,13 +36,18 @@ namespace Unides.Application.Features.Auth.Commands
 
             // 2. ROL ve MAIL UZANTISI DOĞRULAMA (Validation)
             string expectedEmailDomain;
-            string roleName;
+            
+            // Role name'i veritabanından al (LoginCommand ile aynı mantık)
+            string roleName = await _userRepository.GetRoleNameById(req.RoleId);
+            if (string.IsNullOrWhiteSpace(roleName) || roleName == "Bilinmiyor")
+            {
+                throw new Exception("Geçersiz bir rol seçimi yapıldı.");
+            }
 
             switch (req.RoleId)
             {
                 case 2: // GSB Personeli
                     expectedEmailDomain = "gsb.gov.tr";
-                    roleName = "GsbPersonel";
                     if (!req.Email.EndsWith(expectedEmailDomain))
                     {
                         throw new Exception($"GSB Personel kaydı için sadece '{expectedEmailDomain}' uzantılı mail adresi kullanılabilir.");
@@ -50,15 +55,13 @@ namespace Unides.Application.Features.Auth.Commands
                     break;
                 case 1: // Üye
                     expectedEmailDomain = "edu.tr";
-                    roleName = "Uye";
                     if (!req.Email.EndsWith(expectedEmailDomain))
                     {
                         throw new Exception($"Üye kaydı için sadece '{expectedEmailDomain}' uzantılı mail adresi kullanılabilir.");
                     }
                     break;
-                case 3: // Topluluk Başkanı - Yeni Rol Eklendi
+                case 3: // Topluluk Başkanı
                     expectedEmailDomain = "edu.tr";
-                    roleName = "ToplulukBaskani";
                     if (!req.Email.EndsWith(expectedEmailDomain))
                     {
                         throw new Exception($"Topluluk Başkanı kaydı için sadece '{expectedEmailDomain}' uzantılı mail adresi kullanılabilir.");

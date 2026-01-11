@@ -47,16 +47,23 @@ namespace Unides.WebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] string? city, [FromQuery] string? university)
         {
-            var query = _context.Communities.AsQueryable();
+            try
+            {
+                var query = _context.Communities.AsQueryable();
 
-            if (!string.IsNullOrEmpty(city))
-                query = query.Where(c => c.City != null && c.City.ToLower().Contains(city.ToLower()));
+                if (!string.IsNullOrEmpty(city))
+                    query = query.Where(c => c.City != null && c.City.ToLower().Contains(city.ToLower()));
 
-            if (!string.IsNullOrEmpty(university))
-                query = query.Where(c => c.University != null && c.University.ToLower().Contains(university.ToLower()));
+                if (!string.IsNullOrEmpty(university))
+                    query = query.Where(c => c.University != null && c.University.ToLower().Contains(university.ToLower()));
 
-            var list = await query.ToListAsync();
-            return Ok(list);
+                var list = await query.ToListAsync();
+                return Ok(list);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Topluluklar yüklenirken bir hata oluştu.", error = ex.Message });
+            }
         }
 
         [HttpGet("{id}")]
