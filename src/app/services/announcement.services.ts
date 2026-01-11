@@ -104,8 +104,16 @@ export class AnnouncementService {
   private mapToAnnouncement(dto: any): Announcement {
     // Backend camelCase dönüyor, hem camelCase hem PascalCase destekle
     const annId = dto.annId || dto.AnnId || dto.id || 0;
-    const title = dto.title || dto.Title || '';
-    const shortDescription = dto.shortDescription || dto.ShortDescription || '';
+    let title = dto.title || dto.Title || '';
+    let shortDescription = dto.shortDescription || dto.ShortDescription || '';
+
+    // "string" placeholder değerlerini filtrele
+    if (title.toLowerCase().trim() === 'string') {
+      title = '';
+    }
+    if (shortDescription.toLowerCase().trim() === 'string') {
+      shortDescription = '';
+    }
 
     // Tarih alanı - hem camelCase hem PascalCase, hem annDate hem eventDate
     const dateField = dto.annDate || dto.AnnDate || dto.eventDate || dto.EventDate;
@@ -131,11 +139,22 @@ export class AnnouncementService {
     }
 
     // Description alanı (sadece detail endpoint'inde gelir)
-    const description = dto.description || dto.Description || null;
+    let description = dto.description || dto.Description || null;
+    if (description && description.toLowerCase().trim() === 'string') {
+      description = null;
+    }
 
     // Image ve Link alanları
-    const imagePath = dto.imagePath || dto.ImagePath || '';
-    const link = dto.link || dto.Link || '';
+    let imagePath = dto.imagePath || dto.ImagePath || '';
+    let link = dto.link || dto.Link || '';
+    
+    // "string" placeholder değerlerini filtrele
+    if (imagePath.toLowerCase().trim() === 'string') {
+      imagePath = '';
+    }
+    if (link.toLowerCase().trim() === 'string') {
+      link = '';
+    }
 
     return {
       id: annId,

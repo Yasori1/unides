@@ -112,15 +112,7 @@ export class AnnouncementDetailComponent implements OnInit {
     this.isLoading = true;
     this.announcement = null;
     
-    const demo = this.demoMinistryData.find(a => Number(a.id) === Number(id));
-    if (demo) {
-      this.announcement = demo;
-      this.loadRecentAnnouncements(id);
-      this.isLoading = false;
-      return;
-    }
-
-    // 2. Servisten ara
+    // Önce backend'den veri çek
     this.announcementService.getAnnouncementById(id).subscribe({
       next: (data) => {
         if (data) {
@@ -129,12 +121,26 @@ export class AnnouncementDetailComponent implements OnInit {
             category: 'Genel', // Servisten gelenlere varsayılan kategori
             link: data.link || ''
           };
+          this.loadRecentAnnouncements(id);
+          this.isLoading = false;
+        } else {
+          // Backend'den veri gelmediyse demo data'ya bak
+          const demo = this.demoMinistryData.find(a => Number(a.id) === Number(id));
+          if (demo) {
+            this.announcement = demo;
+            this.loadRecentAnnouncements(id);
+          }
+          this.isLoading = false;
         }
-        this.loadRecentAnnouncements(id);
-        this.isLoading = false;
       },
       error: (err) => {
-        console.error('Duyuru detayı yüklenemedi:', err);
+        console.error('Duyuru detayı yüklenemedi, demo data aranıyor:', err);
+        // Hata durumunda demo data'ya fallback yap
+        const demo = this.demoMinistryData.find(a => Number(a.id) === Number(id));
+        if (demo) {
+          this.announcement = demo;
+          this.loadRecentAnnouncements(id);
+        }
         this.isLoading = false;
       }
     });

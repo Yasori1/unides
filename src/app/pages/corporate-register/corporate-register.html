@@ -28,11 +28,19 @@
           <p>Hesabınız var mı? <a routerLink="/corporate-login" class="login-link">Giriş Yap</a></p>
         </div>
 
+        <app-toast></app-toast>
+        
         <form (submit)="onSubmit($event)">
           <!-- Firma Bilgileri -->
           <div class="input-group">
             <div class="icon-wrapper"><i class="bx bx-building"></i></div>
-            <input type="text" placeholder="Firma / Kurum Adı" class="modern-input" required />
+            <input 
+              type="text" 
+              placeholder="Firma / Kurum Adı" 
+              class="modern-input" 
+              (input)="updateCompanyName($event)"
+              required 
+            />
           </div>
 
           <div class="input-group">
@@ -43,6 +51,7 @@
               placeholder="Vergi Numarası"
               class="modern-input"
               (keypress)="onlyNumbers($event)"
+              (input)="updateTaxNumber($event)"
               required
             />
           </div>
@@ -50,12 +59,28 @@
           <!-- Yetkili Bilgileri -->
           <div class="input-group">
             <div class="icon-wrapper"><i class="bx bx-user-voice"></i></div>
-            <input type="text" placeholder="Yetkili Ad Soyad" class="modern-input" required />
+            <input 
+              type="text" 
+              placeholder="Yetkili Ad Soyad" 
+              class="modern-input" 
+              (input)="updateFullName($event)"
+              required 
+            />
           </div>
 
           <div class="input-group">
-            <div class="icon-wrapper"><i class="bx bx-envelope"></i></div>
-            <input type="email" placeholder="Kurumsal E-Posta" class="modern-input" required />
+            <div class="icon-wrapper" [class.error-icon]="emailError"><i class="bx bx-envelope"></i></div>
+            <input 
+              type="email" 
+              placeholder="Kurumsal E-Posta (xxx@gsb.gov.tr)" 
+              class="modern-input" 
+              [class.input-error]="emailError"
+              (input)="validateCorporateEmail($event)"
+              required 
+            />
+          </div>
+          <div *ngIf="emailError" class="error-message">
+            <i class="bx bx-error-circle"></i> Lütfen geçerli bir kurumsal e-posta (gsb.gov.tr) giriniz.
           </div>
 
           <!-- Şifre -->
@@ -94,8 +119,10 @@
             </label>
           </div>
 
-          <button type="submit" class="btn-primary">
-            Başvuruyu Gönder <i class="bx bx-send"></i>
+          <button type="submit" class="btn-primary" [disabled]="isLoading">
+            <app-luma-spin *ngIf="isLoading"></app-luma-spin>
+            <span *ngIf="!isLoading">Başvuruyu Gönder <i class="bx bx-send"></i></span>
+            <span *ngIf="isLoading">Gönderiliyor...</span>
           </button>
         </form>
       </div>

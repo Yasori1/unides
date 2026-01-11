@@ -37,6 +37,8 @@ import { StudentProfileComponent } from './pages/student-profile/student-profile
 import { CommunityDetailComponent } from './pages/community-detail/community-detail.component';
 import { ResetPasswordComponent } from './pages/reset-password/reset-password.component';
 import { CommunityDashboardComponent } from './pages/community-dashboard/community-dashboard.component';
+import { LoginPageComponent } from './pages/login-page/login-page.component';
+import { RegisterPageComponent } from './pages/register-page/register-page.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -57,13 +59,25 @@ export const routes: Routes = [
   { path: 'terms-conditions', component: TermsConditionsPageComponent },
 
   // --- LOGIN & REGISTER ROTALARI ---
-  { path: 'login', component: ComingSoonComponent, data: { title: 'Giriş Yap' } },
+  // TÜM GİRİŞ SAYFALARI AKTİF
+  { path: 'login', component: LoginPageComponent },
   { path: 'corporate-login', component: CorporateLoginComponent },
   { path: 'community-login', component: CommunityLoginComponent },
 
-  { path: 'register', component: ComingSoonComponent, data: { title: 'Kayıt Ol' } },
-  { path: 'corporate-register', component: CorporateRegisterComponent },
-  { path: 'community-register', component: CommunityRegisterComponent },
+  // SADECE ÖĞRENCİ KAYDI AKTİF
+  { path: 'register', component: RegisterPageComponent },
+  
+  // YAPIM AŞAMASINDA - İlk etap için devre dışı
+  { path: 'corporate-register', component: ComingSoonComponent, data: { title: 'Kurumsal Kayıt' } },
+  { path: 'community-register', component: ComingSoonComponent, data: { title: 'Topluluk Kayıt' } },
+  
+  // YAPIM AŞAMASINDA - Gelecekte lazım olabilir (yorum satırında tutuldu)
+  // { path: 'corporate-register', component: CorporateRegisterComponent },
+  // { path: 'community-register', component: CommunityRegisterComponent },
+
+  // YAPIM AŞAMASINDA - Gelecekte lazım olabilir
+  // { path: 'login', component: ComingSoonComponent, data: { title: 'Giriş Yap' } },
+  // { path: 'register', component: ComingSoonComponent, data: { title: 'Kayıt Ol' } },
 
   { path: 'coming-soon', component: ComingSoonComponent, data: { title: 'Bu Sayfa' } },
 

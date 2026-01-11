@@ -1,19 +1,65 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { ToastService } from '../../services/toast.services';
+import { AuthService } from '../../services/auth.services';
+import { ToastComponent } from '../../components/ui/toast/toast.component';
+import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
 
 @Component({
   selector: 'app-community-register',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule, ToastComponent, LumaSpinComponent],
   templateUrl: './community-register.html',
   styleUrls: ['./community-register.scss'],
 })
-// BU SINIF ADININ "CommunityRegisterComponent" OLDUĞUNDAN EMIN OL
 export class CommunityRegisterComponent {
   passwordMismatch: boolean = false;
-  private password = '';
-  private confirmPassword = '';
+  isLoading: boolean = false;
+  emailError: boolean = false;
+  
+  private communityName: string = '';
+  private university: string = '';
+  private fullName: string = '';
+  private email: string = '';
+  private password: string = '';
+  private confirmPassword: string = '';
+
+  constructor(
+    private router: Router,
+    private toastService: ToastService,
+    private authService: AuthService
+  ) {}
+
+  updateCommunityName(event: any) {
+    this.communityName = event.target.value;
+  }
+
+  updateUniversity(event: any) {
+    this.university = event.target.value;
+  }
+
+  updateFullName(event: any) {
+    this.fullName = event.target.value;
+  }
+
+  validateCommunityEmail(event: any) {
+    const email = event.target.value;
+    this.email = email;
+    
+    if (!email) {
+      this.emailError = false;
+      return;
+    }
+    
+    // Topluluk e-posta kontrolü: .edu.tr ile bitmeli
+    if (email.includes('@') && !email.endsWith('.edu.tr')) {
+      this.emailError = true;
+    } else {
+      this.emailError = false;
+    }
+  }
 
   checkPasswords(event: any, type: string) {
     const val = event.target.value;
@@ -23,12 +69,74 @@ export class CommunityRegisterComponent {
       this.confirmPassword && this.password !== this.confirmPassword ? true : false;
   }
 
-  onSubmit(event: Event) {
+  async onSubmit(event: Event) {
     event.preventDefault();
-    if (this.passwordMismatch) {
-      alert('Şifreler eşleşmiyor!');
+
+    // Validasyonlar
+    if (!this.communityName || !this.university || !this.fullName || !this.email || !this.password) {
+      this.toastService.show('Lütfen tüm alanları doldurunuz.', 'error');
       return;
     }
-    console.log('Topluluk oluşturma isteği gönderildi.');
+
+    if (this.emailError) {
+      this.toastService.show('Lütfen geçerli bir topluluk e-postası (.edu.tr) giriniz.', 'error');
+      return;
+    }
+
+    if (this.passwordMismatch) {
+      this.toastService.show('Şifreler eşleşmiyor!', 'error');
+      return;
+    }
+
+    // Backend'e kayıt isteği
+    this.isLoading = true;
+
+    try {
+      const response = await fetch('/api/Auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          fullName: this.fullName,
+          email: this.email,
+          password: this.password,
+          roleId: 3 // 3 = Topluluk
+        }),
+      });
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        this.isLoading = false;
+        this.toastService.show(
+          "Backend'den beklenmeyen yanıt alındı. Lütfen backend servisinin çalıştığından emin olun.",
+          'error'
+        );
+        return;
+      }
+
+      const data = await response.json();
+
+      if (response.ok) {
+        this.toastService.show(
+          'Kayıt işleminiz başarıyla tamamlandı! Giriş sayfasına yönlendiriliyorsunuz...',
+          'success'
+        );
+
+        setTimeout(() => {
+          this.router.navigate(['/community-login']);
+        }, 2000);
+      } else {
+        this.isLoading = false;
+        const errorMessage = data?.message || 'Kayıt sırasında bir hata oluştu.';
+        this.toastService.show(errorMessage, 'error');
+      }
+    } catch (error: any) {
+      console.error('Kayıt Hatası:', error);
+      this.isLoading = false;
+      const message = error?.message || 'Kayıt sırasında bir hata oluştu.';
+      this.toastService.show(message, 'error');
+    }
   }
 }

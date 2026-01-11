@@ -31,11 +31,19 @@
           </p>
         </div>
 
+        <app-toast></app-toast>
+        
         <form (submit)="onSubmit($event)">
           <!-- Topluluk Bilgileri -->
           <div class="input-group">
             <div class="icon-wrapper"><i class="bx bx-group"></i></div>
-            <input type="text" placeholder="Topluluk / Kulüp Adı" class="modern-input" required />
+            <input 
+              type="text" 
+              placeholder="Topluluk / Kulüp Adı" 
+              class="modern-input" 
+              (input)="updateCommunityName($event)"
+              required 
+            />
           </div>
 
           <div class="input-group">
@@ -44,6 +52,7 @@
               type="text"
               placeholder="Bağlı Olduğu Üniversite"
               class="modern-input"
+              (input)="updateUniversity($event)"
               required
             />
           </div>
@@ -55,13 +64,24 @@
               type="text"
               placeholder="Başkan / Temsilci Ad Soyad"
               class="modern-input"
+              (input)="updateFullName($event)"
               required
             />
           </div>
 
           <div class="input-group">
-            <div class="icon-wrapper"><i class="bx bx-envelope"></i></div>
-            <input type="email" placeholder="İletişim E-Postası" class="modern-input" required />
+            <div class="icon-wrapper" [class.error-icon]="emailError"><i class="bx bx-envelope"></i></div>
+            <input 
+              type="email" 
+              placeholder="İletişim E-Postası (xxx@univ.edu.tr)" 
+              class="modern-input" 
+              [class.input-error]="emailError"
+              (input)="validateCommunityEmail($event)"
+              required 
+            />
+          </div>
+          <div *ngIf="emailError" class="error-message">
+            <i class="bx bx-error-circle"></i> Lütfen geçerli bir topluluk e-postası (.edu.tr) giriniz.
           </div>
 
           <!-- Şifre -->
@@ -100,8 +120,10 @@
             </label>
           </div>
 
-          <button type="submit" class="btn-primary">
-            Topluluğu Kur <i class="bx bx-rocket"></i>
+          <button type="submit" class="btn-primary" [disabled]="isLoading">
+            <app-luma-spin *ngIf="isLoading"></app-luma-spin>
+            <span *ngIf="!isLoading">Topluluğu Kur <i class="bx bx-rocket"></i></span>
+            <span *ngIf="isLoading">Gönderiliyor...</span>
           </button>
         </form>
       </div>
