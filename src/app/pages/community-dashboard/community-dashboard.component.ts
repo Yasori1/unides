@@ -26,6 +26,7 @@ interface Member {
   grade: string;
   avatar: string;
   status: 'Aktif' | 'Pasif';
+  university?: string;
 }
 interface UserSearchResult {
   name: string;
@@ -60,8 +61,7 @@ interface DashboardEvent {
   location: string;
   category: string;
   description: string;
-  
-
+  rejectionReason?: string;
   time?: string;
   quota?: number;
 }
@@ -99,6 +99,10 @@ export class CommunityDashboardComponent implements OnInit {
   
   // Eksik olan değişken eklendi
   selectedEvent: DashboardEvent | null = null;
+  
+  // Rejection reason modal
+  showRejectionModal = false;
+  selectedRejectionReason: string = '';
 
   // Event creation modal
   newEventData = {
@@ -204,6 +208,7 @@ export class CommunityDashboardComponent implements OnInit {
       location: 'Ankara Kampüsü',
       category: 'Sosyal',
       description: 'Bağış toplama koşusu için başvuru reddedildi.',
+      rejectionReason: 'Etkinlik bütçesi yetersiz görüldü. Lütfen revize ediniz.',
     },
     {
       id: 5,
@@ -271,6 +276,7 @@ export class CommunityDashboardComponent implements OnInit {
       grade: '3. Sınıf',
       avatar: 'https://ui-avatars.com/api/?name=EY&background=e2e8f0&color=1e293b',
       status: 'Aktif',
+      university: 'İstanbul Teknik Üniversitesi',
     },
     {
       id: 2,
@@ -282,6 +288,7 @@ export class CommunityDashboardComponent implements OnInit {
       grade: '4. Sınıf',
       avatar: 'https://ui-avatars.com/api/?name=MD&background=e2e8f0&color=1e293b',
       status: 'Aktif',
+      university: 'İstanbul Teknik Üniversitesi',
     },
     {
       id: 3,
@@ -293,6 +300,7 @@ export class CommunityDashboardComponent implements OnInit {
       grade: '2. Sınıf',
       avatar: 'https://ui-avatars.com/api/?name=SK&background=e2e8f0&color=1e293b',
       status: 'Aktif',
+      university: 'İstanbul Teknik Üniversitesi',
     },
     {
       id: 4,
@@ -304,6 +312,7 @@ export class CommunityDashboardComponent implements OnInit {
       grade: '1. Sınıf',
       avatar: 'https://ui-avatars.com/api/?name=BC&background=e2e8f0&color=1e293b',
       status: 'Pasif',
+      university: 'İstanbul Teknik Üniversitesi',
     },
     {
       id: 5,
@@ -315,6 +324,7 @@ export class CommunityDashboardComponent implements OnInit {
       grade: '2. Sınıf',
       avatar: 'https://ui-avatars.com/api/?name=AC&background=e2e8f0&color=1e293b',
       status: 'Aktif',
+      university: 'İstanbul Teknik Üniversitesi',
     },
   ];
 
@@ -885,6 +895,22 @@ export class CommunityDashboardComponent implements OnInit {
 
   closeEventDetail() {
     this.selectedEvent = null;
+    if (isPlatformBrowser(this.platformId)) {
+      document.body.style.overflow = 'auto';
+    }
+  }
+
+  openRejectionModal(rejectionReason: string) {
+    this.selectedRejectionReason = rejectionReason;
+    this.showRejectionModal = true;
+    if (isPlatformBrowser(this.platformId)) {
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  closeRejectionModal() {
+    this.showRejectionModal = false;
+    this.selectedRejectionReason = '';
     if (isPlatformBrowser(this.platformId)) {
       document.body.style.overflow = 'auto';
     }

@@ -26,16 +26,6 @@
         <span *ngIf="!isSidebarCollapsed">Etkinliklerim</span>
       </button>
 
-      <div class="menu-divider" *ngIf="!isSidebarCollapsed">İŞBİRLİĞİ</div>
-      <button
-        class="menu-item"
-        [class.active]="activeTab === 'network'"
-        (click)="switchTab('network')"
-      >
-        <span class="material-symbols-outlined">public</span>
-        <span *ngIf="!isSidebarCollapsed">İşbirliği</span>
-      </button>
-
       <div class="menu-divider" *ngIf="!isSidebarCollapsed">YÖNETİM</div>
       <button
         class="menu-item"
@@ -206,6 +196,12 @@
               </div>
               <h4>{{ event.title }}</h4>
               <p class="desc">{{ event.description }}</p>
+              <div class="rejection-reason" *ngIf="event.status === 'rejected' && event.rejectionReason">
+                <span class="material-symbols-outlined rejection-icon">error</span>
+                <span class="rejection-text" (click)="openRejectionModal(event.rejectionReason!); $event.stopPropagation()">
+                  <strong>Red Nedeni:</strong> {{ event.rejectionReason }}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -280,6 +276,12 @@
             </div>
             <h4>{{ event.title }}</h4>
             <p class="desc">{{ event.description }}</p>
+            <div class="rejection-reason" *ngIf="event.status === 'rejected' && event.rejectionReason">
+              <span class="material-symbols-outlined rejection-icon">error</span>
+              <span class="rejection-text" (click)="openRejectionModal(event.rejectionReason!); $event.stopPropagation()">
+                <strong>Red Nedeni:</strong> {{ event.rejectionReason }}
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -287,140 +289,6 @@
         <div class="empty-state">
           <span class="material-symbols-outlined">event_busy</span>
           <p>Henüz listelenecek etkinlik yok.</p>
-        </div>
-      </ng-template>
-    </div>
-
-    <div class="view-container" *ngIf="activeTab === 'network'">
-      <div class="page-header">
-        <div>
-          <h2>Diğer Topluluklar</h2>
-          <p class="page-subtitle">
-            Toplulukları keşfet ve detay sayfalarına giderek iletişime geç.
-          </p>
-        </div>
-      </div>
-
-      <div class="filters-bar network-filters" *ngIf="!isLoading">
-        <div class="search-group">
-          <i class="bx bx-search"></i>
-          <input
-            type="text"
-            placeholder="Topluluk ara..."
-            [(ngModel)]="searchText"
-            (input)="applyFilters()"
-          />
-        </div>
-
-        <div class="filter-groups">
-          <div class="select-wrapper">
-            <select [(ngModel)]="selectedCity" (change)="applyFilters()">
-              <option value="">Tüm Şehirler</option>
-              <option *ngFor="let city of cities" [value]="city">{{ city }}</option>
-            </select>
-            <i class="bx bx-chevron-down"></i>
-          </div>
-
-          <div class="select-wrapper">
-            <select [(ngModel)]="selectedCategory" (change)="applyFilters()">
-              <option value="">Tüm Kategoriler</option>
-              <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
-            </select>
-            <i class="bx bx-chevron-down"></i>
-          </div>
-
-          <div class="select-wrapper">
-            <select [(ngModel)]="sortOrder" (change)="applyFilters()">
-              <option value="default">Önerilen Sıralama</option>
-              <option value="member_desc">Üye Sayısı (Çoktan Az)</option>
-              <option value="member_asc">Üye Sayısı (Azdan Çok)</option>
-            </select>
-            <i class="bx bx-sort-alt-2"></i>
-          </div>
-        </div>
-      </div>
-
-      <div class="loading-state" *ngIf="isLoading">
-        <div class="spinner"></div>
-        <p>Topluluklar yükleniyor...</p>
-      </div>
-
-      <div
-        class="network-grid"
-        *ngIf="!isLoading && filteredCollaborations.length; else emptyNetwork"
-      >
-        <div
-          class="community-card"
-          *ngFor="let c of pagedCollaborations"
-          (click)="goToCommunity(c)"
-        >
-          <div class="cover-area">
-            <img
-              [src]="c.coverImage || 'assets/img/placeholder-cover.svg'"
-              [alt]="c.clubName"
-              class="cover-img"
-              loading="lazy"
-              onerror="this.src='assets/img/placeholder-cover.svg'"
-            />
-          </div>
-
-          <div class="card-content">
-            <div class="header-row">
-              <div class="logo-wrapper">
-                <img
-                  [src]="c.logo"
-                  [alt]="c.clubName"
-                  class="logo-img"
-                  loading="lazy"
-                  onerror="this.src='assets/img/placeholder-logo.svg'"
-                />
-              </div>
-              <div class="title-wrapper">
-                <h3 class="community-name">{{ c.clubName }}</h3>
-                <span class="university-name">{{ c.university }}</span>
-              </div>
-            </div>
-
-            <p class="description">{{ c.description }}</p>
-
-            <div class="card-footer">
-              <button class="detail-btn" (click)="goToCommunity(c); $event.stopPropagation()">
-                İncele
-                <i class="bx bx-right-arrow-alt"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="pagination-area" *ngIf="!isLoading && collabTotalPages > 1">
-        <button
-          class="page-btn prev"
-          [disabled]="collabCurrentPage === 1"
-          (click)="setCollabPage(collabCurrentPage - 1)"
-        >
-          ‹
-        </button>
-        <ng-container *ngFor="let page of [].constructor(collabTotalPages); let idx = index">
-          <button
-            class="page-btn number"
-            [class.active]="idx + 1 === collabCurrentPage"
-            (click)="setCollabPage(idx + 1)"
-          >
-            {{ idx + 1 }}
-          </button>
-        </ng-container>
-        <button
-          class="page-btn next"
-          [disabled]="collabCurrentPage === collabTotalPages"
-          (click)="setCollabPage(collabCurrentPage + 1)"
-        >
-          ›
-        </button>
-      </div>
-      <ng-template #emptyNetwork>
-        <div class="empty-state">
-          <span class="material-symbols-outlined">groups</span>
-          <p>Listelenecek topluluk bulunamadı.</p>
         </div>
       </ng-template>
     </div>
@@ -441,20 +309,41 @@
           <button class="btn-primary" (click)="openModal('new-member')">Üye Ekle</button>
         </div>
       </div>
-      <div *ngIf="pagedMembers.length; else noMembers" class="grid-cards members-grid">
-        <div class="card member-card" *ngFor="let m of pagedMembers">
-          <div class="member-top">
-            <div class="initial-avatar">{{ getInitials(m.name) }}</div>
-          </div>
-          <h4 class="member-name">{{ m.name }}</h4>
-          <p class="member-email">{{ m.email }}</p>
-          <div class="member-actions">
-            <button class="member-delete-btn" (click)="openDeleteConfirm(m.id)">
-              <span class="material-symbols-outlined">delete</span>
-              Üyeyi Sil
-            </button>
-          </div>
-        </div>
+      <div *ngIf="pagedMembers.length; else noMembers" class="members-table-container">
+        <table class="members-table">
+          <thead>
+            <tr>
+              <th>İsim Soyad</th>
+              <th>E-Posta</th>
+              <th>Üniversite</th>
+              <th class="action-column">İşlem</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let m of pagedMembers" class="member-row">
+              <td class="member-name-cell">
+                <div class="member-name-wrapper">
+                  <span>{{ m.name }}</span>
+                  <span 
+                    *ngIf="m.role === 'Başkan' || m.role === 'Başkan Yrd.'" 
+                    class="admin-star"
+                    title="Yönetici"
+                  >
+                    <span class="material-symbols-outlined">star</span>
+                  </span>
+                </div>
+              </td>
+              <td class="member-email-cell">{{ m.email }}</td>
+              <td class="member-university-cell">{{ m.university || '-' }}</td>
+              <td class="member-action-cell">
+                <button class="member-delete-btn-table" (click)="openDeleteConfirm(m.id)" title="Üyeyi Sil">
+                  <span class="material-symbols-outlined">delete</span>
+                  <span>Sil</span>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
       <ng-template #noMembers>
         <div class="empty-state">
@@ -526,6 +415,10 @@
                 <span>Kategori</span>
                 <input type="text" [(ngModel)]="clubInfo.category" disabled />
               </label>
+              <label>
+                <span>E-Posta</span>
+                <input type="email" [(ngModel)]="clubInfo.email" />
+              </label>
             </div>
             <label class="stacked">
               <div class="label-header">
@@ -541,20 +434,6 @@
                 placeholder="Topluluğunuzu anlatan kısa bir yazı yazın..."
               ></textarea>
             </label>
-          </div>
-          
-          <div class="form-section">
-            <h3>İletişim & Sosyal</h3>
-            <div class="input-grid">
-              <label>
-                <span>E-Posta</span>
-                <input type="email" [(ngModel)]="clubInfo.email" />
-              </label>
-              <label>
-                <span>Instagram</span>
-                <input type="text" [(ngModel)]="clubInfo.instagram" placeholder="@kulup" />
-              </label>
-            </div>
           </div>
         </div>
         <div class="action-footer">
@@ -777,6 +656,24 @@
         <span class="description-label">AÇIKLAMA</span>
         <p class="description-text">{{ selectedEvent.description }}</p>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Rejection Reason Modal -->
+<div class="modal-backdrop rejection-modal" *ngIf="showRejectionModal" (click)="closeRejectionModal()">
+  <div class="modal-content rejection-modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header rejection-modal-header">
+      <h3>Reddedilme Nedeni</h3>
+      <button class="close-btn" (click)="closeRejectionModal()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="modal-body rejection-modal-body">
+      <p class="rejection-reason-text">{{ selectedRejectionReason }}</p>
+    </div>
+    <div class="modal-footer rejection-modal-footer">
+      <button class="btn-secondary" (click)="closeRejectionModal()">Kapat</button>
     </div>
   </div>
 </div>
