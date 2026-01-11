@@ -46,8 +46,8 @@ export class AuthService {
   // --- MERKEZİ GİRİŞ METODU (SWAGGER: POST /api/Auth/login) ---
   // Tüm kullanıcı tipleri aynı endpoint üzerinden giriş yapar,
   // Backend rolü response içinde döner veya token'a gömer.
-  private login(email: string, password: string): Observable<LoginResponse> {
-    const payload = { email, password };
+  private login(email: string, password: string, roleId: number): Observable<LoginResponse> {
+    const payload = { email, password, roleId };
     return this.http.post<LoginResponse>(`${this.apiUrl}/Auth/login`, payload).pipe(
       tap((response: any) => {
         const token =
@@ -85,7 +85,7 @@ export class AuthService {
   // --- 1. ÖĞRENCİ GİRİŞİ ---
   // Componentlerdeki mevcut yapıyı bozmamak için wrapper kullanıyoruz.
   loginStudent(email: string, password: string): Observable<LoginResponse> {
-    return this.login(email, password).pipe(
+    return this.login(email, password, 1).pipe( // 1 = Öğrenci
       tap(() => {
         // Frontend tarafında 'student' olduğunu garantiye alıyoruz
         // (Backend response.role dönmezse varsayılan olarak set edilebilir)
@@ -96,19 +96,52 @@ export class AuthService {
 
   // --- 2. KURUMSAL GİRİŞ ---
   loginCorporate(email: string, password: string): Observable<LoginResponse> {
-    return this.login(email, password).pipe(tap(() => this.saveUserType('corporate')));
+    return this.login(email, password, 2).pipe( // 2 = Kurumsal (GSB)
+      tap(() => this.saveUserType('corporate'))
+    );
   }
 
   // --- 3. TOPLULUK GİRİŞİ ---
   loginCommunity(email: string, password: string): Observable<LoginResponse> {
-    return this.login(email, password).pipe(tap(() => this.saveUserType('community')));
+    return this.login(email, password, 3).pipe( // 3 = Topluluk
+      tap(() => this.saveUserType('community'))
+    );
   }
 
   // --- 4. KAYIT OL (REGISTER) ---
   // Swagger: POST /api/Auth/register
   registerStudent(data: RegisterRequest): Observable<any> {
     // Backend tek bir register noktası sunuyor.
-    return this.http.post(`${this.apiUrl}/Auth/register`, data);
+    // Backend formatı: { fullName, email, password, roleId }
+    const backendData = {
+      fullName: data.name,
+      email: data.email,
+      password: data.password,
+      roleId: 1 // 1 = Öğrenci
+    };
+    return this.http.post(`${this.apiUrl}/Auth/register`, backendData);
+  }
+
+  // --- 5. KURUMSAL KAYIT ---
+  registerCorporate(data: RegisterRequest): Observable<any> {
+    const backendData = {
+      fullName: data.name,
+      email: data.email,
+      password: data.password,
+      roleId: 2 // 2 = Kurumsal (GSB)
+    };
+    return this.http.post(`${this.apiUrl}/Auth/register`, backendData);
+  }
+
+  // --- 6. TOPLULUK KAYIT ---
+  registerCommunity(data: RegisterRequest): Observable<any> {
+    const backendData = {
+      fullName: data.name,
+      email: data.email,
+      password: data.password,
+      roleId: 3 // 3 = Topluluk
+    };
+    return this.http.post(`${this.apiUrl}/Auth/register`, backendData);
   }
 
   // --- 5. REFRESH TOKEN (SWAGGER: POST /api/Auth/refresh) ---

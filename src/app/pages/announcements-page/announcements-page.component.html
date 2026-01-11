@@ -95,7 +95,7 @@
 
         <div class="card-content">
           <h3 class="announcement-title">{{ ann.title }}</h3>
-          <p class="description">{{ ann.shortDescription }}</p>
+          <p class="description" *ngIf="ann.shortDescription && ann.shortDescription.trim()">{{ ann.shortDescription }}</p>
           <div class="card-footer">
             <span class="action-text">Devamını Oku <i class='bx bx-right-arrow-alt'></i></span>
           </div>

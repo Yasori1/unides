@@ -103,9 +103,9 @@ export class LoginPageComponent implements OnInit {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        Email: this.email,
-        Password: this.password,
-        RoleId: this.roleId
+        email: this.email,
+        password: this.password,
+        roleId: this.roleId // 1 = Öğrenci
       })
     })
       .then(async (res) => {
