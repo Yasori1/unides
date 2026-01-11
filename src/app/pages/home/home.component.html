@@ -65,17 +65,12 @@
         <div class="card-content">
           <h3 class="comm-name">{{ comm.name }}</h3>
           <span class="comm-category">{{ comm.category }}</span>
-<<<<<<< HEAD
-          <div class="comm-stats">
-            <span class="comm-email-display">{{ comm.email }}</span>
-=======
           
           <div class="comm-stats">
-            <span class="stat">{{ comm.email }}</span>
->>>>>>> parent of 3c98daa (11)
+            <span class="comm-email-display">{{ comm.email }}</span>
             <span class="stat">📅 {{ comm.eventCount }} Etkinlik</span>
           </div>
-        </div>
+          </div>
       </div>
     </div>
 
@@ -223,7 +218,6 @@
       </div>
     </div>
 
-    <!-- Mobile Slider View (2 items visible at a time) -->
     <div class="mobile-slider-container mobile-only">
       <div class="mobile-slider-track">
         <div class="mobile-slider-item" *ngFor="let nc of newestCommunities">

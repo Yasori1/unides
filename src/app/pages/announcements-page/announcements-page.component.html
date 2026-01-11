@@ -1,143 +1,72 @@
-<app-site-navbar />
+<app-site-navbar></app-site-navbar>
 
-<div class="page-spacer" (mousemove)="onHeroMouseMove($event)">
-  <div class="background-wrapper">
-    <div
-      class="interactive-blob"
-      [style.transform]="'translate(' + -heroMoveX + 'px, ' + -heroMoveY + 'px)'"
-    ></div>
-    <div class="noise-overlay"></div>
+<div class="page-wrapper">
+  <!-- Background Elements -->
+  <div class="global-background">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="grid-overlay"></div>
   </div>
 
-  <div class="container relative-content">
-    <h1 class="page-title">ÜNİDES <span class="highlight-text">DUYURULAR</span></h1>
-    <p class="page-subtitle">
-      Üniversitemizden ve Bakanlıklardan güncel haberler, etkinlikler ve önemli duyurular.
-    </p>
-  </div>
-
-  <div class="scroll-indicator">
-    <span>Keşfet</span>
-    <div class="line"></div>
-  </div>
-</div>
-
-<section class="announcements-grid-section">
-  <div class="container">
-    <div class="filters-bar">
-      <div class="search-group">
-        <i class="bx bx-search"></i>
-        <input
-          type="text"
-          placeholder="Duyuru veya Bakanlık haberi ara..."
-          [(ngModel)]="searchText"
-          (input)="applyFilters()"
-        />
-      </div>
-
-      <div class="filter-groups">
-        <div class="select-wrapper category-select">
-            <select [(ngModel)]="selectedCategory" (change)="applyFilters()">
-              <option value="all">Tüm Kategoriler</option>
-              <option value="Bakanlık">Bakanlık Duyuruları</option>
-              <option value="Genel">Genel Duyurular</option>
-            </select>
-            <i class="bx bx-filter-alt"></i>
-        </div>
-
-        <div class="select-wrapper">
-          <select [(ngModel)]="sortOrder" (change)="applyFilters()">
-            <option value="default">Önerilen Sıralama</option>
-            <option value="date_desc">Tarih (Yeniden Eskiye)</option>
-            <option value="date_asc">Tarih (Eskiden Yeniye)</option>
-          </select>
-          <i class="bx bx-sort-alt-2"></i>
-        </div>
-      </div>
-    </div>
-
-    <div class="results-count" *ngIf="!isLoading">
-      <p>
-        Toplam <strong>{{ filteredAnnouncements.length }}</strong> duyuru listeleniyor.
+  <div class="container main-content">
+    <div class="section-header-center fade-in-up">
+      <h6 class="sub-title">GÜNCEL</h6>
+      <h2 class="section-title">
+        ÜNİDES <span class="highlight-text">DUYURULAR</span>
+      </h2>
+      <p class="section-desc">
+        Üniversite ve kampüs yaşamına dair en güncel haberler ve duyurular.
       </p>
+      <div class="blue-divider"></div>
     </div>
 
-    <div *ngIf="isLoading" class="loading-state">
+    <!-- Search Bar -->
+    <div class="search-container fade-in-up">
+      <div class="search-box">
+        <i class="bx bx-search search-icon"></i>
+        <input 
+          type="text" 
+          placeholder="Duyuru ara..." 
+          (input)="onSearch($event)"
+        >
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-state" *ngIf="isLoading">
       <div class="spinner"></div>
       <p>Duyurular yükleniyor...</p>
     </div>
 
-    <div class="grid-container" *ngIf="!isLoading && displayedAnnouncements.length > 0">
-      <a
-        *ngFor="let item of displayedAnnouncements"
-        [routerLink]="['/announcements', item.id]"
-        class="announcement-card"
-        [class.ministry-card]="item.category === 'Bakanlık'"
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!isLoading && filteredAnnouncements.length === 0">
+      <i class='bx bx-news'></i>
+      <p>Aradığınız kriterlere uygun duyuru bulunamadı.</p>
+    </div>
+
+    <!-- Announcements Grid -->
+    <div class="announcements-grid" *ngIf="!isLoading && filteredAnnouncements.length > 0">
+      <a 
+        [routerLink]="['/announcements', ann.id]" 
+        class="announcement-card fade-in-up"
+        *ngFor="let ann of filteredAnnouncements"
       >
-        <div class="cover-area">
-          <img
-            [src]="item.image"
-            [alt]="item.title"
-            class="cover-img"
-            onerror="this.src='assets/img/placeholder-cover.svg'"
-          />
-          
-          <span class="date-badge">{{ formatDate(item.date) }}</span>
-
-          <span 
-            class="category-badge" 
-            [ngClass]="item.category === 'Bakanlık' ? 'badge-ministry' : 'badge-general'"
-          >
-            {{ item.category || 'GENEL' }}
-          </span>
+        <div class="card-image">
+          <img [src]="ann.image || 'assets/img/placeholder-announcement.jpg'" [alt]="ann.title" loading="lazy">
+          <div class="date-badge">
+            {{ formatDate(ann.date) }}
+          </div>
         </div>
-
         <div class="card-content">
-          <h3 class="announcement-title">{{ item.title }}</h3>
-          <p class="description">{{ item.shortDescription }}</p>
-
+          <h3 class="card-title">{{ ann.title }}</h3>
+          <p class="card-desc">{{ ann.shortDescription }}</p>
           <div class="card-footer">
-            <span class="action-text">Devamını Oku <i class="bx bx-right-arrow-alt"></i></span>
+            <span class="read-more">Devamını Oku <i class='bx bx-right-arrow-alt'></i></span>
           </div>
         </div>
       </a>
     </div>
-
-    <div class="no-data" *ngIf="!isLoading && displayedAnnouncements.length === 0">
-      <div class="empty-icon"><i class="bx bx-search-alt"></i></div>
-      <h3>Sonuç Bulunamadı</h3>
-      <p>Aradığınız kriterlere uygun duyuru mevcut değil.</p>
-      <button class="reset-btn" (click)="resetFilters()">Filtreleri Temizle</button>
-    </div>
-
-    <div class="pagination-area" *ngIf="!isLoading && totalPages > 1">
-      <button
-        class="page-btn prev"
-        [disabled]="currentPage === 1"
-        (click)="changePage(currentPage - 1)"
-      >
-        <i class="bx bx-chevron-left"></i>
-      </button>
-
-      <ng-container *ngFor="let page of pages">
-        <button
-          class="page-btn number"
-          [class.active]="page === currentPage"
-          (click)="changePage(page)"
-        >
-          {{ page }}
-        </button>
-      </ng-container>
-
-      <button
-        class="page-btn next"
-        [disabled]="currentPage === totalPages"
-        (click)="changePage(currentPage + 1)"
-      >
-        <i class="bx bx-chevron-right"></i>
-      </button>
-    </div>
   </div>
-</section>
+</div>
 
-<app-site-footer />
+<app-site-footer></app-site-footer>
