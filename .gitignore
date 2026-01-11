@@ -136,3 +136,4 @@ dist
 .pnp.*
 
 .angular/**/*
+src/app/app.routes.ts
