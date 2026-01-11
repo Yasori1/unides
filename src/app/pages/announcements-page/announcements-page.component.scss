@@ -10,13 +10,14 @@
   --accent-color: #2563eb;
   --ministry-color: #1e3a8a; /* Bakanlık rengi */
   --bg-light: #f8fafc;
+  background-color: transparent !important;
 }
 
 // --- 1. PAGE SPACER (Banner) ---
 .page-spacer {
   padding-top: 140px;
   padding-bottom: 70px;
-  background-color: var(--bg-light);
+  background-color: transparent !important;
   text-align: center;
   border-bottom: 1px solid var(--border-color);
   position: relative;
@@ -27,6 +28,7 @@
     inset: 0;
     z-index: 1;
     overflow: hidden;
+    background-color: transparent !important;
     .interactive-blob {
       position: absolute;
       width: 450px;
@@ -116,7 +118,7 @@
 // --- 2. FILTERS BAR ---
 .announcements-grid-section {
   padding: 40px 0 100px;
-  background-color: var(--bg-color);
+  background-color: transparent !important;
 
   .container {
     max-width: 1400px;
@@ -129,11 +131,11 @@
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
-  background: white;
-  padding: 20px;
-  border-radius: 24px;
-  border: 1px solid var(--border-color);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  background: transparent !important;
+  padding: 20px 0;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
   margin-bottom: 30px;
   align-items: center;
 
@@ -157,6 +159,7 @@
       font-size: 0.95rem;
       outline: none;
       transition: all 0.2s;
+      background: white;
       &:focus {
         border-color: var(--accent-color);
         box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
