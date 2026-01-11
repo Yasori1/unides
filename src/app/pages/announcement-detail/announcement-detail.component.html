@@ -8,23 +8,17 @@
 
 <!-- Announcement Detail -->
 <div *ngIf="!isLoading && announcement" class="announcement-detail-page">
-<<<<<<< Updated upstream
   <!-- Hero Banner -->
   <div class="hero-section" (mousemove)="onHeroMouseMove($event)">
     <div class="background-wrapper">
       <img
-        [src]="announcement.image || 'assets/img/placeholder-cover.svg'"
+        src="assets/gsbbina.jpg"
         [alt]="announcement.title"
         class="hero-image"
         loading="lazy"
         onerror="this.src='assets/img/placeholder-cover.svg'"
       />
     </div>
-=======
-  <!-- Hero Image -->
-  <div class="hero-section">
-    <img [src]="announcement.image || 'assets/img/placeholder-announcement.jpg'" [alt]="announcement.title" class="hero-image" />
->>>>>>> Stashed changes
     <div class="hero-overlay">
       <div class="container">
         <div class="breadcrumb">
@@ -46,42 +40,9 @@
   </div>
 
   <!-- Content Section -->
-<<<<<<< Updated upstream
   <div class="content-section layout-option-a">
     <div class="container-wide">
       
-=======
-  <div class="content-section">
-    <div class="container">
-      <div class="announcement-header">
-        <span class="date-badge">
-          <i class="bx bx-calendar"></i>
-          {{ announcement.date | date:'d MMMM y':'':'tr' }}
-        </span>
-        <h1 class="announcement-title">{{ announcement.title }}</h1>
-        <p class="announcement-subtitle">{{ announcement.shortDescription }}</p>
-      </div>
-
-      <div class="announcement-content">
-        <div class="content-text">{{ announcement.content }}</div>
-
-        <!-- Link Section -->
-        <div class="link-section" *ngIf="announcement.link && announcement.link.trim()">
-          <div class="link-card">
-            <i class="bx bx-link-external"></i>
-            <div class="link-info">
-              <h3>İlgili Link</h3>
-              <p>Bu duyuru ile ilgili daha fazla bilgi için aşağıdakis linke tıklayabilirsiniz.</p>
-              <a [href]="announcement.link" target="_blank" class="link-button">
-                Linke Git
-                <i class="bx bx-right-arrow-alt"></i>
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-
->>>>>>> Stashed changes
       <!-- Back Button -->
       <div class="back-button-top">
         <a routerLink="/announcements" class="back-button">
