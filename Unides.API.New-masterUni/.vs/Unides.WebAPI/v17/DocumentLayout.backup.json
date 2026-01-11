@@ -1,16 +1,7 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\Users\\Safa\\Documents\\GitHub\\unides\\Unides.API.New-masterUni\\",
-  "Documents": [
-    {
-      "AbsoluteMoniker": "D:0:0:{914682AA-CB37-427A-A1C7-60F287BC79A8}|Unides.WebAPI\\Unides.WebAPI.csproj|c:\\users\\safa\\documents\\github\\unides\\unides.api.new-masteruni\\unides.webapi\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{914682AA-CB37-427A-A1C7-60F287BC79A8}|Unides.WebAPI\\Unides.WebAPI.csproj|solutionrelative:unides.webapi\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{914682AA-CB37-427A-A1C7-60F287BC79A8}|Unides.WebAPI\\Unides.WebAPI.csproj|c:\\users\\safa\\documents\\github\\unides\\unides.api.new-masteruni\\unides.webapi\\unides.webapi.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
-      "RelativeMoniker": "D:0:0:{914682AA-CB37-427A-A1C7-60F287BC79A8}|Unides.WebAPI\\Unides.WebAPI.csproj|solutionrelative:unides.webapi\\unides.webapi.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
-    }
-  ],
+  "Documents": [],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -18,7 +9,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": -1,
           "Children": [
             {
               "$type": "Bookmark",
@@ -27,31 +18,6 @@
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "appsettings.json",
-              "DocumentMoniker": "C:\\Users\\Safa\\Documents\\GitHub\\unides\\Unides.API.New-masterUni\\Unides.WebAPI\\appsettings.json",
-              "RelativeDocumentMoniker": "Unides.WebAPI\\appsettings.json",
-              "ToolTip": "C:\\Users\\Safa\\Documents\\GitHub\\unides\\Unides.API.New-masterUni\\Unides.WebAPI\\appsettings.json",
-              "RelativeToolTip": "Unides.WebAPI\\appsettings.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAoAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2026-01-11T09:28:22.753Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "Unides.WebAPI.csproj",
-              "DocumentMoniker": "C:\\Users\\Safa\\Documents\\GitHub\\unides\\Unides.API.New-masterUni\\Unides.WebAPI\\Unides.WebAPI.csproj",
-              "RelativeDocumentMoniker": "Unides.WebAPI\\Unides.WebAPI.csproj",
-              "ToolTip": "C:\\Users\\Safa\\Documents\\GitHub\\unides\\Unides.API.New-masterUni\\Unides.WebAPI\\Unides.WebAPI.csproj",
-              "RelativeToolTip": "Unides.WebAPI\\Unides.WebAPI.csproj",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2026-01-11T09:28:13.77Z"
             }
           ]
         }
