@@ -183,26 +183,6 @@ interface Notification {
   action?: 'communities' | 'events' | 'announcements' | 'overview';
 }
 
-interface ActivityFeed {
-  id: number;
-  type: 'community' | 'event' | 'user' | 'announcement';
-  icon: string;
-  message: string;
-  time: string;
-  communityName?: string;
-  userName?: string;
-}
-
-interface PendingApproval {
-  id: number;
-  type: 'Topluluk' | 'Etkinlik';
-  name: string;
-  requestDate: string;
-  status: 'Bekliyor';
-  communityId?: number;
-  eventId?: number;
-}
-
 @Component({
   selector: 'app-corporate-dashboard',
   standalone: true,
@@ -247,40 +227,10 @@ export class CorporateDashboardComponent implements OnInit {
     username: 'unides_admin',
   };
 
-  // Bekleyen Onaylar mock data
-  pendingApprovals: PendingApproval[] = [
-    {
-      id: 1,
-      type: 'Topluluk',
-      name: 'Yapay Zeka ve Makine Öğrenmesi Topluluğu',
-      requestDate: '15 Mart 2024',
-      status: 'Bekliyor',
-      communityId: 101,
-    },
-    {
-      id: 2,
-      type: 'Etkinlik',
-      name: 'Teknoloji Zirvesi 2024',
-      requestDate: '14 Mart 2024',
-      status: 'Bekliyor',
-      eventId: 201,
-    },
-    {
-      id: 3,
-      type: 'Topluluk',
-      name: 'Sürdürülebilir Yaşam ve Çevre Topluluğu',
-      requestDate: '13 Mart 2024',
-      status: 'Bekliyor',
-      communityId: 102,
-    },
-    {
-      id: 4,
-      type: 'Etkinlik',
-      name: 'Girişimcilik Workshop Serisi',
-      requestDate: '12 Mart 2024',
-      status: 'Bekliyor',
-      eventId: 202,
-    },
+  stats: Stat[] = [
+    { label: 'Toplam Topluluk', value: 42, icon: 'groups', colorClass: 'blue' },
+    { label: 'Aktif Etkinlik', value: 12, icon: 'event', colorClass: 'green' },
+    { label: 'Bekleyen İstek', value: 5, icon: 'pending_actions', colorClass: 'orange' },
   ];
 
   // Kategori listesi
@@ -317,20 +267,8 @@ export class CorporateDashboardComponent implements OnInit {
   newEvent: Partial<EventRequest> | null = null;
 
   notifications: Notification[] = [
-    {
-      id: 1,
-      text: 'E-Spor topluluğu onay bekliyor',
-      time: '10 dk önce',
-      read: false,
-      targetTab: 'communities',
-    },
-    {
-      id: 2,
-      text: 'AI Zirvesi bütçe onayı istiyor',
-      time: '1 saat önce',
-      read: false,
-      targetTab: 'events',
-    },
+    { id: 1, text: 'E-Spor topluluğu onay bekliyor', time: '10 dk önce', read: false, targetTab: 'communities' },
+    { id: 2, text: 'AI Zirvesi bütçe onayı istiyor', time: '1 saat önce', read: false, targetTab: 'events' },
   ];
 
   // Router ve Service'leri inject ediyoruz
@@ -353,11 +291,11 @@ export class CorporateDashboardComponent implements OnInit {
     const urlParams = new URLSearchParams(window.location.search);
     const tabParam = urlParams.get('tab');
     const statusParam = urlParams.get('status');
-
+    
     if (tabParam) {
       this.switchTab(tabParam);
     }
-
+    
     if (statusParam) {
       this.statusFilter = statusParam;
     }
@@ -546,40 +484,6 @@ export class CorporateDashboardComponent implements OnInit {
     this.switchTab('communities');
     this.statusFilter = 'Onay Bekliyor';
     this.applyFilters();
-  }
-
-  handleApprovalInspect(approval: PendingApproval) {
-    if (approval.type === 'Topluluk') {
-      // Topluluk başvurusunu incele
-      this.switchTab('communities');
-      this.statusFilter = 'Onay Bekleyen';
-      this.applyFilters();
-      // İlgili topluluğu bul ve detayını aç
-      if (approval.communityId) {
-        const community = this.communities.find((c) => c.id === approval.communityId);
-        if (community) {
-          setTimeout(() => {
-            this.openCommunityDetail(community);
-          }, 100);
-        }
-      }
-    } else if (approval.type === 'Etkinlik') {
-      // Etkinlik başvurusunu incele
-      this.switchTab('events');
-      this.eventStatusFilter = 'Beklemede';
-      this.filterEvents();
-      // İlgili etkinliği bul ve detayını aç
-      if (approval.eventId) {
-        const event = this.allEvents.find((e) => e.id === approval.eventId);
-        if (event) {
-          setTimeout(() => {
-            this.selectedEvent = event;
-            this.modalType = 'event-detail';
-            this.isModalOpen = true;
-          }, 100);
-        }
-      }
-    }
   }
 
   // Topluluk detay ve güncelleme
@@ -810,10 +714,10 @@ export class CorporateDashboardComponent implements OnInit {
   handleNotificationClick(notification: Notification) {
     // Bildirimi okundu olarak işaretle
     notification.read = true;
-
+    
     // Dropdown'u kapat
     this.showNotifications = false;
-
+    
     // Eğer targetTab varsa, o tab'a geç
     if (notification.targetTab) {
       this.switchTab(notification.targetTab);
@@ -823,7 +727,7 @@ export class CorporateDashboardComponent implements OnInit {
       this.router.navigate([notification.targetRoute]);
     }
   }
-
+  
   toggleProfileDropdown(event?: MouseEvent) {
     if (event) {
       event.stopPropagation();
@@ -846,21 +750,17 @@ export class CorporateDashboardComponent implements OnInit {
   @HostListener('document:click', ['$event'])
   clickout(event: MouseEvent) {
     const target = event.target as HTMLElement;
-
+    
     // Buton tıklaması ise işlem yapma
-    if (
-      target.closest('.icon-btn.notification') ||
-      target.closest('.notification-btn') ||
-      target.closest('.profile-pic')
-    ) {
+    if (target.closest('.icon-btn.notification') || target.closest('.notification-btn') || target.closest('.profile-pic')) {
       return;
     }
-
+    
     // Profil dropdown kontrolü
     if (!target.closest('.profile-wrapper') && !target.closest('.profile-dropdown')) {
       this.isProfileOpen = false;
     }
-
+    
     // Bildirimler dropdown kontrolü
     if (!target.closest('.dropdown-menu.notifications')) {
       this.showNotifications = false;

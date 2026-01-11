@@ -84,8 +84,8 @@ export class EventsComponent implements OnInit, AfterViewInit {
   currentFilter: 'all' | 'active' | 'upcoming' = 'all';
 
   // Sıralama
-  sortOrder: 'date_asc' | 'date_desc' | 'name_asc' | 'name_desc' = 'date_asc';
-  // Removed old sort vars
+  sortCriteria: 'date' | 'name' | 'semester' = 'date';
+  sortAscending: boolean = true;
 
   // Detay Modal
   // selectedEvent removed
@@ -94,7 +94,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
   allEventsPool: EventCard[] = [];
   displayedEvents: EventCard[] = [];
   currentPage: number = 1;
-  itemsPerPage: number = 12;
+  itemsPerPage: number = 8;
   totalPages: number = 0;
   pages: number[] = [];
   allCommunities: any[] = [];
@@ -255,6 +255,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
       color: '#ea580c',
       status: 'upcoming',
       city: 'Ankara'
+<<<<<<< HEAD
     },
     {
       id: 109,
@@ -471,6 +472,8 @@ export class EventsComponent implements OnInit, AfterViewInit {
       color: '#0891b2',
       status: 'upcoming',
       city: 'Nevşehir'
+=======
+>>>>>>> parent of 3c98daa (11)
     }
   ];
 
@@ -659,16 +662,15 @@ export class EventsComponent implements OnInit, AfterViewInit {
     }
 
     return filtered.sort((a, b) => {
-      if (this.sortOrder === 'date_asc') {
-        return a.dateObj.getTime() - b.dateObj.getTime();
-      } else if (this.sortOrder === 'date_desc') {
-        return b.dateObj.getTime() - a.dateObj.getTime();
-      } else if (this.sortOrder === 'name_asc') {
-        return a.title.localeCompare(b.title, 'tr');
-      } else if (this.sortOrder === 'name_desc') {
-        return b.title.localeCompare(a.title, 'tr');
+      let comparison = 0;
+      if (this.sortCriteria === 'date') {
+        comparison = a.dateObj.getTime() - b.dateObj.getTime();
+      } else if (this.sortCriteria === 'name') {
+        comparison = a.title.localeCompare(b.title, 'tr');
+      } else if (this.sortCriteria === 'semester') {
+        comparison = a.semester.localeCompare(b.semester, 'tr');
       }
-      return 0;
+      return this.sortAscending ? comparison : -comparison;
     });
   }
 
@@ -717,8 +719,16 @@ export class EventsComponent implements OnInit, AfterViewInit {
     this.applyFiltersAndGoFirstPage();
   }
 
-  // Old changeSortCriteria removed
-  
+  changeSortCriteria(criteria: 'date' | 'name' | 'semester') {
+    if (this.sortCriteria === criteria) {
+      this.sortAscending = !this.sortAscending;
+    } else {
+      this.sortCriteria = criteria;
+      this.sortAscending = true;
+    }
+    this.applyFiltersAndGoFirstPage();
+  }
+
   trackByEventId(index: number, event: EventCard): number {
     return event.id;
   }

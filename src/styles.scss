@@ -1,16 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap'); /* Anasayfadaki Navbar fontu global eklendi */
 
-/* Global Background (Excluding Dashboards) */
-.global-background {
-  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-  z-index: 0; /* Changed from -1 to 0 to ensure visibility */
-  /* Opaque gradient: Left Turquoise (#e0fbfc) -> Right White (#ffffff) */
-  background: linear-gradient(to right, #e0fbfc 0%, #ffffff 100%);
-  overflow: hidden; 
-  pointer-events: none;
-}
-
+/* You can add global styles to this file, and also import other style files */
 :root {
     --fontFamily1: "Open Sans", sans-serif;
     --fontFamily2: "Cabin", sans-serif;

@@ -13,16 +13,16 @@ $border-color: #e2e8f0;
   display: block;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   color: $text-dark;
-  background-color: transparent; /* Transparent */
+  background-color: $white;
 }
 
 // --- HERO / PAGE SPACER ---
 .page-spacer {
   padding-top: 140px;
   padding-bottom: 70px;
-  background-color: transparent; /* Transparent */
+  background-color: $bg-light;
   text-align: center;
-  border-bottom: 1px solid rgba($border-color, 0.5);
+  border-bottom: 1px solid $border-color;
   position: relative;
   overflow: hidden;
 
@@ -208,9 +208,13 @@ $border-color: #e2e8f0;
 // --- FORM SECTION ---
 .form-section {
   padding: 60px 0 100px;
+<<<<<<< HEAD
   background: transparent; 
   position: relative;
   z-index: 5;
+=======
+  background: linear-gradient(to bottom, $white, $bg-light);
+>>>>>>> parent of 3c98daa (11)
 
   .section-text {
     opacity: 1;
@@ -347,10 +351,14 @@ $border-color: #e2e8f0;
 // --- SOCIAL SECTION ---
 .social-connect-section {
   padding: 80px 0;
+<<<<<<< HEAD
   background: transparent; /* Transparent */
   position: relative;
   z-index: 10;
   
+=======
+  background: $white;
+>>>>>>> parent of 3c98daa (11)
   .social-title {
     font-size: 1.5rem;
     font-weight: 700;

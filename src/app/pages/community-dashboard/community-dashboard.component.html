@@ -188,7 +188,7 @@
         </div>
 
         <div class="events-grid compact" *ngIf="displayedDashboardEvents.length; else emptyEvents">
-          <div class="event-card" *ngFor="let event of displayedDashboardEvents" (click)="openEventDetail(event)">
+          <div class="event-card" *ngFor="let event of displayedDashboardEvents">
             <div class="card-image">
               <img [src]="event.imageUrl" [alt]="event.title" loading="lazy" />
               <span class="date-badge">{{ event.date }}</span>
@@ -262,7 +262,7 @@
         class="events-grid compact"
         *ngIf="filteredDashboardEvents.length; else emptyProjectEvents"
       >
-        <div class="event-card" *ngFor="let event of filteredDashboardEvents" (click)="openEventDetail(event)">
+        <div class="event-card" *ngFor="let event of filteredDashboardEvents">
           <div class="card-image">
             <img [src]="event.imageUrl" [alt]="event.title" loading="lazy" />
             <span class="date-badge">{{ event.date }}</span>
@@ -636,13 +636,6 @@
           ></app-image-upload>
         </div>
         <input type="text" placeholder="Etkinlik İsmi" [(ngModel)]="newEventData.title" />
-        <label class="stacked">
-          <span>Kategori</span>
-          <select [(ngModel)]="newEventData.category">
-            <option value="">Kategori Seçin</option>
-            <option *ngFor="let cat of eventCategories" [value]="cat">{{ cat }}</option>
-          </select>
-        </label>
         <div class="row two-cols">
           <label class="stacked">
             <span>Tarih</span>
@@ -727,6 +720,7 @@
       </div>
     </div>
   </div>
+<<<<<<< HEAD
 </div>
 
 <div class="modal-backdrop" *ngIf="selectedEvent" (click)="closeEventDetail()">
@@ -787,3 +781,6 @@
     </div>
   </div>
 </div>
+=======
+</div>
+>>>>>>> parent of 3c98daa (11)

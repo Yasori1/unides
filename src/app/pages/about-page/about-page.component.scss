@@ -11,7 +11,7 @@ $border-color: #e2e8f0; // Slate 200
   display: block;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   color: $text-dark;
-  background-color: transparent; /* Transparent */
+  background-color: $white;
 }
 
 ::-webkit-scrollbar {
@@ -23,9 +23,9 @@ $border-color: #e2e8f0; // Slate 200
 .page-spacer {
   padding-top: 140px;
   padding-bottom: 70px;
-  background-color: transparent; /* Transparent */
+  background-color: $bg-light;
   text-align: center;
-  border-bottom: 1px solid rgba($border-color, 0.5);
+  border-bottom: 1px solid $border-color;
   position: relative;
   overflow: hidden;
 
@@ -132,7 +132,7 @@ $border-color: #e2e8f0; // Slate 200
 .about-area {
   position: relative;
   z-index: 1;
-  background: transparent; /* Transparent */
+  background: $white;
 }
 
 .hero-section {
@@ -353,7 +353,7 @@ $border-color: #e2e8f0; // Slate 200
 // --- 4. MİSYON & VİZYON & TAGS ---
 .mission-section {
   padding: 80px 0;
-  background: transparent; /* Transparent */
+  background: linear-gradient(to bottom, #fff, $bg-light);
 
   .mission-header {
     max-width: 800px;
@@ -578,7 +578,7 @@ $border-color: #e2e8f0; // Slate 200
 // --- 7. INNOVATIVE GUIDE (Holo Kartlar) ---
 .innovative-guide-section {
   padding: 100px 0;
-  background: transparent; /* Transparent */
+  background: $bg-light;
   .guide-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -676,8 +676,8 @@ $border-color: #e2e8f0; // Slate 200
 .marquee-section {
   padding: 80px 0;
   overflow: hidden;
-  background: transparent; /* Transparent */
-  border-top: 1px solid rgba($border-color, 0.5);
+  background: $white;
+  border-top: 1px solid $border-color;
 
   .marquee-header {
     text-align: center;

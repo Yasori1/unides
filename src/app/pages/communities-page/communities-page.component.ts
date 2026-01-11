@@ -23,14 +23,24 @@ export class CommunitiesPageComponent implements OnInit {
   filteredCommunities: Community[] = [];
   displayedCommunities: Community[] = [];
 
-  // Filtre Seçenekleri
-  cities: string[] = [];
-  // categories removed
+  // --- GÜNCELLEME: 81 İL LİSTESİ SABİT OLARAK EKLENDİ ---
+  cities: string[] = [
+    'Adana', 'Adıyaman', 'Afyonkarahisar', 'Ağrı', 'Aksaray', 'Amasya', 'Ankara', 'Antalya', 'Ardahan', 'Artvin', 'Aydın',
+    'Balıkesir', 'Bartın', 'Batman', 'Bayburt', 'Bilecik', 'Bingöl', 'Bitlis', 'Bolu', 'Burdur', 'Bursa',
+    'Çanakkale', 'Çankırı', 'Çorum', 'Denizli', 'Diyarbakır', 'Düzce', 'Edirne', 'Elazığ', 'Erzincan', 'Erzurum', 'Eskişehir',
+    'Gaziantep', 'Giresun', 'Gümüşhane', 'Hakkari', 'Hatay', 'Iğdır', 'Isparta', 'İstanbul', 'İzmir',
+    'Kahramanmaraş', 'Karabük', 'Karaman', 'Kars', 'Kastamonu', 'Kayseri', 'Kırıkkale', 'Kırklareli', 'Kırşehir', 'Kilis', 'Kocaeli', 'Konya', 'Kütahya',
+    'Malatya', 'Manisa', 'Mardin', 'Mersin', 'Muğla', 'Muş', 'Nevşehir', 'Niğde', 'Ordu', 'Osmaniye',
+    'Rize', 'Sakarya', 'Samsun', 'Siirt', 'Sinop', 'Sivas', 'Şanlıurfa', 'Şırnak',
+    'Tekirdağ', 'Tokat', 'Trabzon', 'Tunceli', 'Uşak', 'Van', 'Yalova', 'Yozgat', 'Zonguldak'
+  ];
+  
+  categories: string[] = [];
 
   // Filtreleme Değişkenleri
   searchText: string = '';
   selectedCity: string = '';
-  // selectedCategory removed
+  selectedCategory: string = '';
   sortOrder: 'default' | 'member_desc' | 'member_asc' = 'default';
 
   // Sayfalama
@@ -71,9 +81,9 @@ export class CommunitiesPageComponent implements OnInit {
           this.allCommunities = data;
         }
 
-        // Filtre dropdownlarını doldur
-        this.cities = [...new Set(this.allCommunities.map(c => c.city || 'Belirsiz'))].sort();
-        // categories removed
+        // --- GÜNCELLEME: Şehirleri artık dinamik çekmiyoruz, yukarıdaki sabit listeyi kullanıyoruz. ---
+        // Sadece kategorileri dinamik olarak veriden çekmeye devam ediyoruz.
+        this.categories = [...new Set(this.allCommunities.map(c => c.category))].sort();
 
         // URL Parametrelerini Kontrol Et
         const queryParams = this.route.snapshot.queryParams;
@@ -95,8 +105,8 @@ export class CommunitiesPageComponent implements OnInit {
       error: (err) => {
         console.error('Topluluklar yüklenirken hata oluştu:', err);
         this.allCommunities = this.communityService.getMockCommunities();
-        this.cities = [...new Set(this.allCommunities.map(c => c.city || 'Belirsiz'))].sort();
-        // this.categories removed
+        // Hata olsa bile 81 il listemiz sabit olduğu için bozulmaz
+        this.categories = [...new Set(this.allCommunities.map(c => c.category))].sort();
         this.applyFilters();
         this.isLoading = false;
       }
@@ -122,7 +132,10 @@ export class CommunitiesPageComponent implements OnInit {
       temp = temp.filter((c) => c.city === this.selectedCity);
     }
 
-    // 3. Kategori Filtresi removed
+    // 3. Kategori Filtresi
+    if (this.selectedCategory) {
+      temp = temp.filter((c) => c.category === this.selectedCategory);
+    }
 
     // 4. Sıralama
     if (this.sortOrder === 'member_desc') {
@@ -139,7 +152,7 @@ export class CommunitiesPageComponent implements OnInit {
   resetFilters() {
     this.searchText = '';
     this.selectedCity = '';
-    // selectedCategory removed
+    this.selectedCategory = '';
     this.sortOrder = 'default';
     this.applyFilters();
   }
