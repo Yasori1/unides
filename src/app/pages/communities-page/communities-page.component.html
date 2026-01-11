@@ -101,13 +101,6 @@
             </div>
             <div class="title-wrapper">
               <h3 class="community-name">{{ item.name }}</h3>
-              <span class="university-name">{{ item.university }}</span>
-              <span class="email-tag" *ngIf="item.email">
-                <i class="bx bx-envelope"></i> {{ item.email }}
-              </span>
-              <span class="city-tag" *ngIf="item.city">
-                <i class="bx bxs-map"></i> {{ item.city }}
-              </span>
             </div>
           </div>
 
@@ -178,9 +171,13 @@
           </div>
 
           <div class="card-footer">
-            <div class="stat">
-              <i class="bx bx-group"></i>
-              <span>{{ item.memberCount }} Üye</span>
+            <div class="footer-info">
+              <span class="city-tag" *ngIf="item.city">
+                <i class="bx bxs-map"></i> {{ item.city }}
+              </span>
+              <span class="email-tag" *ngIf="item.email">
+                <i class="bx bx-envelope"></i> {{ item.email }}
+              </span>
             </div>
             <span class="action-text">İncele <i class="bx bx-right-arrow-alt"></i></span>
           </div>

@@ -11,7 +11,7 @@ $ministry-color: #1e3a8a;
 :host {
   display: block;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background-color: $bg-light;
+  background-color: $white; // Changed to white to match community detail base
   min-height: 100vh;
 }
 
@@ -46,9 +46,9 @@ $ministry-color: #1e3a8a;
 // Hero Section
 .hero-section {
   position: relative;
-  height: 350px; // Slightly taller
+  height: 500px; // Match Community Detail
   overflow: hidden;
-  background-color: $text-dark;
+  background-color: $bg-light;
 
   .background-wrapper {
     position: absolute;
@@ -58,110 +58,122 @@ $ministry-color: #1e3a8a;
       width: 100%;
       height: 100%;
       object-fit: cover;
-      opacity: 0.5; // Darker overlay
-      transform: scale(1.05); // Slight zoom
+      opacity: 0.9;
     }
   }
 
   .hero-overlay {
     position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, rgba(15, 23, 42, 0.9), transparent);
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    padding-bottom: 50px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+    padding: 30px 0 20px;
+    z-index: 1;
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
 
     .breadcrumb {
       display: flex;
       align-items: center;
-      gap: 10px;
-      color: rgba(255,255,255,0.7);
-      font-size: 0.95rem;
-      font-weight: 500;
+      gap: 8px;
+      color: white;
+      font-size: 0.9rem;
 
       a {
         color: white;
         text-decoration: none;
-        transition: color 0.2s;
-        &:hover { color: $primary-blue; }
+        opacity: 0.9;
+        transition: opacity 0.2s;
+        &:hover { opacity: 1; }
       }
 
-      i { font-size: 1.2rem; }
+      i { font-size: 0.8rem; opacity: 0.7; }
 
       span {
-        color: rgba(255,255,255,0.5);
-        max-width: 400px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        opacity: 0.8;
       }
     }
   }
 }
 
-.content-section {
-  padding: 40px 0 100px;
-  margin-top: -40px; // Overlap hero
+.content-section.layout-option-a {
+  padding: 60px 0 100px;
   position: relative;
-  z-index: 2;
+  z-index: 10;
   
-  .container {
-    max-width: 1200px;
+  .container-wide {
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0 40px;
   }
 }
 
 .back-button-top {
-  margin-bottom: 20px;
+  margin-bottom: 30px;
   .back-button {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    color: white; // On overlap
-    font-weight: 600;
+    color: $primary-blue;
     text-decoration: none;
-    transition: all 0.2s;
-    background: rgba(255,255,255,0.1);
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s;
     padding: 8px 16px;
-    border-radius: 50px;
-    backdrop-filter: blur(4px);
+    border-radius: 8px;
+    background: $bg-light;
+    border: 1px solid $border-color;
 
     &:hover { 
-        background: rgba(255,255,255,0.2); 
+      gap: 12px;
+      background: $white; 
+      border-color: $primary-blue;
+      color: color.adjust($primary-blue, $lightness: -10%);
+      
+      i { transform: translateX(-4px); }
     }
+    
+    i { transition: transform 0.3s; }
   }
 }
 
 .layout-grid {
   display: grid;
-  grid-template-columns: 2.5fr 1fr;
-  gap: 40px;
+  grid-template-columns: 2fr 1fr; // Match Community Detail
+  gap: 24px;
+  align-items: start;
 
-  @media (max-width: 991px) {
+  @media (max-width: 1024px) {
+    grid-template-columns: 1.5fr 1fr;
+  }
+
+  @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
 }
 
 .main-content {
-  background: white;
-  padding: 50px;
-  border-radius: 24px;
-  border: 1px solid $border-color;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+  // Removed white card styling to match Community Detail main content
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
 
   .announcement-header {
-    margin-bottom: 30px;
-    border-bottom: 1px solid $border-color;
-    padding-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid $border-color;
+    margin-bottom: 0;
 
     .announcement-title {
-      font-size: 2.2rem;
+      font-size: 2.5rem;
       font-weight: 800;
       color: $text-dark;
-      margin: 0 0 20px;
-      line-height: 1.25;
+      line-height: 1.2;
+      margin: 0 0 16px 0;
       letter-spacing: -0.5px;
     }
 
@@ -175,9 +187,9 @@ $ministry-color: #1e3a8a;
         display: flex;
         align-items: center;
         gap: 8px;
-        font-weight: 500;
+        font-weight: 400;
         
-        i { color: $primary-blue; font-size: 1.2rem; }
+        i { color: $primary-blue; font-size: 1.1rem; }
       }
     }
   }
@@ -233,37 +245,50 @@ $ministry-color: #1e3a8a;
 }
 
 .sidebar {
+  position: relative;
+  z-index: 100;
+
   .sidebar-content {
-    background: white;
-    padding: 30px;
-    border-radius: 24px;
-    border: 1px solid $border-color;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
     
     &.sticky-sidebar {
       position: sticky;
-      top: 100px;
+      top: 20px;
     }
   }
 
-  .sidebar-header {
-      margin-bottom: 30px;
-      .sidebar-title {
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: $text-dark;
-        margin: 0 0 15px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
+  .mt-4 { margin-top: 24px; }
 
-      .share-btn {
+  .info-card {
+    background: $white;
+    border-radius: 12px;
+    padding: 28px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid $border-color;
+
+    .card-header {
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 2px solid $border-color;
+        
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: $text-dark;
+            margin: 0;
+            letter-spacing: -0.3px;
+        }
+    }
+
+    .share-btn {
           width: 100%;
-          padding: 12px;
-          border: 1px solid $border-color;
-          background: white;
+          padding: 14px 24px;
+          border: none;
+          background: $primary-blue;
           border-radius: 12px;
-          color: $text-gray;
+          color: white;
           font-weight: 600;
           cursor: pointer;
           display: flex;
@@ -271,30 +296,19 @@ $ministry-color: #1e3a8a;
           justify-content: center;
           gap: 8px;
           transition: all 0.2s;
+          box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 
           &:hover {
-              border-color: $primary-blue;
-              color: $primary-blue;
-              background: rgba(37, 99, 235, 0.05);
+              background: color.adjust($primary-blue, $lightness: -5%);
+              transform: translateY(-2px);
+              box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
           }
 
           &.copied {
-              background: #ecfdf5;
-              border-color: #10b981;
-              color: #10b981;
+              background: #10b981;
+              box-shadow: none;
           }
       }
-  }
-
-  .related-section {
-    .sidebar-title {
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: $text-dark;
-        margin: 0 0 20px;
-        padding-bottom: 15px;
-        border-bottom: 1px solid $border-color;
-    }
 
     .sidebar-list {
         display: flex;
@@ -306,12 +320,12 @@ $ministry-color: #1e3a8a;
         display: flex;
         gap: 15px;
         text-decoration: none;
-        group: hover;
         align-items: flex-start;
+        transition: all 0.2s;
 
         &:hover {
+            transform: translateX(5px);
             .item-info h4 { color: $primary-blue; }
-            .item-image img { transform: scale(1.1); }
         }
 
         .item-image {
@@ -320,12 +334,12 @@ $ministry-color: #1e3a8a;
             flex-shrink: 0;
             border-radius: 12px;
             overflow: hidden;
+            border: 1px solid $border-color;
             
             img {
                 width: 100%;
                 height: 100%;
                 object-fit: cover;
-                transition: transform 0.3s ease;
             }
         }
 
@@ -396,5 +410,20 @@ $ministry-color: #1e3a8a;
         box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
       }
     }
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    height: 350px;
+  }
+  
+  .content-section.layout-option-a {
+    padding: 40px 0 60px;
+    .container-wide { padding: 0 20px; }
+  }
+
+  .main-content .announcement-header .announcement-title {
+    font-size: 1.75rem;
   }
 }
