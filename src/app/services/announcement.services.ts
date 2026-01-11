@@ -109,6 +109,26 @@ export class AnnouncementService {
 
     // Tarih alanı - hem camelCase hem PascalCase, hem annDate hem eventDate
     const dateField = dto.annDate || dto.AnnDate || dto.eventDate || dto.EventDate;
+    
+    // Tarihi Date objesine çevir (ISO string ise) veya string olarak bırak
+    let dateValue: string;
+    if (dateField) {
+      if (typeof dateField === 'string') {
+        // ISO string formatındaysa Date objesine çevir, sonra string'e
+        try {
+          const dateObj = new Date(dateField);
+          dateValue = dateObj.toISOString().split('T')[0];
+        } catch {
+          dateValue = dateField;
+        }
+      } else if (dateField instanceof Date) {
+        dateValue = dateField.toISOString().split('T')[0];
+      } else {
+        dateValue = new Date().toISOString().split('T')[0];
+      }
+    } else {
+      dateValue = new Date().toISOString().split('T')[0];
+    }
 
     // Description alanı (sadece detail endpoint'inde gelir)
     const description = dto.description || dto.Description || null;
@@ -123,7 +143,7 @@ export class AnnouncementService {
       shortDescription: shortDescription,
       // Description varsa onu kullan, yoksa ShortDescription kullan
       content: description || shortDescription || '',
-      date: dateField || new Date().toISOString().split('T')[0],
+      date: dateValue,
       image: imagePath,
       link: link,
     };

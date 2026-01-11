@@ -35,7 +35,6 @@ import { AnnouncementDetailComponent } from './pages/announcement-detail/announc
 import { StudentLoginComponent } from './pages/student-login/student-login.component';
 import { StudentProfileComponent } from './pages/student-profile/student-profile.component';
 import { CommunityDetailComponent } from './pages/community-detail/community-detail.component';
-import { EventsDetailComponent } from './pages/events-detail/events-detail.component';
 import { ResetPasswordComponent } from './pages/reset-password/reset-password.component';
 import { CommunityDashboardComponent } from './pages/community-dashboard/community-dashboard.component';
 
@@ -47,7 +46,6 @@ export const routes: Routes = [
   { path: 'communities', component: CommunitiesPageComponent },
   { path: 'communities/:id', component: CommunityDetailComponent },
   { path: 'events', component: EventsComponent },
-  { path: 'events/:id', component: EventsDetailComponent },
   { path: 'announcements', component: AnnouncementsPageComponent },
   { path: 'announcements/:id', component: AnnouncementDetailComponent },
 
@@ -73,15 +71,16 @@ export const routes: Routes = [
   { path: 'reset-password', component: ResetPasswordComponent },
 
   // KURUMSAL DASHBOARD
-  { path: 'corporate-dashboard', component: CorporateDashboardComponent },
+  // { path: 'corporate-dashboard', component: CorporateDashboardComponent },
   // TOPLULUK DASHBOARD
-  { path: 'community-dashboard', component: CommunityDashboardComponent },
+  // { path: 'community-dashboard', component: CommunityDashboardComponent },
 
   // ÖĞRENCİ GİRİŞ SONRASI SAYFA
   // { path: 'student-login', component: StudentLoginComponent },
   // { path: 'profile', component: StudentProfileComponent },
 
   // Admin Dashboard (Eski/Mevcut)
+  /*
   {
     path: 'dashboard',
     component: AdminDashboardComponent,
@@ -101,6 +100,7 @@ export const routes: Routes = [
       { path: 'my-profile', component: MyProfileComponent },
     ],
   },
+  */
 
   { path: '**', component: ErrorPageComponent },
 ];
