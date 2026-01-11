@@ -197,85 +197,88 @@
     align-items: start;
   }
 
-  // Main Content (Left Column)
-  .main-content {
-    display: flex;
-    flex-direction: column;
-    gap: 32px;
-
-    // --- Featured Image (Full Width & Overlapping) ---
-    .event-featured-image-container {
-      width: 75%; // Reduced width further
-      max-width: 478px;
-      height: auto;
-      aspect-ratio: 16/9;
-      margin: -210px 0 30px auto; // Right aligned and pulled up further
-      border-radius: 15px;
-      overflow: hidden;
-      background: var(--bg-light);
-      border: 4px solid #ffffff;
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+    // Main Content (Left Column)
+    .main-content {
+      display: block; // Changed from flex to block for float support
       position: relative;
-      cursor: pointer;
-      z-index: 20; // Ensure it is above banner
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
 
-      img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-        transition: transform 0.5s ease;
-      }
+      // --- Featured Image (Full Width & Overlapping) ---
+      .event-featured-image-container {
+        float: right;
+        width: 75%; 
+        max-width: 478px;
+        height: auto;
+        aspect-ratio: 16/9;
+        margin: -210px 0 32px 32px; // Right aligned, pulled up, left margin for spacing
+        border-radius: 15px;
+        overflow: hidden;
+        background: var(--bg-light);
+        border: 4px solid #ffffff;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        position: relative;
+        cursor: pointer;
+        z-index: 20; // Ensure it is above banner
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        clear: right;
 
-      .overlay-icon {
-        position: absolute;
-        inset: 0;
-        background: rgba(0,0,0,0.2);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        opacity: 0;
-        transition: opacity 0.3s;
-        
-        i {
-          font-size: 2rem;
-          color: white;
-          background: rgba(255,255,255,0.2);
-          padding: 15px;
-          border-radius: 50%;
-          backdrop-filter: blur(4px);
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+          transition: transform 0.5s ease;
+        }
+
+        .overlay-icon {
+          position: absolute;
+          inset: 0;
+          background: rgba(0,0,0,0.2);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          opacity: 0;
+          transition: opacity 0.3s;
+          
+          i {
+            font-size: 2rem;
+            color: white;
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 50%;
+            backdrop-filter: blur(4px);
+          }
+        }
+
+        &:hover {
+           transform: translateY(-5px);
+           box-shadow: 0 25px 50px rgba(37, 99, 235, 0.15);
+           
+           img {
+             transform: scale(1.05);
+           }
+
+           .overlay-icon {
+             opacity: 1;
+           }
         }
       }
 
-      &:hover {
-         transform: translateY(-5px);
-         box-shadow: 0 25px 50px rgba(37, 99, 235, 0.15);
-         
-         img {
-           transform: scale(1.05);
-         }
+      .event-header {
+        padding-bottom: 20px;
+        border-bottom: 2px solid var(--border-color);
+        margin-bottom: 32px; // Replaces flex gap
+        padding-top: 10px;
+        margin-top: 70px; // Move down by approx 2-3 lines
 
-         .overlay-icon {
-           opacity: 1;
-         }
+        .event-title {
+          font-size: 2.5rem;
+          font-weight: 800;
+          color: var(--primary-color);
+          line-height: 1.2;
+          margin: 0;
+          letter-spacing: -0.5px;
+        }
       }
-    }
-
-    .event-header {
-      padding-bottom: 20px;
-      border-bottom: 2px solid var(--border-color);
-      margin-bottom: 0;
-
-      .event-title {
-        font-size: 2.5rem;
-        font-weight: 800;
-        color: var(--primary-color);
-        line-height: 1.2;
-        margin: 0;
-        letter-spacing: -0.5px;
-      }
-    }
 
     // --- Image Modal ---
     .image-modal-backdrop {
@@ -376,6 +379,7 @@
   .sidebar {
     position: relative;
     z-index: 100;
+    margin-top: 70px; // Align with event header
 
     .sidebar-content {
       display: flex;
