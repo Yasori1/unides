@@ -17,6 +17,7 @@ export class EventsDetailComponent implements OnInit {
   isLoading = true;
   heroMoveX = 0;
   heroMoveY = 0;
+  isImageModalOpen = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -80,6 +81,16 @@ export class EventsDetailComponent implements OnInit {
       this.heroMoveX = x / 40;
       this.heroMoveY = y / 40;
     }
+  }
+
+  openImageModal() {
+    this.isImageModalOpen = true;
+    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+  }
+
+  closeImageModal() {
+    this.isImageModalOpen = false;
+    document.body.style.overflow = ''; // Restore background scrolling
   }
 
   getMonthName(date: Date): string {

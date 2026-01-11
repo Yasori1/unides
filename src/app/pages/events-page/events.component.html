@@ -82,14 +82,11 @@
       </div>
     </div>
 
-    <div class="events-grid" #animItem [@listAnimation]="displayedEvents.length">
+    <div class="events-grid" #animItem>
       <div
         class="event-card"
         *ngFor="let event of displayedEvents; trackBy: trackByEventId"
-        (mousemove)="cardTilt($event, cardRef)"
-        (mouseleave)="cardReset(cardRef)"
         (click)="openEventDetail(event)"
-        #cardRef
       >
         <div class="card-image">
           <img

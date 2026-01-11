@@ -58,6 +58,21 @@
             <h1 class="event-title">{{ event.title }}</h1>
           </div>
 
+          <!-- Event Featured Image -->
+          <div class="event-featured-image-container" *ngIf="event.imageUrl">
+            <img [src]="event.imageUrl" [alt]="event.title" (click)="openImageModal()">
+          </div>
+
+          <!-- Image Modal -->
+          <div class="image-modal-backdrop" *ngIf="isImageModalOpen" (click)="closeImageModal()">
+            <div class="image-modal-content" (click)="$event.stopPropagation()">
+              <button class="close-btn" (click)="closeImageModal()">
+                <i class="bx bx-x"></i>
+              </button>
+              <img [src]="event.imageUrl" [alt]="event.title">
+            </div>
+          </div>
+
           <!-- Description Section -->
           <div class="description-section">
             <h2>Etkinlik Hakkında</h2>
