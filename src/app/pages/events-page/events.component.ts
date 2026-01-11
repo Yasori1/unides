@@ -11,7 +11,6 @@ import {
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { trigger, transition, style, animate, query, stagger, group } from '@angular/animations';
 
 import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
 import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
@@ -43,21 +42,6 @@ interface EventCard {
   imports: [CommonModule, RouterModule, FormsModule, SiteNavbarComponent, SiteFooterComponent],
   templateUrl: './events.component.html',
   styleUrls: ['./events.component.scss'],
-  animations: [
-    trigger('listAnimation', [
-      transition('* <=> *', [
-        group([
-          // REMOVED :leave animation to prevent items from fading out when navigating away
-          query(':enter', [
-            style({ opacity: 0, transform: 'translateY(20px)' }),
-            stagger('40ms', [
-              animate('400ms cubic-bezier(0.16, 1, 0.3, 1)', style({ opacity: 1, transform: 'none' })),
-            ]),
-          ], { optional: true }),
-        ]),
-      ]),
-    ]),
-  ],
 })
 export class EventsComponent implements OnInit, AfterViewInit {
   // Hero Animasyonu
@@ -125,7 +109,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
       club: 'Yapay Zeka Kulübü',
       semester: 'Teknoloji Topluluğu',
       quota: 500,
-      imageUrl: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=800&auto=format&fit=crop',
+      imageUrl: 'assets/etkinlik.jpg',
       color: '#2563eb',
       status: 'upcoming',
       city: 'İstanbul'
@@ -723,26 +707,6 @@ export class EventsComponent implements OnInit, AfterViewInit {
   
   trackByEventId(index: number, event: EventCard): number {
     return event.id;
-  }
-
-  // --- KART BEND EFEKTLERİ ---
-  cardTilt(event: MouseEvent, cardElement: HTMLElement) {
-    const rect = cardElement.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    
-    // Değerleri biraz artırdım ki "bend effect" daha belirgin olsun
-    const rotateX = ((y - centerY) / centerY) * -10; 
-    const rotateY = ((x - centerX) / centerX) * 10;
-
-    cardElement.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
-  }
-
-  cardReset(cardElement: HTMLElement) {
-    // Mouse ayrılınca sıfırla
-    cardElement.style.transform = `perspective(1000px) rotateX(0) rotateY(0) scale(1)`;
   }
 
   // --- MODAL İŞLEMLERİ YERİNE DETAY SAYFASINA GİT ---
