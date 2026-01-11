@@ -46,7 +46,7 @@ $ministry-color: #1e3a8a;
 // Hero Section
 .hero-section {
   position: relative;
-  height: 500px; // Match Community Detail
+  height: 350px; // Reduced height as requested
   overflow: hidden;
   background-color: $bg-light;
 
@@ -68,7 +68,7 @@ $ministry-color: #1e3a8a;
     left: 0;
     right: 0;
     background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
-    padding: 30px 0 20px;
+    padding: 30px 0 80px; // Increased bottom padding to accommodate the wave shape
     z-index: 1;
 
     .container {
@@ -98,6 +98,39 @@ $ministry-color: #1e3a8a;
         opacity: 0.8;
       }
     }
+  }
+
+  .custom-shape-divider-bottom {
+    position: absolute;
+    bottom: -1px; 
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+    line-height: 0;
+    transform: rotate(180deg); // Rotate back to 180 as we use the top-down SVG
+    z-index: 5;
+  }
+
+  .custom-shape-divider-bottom svg {
+      position: relative;
+      display: block;
+      width: calc(100% + 1.3px);
+      height: 60px;
+      transform: none; // Reset transform
+  }
+
+  .custom-shape-divider-bottom .shape-fill-white {
+      fill: $white;
+  }
+  
+  .custom-shape-divider-bottom .shape-fill-blue-medium {
+      fill: $primary-blue;
+      opacity: 0.5;
+  }
+  
+  .custom-shape-divider-bottom .shape-fill-blue-light {
+      fill: $primary-blue;
+      opacity: 0.25;
   }
 }
 
@@ -415,7 +448,17 @@ $ministry-color: #1e3a8a;
 
 @media (max-width: 768px) {
   .hero-section {
-    height: 350px;
+    height: 250px;
+
+    .hero-overlay {
+      padding-bottom: 50px;
+    }
+
+    .custom-shape-divider-bottom svg {
+      height: 40px;
+      width: calc(100% + 1.3px);
+      transform: none;
+    }
   }
   
   .content-section.layout-option-a {
