@@ -1,4 +1,5 @@
-﻿using Application.Features.Events.Commands.Create;
+﻿using System;
+using Application.Features.Events.Commands.Create;
 using Application.Features.Events.Commands.Delete;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
@@ -57,8 +58,15 @@ namespace Unides.API.Controllers
         [HttpGet("all")]
         public async Task<IActionResult> GetAll()
         {
-            var events = await _mediator.Send(new GetAllEventsQuery());
-            return Ok(events);
+            try
+            {
+                var events = await _mediator.Send(new GetAllEventsQuery());
+                return Ok(events);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Etkinlikler yüklenirken bir hata oluştu.", error = ex.Message });
+            }
         }
 
         // GET BY ID

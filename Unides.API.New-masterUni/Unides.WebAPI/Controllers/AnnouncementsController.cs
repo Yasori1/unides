@@ -32,6 +32,18 @@ namespace Unides.WebApi.Controllers
             return int.TryParse(userIdClaim, out var userId) ? userId : 0;
         }
 
+        private int GetUserRoleId()
+        {
+            var roleIdClaim = User.FindFirst("roleId")?.Value;
+            return int.TryParse(roleIdClaim, out var roleId) ? roleId : 0;
+        }
+
+        private bool IsAdmin()
+        {
+            // roleId = 2 (Corporate/GSB Personeli) admin yetkisine sahiptir
+            return GetUserRoleId() == 2;
+        }
+
         private string? GetClientIp()
         {
             var forwarded = Request.Headers["X-Forwarded-For"].FirstOrDefault()?.Split(',')[0].Trim();
@@ -82,9 +94,10 @@ namespace Unides.WebApi.Controllers
 
         // Admin (role=gsb) - create
         [HttpPost("create")]
-        [Authorize(Roles = "gsb,GSB Görevlisi")]
+        [Authorize]
         public async Task<ActionResult<int>> Create([FromBody] CreateAnnouncementCommand cmd)
         {
+            if (!IsAdmin()) return Unauthorized(new { message = "Bu işlem için yetkiniz bulunmamaktadır." });
             if (string.IsNullOrWhiteSpace(cmd.Title)) return BadRequest("Title gereklidir.");
             var userId = GetUserId();
             cmd.AnnCreatedAtUserId = userId;
@@ -113,10 +126,14 @@ namespace Unides.WebApi.Controllers
 
         // Admin (role=gsb) - update
         [HttpPut("update/{id:int}")]
-        [Authorize(Roles = "gsb,GSB Görevlisi")]
+        [Authorize]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateAnnouncementCommand cmd)
         {
+            if (!IsAdmin()) return Unauthorized(new { message = "Bu işlem için yetkiniz bulunmamaktadır." });
             if (string.IsNullOrWhiteSpace(cmd.Title)) return BadRequest("Title gereklidir.");
+            
+            // URL'deki id'yi kullan, body'deki annId'yi ignore et (güvenlik için)
+            // URL'deki id her zaman önceliklidir
             cmd.AnnId = id;
             cmd.AnnUpdatedAtUserId = GetUserId();
             try
@@ -143,9 +160,10 @@ namespace Unides.WebApi.Controllers
 
         // Admin (role=gsb) - delete
         [HttpDelete("delete/{id:int}")]
-        [Authorize(Roles = "gsb,GSB Görevlisi")]
+        [Authorize]
         public async Task<IActionResult> Delete(int id)
         {
+            if (!IsAdmin()) return Unauthorized(new { message = "Bu işlem için yetkiniz bulunmamaktadır." });
             try
             {
                 await _mediator.Send(new DeleteAnnouncementCommand(id));
