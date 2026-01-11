@@ -11,6 +11,8 @@ using Unides.Infrastructure.Services;
 using Unides.Persistence;
 using Unides.Persistence.Repositories;
 using Unides.WebApi.Middlewares;
+using Microsoft.Extensions.FileProviders;
+
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 var builder = WebApplication.CreateBuilder(args);
 
@@ -166,6 +168,30 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowAngularApp");
 app.UseHttpsRedirection();
+
+// Static file serving for images
+var imageBasePath = builder.Configuration["ImageSettings:BasePath"] ?? "images";
+string fullImagePath;
+if (Path.IsPathRooted(imageBasePath))
+{
+    // Absolute path (production: /root/images)
+    fullImagePath = imageBasePath;
+}
+else
+{
+    // Relative path (development: images)
+    fullImagePath = Path.Combine(app.Environment.ContentRootPath, imageBasePath);
+}
+
+if (Directory.Exists(fullImagePath))
+{
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(fullImagePath),
+        RequestPath = "/images"
+    });
+}
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseMiddleware<Unides.WebApi.Middlewares.UnauthorizedLoggingMiddleware>();

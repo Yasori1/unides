@@ -313,11 +313,22 @@ export class AnnouncementService {
     // Authorization header'ını manuel olarak ekle
     // FormData kullanıldığında Content-Type header'ını eklemeyiz (browser otomatik ekler)
     const token = this.authService.getToken();
+    
+    if (!token) {
+      throw new Error('Oturum bilgisi bulunamadı. Lütfen tekrar giriş yapın.');
+    }
+    
     const headers = new HttpHeaders({
-      ...(token ? { Authorization: `Bearer ${token}` } : {})
+      Authorization: `Bearer ${token}`
     });
 
-    return this.http.post<string>(`${this.apiUrl}/upload-image`, formData, { headers }).pipe(
+    // Backend { imageUrl: string } formatında döndürüyor
+    interface UploadResponse {
+      imageUrl: string;
+    }
+
+    return this.http.post<UploadResponse>(`${this.apiUrl}/upload-image`, formData, { headers }).pipe(
+      map((response) => response.imageUrl || response as any), // imageUrl varsa onu döndür, yoksa string olarak döndür
       catchError((error) => {
         console.error('Görsel yüklenemedi:', error);
         console.error('Hata detayı:', error.error);
