@@ -67,7 +67,7 @@ const MOCK_ANNOUNCEMENTS: Announcement[] = [
     id: 901,
     title: 'YÖK 2024-2025 Akademik Takvim Genelgesi Yayınlandı',
     shortDescription: 'Yükseköğretim Kurulu tarafından üniversitelerin akademik takvimlerine ilişkin yeni usul ve esaslar belirlenmiştir.',
-    content: 'Yükseköğretim Kurulu (YÖK) tarafından 81 ildeki üniversitelere gönderilen genelge ile 2024-2025 eğitim öğretim yılı akademik takvimi belirlenmiştir. Bu kapsamda güz ve bahar dönemlerinin başlangıç ve bitiş tarihleri, sınav dönemleri ve tatil süreleri yeniden düzenlenmiştir. Öğrencilerin ders kayıt işlemlerini belirtilen tarihler arasında yapmaları önem arz etmektedir.',
+    content: 'Yükseköğretim Kurulu (YÖK) tarafından 81 ildeki üniversitelere gönderilen genelge ile 2024-2025 eğitim öğretim yılı akademik takvimi belirlenmiştir. <br><br> <img src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=1000&auto=format&fit=crop" alt="Akademik Takvim Görseli"> <br><br> Bu kapsamda güz ve bahar dönemlerinin başlangıç ve bitiş tarihleri, sınav dönemleri ve tatil süreleri yeniden düzenlenmiştir. Öğrencilerin ders kayıt işlemlerini belirtilen tarihler arasında yapmaları önem arz etmektedir.',
     date: '2024-08-15',
     image: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=1000&auto=format&fit=crop',
     link: 'https://yok.gov.tr'

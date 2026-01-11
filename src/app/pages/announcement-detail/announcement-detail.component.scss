@@ -137,7 +137,7 @@ $ministry-color: #1e3a8a;
 }
 
 .content-section.layout-option-a {
-  padding: 60px 0 100px;
+  padding: 20px 0 100px;
   position: relative;
   z-index: 10;
   
@@ -252,6 +252,15 @@ $ministry-color: #1e3a8a;
       ::ng-deep ul, ::ng-deep ol {
         margin-bottom: 20px;
         padding-left: 20px;
+      }
+
+      ::ng-deep img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 12px;
+        margin: 20px 0;
+        display: block; // Ensure it takes its own line
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       }
     }
 

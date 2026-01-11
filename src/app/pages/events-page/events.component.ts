@@ -98,6 +98,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
   totalPages: number = 0;
   pages: number[] = [];
   allCommunities: any[] = [];
+  filteredEventsCount: number = 0; // Added for result count display
 
   @ViewChildren('animItem') animItems!: QueryList<ElementRef>;
 
@@ -679,6 +680,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
 
   initPagination() {
     const filteredPool = this.getFilteredAndSortedPool();
+    this.filteredEventsCount = filteredPool.length;
     this.totalPages = Math.ceil(filteredPool.length / this.itemsPerPage);
     this.pages = Array.from({ length: this.totalPages }, (_, i) => i + 1);
     this.updateDisplayedData();

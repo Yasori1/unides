@@ -123,8 +123,8 @@ $border-color: #e2e8f0;
 
 // --- 2. HERO SECTION (İçerik) ---
 .events-content-section {
-  padding: 10px 0 80px;
-  background-color: transparent; /* Transparent */
+  padding: 40px 0 100px;
+  background-color: transparent !important;
 
   .container {
     max-width: 1400px;
@@ -137,12 +137,12 @@ $border-color: #e2e8f0;
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
-  background: white;
-  padding: 20px;
-  border-radius: 24px;
-  border: 1px solid $border-color;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
-  margin-bottom: 0px;
+  background: transparent !important;
+  padding: 20px 0;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+  margin-bottom: 30px;
   align-items: center;
 
   .search-group {
@@ -167,6 +167,7 @@ $border-color: #e2e8f0;
       transition: all 0.2s;
       font-family: inherit;
       color: $text-dark;
+      background: white; // Input needs white bg on transparent bar
       &:focus {
         border-color: $primary-blue;
         box-shadow: 0 0 0 3px rgba($primary-blue, 0.1);
@@ -199,7 +200,7 @@ $border-color: #e2e8f0;
         border-radius: 12px;
         font-size: 0.95rem;
         color: $text-dark;
-        background: white;
+        background: white; // Select needs white bg on transparent bar
         outline: none;
         appearance: none;
         cursor: pointer;
@@ -215,23 +216,12 @@ $border-color: #e2e8f0;
 
 // Removed old filter styles (.search-container, .events-filter-menu, .filter-bar-container)
 
-.section-header {
-  padding: 0 20px;
-  margin-bottom: 0px;
-  h2 {
-    font-size: 1.7rem;
-    margin: 0;
+.results-count {
+  margin-bottom: 20px;
+  color: $text-gray;
+  font-size: 0.9rem;
+  strong {
     color: $text-dark;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-    .highlight {
-      color: $primary-blue;
-    }
-  }
-  p {
-    color: $text-gray;
-    font-size: 0.95rem;
-    margin-top: 4px;
   }
 }
 
@@ -239,8 +229,8 @@ $border-color: #e2e8f0;
 .events-grid {
   display: grid;
   grid-template-columns: repeat(1, 1fr);
-  gap: 24px;
-  padding: 0 20px 40px;
+  gap: 30px; // Increased gap to match communities
+  padding: 0 0 40px; // Removed side padding as container handles it
   min-height: 800px;
   @media (min-width: 768px) {
     grid-template-columns: repeat(2, 1fr);

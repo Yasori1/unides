@@ -65,9 +65,10 @@
       </div>
     </div>
 
-    <div class="section-header" #animItem>
-      <h2>Yaklaşan <span class="highlight">Etkinlikler</span></h2>
-      <p>{{ activeCategory }} kategorisi listeleniyor.</p>
+    <div class="results-count" *ngIf="filteredEventsCount > 0">
+      <p>
+        Toplam <strong>{{ filteredEventsCount }}</strong> etkinlik listeleniyor.
+      </p>
     </div>
 
     <div class="col-12 text-center" *ngIf="displayedEvents.length === 0">

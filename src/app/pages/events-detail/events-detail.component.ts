@@ -93,7 +93,20 @@ export class EventsDetailComponent implements OnInit {
         {
           id: 101,
           title: 'Geleceğin Teknolojileri ve Yapay Zeka Zirvesi',
-          description: 'Yapay zeka, blok zincir ve geleceğin teknolojilerinin tartışılacağı dev bir zirveye hazır olun. Sektörün öncüleri ile tanışma fırsatı. Yapay zeka, blok zincir ve geleceğin teknolojilerinin tartışılacağı dev bir zirveye hazır olun. Sektörün öncüleri ile tanışma fırsatı.Yapay zeka, blok zincir ve geleceğin teknolojilerinin tartışılacağı dev bir zirveye hazır olun. Sektörün öncüleri ile tanışma fırsatı.',
+          description: `Yapay zeka ve teknoloji dünyasının sınırlarını zorlayan bu zirvede, geleceğin nasıl şekilleneceğini keşfetmeye hazır mısınız? 
+
+Bu yıl düzenlenecek olan "Geleceğin Teknolojileri ve Yapay Zeka Zirvesi", sektörün önde gelen liderlerini, yenilikçi girişimcileri ve akademisyenleri bir araya getiriyor. Etkinlik boyunca yapay zeka etiği, blok zincir teknolojisinin finans dünyasındaki yeri, otonom sistemler ve nesnelerin interneti (IoT) gibi kritik konular derinlemesine tartışılacak.
+
+Katılımcılar, alanında uzman konuşmacıların sunumlarını dinleme, interaktif panellere katılma ve workshoplar sayesinde teorik bilgilerini pratiğe dökme şansı bulacaklar. Ayrıca fuar alanında en yeni teknolojik ürünleri deneyimleyebilir, startup standlarını gezerek yeni kariyer fırsatları yakalayabilirsiniz.
+
+Etkinlik Programı:
+- 10:00 - Açılış Konuşması ve Keynote: "Yapay Zeka Nereye Gidiyor?"
+- 11:30 - Panel: Blok Zincir ve Finansın Geleceği
+- 13:00 - Öğle Arası ve Networking
+- 14:00 - Workshop: Python ile Veri Analizine Giriş
+- 16:00 - Kapanış ve Ödül Töreni
+
+Siz de teknolojinin kalbinin attığı bu etkinlikte yerinizi alın, geleceği bugünden yakalayın!`,
           category: 'Teknoloji',
           date: '25 Ekim 2025',
           dateObj: new Date('2025-10-25'),
@@ -110,7 +123,18 @@ export class EventsDetailComponent implements OnInit {
         {
           id: 102,
           title: 'Kampüs Caz Festivali',
-          description: 'Sonbaharın renkleri cazın büyüleyici ritimleriyle buluşuyor. Açık hava konserleri ve workshoplar sizi bekliyor.',
+          description: `Sonbaharın büyüleyici atmosferinde, cazın özgür ruhunu kampüse taşıyoruz! Kampüs Caz Festivali, müzikseverleri unutulmaz bir deneyime davet ediyor.
+
+ODTÜ Vişnelik Çim Amfi'nin eşsiz doğasında gerçekleşecek festivalde, yerli ve yabancı caz gruplarının sahne alacağı konserler, gün boyu sürecek müzik ziyafeti sunacak. Sadece dinlemekle kalmayacak, ritim atölyeleri ve enstrüman tanıtımları ile müziğin mutfağına da girebileceksiniz.
+
+Festival alanında kurulacak yeme-içme standları, plak pazarı ve sanat sergileri ile tam bir kültür-sanat günü sizi bekliyor. Arkadaşlarınızla çimlere uzanıp, yıldızların altında cazın keyfini çıkarmak için biletinizi şimdiden ayırtın.
+
+Öne Çıkan Grupler:
+- Blue Note Quartet
+- Jazz & Blues Band
+- Kampüs Orkestrası (Özel Performans)
+
+Unutmayın, müzik ruhun gıdasıdır ve bu festival ruhunuzu doyuracak!`,
           category: 'Müzik',
           date: '15 Kasım 2025',
           dateObj: new Date('2025-11-15'),
@@ -127,7 +151,13 @@ export class EventsDetailComponent implements OnInit {
         {
           id: 103,
           title: 'Modern Sanat ve Tasarım Bienali',
-          description: 'Genç sanatçıların eserlerinin sergileneceği, interaktif enstalasyonların yer aldığı sanat dolu bir hafta.',
+          description: `Sanatın sınırlarını zorlayan, yaratıcılığın ve estetiğin buluşma noktası: Modern Sanat ve Tasarım Bienali başlıyor.
+
+Genç sanatçıların ve tasarımcıların eserlerinin sergileneceği bu bienal, geleneksel sanat anlayışını modern tekniklerle harmanlıyor. Dijital sanat, enstalasyon, heykel ve grafik tasarım alanlarında yüzlerce eser sanatseverlerin beğenisine sunulacak.
+
+Etkinlik kapsamında düzenlenecek panellerde, sanatın toplum üzerindeki etkisi, dijitalleşmenin sanata yansımaları ve sürdürülebilir tasarım konuları ele alınacak. Küratör eşliğinde yapılacak sergi turları ile eserlerin hikayelerini ve sanatçıların ilham kaynaklarını yakından tanıma fırsatı bulacaksınız.
+
+Sanatla dolu, ilham verici bir hafta için Mimar Sinan Güzel Sanatlar Üniversitesi'nde buluşuyoruz.`,
           category: 'Sanat',
           date: '01 Aralık 2025',
           dateObj: new Date('2025-12-01'),
@@ -144,7 +174,13 @@ export class EventsDetailComponent implements OnInit {
         {
           id: 104,
           title: 'Kariyer ve Networking Günleri',
-          description: 'Türkiye\'nin önde gelen firmalarının İK yöneticileri ile birebir görüşme şansı. Staj ve iş imkanlarını kaçırmayın.',
+          description: `Kariyerinize güçlü bir başlangıç yapmak, iş dünyasının profesyonelleri ile tanışmak ve hayalinizdeki işe bir adım daha yaklaşmak ister misiniz?
+
+Kariyer ve Networking Günleri, Türkiye'nin önde gelen şirketlerinin İnsan Kaynakları yöneticilerini ve sektör liderlerini öğrencilerle buluşturuyor. Etkinlik boyunca düzenlenecek seminerlerde, CV hazırlama teknikleri, mülakat simülasyonları ve kariyer planlama stratejileri üzerine değerli bilgiler paylaşılacak.
+
+Katılımcı firmaların stantlarını ziyaret ederek staj ve iş başvurusu yapabilir, şirket kültürlerini yakından tanıyabilirsiniz. Ayrıca, "Networking Saati" etkinliklerinde profesyonellerle birebir görüşme ve mentörlük alma fırsatı yakalayabilirsiniz.
+
+Geleceğinizi şansa bırakmayın, bu etkinlikte yerinizi alın!`,
           category: 'Kariyer',
           date: '20 Eylül 2025',
           dateObj: new Date('2025-09-20'),
@@ -161,7 +197,13 @@ export class EventsDetailComponent implements OnInit {
         {
           id: 105,
           title: 'Doğa Yürüyüşü ve Kamp',
-          description: 'Şehrin gürültüsünden uzaklaşıp doğayla iç içe bir hafta sonu. Çadırını kap gel!',
+          description: `Şehrin stresinden ve gürültüsünden uzaklaşarak doğanın kucağında huzurlu bir hafta sonu geçirmeye ne dersiniz?
+
+Uludağ Milli Parkı'nın eşsiz güzellikleri arasında gerçekleştireceğimiz bu etkinlikte, doğa yürüyüşü, kamp ateşi sohbetleri ve yıldız gözlemi gibi aktiviteler sizi bekliyor. Tecrübeli rehberler eşliğinde yapılacak yürüyüşte, bölgenin flora ve faunasını tanıma şansı bulacak, temiz havanın tadını çıkaracaksınız.
+
+Kampçılık eğitimi verilecek etkinlikte, çadır kurma, doğada yön bulma ve temel hayatta kalma becerileri üzerine pratik bilgiler paylaşılacak. Akşam yakılan kamp ateşi etrafında toplanıp, müzik eşliğinde keyifli vakit geçireceğiz.
+
+Doğaya saygı çerçevesinde gerçekleştireceğimiz bu etkinliğe katılmak için sırt çantanızı hazırlayın!`,
           category: 'Spor',
           date: '05 Ekim 2025',
           dateObj: new Date('2025-10-05'),
@@ -178,7 +220,11 @@ export class EventsDetailComponent implements OnInit {
         {
           id: 106,
           title: 'Siber Güvenlik Bootcamp',
-          description: 'Uygulamalı laboratuvarlarla siber güvenliğin temellerini öğren. CTF mini yarışması da var.',
+          description: `Dijital dünyanın savunma hattında yer almak isteyenler için kaçırılmayacak bir fırsat! Siber Güvenlik Bootcamp ile etik hackerlık dünyasına adım atın.
+
+3 gün sürecek bu yoğun eğitim programında, ağ güvenliği, web uygulama güvenliği, zararlı yazılım analizi ve sızma testleri (pentest) konularında kapsamlı eğitimler verilecek. Alanında uzman siber güvenlik analistleri tarafından verilecek teorik eğitimlerin yanı sıra, sanal laboratuvar ortamlarında gerçek senaryolar üzerinden pratik yapma imkanı bulacaksınız.
+
+Kampın sonunda düzenlenecek "Capture The Flag (CTF)" yarışmasında öğrendiklerinizi test edebilir, sürpriz ödüllerin sahibi olabilirsiniz. Siber güvenlik kariyerine başlamak isteyen herkesi bekliyoruz.`,
           category: 'Teknoloji',
           date: '10 Ocak 2026',
           dateObj: new Date('2026-01-10'),
@@ -195,7 +241,11 @@ export class EventsDetailComponent implements OnInit {
         {
           id: 107,
           title: 'Fotoğrafçılık Şehir Turu',
-          description: 'Şehir turunda sokak fotoğrafçılığı teknikleri, kompozisyon ve ışık kullanımı üzerine pratik.',
+          description: `Şehri vizörden keşfetmeye hazır mısınız? İstanbul'un tarihi sokaklarında, gizli kalmış köşelerinde ve büyüleyici manzaralarında fotoğraf dolu bir gün geçiriyoruz.
+
+Bu etkinlikte, sokak fotoğrafçılığı teknikleri, kompozisyon kuralları, ışık kullanımı ve portre çekimi üzerine uygulamalı eğitimler alacaksınız. Profesyonel fotoğrafçıların mentorluğunda gerçekleşecek turda, hem teorik bilgilerinizi pekiştirecek hem de portfolyonuz için harika kareler yakalayacaksınız.
+
+Tur rotamız Galata, Karaköy ve Balat'ı kapsıyor. Fotoğraf makinenizi veya telefonunuzu kapın, anı dondurmak için bize katılın!`,
           category: 'Sanat',
           date: '18 Ocak 2026',
           dateObj: new Date('2026-01-18'),
@@ -212,7 +262,11 @@ export class EventsDetailComponent implements OnInit {
         {
           id: 108,
           title: 'Kariyer CV Atölyesi',
-          description: 'CV ve LinkedIn profilini güçlendirmek için uygulamalı atölye. Örnek mülakat simülasyonu da yapılacak.',
+          description: `İş dünyasında ilk izlenim her şeydir. Etkileyici bir CV hazırlayarak kariyer basamaklarını daha hızlı tırmanmaya ne dersiniz?
+
+Bu atölyede, İK uzmanları eşliğinde profesyonel CV hazırlama tekniklerini öğreneceksiniz. ATS uyumlu CV nedir, ön yazı nasıl yazılır, LinkedIn profili nasıl optimize edilir gibi soruların cevaplarını bulacaksınız. Ayrıca, birebir CV incelemeleri ile eksiklerinizi görme ve düzeltme şansı yakalayacaksınız.
+
+Mülakat teknikleri üzerine yapılacak simülasyonlarla, iş görüşmelerine de hazırlıklı olacaksınız. Hayalinizdeki işe giden yolda sağlam bir adım atmak için bu atölyeyi kaçırmayın.`,
           category: 'Kariyer',
           date: '28 Ocak 2026',
           dateObj: new Date('2026-01-28'),
@@ -229,7 +283,17 @@ export class EventsDetailComponent implements OnInit {
         {
           id: 109,
           title: 'Veri Bilimi ve R Atölyesi',
-          description: 'Veri analizine giriş yapmak isteyenler için kapsamlı bir atölye. R dili ile uygulama yapılacak.',
+          description: `Verilerin gücünü keşfedin! Veri bilimi dünyasına giriş yapmak ve R programlama dili ile analiz yeteneklerinizi geliştirmek için harika bir fırsat.
+
+Başlangıç seviyesindeki bu atölyede, veri manipülasyonu, veri görselleştirme ve temel istatistiksel analiz konuları işlenecek. Gerçek dünya veri setleri üzerinde çalışarak, teorik bilgileri pratiğe dökme imkanı bulacaksınız.
+
+Eğitim İçeriği:
+- R ve RStudio Kurulumu ve Arayüz Tanıtımı
+- Veri Yapıları ve Veri Okuma
+- Dplyr ile Veri Manipülasyonu
+- Ggplot2 ile Veri Görselleştirme
+
+Kendi bilgisayarınızı getirmeyi unutmayın!`,
           category: 'Teknoloji',
           date: '05 Şubat 2026',
           dateObj: new Date('2026-02-05'),
@@ -246,7 +310,11 @@ export class EventsDetailComponent implements OnInit {
         {
           id: 110,
           title: 'Klasik Müzik Akşamı',
-          description: 'Üniversite orkestrasından unutulmaz bir klasik müzik dinletisi.',
+          description: `Ruhunuzu dinlendirecek, sanat dolu bir akşam için Klasik Müzik Konseri'ne davetlisiniz. Üniversite senfoni orkestrasının icra edeceği eserlerle, klasik müziğin büyülü dünyasında bir yolculuğa çıkacağız.
+
+Repertuarda Mozart, Beethoven, Vivaldi ve Çaykovski gibi usta bestecilerin ölümsüz eserleri yer alıyor. Müziğin evrensel diliyle buluşacağımız bu özel gecede, hem solo performanslar hem de orkestra uyumu kulaklarınızın pasını silecek.
+
+Sanatın ve müziğin birleştirici gücünü hissetmek için tüm öğrencilerimizi ve akademisyenlerimizi bekliyoruz.`,
           category: 'Müzik',
           date: '12 Şubat 2026',
           dateObj: new Date('2026-02-12'),
@@ -263,7 +331,11 @@ export class EventsDetailComponent implements OnInit {
         {
           id: 111,
           title: 'Modern Dans Gösterisi',
-          description: 'Dans topluluğunun hazırladığı modern dans koreografileri sahneleniyor.',
+          description: `Bedenin diliyle anlatılan hikayelere tanıklık etmeye hazır mısınız? Üniversitemiz Dans Topluluğu'nun hazırladığı "Hareketin İzleri" modern dans gösterisi sahnede!
+
+Aylardır süren provaların ardından ortaya çıkan bu gösteride, modern dansın estetiği, çağdaş koreografilerle buluşuyor. Duyguların hareketle ifade edildiği, müziğin ritmine kapılan dansçıların performansı izleyicileri büyüleyecek.
+
+Sanatın her dalını destekleyen üniversitemizde, dansın enerjisini hissetmek ve arkadaşlarınızla keyifli bir akşam geçirmek için bu gösteriyi kaçırmayın.`,
           category: 'Sanat',
           date: '20 Şubat 2026',
           dateObj: new Date('2026-02-20'),
@@ -280,7 +352,11 @@ export class EventsDetailComponent implements OnInit {
         {
           id: 112,
           title: 'Startup Pitching Day',
-          description: 'Girişim fikirlerini yatırımcılara sunmak isteyen öğrenciler için büyük fırsat.',
+          description: `Fikrine güvenen, girişimcilik ruhuna sahip gençler sahneye çıkıyor! Startup Pitching Day, inovatif iş fikirlerinin yatırımcılarla ve mentörlerle buluştuğu heyecan dolu bir etkinlik.
+
+Ön elemeyi geçen girişimci takımlar, projelerini jüri karşısında sunacak ve büyük ödül için yarışacaklar. Etkinlikte ayrıca başarılı girişimcilerin deneyim paylaşımları, ekosistem analizi ve networking seansları da yer alacak.
+
+Kendi girişiminizi kurma hayaliniz varsa veya girişimcilik dünyasındaki yenilikleri takip etmek istiyorsanız, bu etkinlik tam size göre. İlham almak ve geleceğin unicornlarıyla tanışmak için orada olun!`,
           category: 'Kariyer',
           date: '25 Şubat 2026',
           dateObj: new Date('2026-02-25'),
@@ -297,7 +373,11 @@ export class EventsDetailComponent implements OnInit {
         {
           id: 113,
           title: 'Kampüs Koşusu',
-          description: 'Sağlıklı yaşam için kampüste 5K koşusu düzenliyoruz. Herkes davetli!',
+          description: `Sağlıklı yaşam için harekete geç! Geleneksel Kampüs Koşusu ile hem spor yapıyor hem de eğleniyoruz.
+
+5K parkurunda gerçekleşecek koşuya, amatörden profesyonele her seviyeden koşucu davetli. Yarış öncesi ısınma hareketleri, müzik ve eğlenceli aktivitelerle başlayacak gün, koşu sonrası düzenlenecek ödül töreni ve ikramlarla devam edecek.
+
+Sporun birleştirici gücüyle bir araya geleceğimiz bu etkinlikte, dereceye girenleri sürpriz hediyeler bekliyor. Kondisyonuna güvenen, temiz havada spor yapmak isteyen herkesi start çizgisine bekliyoruz.`,
           category: 'Spor',
           date: '01 Mart 2026',
           dateObj: new Date('2026-03-01'),
@@ -314,7 +394,11 @@ export class EventsDetailComponent implements OnInit {
         {
           id: 114,
           title: 'Ege Köyleri Gezisi',
-          description: 'Ege\'nin saklı kalmış köylerini keşfetmeye gidiyoruz. Fotoğraf makinenizi unutmayın.',
+          description: `Tarihin ve doğanın iç içe geçtiği Ege'nin incisi köyleri keşfe çıkıyoruz. Taş evleri, dar sokakları ve samimi insanlarıyla ünlü bu köylerde zamanın nasıl geçtiğini anlamayacaksınız.
+
+Rota kapsamında Şirince, Birgi ve Sığacık gibi tarihi dokusu korunmuş yerleşimleri ziyaret edeceğiz. Yöresel lezzetlerin tadına bakacak, el sanatları atölyelerini gezecek ve bol bol fotoğraf çekeceğiz.
+
+Baharın gelişini Ege'nin renkleriyle karşılamak, yeni arkadaşlıklar kurmak ve unutulmaz anılar biriktirmek için bu geziyi kaçırmayın. Kontenjan sınırlıdır, acele edin!`,
           category: 'Gezi',
           date: '10 Mart 2026',
           dateObj: new Date('2026-03-10'),
@@ -331,7 +415,9 @@ export class EventsDetailComponent implements OnInit {
         {
           id: 115,
           title: 'Blockchain 101',
-          description: 'Blokzincir teknolojisinin temelleri ve kripto varlıklar üzerine seminer.',
+          description: `Merkeziyetsiz dünyanın kapılarını aralıyoruz! Blockchain teknolojisinin temellerini öğrenmek ve kripto varlık ekosistemini anlamak isteyenler için hazırlanan bu seminerde, teknolojinin geleceği masaya yatırılıyor.
+
+Blokzincir nedir, nasıl çalışır? Akıllı kontratlar, NFT'ler ve DeFi (Merkeziyetsiz Finans) kavramları ne anlama geliyor? Bu soruların ve daha fazlasının cevabını uzman konuşmacılarımızdan dinleyeceksiniz. Sektördeki son gelişmelerin ve kariyer fırsatlarının da konuşulacağı etkinlik, teknoloji meraklıları için ufuk açıcı olacak.`,
           category: 'Teknoloji',
           date: '15 Mart 2026',
           dateObj: new Date('2026-03-15'),
@@ -348,7 +434,11 @@ export class EventsDetailComponent implements OnInit {
         {
           id: 116,
           title: 'Rock Festivali',
-          description: 'Amatör ve profesyonel rock gruplarının sahne alacağı müzik şöleni.',
+          description: `Gitarların sesi, davulun ritmi ve gençliğin enerjisi bu festivalde buluşuyor! Üniversite kampüsünde gerçekleşecek Rock Festivali ile müziğe doyacaksınız.
+
+Amatör üniversite gruplarının yanı sıra, profesyonel rock gruplarının da sahne alacağı festivalde, rock müziğin en sevilen parçaları hep bir ağızdan söylenecek. Festival alanında kurulacak oyun alanları ve yiyecek stantları ile eğlence gün boyu devam edecek.
+
+Sınav stresini atmak, doyasıya eğlenmek ve rock müziğin coşkusunu yaşamak için herkesi bekliyoruz!`,
           category: 'Müzik',
           date: '22 Mart 2026',
           dateObj: new Date('2026-03-22'),
@@ -365,7 +455,11 @@ export class EventsDetailComponent implements OnInit {
         {
           id: 117,
           title: 'Seramik Atölyesi',
-          description: 'Kendi seramik kupanı tasarla ve üret. Malzemeler bizden!',
+          description: `Çamurun sanata dönüştüğü yerde buluşuyoruz. Kendi ellerinizle şekil verip, boyayıp, pişireceğiniz seramik objeler tasarlamak ister misiniz?
+
+Bu atölyede, seramik sanatının temel tekniklerini öğrenecek, çamuru yoğurma, şekillendirme ve sırlama aşamalarını deneyimleyeceksiniz. Yaratıcılığınızı serbest bırakarak yapacağınız kupa, tabak veya dekoratif objeler, tamamen size özel olacak.
+
+Stres atmak, üretmenin keyfine varmak ve sanatla iç içe bir gün geçirmek için kontenjan dolmadan kaydınızı yaptırın.`,
           category: 'Sanat',
           date: '28 Mart 2026',
           dateObj: new Date('2026-03-28'),
@@ -382,7 +476,9 @@ export class EventsDetailComponent implements OnInit {
         {
           id: 118,
           title: 'Staj Fuarı 2026',
-          description: 'Yaz dönemi stajı için firmalarla buluşma noktası.',
+          description: `Kariyer yolculuğunuzun ilk adımı olan staj imkanlarını keşfetmek için Staj Fuarı'na davetlisiniz. Farklı sektörlerden onlarca firma, stajyer adaylarıyla tanışmak için kampüse geliyor.
+
+Mühendislikten işletmeye, sağlıktan iletişime kadar birçok alanda faaliyet gösteren şirketlerin stantlarını ziyaret ederek staj programları hakkında bilgi alabilir, başvurularınızı doğrudan yapabilirsiniz. Ayrıca fuar süresince düzenlenecek "Stajda Başarı Tüyoları" konulu seminerlere katılarak kendinizi geliştirebilirsiniz.`,
           category: 'Kariyer',
           date: '05 Nisan 2026',
           dateObj: new Date('2026-04-05'),
@@ -399,7 +495,9 @@ export class EventsDetailComponent implements OnInit {
         {
           id: 119,
           title: 'Voleybol Turnuvası',
-          description: 'Fakülteler arası voleybol turnuvası final maçı.',
+          description: `Takımını kur, sahaya çık ve şampiyonluk için ter dök! Fakülteler arası düzenlenen Voleybol Turnuvası'nda rekabet ve dostluk bir arada.
+
+Elemeler sonucunda finale kalan takımların karşılaşacağı büyük final maçında heyecan dorukta olacak. Tribünlerde yerinizi alarak favori takımınızı destekleyebilir, sporun coşkusuna ortak olabilirsiniz. Maç aralarında düzenlenecek yarışmalar ve gösterilerle eğlenceli bir spor günü sizi bekliyor.`,
           category: 'Spor',
           date: '12 Nisan 2026',
           dateObj: new Date('2026-04-12'),
@@ -416,7 +514,11 @@ export class EventsDetailComponent implements OnInit {
         {
           id: 120,
           title: 'Kapadokya Turu',
-          description: 'Peribacaları ve balon turu ile eşsiz bir hafta sonu gezisi.',
+          description: `Masalsı bir coğrafyada unutulmaz bir hafta sonu! Güzel atlar ülkesi Kapadokya'yı keşfetmek için yola çıkıyoruz.
+
+Peribacaları arasında yürüyüş yapacak, yeraltı şehirlerinin gizemini çözecek ve gün doğumunda balonların gökyüzünü süslediği o eşsiz manzaraya şahit olacağız. Avanos'ta çömlek yapımını izleyecek, Göreme Açık Hava Müzesi'nde tarihe yolculuk yapacağız.
+
+Hem kültürel bir gezi hem de doğa ile iç içe keyifli bir tatil arayanlar için harika bir fırsat.`,
           category: 'Gezi',
           date: '20 Nisan 2026',
           dateObj: new Date('2026-04-20'),
