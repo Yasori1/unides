@@ -8,9 +8,17 @@
 
 <!-- Announcement Detail -->
 <div *ngIf="!isLoading && announcement" class="announcement-detail-page">
-  <!-- Hero Image -->
-  <div class="hero-section">
-    <img [src]="announcement.image" [alt]="announcement.title" class="hero-image" />
+  <!-- Hero Banner -->
+  <div class="hero-section" (mousemove)="onHeroMouseMove($event)">
+    <div class="background-wrapper">
+      <img
+        [src]="announcement.image || 'assets/img/placeholder-cover.svg'"
+        [alt]="announcement.title"
+        class="hero-image"
+        loading="lazy"
+        onerror="this.src='assets/img/placeholder-cover.svg'"
+      />
+    </div>
     <div class="hero-overlay">
       <div class="container">
         <div class="breadcrumb">
@@ -25,41 +33,78 @@
   <!-- Content Section -->
   <div class="content-section">
     <div class="container">
-      <div class="announcement-header">
-        <span class="date-badge">
-          <i class="bx bx-calendar"></i>
-          {{ formatDate(announcement.date) }}
-        </span>
-        <h1 class="announcement-title">{{ announcement.title }}</h1>
-        <p class="announcement-subtitle">{{ announcement.shortDescription }}</p>
-      </div>
-
-      <div class="announcement-content">
-        <div class="content-text">{{ announcement.content }}</div>
-
-        <!-- Link Section -->
-        <div class="link-section" *ngIf="announcement.link && announcement.link.trim()">
-          <div class="link-card">
-            <i class="bx bx-link-external"></i>
-            <div class="link-info">
-              <h3>İlgili Link</h3>
-              <p>Bu duyuru ile ilgili daha fazla bilgi için aşağıdakis linke tıklayabilirsiniz.</p>
-              <a [href]="announcement.link" target="_blank" class="link-button">
-                Linke Git
-                <i class="bx bx-right-arrow-alt"></i>
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-
+      
       <!-- Back Button -->
-      <div class="back-section">
+      <div class="back-button-top">
         <a routerLink="/announcements" class="back-button">
           <i class="bx bx-arrow-back"></i>
           Duyurulara Dön
         </a>
       </div>
+
+      <div class="layout-grid">
+        <!-- Left Column (Main Content) -->
+        <main class="main-content">
+          <div class="announcement-header">
+            <h1 class="announcement-title">{{ announcement.title }}</h1>
+            <div class="announcement-meta">
+              <span class="meta-item date">
+                <i class="bx bx-calendar"></i>
+                {{ formatDate(announcement.date) }}
+              </span>
+              <span class="meta-item category" *ngIf="announcement.category">
+                <i class="bx bx-category"></i>
+                {{ announcement.category }}
+              </span>
+            </div>
+          </div>
+
+          <div class="announcement-body">
+             <p class="short-desc">{{ announcement.shortDescription }}</p>
+             <div class="full-content" [innerHTML]="announcement.content"></div>
+             
+             <!-- External Link Button (Optional) -->
+             <div class="action-buttons" *ngIf="announcement.link">
+               <a [href]="announcement.link" target="_blank" class="external-link-btn">
+                 Kaynak/Detay <i class="bx bx-link-external"></i>
+               </a>
+             </div>
+          </div>
+        </main>
+
+        <!-- Right Column (Sidebar) -->
+        <aside class="sidebar">
+          <div class="sidebar-content sticky-sidebar">
+            <div class="sidebar-header">
+                <h3 class="sidebar-title">Paylaş</h3>
+                <button class="share-btn" (click)="copyToClipboard()" [class.copied]="copyLinkSuccess">
+                    <i class="bx" [class.bx-share-alt]="!copyLinkSuccess" [class.bx-check]="copyLinkSuccess"></i>
+                    {{ copyLinkSuccess ? 'Kopyalandı!' : 'Bağlantıyı Kopyala' }}
+                </button>
+            </div>
+
+            <div class="related-section">
+                <h3 class="sidebar-title">İlgili Duyurular</h3>
+                <div class="sidebar-list">
+                <a 
+                    *ngFor="let item of recentAnnouncements" 
+                    [routerLink]="['/announcements', item.id]" 
+                    class="sidebar-item"
+                >
+                    <div class="item-image">
+                    <img [src]="item.image || 'assets/img/placeholder-thumb.jpg'" [alt]="item.title">
+                    </div>
+                    <div class="item-info">
+                    <h4>{{ item.title }}</h4>
+                    <span class="item-date">{{ formatDate(item.date) }}</span>
+                    </div>
+                </a>
+                </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+
     </div>
   </div>
 </div>
@@ -70,11 +115,10 @@
     <div class="not-found-content">
       <i class="bx bx-error-circle"></i>
       <h2>Duyuru Bulunamadı</h2>
-      <p>Aradığınız duyuru bulunamadı veya kaldırılmış olabilir.</p>
+      <p>Aradığınız duyuru yayından kaldırılmış veya bulunamıyor.</p>
       <a routerLink="/announcements" class="back-button">Duyurulara Dön</a>
     </div>
   </div>
 </div>
 
 <app-site-footer />
-
