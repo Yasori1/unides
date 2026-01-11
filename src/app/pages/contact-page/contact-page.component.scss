@@ -1,6 +1,6 @@
 @use "sass:color";
 
-// --- RENK PALETİ (About Sayfası ile Uyumlu) ---
+// --- RENK PALETİ ---
 $primary-blue: #2563eb;
 $dark-blue: #1e3a8a;
 $text-dark: #0f172a;
@@ -81,7 +81,7 @@ $border-color: #e2e8f0;
       margin-left: 10px;
       letter-spacing: 1px;
       font-weight: 900;
-      -webkit-text-stroke: 0; 
+      -webkit-text-stroke: 0;
       filter: drop-shadow(0 2px 10px rgba(37, 99, 235, 0.3));
     }
   }
@@ -120,6 +120,10 @@ $border-color: #e2e8f0;
   }
 }
 
+.contact-page-wrapper {
+  background-color: $white;
+}
+
 // --- INFO CARDS SECTION ---
 .contact-cards-section {
   position: relative;
@@ -127,19 +131,359 @@ $border-color: #e2e8f0;
   margin-top: -40px; // Hero üzerine hafif binmesi için
   margin-bottom: 80px;
 
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
   .cards-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 30px;
-  }
 
     .info-card {
       background: $white;
       padding: 40px 30px;
       border-radius: 20px;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(228, 228, 231, 0.8);
       text-align: center;
       position: relative;
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: default;
+      
+      // 3D Tilt için gerekli
+      transform-style: preserve-3d;
+      will-change: transform;
+
+      &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.1);
+        
+        .card-icon {
+          transform: scale(1.1);
+          background: color.adjust($primary-blue, $lightness: 45%);
+          color: $primary-blue;
+        }
+      }
+
+      .card-icon {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background: $bg-light;
+        color: $text-gray;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        transition: all 0.3s ease;
+        
+        span {
+          font-size: 32px;
+        }
+
+        &.blue { color: $primary-blue; background: rgba($primary-blue, 0.1); }
+        &.purple { color: #9333ea; background: rgba(147, 51, 234, 0.1); }
+      }
+
+      h3 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        color: $text-dark;
+      }
+
+      p {
+        color: $text-gray;
+        line-height: 1.6;
+        margin-bottom: 15px;
+      }
+
+      .link-text {
+        font-weight: 600;
+        color: $primary-blue;
+        text-decoration: none;
+        transition: color 0.2s;
+        
+        &:hover {
+          color: $dark-blue;
+          text-decoration: underline;
+        }
+
+        &.big {
+          font-size: 1.2rem;
+        }
+      }
+
+      .hover-bg {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(255,255,255,0) 0%, rgba(37, 99, 235, 0.03) 100%);
+        opacity: 0;
+        transition: opacity 0.3s;
+        pointer-events: none;
+      }
+
+      &:hover .hover-bg {
+        opacity: 1;
+      }
     }
   }
+}
+
+// --- FORM SECTION ---
+.form-section {
+  padding: 60px 0 100px;
+  background-color: $white;
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .section-text {
+    .sub-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: $primary-blue;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 15px;
+    }
+
+    h2 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: $text-dark;
+      margin-bottom: 20px;
+      line-height: 1.2;
+    }
+
+    p {
+      font-size: 1.1rem;
+      color: $text-gray;
+      line-height: 1.7;
+      margin-bottom: 40px;
+    }
+
+    .mini-faq {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+
+      .faq-item {
+        display: flex;
+        gap: 15px;
+        align-items: flex-start;
+
+        i {
+          font-size: 1.5rem;
+          color: $primary-blue;
+          background: rgba($primary-blue, 0.1);
+          padding: 8px;
+          border-radius: 50%;
+        }
+
+        strong {
+          display: block;
+          font-weight: 700;
+          color: $text-dark;
+          margin-bottom: 5px;
+        }
+
+        p {
+          font-size: 0.95rem;
+          margin: 0;
+        }
+      }
+    }
+  }
+
+  .contact-form-wrapper {
+    background: $white;
+    border: 1px solid $border-color;
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+
+    &.glass-panel {
+        /* Optional glass effect if background was not white */
+        /* background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); */
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      
+      @media (max-width: 576px) {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+
+      label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: $text-dark;
+      }
+
+      .modern-input {
+        padding: 12px 16px;
+        border-radius: 12px;
+        border: 1px solid $border-color;
+        background: #f9fafb;
+        font-size: 1rem;
+        color: $text-dark;
+        outline: none;
+        transition: all 0.2s;
+        font-family: inherit;
+
+        &:focus {
+          border-color: $primary-blue;
+          background: $white;
+          box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        &::placeholder {
+          color: #9ca3af;
+        }
+      }
+      
+      textarea.modern-input {
+          resize: vertical;
+          min-height: 100px;
+      }
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background: $primary-blue;
+      color: $white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.3s;
+
+      &:hover {
+        background: color.adjust($primary-blue, $lightness: -5%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+      }
+
+      i { font-size: 1.2rem; }
+    }
+  }
+}
+
+// --- SOCIAL CONNECT SECTION ---
+.social-connect-section {
+  padding: 60px 0 100px;
+  background-color: $bg-light;
+  border-top: 1px solid $border-color;
+
+  .social-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 40px;
+    color: $text-dark;
+  }
+
+  .social-grid {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+
+    .social-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      width: 140px;
+      padding: 20px;
+      background: $white;
+      border-radius: 16px;
+      text-decoration: none;
+      transition: all 0.3s;
+      border: 1px solid $border-color;
+
+      .icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: $bg-light;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        transition: all 0.3s;
+        color: $text-dark;
+      }
+
+      span {
+        font-weight: 600;
+        color: $text-gray;
+        font-size: 0.9rem;
+        transition: color 0.3s;
+      }
+
+      &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+
+        .icon {
+            color: $white;
+        }
+        
+        span { color: $text-dark; }
+
+        &.x-twitter .icon { background: #000000; }
+        &.instagram .icon { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
+        &.youtube .icon { background: #FF0000; }
+        &.linkedin .icon { background: #0077b5; }
+      }
+    }
+  }
+}
+
+// Animations
+@keyframes dropLine {
+  0% { transform: scaleY(0); transform-origin: top; }
+  50% { transform: scaleY(1); transform-origin: top; }
+  51% { transform: scaleY(1); transform-origin: bottom; }
+  100% { transform: scaleY(0); transform-origin: bottom; }
+}
+
+@media (max-width: 768px) {
+  .page-spacer .page-title {
+    font-size: 2rem;
+  }
+  
+  .form-section {
+      padding: 40px 0 60px;
+      
+      .section-text {
+          margin-bottom: 40px;
+          text-align: center;
+          
+          h2 { font-size: 2rem; }
+      }
+  }
+}

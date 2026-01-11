@@ -203,6 +203,65 @@
     flex-direction: column;
     gap: 32px;
 
+    // --- Featured Image (Full Width & Overlapping) ---
+    .event-featured-image-container {
+      width: 75%; // Reduced width further
+      max-width: 478px;
+      height: auto;
+      aspect-ratio: 16/9;
+      margin: -210px 0 30px auto; // Right aligned and pulled up further
+      border-radius: 15px;
+      overflow: hidden;
+      background: var(--bg-light);
+      border: 4px solid #ffffff;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+      position: relative;
+      cursor: pointer;
+      z-index: 20; // Ensure it is above banner
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: transform 0.5s ease;
+      }
+
+      .overlay-icon {
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s;
+        
+        i {
+          font-size: 2rem;
+          color: white;
+          background: rgba(255,255,255,0.2);
+          padding: 15px;
+          border-radius: 50%;
+          backdrop-filter: blur(4px);
+        }
+      }
+
+      &:hover {
+         transform: translateY(-5px);
+         box-shadow: 0 25px 50px rgba(37, 99, 235, 0.15);
+         
+         img {
+           transform: scale(1.05);
+         }
+
+         .overlay-icon {
+           opacity: 1;
+         }
+      }
+    }
+
     .event-header {
       padding-bottom: 20px;
       border-bottom: 2px solid var(--border-color);
@@ -215,31 +274,6 @@
         line-height: 1.2;
         margin: 0;
         letter-spacing: -0.5px;
-      }
-    }
-
-    // --- Featured Image (Static) ---
-    .event-featured-image-container {
-      width: 100%;
-      height: 350px; // Standardized height for featured image
-      overflow: hidden;
-      margin-bottom: 30px;
-      border-radius: 20px;
-      position: relative;
-      background: var(--bg-light);
-      border: 1px solid var(--border-color);
-
-      img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-        cursor: pointer; // Pointer cursor to indicate clickable
-        transition: transform 0.3s;
-
-        &:hover {
-           transform: scale(1.02);
-        }
       }
     }
 
@@ -308,12 +342,25 @@
     }
 
     .description-section {
+      // Clearfix for floated image
+      &::after {
+        content: "";
+        display: table;
+        clear: both;
+      }
+
       h2 {
         font-size: 1.5rem;
         font-weight: 700;
         color: var(--primary-color);
-        margin-bottom: 16px;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border-color);
       }
+
+      // --- Featured Image (Stilized & Floated) ---
+      // Moved to top of main-content
+
 
       p {
         font-size: 1.05rem;
