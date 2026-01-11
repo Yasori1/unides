@@ -24,6 +24,7 @@ import { EmailReadComponent } from './admin-dashboard/email-read/email-read.comp
 import { EmailComposeComponent } from './admin-dashboard/email-compose/email-compose.component';
 import { CommunitiesPageComponent } from './pages/communities-page/communities-page.component';
 import { EventsComponent } from './pages/events-page/events.component';
+import { EventsDetailComponent } from './pages/events-detail/events-detail.component';
 import { CorporateLoginComponent } from './pages/corporate-login/corporate-login';
 import { CommunityLoginComponent } from './pages/community-login/community-login';
 import { CorporateRegisterComponent } from './pages/corporate-register/corporate-register';
@@ -46,6 +47,7 @@ export const routes: Routes = [
   { path: 'communities', component: CommunitiesPageComponent },
   { path: 'communities/:id', component: CommunityDetailComponent },
   { path: 'events', component: EventsComponent },
+  { path: 'events/:id', component: EventsDetailComponent },
   { path: 'announcements', component: AnnouncementsPageComponent },
   { path: 'announcements/:id', component: AnnouncementDetailComponent },
 
