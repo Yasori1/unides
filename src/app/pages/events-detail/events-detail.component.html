@@ -53,6 +53,12 @@
       <div class="layout-grid">
         <!-- Main Content (Left Column) -->
         <main class="main-content">
+          <!-- Event Featured Image (Moved above header) -->
+          <div class="event-featured-image-container" *ngIf="event.imageUrl" (click)="openImageModal()">
+            <img [src]="event.imageUrl" [alt]="event.title">
+            <div class="overlay-icon"><i class="bx bx-zoom-in"></i></div>
+          </div>
+
           <!-- Event Header -->
           <div class="event-header">
             <h1 class="event-title">{{ event.title }}</h1>
@@ -62,12 +68,6 @@
           <div class="description-section">
             <h2>Etkinlik Hakkında</h2>
             
-            <!-- Event Featured Image (Inside content) -->
-            <div class="event-featured-image-container" *ngIf="event.imageUrl" (click)="openImageModal()">
-              <img [src]="event.imageUrl" [alt]="event.title">
-              <div class="overlay-icon"><i class="bx bx-zoom-in"></i></div>
-            </div>
-
             <p>{{ event.description }}</p>
           </div>
           <!-- Image Modal -->
