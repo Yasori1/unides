@@ -893,6 +893,12 @@ export class CommunityDashboardComponent implements OnInit {
     }
   }
 
+  onEventCardClick(event: DashboardEvent) {
+    if (event.status === 'rejected' && event.rejectionReason) {
+      this.openRejectionModal(event.rejectionReason);
+    }
+  }
+
   closeEventDetail() {
     this.selectedEvent = null;
     if (isPlatformBrowser(this.platformId)) {

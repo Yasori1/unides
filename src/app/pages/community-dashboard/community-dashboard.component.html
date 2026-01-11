@@ -2,7 +2,7 @@
   <aside class="sidebar" [class.collapsed]="isSidebarCollapsed">
     <div class="brand" (click)="switchTab('overview')">
       <div class="logo-badge">
-        <img class="brand-logo" src="images/logo.png" alt="Ünides Dijital Portal" />
+        <img class="brand-logo" src="assets/unides1.png" alt="Ünides Dijital Portal" />
       </div>
     </div>
 
@@ -178,10 +178,13 @@
         </div>
 
         <div class="events-grid compact" *ngIf="displayedDashboardEvents.length; else emptyEvents">
-          <div class="event-card" *ngFor="let event of displayedDashboardEvents">
+          <div class="event-card" *ngFor="let event of displayedDashboardEvents" (click)="onEventCardClick(event)" [class.rejected-card]="event.status === 'rejected'">
             <div class="card-image">
               <img [src]="event.imageUrl" [alt]="event.title" loading="lazy" />
               <span class="date-badge">{{ event.date }}</span>
+              <div class="rejected-badge" *ngIf="event.status === 'rejected'">
+                <span class="material-symbols-outlined">priority_high</span>
+              </div>
               <span class="status-chip" [ngClass]="event.status">{{
                 statusLabels[event.status]
               }}</span>
@@ -196,12 +199,6 @@
               </div>
               <h4>{{ event.title }}</h4>
               <p class="desc">{{ event.description }}</p>
-              <div class="rejection-reason" *ngIf="event.status === 'rejected' && event.rejectionReason">
-                <span class="material-symbols-outlined rejection-icon">error</span>
-                <span class="rejection-text" (click)="openRejectionModal(event.rejectionReason!); $event.stopPropagation()">
-                  <strong>Red Nedeni:</strong> {{ event.rejectionReason }}
-                </span>
-              </div>
             </div>
           </div>
         </div>
@@ -258,10 +255,13 @@
         class="events-grid compact"
         *ngIf="filteredDashboardEvents.length; else emptyProjectEvents"
       >
-        <div class="event-card" *ngFor="let event of filteredDashboardEvents">
+        <div class="event-card" *ngFor="let event of filteredDashboardEvents" (click)="onEventCardClick(event)" [class.rejected-card]="event.status === 'rejected'">
           <div class="card-image">
             <img [src]="event.imageUrl" [alt]="event.title" loading="lazy" />
             <span class="date-badge">{{ event.date }}</span>
+            <div class="rejected-badge" *ngIf="event.status === 'rejected'">
+              <span class="material-symbols-outlined">priority_high</span>
+            </div>
             <span class="status-chip" [ngClass]="event.status">{{
               statusLabels[event.status]
             }}</span>
@@ -276,12 +276,6 @@
             </div>
             <h4>{{ event.title }}</h4>
             <p class="desc">{{ event.description }}</p>
-            <div class="rejection-reason" *ngIf="event.status === 'rejected' && event.rejectionReason">
-              <span class="material-symbols-outlined rejection-icon">error</span>
-              <span class="rejection-text" (click)="openRejectionModal(event.rejectionReason!); $event.stopPropagation()">
-                <strong>Red Nedeni:</strong> {{ event.rejectionReason }}
-              </span>
-            </div>
           </div>
         </div>
       </div>
@@ -662,18 +656,26 @@
 
 <!-- Rejection Reason Modal -->
 <div class="modal-backdrop rejection-modal" *ngIf="showRejectionModal" (click)="closeRejectionModal()">
-  <div class="modal-content rejection-modal-content" (click)="$event.stopPropagation()">
-    <div class="modal-header rejection-modal-header">
-      <h3>Reddedilme Nedeni</h3>
-      <button class="close-btn" (click)="closeRejectionModal()">
-        <span class="material-symbols-outlined">close</span>
-      </button>
-    </div>
-    <div class="modal-body rejection-modal-body">
-      <p class="rejection-reason-text">{{ selectedRejectionReason }}</p>
-    </div>
-    <div class="modal-footer rejection-modal-footer">
-      <button class="btn-secondary" (click)="closeRejectionModal()">Kapat</button>
+  <div class="modal-content rejection-modal-content compact-modern" (click)="$event.stopPropagation()">
+    <div class="decoration-circle"></div>
+    <div class="content-wrapper">
+      <div class="icon-floating">
+        <span class="material-symbols-outlined">feedback</span>
+      </div>
+      
+      <div class="text-content">
+        <h3>Etkinlik Onaylanmadı</h3>
+        <div class="scrollable-reason">
+          <p>{{ selectedRejectionReason }}</p>
+        </div>
+      </div>
+
+      <div class="action-area">
+        <button class="btn-theme-modern" (click)="closeRejectionModal()">
+          <span>Anlaşıldı</span>
+          <span class="material-symbols-outlined">arrow_forward</span>
+        </button>
+      </div>
     </div>
   </div>
 </div>
