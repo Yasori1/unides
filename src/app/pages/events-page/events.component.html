@@ -140,11 +140,7 @@
             <span class="tag uni" title="{{ event.university }}">{{ event.university }}</span>
             <span class="tag semester" *ngIf="event.semester">
               <span class="material-symbols-outlined" style="font-size: 14px">groups</span>
-<<<<<<< HEAD
               {{ getUniversityAbbreviation(event.university) }} {{ event.club }}
-=======
-              {{ event.semester }}
->>>>>>> parent of 3c98daa (11)
             </span>
           </div>
 
@@ -208,68 +204,6 @@
 
 <app-site-footer />
 
-<<<<<<< HEAD
-=======
-<div class="modal-backdrop" *ngIf="selectedEvent" (click)="closeModal()">
-  <div class="modal-content" (click)="$event.stopPropagation()">
-    <button class="close-btn" (click)="closeModal()">
-      <span class="material-symbols-outlined">close</span>
-    </button>
-
-    <div class="modal-header">
-      <img
-        [src]="selectedEvent.imageUrl"
-        class="modal-cover"
-        onerror="this.src='assets/images/placeholder.jpg'"
-      />
-      <span class="modal-cat-badge" [style.background]="selectedEvent.color">
-        {{ selectedEvent.category }}
-      </span>
-    </div>
-
-    <div class="modal-body">
-      <h2 class="event-title">{{ selectedEvent.title }}</h2>
-
-      <div class="info-card">
-        <div class="info-column">
-          <div class="info-item">
-            <span class="info-label">ÜNİVERSİTE</span>
-            <span class="info-value">{{ selectedEvent.university }}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">KULÜP</span>
-            <span class="info-value">{{ selectedEvent.club }}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">KONUM</span>
-            <span class="info-value">{{ selectedEvent.location }}</span>
-          </div>
-        </div>
-        <div class="info-column">
-          <div class="info-item">
-            <span class="info-label">TOPLULUK</span>
-            <span class="info-value">{{ selectedEvent.semester }}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">TARİH & SAAT</span>
-            <span class="info-value">{{ selectedEvent.date }} | {{ selectedEvent.time }}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">KONTENJAN</span>
-            <span class="info-value">{{ selectedEvent.quota }} Kişilik Yer Var</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="description-section">
-        <span class="description-label">AÇIKLAMA</span>
-        <p class="description-text">{{ selectedEvent.description }}</p>
-      </div>
-    </div>
-  </div>
-</div>
-
->>>>>>> parent of 3c98daa (11)
 <link
   rel="stylesheet"
   href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"

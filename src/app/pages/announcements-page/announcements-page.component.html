@@ -1,7 +1,6 @@
 <app-site-navbar></app-site-navbar>
 
 <div class="page-wrapper">
-  <!-- Background Elements -->
   <div class="global-background">
     <div class="blob blob-1"></div>
     <div class="blob blob-2"></div>
@@ -20,7 +19,6 @@
       <div class="blue-divider"></div>
     </div>
 
-    <!-- Search Bar -->
     <div class="search-container fade-in-up">
       <div class="search-box">
         <i class="bx bx-search search-icon"></i>
@@ -32,19 +30,16 @@
       </div>
     </div>
 
-    <!-- Loading State -->
     <div class="loading-state" *ngIf="isLoading">
       <div class="spinner"></div>
       <p>Duyurular yükleniyor...</p>
     </div>
 
-    <!-- Empty State -->
     <div class="empty-state" *ngIf="!isLoading && filteredAnnouncements.length === 0">
       <i class='bx bx-news'></i>
       <p>Aradığınız kriterlere uygun duyuru bulunamadı.</p>
     </div>
 
-    <!-- Announcements Grid -->
     <div class="announcements-grid" *ngIf="!isLoading && filteredAnnouncements.length > 0">
       <a 
         [routerLink]="['/announcements', ann.id]" 
@@ -52,7 +47,12 @@
         *ngFor="let ann of filteredAnnouncements"
       >
         <div class="card-image">
-          <img [src]="ann.image || 'assets/img/placeholder-announcement.jpg'" [alt]="ann.title" loading="lazy">
+          <img 
+            [src]="ann.image || 'assets/img/placeholder-announcement.jpg'" 
+            [alt]="ann.title" 
+            loading="lazy"
+            onerror="this.src='assets/img/placeholder-announcement.jpg'"
+          >
           <div class="date-badge">
             {{ formatDate(ann.date) }}
           </div>

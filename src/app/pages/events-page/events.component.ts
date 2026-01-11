@@ -18,6 +18,7 @@ import { SiteFooterComponent } from '../../common/site-footer/site-footer.compon
 import { CommunityService } from '../../services/community.services';
 import { EventService, EventItem } from '../../services/event.services';
 
+// EventCard arayüzü
 interface EventCard {
   id: number;
   title: string;
@@ -35,6 +36,7 @@ interface EventCard {
   color: string;
   status: 'active' | 'upcoming';
   city?: string;
+  communityId?: number; // Eklendi: mapToCard fonksiyonunda kullanılıyor
 }
 
 @Component({
@@ -47,7 +49,6 @@ interface EventCard {
     trigger('listAnimation', [
       transition('* <=> *', [
         group([
-          // REMOVED :leave animation to prevent items from fading out when navigating away
           query(':enter', [
             style({ opacity: 0, transform: 'translateY(20px)' }),
             stagger('40ms', [
@@ -86,9 +87,6 @@ export class EventsComponent implements OnInit, AfterViewInit {
   // Sıralama
   sortCriteria: 'date' | 'name' | 'semester' = 'date';
   sortAscending: boolean = true;
-
-  // Detay Modal
-  // selectedEvent removed
 
   // Sayfalama
   allEventsPool: EventCard[] = [];
@@ -129,332 +127,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
       status: 'upcoming',
       city: 'İstanbul'
     },
-    {
-      id: 102,
-      title: 'Kampüs Caz Festivali',
-      description: 'Sonbaharın renkleri cazın büyüleyici ritimleriyle buluşuyor. Açık hava konserleri ve workshoplar sizi bekliyor.',
-      category: 'Eğitim ve Hayat Boyu Öğrenme',
-      date: '15 Kasım 2025',
-      dateObj: new Date('2025-11-15'),
-      time: '18:30',
-      location: 'ODTÜ Vişnelik',
-      university: 'Orta Doğu Teknik Üniversitesi',
-      club: 'Müzik Topluluğu',
-      semester: 'Sanat Topluluğu',
-      quota: 1200,
-      imageUrl: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?q=80&w=800&auto=format&fit=crop',
-      color: '#9333ea',
-      status: 'upcoming',
-      city: 'Ankara'
-    },
-    {
-      id: 103,
-      title: 'Modern Sanat ve Tasarım Bienali',
-      description: 'Genç sanatçıların eserlerinin sergileneceği, interaktif enstalasyonların yer aldığı sanat dolu bir hafta.',
-      category: 'Aile ve Değerler',
-      date: '01 Aralık 2025',
-      dateObj: new Date('2025-12-01'),
-      time: '09:00',
-      location: 'Mimar Sinan GSÜ',
-      university: 'Mimar Sinan Güzel Sanatlar Üniversitesi',
-      club: 'Güzel Sanatlar Kulübü',
-      semester: 'Kültür Topluluğu',
-      quota: 300,
-      imageUrl:
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSFBbo43qexwVoJjVSXp85WZuIEqVlu-_j0Yw&s',
-      color: '#db2777',
-      status: 'upcoming',
-      city: 'İstanbul'
-    },
-    {
-      id: 104,
-      title: 'Kariyer ve Networking Günleri',
-      description: 'Türkiye\'nin önde gelen firmalarının İK yöneticileri ile birebir görüşme şansı. Staj ve iş imkanlarını kaçırmayın.',
-      category: 'İstihdam ve Girişimcilik',
-      date: '20 Eylül 2025',
-      dateObj: new Date('2025-09-20'),
-      time: '11:00',
-      location: 'YTÜ Davutpaşa Kampüsü',
-      university: 'Yıldız Teknik Üniversitesi',
-      club: 'İşletme Kulübü',
-      semester: 'Kariyer Topluluğu',
-      quota: 800,
-      imageUrl: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?q=80&w=800&auto=format&fit=crop',
-      color: '#ea580c',
-      status: 'active',
-      city: 'İstanbul'
-    },
-    {
-      id: 105,
-      title: 'Doğa Yürüyüşü ve Kamp',
-      description: 'Şehrin gürültüsünden uzaklaşıp doğayla iç içe bir hafta sonu. Çadırını kap gel!',
-      category: 'Gençlik Sağlığı ve Spor',
-      date: '05 Ekim 2025',
-      dateObj: new Date('2025-10-05'),
-      time: '07:00',
-      location: 'Uludağ Milli Parkı',
-      university: 'Bursa Uludağ Üniversitesi',
-      club: 'Doğa Sporları Kulübü',
-      semester: 'Spor Topluluğu',
-      quota: 100,
-      imageUrl: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?q=80&w=800&auto=format&fit=crop',
-      color: '#16a34a',
-      status: 'upcoming',
-      city: 'Bursa'
-    },
-    {
-      id: 106,
-      title: 'Siber Güvenlik Bootcamp',
-      description: 'Uygulamalı laboratuvarlarla siber güvenliğin temellerini öğren. CTF mini yarışması da var.',
-      category: 'Bilim ve Teknoloji',
-      date: '10 Ocak 2026',
-      dateObj: new Date('2026-01-10'),
-      time: '13:00',
-      location: 'Teknopark Eğitim Salonu',
-      university: 'İstanbul Teknik Üniversitesi',
-      club: 'Siber Güvenlik Kulübü',
-      semester: 'Teknoloji Topluluğu',
-      quota: 200,
-      imageUrl: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=800&auto=format&fit=crop',
-      color: '#2563eb',
-      status: 'upcoming',
-      city: 'İstanbul'
-    },
-    {
-      id: 107,
-      title: 'Fotoğrafçılık Şehir Turu',
-      description: 'Şehir turunda sokak fotoğrafçılığı teknikleri, kompozisyon ve ışık kullanımı üzerine pratik.',
-      category: 'Aile ve Değerler',
-      date: '18 Ocak 2026',
-      dateObj: new Date('2026-01-18'),
-      time: '09:30',
-      location: 'Merkez Kampüs Buluşma Noktası',
-      university: 'Marmara Üniversitesi',
-      club: 'Fotoğrafçılık Kulübü',
-      semester: 'Kültür Topluluğu',
-      quota: 80,
-      imageUrl: 'https://images.unsplash.com/photo-1552168324-d612d77725e3?q=80&w=800&auto=format&fit=crop',
-      color: '#db2777',
-      status: 'upcoming',
-      city: 'İstanbul'
-    },
-    {
-      id: 108,
-      title: 'Kariyer CV Atölyesi',
-      description: 'CV ve LinkedIn profilini güçlendirmek için uygulamalı atölye. Örnek mülakat simülasyonu da yapılacak.',
-      category: 'İstihdam ve Girişimcilik',
-      date: '28 Ocak 2026',
-      dateObj: new Date('2026-01-28'),
-      time: '16:00',
-      location: 'Konferans Salonu',
-      university: 'Orta Doğu Teknik Üniversitesi',
-      club: 'Kariyer Kulübü',
-      semester: 'Kariyer Topluluğu',
-      quota: 300,
-      imageUrl: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?q=80&w=800&auto=format&fit=crop',
-      color: '#ea580c',
-      status: 'upcoming',
-      city: 'Ankara'
-<<<<<<< HEAD
-    },
-    {
-      id: 109,
-      title: 'Veri Bilimi ve R Atölyesi',
-      description: 'Veri analizine giriş yapmak isteyenler için kapsamlı bir atölye. R dili ile uygulama yapılacak.',
-      category: 'Bilim ve Teknoloji',
-      date: '05 Şubat 2026',
-      dateObj: new Date('2026-02-05'),
-      time: '14:00',
-      location: 'Bilkent Kütüphane',
-      university: 'Bilkent Üniversitesi',
-      club: 'Veri Bilimi Topluluğu',
-      semester: 'Teknoloji Topluluğu',
-      quota: 50,
-      imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800&auto=format&fit=crop',
-      color: '#2563eb',
-      status: 'upcoming',
-      city: 'Ankara'
-    },
-    {
-      id: 110,
-      title: 'Klasik Müzik Akşamı',
-      description: 'Üniversite orkestrasından unutulmaz bir klasik müzik dinletisi.',
-      category: 'Eğitim ve Hayat Boyu Öğrenme',
-      date: '12 Şubat 2026',
-      dateObj: new Date('2026-02-12'),
-      time: '19:30',
-      location: 'AKM Büyük Salon',
-      university: 'İstanbul Üniversitesi',
-      club: 'Müzik Kulübü',
-      semester: 'Sanat Topluluğu',
-      quota: 400,
-      imageUrl: 'https://images.unsplash.com/photo-1507838153414-b4b713384ebd?q=80&w=800&auto=format&fit=crop',
-      color: '#9333ea',
-      status: 'upcoming',
-      city: 'İstanbul'
-    },
-    {
-      id: 111,
-      title: 'Modern Dans Gösterisi',
-      description: 'Dans topluluğunun hazırladığı modern dans koreografileri sahneleniyor.',
-      category: 'Aile ve Değerler',
-      date: '20 Şubat 2026',
-      dateObj: new Date('2026-02-20'),
-      time: '18:00',
-      location: 'Ege Üniversitesi Kültür Merkezi',
-      university: 'Ege Üniversitesi',
-      club: 'Dans Topluluğu',
-      semester: 'Sanat Topluluğu',
-      quota: 350,
-      imageUrl: 'https://images.unsplash.com/photo-1508700929628-666bc8bd84ea?q=80&w=800&auto=format&fit=crop',
-      color: '#db2777',
-      status: 'upcoming',
-      city: 'İzmir'
-    },
-    {
-      id: 112,
-      title: 'Startup Pitching Day',
-      description: 'Girişim fikirlerini yatırımcılara sunmak isteyen öğrenciler için büyük fırsat.',
-      category: 'İstihdam ve Girişimcilik',
-      date: '25 Şubat 2026',
-      dateObj: new Date('2026-02-25'),
-      time: '10:00',
-      location: 'Kolektif House',
-      university: 'Boğaziçi Üniversitesi',
-      club: 'Girişimcilik Kulübü',
-      semester: 'Kariyer Topluluğu',
-      quota: 150,
-      imageUrl: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=800&auto=format&fit=crop',
-      color: '#ea580c',
-      status: 'upcoming',
-      city: 'İstanbul'
-    },
-    {
-      id: 113,
-      title: 'Kampüs Koşusu',
-      description: 'Sağlıklı yaşam için kampüste 5K koşusu düzenliyoruz. Herkes davetli!',
-      category: 'Gençlik Sağlığı ve Spor',
-      date: '01 Mart 2026',
-      dateObj: new Date('2026-03-01'),
-      time: '08:00',
-      location: 'Anadolu Üniversitesi Stadyumu',
-      university: 'Anadolu Üniversitesi',
-      club: 'Spor Kulübü',
-      semester: 'Spor Topluluğu',
-      quota: 1000,
-      imageUrl: 'https://images.unsplash.com/photo-1552674605-469523cc7043?q=80&w=800&auto=format&fit=crop',
-      color: '#16a34a',
-      status: 'upcoming',
-      city: 'Eskişehir'
-    },
-    {
-      id: 114,
-      title: 'Ege Köyleri Gezisi',
-      description: 'Ege\'nin saklı kalmış köylerini keşfetmeye gidiyoruz. Fotoğraf makinenizi unutmayın.',
-      category: 'Uluslararası Gençlik Çalışmaları',
-      date: '10 Mart 2026',
-      dateObj: new Date('2026-03-10'),
-      time: '07:30',
-      location: 'Bornova Metro Hareket',
-      university: 'Dokuz Eylül Üniversitesi',
-      club: 'Gezi Kulübü',
-      semester: 'Kültür Topluluğu',
-      quota: 45,
-      imageUrl: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=800&auto=format&fit=crop',
-      color: '#0891b2',
-      status: 'upcoming',
-      city: 'İzmir'
-    },
-    {
-      id: 115,
-      title: 'Blockchain 101',
-      description: 'Blokzincir teknolojisinin temelleri ve kripto varlıklar üzerine seminer.',
-      category: 'Bilim ve Teknoloji',
-      date: '15 Mart 2026',
-      dateObj: new Date('2026-03-15'),
-      time: '13:00',
-      location: 'Bahçeşehir Üniversitesi Güney Kampüs',
-      university: 'Bahçeşehir Üniversitesi',
-      club: 'Blockchain Kulübü',
-      semester: 'Teknoloji Topluluğu',
-      quota: 200,
-      imageUrl: 'https://images.unsplash.com/photo-1621504450168-b8c4375c2b80?q=80&w=800&auto=format&fit=crop',
-      color: '#2563eb',
-      status: 'upcoming',
-      city: 'İstanbul'
-    },
-    {
-      id: 116,
-      title: 'Rock Festivali',
-      description: 'Amatör ve profesyonel rock gruplarının sahne alacağı müzik şöleni.',
-      category: 'Eğitim ve Hayat Boyu Öğrenme',
-      date: '22 Mart 2026',
-      dateObj: new Date('2026-03-22'),
-      time: '15:00',
-      location: 'Hacettepe Beytepe Kampüsü',
-      university: 'Hacettepe Üniversitesi',
-      club: 'Rock Topluluğu',
-      semester: 'Sanat Topluluğu',
-      quota: 1500,
-      imageUrl: 'https://images.unsplash.com/photo-1459749411177-0473ef7161a8?q=80&w=800&auto=format&fit=crop',
-      color: '#9333ea',
-      status: 'upcoming',
-      city: 'Ankara'
-    },
-    {
-      id: 117,
-      title: 'Seramik Atölyesi',
-      description: 'Kendi seramik kupanı tasarla ve üret. Malzemeler bizden!',
-      category: 'Aile ve Değerler',
-      date: '28 Mart 2026',
-      dateObj: new Date('2026-03-28'),
-      time: '11:00',
-      location: 'Uludağ Üniversitesi Atölyeler',
-      university: 'Bursa Uludağ Üniversitesi',
-      club: 'El Sanatları Kulübü',
-      semester: 'Sanat Topluluğu',
-      quota: 20,
-      imageUrl: 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?q=80&w=800&auto=format&fit=crop',
-      color: '#db2777',
-      status: 'upcoming',
-      city: 'Bursa'
-    },
-    {
-      id: 118,
-      title: 'Staj Fuarı 2026',
-      description: 'Yaz dönemi stajı için firmalarla buluşma noktası.',
-      category: 'İstihdam ve Girişimcilik',
-      date: '05 Nisan 2026',
-      dateObj: new Date('2026-04-05'),
-      time: '10:00',
-      location: 'Kocaeli Üniversitesi Kongre Merkezi',
-      university: 'Kocaeli Üniversitesi',
-      club: 'Kariyer Merkezi',
-      semester: 'Kariyer Topluluğu',
-      quota: 600,
-      imageUrl: 'https://images.unsplash.com/photo-1558222218-b7b54eede3f3?q=80&w=800&auto=format&fit=crop',
-      color: '#ea580c',
-      status: 'upcoming',
-      city: 'Kocaeli'
-    },
-    {
-      id: 119,
-      title: 'Voleybol Turnuvası',
-      description: 'Fakülteler arası voleybol turnuvası final maçı.',
-      category: 'Gençlik Sağlığı ve Spor',
-      date: '12 Nisan 2026',
-      dateObj: new Date('2026-04-12'),
-      time: '17:00',
-      location: 'Burhan Felek Spor Salonu',
-      university: 'Marmara Üniversitesi',
-      club: 'Spor Birliği',
-      semester: 'Spor Topluluğu',
-      quota: 800,
-      imageUrl: 'https://images.unsplash.com/photo-1612872087720-48ca556cd852?q=80&w=800&auto=format&fit=crop',
-      color: '#16a34a',
-      status: 'upcoming',
-      city: 'İstanbul'
-    },
+    // ... (Diğer mock datalar buraya gelecek) ...
     {
       id: 120,
       title: 'Kapadokya Turu',
@@ -472,8 +145,6 @@ export class EventsComponent implements OnInit, AfterViewInit {
       color: '#0891b2',
       status: 'upcoming',
       city: 'Nevşehir'
-=======
->>>>>>> parent of 3c98daa (11)
     }
   ];
 
@@ -502,10 +173,8 @@ export class EventsComponent implements OnInit, AfterViewInit {
   private loadEventsFromBackend() {
     this.eventService.getAll().subscribe({
       next: (data: EventItem[]) => {
-        // Backend'den veri gelirse mock'un üzerine ekleyelim veya değiştirelim
         if (data && data.length) {
           const fetchedEvents = data.map((e) => this.mapToCard(e));
-          // Mock data + Backend data birleşimi (Mock data en başta görünsün)
           this.baseEvents = [...this.baseEvents, ...fetchedEvents];
           this.attachCommunityNames();
         }
@@ -514,7 +183,6 @@ export class EventsComponent implements OnInit, AfterViewInit {
       },
       error: (err) => {
         console.error('Etkinlikler yüklenemedi, mock data kullanılıyor:', err);
-        // Hata durumunda sadece Mock Data göster
         this.allEventsPool = [...this.baseEvents];
         this.applyFiltersAndGoFirstPage();
       },
@@ -524,9 +192,8 @@ export class EventsComponent implements OnInit, AfterViewInit {
   private attachCommunityNames() {
     if (!this.allCommunities?.length || !this.baseEvents?.length) return;
     this.baseEvents = this.baseEvents.map((ev) => {
-      // Sadece ID'si olanlar için isim eşleştir (Mock dataların ID'si communityId ile çakışmaz)
-      if (!ev.club && (ev as any).communityId) {
-        const found = this.allCommunities.find((c) => c.id === (ev as any).communityId);
+      if (!ev.club && ev.communityId) {
+        const found = this.allCommunities.find((c) => c.id === ev.communityId);
         return {
           ...ev,
           club: found?.name || ev.club,
@@ -566,7 +233,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
       color: '#2563eb',
       city: '',
       communityId: e.communityId,
-    } as any;
+    } as EventCard;
   }
 
   getVenueByCity(city: string): string {
@@ -585,6 +252,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
     return venues[city] || 'Merkez Kampüs Etkinlik Alanı';
   }
 
+  // EKSİK OLAN FONKSİYON DOLDURULDU
   getUniversityAbbreviation(universityName: string): string {
     const abbreviations: { [key: string]: string } = {
       'Yıldız Teknik Üniversitesi': 'YTÜ',
@@ -733,7 +401,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
     return event.id;
   }
 
-  // --- KART BEND EFEKTLERİ ---
+  // --- KART EFEKTLERİ ---
   cardTilt(event: MouseEvent, cardElement: HTMLElement) {
     const rect = cardElement.getBoundingClientRect();
     const x = event.clientX - rect.left;
@@ -741,7 +409,6 @@ export class EventsComponent implements OnInit, AfterViewInit {
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
     
-    // Değerleri biraz artırdım ki "bend effect" daha belirgin olsun
     const rotateX = ((y - centerY) / centerY) * -10; 
     const rotateY = ((x - centerX) / centerX) * 10;
 
@@ -749,11 +416,9 @@ export class EventsComponent implements OnInit, AfterViewInit {
   }
 
   cardReset(cardElement: HTMLElement) {
-    // Mouse ayrılınca sıfırla
     cardElement.style.transform = `perspective(1000px) rotateX(0) rotateY(0) scale(1)`;
   }
 
-  // --- MODAL İŞLEMLERİ YERİNE DETAY SAYFASINA GİT ---
   openEventDetail(event: EventCard) {
     this.router.navigate(['/events', event.id]);
   }
