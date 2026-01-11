@@ -1,6 +1,7 @@
 import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 // Servisler
 import { ToastService } from '../../services/toast.services';
 // Bileşenler
@@ -20,7 +21,7 @@ interface AuthResponse {
 @Component({
   selector: 'app-login-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, ToastComponent, LumaSpinComponent],
+  imports: [CommonModule, RouterLink, FormsModule, ToastComponent, LumaSpinComponent],
   templateUrl: './login-page.component.html',
   styleUrls: ['./login-page.component.scss'],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -32,6 +33,13 @@ export class LoginPageComponent implements OnInit {
   roleId: number = 1; // öğrenci
   isLoading: boolean = false;
   loginError: string = '';
+  
+  // Şifremi Unuttum Modal
+  showForgotPasswordModal: boolean = false;
+  forgotPasswordEmail: string = '';
+  forgotEmailError: boolean = false;
+  isSendingEmail: boolean = false;
+  emailSent: boolean = false;
 
   constructor(
     private toastService: ToastService,
@@ -134,10 +142,10 @@ export class LoginPageComponent implements OnInit {
         }));
         localStorage.setItem('user_type', 'student');
 
-        this.toastService.show('Giriş başarılı! Anasayfaya yönlendiriliyorsunuz...', 'success');
+        this.toastService.show('Giriş başarılı! Dashboard\'a yönlendiriliyorsunuz...', 'success');
 
         setTimeout(() => {
-          this.router.navigateByUrl('/');
+          this.router.navigateByUrl('/student-dashboard');
         }, 1500);
       })
       .catch((e: any) => {
@@ -149,5 +157,100 @@ export class LoginPageComponent implements OnInit {
       .finally(() => {
         this.isLoading = false;
       });
+  }
+
+  // Şifremi Unuttum Modal Fonksiyonları
+  openForgotPasswordModal() {
+    this.showForgotPasswordModal = true;
+    this.forgotPasswordEmail = '';
+    this.forgotEmailError = false;
+    this.emailSent = false;
+  }
+
+  closeForgotPasswordModal() {
+    this.showForgotPasswordModal = false;
+    this.forgotPasswordEmail = '';
+    this.forgotEmailError = false;
+    this.emailSent = false;
+  }
+
+  validateForgotEmail(event: any) {
+    const email = event.target.value;
+    this.forgotPasswordEmail = email;
+    
+    if (!email) {
+      this.forgotEmailError = false;
+      return;
+    }
+    
+    // E-posta format kontrolü: .edu.tr ile bitmeli
+    if (email.includes('@') && !email.endsWith('.edu.tr')) {
+      this.forgotEmailError = true;
+    } else {
+      this.forgotEmailError = false;
+    }
+  }
+
+  async sendPasswordResetEmail() {
+    if (!this.forgotPasswordEmail || this.forgotEmailError) {
+      this.toastService.show('Lütfen geçerli bir öğrenci e-postası (.edu.tr) giriniz.', 'error');
+      return;
+    }
+
+    this.isSendingEmail = true;
+    this.emailSent = false;
+
+    try {
+      // NOT: Backend endpoint şu an yok ama kodlar hazır, endpoint eklendiğinde çalışacak
+      const response = await fetch('/api/Auth/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: this.forgotPasswordEmail.trim(),
+        }),
+      });
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        this.isSendingEmail = false;
+        this.toastService.show('Sunucuya bağlanılamadı. Lütfen tekrar deneyiniz.', 'error');
+        return;
+      }
+
+      const data = await response.json();
+
+      if (response.ok) {
+        this.emailSent = true;
+        this.toastService.show('Şifre sıfırlama linki e-posta adresinize gönderildi.', 'success');
+        setTimeout(() => {
+          this.closeForgotPasswordModal();
+        }, 3000);
+      } else {
+        this.isSendingEmail = false;
+        const errorMessage = data?.message || '';
+        const lowerMessage = errorMessage.toLowerCase();
+
+        if (
+          response.status === 404 ||
+          lowerMessage.includes('not found') ||
+          lowerMessage.includes('bulunamadı') ||
+          lowerMessage.includes('kullanıcı bulunamadı') ||
+          lowerMessage.includes('email not found') ||
+          lowerMessage.includes('e-posta bulunamadı')
+        ) {
+          this.toastService.show('Bu e-posta adresi ile kayıtlı kullanıcı bulunamadı.', 'error');
+        } else if (errorMessage) {
+          this.toastService.show(errorMessage, 'error');
+        } else {
+          this.toastService.show('Bir hata oluştu. Lütfen tekrar deneyiniz.', 'error');
+        }
+      }
+    } catch (error: any) {
+      console.error('Şifre sıfırlama hatası:', error);
+      this.isSendingEmail = false;
+      this.toastService.show('Sunucuya bağlanılamadı. Lütfen tekrar deneyiniz.', 'error');
+    }
   }
 }

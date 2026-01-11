@@ -117,7 +117,16 @@ export class StudentProfileComponent implements OnInit {
       const userInfoStr = localStorage.getItem('user_info');
       if (userInfoStr) {
         try {
-          this.userInfo = JSON.parse(userInfoStr);
+          const savedUserInfo = JSON.parse(userInfoStr);
+          // localStorage'dan gelen veriyi mevcut userInfo objesine merge et
+          // Böylece password alanları gibi mevcut alanlar korunur
+          this.userInfo = {
+            ...this.userInfo,
+            name: savedUserInfo.name || savedUserInfo.fullName || this.userInfo.name,
+            email: savedUserInfo.email || this.userInfo.email,
+            id: savedUserInfo.id || this.userInfo.id,
+            role: savedUserInfo.role || this.userInfo.role
+          };
         } catch (e) {
           console.error('Error parsing user info:', e);
         }
@@ -435,7 +444,7 @@ export class StudentProfileComponent implements OnInit {
     }
   }
 
-  changePassword(): void {
+  async changePassword(): Promise<void> {
     // Validate password change
     if (
       !this.userInfo.currentPassword ||
@@ -456,14 +465,51 @@ export class StudentProfileComponent implements OnInit {
       return;
     }
 
-    // Here you would typically call an API to change the password
-    // For now, we'll just show a success message
-    this.toastService.show('Şifre başarıyla değiştirildi', 'success');
+    // Backend'e şifre değiştirme isteği gönder
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        this.toastService.show('Oturum bilgisi bulunamadı. Lütfen tekrar giriş yapın.', 'error');
+        return;
+      }
 
-    // Clear password fields
-    this.userInfo.currentPassword = '';
-    this.userInfo.newPassword = '';
-    this.userInfo.confirmPassword = '';
+      const response = await fetch('/api/Auth/change-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          email: this.userInfo.email,
+          oldPassword: this.userInfo.currentPassword,
+          newPassword: this.userInfo.newPassword,
+          confirmNewPassword: this.userInfo.confirmPassword
+        }),
+      });
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        this.toastService.show('Sunucuya bağlanılamadı. Lütfen tekrar deneyiniz.', 'error');
+        return;
+      }
+
+      const data = await response.json();
+
+      if (response.ok) {
+        this.toastService.show('Şifreniz başarıyla değiştirildi', 'success');
+        
+        // Clear password fields
+        this.userInfo.currentPassword = '';
+        this.userInfo.newPassword = '';
+        this.userInfo.confirmPassword = '';
+      } else {
+        const errorMessage = data?.message || 'Şifre değiştirme işlemi başarısız oldu.';
+        this.toastService.show(errorMessage, 'error');
+      }
+    } catch (error: any) {
+      console.error('Şifre değiştirme hatası:', error);
+      this.toastService.show('Bir hata oluştu. Lütfen tekrar deneyiniz.', 'error');
+    }
   }
 
   toggleProfileDropdown(event?: MouseEvent): void {
