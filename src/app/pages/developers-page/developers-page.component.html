@@ -19,16 +19,14 @@
     </div>
   </div>
 
-  <!-- GELİŞTİRİCİ KARTLARI GRID (Waves Arka Planı Burada) -->
+  <!-- GELİŞTİRİCİ KARTLARI GRID (Neurons Arka Planı Burada) -->
   <div class="team-grid-section">
-    <!-- WAVES BACKGROUND (BEYAZ ZEMİN, SİYAH ÇİZGİLER) -->
-    <div class="waves-wrapper">
-      <app-waves
-        [backgroundColor]="'#ffffff'"
-        [strokeColor]="'rgba(0,0,0,0.1)'"
-        [pointerSize]="0.5"
-      >
-      </app-waves>
+    <!-- NEURONS BACKGROUND (BEYAZ ZEMİN, SOFT NÖRON ANİMASYONU) -->
+    <div class="neurons-wrapper">
+      <app-neurons-background
+        [nodeCount]="60"
+        [connectionDistance]="220"
+      ></app-neurons-background>
     </div>
 
     <div class="container">
@@ -42,7 +40,9 @@
           <app-profile-card
             [name]="dev.name"
             [title]="dev.title"
-            [enableTilt]="true"
+            [image]="dev.image"
+            [work]="dev.work"
+            [socialLinks]="dev.socialLinks"
           ></app-profile-card>
         </div>
       </div>

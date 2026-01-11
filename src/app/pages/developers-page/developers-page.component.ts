@@ -3,15 +3,22 @@ import { CommonModule } from '@angular/common';
 import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
 import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
 import { ProfileCardComponent } from '../../components/ui/profile-card/profile-card';
-import { WavesComponent } from '../../components/ui/waves/waves';
+import { NeuronsBackgroundComponent } from '../../components/ui/neurons-background/neurons-background';
+
+interface SocialLinks {
+  github?: string;
+  linkedin?: string;
+  twitter?: string;
+  instagram?: string;
+  website?: string;
+}
 
 interface Developer {
   name: string;
   title: string;
   image: string;
-  handle: string;
-  status: string;
-  contactText: string;
+  work: string; // Yaptığı iş / Developladığı kısım
+  socialLinks: SocialLinks;
 }
 
 @Component({
@@ -22,7 +29,7 @@ interface Developer {
     SiteNavbarComponent,
     SiteFooterComponent,
     ProfileCardComponent,
-    WavesComponent,
+    NeuronsBackgroundComponent,
   ],
   templateUrl: './developers-page.component.html',
   styleUrls: ['./developers-page.component.scss'],
@@ -35,161 +42,165 @@ export class DevelopersPageComponent implements OnInit {
       name: 'Safa G.',
       title: 'Lead Architect',
       image: 'https://randomuser.me/api/portraits/men/32.jpg',
-      handle: 'safa_arch',
-      status: 'Coding',
-      contactText: 'Follow',
+      work: 'Sistem mimarisi ve altyapı geliştirme',
+      socialLinks: {
+        github: 'https://github.com/safa',
+        linkedin: 'https://linkedin.com/in/safa',
+        website: 'https://safa.dev',
+      },
     },
     {
       name: 'Elif Y.',
       title: 'Product Manager',
       image: 'https://randomuser.me/api/portraits/women/44.jpg',
-      handle: 'elif_pm',
-      status: 'In Meeting',
-      contactText: 'Connect',
+      work: 'Ürün yönetimi ve strateji geliştirme',
+      socialLinks: {
+        linkedin: 'https://linkedin.com/in/elif',
+        twitter: 'https://twitter.com/elif',
+      },
     },
     {
       name: 'Caner K.',
       title: 'Senior Backend',
       image: 'https://randomuser.me/api/portraits/men/86.jpg',
-      handle: 'caner_dev',
-      status: 'Deploying',
-      contactText: 'Message',
+      work: 'Backend API ve veritabanı yönetimi',
+      socialLinks: {
+        github: 'https://github.com/caner',
+        linkedin: 'https://linkedin.com/in/caner',
+      },
     },
     {
       name: 'Zeynep S.',
       title: 'Senior Frontend',
       image: 'https://randomuser.me/api/portraits/women/68.jpg',
-      handle: 'zeynep_ui',
-      status: 'Designing',
-      contactText: 'Follow',
+      work: 'Kullanıcı arayüzü ve frontend geliştirme',
+      socialLinks: {
+        github: 'https://github.com/zeynep',
+        linkedin: 'https://linkedin.com/in/zeynep',
+        website: 'https://zeynep.dev',
+      },
     },
     {
       name: 'Murat D.',
       title: 'DevOps Engineer',
       image: 'https://randomuser.me/api/portraits/men/46.jpg',
-      handle: 'murat_ops',
-      status: 'Offline',
-      contactText: 'Email',
+      work: 'CI/CD pipeline ve altyapı otomasyonu',
+      socialLinks: {
+        github: 'https://github.com/murat',
+        linkedin: 'https://linkedin.com/in/murat',
+      },
     },
     {
       name: 'Ayşe T.',
       title: 'UI/UX Designer',
       image: 'https://randomuser.me/api/portraits/women/23.jpg',
-      handle: 'ayse_design',
-      status: 'Online',
-      contactText: 'Dribbble',
+      work: 'Kullanıcı deneyimi tasarımı ve arayüz geliştirme',
+      socialLinks: {
+        instagram: 'https://instagram.com/ayse',
+        linkedin: 'https://linkedin.com/in/ayse',
+        website: 'https://ayse.design',
+      },
     },
     {
       name: 'Burak Y.',
       title: 'Backend Developer',
       image: 'https://randomuser.me/api/portraits/men/22.jpg',
-      handle: 'burak_api',
-      status: 'Away',
-      contactText: 'GitHub',
+      work: 'RESTful API ve mikroservis geliştirme',
+      socialLinks: {
+        github: 'https://github.com/burak',
+        linkedin: 'https://linkedin.com/in/burak',
+      },
     },
     {
       name: 'Selin D.',
       title: 'Frontend Developer',
       image: 'https://randomuser.me/api/portraits/women/90.jpg',
-      handle: 'selin_fe',
-      status: 'Coding',
-      contactText: 'Follow',
+      work: 'React ve Angular uygulamaları geliştirme',
+      socialLinks: {
+        github: 'https://github.com/selin',
+        linkedin: 'https://linkedin.com/in/selin',
+      },
     },
     {
       name: 'Oğuzhan K.',
       title: 'Mobile Developer',
       image: 'https://randomuser.me/api/portraits/men/11.jpg',
-      handle: 'oguz_mob',
-      status: 'Testing',
-      contactText: 'Contact',
+      work: 'iOS ve Android uygulama geliştirme',
+      socialLinks: {
+        github: 'https://github.com/oguzhan',
+        linkedin: 'https://linkedin.com/in/oguzhan',
+      },
     },
     {
       name: 'Fatma A.',
       title: 'QA Engineer',
       image: 'https://randomuser.me/api/portraits/women/12.jpg',
-      handle: 'fatma_qa',
-      status: 'Bug Hunting',
-      contactText: 'Report',
+      work: 'Test otomasyonu ve kalite güvence',
+      socialLinks: {
+        linkedin: 'https://linkedin.com/in/fatma',
+      },
     },
     {
       name: 'Emre V.',
       title: 'Full Stack',
       image: 'https://randomuser.me/api/portraits/men/33.jpg',
-      handle: 'emre_fs',
-      status: 'Online',
-      contactText: 'Connect',
+      work: 'Full stack web uygulama geliştirme',
+      socialLinks: {
+        github: 'https://github.com/emre',
+        linkedin: 'https://linkedin.com/in/emre',
+        website: 'https://emre.dev',
+      },
     },
     {
       name: 'Gamze Ö.',
       title: 'Data Scientist',
       image: 'https://randomuser.me/api/portraits/women/45.jpg',
-      handle: 'gamze_data',
-      status: 'Analyzing',
-      contactText: 'Follow',
+      work: 'Veri analizi ve makine öğrenmesi',
+      socialLinks: {
+        github: 'https://github.com/gamze',
+        linkedin: 'https://linkedin.com/in/gamze',
+      },
     },
     {
       name: 'Hakan Ç.',
       title: 'Security',
       image: 'https://randomuser.me/api/portraits/men/55.jpg',
-      handle: 'hakan_sec',
-      status: 'Auditing',
-      contactText: 'Secure',
+      work: 'Güvenlik analizi ve siber güvenlik',
+      socialLinks: {
+        linkedin: 'https://linkedin.com/in/hakan',
+        website: 'https://hakan.security',
+      },
     },
     {
       name: 'İrem B.',
       title: 'Content Strategist',
       image: 'https://randomuser.me/api/portraits/women/66.jpg',
-      handle: 'irem_cont',
-      status: 'Writing',
-      contactText: 'Read',
+      work: 'İçerik stratejisi ve pazarlama',
+      socialLinks: {
+        instagram: 'https://instagram.com/irem',
+        linkedin: 'https://linkedin.com/in/irem',
+        twitter: 'https://twitter.com/irem',
+      },
     },
     {
       name: 'Kaan L.',
       title: 'Frontend Developer',
       image: 'https://randomuser.me/api/portraits/men/77.jpg',
-      handle: 'kaan_js',
-      status: 'Debugging',
-      contactText: 'Follow',
+      work: 'Vue.js ve React uygulamaları',
+      socialLinks: {
+        github: 'https://github.com/kaan',
+        linkedin: 'https://linkedin.com/in/kaan',
+      },
     },
     {
       name: 'Leyla M.',
       title: 'Backend Developer',
       image: 'https://randomuser.me/api/portraits/women/88.jpg',
-      handle: 'leyla_py',
-      status: 'Online',
-      contactText: 'Connect',
-    },
-    {
-      name: 'Mert N.',
-      title: 'Intern',
-      image: 'https://randomuser.me/api/portraits/men/99.jpg',
-      handle: 'mert_int',
-      status: 'Learning',
-      contactText: 'Support',
-    },
-    {
-      name: 'Nazlı P.',
-      title: 'Intern',
-      image: 'https://randomuser.me/api/portraits/women/29.jpg',
-      handle: 'nazli_int',
-      status: 'Online',
-      contactText: 'Connect',
-    },
-    {
-      name: 'Osman R.',
-      title: 'Cloud Architect',
-      image: 'https://randomuser.me/api/portraits/men/39.jpg',
-      handle: 'osman_cloud',
-      status: 'Scaling',
-      contactText: 'Contact',
-    },
-    {
-      name: 'Pelin S.',
-      title: 'Community Manager',
-      image: 'https://randomuser.me/api/portraits/women/59.jpg',
-      handle: 'pelin_cm',
-      status: 'Online',
-      contactText: 'Join',
+      work: 'Node.js ve Python backend geliştirme',
+      socialLinks: {
+        github: 'https://github.com/leyla',
+        linkedin: 'https://linkedin.com/in/leyla',
+      },
     },
   ];
 
