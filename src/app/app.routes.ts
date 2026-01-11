@@ -40,6 +40,7 @@ import { ResetPasswordComponent } from './pages/reset-password/reset-password.co
 import { CommunityDashboardComponent } from './pages/community-dashboard/community-dashboard.component';
 import { LoginPageComponent } from './pages/login-page/login-page.component';
 import { RegisterPageComponent } from './pages/register-page/register-page.component';
+import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -84,16 +85,17 @@ export const routes: Routes = [
   { path: 'coming-soon', component: ComingSoonComponent, data: { title: 'Bu Sayfa' } },
 
   // ŞİFRE SIFIRLAMA
+  { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'reset-password', component: ResetPasswordComponent },
 
   // KURUMSAL DASHBOARD
-  // { path: 'corporate-dashboard', component: CorporateDashboardComponent },
+  { path: 'corporate-dashboard', component: CorporateDashboardComponent },
   // TOPLULUK DASHBOARD
-  // { path: 'community-dashboard', component: CommunityDashboardComponent },
+  { path: 'community-dashboard', component: CommunityDashboardComponent },
 
-  // ÖĞRENCİ GİRİŞ SONRASI SAYFA
-  // { path: 'student-login', component: StudentLoginComponent },
-  // { path: 'profile', component: StudentProfileComponent },
+  // ÖĞRENCİ DASHBOARD
+  { path: 'student-dashboard', component: StudentProfileComponent },
+  { path: 'profile', component: StudentProfileComponent }, // Alias for student-dashboard
 
   // Admin Dashboard (Eski/Mevcut)
   /*
