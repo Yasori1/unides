@@ -50,6 +50,7 @@ interface Collaboration {
   city?: string;
   category?: string;
 }
+
 interface DashboardEvent {
   id: number;
   title: string;
@@ -59,6 +60,10 @@ interface DashboardEvent {
   location: string;
   category: string;
   description: string;
+  
+
+  time?: string;
+  quota?: number;
 }
 
 @Component({
@@ -91,6 +96,9 @@ export class CommunityDashboardComponent implements OnInit {
   showBannerModal = false;
   showAvatarModal = false;
   initialClubInfo: any = {};
+  
+  // Eksik olan değişken eklendi
+  selectedEvent: DashboardEvent | null = null;
 
   // Event creation modal
   newEventData = {
@@ -103,7 +111,6 @@ export class CommunityDashboardComponent implements OnInit {
     image: '',
   };
 
-<<<<<<< HEAD
   eventCategories: string[] = [
     'Afet Yönetimi ve Dayanıklılık',
     'Aile ve Değerler',
@@ -117,8 +124,7 @@ export class CommunityDashboardComponent implements OnInit {
     'Sosyal Kapsayıcılık',
     'Uluslararası Gençlik Çalışmaları',
   ];
-=======
->>>>>>> parent of 3c98daa (11)
+
   // Form Data
   newProjectData = { name: '', category: 'Teknoloji', budget: 0, deadline: '' };
   newMemberData = {
@@ -147,7 +153,6 @@ export class CommunityDashboardComponent implements OnInit {
     email: 'ai@itu.edu.tr',
     phone: '+90 555 123 45 67',
     instagram: '@itu_ai_official',
-    // GÜNCELLEME: Youtube, Twitter, Tiktok ve Website alanları kaldırıldı.
     description: 'Geleceği kodlayanların buluşma noktası.',
   };
 
@@ -870,7 +875,6 @@ export class CommunityDashboardComponent implements OnInit {
     }
     this.toastMessage = null;
   }
-<<<<<<< HEAD
 
   openEventDetail(event: DashboardEvent) {
     this.selectedEvent = event;
@@ -886,6 +890,3 @@ export class CommunityDashboardComponent implements OnInit {
     }
   }
 }
-=======
-}
->>>>>>> parent of 3c98daa (11)
