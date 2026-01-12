@@ -35,15 +35,6 @@
 
       <div class="filter-groups">
         <div class="select-wrapper">
-          <select [(ngModel)]="selectedCategory" (change)="applyFilters()">
-            <option value="all">Tüm Kategoriler</option>
-            <option value="Genel">Genel</option>
-            <option value="Bakanlık">Bakanlık</option>
-          </select>
-          <i class="bx bx-chevron-down"></i>
-        </div>
-
-        <div class="select-wrapper">
           <select [(ngModel)]="sortOrder" (change)="applyFilters()">
             <option value="default">Önerilen Sıralama</option>
             <option value="date_desc">Tarih (Yeni-Eski)</option>

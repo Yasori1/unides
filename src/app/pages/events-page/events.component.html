@@ -36,15 +36,8 @@
       </div>
 
       <div class="filter-groups">
-        <!-- Status Filter -->
-        <div class="select-wrapper">
-          <select [(ngModel)]="currentFilter" (change)="applyFiltersAndGoFirstPage()">
-            <option value="all">Tüm Projeler</option>
-            <option value="active">Başlayan Projeler</option>
-            <option value="upcoming">Başlayacak Projeler</option>
-          </select>
-          <i class="bx bx-chevron-down"></i>
-        </div>
+        <!-- Status Filter Removed -->
+        
         <!-- Category Filter -->
         <div class="select-wrapper">
           <select [(ngModel)]="activeCategory" (change)="applyFiltersAndGoFirstPage()">

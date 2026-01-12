@@ -140,7 +140,7 @@
   align-items: center;
 
   .search-group {
-    flex: 2;
+    flex: 3; /* Daha geniş alan kaplasın (önceden 2 idi) */
     min-width: 250px;
     position: relative;
     i {
@@ -168,14 +168,15 @@
   }
 
   .filter-groups {
-    flex: 3;
+    flex: 2; /* Daha dar alan kaplasın (önceden 3 idi) */
     display: flex;
     gap: 15px;
     flex-wrap: wrap;
 
     .select-wrapper {
-      flex: 1;
-      min-width: 160px;
+      flex: 1; /* Uzatıldı: available space'i kaplasın */
+      min-width: 220px; /* Biraz daha geniş min-width */
+      max-width: none; /* Max-width kaldırıldı */
       position: relative;
       i {
         position: absolute;
