@@ -195,8 +195,8 @@ export class CorporateDashboardComponent implements OnInit {
 
   // Topluluk düzenleme için
   selectedCommunity: Community | null = null;
-  editingCommunity: (Community & { presidentEmail?: string }) | null = null;
-  newCommunity: (Community & { presidentEmail?: string }) | null = null;
+  editingCommunity: (Community & { presidentEmail?: string; shortDescription?: string }) | null = null;
+  newCommunity: (Community & { presidentEmail?: string; shortDescription?: string }) | null = null;
 
   // Duyuru düzenleme için
   selectedAnnouncement: Announcement | null = null;
@@ -556,6 +556,7 @@ export class CorporateDashboardComponent implements OnInit {
       id: '', // Yeni topluluk için boş string, kaydedilirken otomatik Guid atanacak
       name: '',
       about: '',
+      shortDescription: '', // Kısa açıklama alanı
       city: '',
       university: '',
       memberCount: 0,
@@ -566,7 +567,7 @@ export class CorporateDashboardComponent implements OnInit {
       banner: '',
       status: 'Aktif',
       presidentEmail: '', // Topluluk başkanının email adresi (zorunlu)
-    } as Community & { presidentEmail?: string };
+    } as Community & { presidentEmail?: string; shortDescription?: string };
     this.modalType = 'new-community';
     this.isModalOpen = true;
   }
@@ -642,7 +643,8 @@ export class CorporateDashboardComponent implements OnInit {
       const communityForService = {
         ...this.newCommunity,
         id: '', // Service otomatik ID (Guid) atayacak - string olmalı
-        description: this.newCommunity.about || this.newCommunity.description || '',
+        description: (this.newCommunity as any).shortDescription || '', // Kısa açıklama description'a
+        about: this.newCommunity.about || '', // Detaylı açıklama about'a
         coverImage: this.newCommunity.banner || '',
         presidentEmail: presidentEmail.trim(),
       } as Community & { presidentEmail?: string };
