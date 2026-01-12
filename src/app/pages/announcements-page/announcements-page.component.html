@@ -83,14 +83,6 @@
           <div class="date-badge">
             {{ formatDate(ann.date) }}
           </div>
-          <!-- Kategori Badge (Yeni Eklendi) -->
-          <span 
-            class="category-badge" 
-            [ngClass]="ann.category === 'Bakanlık' ? 'badge-ministry' : 'badge-general'"
-            *ngIf="ann.category"
-          >
-            {{ ann.category }}
-          </span>
         </div>
 
         <div class="card-content">

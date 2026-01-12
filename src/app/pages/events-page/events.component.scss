@@ -513,6 +513,7 @@ $border-color: #e2e8f0;
         overflow: hidden;
         flex-shrink: 0;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
+        cursor: pointer; // Cursor pointer eklendi
         img {
           width: 100%;
           height: 100%;
@@ -527,141 +528,53 @@ $border-color: #e2e8f0;
   }
 }
 
-// --- MODAL ---
-.modal-backdrop {
+// --- LIGHTBOX MODAL ---
+.lightbox-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(5px);
-  z-index: 9999;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 10000;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
-}
+  backdrop-filter: blur(8px);
+  cursor: zoom-out;
+  animation: fadeIn 0.3s ease-out;
 
-.modal-content {
-  background: #fff;
-  width: 100%;
-  max-width: 900px;
-  border-radius: 24px;
-  overflow: hidden;
-  position: relative;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
-  max-height: 90vh;
-  overflow-y: auto;
+  img {
+    max-width: 90vw;
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+    cursor: default;
+    animation: scaleIn 0.3s ease-out;
+  }
 
-  .close-btn {
+  .close-lightbox {
     position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 40px;
-    height: 40px;
-    background: rgba(0, 0, 0, 0.6);
+    top: 30px;
+    right: 30px;
+    background: transparent;
     border: none;
-    border-radius: 50%;
     color: white;
-    cursor: pointer;
-    z-index: 10;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: 0.3s;
-    backdrop-filter: blur(4px);
+    cursor: pointer;
+    z-index: 10001;
+    transition: all 0.2s;
+    
     .material-symbols-outlined {
-      font-size: 24px;
+      font-size: 32px;
     }
+
     &:hover {
-      background: rgba(0, 0, 0, 0.8);
-      transform: rotate(90deg);
-    }
-  }
-
-  .modal-header {
-    height: 300px;
-    position: relative;
-    overflow: hidden;
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .modal-cat-badge {
-      position: absolute;
-      bottom: 20px;
-      left: 20px;
-      padding: 8px 16px;
-      color: white;
-      border-radius: 12px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-  }
-
-  .modal-body {
-    padding: 40px;
-    .event-title {
-      font-size: 2.2rem;
-      margin-bottom: 30px;
-      color: $text-dark;
-      font-weight: 800;
-      line-height: 1.2;
-      letter-spacing: -0.5px;
-      text-align: center;
-    }
-    .info-card {
-      background: $white;
-      border: 1px solid $border-color;
-      border-radius: 20px;
-      padding: 30px;
-      margin-bottom: 30px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 30px;
-      .info-column {
-        display: flex;
-        flex-direction: column;
-        gap: 24px;
-      }
-      .info-item {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        .info-label {
-          font-size: 0.7rem;
-          font-weight: 700;
-          color: $text-light-gray;
-          text-transform: uppercase;
-          letter-spacing: 0.8px;
-        }
-        .info-value {
-          font-size: 1rem;
-          font-weight: 600;
-          color: $text-dark;
-          line-height: 1.4;
-        }
-      }
-    }
-    .description-section {
-      margin-top: 30px;
-      .description-label {
-        font-size: 0.7rem;
-        font-weight: 700;
-        color: $text-light-gray;
-        text-transform: uppercase;
-        letter-spacing: 0.8px;
-        margin-bottom: 12px;
-        display: block;
-      }
-      .description-text {
-        color: #475569;
-        line-height: 1.7;
-        margin: 0;
-        font-size: 1rem;
-      }
+      background: rgba(255, 255, 255, 0.1);
+      transform: scale(1.1);
     }
   }
 }
@@ -700,6 +613,14 @@ $border-color: #e2e8f0;
     transform: rotate(360deg);
   }
 }
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes scaleIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
 
 // Remove old media queries at the bottom
 @media (max-width: 768px) {
@@ -714,20 +635,6 @@ $border-color: #e2e8f0;
     .sort-group {
       justify-content: space-between;
       margin-top: 15px;
-    }
-  }
-  .modal-content {
-    max-width: 95%;
-    .modal-body {
-      padding: 30px 20px;
-      .event-title {
-        font-size: 1.8rem;
-      }
-      .info-card {
-        grid-template-columns: 1fr;
-        gap: 20px;
-        padding: 20px;
-      }
     }
   }
 }
