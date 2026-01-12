@@ -75,11 +75,7 @@ export class CommunitiesPageComponent implements OnInit {
 
     this.communityService.getAllCommunities().subscribe({
       next: (data) => {
-        if (data.length === 0) {
-          this.allCommunities = this.communityService.getMockCommunities();
-        } else {
-          this.allCommunities = data;
-        }
+        this.allCommunities = data;
 
         // --- GÜNCELLEME: Şehirleri artık dinamik çekmiyoruz, yukarıdaki sabit listeyi kullanıyoruz. ---
         // Sadece kategorileri dinamik olarak veriden çekmeye devam ediyoruz.
@@ -104,9 +100,8 @@ export class CommunitiesPageComponent implements OnInit {
       },
       error: (err) => {
         console.error('Topluluklar yüklenirken hata oluştu:', err);
-        this.allCommunities = this.communityService.getMockCommunities();
-        // Hata olsa bile 81 il listemiz sabit olduğu için bozulmaz
-        this.categories = [...new Set(this.allCommunities.map(c => c.category))].sort();
+        this.allCommunities = [];
+        this.categories = [];
         this.applyFilters();
         this.isLoading = false;
       }
@@ -180,7 +175,7 @@ export class CommunitiesPageComponent implements OnInit {
     }
   }
 
-  navigateToDetail(id: number) {
+  navigateToDetail(id: string) {
     this.router.navigate(['/communities', id]);
   }
 

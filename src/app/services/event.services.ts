@@ -15,6 +15,7 @@ export interface EventItem {
   communityName?: string;
   imageUrl?: string;
   status?: 'Onaylandı' | 'Beklemede' | 'Reddedildi';
+  capacity?: string;
 }
 
 // Swipe/magic-card bileşenleri için kullanılan mock Project tipi
@@ -59,51 +60,11 @@ export class EventService {
       status: 'upcoming',
       location: 'Ankara',
     },
-    {
-      id: 3,
-      title: 'Dijital Girişimcilik Akademisi',
-      category: 'Kariyer & Eğitim',
-      date: 'Her Cumartesi',
-      description: 'Fikrini girişime dönüştürmek isteyenler için 8 haftalık eğitim programı.',
-      image:
-        'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=1000&auto=format&fit=crop',
-      status: 'active',
-      location: 'Online',
-    },
-    {
-      id: 4,
-      title: 'Yapay Zeka ve Sanat Sergisi',
-      category: 'Kültür & Sanat',
-      date: 'Ocak 2026',
-      description: 'Yapay zeka araçlarıyla üretilen eserlerin sergileneceği büyük buluşma.',
-      image:
-        'https://images.unsplash.com/photo-1561557944-6e7860d1a7eb?q=80&w=1000&auto=format&fit=crop',
-      status: 'upcoming',
-      location: 'İzmir',
-    },
-    {
-      id: 5,
-      title: 'Kış Müzik Festivali',
-      category: 'Eğlence',
-      date: '15 Şubat 2026',
-      description: 'Ünlü grupların sahne alacağı, karlar altında sıcak bir müzik şöleni.',
-      image:
-        'https://images.unsplash.com/photo-1459749411177-287ce3276916?q=80&w=1000&auto=format&fit=crop',
-      status: 'upcoming',
-      location: 'Uludağ',
-    },
-    {
-      id: 6,
-      title: 'Robotik Atölyesi',
-      category: 'Teknoloji',
-      date: 'Her Çarşamba',
-      description: 'Kendi robotunu tasarla ve kodla. Malzemeler bizden!',
-      image:
-        'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=1000&auto=format&fit=crop',
-      status: 'active',
-      location: 'Maker Lab',
-    },
+    // ...
   ];
+
+  // In-memory mock events for cross-component communication demo
+  private mockEvents: EventItem[] = [];
 
   constructor(private http: HttpClient) {}
 
@@ -123,14 +84,39 @@ export class EventService {
   }
 
   getAll(): Observable<EventItem[]> {
+    // API çağrısı yap, hata alırsan veya sonuç dönerse üzerine mock verileri ekle
     return this.http.get<any[]>(`${this.apiUrl}/all`).pipe(
-      map((list) => list.map((dto) => this.mapToEvent(dto))),
+      map((list) => {
+        const apiEvents = list.map((dto) => this.mapToEvent(dto));
+        return [...this.mockEvents, ...apiEvents];
+      }),
       catchError((error) => {
-        console.error('Etkinlikler yüklenemedi:', error);
-        return of([]);
+        console.error('Etkinlikler yüklenemedi (API), mock veri dönülüyor:', error);
+        return of([...this.mockEvents]);
       })
     );
   }
+
+  // Yeni etkinlik ekleme (Mock)
+  addEvent(event: Partial<EventItem>): Observable<EventItem> {
+    const newItem: EventItem = {
+      id: Date.now(), // Basit ID üretimi
+      title: event.title || '',
+      description: event.description || '',
+      shortDescription: event.shortDescription || event.description || '',
+      startDate: event.startDate || '',
+      location: event.location || '',
+      imageUrl: event.imageUrl || '',
+      communityId: event.communityId || 0,
+      communityName: event.communityName || '',
+      status: 'Beklemede',
+      ...event
+    } as EventItem;
+    
+    this.mockEvents.unshift(newItem);
+    return of(newItem).pipe(delay(500)); // Network gecikmesi simülasyonu
+  }
+
 
   // --- Magic-card / swipe-stack mock veri kaynakları ---
   getEvents(): Observable<Project[]> {

@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
 import { Router } from '@angular/router';
 import { ImageUploadComponent } from '../../components/ui/image-upload/image-upload';
-import { CommunityService } from '../../services/community.services';
+import { CommunityService, Community } from '../../services/community.services';
 import { AnnouncementService } from '../../services/announcement.services';
 import { EventService, EventItem } from '../../services/event.services';
 
@@ -129,27 +129,8 @@ interface Stat {
   icon: string;
   colorClass: string;
 }
-interface Community {
-  id: number;
-  name: string;
-  about?: string;
-  description?: string; // CommunityService'ten gelen veri için
-  city?: string;
-  university: string;
-  memberCount: number;
-  socialMedia?: string; // Eski uyumluluk için
-  instagram?: string;
-  youtube?: string;
-  twitter?: string;
-  tiktok?: string;
-  website?: string;
-  email?: string;
-  category: string;
-  logo: string;
-  banner?: string;
-  coverImage?: string; // CommunityService'ten gelen veri için
-  status?: 'Aktif' | 'Pasif' | 'Onay Bekleyen';
-}
+// Community interface artık model dosyasından import ediliyor
+// Eski interface kaldırıldı - yeni model kullanılıyor (id: string)
 interface Announcement {
   id: number;
   title: string;
@@ -161,7 +142,7 @@ interface Announcement {
 }
 interface EventRequest {
   id: number;
-  communityId?: number;
+  communityId?: number | string; // Hem number (eski) hem string (Guid) destekle
   communityName: string;
   eventName: string;
   date: string;
@@ -170,6 +151,7 @@ interface EventRequest {
   description?: string;
   status: 'Onaylandı' | 'Beklemede' | 'Reddedildi';
   capacity?: string;
+  rejectionReason?: string;
 }
 
 interface Notification {
@@ -227,11 +209,7 @@ export class CorporateDashboardComponent implements OnInit {
     username: 'unides_admin',
   };
 
-  stats: Stat[] = [
-    { label: 'Toplam Topluluk', value: 42, icon: 'groups', colorClass: 'blue' },
-    { label: 'Aktif Etkinlik', value: 12, icon: 'event', colorClass: 'green' },
-    { label: 'Bekleyen İstek', value: 5, icon: 'pending_actions', colorClass: 'orange' },
-  ];
+  // stats dizisi ve ilgili HTML kullanımı kaldırıldı
 
   // Kategori listesi
   categories: string[] = [
@@ -264,6 +242,8 @@ export class CorporateDashboardComponent implements OnInit {
 
   allEvents: EventRequest[] = [];
   selectedEvent: EventRequest | null = null;
+  eventToReject: EventRequest | null = null;
+  rejectionReason = '';
   newEvent: Partial<EventRequest> | null = null;
 
   notifications: Notification[] = [
@@ -361,12 +341,87 @@ export class CorporateDashboardComponent implements OnInit {
           status: e.status || 'Beklemede',
           capacity: '',
         }));
+
+        // DEMO EVENTS - TEST İÇİN
+        const demoEvents: EventRequest[] = [
+          {
+            id: 9001,
+            communityName: 'Teknoloji Topluluğu',
+            eventName: 'Yapay Zeka Zirvesi',
+            date: '15 Şubat 2026 | 10:00',
+            location: 'Merkez Kampüs - Konferans Salonu A',
+            description: 'Yapay zeka dünyasındaki son gelişmeler, etik tartışmalar ve gelecek vizyonunun ele alınacağı kapsamlı bir zirve. Sektör öncüleri ve akademisyenlerin katılımıyla gerçekleşecek.',
+            status: 'Beklemede',
+            imageUrl: 'assets/images/listing/img1.jpg',
+            capacity: '500 Kişi'
+          },
+          {
+            id: 9002,
+            communityName: 'Müzik Kulübü',
+            eventName: 'Bahar Konseri',
+            date: '20 Mart 2026 | 18:00',
+            location: 'Kampüs Meydanı - Açık Hava Sahnesi',
+            description: 'Baharın gelişini coşkuyla kutluyoruz! Öğrenci grupları ve sürpriz konuk sanatçıların sahne alacağı müzik dolu bir akşam.',
+            status: 'Beklemede',
+            imageUrl: 'assets/images/listing/img2.jpg',
+            capacity: '1000+ Kişi'
+          },
+          {
+            id: 9003,
+            communityName: 'Girişimcilik Kulübü',
+            eventName: 'Startup Weekend',
+            date: '05 Nisan 2026 | 09:00',
+            location: 'İnovasyon Merkezi - Kuluçka Alanı',
+            description: '48 saat sürecek kesintisiz girişimcilik maratonu. Fikrini takıma dönüştür, mentorlardan destek al ve jüri karşısında sunumunu yap.',
+            status: 'Beklemede',
+            imageUrl: 'assets/images/listing/img3.jpg',
+            capacity: '100 Kişi'
+          }
+        ];
+        this.allEvents = [...demoEvents, ...this.allEvents];
+
         this.attachCommunityNamesToEvents();
         this.filteredEvents = [...this.allEvents]; // Başlangıçta tüm etkinlikleri göster
       },
       error: (err) => {
         console.error('Etkinlikler yüklenemedi:', err);
-        this.filteredEvents = [];
+        // Hata durumunda da demo eventleri göster
+        this.allEvents = [
+          {
+            id: 9001,
+            communityName: 'Teknoloji Topluluğu',
+            eventName: 'Yapay Zeka Zirvesi',
+            date: '15 Şubat 2026 | 10:00',
+            location: 'Merkez Kampüs - Konferans Salonu A',
+            description: 'Yapay zeka dünyasındaki son gelişmeler, etik tartışmalar ve gelecek vizyonunun ele alınacağı kapsamlı bir zirve. Sektör öncüleri ve akademisyenlerin katılımıyla gerçekleşecek.',
+            status: 'Beklemede',
+            imageUrl: 'assets/images/listing/img1.jpg',
+            capacity: '500 Kişi'
+          },
+          {
+            id: 9002,
+            communityName: 'Müzik Kulübü',
+            eventName: 'Bahar Konseri',
+            date: '20 Mart 2026 | 18:00',
+            location: 'Kampüs Meydanı - Açık Hava Sahnesi',
+            description: 'Baharın gelişini coşkuyla kutluyoruz! Öğrenci grupları ve sürpriz konuk sanatçıların sahne alacağı müzik dolu bir akşam.',
+            status: 'Beklemede',
+            imageUrl: 'assets/images/listing/img2.jpg',
+            capacity: '1000+ Kişi'
+          },
+          {
+            id: 9003,
+            communityName: 'Girişimcilik Kulübü',
+            eventName: 'Startup Weekend',
+            date: '05 Nisan 2026 | 09:00',
+            location: 'İnovasyon Merkezi - Kuluçka Alanı',
+            description: '48 saat sürecek kesintisiz girişimcilik maratonu. Fikrini takıma dönüştür, mentorlardan destek al ve jüri karşısında sunumunu yap.',
+            status: 'Beklemede',
+            imageUrl: 'assets/images/listing/img3.jpg',
+            capacity: '100 Kişi'
+          }
+        ];
+        this.filteredEvents = [...this.allEvents];
       },
     });
   }
@@ -374,7 +429,8 @@ export class CorporateDashboardComponent implements OnInit {
   attachCommunityNamesToEvents() {
     if (!this.allCommunities?.length || !this.allEvents?.length) return;
     this.allEvents = this.allEvents.map((ev) => {
-      const found = this.allCommunities.find((c) => c.id === ev.communityId);
+      // Community id string (Guid), EventItem communityId number - String'e çevirip karşılaştır
+      const found = this.allCommunities.find((c) => String(c.id) === String(ev.communityId));
       return { ...ev, communityName: found?.name || ev.communityName };
     });
   }
@@ -497,7 +553,7 @@ export class CorporateDashboardComponent implements OnInit {
   // Yeni topluluk ekleme
   openNewCommunityModal() {
     this.newCommunity = {
-      id: 0, // Yeni topluluk için 0, kaydedilirken otomatik ID atanacak
+      id: '', // Yeni topluluk için boş string, kaydedilirken otomatik Guid atanacak
       name: '',
       about: '',
       city: '',
@@ -585,7 +641,7 @@ export class CorporateDashboardComponent implements OnInit {
       // CommunityService'e kaydet (communities-page'e otomatik eklenir)
       const communityForService = {
         ...this.newCommunity,
-        id: 0, // Service otomatik ID atayacak
+        id: '', // Service otomatik ID (Guid) atayacak - string olmalı
         description: this.newCommunity.about || this.newCommunity.description || '',
         coverImage: this.newCommunity.banner || '',
         presidentEmail: presidentEmail.trim(),
@@ -786,8 +842,25 @@ export class CorporateDashboardComponent implements OnInit {
   rejectEvent(id: number) {
     const event = this.allEvents.find((e) => e.id === id);
     if (event) {
-      event.status = 'Reddedildi';
-      this.showToast('Etkinlik reddedildi', 'error');
+      this.eventToReject = event;
+      this.rejectionReason = ''; // Reset reason
+      this.modalType = 'reject-event'; // Set modal type for rejection
+      this.isModalOpen = true;
+    }
+  }
+
+  confirmRejection() {
+    if (this.eventToReject) {
+      this.eventToReject.status = 'Reddedildi';
+      this.eventToReject.rejectionReason = this.rejectionReason;
+      
+      // Burada normalde backend'e rejectionReason ile birlikte güncelleme isteği atılır
+      console.log(`Event ${this.eventToReject.id} rejected. Reason: ${this.rejectionReason}`);
+      
+      this.showToast('Etkinlik reddedildi', 'success'); // 'error' yerine 'success' çünkü işlem başarılı
+      this.closeModal();
+      this.eventToReject = null;
+      this.rejectionReason = '';
     }
   }
 
@@ -802,7 +875,9 @@ export class CorporateDashboardComponent implements OnInit {
       eventName: '',
       date: '',
       location: '',
-      communityId: this.allCommunities[0]?.id || undefined,
+      // Community id string (Guid), EventRequest communityId number bekliyor - undefined bırakıyoruz
+      // Backend'e gönderilirken uygun formata çevrilecek
+      communityId: undefined,
       communityName: this.allCommunities[0]?.name || '',
       imageUrl: '',
       description: '',
@@ -825,7 +900,7 @@ export class CorporateDashboardComponent implements OnInit {
       location: this.newEvent.location || '',
       communityId: this.newEvent.communityId,
       communityName:
-        this.allCommunities.find((c) => c.id === this.newEvent?.communityId)?.name ||
+        this.allCommunities.find((c) => String(c.id) === String(this.newEvent?.communityId))?.name ||
         this.newEvent.communityName ||
         '',
       imageUrl: this.newEvent.imageUrl || '',
@@ -1130,5 +1205,14 @@ export class CorporateDashboardComponent implements OnInit {
       default:
         return '';
     }
+  }
+
+  getShortDesc(description: string | undefined): string {
+    const desc = description || 'Açıklama bulunmuyor.';
+    const limit = 120;
+    if (desc.length > limit) {
+      return desc.substring(0, limit) + '...';
+    }
+    return desc;
   }
 }

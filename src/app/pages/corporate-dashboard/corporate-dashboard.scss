@@ -89,9 +89,9 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
       box-shadow: none;
 
       .brand-logo {
-        height: 90px;
+        height: 60px;
         width: auto;
-        max-width: 220px;
+        max-width: 180px;
         display: block;
         object-fit: contain;
       }
@@ -282,7 +282,7 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
   .event-card-top {
     padding: 18px;
     background: #fff;
-    height: 100%;
+    flex: 1; /* height: 100% yerine esnek yükseklik */
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -312,16 +312,16 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
   }
 
   .card-info {
-    height: 58%;
+    flex: 1; /* height: 58% yerine esnek */
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
 
     .tags-row {
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
       .tag {
         font-size: 0.7rem;
         font-weight: 600;
@@ -354,31 +354,49 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
       color: $text-muted;
       line-height: 1.5;
       display: -webkit-box;
-      -webkit-line-clamp: 3;
+      -webkit-line-clamp: 5; /* Satır sayısı artırıldı */
       -webkit-box-orient: vertical;
       overflow: hidden;
-      margin: 0 0 4px;
+      margin: 0;
     }
 
     .bottom-meta {
+      margin-top: auto; /* En alta it */
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      flex-direction: column;
+      align-items: flex-start;
       border-top: 1px solid $bg-body;
       padding-top: 12px;
-      .category {
-        font-size: 0.7rem;
-        text-transform: uppercase;
-        letter-spacing: 0.6px;
-        font-weight: 700;
-        color: $primary;
-      }
+      gap: 8px;
+
       .mini-location {
         display: flex;
         align-items: center;
         gap: 4px;
         font-size: 0.75rem;
         color: $text-muted;
+      }
+
+      .status-badge-inline {
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+
+        &.Beklemede {
+          color: $warning;
+          background: rgba($warning, 0.1);
+        }
+        &.Onaylandı {
+          color: $success;
+          background: rgba($success, 0.1);
+        }
+        &.Reddedildi {
+          color: $danger;
+          background: rgba($danger, 0.1);
+        }
       }
     }
   }
@@ -549,18 +567,27 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
 }
 .event-detail-cover {
   width: 100%;
-  height: 220px;
-  border-radius: 12px;
+  height: 250px;
+  border-radius: 16px;
   overflow: hidden;
   background: #f3f4f6;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  margin-bottom: 24px;
+
   img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.5s ease;
   }
+  
+  &:hover img {
+    transform: scale(1.03);
+  }
+
   &.placeholder {
     color: $text-muted;
     span {
@@ -570,27 +597,64 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
 }
 .event-detail-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+  
   .item {
-    background: #f8fafc;
-    border: 1px solid $border;
-    border-radius: 12px;
-    padding: 12px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    transition: all 0.2s ease;
+
+    &:hover {
+      border-color: #2563eb;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      background: #fcfcfc;
+    }
+
     .label {
-      font-size: 0.75rem;
-      color: $text-muted;
+      font-size: 0.7rem;
+      color: #64748b;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      
+      &::before {
+        content: '';
+        width: 6px;
+        height: 6px;
+        background: #2563eb;
+        border-radius: 50%;
+        opacity: 0.6;
+      }
     }
+
     .value {
-      margin: 4px 0 0;
-      color: $text-main;
-      font-weight: 700;
+      margin: 2px 0 0;
+      color: #1e293b;
+      font-weight: 600;
+      font-size: 0.95rem;
+      line-height: 1.4;
     }
+
     &.full {
       grid-column: 1 / -1;
+      background: #f8fafc;
+      border-style: dashed;
+      
+      .value {
+        font-weight: 400;
+        color: #475569;
+        font-size: 0.9rem;
+      }
     }
   }
 }
@@ -722,8 +786,8 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
       position: absolute !important;
       top: calc(100% + 10px) !important;
       right: 0 !important;
-      width: 280px !important;
-      min-width: 280px;
+      width: 200px !important;
+      min-width: 200px;
       background: #fff !important;
       border: 1px solid #e2e8f0 !important;
       border-radius: 16px !important;
@@ -771,6 +835,7 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
         transition: all 0.2s ease;
         font-size: 0.9rem;
         position: relative;
+        justify-content: flex-start;
 
         &:hover {
           background: rgba(20, 210, 204, 0.1);
@@ -917,17 +982,30 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
     }
 
     .status-filter {
-      padding: 10px 15px;
+      padding: 10px 36px 10px 15px;
       border-radius: 8px;
       border: 1px solid $border;
-      background: $surface;
+      background-color: $surface;
       color: $text-main;
       font-size: 0.9rem;
+      font-weight: 500;
       cursor: pointer;
       outline: none;
-      min-width: 150px;
+      min-width: 160px;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 -960 960 960' width='24' fill='%2364748b'%3E%3Cpath d='M480-360 280-560h400L480-360Z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      background-size: 24px;
+
       &:focus {
         border-color: $primary;
+      }
+      
+      option {
+        color: $text-main;
       }
     }
   }
@@ -1924,6 +2002,19 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
   }
 }
 
+.upload-hint-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.size-hint {
+  font-size: 0.75rem;
+  color: #64748b; // $text-muted ile aynı
+  margin-left: 4px;
+  font-style: italic;
+}
+
 .logo-upload-wrapper {
   ::ng-deep {
     .image-upload-container {
@@ -2099,6 +2190,26 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
       background: $danger;
       color: white;
       border-color: $danger;
+    }
+  }
+
+  .btn-success {
+    background: #ecfdf5;
+    color: $success;
+    border: 1px solid #a7f3d0;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.2s;
+    font-family: inherit;
+    &:hover {
+      background: $success;
+      color: white;
+      border-color: $success;
     }
   }
 

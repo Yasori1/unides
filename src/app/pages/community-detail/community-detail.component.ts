@@ -5,6 +5,7 @@ import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.compon
 import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
 import { CommunityService, Community } from '../../services/community.services';
 import { EventService, EventItem } from '../../services/event.services';
+import { CommunityEventDto } from '../../models/community.models';
 
 // CommunityEvent interface for mock data
 export interface CommunityEvent {
@@ -26,7 +27,7 @@ export interface CommunityEvent {
 export class CommunityDetailComponent implements OnInit {
   community: Community | null = null;
   isLoading: boolean = true;
-  communityId: number | null = null;
+  communityId: string | null = null;
   communityEvents: EventItem[] = [];
   isLoadingEvents: boolean = false;
 
@@ -84,7 +85,7 @@ export class CommunityDetailComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.params.subscribe((params) => {
-      const id = +params['id'];
+      const id = params['id'];
       if (id) {
         this.communityId = id;
         // SSR sırasında HTTP istekleri yapma, sadece browser'da yap
@@ -102,7 +103,7 @@ export class CommunityDetailComponent implements OnInit {
     });
   }
 
-  loadCommunity(id: number) {
+  loadCommunity(id: string) {
     // Sadece browser'da çalıştığından emin ol
     if (!isPlatformBrowser(this.platformId)) {
       return;
@@ -115,7 +116,9 @@ export class CommunityDetailComponent implements OnInit {
           this.community = data;
           this.communityId = id;
           // Topluluk yüklendikten sonra etkinlikleri yükle
-          this.loadCommunityEvents(id);
+          if (data) {
+            this.loadCommunityEvents(id);
+          }
         } else {
           // Topluluk bulunamadıysa listeye yönlendir
           this.router.navigate(['/communities']);
@@ -130,24 +133,41 @@ export class CommunityDetailComponent implements OnInit {
     });
   }
 
-  loadCommunityEvents(communityId: number) {
+  loadCommunityEvents(communityId: string) {
     if (!isPlatformBrowser(this.platformId)) {
       return;
     }
 
     this.isLoadingEvents = true;
-    this.eventService.getAll().subscribe({
-      next: (events) => {
-        // Bu topluluğa ait etkinlikleri filtrele
-        this.communityEvents = events.filter((e) => e.communityId === communityId);
-        this.isLoadingEvents = false;
-      },
-      error: (err) => {
-        console.error('Etkinlikler yüklenemedi:', err);
-        this.communityEvents = [];
-        this.isLoadingEvents = false;
-      },
-    });
+    // Backend'den gelen community.events kullanılacak
+    if (this.community?.events && this.community.events.length > 0) {
+      // Backend'den gelen events'i kullan
+      this.communityEvents = this.community.events.map((e: CommunityEventDto) => ({
+        id: parseInt(e.eventId) || 0, // EventItem id number bekliyor
+        title: e.title || '',
+        date: e.startDate || '',
+        location: e.location || '',
+        description: '',
+        communityId: parseInt(this.communityId || '0') || 0, // EventItem communityId number bekliyor
+      }));
+      this.isLoadingEvents = false;
+    } else {
+      // Eğer backend'de events yoksa, eski event service'ten çek (fallback)
+      this.eventService.getAll().subscribe({
+        next: (events) => {
+          // Bu topluluğa ait etkinlikleri filtrele
+          // EventItem'da communityId number, bizim communityId string (Guid)
+          // String'e çevirip karşılaştırıyoruz
+          this.communityEvents = events.filter((e) => String(e.communityId) === communityId);
+          this.isLoadingEvents = false;
+        },
+        error: (err) => {
+          console.error('Etkinlikler yüklenemedi:', err);
+          this.communityEvents = [];
+          this.isLoadingEvents = false;
+        },
+      });
+    }
   }
 
   onHeroMouseMove(event: MouseEvent) {

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ImageUploadComponent } from '../../components/ui/image-upload/image-upload';
 import { CommunityService, Community } from '../../services/community.services';
+import { EventService } from '../../services/event.services';
 
 // --- Interfaces ---
 interface Project {
@@ -41,7 +42,7 @@ interface Notification {
   targetRoute?: string; 
 }
 interface Collaboration {
-  id: number;
+  id: string; // Guid (string)
   clubName: string;
   university: string;
   description: string;
@@ -146,7 +147,8 @@ export class CommunityDashboardComponent implements OnInit {
   toastType: 'success' | 'error' = 'success';
 
   // --- DATA ---
-  clubInfo = {
+  clubInfo: any = {
+    id: '', // Community ID (Guid) - route'dan veya auth service'ten alınacak
     name: 'Yapay Zeka ve Robotik Kulübü',
     university: 'İstanbul Teknik Üniversitesi',
     city: 'İstanbul',
@@ -350,6 +352,7 @@ export class CommunityDashboardComponent implements OnInit {
   constructor(
     private router: Router,
     private communityService: CommunityService,
+    private eventService: EventService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -716,13 +719,30 @@ export class CommunityDashboardComponent implements OnInit {
       this.showToast('Lütfen tüm alanları doldurun.', 'error');
       return;
     }
-    this.showToast('Kurumsal girişe yönlendiriliyorsunuz...', 'success');
-    setTimeout(() => {
-      this.router.navigate(['/corporate-dashboard'], {
-        queryParams: { from: 'community-dashboard', draftEvent: this.newEventData.title },
-      });
-      this.closeModal();
-    }, 600);
+
+    // Tarih ve saat birleştirme
+    const fullDate = `${this.newEventData.date} ${this.newEventData.time}`;
+
+    // EventService üzerinden etkinlik ekle (Mock)
+    this.eventService.addEvent({
+      title: this.newEventData.title,
+      startDate: fullDate,
+      location: this.newEventData.location,
+      capacity: this.newEventData.quota.toString(), // number -> string
+      description: this.newEventData.description,
+      imageUrl: this.newEventData.image,
+      communityId: this.clubInfo.id ? Number(this.clubInfo.id) : 0, // Mock id dönüşümü
+      communityName: this.clubInfo.name,
+      status: 'Beklemede'
+    }).subscribe(() => {
+      this.showToast('Etkinlik oluşturuldu, kurumsal girişe yönlendiriliyorsunuz...', 'success');
+      setTimeout(() => {
+        this.router.navigate(['/corporate-dashboard'], {
+          queryParams: { from: 'community-dashboard' },
+        });
+        this.closeModal();
+      }, 800);
+    });
   }
 
   get isEventFormValid() {
@@ -762,45 +782,65 @@ export class CommunityDashboardComponent implements OnInit {
   }
 
   saveMember() {
-    if (this.newMemberData.name && this.newMemberData.email) {
-      if (this.modalType === 'edit-member') {
-        // Update existing
-        const id = (this.newMemberData as any).id;
-        const index = this.members.findIndex(m => m.id === id);
-        if (index !== -1) {
-          this.members[index] = {
-            ...this.members[index],
-            name: this.newMemberData.name,
-            role: this.newMemberData.role,
-            department: this.newMemberData.department,
-            email: this.newMemberData.email,
-            phone: this.newMemberData.phone,
-            grade: this.newMemberData.grade,
-          };
-          this.showToast('Üye güncellendi.', 'success');
-        }
-      } else {
-        // Create new
-        this.members.unshift({
-          id: Date.now(),
+    if (!this.newMemberData.email) {
+      this.showToast('E-posta adresi zorunludur.', 'error');
+      return;
+    }
+
+    // Community ID kontrolü
+    const communityId = this.clubInfo?.id;
+    if (!communityId) {
+      this.showToast('Topluluk bilgisi bulunamadı.', 'error');
+      return;
+    }
+
+    if (this.modalType === 'edit-member') {
+      // Backend'de üye güncelleme yok, sadece silip yeniden ekleme yapılabilir
+      // Şimdilik sadece frontend'de güncelleme yapıyoruz
+      const id = (this.newMemberData as any).id;
+      const index = this.members.findIndex(m => m.id === id);
+      if (index !== -1) {
+        this.members[index] = {
+          ...this.members[index],
           name: this.newMemberData.name,
           role: this.newMemberData.role,
           department: this.newMemberData.department,
           email: this.newMemberData.email,
           phone: this.newMemberData.phone,
           grade: this.newMemberData.grade,
-          avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(
-            this.getInitials(this.newMemberData.name)
-          )}&background=e2e8f0&color=1e293b`,
-          status: 'Aktif',
-        });
-        this.stats.totalMembers++;
-        this.showToast('Üye eklendi.', 'success');
-        this.memberCurrentPage = 1;
+        };
+        this.showToast('Üye güncellendi.', 'success');
       }
       this.closeModal();
     } else {
-      this.showToast('Ad Soyad ve e-posta zorunludur.', 'error');
+      // Backend'e üye ekle
+      this.communityService.addMember(communityId, { email: this.newMemberData.email }).subscribe({
+        next: () => {
+          // Başarılı - frontend listesine ekle
+          this.members.unshift({
+            id: Date.now(),
+            name: this.newMemberData.name,
+            role: this.newMemberData.role,
+            department: this.newMemberData.department,
+            email: this.newMemberData.email,
+            phone: this.newMemberData.phone,
+            grade: this.newMemberData.grade,
+            avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(
+              this.getInitials(this.newMemberData.name)
+            )}&background=e2e8f0&color=1e293b`,
+            status: 'Aktif',
+          });
+          this.stats.totalMembers++;
+          this.showToast('Üye eklendi.', 'success');
+          this.memberCurrentPage = 1;
+          this.closeModal();
+        },
+        error: (err) => {
+          console.error('Üye eklenirken hata:', err);
+          const errorMsg = err.error?.message || 'Üye eklenirken bir hata oluştu.';
+          this.showToast(errorMsg, 'error');
+        },
+      });
     }
   }
 
@@ -845,13 +885,41 @@ export class CommunityDashboardComponent implements OnInit {
 
   deleteMemberConfirmed() {
     if (this.confirmDeleteId === null) return;
-    this.members = this.members.filter((m) => m.id !== this.confirmDeleteId);
-    this.stats.totalMembers--;
-    this.showToast('Üye Silindi', 'success');
-    if (this.memberCurrentPage > this.memberTotalPages) {
-      this.memberCurrentPage = this.memberTotalPages;
+
+    // Silinecek üyeyi bul
+    const memberToDelete = this.members.find((m) => m.id === this.confirmDeleteId);
+    if (!memberToDelete) {
+      this.startCloseConfirm();
+      return;
     }
-    this.startCloseConfirm();
+
+    // Community ID kontrolü
+    const communityId = this.clubInfo?.id;
+    if (!communityId) {
+      this.showToast('Topluluk bilgisi bulunamadı.', 'error');
+      this.startCloseConfirm();
+      return;
+    }
+
+    // Backend'den üye çıkar
+    this.communityService.removeMember(communityId, { email: memberToDelete.email }).subscribe({
+      next: () => {
+        // Başarılı - frontend listesinden çıkar
+        this.members = this.members.filter((m) => m.id !== this.confirmDeleteId);
+        this.stats.totalMembers--;
+        this.showToast('Üye silindi.', 'success');
+        if (this.memberCurrentPage > this.memberTotalPages) {
+          this.memberCurrentPage = this.memberTotalPages;
+        }
+        this.startCloseConfirm();
+      },
+      error: (err) => {
+        console.error('Üye silinirken hata:', err);
+        const errorMsg = err.error?.message || 'Üye silinirken bir hata oluştu.';
+        this.showToast(errorMsg, 'error');
+        this.startCloseConfirm();
+      },
+    });
   }
 
   setMemberPage(page: number) {
