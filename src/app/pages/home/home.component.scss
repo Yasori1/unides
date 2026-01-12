@@ -268,21 +268,6 @@ $card-shadow: 0 10px 30px rgba(0,0,0,0.06);
     }
 }
 .section-communities { background-color: transparent; border-top: none; 
-    /* Add divider to communities as requested */
-    .section-header-center {
-        position: relative;
-        padding-bottom: 15px; /* Space for pseudo-element */
-        
-        &::after {
-            content: '';
-            display: block;
-            width: 50px;
-            height: 4px;
-            background: $primary;
-            margin: 15px auto 0; /* Position below text */
-            border-radius: 2px;
-        }
-    }
 }
 .section-upcoming-events { background: transparent; }
 .section-why-unides { background-color: transparent; }
