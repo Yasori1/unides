@@ -330,6 +330,10 @@
               <td class="member-email-cell">{{ m.email }}</td>
               <td class="member-university-cell">{{ m.university || '-' }}</td>
               <td class="member-action-cell">
+                <button class="member-edit-btn-table" (click)="editMember(m)" title="Üyeyi Düzenle">
+                  <span class="material-symbols-outlined">edit</span>
+                  <span>Düzenle</span>
+                </button>
                 <button class="member-delete-btn-table" (click)="openDeleteConfirm(m.id)" title="Üyeyi Sil">
                   <span class="material-symbols-outlined">delete</span>
                   <span>Sil</span>
@@ -488,6 +492,8 @@
               ? 'Etkinlik Oluştur'
               : modalType === 'new-project'
               ? 'Yeni Proje Başlat'
+              : modalType === 'edit-member'
+              ? 'Üye Düzenle'
               : 'Topluluğa Üye Ekle'
           }}
         </h3>
@@ -544,8 +550,8 @@
         </div>
         <button class="btn-primary full" (click)="saveProject()">Oluştur 🚀</button>
       </div>
-      <div class="modal-body" *ngIf="modalType === 'new-member'">
-        <div class="member-search-box">
+      <div class="modal-body" *ngIf="modalType === 'new-member' || modalType === 'edit-member'">
+        <div class="member-search-box" *ngIf="modalType === 'new-member'">
           <span class="material-symbols-outlined search-icon">search</span>
           <input
             type="text"
@@ -564,6 +570,18 @@
             </div>
           </li>
         </ul>
+
+        <div *ngIf="modalType === 'edit-member'" class="edit-member-form" style="display: flex; flex-direction: column; gap: 10px;">
+          <label class="stacked">
+            <span>Adı Soyadı Düzenle</span>
+            <input type="text" [(ngModel)]="newMemberData.name" placeholder="Ad Soyad" />
+          </label>
+          <label class="stacked">
+            <span>Mail Adresi Düzenle</span>
+            <input type="email" [(ngModel)]="newMemberData.email" placeholder="E-Posta Adresi" />
+          </label>
+        </div>
+
         <button
           class="btn-primary full"
           [disabled]="!newMemberData.name || !newMemberData.email"

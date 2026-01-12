@@ -82,7 +82,7 @@ export class CommunityDashboardComponent implements OnInit {
   isProfileOpen: boolean = false;
   showNotifications: boolean = false;
   activeRowMenuId: number | null = null;
-  modalType: 'new-event' | 'new-project' | 'new-member' | null = null;
+  modalType: 'new-event' | 'new-project' | 'new-member' | 'edit-member' | null = null;
   isSearchingMembers = false;
   memberSearchQuery = '';
   memberSearchResults: UserSearchResult[] = [];
@@ -763,23 +763,42 @@ export class CommunityDashboardComponent implements OnInit {
 
   saveMember() {
     if (this.newMemberData.name && this.newMemberData.email) {
-      this.members.unshift({
-        id: Date.now(),
-        name: this.newMemberData.name,
-        role: this.newMemberData.role,
-        department: this.newMemberData.department,
-        email: this.newMemberData.email,
-        phone: this.newMemberData.phone,
-        grade: this.newMemberData.grade,
-        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(
-          this.getInitials(this.newMemberData.name)
-        )}&background=e2e8f0&color=1e293b`,
-        status: 'Aktif',
-      });
-      this.stats.totalMembers++;
-      this.showToast('Üye eklendi.', 'success');
+      if (this.modalType === 'edit-member') {
+        // Update existing
+        const id = (this.newMemberData as any).id;
+        const index = this.members.findIndex(m => m.id === id);
+        if (index !== -1) {
+          this.members[index] = {
+            ...this.members[index],
+            name: this.newMemberData.name,
+            role: this.newMemberData.role,
+            department: this.newMemberData.department,
+            email: this.newMemberData.email,
+            phone: this.newMemberData.phone,
+            grade: this.newMemberData.grade,
+          };
+          this.showToast('Üye güncellendi.', 'success');
+        }
+      } else {
+        // Create new
+        this.members.unshift({
+          id: Date.now(),
+          name: this.newMemberData.name,
+          role: this.newMemberData.role,
+          department: this.newMemberData.department,
+          email: this.newMemberData.email,
+          phone: this.newMemberData.phone,
+          grade: this.newMemberData.grade,
+          avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(
+            this.getInitials(this.newMemberData.name)
+          )}&background=e2e8f0&color=1e293b`,
+          status: 'Aktif',
+        });
+        this.stats.totalMembers++;
+        this.showToast('Üye eklendi.', 'success');
+        this.memberCurrentPage = 1;
+      }
       this.closeModal();
-      this.memberCurrentPage = 1;
     } else {
       this.showToast('Ad Soyad ve e-posta zorunludur.', 'error');
     }
@@ -842,6 +861,20 @@ export class CommunityDashboardComponent implements OnInit {
 
   onMemberSearchChange() {
     this.memberCurrentPage = 1;
+  }
+
+  editMember(member: Member) {
+    this.openModal('edit-member'); 
+    this.newMemberData = {
+      name: member.name,
+      department: member.department,
+      role: member.role,
+      email: member.email,
+      phone: member.phone,
+      grade: member.grade,
+    };
+    // Store ID to know which member to update
+    (this.newMemberData as any).id = member.id;
   }
 
   private startCloseConfirm() {

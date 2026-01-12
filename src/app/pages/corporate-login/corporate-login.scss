@@ -68,13 +68,38 @@
 }
 
 .brand-badge {
-  font-size: 24px;
-  font-weight: 700;
   display: flex;
   align-items: center;
   gap: 10px;
-  opacity: 0.9;
+  
+  .logo-box {
+    width: 120px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, background 0.3s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    img {
+      height: 100%;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+    }
+  }
 }
+
 .quote-container {
   h1 {
     font-size: 3.5rem;
@@ -113,12 +138,27 @@
 
 .mobile-logo {
   display: none;
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--primary-color);
   margin-bottom: 30px;
-  align-items: center;
-  gap: 10px;
+  justify-content: center;
+  
+  .logo-box {
+    width: 100px;
+    height: 50px;
+    background: #f0f9ff;
+    border: 1px solid #e0f2fe;
+    border-radius: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+
+    img {
+      height: 100%;
+      width: auto;
+      object-fit: contain;
+    }
+  }
 }
 
 .header-text {

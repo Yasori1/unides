@@ -985,6 +985,8 @@
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.16);
   border: 1px solid #e2e8f0;
   animation: popIn 160ms ease;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 .modal-head {
   display: flex;
@@ -1949,7 +1951,38 @@
         }
         
         &.member-action-cell {
-          text-align: center;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+
+          .member-edit-btn-table {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: transparent;
+            border: 1px solid #bfdbfe;
+            border-radius: 6px;
+            color: #2563eb;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            
+            .material-symbols-outlined {
+              font-size: 18px;
+            }
+            
+            &:hover {
+              background: #eff6ff;
+              border-color: #2563eb;
+            }
+            
+            &:active {
+              transform: scale(0.98);
+            }
+          }
           
           .member-delete-btn-table {
             display: inline-flex;
