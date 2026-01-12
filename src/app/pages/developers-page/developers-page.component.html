@@ -1,13 +1,10 @@
 <app-site-navbar />
 
 <div class="developers-page">
-  <!-- HERO ALANI (3D Model Geri Geldi) -->
+  <!-- HERO ALANI -->
   <div class="hero-section">
-    <!-- 3D MODEL ALANI -->
-    <div class="spline-background">
-      <spline-viewer url="https://prod.spline.design/ZtxTo143JkmaQE4C/scene.splinecode">
-      </spline-viewer>
-    </div>
+    <!-- Developer Stream Animation -->
+    <app-developer-stream [developerNames]="developerNames"></app-developer-stream>
 
     <!-- İçerik -->
     <div class="container text-center content-wrapper">
@@ -19,16 +16,14 @@
     </div>
   </div>
 
-  <!-- GELİŞTİRİCİ KARTLARI GRID (Waves Arka Planı Burada) -->
+  <!-- GELİŞTİRİCİ KARTLARI GRID (Neurons Arka Planı Burada) -->
   <div class="team-grid-section">
-    <!-- WAVES BACKGROUND (BEYAZ ZEMİN, SİYAH ÇİZGİLER) -->
-    <div class="waves-wrapper">
-      <app-waves
-        [backgroundColor]="'#ffffff'"
-        [strokeColor]="'rgba(0,0,0,0.1)'"
-        [pointerSize]="0.5"
-      >
-      </app-waves>
+    <!-- NEURONS BACKGROUND (BEYAZ ZEMİN, SOFT NÖRON ANİMASYONU) -->
+    <div class="neurons-wrapper">
+      <app-neurons-background
+        [nodeCount]="60"
+        [connectionDistance]="220"
+      ></app-neurons-background>
     </div>
 
     <div class="container">
@@ -42,7 +37,9 @@
           <app-profile-card
             [name]="dev.name"
             [title]="dev.title"
-            [enableTilt]="true"
+            [image]="dev.image"
+            [work]="dev.work"
+            [socialLinks]="dev.socialLinks"
           ></app-profile-card>
         </div>
       </div>
