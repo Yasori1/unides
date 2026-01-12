@@ -1,7 +1,7 @@
 /* --- MODERN CSS RESET & VARIABLES --- */
 :host {
-  --primary-color: #4f46e5;
-  --primary-hover: #4338ca;
+  --primary-color: #1e3a8a;
+  --primary-hover: #0f172a;
   --secondary-bg: #f3f4f6;
   --text-dark: #111827;
   --text-gray: #6b7280;
@@ -41,18 +41,10 @@
   display: none;
   width: 50%;
   position: relative; /* Spline'ın buna göre konumlanması için */
-  background-color: #1e1e1e; /* Yüklenirken görünecek arka plan rengi */
+  background-image: url('https://images.unsplash.com/photo-1523580494863-6f3031224c94?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80');
+  background-size: cover;
+  background-position: center;
   overflow: hidden;
-
-  /* Spline Viewer Ayarları */
-  spline-viewer {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1; /* En altta */
-  }
 
   .visual-overlay {
     position: absolute;
@@ -62,7 +54,7 @@
     height: 100%;
     z-index: 2; /* 3D sahnenin üzerinde ama içeriğin altında */
     /* 3D sahneyi tamamen kapatmamak için daha şeffaf bir gradient */
-    background: linear-gradient(135deg, rgba(79, 70, 229, 0.4) 0%, rgba(67, 56, 202, 0.2) 100%);
+    background: linear-gradient(135deg, rgba(30, 58, 138, 0.4) 0%, rgba(30, 58, 138, 0.2) 100%);
     backdrop-filter: blur(0px); /* Netlik için blur'u kaldırdık */
     pointer-events: none; /* Mouse olayları 3D sahneye geçebilsin */
   }
@@ -81,13 +73,39 @@
 }
 
 .brand-badge {
-  font-size: 24px;
-  font-weight: 700;
   display: flex;
   align-items: center;
   gap: 10px;
-  opacity: 0.9;
+  pointer-events: auto;
+  
+  .logo-box {
+    width: 120px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, background 0.3s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    img {
+      height: 100%;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+    }
+  }
 }
+
 .quote-container {
   h1 {
     font-size: 3.5rem;
@@ -128,12 +146,27 @@
 
 .mobile-logo {
   display: none;
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--primary-color);
   margin-bottom: 30px;
-  align-items: center;
-  gap: 10px;
+  justify-content: center;
+  
+  .logo-box {
+    width: 100px;
+    height: 50px;
+    background: #f0f9ff;
+    border: 1px solid #e0f2fe;
+    border-radius: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+
+    img {
+      height: 100%;
+      width: auto;
+      object-fit: contain;
+    }
+  }
 }
 
 .header-text {
@@ -258,7 +291,7 @@
 .btn-primary {
   width: 100%;
   padding: 16px;
-  background: linear-gradient(135deg, var(--primary-color) 0%, #4338ca 100%);
+  background: #1e3a8a;
   color: white;
   border: none;
   border-radius: 12px;
@@ -271,13 +304,21 @@
   align-items: center;
   gap: 8px;
   font-family: var(--font-main);
+  /* Spinner zıplamasını engellemek için min-height */
+  min-height: 56px;
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.4);
+    box-shadow: 0 10px 20px -5px rgba(30, 58, 138, 0.4);
+    background-color: var(--primary-hover);
   }
   &:active {
     transform: translateY(0);
+  }
+  &:disabled {
+    cursor: not-allowed;
+    transform: none;
+    opacity: 0.7;
   }
 }
 
@@ -320,62 +361,53 @@
   transition: all 0.2s ease;
   text-align: left;
 
+  .btn-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .text-col {
+    display: flex;
+    flex-direction: column;
+  }
+  .btn-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    color: #9ca3af;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
+  .btn-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dark);
+  }
+  .icon-official {
+    font-size: 24px;
+    color: var(--official-color);
+  }
+  .emoji-icon {
+    font-size: 20px;
+    font-style: normal;
+    line-height: 1;
+  }
+
   &:hover {
     background-color: #f8fafc;
     border-color: #cbd5e1;
   }
+
+  &.btn-community:hover {
+    border-color: var(--community-color);
+    background-color: #eff6ff;
+  }
 }
 
-.btn-content {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.text-col {
-  display: flex;
-  flex-direction: column;
-}
-.btn-label {
-  font-size: 10px;
-  text-transform: uppercase;
-  color: #9ca3af;
-  letter-spacing: 0.5px;
-  font-weight: 600;
-}
-.btn-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-dark);
-}
-.icon-official {
-  font-size: 24px;
-  color: var(--official-color);
-}
-.emoji-icon {
-  font-size: 20px;
-  font-style: normal;
-  line-height: 1;
-}
-
-.btn-official:hover {
-  border-color: var(--official-color);
-  background-color: #f8fafc;
-}
-.btn-community:hover {
-  border-color: var(--community-color);
-  background-color: #eff6ff;
-}
-
-/* DÜZELTME: Footer stilleri güncellendi */
 .simple-footer {
   position: absolute;
   bottom: 20px;
-  width: 100%; /* Tam genişlik */
-  text-align: center; /* Ortala */
-  left: 0; /* Solu sıfırla */
   color: #9ca3af;
   font-size: 12px;
-  pointer-events: none; /* Etkileşimi engelle */
 }
 
 /* RESPONSIVE */

@@ -72,41 +72,47 @@
 
 /* --- GRID SECTION --- */
 .team-grid-section {
-  position: relative; // Waves için gerekli
-  padding: 100px 0;
-  background-color: #ffffff; // Beyaz zemin
-  overflow: hidden;
+  position: relative;
+  padding: 100px 0 120px;
+  background-color: #ffffff;
+  overflow: visible;
 
-  // Waves Efekti Konumu
-  .waves-wrapper {
+  // Neurons Efekti Konumu
+  .neurons-wrapper {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 0; // En altta
-    opacity: 0.6; // Çizgileri biraz daha soft yap
+    z-index: 0;
   }
 
   .container {
     position: relative;
-    z-index: 1; // Waves'in üstünde
+    z-index: 1;
     max-width: 1300px;
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0 24px;
   }
 }
 
 .grid-layout {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 30px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 32px;
+  align-items: start;
 }
 
 .card-wrapper {
-  height: 200px;
+  height: 300px;
   width: 100%;
   opacity: 0;
+  position: relative;
+  z-index: 1;
+
+  &:hover {
+    z-index: 100;
+  }
 }
 
 // --- KART GİRİŞ ANİMASYONU ---
@@ -132,5 +138,10 @@
     .hero-title {
       font-size: 2.5rem;
     }
+  }
+
+  .grid-layout {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 30px;
   }
 }
