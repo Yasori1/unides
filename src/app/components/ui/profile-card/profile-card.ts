@@ -1,6 +1,8 @@
 import {
   Component,
   Input,
+  Output,
+  EventEmitter,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -25,4 +27,10 @@ export class ProfileCardComponent {
   @Input() image: string = '';
   @Input() work: string = '';
   @Input() socialLinks?: SocialLinks;
+  @Input() isExpanded: boolean = false;
+  @Output() cardClick = new EventEmitter<void>();
+
+  toggleCard(): void {
+    this.cardClick.emit();
+  }
 }
