@@ -27,6 +27,7 @@ interface UpcomingEvent {
   description: string;
   communityName: string;
   communityLogo: string;
+  remainingTimeStr?: string; // Performans için eklendi
 }
 
 interface NewCommunity {
@@ -282,6 +283,11 @@ export class HomeComponent implements OnInit, OnDestroy {
         },
       ];
       this.upcomingEvents = rawEvents.sort((a, b) => a.date.getTime() - b.date.getTime());
+      
+      // Performans optimizasyonu: Template içinde fonksiyon çağırmak yerine hesaplayıp sakla
+      this.upcomingEvents.forEach(e => {
+        e.remainingTimeStr = this.getRemainingTime(e.date);
+      });
 
       const placeholderProfile = 'assets/img/placeholder-avatar.svg';
       const mockCommunityNames = [

@@ -62,7 +62,7 @@
         (click)="goToCommunityDetail(comm.id)"
       >
         <div class="card-image-wrapper">
-          <img [src]="comm.image" [alt]="comm.name" />
+          <img [src]="comm.image" [alt]="comm.name" loading="lazy" />
           <div class="card-overlay"></div>
         </div>
         <div class="card-content">
@@ -97,12 +97,13 @@
         *ngFor="let event of upcomingEvents"
         (click)="goToEventDetail(event.id)"
       >
-        <div class="countdown-badge">⏳ {{ getRemainingTime(event.date) }}</div>
+        <div class="countdown-badge">⏳ {{ event.remainingTimeStr }}</div>
 
         <div class="logo-box-modern">
           <img
             [src]="event.communityLogo || 'assets/img/placeholder-avatar.svg'"
             alt="Logo"
+            loading="lazy"
             onerror="this.src='assets/img/placeholder-avatar.svg'"
           />
         </div>
@@ -183,6 +184,7 @@
             <img
               [src]="nc.image || 'assets/img/placeholder-avatar.svg'"
               alt=""
+              loading="lazy"
               onerror="this.src='assets/img/placeholder-avatar.svg'"
             />
             <span>{{ nc.name }}</span>
@@ -193,6 +195,7 @@
             <img
               [src]="nc.image || 'assets/img/placeholder-avatar.svg'"
               alt=""
+              loading="lazy"
               onerror="this.src='assets/img/placeholder-avatar.svg'"
             />
             <span>{{ nc.name }}</span>
@@ -203,6 +206,7 @@
             <img
               [src]="nc.image || 'assets/img/placeholder-avatar.svg'"
               alt=""
+              loading="lazy"
               onerror="this.src='assets/img/placeholder-avatar.svg'"
             />
             <span>{{ nc.name }}</span>
@@ -213,6 +217,7 @@
             <img
               [src]="nc.image || 'assets/img/placeholder-avatar.svg'"
               alt=""
+              loading="lazy"
               onerror="this.src='assets/img/placeholder-avatar.svg'"
             />
             <span>{{ nc.name }}</span>
@@ -228,6 +233,7 @@
             <img
               [src]="nc.image || 'assets/img/placeholder-avatar.svg'"
               alt=""
+              loading="lazy"
               onerror="this.src='assets/img/placeholder-avatar.svg'"
             />
             <span class="mobile-name">{{ nc.name }}</span>
@@ -248,6 +254,7 @@
             [src]="videoThumbnail"
             class="cover-img"
             alt="Tanıtım Videosu"
+            loading="lazy"
             onerror="this.src='assets/unides_video_gorsel.jpg'"
           />
           <div class="play-overlay">
