@@ -1,0 +1,37 @@
+<app-site-navbar />
+
+<div class="page-spacer" (mousemove)="onHeroMouseMove($event)">
+  <div class="background-wrapper">
+    <div
+      class="interactive-blob"
+      [style.transform]="'translate(' + -heroMoveX + 'px, ' + -heroMoveY + 'px)'"
+    ></div>
+    <div class="noise-overlay"></div>
+  </div>
+
+  <div class="container relative-content">
+    <h1 class="page-title">ÜNİDES <span class="highlight-text">KVKK AYDINLATMA METNİ</span></h1>
+    <p class="page-subtitle">
+      Kişisel verilerinizin korunması ve işlenmesi hakkında bilgilendirme.
+    </p>
+  </div>
+
+  <div class="scroll-indicator">
+    <span>İncele</span>
+    <div class="line"></div>
+  </div>
+</div>
+
+<section class="kvkk-content-section">
+  <div class="container">
+    <div class="content-box">
+      <!-- Buraya KVKK içeriği gelecek. Şimdilik boş bırakıyorum. -->
+      <h2>KİŞİSEL VERİLERİN KORUNMASI HAKKINDA AYDINLATMA METNİ</h2>
+      <p>
+        Bu alan KVKK Aydınlatma Metni içeriği için ayrılmıştır. İçerik eklenecektir.
+      </p>
+    </div>
+  </div>
+</section>
+
+<app-site-footer />

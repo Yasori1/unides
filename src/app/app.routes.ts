@@ -41,6 +41,7 @@ import { CommunityDashboardComponent } from './pages/community-dashboard/communi
 import { LoginPageComponent } from './pages/login-page/login-page.component';
 import { RegisterPageComponent } from './pages/register-page/register-page.component';
 import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
+import { KvkkPageComponent } from './pages/kvkk-page/kvkk-page.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -60,6 +61,7 @@ export const routes: Routes = [
   { path: 'contact', component: ContactPageComponent },
   { path: 'privacy-policy', component: PrivacyPolicyPageComponent },
   { path: 'terms-conditions', component: TermsConditionsPageComponent },
+  { path: 'kvkk', component: KvkkPageComponent },
 
   // --- LOGIN & REGISTER ROTALARI ---
   // TÜM GİRİŞ SAYFALARI AKTİF
