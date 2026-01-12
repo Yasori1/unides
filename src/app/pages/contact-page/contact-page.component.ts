@@ -9,6 +9,7 @@ import {
   ElementRef,
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
 import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
@@ -16,13 +17,15 @@ import { SiteFooterComponent } from '../../common/site-footer/site-footer.compon
 @Component({
   selector: 'app-contact-page',
   standalone: true,
-  imports: [CommonModule, SiteNavbarComponent, SiteFooterComponent],
+  imports: [CommonModule, SiteNavbarComponent, SiteFooterComponent, FormsModule],
   templateUrl: './contact-page.component.html',
   styleUrls: ['./contact-page.component.scss'],
 })
 export class ContactPageComponent implements OnInit, AfterViewInit {
   heroMoveX = 0;
   heroMoveY = 0;
+  message: string = '';
+  messageLength: number = 0;
 
   @ViewChildren('animItem') animItems!: QueryList<ElementRef>;
 
@@ -80,6 +83,10 @@ export class ContactPageComponent implements OnInit, AfterViewInit {
   // Karttan çıkınca sıfırla
   cardReset(cardElement: HTMLElement) {
     cardElement.style.transform = `perspective(1000px) rotateX(0) rotateY(0) scale(1)`;
+  }
+
+  onMessageInput() {
+    this.messageLength = this.message.length;
   }
 
   onSubmit(event: Event) {

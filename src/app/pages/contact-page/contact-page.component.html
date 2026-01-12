@@ -141,7 +141,14 @@
                   rows="4"
                   placeholder="Mesajınızı buraya yazın..."
                   class="modern-input"
+                  maxlength="1000"
+                  [(ngModel)]="message"
+                  (input)="onMessageInput()"
+                  name="message"
                 ></textarea>
+                <div class="char-counter">
+                  <span [class.char-limit]="messageLength >= 1000">{{ messageLength }}/1000</span>
+                </div>
               </div>
 
               <button type="submit" class="btn-submit mt-4">
