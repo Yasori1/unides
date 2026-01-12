@@ -1,90 +1,19 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map, catchError, of, switchMap } from 'rxjs';
+import {
+  CommunityMiniDto,
+  CommunityDetailDto,
+  CommunityEventDto,
+  CreateCommunityDto,
+  UpdateCommunityDto,
+  AddCommunityMemberDto,
+  RemoveCommunityMemberDto,
+  Community,
+} from '../models/community.models';
 
-// Community Interface
-export interface Community {
-  id: number;
-  name: string;
-  university: string;
-  category: string;
-  description?: string; // Optional yapıldı
-  coverImage?: string;
-  logo: string;
-  memberCount: number;
-  city?: string;
-  about?: string;
-  banner?: string;
-  socialMedia?: string; // Eski uyumluluk için
-  instagram?: string;
-  youtube?: string;
-  twitter?: string;
-  tiktok?: string;
-  website?: string;
-  email?: string;
-  status?: 'Aktif' | 'Pasif' | 'Onay Bekleyen';
-  presidentEmail?: string; // Topluluk başkanı email (oluşturma/güncelleme için)
-}
-
-// Backend'den gelen format (PascalCase)
-interface CommunityDto {
-  id: number;
-  name?: string;
-  Name?: string;
-  about?: string;
-  About?: string;
-  city?: string;
-  City?: string;
-  university?: string;
-  University?: string;
-  logoUrl?: string;
-  LogoUrl?: string;
-  tags?: string[];
-  Tags?: string[];
-  contactEmail?: string;
-  ContactEmail?: string;
-  websiteUrl?: string;
-  WebsiteUrl?: string;
-  socialLinks?: string;
-  SocialLinks?: string;
-  userCommunities?: any[];
-  UserCommunities?: any[];
-}
-
-// Backend'e gönderilecek format (PascalCase - Backend DTO formatı)
-interface CreateCommunityRequest {
-  Name: string;
-  About?: string;
-  City: string;
-  University: string;
-  ContactEmail?: string;
-  WebsiteUrl?: string;
-  SocialLinks?: string;
-  LogoUrl?: string;
-  Tags?: string[];
-  Description?: string;
-  BannerUrl?: string;
-  LongDescription?: string;
-  Status?: string;
-  PresidentEmail: string; // Zorunlu: Topluluk başkanının email adresi
-}
-
-interface UpdateCommunityRequest {
-  Name?: string;
-  About?: string;
-  City?: string;
-  University?: string;
-  LogoUrl?: string;
-  ContactEmail?: string;
-  WebsiteUrl?: string;
-  SocialLinks?: string;
-  Tags?: string[];
-  Description?: string;
-  BannerUrl?: string;
-  LongDescription?: string;
-  Status?: string;
-  PresidentEmail?: string; // Başkan değişikliği için (sadece GSB)
-}
+// Re-export Community for backward compatibility
+export type { Community } from '../models/community.models';
 
 @Injectable({
   providedIn: 'root',
@@ -112,403 +41,76 @@ export class CommunityService {
     };
   }
 
-  // Backend formatını frontend formatına dönüştür
-  private mapToCommunity(dto: any): Community {
-    const name = dto.name || dto.Name || '';
-    const about = dto.about || dto.About || '';
-    const city = dto.city || dto.City || '';
-    const university = dto.university || dto.University || '';
-    const logoUrl = dto.logoUrl || dto.LogoUrl || dto.logo || dto.Logo || '';
-    const contactEmail = dto.contactEmail || dto.ContactEmail || '';
-    const websiteUrl = dto.websiteUrl || dto.WebsiteUrl || '';
-    const socialLinks = dto.socialLinks || dto.SocialLinks || '';
-    const tags = dto.tags || dto.Tags || [];
-    const userCommunities = dto.userCommunities || dto.UserCommunities || [];
-
-    // Banner/Cover için olası alanlar (backend farklı isim dönebilir)
-    const bannerUrl =
-      dto.bannerUrl ||
-      dto.BannerUrl ||
-      dto.banner ||
-      dto.Banner ||
-      dto.coverImage ||
-      dto.CoverImage ||
-      dto.coverImageUrl ||
-      dto.CoverImageUrl ||
-      '';
-
-    // Tags'den category çıkar (ilk tag'i category olarak kullan)
-    const category = tags && tags.length > 0 ? tags[0] : 'Genel';
-
-    // SocialLinks'i parse et (JSON string olabilir)
-    let socialMedia = '';
-    let instagram = '';
-    let youtube = '';
-    let twitter = '';
-    let tiktok = '';
-
-    if (socialLinks) {
-      try {
-        const parsed = typeof socialLinks === 'string' ? JSON.parse(socialLinks) : socialLinks;
-        socialMedia = parsed.instagram || parsed.Instagram || '';
-        instagram = parsed.instagram || parsed.Instagram || '';
-        youtube = parsed.youtube || parsed.Youtube || '';
-        twitter = parsed.twitter || parsed.Twitter || '';
-        tiktok = parsed.tiktok || parsed.Tiktok || '';
-      } catch {
-        // JSON parse edilemezse direkt string olarak kullan
-        socialMedia = socialLinks;
-      }
-    }
-
+  // CommunityMiniDto'yu Community'ye dönüştür (List için)
+  private mapMiniDtoToCommunity(dto: CommunityMiniDto): Community {
     return {
-      id: dto.id || dto.Id || 0,
-      name: name,
-      university: university,
-      category: category,
-      description: about || dto.description || dto.Description || undefined,
-      logo: logoUrl && String(logoUrl).trim() ? logoUrl : this.placeholderLogo,
-      memberCount: userCommunities?.length || 0,
-      city: city,
-      about: about,
-      banner:
-        bannerUrl && String(bannerUrl).trim()
-          ? bannerUrl
-          : logoUrl && String(logoUrl).trim()
-          ? logoUrl
-          : this.placeholderCover,
-      coverImage:
-        bannerUrl && String(bannerUrl).trim()
-          ? bannerUrl
-          : logoUrl && String(logoUrl).trim()
-          ? logoUrl
-          : this.placeholderCover,
-      socialMedia: socialMedia,
-      instagram: instagram,
-      youtube: youtube,
-      twitter: twitter,
-      tiktok: tiktok,
-      website: websiteUrl,
-      email: contactEmail,
-      status: (dto.status || dto.Status || 'Aktif') as 'Aktif' | 'Pasif' | 'Onay Bekleyen',
+      id: dto.communityId,
+      name: dto.comName,
+      university: dto.university || '',
+      category: dto.comCategory || 'Genel',
+      description: dto.miniAbout,
+      logo: dto.logoUrl && dto.logoUrl.trim() ? dto.logoUrl : this.placeholderLogo,
+      memberCount: 0, // List endpoint'inde memberCount yok
+      city: dto.city,
+      about: dto.miniAbout,
+      banner: dto.bannerUrl && dto.bannerUrl.trim() ? dto.bannerUrl : this.placeholderCover,
+      coverImage: dto.bannerUrl && dto.bannerUrl.trim() ? dto.bannerUrl : this.placeholderCover,
+      status: dto.isActivity ? 'Aktif' : 'Pasif',
+      miniAbout: dto.miniAbout,
+      isActivity: dto.isActivity,
     };
   }
 
-  // Mock Veriler - Fallback için (artık kullanılmayacak)
-  private mockCommunities: Community[] = [
-    {
-      id: 1,
-      name: 'ODTÜ Yazılım Topluluğu',
-      university: 'Orta Doğu Teknik Üniversitesi',
-      category: 'Teknoloji',
-      description: 'Yazılım dünyasındaki yenilikleri takip eden ve projeler geliştiren topluluk.',
-      coverImage:
-        'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1000&q=80',
-      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
-      banner:
-        'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=1600&q=80',
-      memberCount: 450,
-      city: 'Ankara',
-      email: 'odtu-yazilim@uni.edu.tr',
-    },
-    {
-      id: 2,
-      name: 'İTÜ Girişimcilik Kulübü',
-      university: 'İstanbul Teknik Üniversitesi',
-      category: 'Girişimcilik',
-      description: 'Girişimcilik ekosistemine yeni yetenekler kazandırmayı hedefleyen kulüp.',
-      coverImage:
-        'https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&w=1000&q=80',
-      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
-      banner: 'assets/img/placeholder-cover.svg',
-      memberCount: 1200,
-      city: 'İstanbul',
-      email: 'itu-girisimcilik@uni.edu.tr',
-    },
-    {
-      id: 3,
-      name: 'Hacettepe Dans Topluluğu',
-      university: 'Hacettepe Üniversitesi',
-      category: 'Sanat',
-      description: 'Modern ve halk dansları üzerine eğitimler ve gösteriler düzenler.',
-      coverImage:
-        'https://images.unsplash.com/photo-1547153760-18fc86324498?auto=format&fit=crop&w=1000&q=80',
-      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
-      banner:
-        'https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=1600&q=80',
-      memberCount: 300,
-      city: 'Ankara',
-      email: 'hacettepe-dans@uni.edu.tr',
-    },
-    {
-      id: 4,
-      name: 'Boğaziçi Müzik Kulübü',
-      university: 'Boğaziçi Üniversitesi',
-      category: 'Müzik',
-      description: 'Kampüsün ritmini tutan, konserler ve atölyeler düzenleyen kulüp.',
-      coverImage:
-        'https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=1000&q=80',
-      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
-      banner: 'assets/img/placeholder-cover.svg',
-      memberCount: 800,
-      city: 'İstanbul',
-      email: 'bogazici-muzik@uni.edu.tr',
-    },
-    {
-      id: 5,
-      name: 'Ege Üniversitesi Sinema Topluluğu',
-      university: 'Ege Üniversitesi',
-      category: 'Sanat',
-      description: 'Sinema sanatına gönül vermiş öğrencilerin buluşma noktası.',
-      coverImage:
-        'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1000&q=80',
-      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
-      banner:
-        'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1600&q=80',
-      memberCount: 150,
-      city: 'İzmir',
-      email: 'ege-sinema@uni.edu.tr',
-    },
-    {
-      id: 6,
-      name: 'YTÜ Robotik Kulübü',
-      university: 'Yıldız Teknik Üniversitesi',
-      category: 'Teknoloji',
-      description: 'Robotik sistemler ve otomasyon üzerine çalışmalar yapar.',
-      coverImage:
-        'https://images.unsplash.com/photo-1581092160562-40aa08e78837?auto=format&fit=crop&w=1000&q=80',
-      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
-      banner:
-        'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1600&q=80',
-      memberCount: 600,
-      city: 'İstanbul',
-      email: 'ytu-robotik@uni.edu.tr',
-    },
-    {
-      id: 7,
-      name: 'Gazi Üniversitesi Tiyatro Topluluğu',
-      university: 'Gazi Üniversitesi',
-      category: 'Sanat',
-      description: 'Tiyatro sanatını sevdirmek ve sahne deneyimi kazandırmak için çalışır.',
-      coverImage:
-        'https://esenler.bel.tr/wp-content/uploads/2021/08/144438347-1600775959586-gfhfghfgh.jpg', // Tiyatro Sahnesi
-      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
-      banner:
-        'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=1600&q=80',
-      memberCount: 220,
-      city: 'Ankara',
-      email: 'gazi-tiyatro@uni.edu.tr',
-    },
-    {
-      id: 8,
-      name: 'Marmara Fotoğrafçılık Kulübü',
-      university: 'Marmara Üniversitesi',
-      category: 'Sanat',
-      description: 'Anı yakalamayı seven fotoğraf tutkunlarının bir araya geldiği kulüp.',
-      coverImage:
-        'https://images.unsplash.com/photo-1552168324-d612d77725e3?auto=format&fit=crop&w=1000&q=80',
-      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
-      banner: 'assets/img/placeholder-cover.svg',
-      memberCount: 340,
-      city: 'İstanbul',
-      email: 'marmara-fotograf@uni.edu.tr',
-    },
-    {
-      id: 9,
-      name: 'Anadolu Üniversitesi Havacılık Kulübü',
-      university: 'Anadolu Üniversitesi',
-      category: 'Bilim',
-      description: 'Gökyüzüne tutkun, havacılık meraklısı öğrencilerin buluşma adresi.',
-      coverImage:
-        'https://images.unsplash.com/photo-1483304528321-0674f0040030?auto=format&fit=crop&w=1000&q=80',
-      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
-      banner:
-        'https://images.unsplash.com/photo-1483304528321-0674f0040030?auto=format&fit=crop&w=1600&q=80',
-      memberCount: 550,
-      city: 'Eskişehir',
-      email: 'anadolu-havacilik@uni.edu.tr',
-    },
-    {
-      id: 10,
-      name: 'Akdeniz Üni. Sualtı Sporları',
-      university: 'Akdeniz Üniversitesi',
-      category: 'Spor',
-      description: 'Mavilikleri keşfetmek isteyenler için dalış ve sualtı etkinlikleri.',
-      coverImage:
-        'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1000&q=80',
-      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
-      banner:
-        'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1600&q=80',
-      memberCount: 180,
-      city: 'Antalya',
-      email: 'akdeniz-sualti@uni.edu.tr',
-    },
-    {
-      id: 11,
-      name: 'DEÜ Yelken Topluluğu',
-      university: 'Dokuz Eylül Üniversitesi',
-      category: 'Spor',
-      description: 'Rüzgarla dans edenlerin, deniz tutkunlarının bir araya geldiği topluluk.',
-      coverImage:
-        'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1000&q=80',
-      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
-      banner:
-        'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1600&q=80',
-      memberCount: 210,
-      city: 'İzmir',
-      email: 'deu-yelken@uni.edu.tr',
-    },
-    {
-      id: 12,
-      name: 'Bilkent Münazara Topluluğu',
-      university: 'Bilkent Üniversitesi',
-      category: 'Kültür',
-      description: 'Fikirlerin çarpıştığı, retorik ve argümantasyon becerilerinin geliştiği ortam.',
-      coverImage:
-        'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=1000&q=80',
-      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
-      banner:
-        'https://images.unsplash.com/photo-1505664194779-8beaceb93744?auto=format&fit=crop&w=1600&q=80',
-      memberCount: 400,
-      city: 'Ankara',
-      email: 'bilkent-munazara@uni.edu.tr',
-    },
-    {
-      id: 13,
-      name: 'Sabancı Veri Bilimi Kulübü',
-      university: 'Sabancı Üniversitesi',
-      category: 'Teknoloji',
-      description: 'Büyük veri, yapay zeka ve makine öğrenmesi üzerine çalışmalar yapar.',
-      coverImage:
-        'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1000&q=80',
-      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
-      banner:
-        'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1600&q=80',
-      memberCount: 320,
-      city: 'İstanbul',
-      email: 'sabanci-veribilimi@uni.edu.tr',
-    },
-    {
-      id: 14,
-      name: 'Koç Pazarlama Kulübü',
-      university: 'Koç Üniversitesi',
-      category: 'İşletme',
-      description: 'Pazarlama dünyasının trendlerini takip eden, vaka analizleri yapan kulüp.',
-      coverImage:
-        'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1000&q=80',
-      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
-      banner:
-        'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1600&q=80',
-      memberCount: 500,
-      city: 'İstanbul',
-      email: 'koc-pazarlama@uni.edu.tr',
-    },
-    {
-      id: 15,
-      name: 'Çukurova E-Spor Topluluğu',
-      university: 'Çukurova Üniversitesi',
-      category: 'Oyun',
-      description: 'Rekabetçi oyun dünyasında üniversitemizi temsil eden oyuncular topluluğu.',
-      coverImage:
-        'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1000&q=80',
-      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
-      banner:
-        'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1600&q=80',
-      memberCount: 850,
-      city: 'Adana',
-      email: 'cukurova-espor@uni.edu.tr',
-    },
-    {
-      id: 16,
-      name: 'Erciyes Dağcılık Kulübü',
-      university: 'Erciyes Üniversitesi',
-      category: 'Spor',
-      description: 'Zirvelere tırmanmayı hedefleyen, doğa ile iç içe sporcuların kulübü.',
-      coverImage:
-        'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1000&q=80', // Karlı Dağ
-      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
-      banner:
-        'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1600&q=80',
-      memberCount: 190,
-      city: 'Kayseri',
-      email: 'erciyes-dagcilik@uni.edu.tr',
-    },
-    {
-      id: 17,
-      name: 'KTÜ Mimarlık Kulübü',
-      university: 'Karadeniz Teknik Üniversitesi',
-      category: 'Tasarım',
-      description: 'Mimarlık öğrencileri için atölyeler, geziler ve söyleşiler düzenler.',
-      coverImage:
-        'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1000&q=80',
-      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
-      banner:
-        'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1600&q=80',
-      memberCount: 420,
-      city: 'Trabzon',
-      email: 'ktu-mimarlik@uni.edu.tr',
-    },
-    {
-      id: 18,
-      name: 'Uludağ Otomotiv Topluluğu',
-      university: 'Uludağ Üniversitesi',
-      category: 'Mühendislik',
-      description: 'Otomotiv teknolojileri ve alternatif enerjili araçlar üzerine çalışır.',
-      coverImage:
-        'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1000&q=80',
-      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
-      banner:
-        'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1600&q=80',
-      memberCount: 360,
-      city: 'Bursa',
-      email: 'uludag-otomotiv@uni.edu.tr',
-    },
-    {
-      id: 19,
-      name: 'Selçuk Arkeoloji Topluluğu',
-      university: 'Selçuk Üniversitesi',
-      category: 'Tarih',
-      description: 'Tarihin izinde, kültürel mirasımızı koruyan ve tanıtan topluluk.',
-      coverImage: 'https://www.antiktarih.com/wp-content/uploads/2018/07/indi4-750x445.jpg', // Antik Harabeler
-      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
-      banner:
-        'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=1600&q=80',
-      memberCount: 140,
-      city: 'Konya',
-      email: 'selcuk-arkeoloji@uni.edu.tr',
-    },
-    {
-      id: 20,
-      name: 'Galatasaray Hukuk Kulübü',
-      university: 'Galatasaray Üniversitesi',
-      category: 'Hukuk',
-      description: 'Hukuk dünyasındaki güncel gelişmeleri takip eden, paneller düzenleyen kulüp.',
-      coverImage:
-        'https://images.unsplash.com/photo-1505664194779-8beaceb93744?auto=format&fit=crop&w=1000&q=80', // Adalet Heykeli
-      logo: 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg',
-      banner:
-        'https://images.unsplash.com/photo-1505664194779-8beaceb93744?auto=format&fit=crop&w=1600&q=80',
-      memberCount: 650,
-      city: 'İstanbul',
-      email: 'gsu-hukuk@uni.edu.tr',
-    },
-  ];
-
-  // Mock verileri getir
-  getMockCommunities(): Community[] {
-    return this.mockCommunities.map((c) => this.ensureCommunityAssets(c));
+  // CommunityDetailDto'yu Community'ye dönüştür (Detail için)
+  private mapDetailDtoToCommunity(dto: CommunityDetailDto): Community {
+    return {
+      id: dto.communityId,
+      name: dto.comName,
+      university: dto.university || '',
+      category: dto.comCategory || 'Genel',
+      description: dto.comAbout || dto.miniAbout,
+      logo: dto.logoUrl && dto.logoUrl.trim() ? dto.logoUrl : this.placeholderLogo,
+      memberCount: 0, // Backend'de memberCount yok, gerekirse ayrı endpoint'ten çekilebilir
+      city: dto.city,
+      about: dto.comAbout,
+      banner: dto.bannerUrl && dto.bannerUrl.trim() ? dto.bannerUrl : this.placeholderCover,
+      coverImage: dto.bannerUrl && dto.bannerUrl.trim() ? dto.bannerUrl : this.placeholderCover,
+      website: dto.webSiteUrl,
+      email: dto.comMail,
+      instagram: dto.instagramUrl,
+      status: dto.isActivity ? 'Aktif' : 'Pasif',
+      presidentEmail: dto.comLeadMail,
+      comMail: dto.comMail,
+      comLeadMail: dto.comLeadMail,
+      webSiteUrl: dto.webSiteUrl,
+      instagramUrl: dto.instagramUrl,
+      miniAbout: dto.miniAbout,
+      isActivity: dto.isActivity,
+      events: dto.events || [],
+    };
   }
 
-  // Tüm Toplulukları Getir
-  getAllCommunities(): Observable<Community[]> {
-    return this.http.get<CommunityDto[]>(this.apiUrl).pipe(
+  // Tüm Toplulukları Getir (Backend: GET /api/Communities)
+  // Query parametreleri: city, university, category, name
+  getAllCommunities(params?: {
+    city?: string;
+    university?: string;
+    category?: string;
+    name?: string;
+  }): Observable<Community[]> {
+    let httpParams = new HttpParams();
+    if (params?.city) httpParams = httpParams.set('city', params.city);
+    if (params?.university) httpParams = httpParams.set('university', params.university);
+    if (params?.category) httpParams = httpParams.set('category', params.category);
+    if (params?.name) httpParams = httpParams.set('name', params.name);
+
+    return this.http.get<CommunityMiniDto[]>(this.apiUrl, { params: httpParams }).pipe(
       map((response) => {
-        return response.map((dto) => this.mapToCommunity(dto));
+        return response.map((dto) => this.mapMiniDtoToCommunity(dto));
       }),
       catchError((error) => {
-        console.warn('Backend API erişilemedi, mock veri kullanılıyor:', error);
-        // Hata durumunda mock veri döndür
-        return of(this.mockCommunities);
+        console.error('Topluluklar yüklenirken hata oluştu:', error);
+        return of([]);
       })
     );
   }
@@ -527,179 +129,71 @@ export class CommunityService {
     );
   }
 
-  // Topluluk Detayı Getir
-  getCommunityById(id: number): Observable<Community> {
-    // Önce mock veriden kontrol et
-    const mockCommunity = this.mockCommunities.find((c) => c.id === id);
-    if (mockCommunity) {
-      // Mock veride varsa onu döndür, API'ye gitme (geliştirme ortamı için)
-      // Ancak gerçek senaryoda API'yi denemek isteyebilirsiniz.
-      // Şimdilik proxy hatasını engellemek için mock varsa dönüyoruz.
-      return of(this.ensureCommunityAssets(mockCommunity));
-    }
-
-    return this.http.get<CommunityDto>(`${this.apiUrl}/${id}`).pipe(
-      map((response) => this.mapToCommunity(response)),
+  // Topluluk Detayı Getir (Backend: GET /api/Communities/{id:guid})
+  getCommunityById(id: string): Observable<Community> {
+    return this.http.get<CommunityDetailDto>(`${this.apiUrl}/${id}`).pipe(
+      map((response) => this.mapDetailDtoToCommunity(response)),
       catchError((error) => {
-        console.warn('Backend API erişilemedi (Detay) ve mock veride bulunamadı:', error);
-        console.error('Topluluk detayı getirilemedi.');
+        console.error('Topluluk detayı getirilemedi:', error);
         throw error;
       })
     );
   }
 
-  private buildSocialLinks(community: any): string | undefined {
-    const obj: any = {};
-    if (community.instagram) obj.instagram = community.instagram;
-    if (community.youtube) obj.youtube = community.youtube;
-    if (community.twitter) obj.twitter = community.twitter;
-    if (community.tiktok) obj.tiktok = community.tiktok;
-    if (community.website) obj.website = community.website;
-    if (community.socialMedia) obj.socialMedia = community.socialMedia;
-
-    // Eğer ayrı alanlar yoksa ve socialLinks string geldiyse onu JSON olarak sar
-    if (Object.keys(obj).length === 0 && community.socialLinks) {
-      try {
-        JSON.parse(community.socialLinks);
-        return community.socialLinks; // zaten JSON string
-      } catch {
-        return JSON.stringify({ link: community.socialLinks });
-      }
-    }
-
-    if (Object.keys(obj).length === 0) return undefined;
-    return JSON.stringify(obj);
-  }
-
-  // Topluluk Oluştur
-  createCommunity(community: {
-    name: string;
-    about?: string;
-    city: string;
-    university: string;
-    contactEmail?: string;
-    websiteUrl?: string;
-    socialLinks?: string;
-    logoUrl?: string;
-    tags?: string[];
-    description?: string;
-    bannerUrl?: string;
-    longDescription?: string;
-    status?: string;
-    presidentEmail: string; // Zorunlu
-  }): Observable<Community> {
-    // Backend PascalCase bekliyor
-    const socialLinksJson = this.buildSocialLinks(community);
-    const request: CreateCommunityRequest = {
-      Name: community.name,
-      About: community.about,
-      City: community.city,
-      University: community.university,
-      ContactEmail: community.contactEmail,
-      WebsiteUrl: community.websiteUrl,
-      SocialLinks: socialLinksJson,
-      LogoUrl: community.logoUrl,
-      Tags: community.tags,
-      Description: community.description,
-      BannerUrl: community.bannerUrl,
-      LongDescription: community.longDescription,
-      Status: community.status,
-      PresidentEmail: community.presidentEmail,
-    };
-
-    return this.http.post<{ id: number; message: string }>(this.apiUrl, request).pipe(
+  // Topluluk Oluştur (Backend: POST /api/Communities)
+  // Backend Community entity döndürüyor (communityId: Guid)
+  createCommunity(dto: CreateCommunityDto): Observable<Community> {
+    return this.http.post<{ communityId: string; comName: string }>(this.apiUrl, dto).pipe(
       switchMap((response) => {
-        // Oluşturulan topluluğu getir
-        return this.getCommunityById(response.id);
+        // Backend Community entity döndürüyor, detayı çek
+        return this.getCommunityById(response.communityId);
       }),
       catchError((error) => {
         console.error('Topluluk oluşturulamadı:', error);
-        console.error('Hata detayı:', error.error);
-        console.error('Request body:', JSON.stringify(request, null, 2));
         throw error;
       })
     );
   }
 
-  // Topluluk Güncelle
-  updateCommunity(
-    id: number,
-    community: {
-      name?: string;
-      about?: string;
-      city?: string;
-      university?: string;
-      logoUrl?: string;
-      contactEmail?: string;
-      websiteUrl?: string;
-      socialLinks?: string;
-      tags?: string[];
-      description?: string;
-      bannerUrl?: string;
-      longDescription?: string;
-      status?: string;
-      presidentEmail?: string; // Başkan değişikliği için (sadece GSB)
-    }
-  ): Observable<Community> {
-    // Backend PascalCase bekliyor
-    // Boş string'leri null'a çevir (backend null kontrolü yapıyor)
-    const socialLinksJson = this.buildSocialLinks(community);
-    const request: UpdateCommunityRequest = {
-      Name: community.name && community.name.trim() ? community.name.trim() : undefined,
-      About: community.about && community.about.trim() ? community.about.trim() : undefined,
-      City: community.city && community.city.trim() ? community.city.trim() : undefined,
-      University:
-        community.university && community.university.trim()
-          ? community.university.trim()
-          : undefined,
-      LogoUrl: community.logoUrl && community.logoUrl.trim() ? community.logoUrl.trim() : undefined,
-      ContactEmail:
-        community.contactEmail && community.contactEmail.trim()
-          ? community.contactEmail.trim()
-          : undefined,
-      WebsiteUrl:
-        community.websiteUrl && community.websiteUrl.trim()
-          ? community.websiteUrl.trim()
-          : undefined,
-      SocialLinks: socialLinksJson,
-      Tags: community.tags,
-      Description:
-        community.description && community.description.trim()
-          ? community.description.trim()
-          : undefined,
-      BannerUrl:
-        community.bannerUrl && community.bannerUrl.trim() ? community.bannerUrl.trim() : undefined,
-      LongDescription:
-        community.longDescription && community.longDescription.trim()
-          ? community.longDescription.trim()
-          : undefined,
-      Status: community.status,
-      PresidentEmail:
-        community.presidentEmail && community.presidentEmail.trim()
-          ? community.presidentEmail.trim()
-          : undefined,
-    };
-
-    return this.http.put<{ message: string }>(`${this.apiUrl}/${id}`, request).pipe(
+  // Topluluk Güncelle (Backend: PUT /api/Communities/{id:guid})
+  updateCommunity(id: string, dto: UpdateCommunityDto): Observable<Community> {
+    return this.http.put<void>(`${this.apiUrl}/${id}`, dto).pipe(
       switchMap(() => {
         // Güncellenen topluluğu getir
         return this.getCommunityById(id);
       }),
       catchError((error) => {
         console.error('Topluluk güncellenemedi:', error);
-        console.error('Hata detayı:', error.error);
-        console.error('Request body:', JSON.stringify(request, null, 2));
         throw error;
       })
     );
   }
 
-  // Topluluk Sil
-  deleteCommunity(id: number): Observable<void> {
+  // Topluluk Sil (Backend: DELETE /api/Communities/{id:guid})
+  deleteCommunity(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
       catchError((error) => {
         console.error('Topluluk silinemedi:', error);
-        console.error('Hata detayı:', error.error);
+        throw error;
+      })
+    );
+  }
+
+  // Üye Ekle (Backend: POST /api/Communities/{id:guid}/members)
+  addMember(id: string, dto: AddCommunityMemberDto): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/${id}/members`, dto).pipe(
+      catchError((error) => {
+        console.error('Üye eklenemedi:', error);
+        throw error;
+      })
+    );
+  }
+
+  // Üye Çıkar (Backend: DELETE /api/Communities/{id:guid}/members)
+  removeMember(id: string, dto: RemoveCommunityMemberDto): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}/members`, { body: dto }).pipe(
+      catchError((error) => {
+        console.error('Üye çıkarılamadı:', error);
         throw error;
       })
     );
@@ -707,41 +201,43 @@ export class CommunityService {
 
   // Corporate dashboard için uyumluluk metodu (eski interface ile çalışır)
   addOrUpdateCommunity(community: Community & { presidentEmail?: string }): Observable<Community> {
-    if (community.id && community.id > 0) {
+    if (community.id && community.id !== '') {
       // Güncelleme
-      return this.updateCommunity(community.id, {
-        name: community.name,
-        about: community.about || community.description,
+      const updateDto: UpdateCommunityDto = {
+        comName: community.name,
+        comAbout: community.about || community.description,
         city: community.city,
         university: community.university,
         logoUrl: community.logo || community.banner,
-        contactEmail: community.email,
-        websiteUrl: community.website,
-        socialLinks: community.socialMedia,
-        description: community.description,
+        comMail: community.email || community.comMail,
+        webSiteUrl: community.website || community.webSiteUrl,
+        instagramUrl: community.instagram || community.instagramUrl,
         bannerUrl: community.banner,
-        status: community.status,
-        presidentEmail: community.presidentEmail,
-      });
+        miniAbout: community.miniAbout,
+        isActivity: community.isActivity ?? community.status === 'Aktif',
+        comLeadMail: community.presidentEmail || community.comLeadMail,
+      };
+      return this.updateCommunity(community.id, updateDto);
     } else {
-      // Yeni topluluk oluşturma - PresidentEmail zorunlu
-      if (!community.presidentEmail) {
-        throw new Error('Topluluk başkanı email adresi zorunludur.');
+      // Yeni topluluk oluşturma - ComLeadMail zorunlu
+      if (!community.presidentEmail && !community.comLeadMail) {
+        throw new Error('Topluluk başkanı email adresi (comLeadMail) zorunludur.');
       }
-      return this.createCommunity({
-        name: community.name,
-        about: community.about || community.description,
+      const createDto: CreateCommunityDto = {
+        comName: community.name,
+        comAbout: community.about || community.description,
         city: community.city || '',
         university: community.university,
-        contactEmail: community.email,
-        websiteUrl: community.website,
-        socialLinks: community.socialMedia,
+        comMail: community.email || community.comMail,
+        comLeadMail: community.presidentEmail || community.comLeadMail || '',
+        webSiteUrl: community.website || community.webSiteUrl,
+        instagramUrl: community.instagram || community.instagramUrl,
         logoUrl: community.logo,
-        description: community.description,
         bannerUrl: community.banner,
-        status: community.status,
-        presidentEmail: community.presidentEmail,
-      });
+        miniAbout: community.miniAbout,
+        comCategory: community.category,
+      };
+      return this.createCommunity(createDto);
     }
   }
 }

@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
 import { Router } from '@angular/router';
 import { ImageUploadComponent } from '../../components/ui/image-upload/image-upload';
-import { CommunityService } from '../../services/community.services';
+import { CommunityService, Community } from '../../services/community.services';
 import { AnnouncementService } from '../../services/announcement.services';
 import { EventService, EventItem } from '../../services/event.services';
 
@@ -129,27 +129,8 @@ interface Stat {
   icon: string;
   colorClass: string;
 }
-interface Community {
-  id: number;
-  name: string;
-  about?: string;
-  description?: string; // CommunityService'ten gelen veri için
-  city?: string;
-  university: string;
-  memberCount: number;
-  socialMedia?: string; // Eski uyumluluk için
-  instagram?: string;
-  youtube?: string;
-  twitter?: string;
-  tiktok?: string;
-  website?: string;
-  email?: string;
-  category: string;
-  logo: string;
-  banner?: string;
-  coverImage?: string; // CommunityService'ten gelen veri için
-  status?: 'Aktif' | 'Pasif' | 'Onay Bekleyen';
-}
+// Community interface artık model dosyasından import ediliyor
+// Eski interface kaldırıldı - yeni model kullanılıyor (id: string)
 interface Announcement {
   id: number;
   title: string;
@@ -161,7 +142,7 @@ interface Announcement {
 }
 interface EventRequest {
   id: number;
-  communityId?: number;
+  communityId?: number | string; // Hem number (eski) hem string (Guid) destekle
   communityName: string;
   eventName: string;
   date: string;
@@ -374,7 +355,8 @@ export class CorporateDashboardComponent implements OnInit {
   attachCommunityNamesToEvents() {
     if (!this.allCommunities?.length || !this.allEvents?.length) return;
     this.allEvents = this.allEvents.map((ev) => {
-      const found = this.allCommunities.find((c) => c.id === ev.communityId);
+      // Community id string (Guid), EventItem communityId number - String'e çevirip karşılaştır
+      const found = this.allCommunities.find((c) => String(c.id) === String(ev.communityId));
       return { ...ev, communityName: found?.name || ev.communityName };
     });
   }
@@ -497,7 +479,7 @@ export class CorporateDashboardComponent implements OnInit {
   // Yeni topluluk ekleme
   openNewCommunityModal() {
     this.newCommunity = {
-      id: 0, // Yeni topluluk için 0, kaydedilirken otomatik ID atanacak
+      id: '', // Yeni topluluk için boş string, kaydedilirken otomatik Guid atanacak
       name: '',
       about: '',
       city: '',
@@ -585,7 +567,7 @@ export class CorporateDashboardComponent implements OnInit {
       // CommunityService'e kaydet (communities-page'e otomatik eklenir)
       const communityForService = {
         ...this.newCommunity,
-        id: 0, // Service otomatik ID atayacak
+        id: '', // Service otomatik ID (Guid) atayacak - string olmalı
         description: this.newCommunity.about || this.newCommunity.description || '',
         coverImage: this.newCommunity.banner || '',
         presidentEmail: presidentEmail.trim(),
@@ -802,7 +784,9 @@ export class CorporateDashboardComponent implements OnInit {
       eventName: '',
       date: '',
       location: '',
-      communityId: this.allCommunities[0]?.id || undefined,
+      // Community id string (Guid), EventRequest communityId number bekliyor - undefined bırakıyoruz
+      // Backend'e gönderilirken uygun formata çevrilecek
+      communityId: undefined,
       communityName: this.allCommunities[0]?.name || '',
       imageUrl: '',
       description: '',
@@ -825,7 +809,7 @@ export class CorporateDashboardComponent implements OnInit {
       location: this.newEvent.location || '',
       communityId: this.newEvent.communityId,
       communityName:
-        this.allCommunities.find((c) => c.id === this.newEvent?.communityId)?.name ||
+        this.allCommunities.find((c) => String(c.id) === String(this.newEvent?.communityId))?.name ||
         this.newEvent.communityName ||
         '',
       imageUrl: this.newEvent.imageUrl || '',
