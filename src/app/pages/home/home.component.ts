@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
 import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
+import { TurkeySkylineComponent } from '../../components/ui/turkey-skyline/turkey-skyline.component';
 
 // --- Veri Tipleri (Interfaces) ---
 interface Community {
@@ -44,7 +45,7 @@ interface Announcement {
 @Component({
   selector: 'app-home', // DÜZELTİLDİ
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, SiteNavbarComponent, SiteFooterComponent],
+  imports: [CommonModule, RouterModule, FormsModule, SiteNavbarComponent, SiteFooterComponent, TurkeySkylineComponent],
   templateUrl: './home.component.html', // DÜZELTİLDİ
   styleUrls: ['./home.component.scss'], // DÜZELTİLDİ
 })
