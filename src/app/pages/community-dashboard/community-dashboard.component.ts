@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ImageUploadComponent } from '../../components/ui/image-upload/image-upload';
 import { CommunityService, Community } from '../../services/community.services';
+import { EventService } from '../../services/event.services';
 
 // --- Interfaces ---
 interface Project {
@@ -351,6 +352,7 @@ export class CommunityDashboardComponent implements OnInit {
   constructor(
     private router: Router,
     private communityService: CommunityService,
+    private eventService: EventService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -717,13 +719,30 @@ export class CommunityDashboardComponent implements OnInit {
       this.showToast('Lütfen tüm alanları doldurun.', 'error');
       return;
     }
-    this.showToast('Kurumsal girişe yönlendiriliyorsunuz...', 'success');
-    setTimeout(() => {
-      this.router.navigate(['/corporate-dashboard'], {
-        queryParams: { from: 'community-dashboard', draftEvent: this.newEventData.title },
-      });
-      this.closeModal();
-    }, 600);
+
+    // Tarih ve saat birleştirme
+    const fullDate = `${this.newEventData.date} ${this.newEventData.time}`;
+
+    // EventService üzerinden etkinlik ekle (Mock)
+    this.eventService.addEvent({
+      title: this.newEventData.title,
+      startDate: fullDate,
+      location: this.newEventData.location,
+      capacity: this.newEventData.quota.toString(), // number -> string
+      description: this.newEventData.description,
+      imageUrl: this.newEventData.image,
+      communityId: this.clubInfo.id ? Number(this.clubInfo.id) : 0, // Mock id dönüşümü
+      communityName: this.clubInfo.name,
+      status: 'Beklemede'
+    }).subscribe(() => {
+      this.showToast('Etkinlik oluşturuldu, kurumsal girişe yönlendiriliyorsunuz...', 'success');
+      setTimeout(() => {
+        this.router.navigate(['/corporate-dashboard'], {
+          queryParams: { from: 'community-dashboard' },
+        });
+        this.closeModal();
+      }, 800);
+    });
   }
 
   get isEventFormValid() {

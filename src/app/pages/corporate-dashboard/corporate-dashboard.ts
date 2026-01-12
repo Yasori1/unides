@@ -151,6 +151,7 @@ interface EventRequest {
   description?: string;
   status: 'Onaylandı' | 'Beklemede' | 'Reddedildi';
   capacity?: string;
+  rejectionReason?: string;
 }
 
 interface Notification {
@@ -241,6 +242,8 @@ export class CorporateDashboardComponent implements OnInit {
 
   allEvents: EventRequest[] = [];
   selectedEvent: EventRequest | null = null;
+  eventToReject: EventRequest | null = null;
+  rejectionReason = '';
   newEvent: Partial<EventRequest> | null = null;
 
   notifications: Notification[] = [
@@ -338,12 +341,87 @@ export class CorporateDashboardComponent implements OnInit {
           status: e.status || 'Beklemede',
           capacity: '',
         }));
+
+        // DEMO EVENTS - TEST İÇİN
+        const demoEvents: EventRequest[] = [
+          {
+            id: 9001,
+            communityName: 'Teknoloji Topluluğu',
+            eventName: 'Yapay Zeka Zirvesi',
+            date: '15 Şubat 2026 | 10:00',
+            location: 'Merkez Kampüs - Konferans Salonu A',
+            description: 'Yapay zeka dünyasındaki son gelişmeler, etik tartışmalar ve gelecek vizyonunun ele alınacağı kapsamlı bir zirve. Sektör öncüleri ve akademisyenlerin katılımıyla gerçekleşecek.',
+            status: 'Beklemede',
+            imageUrl: 'assets/images/listing/img1.jpg',
+            capacity: '500 Kişi'
+          },
+          {
+            id: 9002,
+            communityName: 'Müzik Kulübü',
+            eventName: 'Bahar Konseri',
+            date: '20 Mart 2026 | 18:00',
+            location: 'Kampüs Meydanı - Açık Hava Sahnesi',
+            description: 'Baharın gelişini coşkuyla kutluyoruz! Öğrenci grupları ve sürpriz konuk sanatçıların sahne alacağı müzik dolu bir akşam.',
+            status: 'Beklemede',
+            imageUrl: 'assets/images/listing/img2.jpg',
+            capacity: '1000+ Kişi'
+          },
+          {
+            id: 9003,
+            communityName: 'Girişimcilik Kulübü',
+            eventName: 'Startup Weekend',
+            date: '05 Nisan 2026 | 09:00',
+            location: 'İnovasyon Merkezi - Kuluçka Alanı',
+            description: '48 saat sürecek kesintisiz girişimcilik maratonu. Fikrini takıma dönüştür, mentorlardan destek al ve jüri karşısında sunumunu yap.',
+            status: 'Beklemede',
+            imageUrl: 'assets/images/listing/img3.jpg',
+            capacity: '100 Kişi'
+          }
+        ];
+        this.allEvents = [...demoEvents, ...this.allEvents];
+
         this.attachCommunityNamesToEvents();
         this.filteredEvents = [...this.allEvents]; // Başlangıçta tüm etkinlikleri göster
       },
       error: (err) => {
         console.error('Etkinlikler yüklenemedi:', err);
-        this.filteredEvents = [];
+        // Hata durumunda da demo eventleri göster
+        this.allEvents = [
+          {
+            id: 9001,
+            communityName: 'Teknoloji Topluluğu',
+            eventName: 'Yapay Zeka Zirvesi',
+            date: '15 Şubat 2026 | 10:00',
+            location: 'Merkez Kampüs - Konferans Salonu A',
+            description: 'Yapay zeka dünyasındaki son gelişmeler, etik tartışmalar ve gelecek vizyonunun ele alınacağı kapsamlı bir zirve. Sektör öncüleri ve akademisyenlerin katılımıyla gerçekleşecek.',
+            status: 'Beklemede',
+            imageUrl: 'assets/images/listing/img1.jpg',
+            capacity: '500 Kişi'
+          },
+          {
+            id: 9002,
+            communityName: 'Müzik Kulübü',
+            eventName: 'Bahar Konseri',
+            date: '20 Mart 2026 | 18:00',
+            location: 'Kampüs Meydanı - Açık Hava Sahnesi',
+            description: 'Baharın gelişini coşkuyla kutluyoruz! Öğrenci grupları ve sürpriz konuk sanatçıların sahne alacağı müzik dolu bir akşam.',
+            status: 'Beklemede',
+            imageUrl: 'assets/images/listing/img2.jpg',
+            capacity: '1000+ Kişi'
+          },
+          {
+            id: 9003,
+            communityName: 'Girişimcilik Kulübü',
+            eventName: 'Startup Weekend',
+            date: '05 Nisan 2026 | 09:00',
+            location: 'İnovasyon Merkezi - Kuluçka Alanı',
+            description: '48 saat sürecek kesintisiz girişimcilik maratonu. Fikrini takıma dönüştür, mentorlardan destek al ve jüri karşısında sunumunu yap.',
+            status: 'Beklemede',
+            imageUrl: 'assets/images/listing/img3.jpg',
+            capacity: '100 Kişi'
+          }
+        ];
+        this.filteredEvents = [...this.allEvents];
       },
     });
   }
@@ -764,8 +842,25 @@ export class CorporateDashboardComponent implements OnInit {
   rejectEvent(id: number) {
     const event = this.allEvents.find((e) => e.id === id);
     if (event) {
-      event.status = 'Reddedildi';
-      this.showToast('Etkinlik reddedildi', 'error');
+      this.eventToReject = event;
+      this.rejectionReason = ''; // Reset reason
+      this.modalType = 'reject-event'; // Set modal type for rejection
+      this.isModalOpen = true;
+    }
+  }
+
+  confirmRejection() {
+    if (this.eventToReject) {
+      this.eventToReject.status = 'Reddedildi';
+      this.eventToReject.rejectionReason = this.rejectionReason;
+      
+      // Burada normalde backend'e rejectionReason ile birlikte güncelleme isteği atılır
+      console.log(`Event ${this.eventToReject.id} rejected. Reason: ${this.rejectionReason}`);
+      
+      this.showToast('Etkinlik reddedildi', 'success'); // 'error' yerine 'success' çünkü işlem başarılı
+      this.closeModal();
+      this.eventToReject = null;
+      this.rejectionReason = '';
     }
   }
 
@@ -1110,5 +1205,14 @@ export class CorporateDashboardComponent implements OnInit {
       default:
         return '';
     }
+  }
+
+  getShortDesc(description: string | undefined): string {
+    const desc = description || 'Açıklama bulunmuyor.';
+    const limit = 120;
+    if (desc.length > limit) {
+      return desc.substring(0, limit) + '...';
+    }
+    return desc;
   }
 }
