@@ -6,8 +6,10 @@ import {
   OnDestroy,
   ViewChild,
   NgZone,
+  Inject,
+  PLATFORM_ID,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 
 interface Neuron {
   x: number;
@@ -60,32 +62,44 @@ export class NeuronsBackgroundComponent implements AfterViewInit, OnDestroy {
   private animationFrameId: number | null = null;
   private onResize = () => this.resizeCanvas();
 
-  constructor(private ngZone: NgZone) {}
+  constructor(
+    private ngZone: NgZone,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {}
 
   ngAfterViewInit() {
+    if (!isPlatformBrowser(this.platformId)) return;
+
     this.ngZone.runOutsideAngular(() => {
       this.initCanvas();
       this.initNeurons();
       this.animate();
-      window.addEventListener('resize', this.onResize);
+      if (typeof window !== 'undefined') {
+        window.addEventListener('resize', this.onResize);
+      }
     });
   }
 
   ngOnDestroy() {
+    if (!isPlatformBrowser(this.platformId)) return;
+
     if (this.animationFrameId !== null) {
       cancelAnimationFrame(this.animationFrameId);
     }
-    window.removeEventListener('resize', this.onResize);
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('resize', this.onResize);
+    }
   }
 
   private initCanvas() {
+    if (!isPlatformBrowser(this.platformId)) return;
     this.canvas = this.canvasRef.nativeElement;
     this.ctx = this.canvas.getContext('2d')!;
     this.resizeCanvas();
   }
 
   private resizeCanvas() {
-    if (!this.canvas || !this.canvas.parentElement) return;
+    if (!isPlatformBrowser(this.platformId) || !this.canvas || !this.canvas.parentElement) return;
     const container = this.canvas.parentElement;
     this.canvas.width = container.clientWidth;
     this.canvas.height = container.clientHeight;
@@ -93,7 +107,7 @@ export class NeuronsBackgroundComponent implements AfterViewInit, OnDestroy {
   }
 
   private initNeurons() {
-    if (!this.canvas) return;
+    if (!isPlatformBrowser(this.platformId) || !this.canvas) return;
     this.neurons = [];
     for (let i = 0; i < this.nodeCount; i++) {
       this.neurons.push({
@@ -109,7 +123,7 @@ export class NeuronsBackgroundComponent implements AfterViewInit, OnDestroy {
   }
 
   private animate = () => {
-    if (!this.ctx || !this.canvas) return;
+    if (!isPlatformBrowser(this.platformId) || !this.ctx || !this.canvas) return;
 
     // Clear canvas
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);

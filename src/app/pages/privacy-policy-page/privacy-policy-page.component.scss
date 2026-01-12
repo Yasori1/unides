@@ -16,6 +16,30 @@ $card-bg: rgba(241, 245, 249, 0.7);
   display: block;
   width: 100%;
   font-family: 'Inter', sans-serif;
+  position: relative;
+  overflow-x: hidden;
+}
+
+// --- ARKA PLAN (AURORA / AKIŞKAN) ---
+.global-background {
+  position: fixed; 
+  top: 0; 
+  left: 0; 
+  width: 100vw; 
+  height: 100vh;
+  z-index: -1; 
+  /* Opaque gradient: Left Turquoise (#e0fbfc) -> Right White (#ffffff) */
+  background: 
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 1px,
+      rgba(224, 251, 252, 0.15) 1px,
+      rgba(224, 251, 252, 0.15) 2px
+    ),
+    linear-gradient(to right, #e0fbfc 0%, #ffffff 100%);
+  overflow: hidden; 
+  pointer-events: none;
 }
 
 // --- PAGE SPACER ---

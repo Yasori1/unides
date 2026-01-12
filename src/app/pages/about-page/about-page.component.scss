@@ -11,7 +11,31 @@ $border-color: #e2e8f0; // Slate 200
   display: block;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   color: $text-dark;
-  background-color: $white;
+  background-color: transparent;
+  position: relative;
+  overflow-x: hidden;
+}
+
+// --- ARKA PLAN (AURORA / AKIŞKAN) ---
+.global-background {
+  position: fixed; 
+  top: 0; 
+  left: 0; 
+  width: 100vw; 
+  height: 100vh;
+  z-index: -1; 
+  /* Opaque gradient: Left Turquoise (#e0fbfc) -> Right White (#ffffff) */
+  background: 
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 1px,
+      rgba(224, 251, 252, 0.15) 1px,
+      rgba(224, 251, 252, 0.15) 2px
+    ),
+    linear-gradient(to right, #e0fbfc 0%, #ffffff 100%);
+  overflow: hidden; 
+  pointer-events: none;
 }
 
 ::-webkit-scrollbar {
@@ -23,7 +47,7 @@ $border-color: #e2e8f0; // Slate 200
 .page-spacer {
   padding-top: 140px;
   padding-bottom: 70px;
-  background-color: $bg-light;
+  background-color: transparent;
   text-align: center;
   border-bottom: 1px solid $border-color;
   position: relative;

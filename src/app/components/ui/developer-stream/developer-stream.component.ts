@@ -5,8 +5,10 @@ import {
   OnDestroy,
   ViewChild,
   Input,
+  Inject,
+  PLATFORM_ID,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 
 interface CodeChar {
   char: string;
@@ -64,6 +66,8 @@ export class DeveloperStreamComponent implements AfterViewInit, OnDestroy {
   private columnWidth = 28;
   private frameCount = 0;
 
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
+
   // Matrix tarzı karakterler
   private chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()_+-=[]{}|;:,.<>?';
   private numbers = '0123456789';
@@ -87,6 +91,8 @@ export class DeveloperStreamComponent implements AfterViewInit, OnDestroy {
   ];
 
   ngAfterViewInit(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+
     this.canvas = this.canvasRef.nativeElement;
     this.ctx = this.canvas.getContext('2d')!;
 
@@ -98,22 +104,28 @@ export class DeveloperStreamComponent implements AfterViewInit, OnDestroy {
       this.animate();
     }, 100);
 
-    window.addEventListener('resize', this.resize);
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', this.resize);
+    }
   }
 
   ngOnDestroy(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+
     if (this.animationFrameId !== null) {
       cancelAnimationFrame(this.animationFrameId);
     }
-    window.removeEventListener('resize', this.resize);
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('resize', this.resize);
+    }
   }
 
   private resize = () => {
-    if (!this.canvas) return;
+    if (!this.canvas || !isPlatformBrowser(this.platformId)) return;
 
     const rect = this.canvas.getBoundingClientRect();
-    const width = rect.width || window.innerWidth;
-    const height = rect.height || window.innerHeight;
+    const width = rect.width || (typeof window !== 'undefined' ? window.innerWidth : 0);
+    const height = rect.height || (typeof window !== 'undefined' ? window.innerHeight : 0);
     
     this.canvas.width = width;
     this.canvas.height = height;
@@ -194,8 +206,10 @@ export class DeveloperStreamComponent implements AfterViewInit, OnDestroy {
   }
 
   private animate = () => {
-    if (!this.ctx || !this.canvas || this.canvas.width === 0 || this.canvas.height === 0) {
-      this.animationFrameId = requestAnimationFrame(this.animate);
+    if (!isPlatformBrowser(this.platformId) || !this.ctx || !this.canvas || this.canvas.width === 0 || this.canvas.height === 0) {
+      if (isPlatformBrowser(this.platformId)) {
+        this.animationFrameId = requestAnimationFrame(this.animate);
+      }
       return;
     }
 
