@@ -208,11 +208,7 @@ export class CorporateDashboardComponent implements OnInit {
     username: 'unides_admin',
   };
 
-  stats: Stat[] = [
-    { label: 'Toplam Topluluk', value: 42, icon: 'groups', colorClass: 'blue' },
-    { label: 'Aktif Etkinlik', value: 12, icon: 'event', colorClass: 'green' },
-    { label: 'Bekleyen İstek', value: 5, icon: 'pending_actions', colorClass: 'orange' },
-  ];
+  // stats dizisi ve ilgili HTML kullanımı kaldırıldı
 
   // Kategori listesi
   categories: string[] = [

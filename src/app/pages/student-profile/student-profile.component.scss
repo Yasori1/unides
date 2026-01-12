@@ -88,9 +88,9 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
       box-shadow: none;
 
       .brand-logo {
-        height: 90px;
+        height: 60px;
         width: auto;
-        max-width: 220px;
+        max-width: 180px;
         display: block;
         object-fit: contain;
       }
@@ -455,62 +455,62 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
       }
 
       .dropdown-menu {
-        position: absolute !important;
-        top: calc(100% + 10px) !important;
-        right: 0 !important;
-        width: 280px !important;
-        min-width: 280px;
-        background: #fff !important;
-        border: 1px solid #e2e8f0 !important;
-        border-radius: 16px !important;
-        box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1) !important;
-        z-index: 10000 !important;
+        position: absolute;
+        top: calc(100% + 10px);
+        right: 0;
+        width: 200px;
+        min-width: 200px;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
         overflow: hidden;
         animation: slideUp 0.2s ease-out;
-        display: block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        pointer-events: auto !important;
+        display: block;
 
         &.notifications {
-          right: 60px !important;
-          top: calc(100% + 8px) !important;
+          right: 0;
+          width: 280px;
         }
 
         &.profile-dropdown {
-          right: 0 !important;
-          top: calc(100% + 8px) !important;
+          right: 0;
         }
 
         .dd-header {
-          padding: 15px 20px;
+          padding: 12px 16px;
           background: #f8fafc;
           border-bottom: 1px solid #e2e8f0;
           font-weight: 700;
-          font-size: 0.95rem;
+          font-size: 0.85rem;
           color: #0f172a;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
         ul {
           list-style: none;
-          padding: 5px 0;
+          padding: 4px 0;
           margin: 0;
         }
 
         li {
-          padding: 12px 20px;
+          padding: 10px 16px;
           display: flex;
           align-items: center;
           gap: 10px;
           cursor: pointer;
           color: #0f172a;
           transition: all 0.2s ease;
-          font-size: 0.9rem;
+          font-size: 0.85rem;
           position: relative;
+          justify-content: flex-start;
 
           &:hover {
-            background: rgba(20, 210, 204, 0.1);
-            color: #14d2cc;
+            background: rgba(37, 99, 235, 0.05);
+            color: #2563eb;
           }
 
           &.read {
@@ -531,7 +531,7 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
           }
 
           .small-icon {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
           }
 
           small {
@@ -862,7 +862,7 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
           opacity: 1;
         }
         
-        i {
+        i, .material-symbols-outlined {
           transform: translateX(6px);
         }
       }
@@ -871,7 +871,7 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
         transform: translateX(1px) scale(0.98);
       }
       
-      i {
+      i, .material-symbols-outlined {
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         font-size: 1.1em;
       }
@@ -1011,149 +1011,50 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
       overflow: hidden;
     }
 
-    .social-media-icons {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 15px;
-      flex-wrap: wrap;
-      .social-icon {
-        width: 32px;
-        height: 32px;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #f8fafc;
-        border: 1px solid #e4e4e7;
-        color: #71717a;
-        transition: all 0.2s;
-        font-size: 1.1rem;
-        &:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        &.instagram {
-          color: #e4405f;
-          border-color: rgba(228, 64, 95, 0.2);
-          background: rgba(228, 64, 95, 0.05);
-          &:hover {
-            background: rgba(228, 64, 95, 0.1);
-            border-color: #e4405f;
-          }
-        }
-        &.youtube {
-          color: #ff0000;
-          border-color: rgba(255, 0, 0, 0.2);
-          background: rgba(255, 0, 0, 0.05);
-          &:hover {
-            background: rgba(255, 0, 0, 0.1);
-            border-color: #ff0000;
-          }
-        }
-        &.twitter {
-          color: #1da1f2;
-          border-color: rgba(29, 161, 242, 0.2);
-          background: rgba(29, 161, 242, 0.05);
-          &:hover {
-            background: rgba(29, 161, 242, 0.1);
-            border-color: #1da1f2;
-          }
-        }
-        &.tiktok {
-          color: #000000;
-          border-color: rgba(0, 0, 0, 0.2);
-          background: rgba(0, 0, 0, 0.05);
-          &:hover {
-            background: rgba(0, 0, 0, 0.1);
-            border-color: #000000;
-          }
-        }
-      }
-    }
-
     .card-footer {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-end;
       border-top: 1px solid #e4e4e7;
       padding-top: 15px;
       font-size: 0.85rem;
       background: #fff;
-      .stat {
+      margin-top: auto;
+
+      .footer-info {
         display: flex;
-        align-items: center;
+        flex-direction: column;
         gap: 6px;
-        color: #0f172a;
-        font-weight: 600;
-        i {
-          font-size: 1.1rem;
-          color: #2563eb;
-        }
-      }
-      .actions {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        .btn-danger.ghost {
-          background: #fff1f2;
-          color: #dc2626;
-          border: 1px solid #fecdd3;
-          border-radius: 10px;
-          padding: 8px 10px;
-          font-weight: 700;
-          cursor: pointer;
-          transition: 0.2s;
-          &:hover {
-            background: #fecdd3;
-            color: #b91c1c;
-          }
-        }
-        .action-text {
-          font-weight: 600;
-          color: #2563eb;
+        
+        .city-tag {
+          font-size: 0.75rem;
+          color: #71717a;
           display: flex;
           align-items: center;
           gap: 6px;
-          cursor: pointer;
-          user-select: none;
-          padding: 6px 12px;
-          border-radius: 8px;
-          background: rgba(37, 99, 235, 0.08);
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          position: relative;
-          overflow: hidden;
           
-          &::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(20, 210, 204, 0.1));
-            opacity: 0;
-            transition: opacity 0.3s ease;
+          .material-symbols-outlined {
+            color: #2563eb;
+            font-size: 1rem;
           }
-          
-          &:hover {
-            color: #1e40af;
-            background: rgba(37, 99, 235, 0.15);
-            transform: translateX(2px);
-            
-            &::before {
-              opacity: 1;
-            }
-            
-            i {
-              transform: translateX(4px);
-            }
-          }
-          
-          &:active {
-            transform: translateX(1px) scale(0.98);
-          }
-          
-          i {
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            font-size: 1.1em;
-          }
+        }
+        .university-name {
+            font-size: 0.75rem;
+            color: #71717a;
+            font-weight: 600;
+        }
+      }
+
+      .action-text {
+        font-weight: 600;
+        color: #0f172a;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        transition: color 0.3s;
+        
+        .material-symbols-outlined {
+          transition: transform 0.3s;
         }
       }
     }

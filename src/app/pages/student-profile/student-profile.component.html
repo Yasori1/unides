@@ -16,7 +16,7 @@
   <aside class="sidebar" [class.collapsed]="isSidebarCollapsed">
     <div class="brand" (click)="switchTab('overview')">
       <div class="logo-badge">
-        <img class="brand-logo" src="images/logo.png" alt="Ünides Dijital Portal" />
+        <img class="brand-logo" src="assets/unides1.png" alt="Ünides Dijital Portal" />
       </div>
     </div>
 
@@ -67,10 +67,6 @@
     </nav>
 
     <div class="sidebar-footer">
-      <button class="menu-item home-btn" (click)="router.navigate(['/'])" title="Anasayfaya Dön">
-        <span class="material-symbols-outlined">home</span>
-        <span *ngIf="!isSidebarCollapsed">Anasayfaya Dön</span>
-      </button>
       <button class="logout-btn" (click)="logout()" title="Çıkış">
         <span class="material-symbols-outlined">logout</span>
         <span *ngIf="!isSidebarCollapsed">Çıkış Yap</span>
@@ -104,22 +100,6 @@
       </div>
 
       <div class="header-right">
-        <button class="icon-btn notification" (click)="toggleNotifications($event)">
-          <span class="material-symbols-outlined">notifications</span>
-          <span class="indicator" *ngIf="notifications.length"></span>
-        </button>
-        <div
-          class="dropdown-menu notifications"
-          *ngIf="showNotifications"
-          (click)="$event.stopPropagation()"
-        >
-          <div class="dd-header">Bildirimler</div>
-          <ul>
-            <li *ngFor="let n of notifications" (click)="handleNotificationClick(n)" [class.read]="n.read">
-              {{ n.text }} <small>{{ n.time }}</small>
-            </li>
-          </ul>
-        </div>
 
         <div class="profile-wrapper">
           <div class="profile-pic" (click)="toggleProfileDropdown($event)">
@@ -270,96 +250,39 @@
           <div class="community-card" *ngFor="let community of myCommunities.slice(0, 3)" (click)="goCommunityDetail(community)">
             <div class="cover-area">
               <img
-                [src]="community.coverImage || community.logo"
+                [src]="community.coverImage || community.banner || 'assets/img/placeholder-cover.svg'"
                 [alt]="community.name"
                 class="cover-img"
+                onerror="this.src='assets/img/placeholder-cover.svg'"
               />
               <span class="category-badge">{{ community.category }}</span>
             </div>
             <div class="card-content">
               <div class="header-row">
                 <div class="logo-wrapper">
-                  <img [src]="community.logo" [alt]="community.name" class="logo-img" />
+                  <img
+                    [src]="community.logo || 'assets/img/placeholder-logo.svg'"
+                    [alt]="community.name"
+                    class="logo-img"
+                    onerror="this.src='assets/img/placeholder-logo.svg'"
+                  />
                 </div>
                 <div class="title-wrapper">
                   <h3 class="community-name">{{ community.name }}</h3>
-                  <span class="university-name">{{
-                    community.university || community.city
-                  }}</span>
+                </div>
+              </div>
+              <p class="description" *ngIf="community.description || community.about">{{ community.description || community.about }}</p>
+              
+              <div class="card-footer">
+                <div class="footer-info">
                   <span class="city-tag" *ngIf="community.city">
-                    <i class="bx bxs-map"></i> {{ community.city }}
+                    <span class="material-symbols-outlined" style="font-size: 16px;">location_on</span> {{ community.city }}
                   </span>
                 </div>
-              </div>
-              <p class="description" *ngIf="community.description">{{ community.description }}</p>
-              <div
-                class="social-media-icons"
-                *ngIf="
-                  community.instagram ||
-                  community.youtube ||
-                  community.twitter ||
-                  community.tiktok ||
-                  community.socialMedia
-                "
-              >
-                <a
-                  *ngIf="community.instagram"
-                  [href]="community.instagram"
-                  target="_blank"
-                  class="social-icon instagram"
-                  (click)="$event.stopPropagation()"
-                >
-                  <i class="bx bxl-instagram"></i>
-                </a>
-                <a
-                  *ngIf="community.youtube"
-                  [href]="community.youtube"
-                  target="_blank"
-                  class="social-icon youtube"
-                  (click)="$event.stopPropagation()"
-                >
-                  <i class="bx bxl-youtube"></i>
-                </a>
-                <a
-                  *ngIf="community.twitter"
-                  [href]="community.twitter"
-                  target="_blank"
-                  class="social-icon twitter"
-                  (click)="$event.stopPropagation()"
-                >
-                  <i class="bx bxl-twitter"></i>
-                </a>
-                <a
-                  *ngIf="community.tiktok"
-                  [href]="community.tiktok"
-                  target="_blank"
-                  class="social-icon tiktok"
-                  (click)="$event.stopPropagation()"
-                >
-                  <i class="bx bxl-tiktok"></i>
-                </a>
-                <a
-                  *ngIf="
-                    community.socialMedia &&
-                    !community.instagram &&
-                    !community.youtube &&
-                    !community.twitter &&
-                    !community.tiktok
-                  "
-                  [href]="community.socialMedia"
-                  target="_blank"
-                  class="social-icon"
-                  (click)="$event.stopPropagation()"
-                >
-                  <i class="bx bxl-facebook"></i>
-                </a>
-              </div>
-              <div class="card-footer">
-                <div class="stat">
-                  <i class="bx bx-group"></i>
-                  <span>{{ community.memberCount }} Üye</span>
-                </div>
-                <span class="action-text">İncele <i class="bx bx-right-arrow-alt"></i></span>
+                <span class="action-text">
+                  İncele
+                  <span class="material-symbols-outlined" style="font-size: 18px;">arrow_forward</span>
+                </span>
               </div>
             </div>
           </div>
@@ -388,89 +311,44 @@
           </button>
           <div class="cover-area">
             <img
-              [src]="community.coverImage || community.logo"
+              [src]="community.coverImage || community.banner || 'assets/img/placeholder-cover.svg'"
               [alt]="community.name"
               class="cover-img"
+              onerror="this.src='assets/img/placeholder-cover.svg'"
             />
             <span class="category-badge">{{ community.category }}</span>
           </div>
+
           <div class="card-content">
             <div class="header-row">
               <div class="logo-wrapper">
-                <img [src]="community.logo" [alt]="community.name" class="logo-img" />
+                <img
+                  [src]="community.logo || 'assets/img/placeholder-logo.svg'"
+                  [alt]="community.name"
+                  class="logo-img"
+                  onerror="this.src='assets/img/placeholder-logo.svg'"
+                />
               </div>
               <div class="title-wrapper">
                 <h3 class="community-name">{{ community.name }}</h3>
-                <span class="university-name">{{ community.university || community.city }}</span>
+              </div>
+            </div>
+
+            <p class="description">{{ community.description || community.about }}</p>
+
+            <div class="card-footer">
+              <div class="footer-info">
                 <span class="city-tag" *ngIf="community.city">
-                  <i class="bx bxs-map"></i> {{ community.city }}
+                  <span class="material-symbols-outlined" style="font-size: 16px;">location_on</span> {{ community.city }}
+                </span>
+                <span class="university-name" *ngIf="community.university">
+                   {{ community.university }}
                 </span>
               </div>
-            </div>
-            <p class="description" *ngIf="community.description">{{ community.description }}</p>
-            <div
-              class="social-media-icons"
-              *ngIf="
-                community.instagram ||
-                community.youtube ||
-                community.twitter ||
-                community.tiktok ||
-                community.socialMedia
-              "
-            >
-              <a
-                *ngIf="community.instagram"
-                [href]="community.instagram"
-                target="_blank"
-                class="social-icon instagram"
-              >
-                <i class="bx bxl-instagram"></i>
-              </a>
-              <a
-                *ngIf="community.youtube"
-                [href]="community.youtube"
-                target="_blank"
-                class="social-icon youtube"
-              >
-                <i class="bx bxl-youtube"></i>
-              </a>
-              <a
-                *ngIf="community.twitter"
-                [href]="community.twitter"
-                target="_blank"
-                class="social-icon twitter"
-              >
-                <i class="bx bxl-twitter"></i>
-              </a>
-              <a
-                *ngIf="community.tiktok"
-                [href]="community.tiktok"
-                target="_blank"
-                class="social-icon tiktok"
-              >
-                <i class="bx bxl-tiktok"></i>
-              </a>
-              <a
-                *ngIf="
-                  community.socialMedia &&
-                  !community.instagram &&
-                  !community.youtube &&
-                  !community.twitter &&
-                  !community.tiktok
-                "
-                [href]="community.socialMedia"
-                target="_blank"
-                class="social-icon"
-              >
-                <i class="bx bxl-facebook"></i>
-              </a>
-            </div>
-            <div class="card-footer">
-              <div class="stat">
-                <i class="bx bx-group"></i>
-                <span>{{ community.memberCount }} Üye</span>
-              </div>
-              <span class="action-text">İncele <i class="bx bx-right-arrow-alt"></i></span>
+              <span class="action-text">
+                İncele
+                <span class="material-symbols-outlined" style="font-size: 18px;">arrow_forward</span>
+              </span>
             </div>
           </div>
         </div>
@@ -659,56 +537,6 @@
   </div>
 </div>
 
-<div class="modal-backdrop" *ngIf="selectedEvent" (click)="closeEventDetail()">
-  <div class="modal-content" (click)="$event.stopPropagation()">
-    <button class="close-btn" (click)="closeEventDetail()">
-      <span class="material-symbols-outlined">close</span>
-    </button>
-    <div class="modal-header">
-      <img [src]="selectedEvent.imageUrl || 'assets/images/page-title1.jpg'" class="modal-cover" />
-      <span class="modal-cat-badge" [style.background]="selectedEvent.color || '#2563eb'">
-        {{ selectedEvent.category || 'Etkinlik' }}
-      </span>
-    </div>
-    <div class="modal-body">
-      <h2 class="event-title">{{ selectedEvent.title }}</h2>
-      <div class="info-card">
-        <div class="info-column">
-          <div class="info-item">
-            <span class="info-label">ÜNİVERSİTE</span>
-            <span class="info-value">{{ selectedEvent.university || '-' }}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">KULÜP (DETAY)</span>
-            <span class="info-value">{{ selectedEvent.club || selectedEvent.community }}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">KONUM</span>
-            <span class="info-value">{{ selectedEvent.location }}</span>
-          </div>
-        </div>
-        <div class="info-column">
-          <div class="info-item">
-            <span class="info-label">TOPLULUK</span>
-            <span class="info-value">{{ selectedEvent.semester || selectedEvent.community }}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">TARİH & SAAT</span>
-            <span class="info-value">{{ selectedEvent.date }} | {{ selectedEvent.time }}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">KONTENJAN</span>
-            <span class="info-value">{{ selectedEvent.quota || '-' }}</span>
-          </div>
-        </div>
-      </div>
-      <div class="description-section">
-        <span class="description-label">AÇIKLAMA</span>
-        <p class="description-text">{{ selectedEvent.description }}</p>
-      </div>
-    </div>
-  </div>
-</div>
 
 <div class="calendar-overlay" *ngIf="showEventDates" (click)="toggleEventCalendar(false)">
   <div class="calendar-modal" (click)="$event.stopPropagation()">

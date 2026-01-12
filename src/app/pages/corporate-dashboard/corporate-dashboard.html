@@ -109,31 +109,6 @@
       </div>
 
       <div class="header-right">
-        <button class="icon-btn notification notification-btn" (click)="toggleNotifications($event)">
-          <span class="material-symbols-outlined">notifications</span>
-          <span class="indicator" *ngIf="notifications.length"></span>
-        </button>
-        <div
-          class="dropdown-menu notifications"
-          *ngIf="showNotifications"
-          (click)="$event.stopPropagation()"
-        >
-          <div class="dd-header">Bildirimler</div>
-          <ul *ngIf="notifications.length > 0; else noNotifications">
-            <li *ngFor="let n of notifications" (click)="handleNotificationClick(n)" [class.read]="n.read">
-              <div>
-                {{ n.text }}
-                <small>{{ n.time }}</small>
-              </div>
-            </li>
-          </ul>
-          <ng-template #noNotifications>
-            <div class="empty-notifications">
-              <span class="material-symbols-outlined">notifications_off</span>
-              <p>Henüz bildirim yok</p>
-            </div>
-          </ng-template>
-        </div>
 
         <div class="profile-wrapper">
           <div class="profile-pic" (click)="toggleProfileDropdown($event)">
@@ -160,18 +135,6 @@
 
     <!-- 1. TAB: GENEL BAKIŞ -->
     <div class="view-container" *ngIf="activeTab === 'overview'">
-      <div class="stats-grid-compact">
-        <div class="stat-card-mini" *ngFor="let stat of stats">
-          <div class="icon-box" [ngClass]="stat.colorClass">
-            <span class="material-symbols-outlined">{{ stat.icon }}</span>
-          </div>
-          <div class="text">
-            <span>{{ stat.label }}</span>
-            <h3>{{ stat.value }}</h3>
-          </div>
-        </div>
-      </div>
-
       <div class="split-grid">
         <!-- Bekleyen Onaylar -->
         <div class="card table-card">
@@ -236,7 +199,7 @@
             />
           </div>
           <select class="status-filter" [(ngModel)]="statusFilter" (change)="applyFilters()">
-            <option value="">Tüm Durumlar</option>
+            <option value="" selected>Tüm Durumlar</option>
             <option value="Aktif">Aktif</option>
             <option value="Pasif">Pasif</option>
             <option value="Onay Bekleyen">Onay Bekleyen</option>
