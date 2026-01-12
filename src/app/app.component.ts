@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
 import { ViewportScroller } from '@angular/common';
 import { RouterOutlet, Router, Event, NavigationEnd } from '@angular/router';
+import { ChatbotWidgetComponent } from './components/chatbot/chatbot-widget.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, ChatbotWidgetComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
