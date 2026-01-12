@@ -1,9 +1,10 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
 import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
 import { ProfileCardComponent } from '../../components/ui/profile-card/profile-card';
 import { NeuronsBackgroundComponent } from '../../components/ui/neurons-background/neurons-background';
+import { DeveloperStreamComponent } from '../../components/ui/developer-stream/developer-stream.component';
 
 interface SocialLinks {
   github?: string;
@@ -30,10 +31,10 @@ interface Developer {
     SiteFooterComponent,
     ProfileCardComponent,
     NeuronsBackgroundComponent,
+    DeveloperStreamComponent,
   ],
   templateUrl: './developers-page.component.html',
   styleUrls: ['./developers-page.component.scss'],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA], // Bu satır 'spline-viewer' hatasını çözer
 })
 export class DevelopersPageComponent implements OnInit {
   // Geliştiriciler
@@ -204,17 +205,12 @@ export class DevelopersPageComponent implements OnInit {
     },
   ];
 
-  ngOnInit(): void {
-    // Spline scriptinin yüklenip yüklenmediğini kontrol et
-    const scriptCheck = document.querySelector(
-      'script[src="https://unpkg.com/@splinetool/viewer@1.9.59/build/spline-viewer.js"]'
-    );
+  // Developer names for stream animation
+  get developerNames(): string[] {
+    return this.developers.map(dev => dev.name);
+  }
 
-    if (!scriptCheck) {
-      const script = document.createElement('script');
-      script.type = 'module';
-      script.src = 'https://unpkg.com/@splinetool/viewer@1.9.59/build/spline-viewer.js';
-      document.head.appendChild(script);
-    }
+  ngOnInit(): void {
+    // Component initialization
   }
 }
