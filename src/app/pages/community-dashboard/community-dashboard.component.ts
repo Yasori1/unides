@@ -108,6 +108,7 @@ export class CommunityDashboardComponent implements OnInit {
   // Event creation modal
   newEventData = {
     title: '',
+    shortDescription: '',
     date: '',
     time: '',
     location: '',
@@ -670,6 +671,7 @@ export class CommunityDashboardComponent implements OnInit {
     this.isModalOpen = true;
     this.newEventData = {
       title: '',
+      shortDescription: '',
       date: '',
       time: '',
       location: '',
