@@ -363,6 +363,19 @@ $border-color: #e2e8f0;
           resize: vertical;
           min-height: 100px;
       }
+
+      .char-counter {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 5px;
+        font-size: 0.85rem;
+        color: #6b7280;
+
+        .char-limit {
+          color: #ef4444;
+          font-weight: 600;
+        }
+      }
     }
 
     .btn-submit {

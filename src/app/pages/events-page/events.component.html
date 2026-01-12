@@ -36,15 +36,8 @@
       </div>
 
       <div class="filter-groups">
-        <!-- Status Filter -->
-        <div class="select-wrapper">
-          <select [(ngModel)]="currentFilter" (change)="applyFiltersAndGoFirstPage()">
-            <option value="all">Tüm Projeler</option>
-            <option value="active">Başlayan Projeler</option>
-            <option value="upcoming">Başlayacak Projeler</option>
-          </select>
-          <i class="bx bx-chevron-down"></i>
-        </div>
+        <!-- Status Filter Removed -->
+        
         <!-- Category Filter -->
         <div class="select-wrapper">
           <select [(ngModel)]="activeCategory" (change)="applyFiltersAndGoFirstPage()">
@@ -157,16 +150,24 @@
       <div class="slider-container">
         <div class="slider-track">
           <div class="slide" *ngFor="let img of sliderImages">
-            <img [src]="img" alt="Etkinlik Karesi" loading="lazy" />
+            <img [src]="img" alt="Etkinlik Karesi" loading="lazy" (click)="openLightbox(img)" />
           </div>
           <div class="slide" *ngFor="let img of sliderImages">
-            <img [src]="img" alt="Etkinlik Karesi" loading="lazy" />
+            <img [src]="img" alt="Etkinlik Karesi" loading="lazy" (click)="openLightbox(img)" />
           </div>
         </div>
       </div>
     </div>
   </div>
 </section>
+
+<!-- Lightbox Modal -->
+<div class="lightbox-backdrop" *ngIf="lightboxOpen" (click)="closeLightbox()">
+  <button class="close-lightbox" (click)="closeLightbox()">
+    <span class="material-symbols-outlined">close</span>
+  </button>
+  <img [src]="selectedImage" (click)="$event.stopPropagation()" alt="Full Size" />
+</div>
 
 <app-site-footer />
 

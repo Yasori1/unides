@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ImageUploadComponent } from '../../components/ui/image-upload/image-upload';
 import { CommunityService, Community } from '../../services/community.services';
+import { EventService } from '../../services/event.services';
 
 // --- Interfaces ---
 interface Project {
@@ -86,6 +87,8 @@ export class CommunityDashboardComponent implements OnInit {
   isSearchingMembers = false;
   memberSearchQuery = '';
   memberSearchResults: UserSearchResult[] = [];
+  isBulkAddMode = false;
+  bulkEmailsText = '';
   confirmDeleteId: number | null = null;
   confirmVisible = false;
   confirmHiding = false;
@@ -351,6 +354,7 @@ export class CommunityDashboardComponent implements OnInit {
   constructor(
     private router: Router,
     private communityService: CommunityService,
+    private eventService: EventService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -687,6 +691,8 @@ export class CommunityDashboardComponent implements OnInit {
     this.memberSearchQuery = '';
     this.memberSearchResults = [];
     this.isSearchingMembers = false;
+    this.isBulkAddMode = false;
+    this.bulkEmailsText = '';
   }
 
   closeModal() {
@@ -717,13 +723,30 @@ export class CommunityDashboardComponent implements OnInit {
       this.showToast('Lütfen tüm alanları doldurun.', 'error');
       return;
     }
-    this.showToast('Kurumsal girişe yönlendiriliyorsunuz...', 'success');
-    setTimeout(() => {
-      this.router.navigate(['/corporate-dashboard'], {
-        queryParams: { from: 'community-dashboard', draftEvent: this.newEventData.title },
-      });
-      this.closeModal();
-    }, 600);
+
+    // Tarih ve saat birleştirme
+    const fullDate = `${this.newEventData.date} ${this.newEventData.time}`;
+
+    // EventService üzerinden etkinlik ekle (Mock)
+    this.eventService.addEvent({
+      title: this.newEventData.title,
+      startDate: fullDate,
+      location: this.newEventData.location,
+      capacity: this.newEventData.quota.toString(), // number -> string
+      description: this.newEventData.description,
+      imageUrl: this.newEventData.image,
+      communityId: this.clubInfo.id ? Number(this.clubInfo.id) : 0, // Mock id dönüşümü
+      communityName: this.clubInfo.name,
+      status: 'Beklemede'
+    }).subscribe(() => {
+      this.showToast('Etkinlik oluşturuldu, kurumsal girişe yönlendiriliyorsunuz...', 'success');
+      setTimeout(() => {
+        this.router.navigate(['/corporate-dashboard'], {
+          queryParams: { from: 'community-dashboard' },
+        });
+        this.closeModal();
+      }, 800);
+    });
   }
 
   get isEventFormValid() {
@@ -763,6 +786,12 @@ export class CommunityDashboardComponent implements OnInit {
   }
 
   saveMember() {
+    // Toplu ekleme modu aktifse, toplu ekleme fonksiyonunu çağır
+    if (this.isBulkAddMode) {
+      this.saveBulkMembers();
+      return;
+    }
+
     if (!this.newMemberData.email) {
       this.showToast('E-posta adresi zorunludur.', 'error');
       return;
@@ -850,6 +879,137 @@ export class CommunityDashboardComponent implements OnInit {
     this.memberSearchQuery = `${user.name} (${user.email})`;
     this.memberSearchResults = [];
     this.memberCurrentPage = 1;
+  }
+
+  // Mail adresinden isim çıkarma (domain'den üniversite adı)
+  extractNameFromEmail(email: string): string {
+    const emailRegex = /^[^\s@]+@([^\s@]+)$/;
+    const match = email.match(emailRegex);
+    if (!match) return email;
+
+    const domain = match[1].toLowerCase();
+    
+    // Üniversite domain mapping
+    const universityMap: { [key: string]: string } = {
+      'itu.edu.tr': 'İTÜ',
+      'bogazici.edu.tr': 'Boğaziçi',
+      'odtu.edu.tr': 'ODTÜ',
+      'metu.edu.tr': 'ODTÜ',
+      'hacettepe.edu.tr': 'Hacettepe',
+      'ege.edu.tr': 'Ege',
+      'marmara.edu.tr': 'Marmara',
+      'ankara.edu.tr': 'Ankara',
+      'gsu.edu.tr': 'Galatasaray',
+      'gsb.edu.tr': 'GSB',
+      'yildiz.edu.tr': 'YTÜ',
+      'koc.edu.tr': 'Koç',
+    };
+
+    // Eğer mapping'de varsa kullan, yoksa domain'i formatla
+    if (universityMap[domain]) {
+      return universityMap[domain];
+    }
+
+    // Domain'i formatla (örnek: itu.edu.tr -> İTÜ)
+    const parts = domain.split('.');
+    if (parts.length >= 2 && parts[1] === 'edu' && parts[2] === 'tr') {
+      const uniCode = parts[0].toUpperCase();
+      return uniCode;
+    }
+
+    // Fallback: domain'i direkt göster
+    return domain;
+  }
+
+  // Toplu mail parse etme
+  parseBulkEmails(text: string): string[] {
+    if (!text || !text.trim()) return [];
+
+    // Virgül, noktalı virgül, boşluk veya yeni satır ile ayrılmış mailleri parse et
+    const emails = text
+      .split(/[,;\s\n]+/)
+      .map(email => email.trim())
+      .filter(email => {
+        // Basit email validasyonu
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+      });
+
+    return emails;
+  }
+
+  // Toplu üye ekleme
+  saveBulkMembers() {
+    const emails = this.parseBulkEmails(this.bulkEmailsText);
+    
+    if (emails.length === 0) {
+      this.showToast('Geçerli e-posta adresi bulunamadı.', 'error');
+      return;
+    }
+
+    const communityId = this.clubInfo?.id;
+    if (!communityId) {
+      this.showToast('Topluluk bilgisi bulunamadı.', 'error');
+      return;
+    }
+
+    let successCount = 0;
+    let errorCount = 0;
+    let processedCount = 0;
+
+    // Her mail için üye ekle
+    emails.forEach((email, index) => {
+      const name = this.extractNameFromEmail(email);
+      
+      this.communityService.addMember(communityId, { email }).subscribe({
+        next: () => {
+          // Başarılı - frontend listesine ekle
+          this.members.unshift({
+            id: Date.now() + index,
+            name: name,
+            role: 'Üye',
+            department: '',
+            email: email,
+            phone: '',
+            grade: '1. Sınıf',
+            avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(
+              this.getInitials(name)
+            )}&background=e2e8f0&color=1e293b`,
+            status: 'Aktif',
+          });
+          successCount++;
+          processedCount++;
+          this.stats.totalMembers++;
+
+          // Tüm işlemler tamamlandığında toast göster
+          if (processedCount === emails.length) {
+            if (errorCount === 0) {
+              this.showToast(`${successCount} üye başarıyla eklendi.`, 'success');
+            } else {
+              this.showToast(`${successCount} üye eklendi, ${errorCount} üye eklenirken hata oluştu.`, 'error');
+            }
+            this.memberCurrentPage = 1;
+            this.closeModal();
+          }
+        },
+        error: (err) => {
+          console.error(`Üye eklenirken hata (${email}):`, err);
+          errorCount++;
+          processedCount++;
+
+          // Tüm işlemler tamamlandığında toast göster
+          if (processedCount === emails.length) {
+            if (successCount > 0) {
+              this.showToast(`${successCount} üye eklendi, ${errorCount} üye eklenirken hata oluştu.`, 'error');
+            } else {
+              this.showToast('Üyeler eklenirken bir hata oluştu.', 'error');
+            }
+            this.memberCurrentPage = 1;
+            this.closeModal();
+          }
+        },
+      });
+    });
   }
 
   openDeleteConfirm(id: number) {

@@ -71,6 +71,10 @@ export class EventsComponent implements OnInit, AfterViewInit {
   sortOrder: 'date_asc' | 'date_desc' | 'name_asc' | 'name_desc' = 'date_asc';
   // Removed old sort vars
 
+  // Lightbox
+  lightboxOpen: boolean = false;
+  selectedImage: string | null = null;
+
   // Detay Modal
   // selectedEvent removed
 
@@ -643,11 +647,22 @@ export class EventsComponent implements OnInit, AfterViewInit {
       );
     }
 
+    // Bugünün tarihini al (sadece tarih, saat olmadan)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayTime = today.getTime();
+
     return filtered.sort((a, b) => {
       if (this.sortOrder === 'date_asc') {
-        return a.dateObj.getTime() - b.dateObj.getTime();
+        // Yakın-Uzak: Bugüne en yakın tarihten en uzağa
+        const diffA = Math.abs(a.dateObj.getTime() - todayTime);
+        const diffB = Math.abs(b.dateObj.getTime() - todayTime);
+        return diffA - diffB;
       } else if (this.sortOrder === 'date_desc') {
-        return b.dateObj.getTime() - a.dateObj.getTime();
+        // Uzak-Yakın: Bugünden en uzak tarihten en yakına
+        const diffA = Math.abs(a.dateObj.getTime() - todayTime);
+        const diffB = Math.abs(b.dateObj.getTime() - todayTime);
+        return diffB - diffA;
       } else if (this.sortOrder === 'name_asc') {
         return a.title.localeCompare(b.title, 'tr');
       } else if (this.sortOrder === 'name_desc') {
@@ -712,5 +727,22 @@ export class EventsComponent implements OnInit, AfterViewInit {
   // --- MODAL İŞLEMLERİ YERİNE DETAY SAYFASINA GİT ---
   openEventDetail(event: EventCard) {
     this.router.navigate(['/events', event.id]);
+  }
+
+  // --- LIGHTBOX İŞLEMLERİ ---
+  openLightbox(imageUrl: string) {
+    this.selectedImage = imageUrl;
+    this.lightboxOpen = true;
+    if (isPlatformBrowser(this.platformId)) {
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  closeLightbox() {
+    this.lightboxOpen = false;
+    this.selectedImage = null;
+    if (isPlatformBrowser(this.platformId)) {
+      document.body.style.overflow = '';
+    }
   }
 }

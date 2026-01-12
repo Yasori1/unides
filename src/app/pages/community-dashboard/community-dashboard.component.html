@@ -551,26 +551,54 @@
         <button class="btn-primary full" (click)="saveProject()">Oluştur 🚀</button>
       </div>
       <div class="modal-body" *ngIf="modalType === 'new-member' || modalType === 'edit-member'">
-        <div class="member-search-box" *ngIf="modalType === 'new-member'">
-          <span class="material-symbols-outlined search-icon">search</span>
-          <input
-            type="text"
-            placeholder="Ad veya e-posta ile ara"
-            [(ngModel)]="memberSearchQuery"
-            (input)="onMemberSearch()"
-          />
-          <span class="spinner" *ngIf="isSearchingMembers"></span>
+        <!-- Topluca Üye Ekle Toggle -->
+        <div class="bulk-add-toggle" *ngIf="modalType === 'new-member'">
+          <label class="toggle-label">
+            <input type="checkbox" [(ngModel)]="isBulkAddMode" />
+            <span class="toggle-text">Topluca Üye Ekle</span>
+          </label>
         </div>
-        <ul class="member-search-results" *ngIf="memberSearchResults.length">
-          <li *ngFor="let u of memberSearchResults" (click)="selectMemberSuggestion(u)">
-            <div class="avatar-chip">{{ getInitials(u.name) }}</div>
-            <div class="meta">
-              <strong>{{ u.name }}</strong>
-              <span>{{ u.email }}</span>
-            </div>
-          </li>
-        </ul>
 
+        <!-- Normal Arama Modu -->
+        <div *ngIf="!isBulkAddMode && modalType === 'new-member'">
+          <div class="member-search-box">
+            <span class="material-symbols-outlined search-icon">search</span>
+            <input
+              type="text"
+              placeholder="Ad veya e-posta ile ara"
+              [(ngModel)]="memberSearchQuery"
+              (input)="onMemberSearch()"
+            />
+            <span class="spinner" *ngIf="isSearchingMembers"></span>
+          </div>
+          <ul class="member-search-results" *ngIf="memberSearchResults.length">
+            <li *ngFor="let u of memberSearchResults" (click)="selectMemberSuggestion(u)">
+              <div class="avatar-chip">{{ getInitials(u.name) }}</div>
+              <div class="meta">
+                <strong>{{ u.name }}</strong>
+                <span>{{ u.email }}</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Toplu Ekleme Modu -->
+        <div *ngIf="isBulkAddMode && modalType === 'new-member'" class="bulk-add-section">
+          <label class="stacked">
+            <span>E-posta Adresleri</span>
+            <textarea
+              rows="8"
+              placeholder="E-posta adreslerini virgül, noktalı virgül veya yeni satır ile ayırarak yapıştırın:&#10;abc@itu.edu.tr, bbb@bogazici.edu.tr, xxx@odtu.edu.tr"
+              [(ngModel)]="bulkEmailsText"
+              class="bulk-emails-textarea"
+            ></textarea>
+            <span class="bulk-hint">
+              Örnek: abc@itu.edu.tr, bbb@bogazici.edu.tr, xxx@odtu.edu.tr
+            </span>
+          </label>
+        </div>
+
+        <!-- Düzenleme Modu -->
         <div *ngIf="modalType === 'edit-member'" class="edit-member-form" style="display: flex; flex-direction: column; gap: 10px;">
           <label class="stacked">
             <span>Adı Soyadı Düzenle</span>
@@ -584,10 +612,10 @@
 
         <button
           class="btn-primary full"
-          [disabled]="!newMemberData.name || !newMemberData.email"
+          [disabled]="isBulkAddMode ? !bulkEmailsText.trim() : (!newMemberData.name || !newMemberData.email)"
           (click)="saveMember()"
         >
-          Kaydet
+          {{ isBulkAddMode ? 'Toplu Ekle' : 'Kaydet' }}
         </button>
       </div>
     </div>
