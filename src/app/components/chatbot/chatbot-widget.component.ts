@@ -1,8 +1,11 @@
-import { Component, OnInit, HostListener, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, HostListener, Inject, PLATFORM_ID, OnDestroy } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { ChatbotService, ChatResponse } from '../../services/chatbot.service';
+import { Router, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 
 interface Message {
   text: string;
@@ -44,11 +47,16 @@ interface Message {
     ]),
   ],
 })
-export class ChatbotWidgetComponent implements OnInit {
+export class ChatbotWidgetComponent implements OnInit, OnDestroy {
   isOpen = false;
+  isVisible = true; // Chatbot görünürlüğü
   messages: Message[] = [];
   userInput = '';
   isLoading = false;
+  private routerSubscription: Subscription | undefined;
+
+  // Gizlenecek rotalar
+  private hiddenRoutes = ['/community-dashboard', '/corporate-dashboard', '/profile', '/student-dashboard'];
 
   // Türkçe karakterli buton metinlerini backend'in beklediği İngilizce karakterli metinlere çevir
   // Frontend'de gösterilen -> Backend'e gönderilecek
@@ -68,6 +76,7 @@ export class ChatbotWidgetComponent implements OnInit {
 
   constructor(
     private chatbotService: ChatbotService,
+    private router: Router,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -78,6 +87,28 @@ export class ChatbotWidgetComponent implements OnInit {
         '👋 **Hoş Geldiniz!** Ben ÜNİDES Dijital Portal Asistanı.\n\nÜniversite topluluklarına sağlanan ayni destekler, proje başvuruları, görünürlük, mali süreçler ve raporlama konularında size yardımcı olabilirim.\n\nBaşlamak için bir konu seçin 👇',
         ['ÜNİDES Nedir?', 'Başvuru Süreci', 'Duyurular']
       );
+
+      // Rota takibi yap
+      this.checkVisibility(this.router.url);
+      this.routerSubscription = this.router.events.pipe(
+        filter(event => event instanceof NavigationEnd)
+      ).subscribe((event: any) => {
+        this.checkVisibility(event.urlAfterRedirects || event.url);
+      });
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.routerSubscription) {
+      this.routerSubscription.unsubscribe();
+    }
+  }
+
+  private checkVisibility(url: string) {
+    // URL, hiddenRoutes listesindeki herhangi biriyle başlıyorsa gizle
+    this.isVisible = !this.hiddenRoutes.some(route => url.startsWith(route));
+    if (!this.isVisible) {
+      this.isOpen = false; // Gizlendiğinde sohbeti de kapat
     }
   }
 

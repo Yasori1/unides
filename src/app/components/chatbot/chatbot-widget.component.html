@@ -1,6 +1,6 @@
 <!-- Floating Chat Button -->
 <button
-  *ngIf="!isOpen"
+  *ngIf="!isOpen && isVisible"
   class="chatbot-toggle-btn"
   (click)="toggleChat()"
   aria-label="Chatbot'u aç"
@@ -21,7 +21,7 @@
 </button>
 
 <!-- Chat Widget -->
-<div class="chatbot-widget" *ngIf="isOpen" [@slideUpFadeIn]>
+<div class="chatbot-widget" *ngIf="isOpen && isVisible" [@slideUpFadeIn]>
   <!-- Header -->
   <div class="chatbot-header">
     <div class="chatbot-header-content">
