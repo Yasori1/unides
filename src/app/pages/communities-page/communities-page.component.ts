@@ -73,7 +73,42 @@ export class CommunitiesPageComponent implements OnInit {
 
     this.isLoading = true;
 
-    this.communityService.getAllCommunities().subscribe({
+    // URL Parametrelerini Kontrol Et ve backend'e query params olarak gönder
+    const queryParams = this.route.snapshot.queryParams;
+    const backendParams: {
+      city?: string;
+      university?: string;
+      category?: string;
+      name?: string;
+    } = {};
+
+    if (queryParams['search']) {
+      this.searchText = queryParams['search'];
+      backendParams.name = queryParams['search'];
+    }
+
+    if (queryParams['city']) {
+      if (this.cities.includes(queryParams['city'])) {
+        this.selectedCity = queryParams['city'];
+        backendParams.city = queryParams['city'];
+      }
+    }
+
+    if (queryParams['category']) {
+      this.selectedCategory = queryParams['category'];
+      backendParams.category = queryParams['category'];
+    }
+
+    if (queryParams['university']) {
+      backendParams.university = queryParams['university'];
+    }
+
+    // Backend'e query parametreleriyle istek at
+    // Anasayfada sadece aktif toplulukları göster
+    this.communityService.getAllCommunities({
+      ...backendParams,
+      status: 'active', // Backend'de sadece aktif toplulukları getir
+    }).subscribe({
       next: (data) => {
         this.allCommunities = data;
 
@@ -81,20 +116,7 @@ export class CommunitiesPageComponent implements OnInit {
         // Sadece kategorileri dinamik olarak veriden çekmeye devam ediyoruz.
         this.categories = [...new Set(this.allCommunities.map(c => c.category))].sort();
 
-        // URL Parametrelerini Kontrol Et
-        const queryParams = this.route.snapshot.queryParams;
-
-        if (queryParams['search']) {
-          this.searchText = queryParams['search'];
-        }
-
-        if (queryParams['city']) {
-          // Gelen şehir bizim 81 il listemizde var mı diye bakıyoruz
-          if (this.cities.includes(queryParams['city'])) {
-            this.selectedCity = queryParams['city'];
-          }
-        }
-
+        // Backend'den zaten sadece aktif topluluklar geldiği için frontend'de ekstra filtreleme yapmaya gerek yok
         this.applyFilters();
         this.isLoading = false;
       },
@@ -111,6 +133,17 @@ export class CommunitiesPageComponent implements OnInit {
   // --- FİLTRELEME MANTIĞI ---
   applyFilters() {
     let temp = [...this.allCommunities];
+
+    // Backend'den zaten sadece aktif topluluklar geldiği için (status='active' ile istek atıldı)
+    // Frontend'de ekstra filtreleme yapmaya gerek yok
+    // Ancak güvenlik için yine de kontrol ediyoruz
+    temp = temp.filter((c) => {
+      // isActivity boolean değeri varsa onu kullan, yoksa status string'ini kontrol et
+      if (c.isActivity !== undefined) {
+        return c.isActivity === true;
+      }
+      return c.status === 'Aktif' || c.status === undefined;
+    });
 
     // 1. Arama Metni
     if (this.searchText.trim()) {

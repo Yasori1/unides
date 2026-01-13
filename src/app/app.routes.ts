@@ -30,7 +30,7 @@ import { CommunityLoginComponent } from './pages/community-login/community-login
 import { CorporateRegisterComponent } from './pages/corporate-register/corporate-register';
 import { CommunityRegisterComponent } from './pages/community-register/community-register';
 import { DevelopersPageComponent } from './pages/developers-page/developers-page.component';
-import { CorporateDashboardComponent } from './pages/corporate-dashboard/corporate-dashboard';
+import { CorporateDashboardComponent } from './pages/corporate-dashboard/corporate-dashboard.component';
 import { AnnouncementsPageComponent } from './pages/announcements-page/announcements-page.component';
 import { AnnouncementDetailComponent } from './pages/announcement-detail/announcement-detail.component';
 import { StudentLoginComponent } from './pages/student-login/student-login.component';

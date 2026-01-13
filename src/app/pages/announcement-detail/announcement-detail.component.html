@@ -22,13 +22,6 @@
       />
     </div>
     <div class="hero-overlay">
-      <div class="container">
-        <div class="breadcrumb">
-          <a routerLink="/announcements">Duyurular</a>
-          <i class="bx bx-chevron-right"></i>
-          <span>{{ announcement.title }}</span>
-        </div>
-      </div>
     </div>
 
     <!-- Wave Shape Divider -->
@@ -44,6 +37,15 @@
   <!-- Content Section -->
   <div class="content-section layout-option-a">
     <div class="container-wide">
+      <!-- Breadcrumb -->
+      <div class="breadcrumb-container">
+        <div class="breadcrumb">
+          <a routerLink="/announcements">Duyurular</a>
+          <i class="bx bx-chevron-right"></i>
+          <span>{{ announcement.title }}</span>
+        </div>
+      </div>
+
       <!-- Back Button -->
       <div class="back-button-top">
         <a routerLink="/announcements" class="back-button">

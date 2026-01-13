@@ -31,45 +31,8 @@ export class CommunityDetailComponent implements OnInit {
   communityEvents: EventItem[] = [];
   isLoadingEvents: boolean = false;
 
-  // Mock data for upcoming events
-  upcomingEvents: CommunityEvent[] = [
-    {
-      id: 1,
-      title: 'Networking Meetup',
-      date: '2024-03-15',
-      location: 'Kampüs Merkez Binası, Konferans Salonu',
-      description:
-        'Topluluk üyeleri ve mezunlarla tanışma, networking fırsatları ve kariyer paylaşımları.',
-      imageUrl: 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=800',
-    },
-    {
-      id: 2,
-      title: 'Tech Workshop: Web Development',
-      date: '2024-03-22',
-      location: 'Bilgisayar Laboratuvarı A',
-      description:
-        'Modern web geliştirme teknolojileri, React ve Angular workshop. Pratik uygulamalar ve proje örnekleri.',
-      imageUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800',
-    },
-    {
-      id: 3,
-      title: 'Kariyer Günleri',
-      date: '2024-04-05',
-      location: 'Spor Salonu',
-      description:
-        'Şirket temsilcileriyle buluşma, staj ve iş fırsatları, CV değerlendirme ve mülakat simülasyonları.',
-      imageUrl: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800',
-    },
-    {
-      id: 4,
-      title: 'Hackathon 2024',
-      date: '2024-04-12',
-      location: 'Teknoloji Merkezi',
-      description:
-        '48 saatlik kodlama maratonu. Takımlar halinde yarışın, ödüller kazanın ve network kurun.',
-      imageUrl: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800',
-    },
-  ];
+  // Upcoming events from backend
+  upcomingEvents: CommunityEvent[] = [];
 
   // Banner animation
   heroMoveX = 0;
@@ -115,7 +78,9 @@ export class CommunityDetailComponent implements OnInit {
         if (data) {
           this.community = data;
           this.communityId = id;
-          // Topluluk yüklendikten sonra etkinlikleri yükle
+          // Backend'den gelen events'i kontrol et ve yaklaşan etkinlikleri filtrele
+          this.processUpcomingEvents(data.events || []);
+          // Topluluk yüklendikten sonra etkinlikleri yükle (fallback için)
           if (data) {
             this.loadCommunityEvents(id);
           }
@@ -131,6 +96,45 @@ export class CommunityDetailComponent implements OnInit {
         this.isLoading = false;
       },
     });
+  }
+
+  /**
+   * Backend'den gelen events'i işle ve yaklaşan etkinlikleri filtrele
+   * Yaklaşan etkinlik: startDate bugünden sonra olan etkinlikler
+   */
+  private processUpcomingEvents(events: CommunityEventDto[]): void {
+    if (!events || events.length === 0) {
+      this.upcomingEvents = [];
+      return;
+    }
+
+    const now = new Date();
+    now.setHours(0, 0, 0, 0); // Bugünün başlangıcı
+
+    // Yaklaşan etkinlikleri filtrele ve sırala
+    const upcoming = events
+      .filter((event) => {
+        if (!event.startDate) return false;
+        const eventDate = new Date(event.startDate);
+        eventDate.setHours(0, 0, 0, 0);
+        return eventDate >= now; // Bugün ve sonrası
+      })
+      .sort((a, b) => {
+        // Tarihe göre sırala (en yakın önce)
+        const dateA = a.startDate ? new Date(a.startDate).getTime() : 0;
+        const dateB = b.startDate ? new Date(b.startDate).getTime() : 0;
+        return dateA - dateB;
+      })
+      .map((event, index) => ({
+        id: index + 1, // Frontend için ID
+        title: event.title || 'Etkinlik',
+        date: event.startDate || '',
+        location: event.location || '',
+        description: event.title || '', // Backend'de description yok, title kullan
+        imageUrl: undefined, // Backend'de imageUrl yok
+      }));
+
+    this.upcomingEvents = upcoming;
   }
 
   loadCommunityEvents(communityId: string) {

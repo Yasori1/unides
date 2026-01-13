@@ -419,7 +419,8 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
     }
 
     .btn-success.ghost,
-    .btn-danger.ghost {
+    .btn-danger.ghost,
+    .btn-info.ghost {
       background: transparent;
       border: 1px solid transparent;
       color: inherit;
@@ -445,6 +446,13 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
       border-color: rgba($danger, 0.3);
       &:hover {
         background: rgba($danger, 0.08);
+      }
+    }
+    .btn-info.ghost {
+      color: #3b82f6;
+      border-color: rgba(#3b82f6, 0.3);
+      &:hover {
+        background: rgba(#3b82f6, 0.1);
       }
     }
   }
@@ -929,6 +937,26 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
     gap: 12px;
     align-items: center;
     flex-wrap: wrap;
+
+    .btn-info {
+      background: #eff6ff;
+      color: #3b82f6;
+      border: 1px solid #bfdbfe;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: 0.2s;
+      font-family: inherit;
+      &:hover {
+        background: #3b82f6;
+        color: white;
+        border-color: #3b82f6;
+      }
+    }
 
     .btn-primary {
       display: flex;
@@ -1914,6 +1942,23 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
   }
 }
 
+.modal-content.extra-wide {
+  width: 1200px;
+  max-width: 95vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    max-width: 100vw;
+    max-height: 100vh;
+    border-radius: 0;
+    margin: 0;
+  }
+}
+
 .modal-body-scrollable {
   overflow-y: auto;
   overflow-x: hidden; // Sağa sola kaydırmayı önle
@@ -2210,6 +2255,24 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
       background: $success;
       color: white;
       border-color: $success;
+    }
+  }
+
+  .btn-info {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.2s;
+    font-family: inherit;
+    &:hover {
+      background: #2563eb;
     }
   }
 

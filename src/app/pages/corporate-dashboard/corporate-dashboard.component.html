@@ -198,7 +198,7 @@
               (input)="applyFilters()"
             />
           </div>
-          <select class="status-filter" [(ngModel)]="statusFilter" (change)="applyFilters()">
+          <select class="status-filter" [(ngModel)]="statusFilter" (change)="onStatusFilterChange()">
             <option value="">Tüm Durumlar</option>
             <option value="Aktif">Aktif</option>
             <option value="Pasif">Pasif</option>
@@ -238,7 +238,7 @@
               class="cover-img"
               onerror="this.src='assets/img/placeholder-cover.svg'"
             />
-            <span class="category-badge">{{ item.category }}</span>
+            <span class="category-badge" *ngIf="item.category">{{ item.category }}</span>
           </div>
 
           <div class="card-content">
@@ -262,70 +262,7 @@
 
             <p class="description">{{ item.description || item.about }}</p>
 
-            <!-- Sosyal Medya İkonları -->
-            <div
-              class="social-media-icons"
-              *ngIf="
-                item.instagram || item.youtube || item.twitter || item.tiktok || item.socialMedia
-              "
-            >
-              <a
-                *ngIf="item.instagram"
-                [href]="item.instagram"
-                target="_blank"
-                class="social-icon instagram"
-                (click)="$event.stopPropagation()"
-                title="Instagram"
-              >
-                <i class="bx bxl-instagram"></i>
-              </a>
-              <a
-                *ngIf="item.youtube"
-                [href]="item.youtube"
-                target="_blank"
-                class="social-icon youtube"
-                (click)="$event.stopPropagation()"
-                title="Youtube"
-              >
-                <i class="bx bxl-youtube"></i>
-              </a>
-              <a
-                *ngIf="item.twitter"
-                [href]="item.twitter"
-                target="_blank"
-                class="social-icon twitter"
-                (click)="$event.stopPropagation()"
-                title="Twitter"
-              >
-                <i class="bx bxl-twitter"></i>
-              </a>
-              <a
-                *ngIf="item.tiktok"
-                [href]="item.tiktok"
-                target="_blank"
-                class="social-icon tiktok"
-                (click)="$event.stopPropagation()"
-                title="TikTok"
-              >
-                <i class="bx bxl-tiktok"></i>
-              </a>
-              <a
-                *ngIf="
-                  item.socialMedia &&
-                  !item.instagram &&
-                  !item.youtube &&
-                  !item.twitter &&
-                  !item.tiktok
-                "
-                [href]="item.socialMedia"
-                target="_blank"
-                class="social-icon"
-                (click)="$event.stopPropagation()"
-                title="Sosyal Medya"
-              >
-                <i class="bx bxl-facebook"></i>
-              </a>
-            </div>
+            <!-- Social Media Icons removed for Corporate Dashboard -->
 
             <div class="card-footer">
               <div class="stat">
@@ -452,30 +389,6 @@
                 <span class="status-badge-inline" [ngClass]="e.status">{{ e.status }}</span>
               </div>
             </div>
-
-            <div class="event-actions-row">
-              <div class="actions-left">
-                <button
-                  class="btn-success ghost"
-                  *ngIf="e.status === 'Beklemede'"
-                  (click)="approveEvent(e.id); $event.stopPropagation()"
-                  title="Onayla"
-                >
-                  <span class="material-symbols-outlined">check</span>
-                  Onayla
-                </button>
-                <button
-                  class="btn-danger ghost"
-                  *ngIf="e.status === 'Beklemede'"
-                  (click)="rejectEvent(e.id); $event.stopPropagation()"
-                  title="Reddet"
-                >
-                  <span class="material-symbols-outlined">close</span>
-                  Reddet
-                </button>
-              </div>
-              <span class="category-label">ETKİNLİK</span>
-            </div>
           </div>
         </div>
       </div>
@@ -595,6 +508,7 @@
           modalType === 'new-announcement' ||
           modalType === 'edit-announcement'
         "
+        [class.extra-wide]="modalType === 'event-detail'"
         (click)="$event.stopPropagation()"
       >
         <div class="modal-header">
@@ -830,6 +744,7 @@
               <div class="form-group">
                 <label>Kategori <span class="required">*</span></label>
                 <select [(ngModel)]="newCommunity.category" class="modern-input">
+                  <option value="">Kategori Seçin</option>
                   <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
                 </select>
               </div>
@@ -908,15 +823,7 @@
                   placeholder="0"
                 />
               </div>
-              <div class="form-group">
-                <label>Website (Opsiyonel)</label>
-                <input
-                  type="url"
-                  [(ngModel)]="newCommunity.website"
-                  class="modern-input"
-                  placeholder="https://..."
-                />
-              </div>
+              <!-- Website field removed for Corporate Dashboard -->
             </div>
           </div>
 
@@ -991,6 +898,7 @@
               <div class="form-group">
                 <label>Topluluk Kategorisi</label>
                 <select [(ngModel)]="editingCommunity.category" class="modern-input">
+                  <option value="">Kategori Seçin</option>
                   <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
                 </select>
               </div>
@@ -1052,57 +960,7 @@
                   placeholder="0"
                 />
               </div>
-              <div class="form-group">
-                <label>Website (Opsiyonel)</label>
-                <input
-                  type="url"
-                  [(ngModel)]="editingCommunity.website"
-                  class="modern-input"
-                  placeholder="https://..."
-                />
-              </div>
-            </div>
-          </div>
-
-          <div class="form-section">
-            <h5 class="section-title">Sosyal Medya Linkleri (Opsiyonel)</h5>
-            <div class="form-grid-2col">
-              <div class="form-group">
-                <label>Instagram</label>
-                <input
-                  type="url"
-                  [(ngModel)]="editingCommunity.instagram"
-                  class="modern-input"
-                  placeholder="https://instagram.com/..."
-                />
-              </div>
-              <div class="form-group">
-                <label>Youtube</label>
-                <input
-                  type="url"
-                  [(ngModel)]="editingCommunity.youtube"
-                  class="modern-input"
-                  placeholder="https://youtube.com/..."
-                />
-              </div>
-              <div class="form-group">
-                <label>Twitter</label>
-                <input
-                  type="url"
-                  [(ngModel)]="editingCommunity.twitter"
-                  class="modern-input"
-                  placeholder="https://twitter.com/..."
-                />
-              </div>
-              <div class="form-group">
-                <label>TikTok</label>
-                <input
-                  type="url"
-                  [(ngModel)]="editingCommunity.tiktok"
-                  class="modern-input"
-                  placeholder="https://tiktok.com/..."
-                />
-              </div>
+              <!-- Website and Social Media fields removed for Corporate Dashboard -->
             </div>
           </div>
 
@@ -1172,12 +1030,28 @@
               <button class="btn-secondary" (click)="closeModal()">Kapat</button>
               
               <ng-container *ngIf="selectedEvent.status === 'Beklemede'">
-                <button class="btn-danger" (click)="rejectEvent(selectedEvent.id)">
-                  <span class="material-symbols-outlined">close</span> Reddet
+                <!-- Kontrol Et Butonu -->
+                <button 
+                  class="btn-info"
+                  *ngIf="!inspectedEvents.has(selectedEvent.id)"
+                  (click)="inspectEvent(selectedEvent.id, $event)"
+                >
+                  <span class="material-symbols-outlined">fact_check</span> Kontrol Et
                 </button>
-                <button class="btn-success" (click)="approveEvent(selectedEvent.id); closeModal()">
-                  <span class="material-symbols-outlined">check</span> Onayla
-                </button>
+
+                <!-- Onay/Red Butonları (Sadece İncelendiyse) -->
+                <ng-container *ngIf="inspectedEvents.has(selectedEvent.id)">
+                  <button class="btn-danger" (click)="rejectEvent(selectedEvent.id)">
+                    <span class="material-symbols-outlined">close</span> Reddet
+                  </button>
+                  <button 
+                    class="btn-success" 
+                    *ngIf="isEventClean(selectedEvent.id)"
+                    (click)="approveEvent(selectedEvent.id)"
+                  >
+                    <span class="material-symbols-outlined">check</span> Onayla
+                  </button>
+                </ng-container>
               </ng-container>
 
               <button class="btn-danger" *ngIf="selectedEvent.status !== 'Beklemede'" (click)="deleteEvent(selectedEvent.id)">
