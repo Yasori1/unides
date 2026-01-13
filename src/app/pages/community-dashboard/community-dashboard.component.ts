@@ -157,7 +157,7 @@ export class CommunityDashboardComponent implements OnInit {
 
   // --- DATA ---
   clubInfo: any = {
-    id: '', // Community ID (Guid) - route'dan veya auth service'ten alınacak
+    id: 'mock-community-1', // Community ID (Guid) - default mock ID for demo
     name: 'Yapay Zeka ve Robotik Kulübü',
     university: 'İstanbul Teknik Üniversitesi',
     city: 'İstanbul',
@@ -542,15 +542,15 @@ export class CommunityDashboardComponent implements OnInit {
           // Backend'den gelen üyeleri map et
           this.members = backendMembers.map((m) => ({
             id: m.id || 0,
-            name: m.name || '',
+            name: m.name || this.getNameFromEmail(m.email),
             role: m.role || 'Üye',
             department: m.department || '',
             email: m.email || '',
             phone: m.phone || '',
             grade: m.grade || '',
-            avatar: m.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent((m.name || 'U').substring(0, 2))}&background=e2e8f0&color=1e293b`,
+            avatar: m.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent((m.name || this.getNameFromEmail(m.email) || 'U').substring(0, 2))}&background=e2e8f0&color=1e293b`,
             status: m.status || 'Aktif',
-            university: m.university || '',
+            university: m.university || this.getUniversityFromEmail(m.email),
           } as Member));
           
           // Stats'ı güncelle
@@ -1197,6 +1197,30 @@ export class CommunityDashboardComponent implements OnInit {
       return;
     }
 
+    // Demo/Mock modu kontrolü
+    if (communityId === 'mock-community-1') {
+      const email = this.newMemberData.email;
+      this.members.unshift({
+        id: Date.now(),
+        name: this.newMemberData.name || this.getNameFromEmail(email),
+        role: this.newMemberData.role,
+        department: this.newMemberData.department,
+        email: email,
+        phone: this.newMemberData.phone,
+        grade: this.newMemberData.grade,
+        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(
+          this.getInitials(this.newMemberData.name || this.getNameFromEmail(email))
+        )}&background=e2e8f0&color=1e293b`,
+        status: 'Aktif',
+        university: this.getUniversityFromEmail(email)
+      });
+      this.stats.totalMembers++;
+      this.showToast('Üye eklendi (Demo Modu).', 'success');
+      this.memberCurrentPage = 1;
+      this.closeModal();
+      return;
+    }
+
     if (this.modalType === 'edit-member') {
       // Backend'de üye güncelleme yok, sadece silip yeniden ekleme yapılabilir
       // Şimdilik sadece frontend'de güncelleme yapıyoruz
@@ -1279,11 +1303,25 @@ export class CommunityDashboardComponent implements OnInit {
     this.memberCurrentPage = 1;
   }
 
-  // Mail adresinden isim çıkarma (domain'den üniversite adı)
-  extractNameFromEmail(email: string): string {
+  // Mail adresinden isim çıkarma
+  getNameFromEmail(email: string): string {
+    if (!email) return '';
+    const parts = email.split('@');
+    if (parts.length > 0) {
+      // "ahmet.yilmaz" -> "Ahmet Yilmaz"
+      return parts[0]
+        .split(/[._]/)
+        .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+        .join(' ');
+    }
+    return email;
+  }
+
+  // Mail adresinden üniversite çıkarma (domain'den)
+  getUniversityFromEmail(email: string): string {
     const emailRegex = /^[^\s@]+@([^\s@]+)$/;
     const match = email.match(emailRegex);
-    if (!match) return email;
+    if (!match) return '';
 
     const domain = match[1].toLowerCase();
     
@@ -1351,13 +1389,38 @@ export class CommunityDashboardComponent implements OnInit {
       return;
     }
 
+    // Demo/Mock modu kontrolü
+    if (communityId === 'mock-community-1') {
+      let addedCount = 0;
+      emails.forEach(email => {
+         this.members.unshift({
+            id: Date.now() + Math.random(),
+            name: this.getNameFromEmail(email),
+            email: email,
+            role: 'Üye',
+            department: '',
+            phone: '',
+            grade: '',
+            avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(this.getInitials(this.getNameFromEmail(email)))}&background=e2e8f0&color=1e293b`,
+            status: 'Aktif',
+            university: this.getUniversityFromEmail(email)
+         });
+         addedCount++;
+         this.stats.totalMembers++;
+      });
+      
+      this.showToast(`${addedCount} üye başarıyla eklendi (Demo Modu).`, 'success');
+      this.memberCurrentPage = 1;
+      this.closeModal();
+      return;
+    }
+
     let successCount = 0;
     let errorCount = 0;
     let processedCount = 0;
 
     // Her mail için üye ekle
     emails.forEach((email, index) => {
-      const name = this.extractNameFromEmail(email);
       
       this.communityService.addMember(communityId, { email }).subscribe({
         next: () => {
@@ -1369,8 +1432,24 @@ export class CommunityDashboardComponent implements OnInit {
             if (this.clubInfo.id) {
               this.loadCommunityMembers(this.clubInfo.id);
             } else {
-              // Fallback: stats'ı güncelle (backend endpoint yoksa)
+              // Fallback: stats'ı güncelle (backend endpoint yoksa) ve listeye ekle
               this.stats.totalMembers += successCount;
+              
+              // Backend olmadığı için listeye manuel ekle (mock)
+              emails.forEach(e => {
+                 this.members.unshift({
+                    id: Date.now() + Math.random(),
+                    name: this.getNameFromEmail(e),
+                    email: e,
+                    role: 'Üye',
+                    department: '',
+                    phone: '',
+                    grade: '',
+                    avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(this.getInitials(this.getNameFromEmail(e)))}&background=e2e8f0&color=1e293b`,
+                    status: 'Aktif',
+                    university: this.getUniversityFromEmail(e)
+                 });
+              });
             }
             
             if (errorCount === 0) {
