@@ -165,7 +165,7 @@ export class CommunityDashboardComponent implements OnInit {
     description: 'Geleceği kodlayanların buluşma noktası.',
   };
 
-  stats = { totalMembers: 142, activeProjects: 4, pendingRequests: 2, totalEvents: 12 };
+  stats = { totalMembers: 0, approvedEvents: 0, pendingEvents: 0, totalEvents: 0 };
   statusFilter: 'all' | 'approved' | 'pending' | 'rejected' = 'all';
   statusLabels = {
     approved: 'Onaylanan Etkinlik',
@@ -429,6 +429,9 @@ export class CommunityDashboardComponent implements OnInit {
                 
                 // Load members for this community
                 this.loadCommunityMembers(communityDetail.id);
+                
+                // Load statistics for overview
+                this.loadLeaderStats();
               },
               error: (err: any) => {
                 console.error('Community detail yüklenemedi:', err);
@@ -450,6 +453,9 @@ export class CommunityDashboardComponent implements OnInit {
                 
                 // Load members for this community even if detail failed
                 this.loadCommunityMembers(userCommunity.id);
+                
+                // Load statistics for overview
+                this.loadLeaderStats();
               },
             });
           } else {
@@ -507,6 +513,7 @@ export class CommunityDashboardComponent implements OnInit {
                       this.initialClubInfo = JSON.parse(JSON.stringify(this.clubInfo));
                       this.loadCommunityEvents(userCommunity.id);
                       this.loadCommunityMembers(userCommunity.id);
+                      this.loadLeaderStats();
                     },
                   });
                 }
@@ -554,6 +561,29 @@ export class CommunityDashboardComponent implements OnInit {
         console.error('Topluluk üyeleri yüklenemedi:', err);
         // Hata durumunda mevcut mock data'yı kullan
         console.log('Hata nedeniyle mevcut veriler kullanılıyor');
+      },
+    });
+  }
+
+  // Load leader statistics from backend
+  private loadLeaderStats(): void {
+    this.communityService.getLeaderStats().subscribe({
+      next: (statsData) => {
+        this.stats = {
+          totalMembers: statsData.totalMembers,
+          approvedEvents: statsData.approvedEvents,
+          pendingEvents: statsData.pendingEvents,
+          totalEvents: statsData.totalEvents,
+        };
+      },
+      error: (err: any) => {
+        // Hata durumunda stats'ı sıfırla veya varsayılan değerlerde bırak
+        this.stats = {
+          totalMembers: 0,
+          approvedEvents: 0,
+          pendingEvents: 0,
+          totalEvents: 0,
+        };
       },
     });
   }
@@ -983,7 +1013,7 @@ export class CommunityDashboardComponent implements OnInit {
         isPromoted: false,
         category: this.newProjectData.category,
       });
-      this.stats.activeProjects++;
+      // Stats artık backend'den geliyor, burada güncelleme yapmıyoruz
       this.showToast('Proje eklendi.', 'success');
       this.closeModal();
     }

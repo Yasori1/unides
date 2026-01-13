@@ -993,36 +993,73 @@
 
             <div class="event-detail-grid">
               <div class="item">
-                <span class="label">Kategori</span>
-                <p class="value">{{ selectedEvent.status || 'Beklemede' }}</p>
+                <span class="label">Etkinlik ID</span>
+                <p class="value">{{ selectedEvent.id || '—' }}</p>
               </div>
               <div class="item">
-                <span class="label">Etkinlik</span>
-                <p class="value">{{ selectedEvent.eventName }}</p>
+                <span class="label">Durum</span>
+                <p class="value">
+                  <span [ngClass]="{
+                    'status-badge': true,
+                    'status-pending': selectedEvent.status === 'Beklemede',
+                    'status-approved': selectedEvent.status === 'Onaylandı',
+                    'status-rejected': selectedEvent.status === 'Reddedildi'
+                  }">
+                    {{ selectedEvent.status || 'Beklemede' }}
+                  </span>
+                </p>
+              </div>
+              <div class="item full">
+                <span class="label">Etkinlik Adı</span>
+                <p class="value">{{ selectedEvent.eventName || '—' }}</p>
               </div>
               <div class="item">
-                <span class="label">Üniversite</span>
+                <span class="label">Topluluk Adı</span>
                 <p class="value">{{ selectedEvent.communityName || '—' }}</p>
               </div>
               <div class="item">
-                <span class="label">Kulüp</span>
-                <p class="value">{{ selectedEvent.communityName || '—' }}</p>
+                <span class="label">Topluluk ID</span>
+                <p class="value">{{ selectedEvent.communityId || '—' }}</p>
+              </div>
+              <div class="item">
+                <span class="label">Şehir</span>
+                <p class="value">{{ selectedEvent.city || '—' }}</p>
               </div>
               <div class="item">
                 <span class="label">Konum</span>
                 <p class="value">{{ selectedEvent.location || '—' }}</p>
               </div>
               <div class="item">
-                <span class="label">Tarih & Saat</span>
-                <p class="value">{{ selectedEvent.date || '—' }}</p>
+                <span class="label">Başlangıç Tarihi</span>
+                <p class="value">{{ formatEventDateOnly(selectedEvent.startDate) }}</p>
+              </div>
+              <div class="item">
+                <span class="label">Başlangıç Saati</span>
+                <p class="value">{{ formatEventTime(selectedEvent.startDate) }}</p>
+              </div>
+              <div class="item">
+                <span class="label">Bitiş Tarihi</span>
+                <p class="value">{{ formatEventDateOnly(selectedEvent.endDate) }}</p>
+              </div>
+              <div class="item">
+                <span class="label">Bitiş Saati</span>
+                <p class="value">{{ formatEventTime(selectedEvent.endDate) }}</p>
               </div>
               <div class="item">
                 <span class="label">Kontenjan</span>
                 <p class="value">{{ selectedEvent.capacity || '—' }}</p>
               </div>
               <div class="item full">
-                <span class="label">Açıklama</span>
+                <span class="label">Kısa Açıklama</span>
+                <p class="value">{{ selectedEvent.shortDescription || '—' }}</p>
+              </div>
+              <div class="item full">
+                <span class="label">Detaylı Açıklama</span>
                 <p class="value">{{ selectedEvent.description || '—' }}</p>
+              </div>
+              <div class="item full" *ngIf="selectedEvent.rejectionReason">
+                <span class="label">Red Nedeni</span>
+                <p class="value rejection-reason">{{ selectedEvent.rejectionReason }}</p>
               </div>
             </div>
 

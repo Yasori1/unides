@@ -1,122 +1,13 @@
-import { Component, OnInit, HostListener, Injectable, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, HostListener, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { BehaviorSubject } from 'rxjs';
 import { Router } from '@angular/router';
 import { ImageUploadComponent } from '../../components/ui/image-upload/image-upload';
 import { CommunityService, Community } from '../../services/community.services';
 import { AnnouncementService } from '../../services/announcement.services';
 import { EventService, EventItem } from '../../services/event.services';
-
-// NOT: ToastService ve ToastComponent'i normalde ayrı dosyalardan import edersiniz.
-// Burada örnek çalışabilsin diye aynı dosyada tuttum veya import edilmiş varsaydım.
-
-// ==========================================
-// MOCK TOAST SERVICE & COMPONENT (Dependencies)
-// ==========================================
-export interface Toast {
-  id: number;
-  message: string;
-  type: 'success' | 'error';
-}
-
-@Injectable({ providedIn: 'root' })
-export class ToastService {
-  private toastsSubject = new BehaviorSubject<Toast[]>([]);
-  toasts$ = this.toastsSubject.asObservable();
-  private currentTimeout: any = null;
-
-  show(message: string, type: 'success' | 'error' = 'success') {
-    if (this.currentTimeout) {
-      clearTimeout(this.currentTimeout);
-      this.currentTimeout = null;
-    }
-    const newToast: Toast = { id: Date.now(), message, type };
-    this.toastsSubject.next([newToast]);
-    this.currentTimeout = setTimeout(() => {
-      this.remove(newToast.id);
-    }, 3000);
-  }
-
-  remove(id: number) {
-    const currentToasts = this.toastsSubject.value;
-    this.toastsSubject.next(currentToasts.filter((t) => t.id !== id));
-  }
-}
-
-@Component({
-  selector: 'app-toast',
-  standalone: true,
-  imports: [CommonModule],
-  template: `
-    <div class="toast-container">
-      <div
-        *ngFor="let toast of toasts$ | async"
-        class="toast-notification"
-        [class.error]="toast.type === 'error'"
-      >
-        <span class="material-symbols-outlined">{{
-          toast.type === 'success' ? 'check_circle' : 'error'
-        }}</span>
-        <span>{{ toast.message }}</span>
-      </div>
-    </div>
-  `,
-  styles: [
-    `
-      .toast-container {
-        position: fixed;
-        bottom: 30px;
-        right: 30px;
-        z-index: 3000;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-      }
-      .toast-notification {
-        background: white;
-        padding: 16px 24px;
-        border-radius: 14px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        font-weight: 600;
-        border-left: 5px solid #10b981;
-        animation: slideUp 0.3s ease-out;
-        font-family: 'Inter', sans-serif;
-        font-size: 14px;
-        color: #0f172a;
-      }
-      .toast-notification.error {
-        border-left-color: #ef4444;
-      }
-      .toast-notification.error span:first-child {
-        color: #ef4444;
-      }
-      .toast-notification span:first-child {
-        color: #10b981;
-        font-size: 1.5rem;
-      }
-      @keyframes slideUp {
-        from {
-          opacity: 0;
-          transform: translateY(20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-    `,
-  ],
-})
-export class ToastComponent {
-  toasts$;
-  constructor(public toastService: ToastService) {
-    this.toasts$ = this.toastService.toasts$;
-  }
-}
+import { ToastService } from '../../services/toast.services';
+import { ToastComponent } from '../../components/ui/toast/toast.component';
 
 // ==========================================
 // MAIN DASHBOARD COMPONENT
@@ -146,12 +37,16 @@ interface EventRequest {
   communityName: string;
   eventName: string;
   date: string;
+  startDate?: string; // ISO formatında başlangıç tarihi
+  endDate?: string; // ISO formatında bitiş tarihi
   location: string;
   imageUrl?: string;
   description?: string;
+  shortDescription?: string; // Kısa açıklama
   status: 'Onaylandı' | 'Beklemede' | 'Reddedildi';
   capacity?: string;
   rejectionReason?: string;
+  city?: string; // Şehir bilgisi
 }
 
 interface Notification {
@@ -186,7 +81,7 @@ export class CorporateDashboardComponent implements OnInit {
   eventStatusFilter: string = ''; // Etkinlik durum filtresi
   filteredEvents: EventRequest[] = []; // Filtrelenmiş etkinlikler
   inspectedEvents: Set<number> = new Set();
-  spamResults: Map<number, { clean: boolean, message: string }> = new Map();
+  spamResults: Map<number, { clean: boolean; message: string }> = new Map();
   forbiddenWords: string[] = ['yasak', 'illegal', 'spam', 'kötü', 'bahis', 'kumar'];
 
   // Pagination için değişkenler
@@ -329,16 +224,8 @@ export class CorporateDashboardComponent implements OnInit {
     // Corporate Dashboard'da seçilen filtreye göre toplulukları göster
     // Backend'de status parametresi ile istek atıyoruz
     // Not: 'all' ve 'passive' sadece GSB (RolId 2) yetkisi olan kullanıcılar için çalışır
-    console.log('loadCommunitiesFromService - backendStatus:', backendStatus);
     this.communityService.getAllCommunities({ status: backendStatus }).subscribe({
       next: (data) => {
-        console.log("loadCommunitiesFromService - Backend'den gelen veri:", data);
-        console.log('loadCommunitiesFromService - Topluluk sayısı:', data.length);
-        console.log(
-          'loadCommunitiesFromService - isActivity değerleri:',
-          data.map((c) => ({ name: c.name, isActivity: c.isActivity, status: c.status }))
-        );
-
         // CommunityService'ten gelen veriyi Corporate Dashboard formatına dönüştür
         // EXCLUSION: Website URL and Social Media Links are NOT displayed in Corporate Dashboard
         // Category is INCLUDED and will be shown with dropdown
@@ -347,14 +234,6 @@ export class CorporateDashboardComponent implements OnInit {
           // Backend'den gelen isActivity değerini direkt kullan (zaten doğru map edilmiş)
           // CommunityService.mapMiniDtoToCommunity içinde dto.isActivity doğru map ediliyor
           const isActivity = c.isActivity !== undefined ? c.isActivity : true;
-          console.log(
-            'Mapping community:',
-            c.name,
-            'isActivity:',
-            c.isActivity,
-            'status:',
-            c.status
-          );
           return {
             ...rest,
             about: c.description || c.about || '',
@@ -397,11 +276,8 @@ export class CorporateDashboardComponent implements OnInit {
         this.attachCommunityNamesToEvents();
       },
       error: (err) => {
-        console.error('Topluluklar yüklenemedi:', err);
-
         // Eğer 403 hatası alırsak (GSB yetkisi yoksa), kullanıcıya uyarı göster ve aktif toplulukları göster
         if (err.status === 403) {
-          console.warn('GSB yetkisi yok, sadece aktif topluluklar gösteriliyor');
           this.showToast(
             'Pasif toplulukları görüntülemek için GSB yetkisi gereklidir. Şu anda sadece aktif topluluklar gösteriliyor.',
             'error'
@@ -460,33 +336,95 @@ export class CorporateDashboardComponent implements OnInit {
 
   loadEventsFromService() {
     if (!isPlatformBrowser(this.platformId)) return;
-    this.eventService.getAll().subscribe({
+
+    // Filtreye göre backend'den etkinlikleri çek
+    let statusNumbers: number[] = [];
+
+    if (this.eventStatusFilter === 'Onaylandı') {
+      statusNumbers = [1]; // Onaylandı
+    } else if (this.eventStatusFilter === 'Beklemede') {
+      statusNumbers = [0]; // Beklemede
+    } else if (this.eventStatusFilter === 'Reddedildi') {
+      statusNumbers = [2]; // Reddedildi
+    } else {
+      // Tümü veya boş -> tüm status'leri çek
+      statusNumbers = [0, 1, 2];
+    }
+
+    // Backend'den status'e göre etkinlikleri çek
+    this.eventService.getByStatus(statusNumbers).subscribe({
       next: (data: EventItem[]) => {
-        // Backend'den gelen tüm etkinlikleri map et
+        // Backend'den gelen etkinlikleri map et
+        // EventService zaten EventConfirm (0,1,2) değerlerini 'Beklemede', 'Onaylandı', 'Reddedildi' olarak map ediyor
+        if (!data || data.length === 0) {
+          this.allEvents = [];
+          this.filteredEvents = [];
+          return;
+        }
+
         this.allEvents = data.map((e) => {
           // Community name'i bulmak için communities listesini kullan
           const community = this.allCommunities.find((c) => String(c.id) === String(e.communityId));
+
           return {
             id: e.id,
             communityId: e.communityId,
-            communityName: community?.name || '',
+            communityName: community?.name || e.communityName || '',
             eventName: e.title,
             date: e.startDate || '',
+            startDate: e.startDate,
+            endDate: e.endDate,
             location: e.location || '',
             imageUrl: e.imageUrl || '',
-            description: e.description || e.shortDescription || '',
+            description: e.description || '',
+            shortDescription: e.shortDescription || '',
+            // EventService'ten gelen status değeri zaten doğru format: 'Beklemede', 'Onaylandı', 'Reddedildi'
             status: e.status || 'Beklemede',
-            capacity: '',
+            capacity: e.capacity || '',
+            city: e.city || community?.city || '',
           };
         });
 
-        // Filtreleri uygula
-        this.applyFilters();
+        // Topluluk isimlerini eşleştir
+        this.attachCommunityNamesToEvents();
+
+        // Etkinlik filtrelerini uygula (metin araması için)
+        // filterEvents() metodu filteredEvents'i güncelliyor
+        this.filterEvents();
       },
       error: (err) => {
-        console.error('Etkinlikler yüklenemedi:', err);
-        this.allEvents = [];
-        this.filteredEvents = [];
+        // Hata durumunda getAll() metodunu fallback olarak kullan
+        this.eventService.getAll().subscribe({
+          next: (data: EventItem[]) => {
+            this.allEvents = data.map((e) => {
+              const community = this.allCommunities.find(
+                (c) => String(c.id) === String(e.communityId)
+              );
+              return {
+                id: e.id,
+                communityId: e.communityId,
+                communityName: community?.name || e.communityName || '',
+                eventName: e.title,
+                date: e.startDate || '',
+                startDate: e.startDate,
+                endDate: e.endDate,
+                location: e.location || '',
+                imageUrl: e.imageUrl || '',
+                description: e.description || '',
+                shortDescription: e.shortDescription || '',
+                status: e.status || 'Beklemede',
+                capacity: e.capacity || '',
+                city: e.city || community?.city || '',
+              };
+            });
+            this.attachCommunityNamesToEvents();
+            this.filterEvents();
+          },
+          error: () => {
+            this.allEvents = [];
+            this.filteredEvents = [];
+          },
+        });
       },
     });
   }
@@ -496,8 +434,17 @@ export class CorporateDashboardComponent implements OnInit {
     this.allEvents = this.allEvents.map((ev) => {
       // Community id string (Guid), EventItem communityId number - String'e çevirip karşılaştır
       const found = this.allCommunities.find((c) => String(c.id) === String(ev.communityId));
-      return { ...ev, communityName: found?.name || ev.communityName };
+      if (found) {
+        return {
+          ...ev,
+          communityName: found.name || ev.communityName || '',
+          city: ev.city || found.city || '',
+        };
+      }
+      return ev;
     });
+    // Topluluk isimleri eşleştirildikten sonra filtreleri tekrar uygula
+    this.filterEvents();
   }
 
   // Pagination metodları
@@ -578,6 +525,8 @@ export class CorporateDashboardComponent implements OnInit {
   }
 
   // Etkinlik filtreleme
+  // Not: Durum filtresi artık backend'de yapılıyor (/api/Events/status endpoint'i ile)
+  // Burada sadece metin araması yapılıyor
   filterEvents() {
     let temp = [...this.allEvents];
 
@@ -586,16 +535,12 @@ export class CorporateDashboardComponent implements OnInit {
       const term = this.eventSearchText.toLowerCase();
       temp = temp.filter(
         (e) =>
-          e.eventName.toLowerCase().includes(term) ||
-          e.communityName.toLowerCase().includes(term) ||
+          (e.eventName && e.eventName.toLowerCase().includes(term)) ||
+          (e.communityName && e.communityName.toLowerCase().includes(term)) ||
           (e.description && e.description.toLowerCase().includes(term)) ||
-          (e.location && e.location.toLowerCase().includes(term))
+          (e.location && e.location.toLowerCase().includes(term)) ||
+          (e.shortDescription && e.shortDescription.toLowerCase().includes(term))
       );
-    }
-
-    // Durum filtresi
-    if (this.eventStatusFilter) {
-      temp = temp.filter((e) => e.status === this.eventStatusFilter);
     }
 
     this.filteredEvents = temp;
@@ -604,7 +549,8 @@ export class CorporateDashboardComponent implements OnInit {
   // Etkinlik durum filtresi ayarla
   setEventStatusFilter(status: string) {
     this.eventStatusFilter = status;
-    this.filterEvents();
+    // Backend'den filtreye göre etkinlikleri çek
+    this.loadEventsFromService();
   }
 
   // Topluluklar sayfasına onay bekleyen filtresiyle yönlendir
@@ -654,7 +600,7 @@ export class CorporateDashboardComponent implements OnInit {
           this.isModalOpen = true;
         },
         error: (err) => {
-          console.error('Topluluk detayı yüklenemedi, mevcut veriyi kullanıyoruz:', err);
+          // Hata durumunda mevcut veri kullanılıyor
           // Hata durumunda mevcut veriyi kullan, ama yine de map et
           this.editingCommunity = {
             ...community,
@@ -723,9 +669,6 @@ export class CorporateDashboardComponent implements OnInit {
             : undefined,
       };
 
-      console.log('Güncellenecek topluluk status:', this.editingCommunity.status);
-      console.log('Gönderilecek communityForService:', communityForService);
-
       this.communityService.addOrUpdateCommunity(communityForService).subscribe({
         next: (updatedCommunity) => {
           // Güncellenmiş topluluğu direkt listeye ekle/güncelle
@@ -783,8 +726,7 @@ export class CorporateDashboardComponent implements OnInit {
           this.closeModal();
         },
         error: (err) => {
-          console.error('Topluluk güncellenirken hata:', err);
-          console.error('Hata detayı:', err.error);
+          // Hata zaten toast ile gösteriliyor
           let errorMessage = 'Topluluk güncellenirken bir hata oluştu';
 
           if (err.status === 401) {
@@ -852,7 +794,7 @@ export class CorporateDashboardComponent implements OnInit {
           this.newCommunity = null;
         },
         error: (err) => {
-          console.error('Topluluk eklenirken hata:', err);
+          // Hata zaten toast ile gösteriliyor
           let errorMessage = 'Topluluk eklenirken bir hata oluştu';
 
           if (err.status === 401) {
@@ -889,7 +831,7 @@ export class CorporateDashboardComponent implements OnInit {
           this.closeModal();
         },
         error: (err) => {
-          console.error('Topluluk silinirken hata:', err);
+          // Hata zaten toast ile gösteriliyor
           let errorMessage = 'Topluluk silinirken bir hata oluştu';
 
           if (err.status === 401) {
@@ -1052,7 +994,7 @@ export class CorporateDashboardComponent implements OnInit {
         this.spamResults.set(id, { clean: true, message });
         this.showToast(message, 'success');
       }
-      
+
       this.inspectedEvents.add(id);
     }, 1000);
   }
@@ -1063,37 +1005,30 @@ export class CorporateDashboardComponent implements OnInit {
   }
 
   approveEvent(id: number) {
-    if (!confirm('Bu etkinliği onaylamak istediğinize emin misiniz?')) {
-      return;
-    }
     const event = this.allEvents.find((e) => e.id === id);
     if (event) {
-      // Backend'de status field'ı yok, local state'te tutuyoruz
-      // Ancak etkinlik bilgilerini güncellemek için backend'e update gönderebiliriz
-      event.status = 'Onaylandı';
-<<<<<<< HEAD:src/app/pages/corporate-dashboard/corporate-dashboard.component.ts
-      this.showToast('Etkinlik onaylandı', 'success');
-      this.closeModal();
-=======
+      // Backend'e onay isteği gönder
+      this.eventService.approveEvent(id).subscribe({
+        next: () => {
+          // Backend'den başarılı yanıt geldi, local state'i güncelle
+          event.status = 'Onaylandı';
 
-      // LocalStorage'a onaylanan etkinlik ID'lerini kaydet (Anasayfa için)
-      const approvedEvents = JSON.parse(localStorage.getItem('approved_events') || '[]');
-      if (!approvedEvents.includes(id)) {
-        approvedEvents.push(id);
-        localStorage.setItem('approved_events', JSON.stringify(approvedEvents));
-      }
+          // Filtered events'i güncelle
+          const filteredIndex = this.filteredEvents.findIndex((e) => e.id === id);
+          if (filteredIndex !== -1) {
+            this.filteredEvents[filteredIndex].status = 'Onaylandı';
+          }
 
-      // Filtered events'i güncelle
-      const filteredIndex = this.filteredEvents.findIndex((e) => e.id === id);
-      if (filteredIndex !== -1) {
-        this.filteredEvents[filteredIndex].status = 'Onaylandı';
-      }
+          this.showToast('Etkinlik onaylandı ve anasayfada görüntülenecek', 'success');
 
-      this.showToast('Etkinlik onaylandı ve anasayfada görüntülenecek', 'success');
-
-      // Filtreleri yeniden uygula
-      this.applyFilters();
->>>>>>> 789b767c2c1d2fad7e9af8647932d8e50c5f6c80:src/app/pages/corporate-dashboard/corporate-dashboard.ts
+          // Filtreleri yeniden uygula
+          this.applyFilters();
+        },
+        error: (err: any) => {
+          // Hata zaten toast ile gösteriliyor
+          this.showToast('Etkinlik onaylanırken bir hata oluştu', 'error');
+        },
+      });
     }
   }
 
@@ -1116,7 +1051,6 @@ export class CorporateDashboardComponent implements OnInit {
       this.eventToReject.rejectionReason = this.rejectionReason;
 
       // Burada normalde backend'e rejectionReason ile birlikte güncelleme isteği atılır
-      console.log(`Event ${this.eventToReject.id} rejected. Reason: ${this.rejectionReason}`);
 
       this.showToast('Etkinlik reddedildi', 'success'); // 'error' yerine 'success' çünkü işlem başarılı
       this.closeModal();
@@ -1126,9 +1060,92 @@ export class CorporateDashboardComponent implements OnInit {
   }
 
   openEventDetail(ev: EventRequest) {
-    this.selectedEvent = ev;
-    this.modalType = 'event-detail';
-    this.isModalOpen = true;
+    // Backend'den tam etkinlik detayını çek
+    if (ev.id) {
+      this.eventService.getById(ev.id).subscribe({
+        next: (eventDetail: EventItem) => {
+          // EventItem'ı EventRequest formatına çevir
+          const community = this.allCommunities.find(
+            (c) => String(c.id) === String(eventDetail.communityId)
+          );
+          this.selectedEvent = {
+            id: eventDetail.id,
+            communityId: eventDetail.communityId,
+            communityName: community?.name || eventDetail.communityName || '',
+            eventName: eventDetail.title,
+            date: eventDetail.startDate || '',
+            startDate: eventDetail.startDate,
+            endDate: eventDetail.endDate,
+            location: eventDetail.location || '',
+            imageUrl: eventDetail.imageUrl || '',
+            description: eventDetail.description || '',
+            shortDescription: eventDetail.shortDescription || '',
+            status: eventDetail.status || 'Beklemede',
+            capacity: eventDetail.capacity || '',
+            city: eventDetail.city || community?.city || '',
+          };
+          this.modalType = 'event-detail';
+          this.isModalOpen = true;
+        },
+        error: () => {
+          // Hata durumunda mevcut veriyi kullan
+          this.selectedEvent = ev;
+          this.modalType = 'event-detail';
+          this.isModalOpen = true;
+        },
+      });
+    } else {
+      // ID yoksa mevcut veriyi kullan
+      this.selectedEvent = ev;
+      this.modalType = 'event-detail';
+      this.isModalOpen = true;
+    }
+  }
+
+  formatEventDate(dateString?: string): string {
+    if (!dateString) return '—';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return dateString;
+      return date.toLocaleDateString('tr-TR', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch {
+      return dateString;
+    }
+  }
+
+  formatEventDateOnly(dateString?: string): string {
+    if (!dateString) return '—';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return dateString;
+      return date.toLocaleDateString('tr-TR', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+      });
+    } catch {
+      return dateString;
+    }
+  }
+
+  formatEventTime(dateString?: string): string {
+    if (!dateString) return '—';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return dateString;
+      return date.toLocaleTimeString('tr-TR', {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch {
+      return dateString;
+    }
   }
 
   openNewEventModal() {
@@ -1235,8 +1252,7 @@ export class CorporateDashboardComponent implements OnInit {
           this.closeModal();
         },
         error: (error) => {
-          console.error('Duyuru oluşturulurken hata:', error);
-          console.error('Hata response:', error.error);
+          // Hata zaten toast ile gösteriliyor
 
           // Daha detaylı hata mesajı
           let errorMessage = 'Duyuru oluşturulurken bir hata oluştu';
@@ -1271,7 +1287,7 @@ export class CorporateDashboardComponent implements OnInit {
         this.applyAnnouncementFilters();
       },
       error: (err) => {
-        console.error('Duyurular yüklenemedi:', err);
+        // Hata durumunda boş array kullanılıyor
         // Hata durumunda boş liste kullan
         this.announcements = [];
         this.filteredAnnouncements = [];
@@ -1342,7 +1358,7 @@ export class CorporateDashboardComponent implements OnInit {
           this.closeModal();
         },
         error: (error) => {
-          console.error('Duyuru güncellenirken hata:', error);
+          // Hata zaten toast ile gösteriliyor
 
           // Daha detaylı hata mesajı
           let errorMessage = 'Duyuru güncellenirken bir hata oluştu';
@@ -1386,7 +1402,7 @@ export class CorporateDashboardComponent implements OnInit {
         this.closeModal();
       },
       error: (error) => {
-        console.error('Duyuru silinirken hata:', error);
+        // Hata zaten toast ile gösteriliyor
 
         // Daha detaylı hata mesajı
         let errorMessage = 'Duyuru silinirken bir hata oluştu';
@@ -1439,7 +1455,7 @@ export class CorporateDashboardComponent implements OnInit {
         this.showToast('Görsel başarıyla yüklendi', 'success');
       },
       error: (err) => {
-        console.error('Görsel yüklenirken hata:', err);
+        // Hata zaten toast ile gösteriliyor
         const errorMessage =
           err.error?.message || err.message || 'Görsel yüklenirken bir hata oluştu';
         this.showToast(errorMessage, 'error');

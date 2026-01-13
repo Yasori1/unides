@@ -110,20 +110,20 @@
             let stat of [
               { label: 'Toplam Üye', value: stats.totalMembers, icon: 'group', colorClass: 'cyan' },
               {
-                label: 'Aktif Etkinlik',
-                value: stats.activeProjects,
-                icon: 'rocket_launch',
-                colorClass: 'purple'
-              },
-              {
-                label: 'Düzenlenen Etkinlik Sayısı',
+                label: 'Toplam Etkinlik',
                 value: stats.totalEvents,
                 icon: 'event',
                 colorClass: 'pink'
               },
               {
-                label: 'Onay Bekleyen Etkinlikler',
-                value: stats.pendingRequests,
+                label: 'Onaylanan Etkinlik',
+                value: stats.approvedEvents,
+                icon: 'check_circle',
+                colorClass: 'green'
+              },
+              {
+                label: 'Onay Bekleyen Etkinlik',
+                value: stats.pendingEvents,
                 icon: 'hourglass_top',
                 colorClass: 'orange'
               }
