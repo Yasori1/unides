@@ -452,30 +452,6 @@
                 <span class="status-badge-inline" [ngClass]="e.status">{{ e.status }}</span>
               </div>
             </div>
-
-            <div class="event-actions-row">
-              <div class="actions-left">
-                <button
-                  class="btn-success ghost"
-                  *ngIf="e.status === 'Beklemede'"
-                  (click)="approveEvent(e.id); $event.stopPropagation()"
-                  title="Onayla"
-                >
-                  <span class="material-symbols-outlined">check</span>
-                  Onayla
-                </button>
-                <button
-                  class="btn-danger ghost"
-                  *ngIf="e.status === 'Beklemede'"
-                  (click)="rejectEvent(e.id); $event.stopPropagation()"
-                  title="Reddet"
-                >
-                  <span class="material-symbols-outlined">close</span>
-                  Reddet
-                </button>
-              </div>
-              <span class="category-label">ETKİNLİK</span>
-            </div>
           </div>
         </div>
       </div>
@@ -595,6 +571,7 @@
           modalType === 'new-announcement' ||
           modalType === 'edit-announcement'
         "
+        [class.extra-wide]="modalType === 'event-detail'"
         (click)="$event.stopPropagation()"
       >
         <div class="modal-header">
@@ -1172,12 +1149,28 @@
               <button class="btn-secondary" (click)="closeModal()">Kapat</button>
               
               <ng-container *ngIf="selectedEvent.status === 'Beklemede'">
-                <button class="btn-danger" (click)="rejectEvent(selectedEvent.id)">
-                  <span class="material-symbols-outlined">close</span> Reddet
+                <!-- Kontrol Et Butonu -->
+                <button 
+                  class="btn-info"
+                  *ngIf="!inspectedEvents.has(selectedEvent.id)"
+                  (click)="inspectEvent(selectedEvent.id, $event)"
+                >
+                  <span class="material-symbols-outlined">fact_check</span> Kontrol Et
                 </button>
-                <button class="btn-success" (click)="approveEvent(selectedEvent.id); closeModal()">
-                  <span class="material-symbols-outlined">check</span> Onayla
-                </button>
+
+                <!-- Onay/Red Butonları (Sadece İncelendiyse) -->
+                <ng-container *ngIf="inspectedEvents.has(selectedEvent.id)">
+                  <button class="btn-danger" (click)="rejectEvent(selectedEvent.id)">
+                    <span class="material-symbols-outlined">close</span> Reddet
+                  </button>
+                  <button 
+                    class="btn-success" 
+                    *ngIf="isEventClean(selectedEvent.id)"
+                    (click)="approveEvent(selectedEvent.id)"
+                  >
+                    <span class="material-symbols-outlined">check</span> Onayla
+                  </button>
+                </ng-container>
               </ng-container>
 
               <button class="btn-danger" *ngIf="selectedEvent.status !== 'Beklemede'" (click)="deleteEvent(selectedEvent.id)">

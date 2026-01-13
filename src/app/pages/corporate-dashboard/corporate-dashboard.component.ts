@@ -169,8 +169,8 @@ interface Notification {
   selector: 'app-corporate-dashboard',
   standalone: true,
   imports: [CommonModule, FormsModule, ToastComponent, ImageUploadComponent],
-  templateUrl: './corporate-dashboard.html',
-  styleUrls: ['./corporate-dashboard.scss'],
+  templateUrl: './corporate-dashboard.component.html',
+  styleUrls: ['./corporate-dashboard.component.scss'],
 })
 export class CorporateDashboardComponent implements OnInit {
   isSidebarCollapsed = false;
@@ -185,6 +185,9 @@ export class CorporateDashboardComponent implements OnInit {
   eventSearchText = ''; // Etkinlik arama metni
   eventStatusFilter: string = ''; // Etkinlik durum filtresi
   filteredEvents: EventRequest[] = []; // Filtrelenmiş etkinlikler
+  inspectedEvents: Set<number> = new Set();
+  spamResults: Map<number, { clean: boolean, message: string }> = new Map();
+  forbiddenWords: string[] = ['yasak', 'illegal', 'spam', 'kötü', 'bahis', 'kumar'];
 
   // Pagination için değişkenler
   currentPage = 1;
@@ -833,15 +836,53 @@ export class CorporateDashboardComponent implements OnInit {
     }, 1500);
   }
 
+  inspectEvent(id: number, event: MouseEvent) {
+    event.stopPropagation();
+    const ev = this.allEvents.find((e) => e.id === id);
+    if (!ev) return;
+
+    this.showToast('Spam kontrolü yapılıyor...', 'success'); // Info type olmadığı için success kullanıyoruz
+
+    // Simüle edilmiş spam kontrolü (1 saniye gecikme)
+    setTimeout(() => {
+      const textToCheck = (ev.eventName + ' ' + (ev.description || '')).toLowerCase();
+      const foundForbiddenWords = this.forbiddenWords.filter((word) => textToCheck.includes(word));
+
+      if (foundForbiddenWords.length > 0) {
+        const message = `Yasaklı kelimeler tespit edildi: ${foundForbiddenWords.join(', ')}`;
+        this.spamResults.set(id, { clean: false, message });
+        this.showToast(message, 'error');
+      } else {
+        const message = 'İçerik temizdir.';
+        this.spamResults.set(id, { clean: true, message });
+        this.showToast(message, 'success');
+      }
+      
+      this.inspectedEvents.add(id);
+    }, 1000);
+  }
+
+  isEventClean(id: number): boolean {
+    const result = this.spamResults.get(id);
+    return result ? result.clean : false;
+  }
+
   approveEvent(id: number) {
+    if (!confirm('Bu etkinliği onaylamak istediğinize emin misiniz?')) {
+      return;
+    }
     const event = this.allEvents.find((e) => e.id === id);
     if (event) {
       event.status = 'Onaylandı';
       this.showToast('Etkinlik onaylandı', 'success');
+      this.closeModal();
     }
   }
 
   rejectEvent(id: number) {
+    if (!confirm('Bu etkinliği reddetmek istediğinize emin misiniz?')) {
+      return;
+    }
     const event = this.allEvents.find((e) => e.id === id);
     if (event) {
       this.eventToReject = event;
