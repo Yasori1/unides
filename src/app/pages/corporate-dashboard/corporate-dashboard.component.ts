@@ -458,6 +458,29 @@ export class CorporateDashboardComponent implements OnInit {
     });
   }
 
+  // Üniversite kısaltması için yardımcı metod
+  getUniversityAbbr(uniName: string): string {
+    if (!uniName) return '';
+    const lower = uniName.toLowerCase();
+    if (lower.includes('istanbul teknik')) return 'İTÜ';
+    if (lower.includes('yıldız teknik')) return 'YTÜ';
+    if (lower.includes('orta doğu teknik')) return 'ODTÜ';
+    if (lower.includes('boğaziçi')) return 'BOUN';
+    if (lower.includes('hacettepe')) return 'HACETTEPE';
+    if (lower.includes('ege')) return 'EGE';
+    if (lower.includes('marmara')) return 'MARMARA';
+    if (lower.includes('koç')) return 'KOÇ';
+    if (lower.includes('sabancı')) return 'SABANCI';
+    if (lower.includes('bilkent')) return 'BİLKENT';
+    
+    // Eğer bilinen bir kısaltma değilse ve "Üniversitesi" içeriyorsa, onu atıp kalanı döndür
+    if (lower.includes('üniversitesi')) {
+        return uniName.replace(/Üniversitesi/i, '').trim().toUpperCase();
+    }
+
+    return uniName.split(' ')[0].toUpperCase();
+  }
+
   loadEventsFromService() {
     if (!isPlatformBrowser(this.platformId)) return;
     this.eventService.getAll().subscribe({
@@ -470,10 +493,15 @@ export class CorporateDashboardComponent implements OnInit {
           this.allEvents = data.map((e) => {
             // Community name'i bulmak için communities listesini kullan
             const community = this.allCommunities.find((c) => String(c.id) === String(e.communityId));
+            
+            const uniAbbr = community?.university ? this.getUniversityAbbr(community.university) : '';
+            const rawName = community?.name || e.communityName || '';
+            const finalName = uniAbbr ? `${uniAbbr} - ${rawName}` : rawName;
+
             return {
               id: e.id,
               communityId: e.communityId,
-              communityName: community?.name || e.communityName || '',
+              communityName: finalName,
               eventName: e.title,
               date: e.startDate || '',
               location: e.location || '',
@@ -503,7 +531,7 @@ export class CorporateDashboardComponent implements OnInit {
       {
         id: 101,
         communityId: '1',
-        communityName: 'Yazılım ve Teknoloji Kulübü',
+        communityName: 'İTÜ - Yazılım ve Teknoloji Kulübü',
         eventName: 'Geleceğin Teknolojileri Zirvesi',
         date: '25 Ekim 2025',
         location: 'Kültür Merkezi',
@@ -515,7 +543,7 @@ export class CorporateDashboardComponent implements OnInit {
       {
         id: 102,
         communityId: '2',
-        communityName: 'Müzik Topluluğu',
+        communityName: 'BOUN - Müzik Topluluğu',
         eventName: 'Kampüs Caz Festivali',
         date: '15 Kasım 2025',
         location: 'Çim Amfi',
@@ -527,7 +555,7 @@ export class CorporateDashboardComponent implements OnInit {
       {
         id: 103,
         communityId: '3',
-        communityName: 'Fotoğrafçılık Kulübü',
+        communityName: 'YTÜ - Fotoğrafçılık Kulübü',
         eventName: 'İstanbul Sokakları Gezisi',
         date: '01 Aralık 2025',
         location: 'Eminönü Meydanı',
@@ -540,7 +568,7 @@ export class CorporateDashboardComponent implements OnInit {
       {
         id: 104,
         communityId: '4',
-        communityName: 'Girişimcilik Kulübü',
+        communityName: 'ODTÜ - Girişimcilik Kulübü',
         eventName: 'Startup Pitching Day',
         date: '20 Aralık 2025',
         location: 'Kuluçka Merkezi',
@@ -557,7 +585,16 @@ export class CorporateDashboardComponent implements OnInit {
     this.allEvents = this.allEvents.map((ev) => {
       // Community id string (Guid), EventItem communityId number - String'e çevirip karşılaştır
       const found = this.allCommunities.find((c) => String(c.id) === String(ev.communityId));
-      return { ...ev, communityName: found?.name || ev.communityName };
+      
+      const uniAbbr = found?.university ? this.getUniversityAbbr(found.university) : '';
+      const rawName = found?.name || ev.communityName;
+      // Eğer zaten " - " içeriyorsa (mock data gibi), tekrar ekleme
+      if (rawName.includes(' - ')) {
+         return ev;
+      }
+      
+      const finalName = uniAbbr ? `${uniAbbr} - ${rawName}` : rawName;
+      return { ...ev, communityName: finalName };
     });
     this.filterEvents();
   }
