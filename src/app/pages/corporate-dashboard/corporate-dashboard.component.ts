@@ -462,33 +462,94 @@ export class CorporateDashboardComponent implements OnInit {
     if (!isPlatformBrowser(this.platformId)) return;
     this.eventService.getAll().subscribe({
       next: (data: EventItem[]) => {
-        // Backend'den gelen tüm etkinlikleri map et
-        this.allEvents = data.map((e) => {
-          // Community name'i bulmak için communities listesini kullan
-          const community = this.allCommunities.find((c) => String(c.id) === String(e.communityId));
-          return {
-            id: e.id,
-            communityId: e.communityId,
-            communityName: community?.name || '',
-            eventName: e.title,
-            date: e.startDate || '',
-            location: e.location || '',
-            imageUrl: e.imageUrl || '',
-            description: e.description || e.shortDescription || '',
-            status: e.status || 'Beklemede',
-            capacity: '',
-          };
-        });
+        // Eğer backend'den veri gelmezse mock verileri kullan (Demo amaçlı)
+        if (!data || data.length === 0) {
+          this.allEvents = this.getMockDashboardEvents();
+        } else {
+          // Backend'den gelen tüm etkinlikleri map et
+          this.allEvents = data.map((e) => {
+            // Community name'i bulmak için communities listesini kullan
+            const community = this.allCommunities.find((c) => String(c.id) === String(e.communityId));
+            return {
+              id: e.id,
+              communityId: e.communityId,
+              communityName: community?.name || e.communityName || '',
+              eventName: e.title,
+              date: e.startDate || '',
+              location: e.location || '',
+              imageUrl: e.imageUrl || '',
+              description: e.description || e.shortDescription || '',
+              status: e.status || 'Beklemede',
+              capacity: e.capacity || '',
+            };
+          });
+        }
 
         // Filtreleri uygula
-        this.applyFilters();
+        this.filterEvents();
       },
       error: (err) => {
-        console.error('Etkinlikler yüklenemedi:', err);
-        this.allEvents = [];
-        this.filteredEvents = [];
+        console.error('Etkinlikler yüklenemedi, demo veriler yükleniyor:', err);
+        // Hata durumunda da mock verileri göster
+        this.allEvents = this.getMockDashboardEvents();
+        this.filterEvents();
       },
     });
+  }
+
+  // Demo verileri döndüren yardımcı metod
+  getMockDashboardEvents(): EventRequest[] {
+    return [
+      {
+        id: 101,
+        communityId: '1',
+        communityName: 'Yazılım ve Teknoloji Kulübü',
+        eventName: 'Geleceğin Teknolojileri Zirvesi',
+        date: '25 Ekim 2025',
+        location: 'Kültür Merkezi',
+        imageUrl: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=800&auto=format&fit=crop',
+        description: 'Yapay zeka ve blockchain teknolojilerinin konuşulacağı dev zirve.',
+        status: 'Beklemede',
+        capacity: '500',
+      },
+      {
+        id: 102,
+        communityId: '2',
+        communityName: 'Müzik Topluluğu',
+        eventName: 'Kampüs Caz Festivali',
+        date: '15 Kasım 2025',
+        location: 'Çim Amfi',
+        imageUrl: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?q=80&w=800&auto=format&fit=crop',
+        description: 'Sonbaharın tadını caz müzikle çıkarıyoruz.',
+        status: 'Onaylandı',
+        capacity: '1200',
+      },
+      {
+        id: 103,
+        communityId: '3',
+        communityName: 'Fotoğrafçılık Kulübü',
+        eventName: 'İstanbul Sokakları Gezisi',
+        date: '01 Aralık 2025',
+        location: 'Eminönü Meydanı',
+        imageUrl: 'https://images.unsplash.com/photo-1552168324-d612d77725e3?q=80&w=800&auto=format&fit=crop',
+        description: 'Tarihi yarımadada fotoğraf turu.',
+        status: 'Reddedildi',
+        rejectionReason: 'Etkinlik tarihi sınav haftasına denk gelmektedir.',
+        capacity: '50',
+      },
+      {
+        id: 104,
+        communityId: '4',
+        communityName: 'Girişimcilik Kulübü',
+        eventName: 'Startup Pitching Day',
+        date: '20 Aralık 2025',
+        location: 'Kuluçka Merkezi',
+        imageUrl: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=800&auto=format&fit=crop',
+        description: 'Yatırımcılarla girişimcileri buluşturuyoruz.',
+        status: 'Beklemede',
+        capacity: '100',
+      },
+    ];
   }
 
   attachCommunityNamesToEvents() {
@@ -498,6 +559,7 @@ export class CorporateDashboardComponent implements OnInit {
       const found = this.allCommunities.find((c) => String(c.id) === String(ev.communityId));
       return { ...ev, communityName: found?.name || ev.communityName };
     });
+    this.filterEvents();
   }
 
   // Pagination metodları
@@ -1062,25 +1124,53 @@ export class CorporateDashboardComponent implements OnInit {
     return result ? result.clean : false;
   }
 
-  approveEvent(id: number) {
-    if (!confirm('Bu etkinliği onaylamak istediğinize emin misiniz?')) {
-      return;
+  // Confirmation Modal State
+  isConfirmModalOpen = false;
+  confirmMessage = '';
+  pendingAction: 'approve' | 'reject' | null = null;
+  pendingEventId: number | null = null;
+
+  openConfirmModal(action: 'approve' | 'reject', eventId: number) {
+    this.pendingAction = action;
+    this.pendingEventId = eventId;
+    this.confirmMessage =
+      action === 'approve'
+        ? 'Bu etkinliği onaylamak istediğinize emin misiniz?'
+        : 'Bu etkinliği reddetmek istediğinize emin misiniz?';
+    this.isConfirmModalOpen = true;
+  }
+
+  closeConfirmModal() {
+    this.isConfirmModalOpen = false;
+    this.pendingAction = null;
+    this.pendingEventId = null;
+  }
+
+  onConfirmYes() {
+    if (this.pendingAction === 'approve' && this.pendingEventId) {
+      this.executeApprove(this.pendingEventId);
+    } else if (this.pendingAction === 'reject' && this.pendingEventId) {
+      this.executeReject(this.pendingEventId);
     }
+    this.closeConfirmModal();
+  }
+
+  approveEvent(id: number) {
+    this.openConfirmModal('approve', id);
+  }
+
+  executeApprove(id: number) {
     const event = this.allEvents.find((e) => e.id === id);
     if (event) {
-      // Backend'de status field'ı yok, local state'te tutuyoruz
-      // Ancak etkinlik bilgilerini güncellemek için backend'e update gönderebiliriz
       event.status = 'Onaylandı';
-<<<<<<< HEAD:src/app/pages/corporate-dashboard/corporate-dashboard.component.ts
-      this.showToast('Etkinlik onaylandı', 'success');
-      this.closeModal();
-=======
-
+      
       // LocalStorage'a onaylanan etkinlik ID'lerini kaydet (Anasayfa için)
-      const approvedEvents = JSON.parse(localStorage.getItem('approved_events') || '[]');
-      if (!approvedEvents.includes(id)) {
-        approvedEvents.push(id);
-        localStorage.setItem('approved_events', JSON.stringify(approvedEvents));
+      if (isPlatformBrowser(this.platformId)) {
+        const approvedEvents = JSON.parse(localStorage.getItem('approved_events') || '[]');
+        if (!approvedEvents.includes(id)) {
+          approvedEvents.push(id);
+          localStorage.setItem('approved_events', JSON.stringify(approvedEvents));
+        }
       }
 
       // Filtered events'i güncelle
@@ -1090,17 +1180,18 @@ export class CorporateDashboardComponent implements OnInit {
       }
 
       this.showToast('Etkinlik onaylandı ve anasayfada görüntülenecek', 'success');
-
+      this.closeModal(); // Detay modalını kapat
+      
       // Filtreleri yeniden uygula
       this.applyFilters();
->>>>>>> 789b767c2c1d2fad7e9af8647932d8e50c5f6c80:src/app/pages/corporate-dashboard/corporate-dashboard.ts
     }
   }
 
   rejectEvent(id: number) {
-    if (!confirm('Bu etkinliği reddetmek istediğinize emin misiniz?')) {
-      return;
-    }
+    this.openConfirmModal('reject', id);
+  }
+
+  executeReject(id: number) {
     const event = this.allEvents.find((e) => e.id === id);
     if (event) {
       this.eventToReject = event;

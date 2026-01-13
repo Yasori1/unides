@@ -1128,5 +1128,20 @@
         </div>
       </div>
     </div>
+    <!-- CONFIRMATION MODAL -->
+    <div class="modal-backdrop confirm-modal" *ngIf="isConfirmModalOpen" (click)="closeConfirmModal()">
+      <div class="modal-content confirm-content" (click)="$event.stopPropagation()">
+        <div class="confirm-icon-wrapper">
+          <span class="material-symbols-outlined">help_outline</span>
+        </div>
+        <h3>Emin misiniz?</h3>
+        <p>{{ confirmMessage }}</p>
+        <div class="modal-actions centered">
+          <button class="btn-secondary" (click)="closeConfirmModal()">Hayır</button>
+          <button class="btn-primary" (click)="onConfirmYes()">Evet</button>
+        </div>
+      </div>
+    </div>
+
   </main>
 </div>
