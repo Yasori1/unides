@@ -40,6 +40,8 @@
             [image]="dev.image"
             [work]="dev.work"
             [socialLinks]="dev.socialLinks"
+            [isExpanded]="expandedCardIndex === i"
+            (cardClick)="toggleCard(i)"
           ></app-profile-card>
         </div>
       </div>

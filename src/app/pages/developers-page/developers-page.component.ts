@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
 import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
 import { ProfileCardComponent } from '../../components/ui/profile-card/profile-card';
@@ -37,6 +37,10 @@ interface Developer {
   styleUrls: ['./developers-page.component.scss'],
 })
 export class DevelopersPageComponent implements OnInit {
+  expandedCardIndex: number | null = null;
+
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
+
   // Geliştiriciler
   developers: Developer[] = [
     {
@@ -212,5 +216,13 @@ export class DevelopersPageComponent implements OnInit {
 
   ngOnInit(): void {
     // Component initialization
+  }
+
+  toggleCard(index: number): void {
+    if (this.expandedCardIndex === index) {
+      this.expandedCardIndex = null;
+    } else {
+      this.expandedCardIndex = index;
+    }
   }
 }
