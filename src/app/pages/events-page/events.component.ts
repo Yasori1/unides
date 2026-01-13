@@ -493,9 +493,13 @@ export class EventsComponent implements OnInit, AfterViewInit {
         if (data && data.length) {
           const fetchedEvents = data.map((e) => this.mapToCard(e));
           
-          // Sadece onaylanan etkinlikleri göster (localStorage'dan kontrol et)
-          const approvedEvents = JSON.parse(localStorage.getItem('approved_events') || '[]');
-          const approvedEventsList = fetchedEvents.filter((e) => approvedEvents.includes(e.id));
+          // Sadece onaylanan etkinlikleri göster (status === 'Onaylandı')
+          // EventService zaten eventConfirm: 1 değerini 'Onaylandı' olarak map ediyor
+          const approvedEventsList = fetchedEvents.filter((e) => {
+            // EventItem'dan gelen status değerini kontrol et
+            const eventItem = data.find((item) => item.id === e.id);
+            return eventItem?.status === 'Onaylandı';
+          });
           
           // Sadece backend'den gelen ve onaylanan verileri kullan
           this.baseEvents = approvedEventsList;
@@ -508,7 +512,6 @@ export class EventsComponent implements OnInit, AfterViewInit {
         this.applyFiltersAndGoFirstPage();
       },
       error: (err) => {
-        console.error('Etkinlikler yüklenemedi:', err);
         // Hata durumunda boş array
         this.baseEvents = [];
         this.allEventsPool = [];
@@ -556,11 +559,11 @@ export class EventsComponent implements OnInit, AfterViewInit {
       club: e.communityName || '',
       semester: '',
       location: e.location || '',
-      quota: 0,
+      quota: e.capacity ? parseInt(e.capacity, 10) : 0,
       status: 'active',
       imageUrl: e.imageUrl || '',
       color: '#2563eb',
-      city: '',
+      city: e.city || '',
       communityId: e.communityId,
     } as any;
   }

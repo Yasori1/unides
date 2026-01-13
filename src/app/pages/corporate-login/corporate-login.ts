@@ -110,8 +110,6 @@ export class CorporateLoginComponent implements OnInit, OnDestroy {
     this.authService.loginCorporate(email, password).subscribe({
       next: (response) => {
         // --- BAŞARILI ---
-        console.log('Kurumsal giriş başarılı:', response);
-
         // 1. Toast Mesajı
         this.toastService.show(
           'Giriş başarılı! Yönetim paneline yönlendiriliyorsunuz...',
@@ -121,12 +119,16 @@ export class CorporateLoginComponent implements OnInit, OnDestroy {
         // 2. Yönlendirme ve Buton Durumu
         setTimeout(() => {
           this.isLoading = false; // Spinner durur, yazı geri gelir
-          this.router.navigate(['/corporate-dashboard']); // Yönlendirme
+          this.router.navigateByUrl('/corporate-dashboard').catch((err) => {
+            // Navigation hatası durumunda window.location kullan
+            if (isPlatformBrowser(this.platformId)) {
+              window.location.href = '/corporate-dashboard';
+            }
+          });
         }, 1500);
       },
       error: (error) => {
         // --- HATA ---
-        console.error('Giriş Hatası:', error);
 
         // 1. Spinner'ı durdur, butonu eski haline getir
         this.isLoading = false;
@@ -225,7 +227,6 @@ export class CorporateLoginComponent implements OnInit, OnDestroy {
         }
       }
     } catch (error: any) {
-      console.error('Şifre sıfırlama hatası:', error);
       // Network hatası veya fetch hatası
       if (error.message && error.message.includes('fetch')) {
         this.toastService.show('Sunucuya Bağlanılamadı', 'error');

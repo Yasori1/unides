@@ -5,7 +5,6 @@ import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.compon
 import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
 import { CommunityService, Community } from '../../services/community.services';
 import { EventService, EventItem } from '../../services/event.services';
-import { CommunityEventDto } from '../../models/community.models';
 
 // CommunityEvent interface for mock data
 export interface CommunityEvent {
@@ -78,12 +77,8 @@ export class CommunityDetailComponent implements OnInit {
         if (data) {
           this.community = data;
           this.communityId = id;
-          // Backend'den gelen events'i kontrol et ve yaklaşan etkinlikleri filtrele
-          this.processUpcomingEvents(data.events || []);
-          // Topluluk yüklendikten sonra etkinlikleri yükle (fallback için)
-          if (data) {
-            this.loadCommunityEvents(id);
-          }
+          // Topluluk yüklendikten sonra etkinlikleri backend'den yükle
+          this.loadCommunityEvents(id);
         } else {
           // Topluluk bulunamadıysa listeye yönlendir
           this.router.navigate(['/communities']);
@@ -99,10 +94,10 @@ export class CommunityDetailComponent implements OnInit {
   }
 
   /**
-   * Backend'den gelen events'i işle ve yaklaşan etkinlikleri filtrele
-   * Yaklaşan etkinlik: startDate bugünden sonra olan etkinlikler
+   * EventItem[] array'inden yaklaşan etkinlikleri filtrele ve işle
+   * Yaklaşan etkinlik: startDate bugünden sonra olan ve onaylanmış etkinlikler
    */
-  private processUpcomingEvents(events: CommunityEventDto[]): void {
+  private processUpcomingEventsFromEventItems(events: EventItem[]): void {
     if (!events || events.length === 0) {
       this.upcomingEvents = [];
       return;
@@ -111,9 +106,11 @@ export class CommunityDetailComponent implements OnInit {
     const now = new Date();
     now.setHours(0, 0, 0, 0); // Bugünün başlangıcı
 
-    // Yaklaşan etkinlikleri filtrele ve sırala
+    // Yaklaşan etkinlikleri filtrele ve sırala (sadece onaylanmış etkinlikler)
     const upcoming = events
       .filter((event) => {
+        // Sadece onaylanmış etkinlikleri göster
+        if (event.status !== 'Onaylandı') return false;
         if (!event.startDate) return false;
         const eventDate = new Date(event.startDate);
         eventDate.setHours(0, 0, 0, 0);
@@ -125,13 +122,13 @@ export class CommunityDetailComponent implements OnInit {
         const dateB = b.startDate ? new Date(b.startDate).getTime() : 0;
         return dateA - dateB;
       })
-      .map((event, index) => ({
-        id: index + 1, // Frontend için ID
+      .map((event) => ({
+        id: event.id,
         title: event.title || 'Etkinlik',
         date: event.startDate || '',
         location: event.location || '',
-        description: event.title || '', // Backend'de description yok, title kullan
-        imageUrl: undefined, // Backend'de imageUrl yok
+        description: event.shortDescription || event.description || event.title || '',
+        imageUrl: event.imageUrl,
       }));
 
     this.upcomingEvents = upcoming;
@@ -143,35 +140,49 @@ export class CommunityDetailComponent implements OnInit {
     }
 
     this.isLoadingEvents = true;
-    // Backend'den gelen community.events kullanılacak
-    if (this.community?.events && this.community.events.length > 0) {
-      // Backend'den gelen events'i kullan
-      this.communityEvents = this.community.events.map((e: CommunityEventDto) => ({
-        id: parseInt(e.eventId) || 0, // EventItem id number bekliyor
-        title: e.title || '',
-        date: e.startDate || '',
-        location: e.location || '',
-        description: '',
-        communityId: parseInt(this.communityId || '0') || 0, // EventItem communityId number bekliyor
-      }));
-      this.isLoadingEvents = false;
-    } else {
-      // Eğer backend'de events yoksa, eski event service'ten çek (fallback)
-      this.eventService.getAll().subscribe({
-        next: (events) => {
-          // Bu topluluğa ait etkinlikleri filtrele
-          // EventItem'da communityId number, bizim communityId string (Guid)
-          // String'e çevirip karşılaştırıyoruz
-          this.communityEvents = events.filter((e) => String(e.communityId) === communityId);
-          this.isLoadingEvents = false;
-        },
-        error: (err) => {
-          console.error('Etkinlikler yüklenemedi:', err);
+    
+    // Backend'den tüm etkinlikleri çek ve bu topluluğa ait olanları filtrele
+    this.eventService.getAll().subscribe({
+      next: (events) => {
+        // Backend'den gelen EventListItemDto'da ComId yok, sadece CommunityName var
+        // Bu yüzden CommunityName ile filtreleme yapıyoruz
+        const communityName = this.community?.name;
+        
+        if (!communityName) {
+          // Topluluk adı yoksa boş array döndür
           this.communityEvents = [];
+          this.upcomingEvents = [];
           this.isLoadingEvents = false;
-        },
-      });
-    }
+          return;
+        }
+
+        // Bu topluluğa ait etkinlikleri filtrele
+        // Önce communityId ile deneyelim (eğer backend'den geliyorsa)
+        let filteredEvents = events.filter((e) => {
+          const eventCommunityId = String(e.communityId || '');
+          if (eventCommunityId && eventCommunityId !== '0' && eventCommunityId === communityId) {
+            return true;
+          }
+          // Eğer communityId yoksa veya eşleşmiyorsa, CommunityName ile filtrele
+          const eventCommunityName = e.communityName || '';
+          return eventCommunityName.trim().toLowerCase() === communityName.trim().toLowerCase();
+        });
+
+        // Sadece onaylanmış etkinlikleri göster (public sayfa olduğu için)
+        this.communityEvents = filteredEvents.filter((e) => e.status === 'Onaylandı');
+        
+        // Yaklaşan etkinlikleri de güncelle
+        this.processUpcomingEventsFromEventItems(filteredEvents);
+        
+        this.isLoadingEvents = false;
+      },
+      error: (err) => {
+        // Hata durumunda boş array kullan
+        this.communityEvents = [];
+        this.upcomingEvents = [];
+        this.isLoadingEvents = false;
+      },
+    });
   }
 
   onHeroMouseMove(event: MouseEvent) {
