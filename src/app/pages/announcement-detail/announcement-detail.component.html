@@ -70,6 +70,11 @@
           </div>
 
           <div class="announcement-body">
+             <!-- Announcement Image (if exists) -->
+             <div class="announcement-main-image" *ngIf="announcement.image">
+               <img [src]="announcement.image" [alt]="announcement.title" loading="lazy">
+             </div>
+
              <p class="short-desc">{{ announcement.shortDescription }}</p>
              <div class="full-content" [innerHTML]="announcement.content"></div>
              

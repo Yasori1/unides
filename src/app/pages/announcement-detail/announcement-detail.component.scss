@@ -254,6 +254,22 @@ $ministry-color: #1e3a8a;
   }
 
   .announcement-body {
+    .announcement-main-image {
+      width: 100%;
+      margin-bottom: 24px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      
+      img {
+        width: 100%;
+        height: auto;
+        max-height: 500px; // Limit max height
+        object-fit: cover;
+        display: block;
+      }
+    }
+
     .short-desc {
       font-size: 1.25rem;
       font-weight: 500;

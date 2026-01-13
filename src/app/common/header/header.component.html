@@ -8,6 +8,11 @@
 
   <!-- 2. YÜZEN MENÜ -->
   <nav class="floating-menu d-none d-lg-flex" (mouseleave)="setActive(null)">
+    <!-- ANA SAYFA (Doğrudan link) -->
+    <div class="menu-item">
+      <a routerLink="/" class="item-label">Ana Sayfa</a>
+    </div>
+
     <!-- DUYURULAR (Doğrudan link) -->
     <div class="menu-item">
       <a routerLink="/announcements" class="item-label">Duyurular</a>
