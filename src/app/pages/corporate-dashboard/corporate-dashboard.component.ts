@@ -149,7 +149,7 @@ interface EventRequest {
   location: string;
   imageUrl?: string;
   description?: string;
-  status: 'Onaylandı' | 'Beklemede' | 'Reddedildi';
+  status: 'Onaylandı' | 'Beklemede' | 'Reddedildi' | 'Revize';
   capacity?: string;
   rejectionReason?: string;
 }
@@ -561,7 +561,7 @@ export class CorporateDashboardComponent implements OnInit {
         location: 'Eminönü Meydanı',
         imageUrl: 'https://images.unsplash.com/photo-1552168324-d612d77725e3?q=80&w=800&auto=format&fit=crop',
         description: 'Tarihi yarımadada fotoğraf turu.',
-        status: 'Reddedildi',
+        status: 'Revize',
         rejectionReason: 'Etkinlik tarihi sınav haftasına denk gelmektedir.',
         capacity: '50',
       },
@@ -621,12 +621,6 @@ export class CorporateDashboardComponent implements OnInit {
 
   // Dropdown değiştiğinde backend'den toplulukları çağır
   onStatusFilterChange() {
-    // "Onay Bekleyen" durumu için backend'de status yok, sadece frontend'de filtreleme yap
-    if (this.statusFilter === 'Onay Bekleyen') {
-      this.applyFilters();
-      return;
-    }
-
     // "Tüm Durumlar", "Aktif", "Pasif" için backend'den yeni veri çek
     this.loadCommunitiesFromService(this.statusFilter);
   }
@@ -649,10 +643,10 @@ export class CorporateDashboardComponent implements OnInit {
 
     // Durum filtresi - sadece "Onay Bekleyen" için frontend'de filtreleme yap
     // "Aktif" ve "Pasif" filtreleri backend'den geliyor, burada sadece "Onay Bekleyen" kontrolü yapılıyor
-    if (this.statusFilter === 'Onay Bekleyen') {
-      // Onay bekleyen topluluklar için özel kontrol
-      temp = temp.filter((c) => !c.status || c.status === 'Onay Bekleyen');
-    }
+    // if (this.statusFilter === 'Onay Bekleyen') {
+    //   // Onay bekleyen topluluklar için özel kontrol
+    //   temp = temp.filter((c) => !c.status || c.status === 'Onay Bekleyen');
+    // }
     // "Aktif" ve "Pasif" filtreleri backend'den zaten filtrelenmiş olarak geliyor
 
     this.filteredCommunities = temp;
@@ -1173,7 +1167,7 @@ export class CorporateDashboardComponent implements OnInit {
     this.confirmMessage =
       action === 'approve'
         ? 'Bu etkinliği onaylamak istediğinize emin misiniz?'
-        : 'Bu etkinliği reddetmek istediğinize emin misiniz?';
+        : 'Bu etkinlik için revize istemek istediğinize emin misiniz?';
     this.isConfirmModalOpen = true;
   }
 
@@ -1240,13 +1234,13 @@ export class CorporateDashboardComponent implements OnInit {
 
   confirmRejection() {
     if (this.eventToReject) {
-      this.eventToReject.status = 'Reddedildi';
+      this.eventToReject.status = 'Revize';
       this.eventToReject.rejectionReason = this.rejectionReason;
 
       // Burada normalde backend'e rejectionReason ile birlikte güncelleme isteği atılır
       console.log(`Event ${this.eventToReject.id} rejected. Reason: ${this.rejectionReason}`);
 
-      this.showToast('Etkinlik reddedildi', 'success'); // 'error' yerine 'success' çünkü işlem başarılı
+      this.showToast('Etkinlik revizeye gönderildi', 'success'); // 'error' yerine 'success' çünkü işlem başarılı
       this.closeModal();
       this.eventToReject = null;
       this.rejectionReason = '';

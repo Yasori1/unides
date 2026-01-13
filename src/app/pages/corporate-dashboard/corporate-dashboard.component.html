@@ -202,7 +202,6 @@
             <option value="">Tüm Durumlar</option>
             <option value="Aktif">Aktif</option>
             <option value="Pasif">Pasif</option>
-            <option value="Onay Bekleyen">Onay Bekleyen</option>
           </select>
           <button class="btn-primary" (click)="openNewCommunityModal()">
             <span class="material-symbols-outlined">add</span>
@@ -346,10 +345,10 @@
             </button>
             <button
               class="filter-chip"
-              [class.active]="eventStatusFilter === 'Reddedildi'"
-              (click)="setEventStatusFilter('Reddedildi')"
+              [class.active]="eventStatusFilter === 'Revize'"
+              (click)="setEventStatusFilter('Revize')"
             >
-              <span class="dot rejected"></span>Reddedildi
+              <span class="dot rejected"></span>Revize
             </button>
           </div>
         </div>
@@ -527,7 +526,7 @@
                 : modalType === 'edit-community'
                 ? 'Topluluk Güncelle'
                 : modalType === 'reject-event'
-                ? 'Etkinlik Reddet'
+                ? 'Revize İste'
                 : 'İşlem'
             }}
           </h3>
@@ -1039,10 +1038,10 @@
                   <span class="material-symbols-outlined">fact_check</span> Kontrol Et
                 </button>
 
-                <!-- Onay/Red Butonları (Sadece İncelendiyse) -->
+                <!-- Onay/Revize Butonları (Sadece İncelendiyse) -->
                 <ng-container *ngIf="inspectedEvents.has(selectedEvent.id)">
                   <button class="btn-danger" (click)="rejectEvent(selectedEvent.id)">
-                    <span class="material-symbols-outlined">close</span> Reddet
+                    <span class="material-symbols-outlined">edit_note</span> Revize İste
                   </button>
                   <button 
                     class="btn-success" 
@@ -1103,15 +1102,15 @@
           </div>
         </div>
 
-        <!-- Etkinlik Reddetme Modal -->
+        <!-- Etkinlik Revize Modal -->
         <div class="modal-body" *ngIf="modalType === 'reject-event'">
           <div class="form-group full">
-            <label>Red Nedeni</label>
+            <label>Revize Nedeni</label>
             <textarea
               [(ngModel)]="rejectionReason"
               class="modern-input"
               rows="4"
-              placeholder="Lütfen reddetme nedeninizi belirtiniz..."
+              placeholder="Lütfen revize nedenini belirtiniz..."
             ></textarea>
           </div>
           <div class="modal-actions">
@@ -1121,8 +1120,8 @@
               [disabled]="!rejectionReason || !rejectionReason.trim()"
               (click)="confirmRejection()"
             >
-              <span class="material-symbols-outlined">close</span>
-              Reddet
+              <span class="material-symbols-outlined">edit_note</span>
+              Revizeye Gönder
             </button>
           </div>
         </div>

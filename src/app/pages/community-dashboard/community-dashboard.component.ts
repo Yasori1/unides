@@ -90,6 +90,7 @@ export class CommunityDashboardComponent implements OnInit {
   isBulkAddMode = false;
   bulkEmailsText = '';
   confirmDeleteId: number | null = null;
+  confirmDeleteType: 'member' | 'event' = 'member';
   confirmVisible = false;
   confirmHiding = false;
   private confirmTimer: any;
@@ -1357,11 +1358,53 @@ export class CommunityDashboardComponent implements OnInit {
     this.clearToast();
     this.clearConfirmTimer();
     this.confirmDeleteId = id;
+    this.confirmDeleteType = 'member';
     this.confirmVisible = true;
     this.confirmHiding = false;
   }
 
+  openDeleteEventConfirm(id: number) {
+    this.clearToast();
+    this.clearConfirmTimer();
+    this.confirmDeleteId = id;
+    this.confirmDeleteType = 'event';
+    this.confirmVisible = true;
+    this.confirmHiding = false;
+    // Close the detail modal temporarily or keep it open? 
+    // If we keep it open, the confirm modal will be on top.
+    // But if we delete, we should close the detail modal.
+  }
+
   cancelDelete() {
+    this.startCloseConfirm();
+  }
+
+  confirmDeleteAction() {
+    if (this.confirmDeleteType === 'member') {
+      this.deleteMemberConfirmed();
+    } else {
+      this.deleteEventConfirmed();
+    }
+  }
+
+  deleteEventConfirmed() {
+    if (this.confirmDeleteId === null) return;
+
+    // Backend'den sil (veya mock)
+    // this.eventService.deleteEvent(this.confirmDeleteId)...
+    
+    // Mock delete from local list
+    this.dashboardEvents = this.dashboardEvents.filter(e => e.id !== this.confirmDeleteId);
+    
+    // LocalStorage'dan da kaldır (varsa)
+    if (isPlatformBrowser(this.platformId)) {
+        const approvedEvents = JSON.parse(localStorage.getItem('approved_events') || '[]');
+        const newApproved = approvedEvents.filter((id: number) => id !== this.confirmDeleteId);
+        localStorage.setItem('approved_events', JSON.stringify(newApproved));
+    }
+
+    this.showToast('Etkinlik silindi.', 'success');
+    this.closeEventDetail();
     this.startCloseConfirm();
   }
 

@@ -664,10 +664,11 @@
         <span class="material-symbols-outlined">warning</span>
       </div>
       <h3>Silmek istediğinize emin misiniz?</h3>
-      <p>Bu üye topluluktan kaldırılacak.</p>
+      <p *ngIf="confirmDeleteType === 'member'">Bu üye topluluktan kaldırılacak.</p>
+      <p *ngIf="confirmDeleteType === 'event'">Bu etkinlik kalıcı olarak silinecek.</p>
       <div class="confirm-actions">
         <button class="btn ghost" (click)="cancelDelete()">Vazgeç</button>
-        <button class="btn danger" (click)="deleteMemberConfirmed()">Evet, Sil</button>
+        <button class="btn danger" (click)="confirmDeleteAction()">Evet, Sil</button>
       </div>
     </div>
   </div>
@@ -727,6 +728,12 @@
       <div class="description-section">
         <span class="description-label">AÇIKLAMA</span>
         <p class="description-text">{{ selectedEvent.description }}</p>
+      </div>
+
+      <div class="modal-footer-actions" style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end;">
+        <button class="btn danger" (click)="openDeleteEventConfirm(selectedEvent.id)" style="display: flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 8px; background: #ef4444; color: white; border: none; cursor: pointer; font-weight: 500;">
+          <span class="material-symbols-outlined">delete</span> Etkinliği Sil
+        </button>
       </div>
     </div>
   </div>
