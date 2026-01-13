@@ -1,3 +1,5 @@
+@use "sass:color";
+
 // Color Variables
 $primary-color: #1e3a8a;
 $primary-color-light: #2563eb;
@@ -397,8 +399,8 @@ $primary-color-lighter: #3b82f6;
         max-width: 100%;
 
         &:hover {
-          color: darken($primary-color, 10%);
-          border-bottom-color: darken($primary-color, 10%);
+          color: color.adjust($primary-color, $lightness: -10%);
+          border-bottom-color: color.adjust($primary-color, $lightness: -10%);
         }
       }
 
@@ -584,7 +586,7 @@ $primary-color-lighter: #3b82f6;
   &:hover:not(:disabled) {
     transform: scale(1.08) rotate(5deg);
     box-shadow: 0 6px 20px rgba(30, 58, 138, 0.4);
-    background: linear-gradient(135deg, darken($primary-color, 5%) 0%, $primary-color 100%);
+    background: linear-gradient(135deg, color.adjust($primary-color, $lightness: -5%) 0%, $primary-color 100%);
   }
 
   &:active:not(:disabled) {

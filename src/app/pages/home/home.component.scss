@@ -80,13 +80,24 @@ $card-shadow: 0 10px 30px rgba(0,0,0,0.06);
     overflow: hidden; // Skyline'ın taşmasını önlemek için
     // Yükseklik azaltıldı (eskiden bottom 400px idi)
     padding: {
-        top: 120px;
-        bottom: 200px; 
+        top: 190px;
+        bottom: 720px; 
     };
     /* banner  removed, using img tag instead */
 
-    /* Yeni Mavi-Beyaz Geçişli Arka Plan */
-    background: transparent;
+    /* Yeni Mavi-Beyaz Geçişli Arka Plan - Opaklık ayarı için ::before kullanıldı */
+    &::before {
+        content: "";
+        position: absolute;
+        top: -100px;
+        left: -15px;
+        width: 102%;
+        height: 98%;
+        background: url('/assets/bg.png') no-repeat top center;
+        background-size: 100% auto;
+        opacity: 0.5;/* Arka plan opaklığı düşürüldü */
+        z-index: -1;
+    }
 
     .banner-bottom-image {
         display: none; /* Arka plan resmi kaldırıldı */
@@ -103,15 +114,16 @@ $card-shadow: 0 10px 30px rgba(0,0,0,0.06);
 .banner-wrapper-content {
     position: relative;
     z-index: 10; /* Yazıların üstte kalması için */
-    max-width: 620px;
-    margin: 0; // Sol tarafa yaslandı (eskiden auto ile ortalıydı)
-    text-align: left; // İçerik sola yaslandı
+    max-width: 1000px;
+    margin: -15px auto 0; // İçerik bloğu 15px yukarı taşındı
+    text-align: center; // İçeriği ortala
     
     h1 {
+        margin-top: -60px; // Başlık yukarı çekildi
         margin-bottom: 20px;
         font: {
             size: 32px; // Yazı boyutu küçültüldü (eskiden 50px)
-            weight: 800; // Daha kalın
+            weight: 600; // Daha kalın
         };
         color: $primary-dark; // Daha koyu mavi - daha kontrastlı
         text-shadow: 
@@ -136,6 +148,7 @@ $card-shadow: 0 10px 30px rgba(0,0,0,0.06);
         }
     }
     p {
+        margin-top: 15px; // Başlık ile mesafe kontrolü
         line-height: 1.6;
         max-width: 550px;
         color: $primary-dark; // Daha koyu mavi - daha kontrastlı
@@ -144,11 +157,11 @@ $card-shadow: 0 10px 30px rgba(0,0,0,0.06);
             0 0 8px rgba(255, 255, 255, 0.8),
             0 1px 6px rgba(0, 0, 0, 0.2),
             0 2px 10px rgba(255, 255, 255, 0.9); // Çoklu gölge efekti
-        margin-left: 0;
+        margin-left: auto;
         margin-right: auto;
         margin-bottom: 0;
         font-size: 1.05rem;
-        font-weight: 700; // Daha kalın
+        font-weight: 600; // Semi-bold isteği üzerine Medium yapıldı (daha hafif kalınlık)
 
         // Kutucuk stilleri tamamen kaldırıldı
         background: transparent;
@@ -168,10 +181,10 @@ $card-shadow: 0 10px 30px rgba(0,0,0,0.06);
     }
     form {
         position: relative;
-        margin-top: 25px;
+        margin-top: 20px; // Formun yukarıdan mesafesi ayarlandı
         width: 100%; // Genişliği üstteki yazıya göre ayarla
         max-width: 550px; // Paragraf ile aynı genişlikte
-        margin-left: 0; // Sola yasla
+        margin-left: auto; // Ortala
         margin-right: auto;
 
         .input-search {
@@ -230,7 +243,6 @@ $card-shadow: 0 10px 30px rgba(0,0,0,0.06);
     .main-banner-wrapper {
         padding-top: 100px;
         padding-bottom: 60px;
-        background-position: center bottom;
     }
     .banner-wrapper-content {
         max-width: 100%;
@@ -284,7 +296,12 @@ $card-shadow: 0 10px 30px rgba(0,0,0,0.06);
         .blue-divider { width: 50px; height: 4px; background: $primary; margin: 10px auto; border-radius: 2px; }
     }
 }
-.section-communities { background-color: transparent; border-top: none; 
+.section-communities { 
+    background-color: transparent; 
+    border-top: none; 
+    margin-top: -500px; // İçeriği yukarı taşıyarak görselin üzerine bindiriyoruz
+    position: relative;
+    z-index: 2;
 }
 .section-upcoming-events { background: transparent; }
 .section-why-unides { background-color: transparent; }
