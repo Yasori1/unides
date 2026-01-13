@@ -55,17 +55,31 @@ export class StudentProfileComponent implements OnInit {
   calendarSelectedDate: string | null = null;
   showNotifications: boolean = false;
   isProfileOpen: boolean = false;
-  notifications: Array<{ 
+  notifications: Array<{
     id: number;
-    text: string; 
+    text: string;
     time: string;
     read: boolean;
     type?: 'event' | 'community' | 'general';
     link?: string;
     tab?: string;
   }> = [
-    { id: 1, text: 'Yeni etkinlik duyurusu', time: '10 dk önce', read: false, type: 'event', tab: 'events' },
-    { id: 2, text: 'Topluluk güncellemesi', time: '1 saat önce', read: false, type: 'community', tab: 'communities' },
+    {
+      id: 1,
+      text: 'Yeni etkinlik duyurusu',
+      time: '10 dk önce',
+      read: false,
+      type: 'event',
+      tab: 'events',
+    },
+    {
+      id: 2,
+      text: 'Topluluk güncellemesi',
+      time: '1 saat önce',
+      read: false,
+      type: 'community',
+      tab: 'communities',
+    },
   ];
 
   // User Info
@@ -114,7 +128,7 @@ export class StudentProfileComponent implements OnInit {
             name: savedUserInfo.name || savedUserInfo.fullName || this.userInfo.name,
             email: savedUserInfo.email || this.userInfo.email,
             id: savedUserInfo.id || this.userInfo.id,
-            role: savedUserInfo.role || this.userInfo.role
+            role: savedUserInfo.role || this.userInfo.role,
           };
         } catch (e) {
           console.error('Error parsing user info:', e);
@@ -126,56 +140,84 @@ export class StudentProfileComponent implements OnInit {
   }
 
   loadData(): void {
-    // 1. Fetch all communities (Simulating joined communities)
-    this.communityService.getAllCommunities().subscribe(allCommunities => {
-      // Simulate "Joined" communities by picking random ones or specific IDs if we had auth
-      // For now, let's pick the first 3 if available, or fallback to mock
-      if (allCommunities && allCommunities.length > 0) {
-        this.myCommunities = allCommunities.slice(0, 3).map(c => ({
-          ...c,
-          joinedDate: '2024-01-15' // Mock date
-        }));
-      } else {
-        // Fallback Mock Data if service returns empty
-        this.loadMockCommunities();
-      }
-      
-      this.stats[0].value = this.myCommunities.length;
-
-      // 2. Fetch all events and filter by joined communities
-      this.eventService.getAll().subscribe(allEvents => {
-        if (allEvents && allEvents.length > 0) {
-          // Filter events where communityId matches one of myCommunities
-          const myCommunityIds = this.myCommunities.map(c => c.id);
-          
-          // Note: In a real app, backend would filter this.
-          // Since we are mocking "joined" status, we filter the mock/fetched events.
-          // If event.communityId matches, or if we want to show some events anyway:
-          
-          const filteredEvents = allEvents.filter(e => 
-            myCommunityIds.includes(String(e.communityId)) || 
-            // Fallback: if mock data IDs don't match exactly (number vs string issues),
-            // we might want to just show some events for demo purposes.
-            // Let's assume for this task we show events that "belong" to the mocked joined communities.
-            // If the event service returns events with IDs that don't match our "joined" community IDs (which might be from a different mock source),
-            // we might end up with 0 events.
-            // For robust demo: let's try to match by name if ID fails, or just take a subset.
-            this.myCommunities.some(c => c.name === e.communityName)
-          );
-
-          // Map to EventCard format
-          this.communityEvents = filteredEvents.map(e => this.mapToEventCard(e));
-          
-          // If no events found (e.g. fresh mock data mismatch), let's fallback to some mock events for visual confirmation
-          if (this.communityEvents.length === 0) {
-             this.loadMockEvents();
-          }
+    // 1. Fetch ONLY communities where the current user is a member
+    // This uses localStorage tracking from Community Dashboard's Add Member action
+    this.communityService.getMyCommunities().subscribe({
+      next: (myCommunities) => {
+        if (myCommunities && myCommunities.length > 0) {
+          // Map to ProfileCommunity format
+          this.myCommunities = myCommunities.map((c) => ({
+            ...c,
+            joinedDate: new Date().toISOString().split('T')[0], // Current date as placeholder
+          }));
         } else {
-          this.loadMockEvents();
+          // No memberships found - show empty state
+          this.myCommunities = [];
+          // Don't load mock data - show empty state to user
         }
-        
-        this.stats[1].value = this.communityEvents.length;
-      });
+
+        this.stats[0].value = this.myCommunities.length;
+
+        // 2. Fetch all events and filter by joined communities
+        this.eventService.getAll().subscribe({
+          next: (allEvents) => {
+            if (allEvents && allEvents.length > 0) {
+              // Filter events where communityId matches one of myCommunities
+              const myCommunityIds = this.myCommunities.map((c) => c.id);
+
+              // Note: In a real app, backend would filter this.
+              // Since we are mocking "joined" status, we filter the mock/fetched events.
+              // If event.communityId matches, or if we want to show some events anyway:
+
+              const filteredEvents = allEvents.filter(
+                (e) =>
+                  myCommunityIds.includes(String(e.communityId)) ||
+                  // Fallback: if mock data IDs don't match exactly (number vs string issues),
+                  // we might want to just show some events for demo purposes.
+                  // Let's assume for this task we show events that "belong" to the mocked joined communities.
+                  // If the event service returns events with IDs that don't match our "joined" community IDs (which might be from a different mock source),
+                  // we might end up with 0 events.
+                  // For robust demo: let's try to match by name if ID fails, or just take a subset.
+                  this.myCommunities.some((c) => c.name === e.communityName)
+              );
+
+              // Map to EventCard format
+              this.communityEvents = filteredEvents.map((e) => this.mapToEventCard(e));
+
+              // If no events found (e.g. fresh mock data mismatch), let's fallback to some mock events for visual confirmation
+              if (this.communityEvents.length === 0) {
+                this.loadMockEvents();
+              }
+            } else {
+              this.loadMockEvents();
+            }
+
+            this.stats[1].value = this.communityEvents.length;
+          },
+          error: (err) => {
+            console.error('Events yüklenemedi:', err);
+            // Handle 401/403 gracefully
+            if (err.status === 401 || err.status === 403) {
+              this.toastService.show('Etkinliklere erişim için giriş yapmanız gerekiyor.', 'error');
+            } else {
+              this.loadMockEvents();
+            }
+            this.stats[1].value = this.communityEvents.length;
+          },
+        });
+      },
+      error: (err) => {
+        console.error('Communities yüklenemedi:', err);
+        // Handle 401/403 gracefully - show empty state instead of mock data
+        if (err.status === 401 || err.status === 403) {
+          this.toastService.show('Topluluklara erişim için giriş yapmanız gerekiyor.', 'error');
+          this.myCommunities = [];
+        } else {
+          // Other errors - show empty state
+          this.myCommunities = [];
+        }
+        this.stats[0].value = this.myCommunities.length;
+      },
     });
   }
 
@@ -193,7 +235,7 @@ export class StudentProfileComponent implements OnInit {
       category: 'Etkinlik',
       university: '', // Service might not provide this directly in EventItem
       description: e.shortDescription || e.description,
-      communityId: e.communityId
+      communityId: typeof e.communityId === 'number' ? e.communityId : (typeof e.communityId === 'string' ? parseInt(e.communityId, 10) : undefined),
     };
   }
 
@@ -212,7 +254,7 @@ export class StudentProfileComponent implements OnInit {
         instagram: 'https://instagram.com/ituai',
         joinedDate: '2024-01-15',
         status: 'Aktif',
-        banner: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800'
+        banner: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800',
       },
       {
         id: '2',
@@ -227,7 +269,7 @@ export class StudentProfileComponent implements OnInit {
         instagram: 'https://instagram.com/hacettepegirisim',
         joinedDate: '2024-02-20',
         status: 'Aktif',
-        banner: 'https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?w=800'
+        banner: 'https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?w=800',
       },
     ];
   }
@@ -240,12 +282,12 @@ export class StudentProfileComponent implements OnInit {
       d.setDate(d.getDate() + offset);
       return d.toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric' });
     };
-    
+
     // ISO format for calendar matching
     const isoDate = (offset: number) => {
-       const d = new Date();
-       d.setDate(d.getDate() + offset);
-       return d.toISOString().split('T')[0];
+      const d = new Date();
+      d.setDate(d.getDate() + offset);
+      return d.toISOString().split('T')[0];
     };
 
     this.communityEvents = [
@@ -321,7 +363,6 @@ export class StudentProfileComponent implements OnInit {
     this.isProfileOpen = false;
   }
 
-
   @HostListener('document:click', ['$event'])
   closeDropdowns(event: any): void {
     if (!event.target.closest('.profile-wrapper') && !event.target.closest('.notification')) {
@@ -332,13 +373,13 @@ export class StudentProfileComponent implements OnInit {
 
   handleNotificationClick(notification: any) {
     this.showNotifications = false;
-    
+
     if (notification.tab) {
       this.switchTab(notification.tab as 'overview' | 'communities' | 'events' | 'settings');
     } else if (notification.link) {
       this.router.navigate([notification.link]);
     }
-    
+
     // Bildirimi okundu olarak işaretle
     notification.read = true;
   }
@@ -508,13 +549,13 @@ export class StudentProfileComponent implements OnInit {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           email: this.userInfo.email,
           oldPassword: this.userInfo.currentPassword,
           newPassword: this.userInfo.newPassword,
-          confirmNewPassword: this.userInfo.confirmPassword
+          confirmNewPassword: this.userInfo.confirmPassword,
         }),
       });
 
@@ -528,7 +569,7 @@ export class StudentProfileComponent implements OnInit {
 
       if (response.ok) {
         this.toastService.show('Şifreniz başarıyla değiştirildi', 'success');
-        
+
         // Clear password fields
         this.userInfo.currentPassword = '';
         this.userInfo.newPassword = '';
@@ -551,7 +592,7 @@ export class StudentProfileComponent implements OnInit {
   @HostListener('document:click', ['$event'])
   clickout(event: MouseEvent) {
     const target = event.target as HTMLElement;
-    
+
     // Profil dropdown kontrolü
     if (!target.closest('.profile-wrapper') && !target.closest('.profile-dropdown')) {
       this.isProfileOpen = false;
@@ -563,16 +604,15 @@ export class StudentProfileComponent implements OnInit {
     setTimeout(() => {
       const container = document.querySelector('.events-carousel-container') as HTMLElement;
       if (!container) return;
-      
+
       const scrollAmount = 367; // Scroll amount in pixels (card width + gap)
       const currentScroll = container.scrollLeft;
-      const newPosition = direction === 'left' 
-        ? currentScroll - scrollAmount 
-        : currentScroll + scrollAmount;
-      
+      const newPosition =
+        direction === 'left' ? currentScroll - scrollAmount : currentScroll + scrollAmount;
+
       container.scrollTo({
         left: newPosition,
-        behavior: 'smooth'
+        behavior: 'smooth',
       });
     }, 0);
   }
@@ -581,16 +621,15 @@ export class StudentProfileComponent implements OnInit {
     setTimeout(() => {
       const container = document.querySelector('.communities-carousel-container') as HTMLElement;
       if (!container) return;
-      
+
       const scrollAmount = 425; // Scroll amount in pixels (card width + gap)
       const currentScroll = container.scrollLeft;
-      const newPosition = direction === 'left' 
-        ? currentScroll - scrollAmount 
-        : currentScroll + scrollAmount;
-      
+      const newPosition =
+        direction === 'left' ? currentScroll - scrollAmount : currentScroll + scrollAmount;
+
       container.scrollTo({
         left: newPosition,
-        behavior: 'smooth'
+        behavior: 'smooth',
       });
     }, 0);
   }
@@ -628,7 +667,7 @@ export class StudentProfileComponent implements OnInit {
     if (!isPlatformBrowser(this.platformId)) return false;
     const container = document.querySelector('.events-carousel-container') as HTMLElement;
     if (!container) return false;
-    return container.scrollLeft < (container.scrollWidth - container.clientWidth - 10);
+    return container.scrollLeft < container.scrollWidth - container.clientWidth - 10;
   }
 
   canScrollCommunitiesLeft(): boolean {
@@ -642,7 +681,7 @@ export class StudentProfileComponent implements OnInit {
     if (!isPlatformBrowser(this.platformId)) return false;
     const container = document.querySelector('.communities-carousel-container') as HTMLElement;
     if (!container) return false;
-    return container.scrollLeft < (container.scrollWidth - container.clientWidth - 10);
+    return container.scrollLeft < container.scrollWidth - container.clientWidth - 10;
   }
 
   getDefaultAvatar(): string {
@@ -653,6 +692,8 @@ export class StudentProfileComponent implements OnInit {
       .join('')
       .toUpperCase()
       .slice(0, 2);
-    return `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=14d2cc&color=fff&size=128&font-size=0.4`;
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      initials
+    )}&background=14d2cc&color=fff&size=128&font-size=0.4`;
   }
 }
