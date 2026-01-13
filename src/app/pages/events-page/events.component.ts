@@ -473,7 +473,8 @@ export class EventsComponent implements OnInit, AfterViewInit {
   ngOnInit() {
     if (!isPlatformBrowser(this.platformId)) return;
 
-    this.communityService.getAllCommunities().subscribe({
+    // Events Page'de sadece aktif toplulukları göster
+    this.communityService.getAllCommunities({ status: 'active' }).subscribe({
       next: (communities) => {
         this.allCommunities = communities || [];
         this.loadEventsFromBackend();
@@ -488,20 +489,29 @@ export class EventsComponent implements OnInit, AfterViewInit {
   private loadEventsFromBackend() {
     this.eventService.getAll().subscribe({
       next: (data: EventItem[]) => {
-        // Backend'den veri gelirse mock'un üzerine ekleyelim veya değiştirelim
+        // Backend'den gelen tüm etkinlikleri map et
         if (data && data.length) {
           const fetchedEvents = data.map((e) => this.mapToCard(e));
-          // Mock data + Backend data birleşimi (Mock data en başta görünsün)
-          this.baseEvents = [...this.baseEvents, ...fetchedEvents];
+          
+          // Sadece onaylanan etkinlikleri göster (localStorage'dan kontrol et)
+          const approvedEvents = JSON.parse(localStorage.getItem('approved_events') || '[]');
+          const approvedEventsList = fetchedEvents.filter((e) => approvedEvents.includes(e.id));
+          
+          // Sadece backend'den gelen ve onaylanan verileri kullan
+          this.baseEvents = approvedEventsList;
           this.attachCommunityNames();
+        } else {
+          // Backend'den veri gelmezse boş array
+          this.baseEvents = [];
         }
         this.allEventsPool = [...this.baseEvents];
         this.applyFiltersAndGoFirstPage();
       },
       error: (err) => {
-        console.error('Etkinlikler yüklenemedi, mock data kullanılıyor:', err);
-        // Hata durumunda sadece Mock Data göster
-        this.allEventsPool = [...this.baseEvents];
+        console.error('Etkinlikler yüklenemedi:', err);
+        // Hata durumunda boş array
+        this.baseEvents = [];
+        this.allEventsPool = [];
         this.applyFiltersAndGoFirstPage();
       },
     });

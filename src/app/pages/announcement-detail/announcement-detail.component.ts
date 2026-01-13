@@ -147,12 +147,34 @@ export class AnnouncementDetailComponent implements OnInit {
   }
 
   loadRecentAnnouncements(currentId: number) {
-    // Demo ve servisten gelenleri birleştirip son 5 tanesini gösterelim (hariç currentId)
-    // Gerçek senaryoda servisten "benzer duyurular" endpoint'i çağrılır.
-    // Şimdilik sadece demo verilerden rastgele seçiyoruz.
-    this.recentAnnouncements = this.demoMinistryData
-      .filter(a => a.id !== currentId)
-      .slice(0, 4);
+    // Backend'den tüm duyuruları çek, mevcut duyuruyu hariç tut, tarihe göre sırala (en yeni en üstte) ve en son 4 tanesini al
+    this.announcementService.getAllAnnouncements().subscribe({
+      next: (announcements) => {
+        // Mevcut duyuruyu hariç tut
+        const filtered = announcements.filter(a => a.id !== currentId);
+        
+        // Tarihe göre sırala (en yeni en üstte - en son yayınlanan ilk sırada)
+        const sorted = filtered.sort((a, b) => {
+          const dateA = new Date(a.date).getTime();
+          const dateB = new Date(b.date).getTime();
+          return dateB - dateA; // Büyükten küçüğe (en yeni en üstte)
+        });
+        
+        // En son 4 tanesini al
+        this.recentAnnouncements = sorted.slice(0, 4).map(a => ({
+          ...a,
+          category: 'Genel', // Varsayılan kategori
+          link: a.link || ''
+        }));
+      },
+      error: (err) => {
+        console.error('İlgili duyurular yüklenemedi, demo data kullanılıyor:', err);
+        // Hata durumunda demo data'dan fallback yap
+        this.recentAnnouncements = this.demoMinistryData
+          .filter(a => a.id !== currentId)
+          .slice(0, 4);
+      }
+    });
   }
 
   onHeroMouseMove(event: MouseEvent) {

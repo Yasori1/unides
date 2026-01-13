@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, map, of } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable, catchError, map, of, switchMap } from 'rxjs';
 import { delay } from 'rxjs/operators';
 
 export interface EventItem {
@@ -11,11 +11,44 @@ export interface EventItem {
   startDate?: string;
   endDate?: string;
   location?: string;
-  communityId: number;
+  communityId: number | string; // Backend'den Guid (string) gelebilir
   communityName?: string;
   imageUrl?: string;
   status?: 'Onaylandı' | 'Beklemede' | 'Reddedildi';
   capacity?: string;
+}
+
+// Backend DTO interfaces
+interface EventListItemDto {
+  etkinlikId: number;
+  etkinlikAdi: string;
+  resimUrl?: string;
+  kisaAciklama?: string;
+  baslangicTarihi: string;
+  bitisTarihi: string;
+  konum?: string;
+  comId: string; // Guid
+}
+
+interface CreateEventDto {
+  etkinlikAdi: string;
+  resimUrl?: string;
+  kisaAciklama?: string;
+  detayliAciklama?: string;
+  baslangicTarihi: string;
+  bitisTarihi: string;
+  konum?: string;
+  comId: string; // Guid
+}
+
+interface UpdateEventDto {
+  etkinlikAdi: string;
+  resimUrl?: string;
+  kisaAciklama?: string;
+  detayliAciklama?: string;
+  baslangicTarihi: string;
+  bitisTarihi: string;
+  konum?: string;
 }
 
 // Swipe/magic-card bileşenleri için kullanılan mock Project tipi
@@ -68,53 +101,155 @@ export class EventService {
 
   constructor(private http: HttpClient) {}
 
-  private mapToEvent(dto: any): EventItem {
+  private mapToEvent(dto: EventListItemDto | any): EventItem {
+    // Backend'den gelen DTO'yu EventItem'a çevir
     return {
       id: dto.etkinlikId || dto.EtkinlikId || dto.id || 0,
       title: dto.etkinlikAdi || dto.EtkinlikAdi || dto.title || '',
       shortDescription: dto.kisaAciklama || dto.KisaAciklama || '',
       description: dto.detayliAciklama || dto.DetayliAciklama || '',
-      startDate: dto.baslangicTarihi || dto.BaslangicTarihi,
-      endDate: dto.bitisTarihi || dto.BitisTarihi,
+      startDate: dto.baslangicTarihi 
+        ? (typeof dto.baslangicTarihi === 'string' ? dto.baslangicTarihi : new Date(dto.baslangicTarihi).toISOString())
+        : (dto.BaslangicTarihi || ''),
+      endDate: dto.bitisTarihi
+        ? (typeof dto.bitisTarihi === 'string' ? dto.bitisTarihi : new Date(dto.bitisTarihi).toISOString())
+        : (dto.BitisTarihi || ''),
       location: dto.konum || dto.Konum || '',
-      communityId: dto.toplulukId || dto.ToplulukId || 0,
+      communityId: dto.comId || dto.ComId || dto.toplulukId || dto.ToplulukId || 0,
       imageUrl: dto.resimUrl || dto.ResimUrl || '',
-      status: 'Beklemede',
+      status: 'Beklemede', // Backend'de status yok, varsayılan olarak Beklemede
     };
   }
 
+  // Tüm etkinlikleri getir (Backend: GET /api/Events/all)
   getAll(): Observable<EventItem[]> {
-    // API çağrısı yap, hata alırsan veya sonuç dönerse üzerine mock verileri ekle
-    return this.http.get<any[]>(`${this.apiUrl}/all`).pipe(
+    // Get auth token if available
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    const headers = token
+      ? new HttpHeaders({
+          Authorization: `Bearer ${token}`,
+        })
+      : undefined;
+
+    return this.http.get<EventListItemDto[]>(`${this.apiUrl}/all`, { headers }).pipe(
       map((list) => {
+        // Backend'den gelen etkinlikleri map et
         const apiEvents = list.map((dto) => this.mapToEvent(dto));
-        return [...this.mockEvents, ...apiEvents];
+        // Mock events'i kaldırdık, sadece backend'den gelenleri döndürüyoruz
+        return apiEvents;
       }),
       catchError((error) => {
-        console.error('Etkinlikler yüklenemedi (API), mock veri dönülüyor:', error);
-        return of([...this.mockEvents]);
+        console.error('Etkinlikler yüklenemedi:', error);
+        // Hata durumunda boş array döndür
+        return of([]);
       })
     );
   }
 
-  // Yeni etkinlik ekleme (Mock)
-  addEvent(event: Partial<EventItem>): Observable<EventItem> {
-    const newItem: EventItem = {
-      id: Date.now(), // Basit ID üretimi
-      title: event.title || '',
-      description: event.description || '',
-      shortDescription: event.shortDescription || event.description || '',
-      startDate: event.startDate || '',
-      location: event.location || '',
-      imageUrl: event.imageUrl || '',
-      communityId: event.communityId || 0,
-      communityName: event.communityName || '',
-      status: 'Beklemede',
-      ...event
-    } as EventItem;
-    
-    this.mockEvents.unshift(newItem);
-    return of(newItem).pipe(delay(500)); // Network gecikmesi simülasyonu
+  // Etkinlik detayını getir (Backend: GET /api/Events/{id})
+  getById(id: number): Observable<EventItem> {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    const headers = token
+      ? new HttpHeaders({
+          Authorization: `Bearer ${token}`,
+        })
+      : undefined;
+
+    return this.http.get<any>(`${this.apiUrl}/${id}`, { headers }).pipe(
+      map((dto) => this.mapToEvent(dto)),
+      catchError((error) => {
+        console.error('Etkinlik detayı yüklenemedi:', error);
+        throw error;
+      })
+    );
+  }
+
+  // Yeni etkinlik ekleme (Backend: POST /api/Events/create)
+  createEvent(event: Partial<EventItem> & { comId: string }): Observable<{ eventId: number }> {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    if (!token) {
+      throw new Error('Etkinlik oluşturmak için giriş yapmanız gerekiyor.');
+    }
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    });
+
+    const createDto: CreateEventDto = {
+      etkinlikAdi: event.title || '',
+      resimUrl: event.imageUrl,
+      kisaAciklama: event.shortDescription || event.description,
+      detayliAciklama: event.description,
+      baslangicTarihi: event.startDate 
+        ? (typeof event.startDate === 'string' ? event.startDate : new Date(event.startDate).toISOString())
+        : new Date().toISOString(),
+      bitisTarihi: event.endDate
+        ? (typeof event.endDate === 'string' ? event.endDate : new Date(event.endDate).toISOString())
+        : new Date().toISOString(),
+      konum: event.location,
+      comId: event.comId || (typeof event.communityId === 'string' ? event.communityId : String(event.communityId)),
+    };
+
+    return this.http.post<{ eventId: number }>(`${this.apiUrl}/create`, createDto, { headers }).pipe(
+      catchError((error) => {
+        console.error('Etkinlik oluşturulamadı:', error);
+        throw error;
+      })
+    );
+  }
+
+  // Etkinlik güncelle (Backend: PUT /api/Events/update/{id})
+  updateEvent(id: number, event: Partial<EventItem>): Observable<{ updated: number }> {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    if (!token) {
+      throw new Error('Etkinlik güncellemek için giriş yapmanız gerekiyor.');
+    }
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    });
+
+    const updateDto: UpdateEventDto = {
+      etkinlikAdi: event.title || '',
+      resimUrl: event.imageUrl,
+      kisaAciklama: event.shortDescription || event.description,
+      detayliAciklama: event.description,
+      baslangicTarihi: event.startDate
+        ? (typeof event.startDate === 'string' ? event.startDate : new Date(event.startDate).toISOString())
+        : new Date().toISOString(),
+      bitisTarihi: event.endDate
+        ? (typeof event.endDate === 'string' ? event.endDate : new Date(event.endDate).toISOString())
+        : new Date().toISOString(),
+      konum: event.location,
+    };
+
+    return this.http.put<{ updated: number }>(`${this.apiUrl}/update/${id}`, updateDto, { headers }).pipe(
+      catchError((error) => {
+        console.error('Etkinlik güncellenemedi:', error);
+        throw error;
+      })
+    );
+  }
+
+  // Etkinlik sil (Backend: DELETE /api/Events/delete/{id})
+  deleteEvent(id: number): Observable<{ deleted: boolean }> {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    if (!token) {
+      throw new Error('Etkinlik silmek için giriş yapmanız gerekiyor.');
+    }
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+
+    return this.http.delete<{ deleted: boolean }>(`${this.apiUrl}/delete/${id}`, { headers }).pipe(
+      catchError((error) => {
+        console.error('Etkinlik silinemedi:', error);
+        throw error;
+      })
+    );
   }
 
 
