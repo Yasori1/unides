@@ -59,6 +59,7 @@ interface DashboardEvent {
   status: 'approved' | 'pending' | 'rejected';
   imageUrl: string;
   date: string;
+  startDateIso: string;
   location: string;
   category: string;
   description: string;
@@ -107,6 +108,10 @@ export class CommunityDashboardComponent implements OnInit {
   // Rejection reason modal
   showRejectionModal = false;
   selectedRejectionReason: string = '';
+  rejectedEventToEdit: DashboardEvent | null = null;
+
+  // Event editing state
+  editingEventId: number | null = null;
 
   // Event creation modal
   newEventData = {
@@ -181,6 +186,7 @@ export class CommunityDashboardComponent implements OnInit {
       status: 'approved',
       imageUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800&q=60',
       date: '12 Mayıs',
+      startDateIso: '2025-05-12T10:00:00Z',
       location: 'İTÜ Ayazağa',
       category: 'Teknoloji',
       description: 'Sektörden konuşmacılarla AI odaklı zirve.',
@@ -191,6 +197,7 @@ export class CommunityDashboardComponent implements OnInit {
       status: 'pending',
       imageUrl: 'https://images.unsplash.com/photo-1581094288338-60f87c68fc9b?auto=format&fit=crop&w=800&q=60',
       date: '25 Mayıs',
+      startDateIso: '2025-05-25T14:00:00Z',
       location: 'ODTÜ Kültür Merkezi',
       category: 'Atölye',
       description: 'Arduino ve sensörlerle uygulamalı robotik eğitimi.',
@@ -201,6 +208,7 @@ export class CommunityDashboardComponent implements OnInit {
       status: 'approved',
       imageUrl: 'https://images.unsplash.com/photo-1556740749-887f6717d7e4?auto=format&fit=crop&w=800&q=60',
       date: '2 Haziran',
+      startDateIso: '2025-06-02T09:00:00Z',
       location: 'Boğaziçi Garanti Kültür',
       category: 'Finans',
       description: 'Ödeme teknolojileri ve blokzincir seminerleri.',
@@ -211,6 +219,7 @@ export class CommunityDashboardComponent implements OnInit {
       status: 'rejected',
       imageUrl: 'https://images.unsplash.com/photo-1508609349937-5ec4ae374ebf?auto=format&fit=crop&w=800&q=60',
       date: '8 Haziran',
+      startDateIso: '2025-06-08T08:00:00Z',
       location: 'Ankara Kampüsü',
       category: 'Sosyal',
       description: 'Bağış toplama koşusu için başvuru reddedildi.',
@@ -222,6 +231,7 @@ export class CommunityDashboardComponent implements OnInit {
       status: 'pending',
       imageUrl: 'https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?auto=format&fit=crop&w=800&q=60',
       date: '15 Haziran',
+      startDateIso: '2025-06-15T18:00:00Z',
       location: 'Online',
       category: 'Yarışma',
       description: '48 saatlik ürün geliştirme maratonu.',
@@ -576,7 +586,7 @@ export class CommunityDashboardComponent implements OnInit {
           const startDate = e.startDate ? new Date(e.startDate) : new Date();
           // LocalStorage'dan onay durumunu kontrol et
           const isApproved = approvedEvents.includes(e.id);
-          const status = isApproved ? 'approved' : (e.status === 'Reddedildi' ? 'rejected' : 'pending');
+          const status = isApproved ? 'approved' : (e.status === 'Reddedildi' || e.status === 'Revize' ? 'rejected' : 'pending');
           
           return {
             id: e.id,
@@ -584,9 +594,11 @@ export class CommunityDashboardComponent implements OnInit {
             status: status,
             imageUrl: e.imageUrl || 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=800&q=60',
             date: startDate.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' }),
+            startDateIso: e.startDate || startDate.toISOString(),
             location: e.location || 'Konum belirtilmemiş',
             category: 'Etkinlik', // Backend'de category yok, varsayılan değer
             description: e.description || e.shortDescription || '',
+            rejectionReason: (e as any).rejectionReason, // Backend'den gelirse
             time: startDate.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
             quota: 0, // Backend'de quota yok
           } as DashboardEvent;
@@ -941,6 +953,7 @@ export class CommunityDashboardComponent implements OnInit {
     this.clearToast();
     this.modalType = type;
     this.isModalOpen = true;
+    this.editingEventId = null; // Reset editing state
     this.newEventData = {
       title: '',
       shortDescription: '',
@@ -970,6 +983,7 @@ export class CommunityDashboardComponent implements OnInit {
   closeModal() {
     this.isModalOpen = false;
     this.modalType = null;
+    this.editingEventId = null;
   }
 
   saveProject() {
@@ -1043,6 +1057,40 @@ export class CommunityDashboardComponent implements OnInit {
     // comId string olarak gönderilmeli (Guid)
     const comId = typeof this.clubInfo.id === 'string' ? this.clubInfo.id : String(this.clubInfo.id);
     
+    // Düzenleme modu kontrolü
+    if (this.editingEventId) {
+        this.eventService.updateEvent(this.editingEventId, {
+            title: this.newEventData.title,
+            startDate: startDate.toISOString(),
+            endDate: endDate.toISOString(),
+            location: this.newEventData.location,
+            description: this.newEventData.description,
+            shortDescription: this.newEventData.shortDescription || this.newEventData.description,
+            imageUrl: this.newEventData.image,
+            // Status backend tarafından 'Beklemede'ye çekilebilir, biz burada belirtmiyoruz
+        }).subscribe({
+            next: (response) => {
+                console.log('Event updated successfully:', response);
+                this.showToast('Etkinlik güncellendi! Kurumsal Dashboard\'a yönlendiriliyorsunuz...', 'success');
+                this.closeModal();
+                if (this.clubInfo.id) {
+                    this.loadCommunityEvents(this.clubInfo.id);
+                }
+                setTimeout(() => {
+                    this.router.navigate(['/corporate-dashboard'], {
+                        queryParams: { from: 'community-dashboard', eventUpdated: 'true' },
+                    });
+                }, 1500);
+            },
+            error: (err: any) => {
+                console.error('Etkinlik güncellenemedi:', err);
+                const errorMessage = err.error?.message || 'Etkinlik güncellenirken bir hata oluştu';
+                this.showToast(errorMessage, 'error');
+            }
+        });
+        return;
+    }
+
     this.eventService.createEvent({
       title: this.newEventData.title,
       startDate: startDate.toISOString(),
@@ -1525,9 +1573,56 @@ export class CommunityDashboardComponent implements OnInit {
   }
 
   onEventCardClick(event: DashboardEvent) {
-    if (event.status === 'rejected' && event.rejectionReason) {
-      this.openRejectionModal(event.rejectionReason);
+    if (event.status === 'rejected') {
+      this.rejectedEventToEdit = event;
+      this.openRejectionModal(event.rejectionReason || 'Red nedeni belirtilmemiş.');
     }
+  }
+
+  proceedToEditRejectedEvent() {
+    this.closeRejectionModal();
+    if (this.rejectedEventToEdit) {
+      this.editEvent(this.rejectedEventToEdit);
+      this.rejectedEventToEdit = null;
+    }
+  }
+
+  editEvent(event: DashboardEvent) {
+    this.editingEventId = event.id;
+    this.modalType = 'new-event';
+    this.isModalOpen = true;
+
+    // Parse date and time from ISO string
+    let dateStr = '';
+    let timeStr = '';
+    if (event.startDateIso) {
+      try {
+        const d = new Date(event.startDateIso);
+        // YYYY-MM-DD
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        dateStr = `${year}-${month}-${day}`;
+        
+        // HH:mm
+        const hour = String(d.getHours()).padStart(2, '0');
+        const minute = String(d.getMinutes()).padStart(2, '0');
+        timeStr = `${hour}:${minute}`;
+      } catch (e) {
+        console.error('Date parsing error', e);
+      }
+    }
+
+    this.newEventData = {
+      title: event.title,
+      shortDescription: event.description, // using description as short desc for now
+      date: dateStr,
+      time: timeStr,
+      location: event.location,
+      quota: event.quota ? String(event.quota) : '',
+      description: event.description,
+      image: event.imageUrl,
+    };
   }
 
   closeEventDetail() {

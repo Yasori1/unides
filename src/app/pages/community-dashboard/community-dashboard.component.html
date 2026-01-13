@@ -489,7 +489,7 @@
         <h3>
           {{
             modalType === 'new-event'
-              ? 'Etkinlik Oluştur'
+              ? (editingEventId ? 'Etkinlik Düzenle' : 'Etkinlik Oluştur')
               : modalType === 'new-project'
               ? 'Yeni Proje Başlat'
               : modalType === 'edit-member'
@@ -571,7 +571,8 @@
           type="button"
         >
           <span *ngIf="!isEventFormValid">Lütfen Tüm Alanları Doldurun</span>
-          <span *ngIf="isEventFormValid">Etkinlik Oluştur ve Kurumsal Tarafa Yönlendir</span>
+          <span *ngIf="isEventFormValid && !editingEventId">Etkinlik Oluştur ve Kurumsal Tarafa Yönlendir</span>
+          <span *ngIf="isEventFormValid && editingEventId">Etkinliği Güncelle ve Onaya Gönder</span>
         </button>
       </div>
       <div class="modal-body" *ngIf="modalType === 'new-project'">
@@ -755,10 +756,13 @@
         </div>
       </div>
 
-      <div class="action-area">
-        <button class="btn-theme-modern" (click)="closeRejectionModal()">
-          <span>Anlaşıldı</span>
-          <span class="material-symbols-outlined">arrow_forward</span>
+      <div class="action-area" style="display: flex; gap: 12px; justify-content: center; width: 100%;">
+        <button class="btn-secondary" (click)="closeRejectionModal()">
+          Vazgeç
+        </button>
+        <button class="btn-theme-modern" (click)="proceedToEditRejectedEvent()">
+          <span>Düzenle</span>
+          <span class="material-symbols-outlined">edit</span>
         </button>
       </div>
     </div>

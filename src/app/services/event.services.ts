@@ -14,7 +14,7 @@ export interface EventItem {
   communityId: number | string; // Backend'den Guid (string) gelebilir
   communityName?: string;
   imageUrl?: string;
-  status?: 'Onaylandı' | 'Beklemede' | 'Reddedildi';
+  status?: 'Onaylandı' | 'Beklemede' | 'Reddedildi' | 'Revize';
   capacity?: string;
 }
 
