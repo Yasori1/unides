@@ -26,11 +26,17 @@ export class ProfileCardComponent {
   @Input() title: string = 'Role';
   @Input() image: string = '';
   @Input() work: string = '';
+  @Input() description?: string;
+  @Input() backgroundImage?: string;
   @Input() socialLinks?: SocialLinks;
-  @Input() isExpanded: boolean = false;
-  @Output() cardClick = new EventEmitter<void>();
+  
+  isHovered: boolean = false;
 
-  toggleCard(): void {
-    this.cardClick.emit();
+  onMouseEnter(): void {
+    this.isHovered = true;
+  }
+
+  onMouseLeave(): void {
+    this.isHovered = false;
   }
 }
