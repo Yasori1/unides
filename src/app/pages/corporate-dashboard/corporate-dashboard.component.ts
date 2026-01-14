@@ -509,7 +509,7 @@ export class CorporateDashboardComponent implements OnInit {
         endDate: '2026-04-20T22:00:00',
         location: 'Davutpaşa Kampüsü',
         imageUrl: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=800&auto=format&fit=crop',
-        description: 'Baharın gelişini müzikle kutluyoruz.',
+        description: 'Bu yıl düzenleyeceğimiz geleneksel bahar konserinde, üniversitemizin yetenekli müzisyenleri sahne alacak. Konser programında klasik müzikten modern pop şarkılarına kadar geniş bir repertuvar yer alıyor. Amacımız, sınav stresi altındaki öğrencilerimize keyifli bir mola sunmak ve kampüsümüzde sanat dolu bir akşam yaşatmak. Etkinliğimiz tüm öğrencilere ve akademik personele açık olup, giriş ücretsizdir. Konser sırasında çeşitli ikramlar sunulacak ve sürpriz çekilişlerle katılımcılara hediyeler dağıtılacaktır. Müzik dolu bu geceye herkesi bekliyoruz! Unutulmaz anlar yaşamak için yerinizi şimdiden ayırtın. Sahne performansları, ışık gösterileri ve çok daha fazlası sizleri bekliyor. Müzik ruhun gıdasıdır diyerek çıktığımız bu yolda bize eşlik etmenizi çok isteriz.',
         shortDescription: 'Bahar konseri.',
         status: 'Beklemede',
         capacity: '500',
@@ -690,6 +690,11 @@ export class CorporateDashboardComponent implements OnInit {
           (e.location && e.location.toLowerCase().includes(term)) ||
           (e.shortDescription && e.shortDescription.toLowerCase().includes(term))
       );
+    }
+
+    // İstemci tarafı durum filtrelemesi (demo verileri için)
+    if (this.eventStatusFilter) {
+      temp = temp.filter(e => e.status === this.eventStatusFilter);
     }
 
     this.filteredEvents = temp;

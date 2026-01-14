@@ -289,17 +289,17 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
     gap: 12px;
   }
 
-  &.Onaylandı {
-    border-color: rgba($success, 0.25);
-    // box-shadow: 0 8px 20px rgba($success, 0.12);
-  }
   &.Beklemede {
     border-color: rgba($warning, 0.25);
-    // box-shadow: 0 8px 20px rgba($warning, 0.12);
+    box-shadow: none;
+  }
+  &.Onaylandı {
+    border-color: rgba($success, 0.25);
+    box-shadow: none;
   }
   &.Reddedildi {
     border-color: rgba($danger, 0.25);
-    // box-shadow: 0 8px 20px rgba($danger, 0.12);
+    box-shadow: none;
   }
 
   .event-title {
@@ -309,6 +309,13 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
     color: $text-main;
     font-weight: 700;
     letter-spacing: -0.2px;
+    
+    // Tek satır kısıtlaması
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    width: 100%;
   }
 
   .card-info {
@@ -322,6 +329,8 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
       flex-wrap: wrap;
       gap: 6px;
       margin-bottom: 2px;
+      width: 100%; // Genişlik sınırlaması için
+      
       .tag {
         font-size: 0.7rem;
         font-weight: 600;
@@ -331,10 +340,13 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
           background: $bg-body;
           color: $text-main;
           border: 1px solid $border;
+          
+          // Tek satır kısıtlaması
           max-width: 100%;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
+          display: inline-block;
         }
         &.semester {
           background: rgba($primary, 0.08);
@@ -368,6 +380,7 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
       border-top: 1px solid $bg-body;
       padding-top: 12px;
       gap: 8px;
+      width: 100%; // Genişlik sınırlaması için
 
       .mini-location {
         display: flex;
@@ -375,6 +388,12 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
         gap: 4px;
         font-size: 0.75rem;
         color: $text-muted;
+        
+        // Tek satır kısıtlaması
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 100%;
       }
 
       .status-badge-inline {

@@ -363,9 +363,6 @@
               loading="lazy"
               onerror="this.src='assets/images/page-title1.jpg'"
             />
-            <div class="date-badge">
-              {{ e.date }}
-            </div>
             <div class="tap-hint">
               <span class="material-symbols-outlined">visibility</span> İncele
             </div>
@@ -378,9 +375,13 @@
               </div>
 
               <h3 class="event-title">{{ e.eventName }}</h3>
-              <p class="short-desc">{{ getShortDesc(e.description) }}</p>
+              <p class="short-desc">{{ e.shortDescription || getShortDesc(e.description) }}</p>
 
               <div class="bottom-meta column-layout">
+                <div class="mini-location" *ngIf="e.city">
+                  <span class="material-symbols-outlined">map</span>
+                  {{ e.city }}
+                </div>
                 <div class="mini-location">
                   <span class="material-symbols-outlined">location_on</span>
                   {{ e.location }}
