@@ -112,9 +112,26 @@ $card-shadow: 0 10px 30px rgba(0,0,0,0.06);
         width: 100%;
         height: 100%;
         background: url('/assets/bg.png') no-repeat top center;
-        background-size: cover;
+        background-size: contain;
         opacity: 0.3;
         z-index: -1;
+        
+        // Tablet: Arka plan görselini optimize et
+        @media (min-width: 768px) and (max-width: 1024px) {
+            background-size: contain;
+            background-position: center center;
+            opacity: 0.25;
+        }
+        
+        // Mobil: Görseli alt kısma sabitle
+        @media (max-width: 767px) {
+            background-position: center bottom;
+            background-size: contain;
+            opacity: 0.2;
+            height: 60%;
+            top: auto;
+            bottom: 0;
+        }
     }
 
     .banner-bottom-image {
