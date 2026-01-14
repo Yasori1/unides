@@ -50,16 +50,6 @@ export class CommunityService {
         : dto.IsActivity !== undefined
         ? dto.IsActivity
         : true;
-    console.log(
-      'mapMiniDtoToCommunity - dto:',
-      dto.comName,
-      'isActivity:',
-      dto.isActivity,
-      'IsActivity:',
-      dto.IsActivity,
-      'final isActivity:',
-      isActivity
-    );
 
     return {
       id: dto.communityId || dto.CommunityId,
@@ -144,28 +134,10 @@ export class CommunityService {
 
     return this.http.get<CommunityMiniDto[]>(this.apiUrl, { params: httpParams, headers }).pipe(
       map((response) => {
-        console.log(
-          'CommunityService.getAllCommunities - Backend response (HAM VERİ):',
-          JSON.stringify(response, null, 2)
-        );
-        console.log('CommunityService.getAllCommunities - Status param:', params?.status);
-        console.log(
-          'CommunityService.getAllCommunities - Response isActivity values:',
-          response.map((dto) => ({
-            name: dto.comName,
-            isActivity: dto.isActivity,
-            IsActivity: (dto as any).IsActivity,
-          }))
-        );
         const mapped = response.map((dto) => this.mapMiniDtoToCommunity(dto));
-        console.log(
-          'CommunityService.getAllCommunities - Mapped communities:',
-          mapped.map((c) => ({ name: c.name, isActivity: c.isActivity, status: c.status }))
-        );
         return mapped;
       }),
       catchError((error) => {
-        console.error('Topluluklar yüklenirken hata oluştu:', error);
         return of([]);
       })
     );
@@ -179,7 +151,7 @@ export class CommunityService {
         return communities.sort((a, b) => b.memberCount - a.memberCount).slice(0, limit);
       }),
       catchError((error) => {
-        console.error('Popüler topluluklar yüklenemedi:', error);
+        // Hata durumunda boş array döndür
         return of([]);
       })
     );
@@ -198,7 +170,7 @@ export class CommunityService {
     return this.http.get<CommunityDetailDto>(`${this.apiUrl}/${id}`, { headers }).pipe(
       map((response) => this.mapDetailDtoToCommunity(response)),
       catchError((error) => {
-        console.error('Topluluk detayı getirilemedi:', error);
+        // Hata durumunda throw ediyoruz
         throw error;
       })
     );
@@ -224,7 +196,7 @@ export class CommunityService {
           return this.getCommunityById(response.communityId);
         }),
         catchError((error) => {
-          console.error('Topluluk oluşturulamadı:', error);
+          // Hata zaten throw ediliyor
           throw error;
         })
       );
@@ -304,13 +276,13 @@ export class CommunityService {
             return updatedCommunity;
           }),
           catchError((error) => {
-            console.error('Topluluk güncellenemedi:', error);
+            // Hata zaten throw ediliyor
             throw error;
           })
         );
       }),
       catchError((error) => {
-        console.error('Topluluk güncellenemedi:', error);
+        // Hata zaten throw ediliyor
         throw error;
       })
     );
@@ -328,7 +300,7 @@ export class CommunityService {
 
     return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers }).pipe(
       catchError((error) => {
-        console.error('Topluluk silinemedi:', error);
+        // Hata zaten throw ediliyor
         throw error;
       })
     );
@@ -354,7 +326,7 @@ export class CommunityService {
           return undefined;
         }),
         catchError((error) => {
-          console.error('Üye eklenemedi:', error);
+          // Hata zaten throw ediliyor
           throw error;
         })
       );
@@ -397,7 +369,7 @@ export class CommunityService {
       }),
       catchError((error) => {
         // Backend'de endpoint yoksa veya hata varsa boş array döndür
-        console.warn("Topluluk üyeleri endpoint'i henüz mevcut değil veya hata oluştu:", error);
+        // Endpoint henüz mevcut değil veya hata oluştu
         return of([]);
       })
     );
@@ -421,7 +393,7 @@ export class CommunityService {
         return undefined;
       }),
       catchError((error) => {
-        console.error('Üye çıkarılamadı:', error);
+        // Hata zaten throw ediliyor
         throw error;
       })
     );
@@ -478,16 +450,16 @@ export class CommunityService {
           return myCommunities;
         }),
         catchError((error) => {
-          console.error('My communities yüklenirken hata oluştu:', error);
+          // Hata durumunda boş array döndür
           // Handle 401/403 gracefully
           if (error.status === 401 || error.status === 403) {
-            console.warn('Unauthorized access - returning empty list');
+            // Unauthorized access - returning empty list
           }
           return of([]);
         })
       );
     } catch (e) {
-      console.error('Error parsing user info:', e);
+      // Error parsing user info
       return of([]);
     }
   }
@@ -512,10 +484,6 @@ export class CommunityService {
         isActivity = true; // Varsayılan: Aktif
       }
 
-      console.log('addOrUpdateCommunity - community.status:', community.status);
-      console.log('addOrUpdateCommunity - community.isActivity:', community.isActivity);
-      console.log('addOrUpdateCommunity - hesaplanan isActivity:', isActivity);
-
       // Güncelleme
       const updateDto: UpdateCommunityDto = {
         comName: community.name,
@@ -532,8 +500,6 @@ export class CommunityService {
         isActivity: isActivity,
         comLeadMail: community.presidentEmail || community.comLeadMail,
       };
-
-      console.log('addOrUpdateCommunity - updateDto:', updateDto);
 
       return this.updateCommunity(community.id, updateDto);
     } else {
@@ -574,5 +540,47 @@ export class CommunityService {
         })
       );
     }
+  }
+
+  // Topluluk başkanı için istatistikleri getir (Backend: GET /api/Communities/leader-stats)
+  getLeaderStats(): Observable<{
+    totalMembers: number;
+    approvedEvents: number;
+    pendingEvents: number;
+    totalEvents: number;
+  }> {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    if (!token) {
+      throw new Error('İstatistikleri görmek için giriş yapmanız gerekiyor.');
+    }
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+
+    return this.http
+      .get<{
+        TotalMembers: number;
+        ApprovedEvents: number;
+        PendingEvents: number;
+        TotalEvents: number;
+      }>(`${this.apiUrl}/leader-stats`, { headers })
+      .pipe(
+        map((response) => ({
+          totalMembers: response.TotalMembers || 0,
+          approvedEvents: response.ApprovedEvents || 0,
+          pendingEvents: response.PendingEvents || 0,
+          totalEvents: response.TotalEvents || 0,
+        })),
+        catchError((error) => {
+          // Hata durumunda varsayılan değerler döndür
+          return of({
+            totalMembers: 0,
+            approvedEvents: 0,
+            pendingEvents: 0,
+            totalEvents: 0,
+          });
+        })
+      );
   }
 }

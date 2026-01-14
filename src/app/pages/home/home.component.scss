@@ -81,8 +81,22 @@ $card-shadow: 0 10px 30px rgba(0,0,0,0.06);
     // Yükseklik azaltıldı (eskiden bottom 400px idi)
     padding: {
         top: 190px;
-        bottom: 720px; 
+        bottom: 420px; // Alt padding azaltıldı, içerik daha aşağıda başlasın
     };
+    
+    @media (min-width: 1920px) and (max-width: 2559px) {
+        padding: {
+            top: 200px;
+            bottom: 550px; // 1920x1080 için daha fazla boşluk (skyline ile çakışmayı önler)
+        };
+    }
+    
+    @media (min-width: 2560px) {
+        padding: {
+            top: 240px; // 2560x1440 için daha fazla üst boşluk
+            bottom: 700px; // 2560x1440 için daha fazla alt boşluk
+        };
+    }
     /* banner  removed, using img tag instead */
 
     /* Yeni Mavi-Beyaz Geçişli Arka Plan - Opaklık ayarı için ::before kullanıldı */
@@ -131,6 +145,12 @@ $card-shadow: 0 10px 30px rgba(0,0,0,0.06);
             0 0 10px rgba(255, 255, 255, 0.8),
             0 2px 8px rgba(0, 0, 0, 0.2),
             0 4px 12px rgba(255, 255, 255, 0.9); // Çoklu gölge efekti
+        line-height: 1.5;
+        display: block;
+        white-space: normal;
+        word-wrap: break-word;
+        overflow: visible;
+        min-height: auto; // Başlığın tam görünmesi için
 
         .highlight-text {
             color: $primary; // Parlak mavi renk
@@ -252,6 +272,9 @@ $card-shadow: 0 10px 30px rgba(0,0,0,0.06);
         h1 {
             font-size: 28px;
             margin-bottom: 15px;
+            line-height: 1.5;
+            display: block;
+            white-space: normal;
         }
         p {
             margin: 0 auto;
@@ -282,6 +305,126 @@ $card-shadow: 0 10px 30px rgba(0,0,0,0.06);
     }
 }
 
+/* Large screens - 1920px to 2559px */
+@media only screen and (min-width : 1920px) and (max-width : 2559px) {
+    .banner-wrapper-content {
+        max-width: 1400px;
+        
+        h1 {
+            font-size: 38px; // 1920x1080 için optimize edilmiş boyut
+            margin-top: -70px;
+            line-height: 1.4; // Daha kompakt satır aralığı
+            min-height: auto; // Tam görünürlük için
+            max-width: 100%; // Taşmayı önler
+            word-break: normal; // Kelimeleri kırma
+        }
+        
+        p {
+            font-size: 1.15rem;
+            max-width: 700px;
+        }
+        
+        form {
+            max-width: 700px;
+            
+            .input-search {
+                height: 65px;
+                font-size: 1.1rem;
+                padding-left: 25px;
+            }
+            
+            button {
+                height: 55px;
+                padding: 0 35px;
+                font-size: 15px;
+            }
+        }
+    }
+    
+    .section-header-center {
+        .section-title {
+            font-size: 2.5rem;
+        }
+        
+        .section-desc {
+            font-size: 1.15rem;
+        }
+    }
+    
+    .communities-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 35px;
+    }
+    
+    .events-grid-modern {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 35px;
+    }
+}
+
+/* Extra large screens - 2560px and above */
+@media only screen and (min-width : 2560px) {
+    .banner-wrapper-content {
+        max-width: 1600px;
+        
+        h1 {
+            font-size: 44px; // 2560x1440 için optimize edilmiş boyut
+            margin-top: -80px;
+            line-height: 1.4; // Daha kompakt satır aralığı
+            min-height: auto;
+            max-width: 100%; // Taşmayı önler
+            word-break: normal; // Kelimeleri kırma
+        }
+        
+        p {
+            font-size: 1.25rem;
+            max-width: 800px;
+        }
+        
+        form {
+            max-width: 800px;
+            
+            .input-search {
+                height: 70px;
+                font-size: 1.15rem;
+                padding-left: 30px;
+            }
+            
+            button {
+                height: 60px;
+                padding: 0 40px;
+                font-size: 16px;
+            }
+        }
+    }
+    
+    .section-header-center {
+        margin-bottom: 60px;
+        
+        .section-title {
+            font-size: 3rem;
+        }
+        
+        .section-desc {
+            font-size: 1.25rem;
+        }
+        
+        .sub-title {
+            font-size: 1rem;
+        }
+    }
+    
+    .communities-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 40px;
+    }
+    
+    .events-grid-modern {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 40px;
+    }
+}
+
 // --- SECTIONS ---
 .section-communities, .section-why-unides, .section-upcoming-events, .section-about-final {
     padding-top: 40px; padding-bottom: 80px; 
@@ -289,19 +432,54 @@ $card-shadow: 0 10px 30px rgba(0,0,0,0.06);
     border-bottom: none;
 
     .section-header-center { 
-        text-align: center; margin-bottom: 40px; 
-        .section-title { font-size: 2rem; font-weight: 800; color: $dark-text; margin-bottom: 0; }
-        .section-desc { font-size: 1rem; color: $light-text; margin-top: 5px; } 
-        .section-subtitle { margin-top: 5px; color: $light-text; }
-        .blue-divider { width: 50px; height: 4px; background: $primary; margin: 10px auto; border-radius: 2px; }
+        text-align: center;
+        margin-bottom: 40px;
+        .blue-divider {
+            width: 50px;
+            height: 4px;
+            background: $primary;
+            margin: 0 auto 15px; // Mavi çizgi en üstte
+            border-radius: 2px;
+        }
+        .sub-title {
+            font-size: 0.85rem;
+            color: $primary-light;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .section-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: $dark-text;
+            margin-bottom: 8px;
+        }
+        .section-desc {
+            font-size: 1rem;
+            color: $light-text;
+            margin-top: 5px;
+        }
+        .section-subtitle {
+            margin-top: 5px;
+            color: $light-text;
+        }
     }
 }
 .section-communities { 
     background-color: transparent; 
     border-top: none; 
-    margin-top: -500px; // İçeriği yukarı taşıyarak görselin üzerine bindiriyoruz
+    margin-top: -300px; // İçeriği daha aşağıya taşıdık
     position: relative;
     z-index: 2;
+    
+    @media (min-width: 1920px) and (max-width: 2559px) {
+        margin-top: -250px; // 1920x1080 için daha aşağıya
+    }
+    
+    @media (min-width: 2560px) {
+        margin-top: -150px; // 2560x1440 için daha da aşağıya
+    }
 }
 .section-upcoming-events { background: transparent; }
 .section-why-unides { background-color: transparent; }
