@@ -12,7 +12,7 @@
         "changeOrigin": true,
         "logLevel": "debug",
         "pathRewrite": {
-            "^/spam-check": "/"
+            "^/spam-check": "/check"
         },
         "headers": {
             "Accept": "application/json",

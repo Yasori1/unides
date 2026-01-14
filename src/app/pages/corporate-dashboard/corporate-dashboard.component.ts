@@ -1062,8 +1062,8 @@ export class CorporateDashboardComponent implements OnInit {
     }, 1500);
   }
 
-  inspectEvent(id: number, event: MouseEvent) {
-    event.stopPropagation();
+  // Spam kontrolünü yapan private metod
+  private performSpamCheck(id: number) {
     const ev = this.allEvents.find((e) => e.id === id);
     if (!ev) return;
 
@@ -1123,7 +1123,7 @@ export class CorporateDashboardComponent implements OnInit {
     };
 
     // API'ye istek gönder (proxy üzerinden - CORS hatası önlemek için)
-    const apiUrl = '/spam-check'; // Proxy bu isteği http://72.62.37.160:5002/ adresine yönlendirecek
+    const apiUrl = '/spam-check'; // Proxy bu isteği http://72.62.37.160:5002/check adresine yönlendirecek
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
       Accept: 'application/json',
@@ -1132,7 +1132,7 @@ export class CorporateDashboardComponent implements OnInit {
     this.http
       .post(apiUrl, eventData, {
         headers,
-        responseType: 'text', // Önce text olarak al, sonra parse et
+        responseType: 'json', // Backend JSON döndürüyor
       })
       .pipe(
         catchError((error) => {
@@ -1156,21 +1156,9 @@ export class CorporateDashboardComponent implements OnInit {
       )
       .subscribe({
         next: (response: any) => {
-          // Response text olarak geldi, JSON'a çevir
-          let parsedResponse: any = null;
-
-          try {
-            // Eğer HTML gelirse
-            if (typeof response === 'string' && response.includes('<!DOCTYPE')) {
-              throw new Error('Backend HTML yanıtı döndürdü. Proxy yapılandırmasını kontrol edin.');
-            }
-
-            // JSON parse et
-            parsedResponse = typeof response === 'string' ? JSON.parse(response) : response;
-          } catch (parseError: any) {
-            // Parse hatası - muhtemelen HTML geldi
-            const errorMessage =
-              'Backend yanıtı beklenmeyen formatta. Lütfen daha sonra tekrar deneyin.';
+          // Response zaten JSON olarak parse edilmiş geliyor
+          if (!response) {
+            const errorMessage = 'Backend yanıtı boş.';
             this.spamResults.set(id, { clean: false, message: errorMessage });
             this.showToast(errorMessage, 'error');
             this.checkingSpamEvents.delete(id);
@@ -1178,12 +1166,21 @@ export class CorporateDashboardComponent implements OnInit {
             return;
           }
 
-          if (parsedResponse) {
-            // Başarılı yanıt
-            const isClean = parsedResponse.clean !== false; // clean true veya undefined ise temiz
+          // Backend formatı: { result: { status: "kabul", reason: "Temiz" }, ... }
+          // result.status === "kabul" ise içerik temiz
+          const result = response.result;
+          if (result) {
+            const isClean = result.status === 'kabul';
             const message =
-              parsedResponse.message ||
-              (isClean ? 'İçerik temizdir.' : 'Spam içerik tespit edildi.');
+              result.reason || (isClean ? 'İçerik temizdir.' : 'Spam içerik tespit edildi.');
+
+            this.spamResults.set(id, { clean: isClean, message });
+            this.showToast(message, isClean ? 'success' : 'error');
+          } else {
+            // Eski format desteği (fallback)
+            const isClean = response.clean !== false;
+            const message =
+              response.message || (isClean ? 'İçerik temizdir.' : 'Spam içerik tespit edildi.');
 
             this.spamResults.set(id, { clean: isClean, message });
             this.showToast(message, isClean ? 'success' : 'error');
@@ -1208,6 +1205,40 @@ export class CorporateDashboardComponent implements OnInit {
   getSpamMessage(id: number): string {
     const result = this.spamResults.get(id);
     return result ? result.message : '';
+  }
+
+  getSpamReport(
+    id: number
+  ): { clean: boolean; message: string; reasons?: string[]; details?: string[] } | null {
+    const result = this.spamResults.get(id);
+    if (!result) {
+      return null;
+    }
+    // Template'in beklediği formatta döndür
+    // Şimdilik reasons ve details boş, gelecekte backend'den gelebilir
+    return {
+      clean: result.clean,
+      message: result.message,
+      reasons: result.clean ? undefined : [], // Spam tespit edildiyse boş array
+      details: [], // Detaylar şimdilik boş
+    };
+  }
+
+  openSpamReportModal(eventId: number) {
+    // Önce spam kontrolü yapılmış mı kontrol et
+    if (!this.spamResults.has(eventId)) {
+      // Eğer spam kontrolü yapılmamışsa, önce kontrol et
+      this.performSpamCheck(eventId);
+      // Kontrol tamamlandığında modal açılacak (performSpamCheck içinde zaten toast gösteriliyor)
+      // Modal açmak için bir callback ekleyebiliriz veya kullanıcı tekrar tıklayabilir
+      this.showToast('Spam kontrolü tamamlandıktan sonra raporu görüntüleyebilirsiniz.', 'success');
+      return;
+    }
+
+    // Spam kontrolü yapılmışsa, modalı aç
+    this.selectedEvent = this.allEvents.find((e) => e.id === eventId) || null;
+    this.modalType = 'spam-report';
+    this.isModalOpen = true;
   }
 
   approveEvent(id: number) {

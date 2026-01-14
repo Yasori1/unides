@@ -381,6 +381,52 @@ export class CommunityService {
    * NOTE: This relies on backend properly filtering based on JWT token.
    * If backend doesn't filter, we fallback to president-only filtering.
    */
+  /**
+   * Get communities where the current user is a member (for students)
+   * Uses backend endpoint: GET /api/Communities/me/memberships
+   * Returns communities with their events
+   */
+  getMyMemberships(): Observable<any[]> {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    if (!token) {
+      return of([]);
+    }
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+
+    return this.http.get<any[]>(`${this.apiUrl}/me/memberships`, { headers }).pipe(
+      map((response) => {
+        // Backend MemberCommunityDto formatını Community formatına çevir
+        return response.map((dto: any) => ({
+          id: dto.communityId || dto.CommunityId,
+          name: dto.comName || dto.ComName,
+          university: dto.university || dto.University || '',
+          category: dto.comCategory || dto.ComCategory || 'Genel',
+          description: dto.comAbout || dto.ComAbout || dto.miniAbout || dto.MiniAbout,
+          logo: dto.logoUrl || dto.LogoUrl || this.placeholderLogo,
+          memberCount: 0,
+          city: dto.city || dto.City || '',
+          about: dto.comAbout || dto.ComAbout,
+          banner: dto.bannerUrl || dto.BannerUrl || this.placeholderCover,
+          coverImage: dto.bannerUrl || dto.BannerUrl || this.placeholderCover,
+          status: 'Aktif',
+          isActivity: true,
+          events: dto.events || dto.Events || [], // Topluluk etkinlikleri
+          joinedDate: dto.joinedDate || dto.JoinedDate, // Üyelik tarihi
+        }));
+      }),
+      catchError((error) => {
+        console.error('Error fetching memberships:', error);
+        if (error.status === 401 || error.status === 403) {
+          // Unauthorized access - returning empty list
+        }
+        return of([]);
+      })
+    );
+  }
+
   getMyCommunities(): Observable<Community[]> {
     // Get current user info from localStorage
     if (typeof window === 'undefined') {
