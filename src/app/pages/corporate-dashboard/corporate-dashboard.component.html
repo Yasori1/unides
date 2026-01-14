@@ -992,10 +992,6 @@
 
             <div class="event-detail-grid">
               <div class="item">
-                <span class="label">Etkinlik ID</span>
-                <p class="value">{{ selectedEvent.id || '—' }}</p>
-              </div>
-              <div class="item">
                 <span class="label">Durum</span>
                 <p class="value">
                   <span [ngClass]="{
@@ -1008,17 +1004,13 @@
                   </span>
                 </p>
               </div>
-              <div class="item full">
+              <div class="item">
                 <span class="label">Etkinlik Adı</span>
                 <p class="value">{{ selectedEvent.eventName || '—' }}</p>
               </div>
-              <div class="item">
+              <div class="item full">
                 <span class="label">Topluluk Adı</span>
                 <p class="value">{{ selectedEvent.communityName || '—' }}</p>
-              </div>
-              <div class="item">
-                <span class="label">Topluluk ID</span>
-                <p class="value">{{ selectedEvent.communityId || '—' }}</p>
               </div>
               <div class="item">
                 <span class="label">Şehir</span>
@@ -1062,6 +1054,21 @@
               </div>
             </div>
 
+            <!-- Spam Kontrol Loading -->
+            <div *ngIf="checkingSpamEvents.has(selectedEvent.id)" class="spam-checking-box">
+              <div class="spinner"></div>
+              <span>Spam kontrolü yapılıyor...</span>
+            </div>
+
+            <!-- Spam Kontrol Sonucu -->
+            <div *ngIf="inspectedEvents.has(selectedEvent.id) && !checkingSpamEvents.has(selectedEvent.id)" 
+                 class="spam-result-box" 
+                 [class.clean]="isEventClean(selectedEvent.id)" 
+                 [class.spam]="!isEventClean(selectedEvent.id)">
+              <span class="material-symbols-outlined">{{ isEventClean(selectedEvent.id) ? 'check_circle' : 'warning' }}</span>
+              <span>{{ getSpamMessage(selectedEvent.id) }}</span>
+            </div>
+
             <div class="modal-actions spaced">
               <button class="btn-secondary" (click)="closeModal()">Kapat</button>
               
@@ -1069,14 +1076,14 @@
                 <!-- Kontrol Et Butonu -->
                 <button 
                   class="btn-info"
-                  *ngIf="!inspectedEvents.has(selectedEvent.id)"
+                  *ngIf="!inspectedEvents.has(selectedEvent.id) && !checkingSpamEvents.has(selectedEvent.id)"
                   (click)="inspectEvent(selectedEvent.id, $event)"
                 >
                   <span class="material-symbols-outlined">fact_check</span> Kontrol Et
                 </button>
 
-                <!-- Onay/Revize Butonları (Sadece İncelendiyse) -->
-                <ng-container *ngIf="inspectedEvents.has(selectedEvent.id)">
+                <!-- Onay/Revize Butonları (Sadece İncelendiyse ve Kontrol bitmişse) -->
+                <ng-container *ngIf="inspectedEvents.has(selectedEvent.id) && !checkingSpamEvents.has(selectedEvent.id)">
                   <button class="btn-danger" (click)="rejectEvent(selectedEvent.id)">
                     <span class="material-symbols-outlined">edit_note</span> Revize İste
                   </button>

@@ -74,6 +74,12 @@ export class CorporateDashboardComponent implements OnInit {
   isProfileOpen = false;
   isModalOpen = false;
   modalType = '';
+  
+  // Confirm Modal Properties
+  isConfirmModalOpen = false;
+  confirmMessage = '';
+  private confirmAction: (() => void) | null = null;
+
   searchText = '';
   statusFilter: string = ''; // Aktif/Pasif filtre
   announcementSearchText = ''; // Duyuru arama metni
@@ -81,8 +87,9 @@ export class CorporateDashboardComponent implements OnInit {
   eventStatusFilter: string = ''; // Etkinlik durum filtresi
   filteredEvents: EventRequest[] = []; // Filtrelenmiş etkinlikler
   inspectedEvents: Set<number> = new Set();
+  checkingSpamEvents: Set<number> = new Set();
   spamResults: Map<number, { clean: boolean; message: string }> = new Map();
-  forbiddenWords: string[] = ['yasak', 'illegal', 'spam', 'kötü', 'bahis', 'kumar'];
+  forbiddenWords: string[] = ['yasak', 'illegal', 'spam', 'kötü', 'bahis', 'kumar', 'lan', 'siyaset', 'propaganda'];
 
   // Pagination için değişkenler
   currentPage = 1;
@@ -360,6 +367,10 @@ export class CorporateDashboardComponent implements OnInit {
   loadEventsFromService() {
     if (!isPlatformBrowser(this.platformId)) return;
 
+    // İlk başta hemen demo verileri göster (Backend yanıt vermese bile gözüksün)
+    this.addDemoEvents();
+    this.filterEvents();
+
     // Filtreye göre backend'den etkinlikleri çek
     let statusNumbers: number[] = [];
 
@@ -377,18 +388,11 @@ export class CorporateDashboardComponent implements OnInit {
     // Backend'den status'e göre etkinlikleri çek
     this.eventService.getByStatus(statusNumbers).subscribe({
       next: (data: EventItem[]) => {
-        // Backend'den gelen etkinlikleri map et
-        // EventService zaten EventConfirm (0,1,2) değerlerini 'Beklemede', 'Onaylandı', 'Reddedildi' olarak map ediyor
-        if (!data || data.length === 0) {
-          this.allEvents = [];
-          this.filteredEvents = [];
-          return;
-        }
-
-        this.allEvents = data.map((e) => {
-          // Community name'i bulmak için communities listesini kullan
+        const eventData = data || [];
+        
+        // Backend'den gelen verileri map et
+        const backendEvents = eventData.map((e) => {
           const community = this.allCommunities.find((c) => String(c.id) === String(e.communityId));
-
           return {
             id: e.id,
             communityId: e.communityId,
@@ -401,25 +405,27 @@ export class CorporateDashboardComponent implements OnInit {
             imageUrl: e.imageUrl || '',
             description: e.description || '',
             shortDescription: e.shortDescription || '',
-            // EventService'ten gelen status değeri zaten doğru format: 'Beklemede', 'Onaylandı', 'Reddedildi'
             status: e.status || 'Beklemede',
             capacity: e.capacity || '',
             city: e.city || community?.city || '',
           };
         });
 
-        // Topluluk isimlerini eşleştir
-        this.attachCommunityNamesToEvents();
+        // Mevcut listeyi güncelle: Backend verileri + Demo verileri
+        // Önce backend verilerini koy
+        this.allEvents = [...backendEvents];
+        
+        // Sonra demo verilerini ekle (addDemoEvents içinde zaten var olanlar temizlenip ekleniyor)
+        this.addDemoEvents();
 
-        // Etkinlik filtrelerini uygula (metin araması için)
-        // filterEvents() metodu filteredEvents'i güncelliyor
+        this.attachCommunityNamesToEvents();
         this.filterEvents();
       },
       error: (err) => {
         // Hata durumunda getAll() metodunu fallback olarak kullan
         this.eventService.getAll().subscribe({
           next: (data: EventItem[]) => {
-            this.allEvents = data.map((e) => {
+            const backendEvents = (data || []).map((e) => {
               const community = this.allCommunities.find(
                 (c) => String(c.id) === String(e.communityId)
               );
@@ -440,16 +446,87 @@ export class CorporateDashboardComponent implements OnInit {
                 city: e.city || community?.city || '',
               };
             });
+            
+            this.allEvents = [...backendEvents];
+            this.addDemoEvents();
             this.attachCommunityNamesToEvents();
             this.filterEvents();
           },
           error: () => {
-            this.allEvents = [];
-            this.filteredEvents = [];
+            // Hiçbir veri alınamazsa sadece demo verileri kalsın
+            // (Zaten başta eklemiştik ama burada tekrar emin oluyoruz veya listeyi temizleyip ekliyoruz)
+            this.allEvents = []; 
+            this.addDemoEvents();
+            this.filteredEvents = [...this.allEvents];
           },
         });
       },
     });
+  }
+
+  // Demo etkinlikleri ekleyen metod
+  addDemoEvents() {
+    const demoEvents: EventRequest[] = [
+      {
+        id: 9001,
+        communityId: '1',
+        communityName: 'İTÜ - Yazılım Kulübü',
+        eventName: 'Yapay Zeka Atölyesi',
+        date: '2026-02-15T14:00:00',
+        startDate: '2026-02-15T14:00:00',
+        endDate: '2026-02-15T17:00:00',
+        location: 'Bilgisayar Fakültesi',
+        imageUrl: 'https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?q=80&w=800&auto=format&fit=crop',
+        description: 'Yapay zeka temelleri üzerine pratik atölye çalışması.',
+        shortDescription: 'Yapay zeka atölyesi.',
+        status: 'Beklemede',
+        capacity: '50',
+        city: 'İstanbul'
+      },
+      {
+        id: 9002,
+        communityId: '2',
+        communityName: 'ODTÜ - Doğa Topluluğu', 
+        eventName: 'Doğa Yürüyüşü', 
+        date: '2026-03-10T09:00:00',
+        startDate: '2026-03-10T09:00:00',
+        endDate: '2026-03-10T14:00:00',
+        location: 'Eymir Gölü',
+        imageUrl: 'https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=800&auto=format&fit=crop',
+        description: 'Doğa ile iç içe harika bir yürüyüş yapacağız lan.',
+        shortDescription: 'Eymir gölünde doğa yürüyüşü.',
+        status: 'Beklemede',
+        capacity: '100',
+        city: 'Ankara'
+      },
+      {
+        id: 9003,
+        communityId: '3',
+        communityName: 'YTÜ - Müzik Kulübü',
+        eventName: 'Bahar Konseri',
+        date: '2026-04-20T18:00:00',
+        startDate: '2026-04-20T18:00:00',
+        endDate: '2026-04-20T22:00:00',
+        location: 'Davutpaşa Kampüsü',
+        imageUrl: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=800&auto=format&fit=crop',
+        description: 'Baharın gelişini müzikle kutluyoruz.',
+        shortDescription: 'Bahar konseri.',
+        status: 'Beklemede',
+        capacity: '500',
+        city: 'İstanbul'
+      }
+    ];
+
+    // Önce mevcut demo etkinliklerini temizle (duplikasyonu önlemek için)
+    const demoIds = demoEvents.map(d => d.id);
+    this.allEvents = this.allEvents.filter(e => !demoIds.includes(e.id));
+    
+    // Demo etkinliklerini ekle
+    this.allEvents.push(...demoEvents);
+  }
+
+  getSpamMessage(id: number): string {
+    return this.spamResults.get(id)?.message || '';
   }
 
   // Demo verileri döndüren yardımcı metod
@@ -889,35 +966,32 @@ export class CorporateDashboardComponent implements OnInit {
     if (this.editingCommunity) {
       const communityId = this.editingCommunity.id;
 
-      // Kullanıcıdan onay al
-      if (!confirm('Bu topluluğu silmek istediğinizden emin misiniz?')) {
-        return;
-      }
+      this.openConfirmModal('Bu topluluğu silmek istediğinizden emin misiniz?', () => {
+        // CommunityService'ten sil (backend'e istek atılır)
+        this.communityService.deleteCommunity(communityId).subscribe({
+          next: () => {
+            // Service'ten güncel veriyi tekrar yükle
+            this.loadCommunitiesFromService();
+            this.showToast('Topluluk başarıyla silindi', 'success');
+            this.closeModal();
+          },
+          error: (err) => {
+            // Hata zaten toast ile gösteriliyor
+            let errorMessage = 'Topluluk silinirken bir hata oluştu';
 
-      // CommunityService'ten sil (backend'e istek atılır)
-      this.communityService.deleteCommunity(communityId).subscribe({
-        next: () => {
-          // Service'ten güncel veriyi tekrar yükle
-          this.loadCommunitiesFromService();
-          this.showToast('Topluluk başarıyla silindi', 'success');
-          this.closeModal();
-        },
-        error: (err) => {
-          // Hata zaten toast ile gösteriliyor
-          let errorMessage = 'Topluluk silinirken bir hata oluştu';
+            if (err.status === 401) {
+              errorMessage = 'Oturum açmanız gerekiyor. Lütfen tekrar giriş yapın.';
+            } else if (err.status === 403) {
+              errorMessage = err.error?.message || 'Bu işlem için yetkiniz bulunmamaktadır.';
+            } else if (err.error?.message) {
+              errorMessage = err.error.message;
+            } else if (err.message) {
+              errorMessage = err.message;
+            }
 
-          if (err.status === 401) {
-            errorMessage = 'Oturum açmanız gerekiyor. Lütfen tekrar giriş yapın.';
-          } else if (err.status === 403) {
-            errorMessage = err.error?.message || 'Bu işlem için yetkiniz bulunmamaktadır.';
-          } else if (err.error?.message) {
-            errorMessage = err.error.message;
-          } else if (err.message) {
-            errorMessage = err.message;
-          }
-
-          this.showToast(errorMessage, 'error');
-        },
+            this.showToast(errorMessage, 'error');
+          },
+        });
       });
     }
   }
@@ -1050,7 +1124,8 @@ export class CorporateDashboardComponent implements OnInit {
     const ev = this.allEvents.find((e) => e.id === id);
     if (!ev) return;
 
-    this.showToast('Spam kontrolü yapılıyor...', 'success'); // Info type olmadığı için success kullanıyoruz
+    this.checkingSpamEvents.add(id);
+    // Toast mesajı kaldırıldı - işlem durumu modal içinde gösterilecek
 
     // Simüle edilmiş spam kontrolü (1 saniye gecikme)
     setTimeout(() => {
@@ -1060,14 +1135,13 @@ export class CorporateDashboardComponent implements OnInit {
       if (foundForbiddenWords.length > 0) {
         const message = `Yasaklı kelimeler tespit edildi: ${foundForbiddenWords.join(', ')}`;
         this.spamResults.set(id, { clean: false, message });
-        this.showToast(message, 'error');
       } else {
         const message = 'İçerik temizdir.';
         this.spamResults.set(id, { clean: true, message });
-        this.showToast(message, 'success');
       }
 
       this.inspectedEvents.add(id);
+      this.checkingSpamEvents.delete(id);
     }, 1000);
   }
 
@@ -1292,6 +1366,26 @@ export class CorporateDashboardComponent implements OnInit {
     this.selectedAnnouncement = null;
   }
 
+  // Confirm Modal Methods
+  openConfirmModal(message: string, action: () => void) {
+    this.confirmMessage = message;
+    this.confirmAction = action;
+    this.isConfirmModalOpen = true;
+  }
+
+  closeConfirmModal() {
+    this.isConfirmModalOpen = false;
+    this.confirmMessage = '';
+    this.confirmAction = null;
+  }
+
+  onConfirmYes() {
+    if (this.confirmAction) {
+      this.confirmAction();
+    }
+    this.closeConfirmModal();
+  }
+
   // Duyuru detay ve güncelleme
   openAnnouncementDetail(announcement: Announcement) {
     this.selectedAnnouncement = announcement;
@@ -1469,40 +1563,37 @@ export class CorporateDashboardComponent implements OnInit {
       return;
     }
 
-    // Onay iste
-    if (!confirm('Bu duyuruyu silmek istediğinize emin misiniz? Bu işlem geri alınamaz.')) {
-      return;
-    }
+    this.openConfirmModal('Bu duyuruyu silmek istediğinize emin misiniz? Bu işlem geri alınamaz.', () => {
+      const announcementId = this.editingAnnouncement!.id;
 
-    const announcementId = this.editingAnnouncement.id;
+      // API'ye istek at
+      this.announcementService.deleteAnnouncement(announcementId).subscribe({
+        next: () => {
+          // Başarılı - Duyuruları yeniden yükle (announcements-page'den de kaldırılır)
+          this.loadAnnouncementsFromService();
+          this.showToast('Duyuru başarıyla silindi', 'success');
+          this.closeModal();
+        },
+        error: (error) => {
+          // Hata zaten toast ile gösteriliyor
 
-    // API'ye istek at
-    this.announcementService.deleteAnnouncement(announcementId).subscribe({
-      next: () => {
-        // Başarılı - Duyuruları yeniden yükle (announcements-page'den de kaldırılır)
-        this.loadAnnouncementsFromService();
-        this.showToast('Duyuru başarıyla silindi', 'success');
-        this.closeModal();
-      },
-      error: (error) => {
-        // Hata zaten toast ile gösteriliyor
+          // Daha detaylı hata mesajı
+          let errorMessage = 'Duyuru silinirken bir hata oluştu';
+          if (error.error?.message) {
+            errorMessage = error.error.message;
+          } else if (error.error && typeof error.error === 'string') {
+            errorMessage = error.error;
+          } else if (error.status === 401 || error.status === 403) {
+            errorMessage = 'Bu işlem için yetkiniz bulunmamaktadır.';
+          } else if (error.status === 404) {
+            errorMessage = 'Duyuru bulunamadı.';
+          } else if (error.status === 0) {
+            errorMessage = 'Sunucuya bağlanılamadı. Lütfen internet bağlantınızı kontrol ediniz.';
+          }
 
-        // Daha detaylı hata mesajı
-        let errorMessage = 'Duyuru silinirken bir hata oluştu';
-        if (error.error?.message) {
-          errorMessage = error.error.message;
-        } else if (error.error && typeof error.error === 'string') {
-          errorMessage = error.error;
-        } else if (error.status === 401 || error.status === 403) {
-          errorMessage = 'Bu işlem için yetkiniz bulunmamaktadır.';
-        } else if (error.status === 404) {
-          errorMessage = 'Duyuru bulunamadı.';
-        } else if (error.status === 0) {
-          errorMessage = 'Sunucuya bağlanılamadı. Lütfen internet bağlantınızı kontrol ediniz.';
-        }
-
-        this.showToast(errorMessage, 'error');
-      },
+          this.showToast(errorMessage, 'error');
+        },
+      });
     });
   }
 

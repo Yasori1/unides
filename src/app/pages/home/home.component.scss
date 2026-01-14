@@ -77,144 +77,125 @@ $card-shadow: 0 10px 30px rgba(0,0,0,0.06);
     background-color: transparent;
     position: relative;
     z-index: 1;
-    overflow: hidden; // Skyline'ın taşmasını önlemek için
-    // Yükseklik azaltıldı (eskiden bottom 400px idi)
-    padding: {
-        top: 190px;
-        bottom: 420px; // Alt padding azaltıldı, içerik daha aşağıda başlasın
-    };
+    overflow: hidden;
+    // 20px yukarı taşımak için padding-top azaltıldı (150px -> 130px)
+    padding-top: 130px;
+    padding-bottom: 230px; 
     
-    @media (min-width: 1920px) and (max-width: 2559px) {
-        padding: {
-            top: 200px;
-            bottom: 550px; // 1920x1080 için daha fazla boşluk (skyline ile çakışmayı önler)
-        };
+    // Varsayılan (Laptop/Desktop 1024px - 1366px arası)
+    @media (min-width: 1024px) {
+        padding-top: 120px; 
+        padding-bottom: 250px;
+    }
+
+    @media (min-width: 1440px) {
+        padding-top: 140px; 
+        padding-bottom: 300px;
+    }
+    
+    @media (min-width: 1920px) {
+        padding-top: 160px; 
+        padding-bottom: 350px;
     }
     
     @media (min-width: 2560px) {
-        padding: {
-            top: 240px; // 2560x1440 için daha fazla üst boşluk
-            bottom: 700px; // 2560x1440 için daha fazla alt boşluk
-        };
+        padding-top: 200px; 
+        padding-bottom: 450px;
     }
-    /* banner  removed, using img tag instead */
 
-    /* Yeni Mavi-Beyaz Geçişli Arka Plan - Opaklık ayarı için ::before kullanıldı */
+    /* Yeni Mavi-Beyaz Geçişli Arka Plan */
     &::before {
         content: "";
         position: absolute;
         top: -100px;
-        left: -15px;
-        width: 102%;
-        height: 98%;
+        left: 0;
+        width: 100%;
+        height: 100%;
         background: url('/assets/bg.png') no-repeat top center;
-        background-size: 100% auto;
-        opacity: 0.3;/* Arka plan opaklığı düşürüldü */
+        background-size: cover;
+        opacity: 0.3;
         z-index: -1;
     }
 
     .banner-bottom-image {
-        display: none; /* Arka plan resmi kaldırıldı */
+        display: none;
     }
 
-    /* Responsive for mobile */
+    /* Responsive for mobile - Kısıtlamalar kaldırıldı, akışkan yapı kullanılıyor */
     @media only screen and (max-width : 767px) {
-        .banner-bottom-image {
-            max-height: 500px;
-        }
+        padding-top: 110px; 
+        padding-bottom: 150px;
     }
 }
 
 .banner-wrapper-content {
     position: relative;
-    z-index: 10; /* Yazıların üstte kalması için */
+    z-index: 10;
     max-width: 1000px;
-    margin: -15px auto 0; // İçerik bloğu 15px yukarı taşındı
-    text-align: center; // İçeriği ortala
+    margin: 0 auto; 
+    text-align: center;
+    padding: 0 5%; // Yüzdelik padding ile site sağdan soldan küçülür
     
     h1 {
-        margin-top: -60px; // Başlık yukarı çekildi
+        // Yazı biraz küçültüldü: max 50px -> 38px, min 28px -> 22px
+        font-size: clamp(22px, 3.2vw, 38px);
+        margin-top: 0;
         margin-bottom: 20px;
-        font: {
-            size: 32px; // Yazı boyutu küçültüldü (eskiden 50px)
-            weight: 600; // Daha kalın
-        };
-        color: $primary-dark; // Daha koyu mavi - daha kontrastlı
+        font-weight: 700;
+        color: $primary-dark;
         text-shadow: 
             0 0 20px rgba(255, 255, 255, 1),
             0 0 10px rgba(255, 255, 255, 0.8),
-            0 2px 8px rgba(0, 0, 0, 0.2),
-            0 4px 12px rgba(255, 255, 255, 0.9); // Çoklu gölge efekti
-        line-height: 1.5;
+            0 2px 8px rgba(0, 0, 0, 0.2);
+        line-height: 1.2;
         display: block;
         white-space: normal;
         word-wrap: break-word;
-        overflow: visible;
-        min-height: auto; // Başlığın tam görünmesi için
 
         .highlight-text {
-            color: $primary; // Parlak mavi renk
-            font-weight: 800; // Daha kalın
-            will-change: contents; // Performans: İçerik sık değişiyor
-            text-shadow: 
-                0 0 20px rgba(255, 255, 255, 1),
-                0 0 10px rgba(255, 255, 255, 0.8),
-                0 2px 8px rgba(0, 0, 0, 0.2); // Gölge katmanları azaltıldı (4 -> 3)
+            color: $primary;
+            font-weight: 800;
+            display: inline-block; 
+            
             .cursor {
                 animation: blink 1s infinite;
                 font-weight: 100;
-                color: $primary; // Parlak mavi
+                color: $primary;
             }
         }
     }
     p {
-        margin-top: 15px; // Başlık ile mesafe kontrolü
+        margin-top: 15px;
         line-height: 1.6;
-        max-width: 550px;
-        color: $primary-dark; // Daha koyu mavi - daha kontrastlı
-        text-shadow: 
-            0 0 15px rgba(255, 255, 255, 1),
-            0 0 8px rgba(255, 255, 255, 0.8),
-            0 1px 6px rgba(0, 0, 0, 0.2),
-            0 2px 10px rgba(255, 255, 255, 0.9); // Çoklu gölge efekti
+        max-width: 600px;
+        color: $primary-dark;
+        text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
         margin-left: auto;
         margin-right: auto;
         margin-bottom: 0;
-        font-size: 1.05rem;
-        font-weight: 600; // Semi-bold isteği üzerine Medium yapıldı (daha hafif kalınlık)
-
-        // Kutucuk stilleri tamamen kaldırıldı
+        // Yazı biraz küçültüldü: max 1.1rem -> 1rem
+        font-size: clamp(0.85rem, 1.2vw, 1rem);
+        font-weight: 500;
         background: transparent;
-        backdrop-filter: none;
-        -webkit-backdrop-filter: none;
-        padding: 0;
-        border-radius: 0;
         border: none;
-        border-left: none;
-        box-shadow: none;
-        
-        transition: none;
-        &:hover {
-            transform: none;
-            background: transparent;
-        }
     }
     form {
         position: relative;
-        margin-top: 20px; // Formun yukarıdan mesafesi ayarlandı
-        width: 100%; // Genişliği üstteki yazıya göre ayarla
-        max-width: 550px; // Paragraf ile aynı genişlikte
-        margin-left: auto; // Ortala
+        margin-top: 30px;
+        width: 100%;
+        max-width: 550px;
+        margin-left: auto;
         margin-right: auto;
+        // Arama motoru boyutu korundu, sadece margin ile konumlandı
 
         .input-search {
             display: block;
             width: 100%;
             background-color: #ffffff;
             border: none;
-            height: 55px; // Biraz daha kompakt
+            height: 55px;
             padding-left: 20px;
-            padding-right: 120px; // Buton boşluğu
+            padding-right: 120px;
             border-radius: 70px;
             outline: 0;
             color: $dark-text;
@@ -238,19 +219,16 @@ $card-shadow: 0 10px 30px rgba(0,0,0,0.06);
             background-color: $primary;
             color: #ffffff;
             border: none;
-            height: 45px; // Input yüksekliğine göre ayarlandı
+            height: 45px;
             padding: 0 25px;
             border-radius: 70px;
             transition: 0.3s;
             text-transform: uppercase;
-            font: {
-                size: 13px;
-                weight: 600;
-            };
+            font-size: 13px;
+            font-weight: 600;
             cursor: pointer;
             &:hover, &:focus {
                 background-color: $primary-dark;
-                color: #ffffff;
             }
         }
     }
@@ -258,172 +236,21 @@ $card-shadow: 0 10px 30px rgba(0,0,0,0.06);
 
 // --- RESPONSIVE AYARLAR (BANNER İÇİN) ---
 
+/* Eski dağınık media query'ler yerine yukarıdaki birleşik yapı kullanılıyor.
+   Ancak global responsive ayarlarını burada tutuyoruz.
+*/
+
 /* Max width 767px */
 @media only screen and (max-width : 767px) {
-    .main-banner-wrapper {
-        padding-top: 100px;
-        padding-bottom: 60px;
-    }
-    .banner-wrapper-content {
-        max-width: 100%;
-        text-align: center; // Mobilde ortala
-        margin: 0 auto;
-
-        h1 {
-            font-size: 28px;
-            margin-bottom: 15px;
-            line-height: 1.5;
-            display: block;
-            white-space: normal;
-        }
-        p {
-            margin: 0 auto;
-        }
-        form {
-            margin: 20px auto 0;
-             .input-search {
-                 height: 50px;
-                 font-size: 14px;
-             }
-             button {
-                 height: 40px;
-                 padding: 0 20px;
-             }
-        }
-    }
+    // Banner için yukarıda tanımlandı
 }
 
 /* Min width 768px to Max width 991px */
 @media only screen and (min-width : 768px) and (max-width : 991px) {
-    .main-banner-wrapper {
-        padding-top: 160px;
-    }
-    .banner-wrapper-content {
-        h1 {
-            font-size: 47px;
-        }
-    }
+    // Tablet için özel ayarlar
 }
 
-/* Large screens - 1920px to 2559px */
-@media only screen and (min-width : 1920px) and (max-width : 2559px) {
-    .banner-wrapper-content {
-        max-width: 1400px;
-        
-        h1 {
-            font-size: 38px; // 1920x1080 için optimize edilmiş boyut
-            margin-top: -70px;
-            line-height: 1.4; // Daha kompakt satır aralığı
-            min-height: auto; // Tam görünürlük için
-            max-width: 100%; // Taşmayı önler
-            word-break: normal; // Kelimeleri kırma
-        }
-        
-        p {
-            font-size: 1.15rem;
-            max-width: 700px;
-        }
-        
-        form {
-            max-width: 700px;
-            
-            .input-search {
-                height: 65px;
-                font-size: 1.1rem;
-                padding-left: 25px;
-            }
-            
-            button {
-                height: 55px;
-                padding: 0 35px;
-                font-size: 15px;
-            }
-        }
-    }
-    
-    .section-header-center {
-        .section-title {
-            font-size: 2.5rem;
-        }
-        
-        .section-desc {
-            font-size: 1.15rem;
-        }
-    }
-    
-    .communities-grid {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 35px;
-    }
-    
-    .events-grid-modern {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 35px;
-    }
-}
-
-/* Extra large screens - 2560px and above */
-@media only screen and (min-width : 2560px) {
-    .banner-wrapper-content {
-        max-width: 1600px;
-        
-        h1 {
-            font-size: 44px; // 2560x1440 için optimize edilmiş boyut
-            margin-top: -80px;
-            line-height: 1.4; // Daha kompakt satır aralığı
-            min-height: auto;
-            max-width: 100%; // Taşmayı önler
-            word-break: normal; // Kelimeleri kırma
-        }
-        
-        p {
-            font-size: 1.25rem;
-            max-width: 800px;
-        }
-        
-        form {
-            max-width: 800px;
-            
-            .input-search {
-                height: 70px;
-                font-size: 1.15rem;
-                padding-left: 30px;
-            }
-            
-            button {
-                height: 60px;
-                padding: 0 40px;
-                font-size: 16px;
-            }
-        }
-    }
-    
-    .section-header-center {
-        margin-bottom: 60px;
-        
-        .section-title {
-            font-size: 3rem;
-        }
-        
-        .section-desc {
-            font-size: 1.25rem;
-        }
-        
-        .sub-title {
-            font-size: 1rem;
-        }
-    }
-    
-    .communities-grid {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 40px;
-    }
-    
-    .events-grid-modern {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 40px;
-    }
-}
+/* Large screens ve Extra large screens ayarları yukarıya taşındı */
 
 // --- SECTIONS ---
 .section-communities, .section-why-unides, .section-upcoming-events, .section-about-final {
@@ -438,7 +265,7 @@ $card-shadow: 0 10px 30px rgba(0,0,0,0.06);
             width: 50px;
             height: 4px;
             background: $primary;
-            margin: 0 auto 15px; // Mavi çizgi en üstte
+            margin: 15px auto 0; // Mavi çizgi en altta
             border-radius: 2px;
         }
         .sub-title {
@@ -450,7 +277,7 @@ $card-shadow: 0 10px 30px rgba(0,0,0,0.06);
             letter-spacing: 1px;
         }
         .section-title {
-            font-size: 2rem;
+            font-size: clamp(1.8rem, 3vw, 2.5rem); // Responsive font size
             font-weight: 800;
             color: $dark-text;
             margin-bottom: 8px;
@@ -469,16 +296,28 @@ $card-shadow: 0 10px 30px rgba(0,0,0,0.06);
 .section-communities { 
     background-color: transparent; 
     border-top: none; 
-    margin-top: -300px; // İçeriği daha aşağıya taşıdık
+    margin-top: -100px; // -300px'den düşürüldü. Banner ile kesişimi optimize edildi.
     position: relative;
     z-index: 2;
     
-    @media (min-width: 1920px) and (max-width: 2559px) {
-        margin-top: -250px; // 1920x1080 için daha aşağıya
+    // Laptop/Desktop
+    @media (min-width: 1024px) {
+        margin-top: -120px;
+    }
+
+    // Large screens
+    @media (min-width: 1920px) {
+        margin-top: -180px;
     }
     
+    // Extra large screens
     @media (min-width: 2560px) {
-        margin-top: -150px; // 2560x1440 için daha da aşağıya
+        margin-top: -220px;
+    }
+    
+    // Mobile
+    @media (max-width: 767px) {
+        margin-top: -50px; // Mobilde daha az negatif margin
     }
 }
 .section-upcoming-events { background: transparent; }
@@ -561,7 +400,7 @@ $card-shadow: 0 10px 30px rgba(0,0,0,0.06);
     flex: 1; display: flex; flex-direction: column;
     .host-community { font-size: 0.75rem; color: $primary; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
     .event-title { font-size: 1.05rem; font-weight: 700; color: $dark-text; margin-bottom: 5px; line-height: 1.2; } 
-    .event-desc-short { font-size: 0.85rem; color: #64748b; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; } 
+    .event-desc-short { font-size: 0.85rem; color: #64748b; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; } 
     .event-meta { 
       display: flex; flex-direction: column; gap: 4px; font-size: 0.75rem; color: $light-text; 
       span { display: flex; align-items: center; gap: 5px; }
@@ -643,9 +482,13 @@ $card-shadow: 0 10px 30px rgba(0,0,0,0.06);
 @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); } 70% { box-shadow: 0 0 0 20px rgba(255, 255, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); } }
 
 // RESPONSIVE GLOBAL
-@media (max-width: 1024px) {
+@media (max-width: 768px) {
   .communities-grid, .events-grid-modern, .why-grid, .about-grid-modern { grid-template-columns: 1fr; gap: 30px; }
   .cube-scene { width: 100%; }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .communities-grid, .events-grid-modern, .why-grid, .about-grid-modern { grid-template-columns: repeat(2, 1fr); gap: 20px; }
 }
 
 // Utility classes for visibility
@@ -739,6 +582,7 @@ $card-shadow: 0 10px 30px rgba(0,0,0,0.06);
             line-height: 1.3;
             display: -webkit-box;
             -webkit-line-clamp: 2;
+            line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
           }
