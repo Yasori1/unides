@@ -516,8 +516,8 @@
         </div>
         
         <label class="stacked">
-          <span>Etkinlik İsmi</span>
-          <input type="text" placeholder="Etkinlik İsmi" [(ngModel)]="newEventData.title" />
+          <span>Etkinlik İsmi (Maks. 90)</span>
+          <input type="text" placeholder="Etkinlik İsmi" [(ngModel)]="newEventData.title" maxlength="90" />
         </label>
 
         <div class="row two-cols">
@@ -531,16 +531,17 @@
           </label>
         </div>
         <label class="stacked">
-          <span>Konum</span>
-          <input type="text" placeholder="Konum" [(ngModel)]="newEventData.location" />
+          <span>Konum (Maks. 100)</span>
+          <input type="text" placeholder="Konum" [(ngModel)]="newEventData.location" maxlength="100" />
         </label>
         <label class="stacked">
-          <span>Kontenjan</span>
+          <span>Kontenjan (Maks. 4 Hane)</span>
           <input 
             type="number" 
             placeholder="Kontenjan" 
             [(ngModel)]="newEventData.quota" 
-            oninput="if(this.value.length > 4) this.value = this.value.slice(0, 4);"
+            oninput="if(this.value.length > 4) this.value = this.value.slice(0, 4); this.value = this.value.replace(/[^0-9]/g, '');"
+            min="0"
           />
         </label>
         
@@ -555,7 +556,7 @@
         </label>
 
         <label class="stacked">
-          <span>Etkinlik Açıklaması</span>
+          <span>Etkinlik Açıklaması (Maks. 500)</span>
           <textarea
             rows="3"
             placeholder="Etkinlik Açıklaması"

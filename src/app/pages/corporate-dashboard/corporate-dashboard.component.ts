@@ -129,6 +129,17 @@ export class CorporateDashboardComponent implements OnInit {
     'Müzik',
   ];
 
+  cities: string[] = [
+    'Adana', 'Adıyaman', 'Afyonkarahisar', 'Ağrı', 'Amasya', 'Ankara', 'Antalya', 'Artvin', 'Aydın', 'Balıkesir',
+    'Bilecik', 'Bingöl', 'Bitlis', 'Bolu', 'Burdur', 'Bursa', 'Çanakkale', 'Çankırı', 'Çorum', 'Denizli',
+    'Diyarbakır', 'Edirne', 'Elazığ', 'Erzincan', 'Erzurum', 'Eskişehir', 'Gaziantep', 'Giresun', 'Gümüşhane', 'Hakkari',
+    'Hatay', 'Isparta', 'Mersin', 'İstanbul', 'İzmir', 'Kars', 'Kastamonu', 'Kayseri', 'Kırklareli', 'Kırşehir',
+    'Kocaeli', 'Konya', 'Kütahya', 'Malatya', 'Manisa', 'Kahramanmaraş', 'Mardin', 'Muğla', 'Muş', 'Nevşehir',
+    'Niğde', 'Ordu', 'Rize', 'Sakarya', 'Samsun', 'Siirt', 'Sinop', 'Sivas', 'Tekirdağ', 'Tokat',
+    'Trabzon', 'Tunceli', 'Şanlıurfa', 'Uşak', 'Van', 'Yozgat', 'Zonguldak', 'Aksaray', 'Bayburt', 'Karaman',
+    'Kırıkkale', 'Batman', 'Şırnak', 'Bartın', 'Ardahan', 'Iğdır', 'Yalova', 'Karabük', 'Kilis', 'Osmaniye', 'Düzce'
+  ].sort();
+
   allCommunities: Community[] = [];
 
   communities: Community[] = [];
@@ -785,22 +796,21 @@ export class CorporateDashboardComponent implements OnInit {
 
   // Yeni topluluk ekleme
   openNewCommunityModal() {
-    this.newCommunity = {
-      id: '', // Yeni topluluk için boş string, kaydedilirken otomatik Guid atanacak
-      name: '',
-      about: '',
-      shortDescription: '', // Kısa açıklama alanı
-      city: '',
-      university: '',
-      memberCount: 0,
-      website: '',
-      email: '',
-      category: this.categories[0] || 'Teknoloji',
-      logo: '',
-      banner: '',
-      status: 'Aktif',
-      presidentEmail: '', // Topluluk başkanının email adresi (zorunlu)
-    } as Community & { presidentEmail?: string; shortDescription?: string };
+      this.newCommunity = {
+        id: '', // Yeni topluluk için boş string, kaydedilirken otomatik Guid atanacak
+        name: '',
+        about: '',
+        shortDescription: '', // Kısa açıklama alanı
+        city: '',
+        university: '',
+        website: '',
+        email: '',
+        category: this.categories[0] || 'Teknoloji',
+        logo: '',
+        banner: '',
+        status: 'Aktif',
+        presidentEmail: '', // Topluluk başkanının email adresi (zorunlu)
+      } as Community & { presidentEmail?: string; shortDescription?: string };
     this.modalType = 'new-community';
     this.isModalOpen = true;
   }

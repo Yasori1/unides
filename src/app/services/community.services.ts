@@ -138,7 +138,27 @@ export class CommunityService {
         return mapped;
       }),
       catchError((error) => {
-        return of([]);
+        // Hata durumunda mock data döndür
+        const mockCommunity: Community = {
+          id: 'mock-id-1',
+          name: 'Yazılım ve Teknoloji Topluluğu (Demo)',
+          university: 'Demo Üniversitesi',
+          category: 'Teknoloji',
+          description: 'Teknoloji ve yazılım meraklılarını bir araya getiren topluluk.',
+          logo: 'assets/img/placeholder-logo.svg',
+          banner: 'assets/img/placeholder-cover.svg',
+          coverImage: 'assets/img/placeholder-cover.svg',
+          memberCount: 150,
+          city: 'İstanbul',
+          about: 'Bu bir demo topluluktur. Detayları inceleyebilirsiniz.',
+          status: 'Aktif',
+          isActivity: true,
+          miniAbout: 'Teknoloji ve yazılım meraklılarını bir araya getiren topluluk.',
+          email: 'demo@community.com',
+          presidentEmail: 'baskan@demo.com',
+          comLeadMail: 'baskan@demo.com'
+        };
+        return of([mockCommunity]);
       })
     );
   }
@@ -170,6 +190,32 @@ export class CommunityService {
     return this.http.get<CommunityDetailDto>(`${this.apiUrl}/${id}`, { headers }).pipe(
       map((response) => this.mapDetailDtoToCommunity(response)),
       catchError((error) => {
+         // Hata durumunda mock data döndür (Demo için)
+         if (id === 'mock-id-1' || error.status === 0 || error.status === 404) {
+            const mockCommunity: Community = {
+              id: 'mock-id-1',
+              name: 'Yazılım ve Teknoloji Topluluğu (Demo)',
+              university: 'Demo Üniversitesi',
+              category: 'Teknoloji',
+              description: 'Teknoloji ve yazılım meraklılarını bir araya getiren topluluk.',
+              logo: 'assets/img/placeholder-logo.svg',
+              banner: 'assets/img/placeholder-cover.svg',
+              coverImage: 'assets/img/placeholder-cover.svg',
+              memberCount: 150,
+              city: 'İstanbul',
+              about: 'Bu bir demo topluluktur. Detayları inceleyebilirsiniz.',
+              status: 'Aktif',
+              isActivity: true,
+              miniAbout: 'Teknoloji ve yazılım meraklılarını bir araya getiren topluluk.',
+              email: 'demo@community.com',
+              presidentEmail: 'baskan@demo.com',
+              comLeadMail: 'baskan@demo.com',
+              webSiteUrl: 'https://demo.com',
+              instagramUrl: 'https://instagram.com/demo',
+              events: []
+            };
+            return of(mockCommunity);
+         }
         // Hata durumunda throw ediyoruz
         throw error;
       })

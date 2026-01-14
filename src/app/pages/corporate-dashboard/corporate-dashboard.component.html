@@ -221,15 +221,10 @@
       <div class="grid-container" *ngIf="displayedCommunities.length > 0">
         <div
           *ngFor="let item of displayedCommunities"
-          class="community-card"
           (click)="openCommunityDetail(item)"
+          class="community-card"
+          style="cursor: pointer"
         >
-          <!-- Status Badge - Sol Üst -->
-          <div class="community-status-badge">
-            <span class="status-indicator" [class.active]="item.status === 'Aktif'" [class.passive]="item.status === 'Pasif'"></span>
-            <span class="status-text">{{ item.status || 'Aktif' }}</span>
-          </div>
-
           <div class="cover-area">
             <img
               [src]="item.coverImage || item.banner || 'assets/img/placeholder-cover.svg'"
@@ -252,26 +247,21 @@
               </div>
               <div class="title-wrapper">
                 <h3 class="community-name">{{ item.name }}</h3>
-                <span class="university-name">{{ item.university }}</span>
-                <span class="city-tag" *ngIf="item.city">
-                  <i class="bx bxs-map"></i> {{ item.city }}
-                </span>
               </div>
             </div>
 
             <p class="description">{{ item.description || item.about }}</p>
 
-            <!-- Social Media Icons removed for Corporate Dashboard -->
-
             <div class="card-footer">
-              <div class="stat">
-                <i class="bx bx-group"></i>
-                <span>{{ item.memberCount }} Üye</span>
+              <div class="footer-info">
+                <span class="city-tag" *ngIf="item.city">
+                  <i class="bx bxs-map"></i> {{ item.city }}
+                </span>
+                <span class="email-tag" *ngIf="item.university">
+                  <i class="bx bxs-graduation"></i> {{ getUniversityAbbr(item.university) }}
+                </span>
               </div>
-              <span class="action-text">
-                İncele
-                <i class="bx bx-right-arrow-alt"></i>
-              </span>
+              <span class="action-text">İncele <i class="bx bx-right-arrow-alt"></i></span>
             </div>
           </div>
         </div>
@@ -759,7 +749,7 @@
                 />
               </div>
               <div class="form-group full-width">
-                <label>Topluluk Hakkında</label>
+                <label>Topluluk Hakkında (Maks. 500)</label>
                 <textarea
                   [(ngModel)]="newCommunity.about"
                   class="modern-input"
@@ -769,21 +759,20 @@
                 ></textarea>
               </div>
               <div class="form-group">
-                <label>Şehir <span class="required">*</span></label>
-                <input
-                  type="text"
-                  [(ngModel)]="newCommunity.city"
-                  class="modern-input"
-                  placeholder="İstanbul"
-                />
+                <label>Şehir</label>
+                <select [(ngModel)]="newCommunity.city" class="modern-input">
+                  <option value="">Şehir Seçin</option>
+                  <option *ngFor="let city of cities" [value]="city">{{ city }}</option>
+                </select>
               </div>
               <div class="form-group">
-                <label>Üniversite <span class="required">*</span></label>
+                <label>Üniversite (Maks. 40)</label>
                 <input
                   type="text"
                   [(ngModel)]="newCommunity.university"
                   class="modern-input"
                   placeholder="Üniversite adı..."
+                  maxlength="40"
                 />
               </div>
             </div>
@@ -793,35 +782,28 @@
             <h5 class="section-title">İletişim Bilgileri</h5>
             <div class="form-grid-2col">
               <div class="form-group">
-                <label>E-posta</label>
+                <label>E-posta (Maks. 60)</label>
                 <input
                   type="email"
                   [(ngModel)]="newCommunity.email"
                   class="modern-input"
                   placeholder="topluluk@mail.com"
+                  maxlength="60"
                 />
               </div>
               <div class="form-group">
-                <label>Topluluk Başkanı E-posta <span style="color: red">*</span></label>
+                <label>Topluluk Başkanı E-posta (Maks. 60) <span style="color: red">*</span></label>
                 <input
                   type="email"
                   [(ngModel)]="newCommunity.presidentEmail"
                   class="modern-input"
                   placeholder="baskan@mail.com"
                   required
+                  maxlength="60"
                 />
                 <small style="color: #666; font-size: 12px; margin-top: 4px; display: block">
                   Topluluk başkanının sistemde kayıtlı email adresi
                 </small>
-              </div>
-              <div class="form-group">
-                <label>Üye Sayısı</label>
-                <input
-                  type="number"
-                  [(ngModel)]="newCommunity.memberCount"
-                  class="modern-input"
-                  placeholder="0"
-                />
               </div>
               <!-- Website field removed for Corporate Dashboard -->
             </div>
@@ -905,12 +887,13 @@
             </div>
 
             <div class="form-group full-width">
-              <label>Topluluk Hakkında</label>
+              <label>Topluluk Hakkında (Maks. 500)</label>
               <textarea
                 [(ngModel)]="editingCommunity.about"
                 class="modern-input"
                 rows="3"
                 placeholder="Topluluk hakkında kısa bir açıklama yazın..."
+                maxlength="500"
               ></textarea>
             </div>
           </div>
@@ -920,20 +903,19 @@
             <div class="form-grid-2col">
               <div class="form-group">
                 <label>Şehir</label>
-                <input
-                  type="text"
-                  [(ngModel)]="editingCommunity.city"
-                  class="modern-input"
-                  placeholder="Şehir"
-                />
+                <select [(ngModel)]="editingCommunity.city" class="modern-input">
+                  <option value="">Şehir Seçin</option>
+                  <option *ngFor="let city of cities" [value]="city">{{ city }}</option>
+                </select>
               </div>
               <div class="form-group">
-                <label>Üniversite</label>
+                <label>Üniversite (Maks. 40)</label>
                 <input
                   type="text"
                   [(ngModel)]="editingCommunity.university"
                   class="modern-input"
                   placeholder="Üniversite adı"
+                  maxlength="40"
                 />
               </div>
             </div>
@@ -943,21 +925,13 @@
             <h5 class="section-title">İletişim Bilgileri</h5>
             <div class="form-grid-2col">
               <div class="form-group">
-                <label>E-posta</label>
+                <label>E-posta (Maks. 60)</label>
                 <input
                   type="email"
                   [(ngModel)]="editingCommunity.email"
                   class="modern-input"
                   placeholder="topluluk@mail.com"
-                />
-              </div>
-              <div class="form-group">
-                <label>Üye Sayısı</label>
-                <input
-                  type="number"
-                  [(ngModel)]="editingCommunity.memberCount"
-                  class="modern-input"
-                  placeholder="0"
+                  maxlength="60"
                 />
               </div>
               <!-- Website and Social Media fields removed for Corporate Dashboard -->

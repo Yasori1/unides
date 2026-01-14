@@ -301,8 +301,23 @@ export class EventService {
         return apiEvents;
       }),
       catchError((error) => {
-        // Hata durumunda boş array döndür
-        return of([]);
+        // Hata durumunda mock data döndür
+        const mockEvent: EventItem = {
+          id: 999,
+          title: 'Kampüs Kodluyor Hackathonu (Demo)',
+          shortDescription: '48 saat sürecek maratonda takımlar en iyi dijital çözümü üretmek için yarışıyor.',
+          description: '48 saat sürecek maratonda takımlar en iyi dijital çözümü üretmek için yarışıyor. Detaylı bilgi için web sitemizi ziyaret edin.',
+          startDate: new Date().toISOString(),
+          endDate: new Date(new Date().getTime() + 86400000).toISOString(), // Yarın
+          location: 'İstanbul Kampüs',
+          communityId: 1,
+          communityName: 'Yazılım Kulübü',
+          imageUrl: 'https://images.unsplash.com/photo-1504384308090-c54be3852f33?q=80&w=1000&auto=format&fit=crop',
+          status: 'Onaylandı',
+          capacity: '100',
+          city: 'İstanbul'
+        };
+        return of([mockEvent]);
       })
     );
   }
@@ -379,7 +394,26 @@ export class EventService {
     return this.http.get<any>(`${this.apiUrl}/${id}`, { headers }).pipe(
       map((dto) => this.mapToEvent(dto)),
       catchError((error) => {
-        console.error('Etkinlik detayı yüklenemedi:', error);
+        console.error('Etkinlik detayı yüklenemedi, mock data dönülüyor:', error);
+        // Eğer id mock event id ise mock event dön
+        if (id === 999) {
+             const mockEvent: EventItem = {
+              id: 999,
+              title: 'Kampüs Kodluyor Hackathonu (Demo)',
+              shortDescription: '48 saat sürecek maratonda takımlar en iyi dijital çözümü üretmek için yarışıyor.',
+              description: '48 saat sürecek maratonda takımlar en iyi dijital çözümü üretmek için yarışıyor. Detaylı bilgi için web sitemizi ziyaret edin.',
+              startDate: new Date().toISOString(),
+              endDate: new Date(new Date().getTime() + 86400000).toISOString(), // Yarın
+              location: 'İstanbul Kampüs',
+              communityId: 1,
+              communityName: 'Yazılım Kulübü',
+              imageUrl: 'https://images.unsplash.com/photo-1504384308090-c54be3852f33?q=80&w=1000&auto=format&fit=crop',
+              status: 'Onaylandı',
+              capacity: '100',
+              city: 'İstanbul'
+            };
+            return of(mockEvent);
+        }
         throw error;
       })
     );
