@@ -1068,6 +1068,17 @@
                 </button>
               </ng-container>
 
+              <!-- Onaylanan Etkinlikler için Spam Kontrolü Butonu -->
+              <ng-container *ngIf="selectedEvent.status === 'Onaylandı'">
+                <button 
+                  class="btn-info"
+                  *ngIf="!checkingSpamEvents.has(selectedEvent.id)"
+                  (click)="performSpamCheck(selectedEvent.id)"
+                >
+                  <span class="material-symbols-outlined">security</span> Spam Kontrolü Kontrol Et
+                </button>
+              </ng-container>
+
               <button class="btn-danger" *ngIf="selectedEvent.status !== 'Beklemede'" (click)="deleteEvent(selectedEvent.id)">
                 <span class="material-symbols-outlined">delete</span> Etkinliği Sil
               </button>

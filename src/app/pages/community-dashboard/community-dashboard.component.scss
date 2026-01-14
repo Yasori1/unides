@@ -1522,6 +1522,11 @@
 
   app-luma-spin {
     transform: scale(2); // Spinner'ı biraz büyüt
+    
+    // LumaSpin rengini #1e3a8a yap
+    ::ng-deep .spin-shape {
+      box-shadow: inset 0 0 0 2px #1e3a8a !important;
+    }
   }
 }
 
@@ -1933,6 +1938,9 @@
     opacity: 1;
   }
 }
+
+// Event Detail Modal Styles - Artık modal-overlay ve modal-card kullanılıyor
+// Eski stiller kaldırıldı, etkinlik oluştur modalı ile aynı yapı kullanılıyor
 
 // Members Table Styles
 .members-table-container {

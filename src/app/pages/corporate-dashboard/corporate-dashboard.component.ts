@@ -85,7 +85,8 @@ export class CorporateDashboardComponent implements OnInit {
   filteredEvents: EventRequest[] = []; // Filtrelenmiş etkinlikler
   inspectedEvents: Set<number> = new Set();
   checkingSpamEvents: Set<number> = new Set(); // Spam kontrolü yapılan event'ler
-  spamResults: Map<number, { clean: boolean; message: string }> = new Map();
+  spamResults: Map<number, { clean: boolean; message: string; analysis?: any; highlighted?: any }> =
+    new Map();
   forbiddenWords: string[] = ['yasak', 'illegal', 'spam', 'kötü', 'bahis', 'kumar'];
 
   // Confirmation modal için
@@ -151,14 +152,87 @@ export class CorporateDashboardComponent implements OnInit {
   ];
 
   cities: string[] = [
-    'Adana', 'Adıyaman', 'Afyonkarahisar', 'Ağrı', 'Amasya', 'Ankara', 'Antalya', 'Artvin', 'Aydın', 'Balıkesir',
-    'Bilecik', 'Bingöl', 'Bitlis', 'Bolu', 'Burdur', 'Bursa', 'Çanakkale', 'Çankırı', 'Çorum', 'Denizli',
-    'Diyarbakır', 'Edirne', 'Elazığ', 'Erzincan', 'Erzurum', 'Eskişehir', 'Gaziantep', 'Giresun', 'Gümüşhane', 'Hakkari',
-    'Hatay', 'Isparta', 'Mersin', 'İstanbul', 'İzmir', 'Kars', 'Kastamonu', 'Kayseri', 'Kırklareli', 'Kırşehir',
-    'Kocaeli', 'Konya', 'Kütahya', 'Malatya', 'Manisa', 'Kahramanmaraş', 'Mardin', 'Muğla', 'Muş', 'Nevşehir',
-    'Niğde', 'Ordu', 'Rize', 'Sakarya', 'Samsun', 'Siirt', 'Sinop', 'Sivas', 'Tekirdağ', 'Tokat',
-    'Trabzon', 'Tunceli', 'Şanlıurfa', 'Uşak', 'Van', 'Yozgat', 'Zonguldak', 'Aksaray', 'Bayburt', 'Karaman',
-    'Kırıkkale', 'Batman', 'Şırnak', 'Bartın', 'Ardahan', 'Iğdır', 'Yalova', 'Karabük', 'Kilis', 'Osmaniye', 'Düzce'
+    'Adana',
+    'Adıyaman',
+    'Afyonkarahisar',
+    'Ağrı',
+    'Amasya',
+    'Ankara',
+    'Antalya',
+    'Artvin',
+    'Aydın',
+    'Balıkesir',
+    'Bilecik',
+    'Bingöl',
+    'Bitlis',
+    'Bolu',
+    'Burdur',
+    'Bursa',
+    'Çanakkale',
+    'Çankırı',
+    'Çorum',
+    'Denizli',
+    'Diyarbakır',
+    'Edirne',
+    'Elazığ',
+    'Erzincan',
+    'Erzurum',
+    'Eskişehir',
+    'Gaziantep',
+    'Giresun',
+    'Gümüşhane',
+    'Hakkari',
+    'Hatay',
+    'Isparta',
+    'Mersin',
+    'İstanbul',
+    'İzmir',
+    'Kars',
+    'Kastamonu',
+    'Kayseri',
+    'Kırklareli',
+    'Kırşehir',
+    'Kocaeli',
+    'Konya',
+    'Kütahya',
+    'Malatya',
+    'Manisa',
+    'Kahramanmaraş',
+    'Mardin',
+    'Muğla',
+    'Muş',
+    'Nevşehir',
+    'Niğde',
+    'Ordu',
+    'Rize',
+    'Sakarya',
+    'Samsun',
+    'Siirt',
+    'Sinop',
+    'Sivas',
+    'Tekirdağ',
+    'Tokat',
+    'Trabzon',
+    'Tunceli',
+    'Şanlıurfa',
+    'Uşak',
+    'Van',
+    'Yozgat',
+    'Zonguldak',
+    'Aksaray',
+    'Bayburt',
+    'Karaman',
+    'Kırıkkale',
+    'Batman',
+    'Şırnak',
+    'Bartın',
+    'Ardahan',
+    'Iğdır',
+    'Yalova',
+    'Karabük',
+    'Kilis',
+    'Osmaniye',
+    'Düzce',
   ].sort();
 
   allCommunities: Community[] = [];
@@ -750,21 +824,21 @@ export class CorporateDashboardComponent implements OnInit {
 
   // Yeni topluluk ekleme
   openNewCommunityModal() {
-      this.newCommunity = {
-        id: '', // Yeni topluluk için boş string, kaydedilirken otomatik Guid atanacak
-        name: '',
-        about: '',
-        shortDescription: '', // Kısa açıklama alanı
-        city: '',
-        university: '',
-        website: '',
-        email: '',
-        category: this.categories[0] || 'Teknoloji',
-        logo: '',
-        banner: '',
-        status: 'Aktif',
-        presidentEmail: '', // Topluluk başkanının email adresi (zorunlu)
-      } as Community & { presidentEmail?: string; shortDescription?: string };
+    this.newCommunity = {
+      id: '', // Yeni topluluk için boş string, kaydedilirken otomatik Guid atanacak
+      name: '',
+      about: '',
+      shortDescription: '', // Kısa açıklama alanı
+      city: '',
+      university: '',
+      website: '',
+      email: '',
+      category: this.categories[0] || 'Teknoloji',
+      logo: '',
+      banner: '',
+      status: 'Aktif',
+      presidentEmail: '', // Topluluk başkanının email adresi (zorunlu)
+    } as Community & { presidentEmail?: string; shortDescription?: string };
     this.modalType = 'new-community';
     this.isModalOpen = true;
   }
@@ -1091,8 +1165,8 @@ export class CorporateDashboardComponent implements OnInit {
     }, 1500);
   }
 
-  // Spam kontrolünü yapan private metod
-  private performSpamCheck(id: number) {
+  // Spam kontrolünü yapan metod (onaylanan etkinlikler için public)
+  performSpamCheck(id: number) {
     const ev = this.allEvents.find((e) => e.id === id);
     if (!ev) return;
 
@@ -1140,19 +1214,16 @@ export class CorporateDashboardComponent implements OnInit {
     }
     const notes = notesParts.join('\n');
 
-    // Backend'in beklediği formata göre veriyi hazırla
+    // Python API'sinin beklediği formata göre veriyi hazırla
     const eventData = {
-      id: ev.id,
       title: ev.eventName || '',
-      body: body || '',
       category: ev.communityName || '',
+      body: body || '',
       notes: notes || '',
-      status: status,
-      created_at: ev.startDate || ev.date || new Date().toISOString(),
     };
 
-    // API'ye istek gönder (proxy üzerinden - CORS hatası önlemek için)
-    const apiUrl = '/spam-check'; // Proxy bu isteği http://72.62.37.160:5002/check adresine yönlendirecek
+    // Python API'sine istek gönder (proxy üzerinden - CORS hatası önlemek için)
+    const apiUrl = '/api/moderate'; // Proxy bu isteği http://72.62.37.160:5002/api/moderate adresine yönlendirecek
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
       Accept: 'application/json',
@@ -1161,18 +1232,17 @@ export class CorporateDashboardComponent implements OnInit {
     this.http
       .post(apiUrl, eventData, {
         headers,
-        responseType: 'json', // Backend JSON döndürüyor
+        responseType: 'json',
       })
       .pipe(
         catchError((error) => {
           // Hata durumunda
           let errorMessage = 'Spam kontrolü sırasında bir hata oluştu.';
 
-          // HTML yanıtı gelirse (JSON parse hatası)
-          if (error.error && typeof error.error === 'string' && error.error.includes('<!DOCTYPE')) {
-            errorMessage = 'Backend bağlantı hatası. Lütfen daha sonra tekrar deneyin.';
-          } else if (error.error && typeof error.error === 'object' && error.error.message) {
-            errorMessage = error.error.message;
+          if (error.error && typeof error.error === 'object' && error.error.error) {
+            errorMessage = error.error.error;
+          } else if (error.error && typeof error.error === 'string') {
+            errorMessage = error.error;
           } else if (error.message) {
             errorMessage = error.message;
           }
@@ -1185,7 +1255,6 @@ export class CorporateDashboardComponent implements OnInit {
       )
       .subscribe({
         next: (response: any) => {
-          // Response zaten JSON olarak parse edilmiş geliyor
           if (!response) {
             const errorMessage = 'Backend yanıtı boş.';
             this.spamResults.set(id, { clean: false, message: errorMessage });
@@ -1195,27 +1264,51 @@ export class CorporateDashboardComponent implements OnInit {
             return;
           }
 
-          // Backend formatı: { result: { status: "kabul", reason: "Temiz" }, ... }
-          // result.status === "kabul" ise içerik temiz
-          const result = response.result;
-          if (result) {
-            const isClean = result.status === 'kabul';
-            const message =
-              result.reason || (isClean ? 'İçerik temizdir.' : 'Spam içerik tespit edildi.');
+          // Python API response formatı:
+          // {
+          //   moderation: { ... },
+          //   analysis: {
+          //     forbidden: { count: number, words: string[] },
+          //     spam: { count: number, keywords: string[] },
+          //     politics: { count: number, keywords: string[] }
+          //   },
+          //   highlighted: { ... }
+          // }
 
-            this.spamResults.set(id, { clean: isClean, message });
-            this.showToast(message, isClean ? 'success' : 'error');
+          const analysis = response.analysis || {};
+          const forbiddenCount = analysis.forbidden?.count || 0;
+          const spamCount = analysis.spam?.count || 0;
+          const politicsCount = analysis.politics?.count || 0;
+
+          // Eğer hiçbir sorun yoksa içerik temizdir
+          const isClean = forbiddenCount === 0 && spamCount === 0 && politicsCount === 0;
+
+          let message = '';
+          if (isClean) {
+            message = 'İçerik temizdir. Spam, yasak kelime veya siyasi içerik tespit edilmedi.';
           } else {
-            // Eski format desteği (fallback)
-            const isClean = response.clean !== false;
-            const message =
-              response.message || (isClean ? 'İçerik temizdir.' : 'Spam içerik tespit edildi.');
-
-            this.spamResults.set(id, { clean: isClean, message });
-            this.showToast(message, isClean ? 'success' : 'error');
+            const issues: string[] = [];
+            if (forbiddenCount > 0) {
+              issues.push(`${forbiddenCount} yasak kelime`);
+            }
+            if (spamCount > 0) {
+              issues.push(`${spamCount} spam kelimesi`);
+            }
+            if (politicsCount > 0) {
+              issues.push(`${politicsCount} siyasi içerik`);
+            }
+            message = `İçerikte sorun tespit edildi: ${issues.join(', ')}.`;
           }
 
-          // Spam kontrolü bitti
+          // Spam sonuçlarını kaydet (analiz detaylarını da sakla)
+          this.spamResults.set(id, {
+            clean: isClean,
+            message: message,
+            analysis: analysis,
+            highlighted: response.highlighted,
+          });
+
+          this.showToast(message, isClean ? 'success' : 'error');
           this.checkingSpamEvents.delete(id);
           this.inspectedEvents.add(id);
         },

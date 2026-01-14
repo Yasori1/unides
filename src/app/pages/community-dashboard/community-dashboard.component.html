@@ -650,65 +650,84 @@
   </div>
 </div>
 
-<div class="modal-backdrop" *ngIf="selectedEvent" (click)="closeEventDetail()">
-  <div class="modal-content" (click)="$event.stopPropagation()">
-    <button class="close-btn" (click)="closeEventDetail()">
-      <span class="material-symbols-outlined">close</span>
-    </button>
-
-    <div class="modal-header">
-      <img
-        [src]="selectedEvent.imageUrl"
-        class="modal-cover"
-        onerror="this.src='assets/images/placeholder.jpg'"
-      />
-      <span class="modal-cat-badge" [style.background]="'#2563eb'">
-        {{ selectedEvent.category }}
-      </span>
+<!-- Event Detail Modal -->
+<div class="modal-overlay" *ngIf="selectedEvent" (click)="closeEventDetail()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-head">
+      <h3>Etkinlik Detayları</h3>
+      <button class="icon-btn ghost close-modern" (click)="closeEventDetail()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
     </div>
-
     <div class="modal-body">
-      <h2 class="event-title">{{ selectedEvent.title }}</h2>
-
-      <div class="info-card">
-        <div class="info-column">
-          <div class="info-item">
-            <span class="info-label">ÜNİVERSİTE</span>
-            <span class="info-value">{{ clubInfo.university }}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">TARİH</span>
-            <span class="info-value">{{ selectedEvent.date }}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">KONUM</span>
-            <span class="info-value">{{ selectedEvent.location }}</span>
-          </div>
+      <div class="single-image-upload no-url-input">
+        <div class="upload-header">
+          <span class="upload-title">Etkinlik Fotoğrafı</span>
         </div>
-        <div class="info-column">
-          <div class="info-item">
-            <span class="info-label">TOPLULUK</span>
-            <span class="info-value">{{ clubInfo.name }}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">SAAT</span>
-            <span class="info-value">{{ selectedEvent.time || '10:00' }}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">KONTENJAN</span>
-            <span class="info-value">{{ selectedEvent.quota || 100 }} Kişilik Yer Var</span>
-          </div>
+        <div class="image-preview">
+          <img [src]="selectedEvent.imageUrl" [alt]="selectedEvent.title" onerror="this.src='assets/images/placeholder.jpg'" />
         </div>
       </div>
+      
+      <label class="stacked">
+        <span>Etkinlik İsmi</span>
+        <input type="text" [value]="selectedEvent.title" readonly />
+      </label>
 
-      <div class="description-section">
-        <span class="description-label">AÇIKLAMA</span>
-        <p class="description-text">{{ selectedEvent.description }}</p>
+      <div class="row two-cols">
+        <label class="stacked">
+          <span>Tarih</span>
+          <input type="text" [value]="selectedEvent.date" readonly />
+        </label>
+        <label class="stacked">
+          <span>Saat</span>
+          <input type="text" [value]="selectedEvent.time || '10:00'" readonly />
+        </label>
       </div>
+      
+      <label class="stacked">
+        <span>Konum</span>
+        <input type="text" [value]="selectedEvent.location" readonly />
+      </label>
+      
+      <label class="stacked">
+        <span>Kontenjan</span>
+        <input type="text" [value]="(selectedEvent.quota || 100) + ' Kişilik Yer Var'" readonly />
+      </label>
+      
+      <label class="stacked">
+        <span>Etkinlik Kısa Açıklama</span>
+        <input type="text" [value]="(selectedEvent.description || '').substring(0, 70) || 'Kısa açıklama belirtilmemiş.'" readonly />
+      </label>
 
-      <div class="modal-footer-actions" style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end;">
-        <button class="btn danger" (click)="openDeleteEventConfirm(selectedEvent.id)" style="display: flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 8px; background: #ef4444; color: white; border: none; cursor: pointer; font-weight: 500;">
-          <span class="material-symbols-outlined">delete</span> Etkinliği Sil
+      <label class="stacked">
+        <span>Etkinlik Açıklaması</span>
+        <textarea rows="3" readonly>{{ selectedEvent.description || 'Açıklama belirtilmemiş.' }}</textarea>
+      </label>
+
+      <!-- Rejection Reason (only for rejected events) -->
+      <label class="stacked" *ngIf="selectedEvent.status === 'rejected' && selectedEvent.rejectionReason">
+        <span>Red Nedeni</span>
+        <textarea rows="2" readonly style="background: #fef2f2; border-color: #fecaca; color: #991b1b;">{{ selectedEvent.rejectionReason }}</textarea>
+      </label>
+
+      <div style="display: flex; gap: 12px; margin-top: 8px;">
+        <button 
+          class="btn-primary full" 
+          *ngIf="selectedEvent.status === 'rejected'"
+          (click)="proceedToEditRejectedEvent()"
+          type="button"
+        >
+          <span>Düzenle</span>
+        </button>
+        <button 
+          class="btn-primary full" 
+          style="background: #ef4444;"
+          (click)="openDeleteEventConfirm(selectedEvent.id)"
+          type="button"
+        >
+          <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px;">delete</span>
+          <span>Etkinliği Sil</span>
         </button>
       </div>
     </div>

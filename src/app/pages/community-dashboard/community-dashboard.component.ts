@@ -524,6 +524,23 @@ export class CommunityDashboardComponent implements OnInit {
       if (!found) {
         console.warn('No community found for user email:', userEmail);
         this.isLoadingCommunity = false;
+
+        // Kullanıcı bir topluluğun başkanı değil, ana sayfaya yönlendir
+        this.showToast(
+          'Bu e-posta adresi ile ilişkili bir topluluk bulunamadı. Topluluk girişi için topluluk başkanı e-postası ile giriş yapmanız gerekmektedir.',
+          'error'
+        );
+
+        // Token'ı temizle ve ana sayfaya yönlendir
+        setTimeout(() => {
+          if (isPlatformBrowser(this.platformId)) {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('refresh_token');
+            localStorage.removeItem('user_info');
+            localStorage.removeItem('user_type');
+          }
+          this.router.navigate(['/']);
+        }, 3000);
       }
     });
   }
@@ -606,7 +623,50 @@ export class CommunityDashboardComponent implements OnInit {
       next: (communityEvents) => {
         // Map to DashboardEvent format
         this.dashboardEvents = communityEvents.map((e) => {
-          const startDate = e.startDate ? new Date(e.startDate) : new Date();
+          // Tarih parse işlemini güvenli hale getir
+          let startDate: Date;
+          let dateStr: string = 'Tarih belirtilmemiş';
+          let timeStr: string = '';
+          let startDateIso: string = '';
+
+          if (e.startDate) {
+            try {
+              // ISO string formatında gelebilir veya farklı formatlarda
+              const dateValue = typeof e.startDate === 'string' ? e.startDate : String(e.startDate);
+
+              // Tarih parse et
+              startDate = new Date(dateValue);
+
+              // Geçerlilik kontrolü
+              if (isNaN(startDate.getTime())) {
+                // Geçersiz tarih, varsayılan değer kullan
+                startDate = new Date();
+                dateStr = 'Tarih belirtilmemiş';
+                timeStr = '';
+                startDateIso = new Date().toISOString();
+              } else {
+                // Geçerli tarih, formatla
+                dateStr = startDate.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' });
+                timeStr = startDate.toLocaleTimeString('tr-TR', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                });
+                startDateIso = startDate.toISOString();
+              }
+            } catch (error) {
+              console.error('Tarih parse hatası:', error, e.startDate);
+              startDate = new Date();
+              dateStr = 'Tarih belirtilmemiş';
+              timeStr = '';
+              startDateIso = new Date().toISOString();
+            }
+          } else {
+            // startDate yoksa varsayılan değer
+            startDate = new Date();
+            dateStr = 'Tarih belirtilmemiş';
+            timeStr = '';
+            startDateIso = new Date().toISOString();
+          }
 
           // Backend'den gelen status değerine göre map et
           // EventService.mapToEvent zaten 'Beklemede', 'Onaylandı', 'Reddedildi' formatına çeviriyor
@@ -626,13 +686,13 @@ export class CommunityDashboardComponent implements OnInit {
             imageUrl:
               e.imageUrl ||
               'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=800&q=60',
-            date: startDate.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' }),
-            startDateIso: e.startDate || startDate.toISOString(),
+            date: dateStr,
+            startDateIso: startDateIso,
             location: e.location || 'Konum belirtilmemiş',
             category: 'Etkinlik', // Backend'de category yok, varsayılan değer
             description: e.description || e.shortDescription || '',
             rejectionReason: (e as any).rejectionReason, // Backend'den gelirse
-            time: startDate.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+            time: timeStr,
             quota: e.capacity ? parseInt(e.capacity, 10) : 0,
           } as DashboardEvent;
         });
@@ -774,6 +834,11 @@ export class CommunityDashboardComponent implements OnInit {
     this.activeTab = tab;
     this.showNotifications = false;
     this.isProfileOpen = false;
+
+    // Üyeler sekmesine geçildiğinde üyeleri yükle
+    if (tab === 'members' && this.clubInfo?.id) {
+      this.loadCommunityMembers(this.clubInfo.id);
+    }
   }
 
   toggleNotifications(event?: MouseEvent) {
@@ -1017,31 +1082,33 @@ export class CommunityDashboardComponent implements OnInit {
       return;
     }
 
-    // Tarih ve saat birleştirme ve ISO formatına çevirme
-    const dateTimeString = `${this.newEventData.date} ${this.newEventData.time}`;
+    // HTML input type="date" zaten YYYY-MM-DD formatında değer döndürüyor
+    // Tarih ve saat parse işlemi
     let startDate: Date;
     let endDate: Date;
 
     try {
-      // Tarih formatını parse et (tr-TR formatı: DD.MM.YYYY veya YYYY-MM-DD)
-      const dateParts = this.newEventData.date.split(/[.\-\/]/);
-      const timeParts = this.newEventData.time.split(':');
+      // HTML input type="date" YYYY-MM-DD formatında döndürür
+      // HTML input type="time" HH:mm formatında döndürür
+      const dateStr = this.newEventData.date; // Format: "YYYY-MM-DD"
+      const timeStr = this.newEventData.time; // Format: "HH:mm"
 
-      if (dateParts.length === 3 && timeParts.length >= 2) {
-        // DD.MM.YYYY formatı
-        const day = parseInt(dateParts[0], 10);
-        const month = parseInt(dateParts[1], 10) - 1; // Month is 0-indexed
-        const year = parseInt(dateParts[2], 10);
-        const hour = parseInt(timeParts[0], 10);
-        const minute = parseInt(timeParts[1], 10);
-
-        startDate = new Date(year, month, day, hour, minute);
-        endDate = new Date(startDate); // Aynı tarih ve saat, backend'de endDate zorunlu
-      } else {
-        // Fallback: string'i direkt parse et
-        startDate = new Date(dateTimeString);
-        endDate = new Date(startDate);
+      if (!dateStr || !timeStr) {
+        throw new Error('Tarih ve saat gereklidir');
       }
+
+      // Tarih ve saati birleştir: "YYYY-MM-DD HH:mm"
+      const dateTimeString = `${dateStr} ${timeStr}`;
+
+      // Local timezone'da parse et (UTC'ye çevirme, çünkü backend DateOnly bekliyor)
+      // YYYY-MM-DD HH:mm formatını parse et
+      const [datePart, timePart] = dateTimeString.split(' ');
+      const [year, month, day] = datePart.split('-').map(Number);
+      const [hour, minute] = timePart.split(':').map(Number);
+
+      // Local timezone'da Date oluştur (UTC'ye çevirme)
+      startDate = new Date(year, month - 1, day, hour, minute);
+      endDate = new Date(startDate); // Aynı tarih ve saat
 
       if (isNaN(startDate.getTime())) {
         throw new Error('Geçersiz tarih formatı');
@@ -1071,7 +1138,7 @@ export class CommunityDashboardComponent implements OnInit {
           location: this.newEventData.location,
           description: this.newEventData.description,
           shortDescription: this.newEventData.shortDescription || this.newEventData.description,
-          imageUrl: this.newEventData.image,
+          imageUrl: this.newEventData.image || undefined, // Fotoğraf optional
           // Status backend tarafından 'Beklemede'ye çekilebilir, biz burada belirtmiyoruz
         })
         .subscribe({
@@ -1107,15 +1174,16 @@ export class CommunityDashboardComponent implements OnInit {
         endDate: endDate.toISOString(),
         location: this.newEventData.location,
         description: this.newEventData.description,
-        shortDescription: this.newEventData.description,
-        imageUrl: this.newEventData.image,
-        comId: comId, // Backend'de Guid (string) bekleniyor
+        shortDescription: this.newEventData.shortDescription || this.newEventData.description,
+        imageUrl: this.newEventData.image || undefined, // Fotoğraf optional
+        quota: this.newEventData.quota ? Number(this.newEventData.quota) : undefined,
+        // comId backend'de otomatik olarak creator'ın topluluğundan alınıyor
       })
       .subscribe({
         next: (response) => {
           console.log('Event created successfully:', response);
           this.showToast(
-            "Etkinlik başarıyla oluşturuldu! Kurumsal Dashboard'a yönlendiriliyorsunuz...",
+            "Etkinlik başarıyla oluşturuldu! Kurumsal Dashboard'daki etkinlik onaylama ekranına iletildi.",
             'success'
           );
 
@@ -1127,26 +1195,8 @@ export class CommunityDashboardComponent implements OnInit {
             this.loadCommunityEvents(this.clubInfo.id);
           }
 
-          // Kurumsal Dashboard'a yönlendir (1.5 saniye sonra)
-          setTimeout(() => {
-            console.log('Navigating to corporate dashboard...');
-            this.router
-              .navigate(['/corporate-dashboard'], {
-                queryParams: { from: 'community-dashboard', eventCreated: 'true' },
-              })
-              .then(
-                (success) => {
-                  console.log('Navigation successful:', success);
-                },
-                (error) => {
-                  console.error('Navigation error:', error);
-                  this.showToast(
-                    "Yönlendirme hatası. Lütfen manuel olarak Kurumsal Dashboard'a gidin.",
-                    'error'
-                  );
-                }
-              );
-          }, 1500);
+          // Route yapma - sadece etkinlik oluşturuldu, kurumsal dashboard'a yönlendirme yok
+          // Etkinlik otomatik olarak kurumsal dashboard'daki onaylama ekranına iletildi
         },
         error: (err: any) => {
           console.error('Etkinlik oluşturulamadı:', err);
@@ -1164,13 +1214,8 @@ export class CommunityDashboardComponent implements OnInit {
   get isEventFormValid() {
     const { title, date, time, location, quota, description, image } = this.newEventData;
     return (
-      !!title.trim() &&
-      !!date &&
-      !!time &&
-      !!location.trim() &&
-      !!quota &&
-      !!description.trim() &&
-      !!image
+      !!title.trim() && !!date && !!time && !!location.trim() && !!quota && !!description.trim()
+      // !!image // Fotoğraf zorunluluğu şimdilik kaldırıldı
     );
   }
 
@@ -1265,22 +1310,6 @@ export class CommunityDashboardComponent implements OnInit {
           // Başarılı - üyeleri backend'den yeniden yükle
           if (this.clubInfo.id) {
             this.loadCommunityMembers(this.clubInfo.id);
-          } else {
-            // Fallback: frontend listesine ekle (backend endpoint yoksa)
-            this.members.unshift({
-              id: Date.now(),
-              name: this.newMemberData.name,
-              role: this.newMemberData.role,
-              department: this.newMemberData.department,
-              email: this.newMemberData.email,
-              phone: this.newMemberData.phone,
-              grade: this.newMemberData.grade,
-              avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                this.getInitials(this.newMemberData.name)
-              )}&background=e2e8f0&color=1e293b`,
-              status: 'Aktif',
-            });
-            this.stats.totalMembers++;
           }
           this.showToast('Üye eklendi.', 'success');
           this.memberCurrentPage = 1;
@@ -1301,17 +1330,31 @@ export class CommunityDashboardComponent implements OnInit {
       this.memberSearchResults = [];
       return;
     }
+
     this.isSearchingMembers = true;
-    const lowered = term.toLowerCase();
-    this.memberSearchResults = this.members
-      .filter(
-        (m) =>
-          m.name.toLowerCase().includes(lowered) ||
-          m.department.toLowerCase().includes(lowered) ||
-          m.email.toLowerCase().includes(lowered)
-      )
-      .map((m) => ({ name: m.name, email: m.email }));
-    this.isSearchingMembers = false;
+
+    // Backend'den topluluğa üye olmayan öğrencileri ara
+    this.communityService.searchNonMemberStudents(term).subscribe({
+      next: (students) => {
+        // Backend'den gelen öğrencileri filtrele (mevcut üyeler hariç)
+        const memberEmails = new Set(this.members.map((m) => m.email.toLowerCase()));
+        this.memberSearchResults = students
+          .filter((s: any) => {
+            const email = (s.email || s.Email || '').toLowerCase();
+            return !memberEmails.has(email);
+          })
+          .map((s: any) => ({
+            name: s.name || s.Name || this.getNameFromEmail(s.email || s.Email || ''),
+            email: s.email || s.Email || '',
+          }));
+        this.isSearchingMembers = false;
+      },
+      error: (err) => {
+        console.error('Öğrenci arama hatası:', err);
+        this.memberSearchResults = [];
+        this.isSearchingMembers = false;
+      },
+    });
   }
 
   selectMemberSuggestion(user: UserSearchResult) {
@@ -1453,27 +1496,6 @@ export class CommunityDashboardComponent implements OnInit {
           if (processedCount === emails.length) {
             if (this.clubInfo.id) {
               this.loadCommunityMembers(this.clubInfo.id);
-            } else {
-              // Fallback: stats'ı güncelle (backend endpoint yoksa) ve listeye ekle
-              this.stats.totalMembers += successCount;
-
-              // Backend olmadığı için listeye manuel ekle (mock)
-              emails.forEach((e) => {
-                this.members.unshift({
-                  id: Date.now() + Math.random(),
-                  name: this.getNameFromEmail(e),
-                  email: e,
-                  role: 'Üye',
-                  department: '',
-                  phone: '',
-                  grade: '',
-                  avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                    this.getInitials(this.getNameFromEmail(e))
-                  )}&background=e2e8f0&color=1e293b`,
-                  status: 'Aktif',
-                  university: this.getUniversityFromEmail(e),
-                });
-              });
             }
 
             if (errorCount === 0) {
@@ -1547,22 +1569,28 @@ export class CommunityDashboardComponent implements OnInit {
   deleteEventConfirmed() {
     if (this.confirmDeleteId === null) return;
 
-    // Backend'den sil (veya mock)
-    // this.eventService.deleteEvent(this.confirmDeleteId)...
+    // Backend'den etkinliği sil
+    this.eventService.deleteEvent(this.confirmDeleteId).subscribe({
+      next: () => {
+        // Başarılı - etkinlikleri backend'den yeniden yükle
+        if (this.clubInfo.id) {
+          this.loadCommunityEvents(this.clubInfo.id);
+        } else {
+          // Fallback: frontend listesinden çıkar (backend endpoint yoksa)
+          this.dashboardEvents = this.dashboardEvents.filter((e) => e.id !== this.confirmDeleteId);
+        }
 
-    // Mock delete from local list
-    this.dashboardEvents = this.dashboardEvents.filter((e) => e.id !== this.confirmDeleteId);
-
-    // LocalStorage'dan da kaldır (varsa)
-    if (isPlatformBrowser(this.platformId)) {
-      const approvedEvents = JSON.parse(localStorage.getItem('approved_events') || '[]');
-      const newApproved = approvedEvents.filter((id: number) => id !== this.confirmDeleteId);
-      localStorage.setItem('approved_events', JSON.stringify(newApproved));
-    }
-
-    this.showToast('Etkinlik silindi.', 'success');
-    this.closeEventDetail();
-    this.startCloseConfirm();
+        this.showToast('Etkinlik silindi.', 'success');
+        this.closeEventDetail();
+        this.startCloseConfirm();
+      },
+      error: (err: any) => {
+        console.error('Etkinlik silinirken hata:', err);
+        const errorMsg = err.error?.message || 'Etkinlik silinirken bir hata oluştu.';
+        this.showToast(errorMsg, 'error');
+        this.startCloseConfirm();
+      },
+    });
   }
 
   deleteMemberConfirmed() {
@@ -1589,10 +1617,6 @@ export class CommunityDashboardComponent implements OnInit {
         // Başarılı - üyeleri backend'den yeniden yükle
         if (this.clubInfo.id) {
           this.loadCommunityMembers(this.clubInfo.id);
-        } else {
-          // Fallback: frontend listesinden çıkar (backend endpoint yoksa)
-          this.members = this.members.filter((m) => m.id !== this.confirmDeleteId);
-          this.stats.totalMembers--;
         }
         this.showToast('Üye silindi.', 'success');
         if (this.memberCurrentPage > this.memberTotalPages) {
@@ -1682,10 +1706,8 @@ export class CommunityDashboardComponent implements OnInit {
   }
 
   onEventCardClick(event: DashboardEvent) {
-    if (event.status === 'rejected') {
-      this.rejectedEventToEdit = event;
-      this.openRejectionModal(event.rejectionReason || 'Red nedeni belirtilmemiş.');
-    }
+    // Tüm etkinlikler için detay modal aç
+    this.openEventDetail(event);
   }
 
   proceedToEditRejectedEvent() {

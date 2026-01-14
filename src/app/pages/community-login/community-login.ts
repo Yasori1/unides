@@ -5,11 +5,14 @@ import { FormsModule } from '@angular/forms';
 // Servisler
 import { ToastService } from '../../services/toast.services';
 import { AuthService, LoginResponse } from '../../services/auth.services';
+import { CommunityService } from '../../services/community.services';
 // Bileşenler
 import { ToastComponent } from '../../components/ui/toast/toast.component';
 import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
 // Http Client
 import { HttpClientModule, HttpErrorResponse } from '@angular/common/http';
+import { switchMap, catchError, take } from 'rxjs/operators';
+import { of, forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-community-login',
@@ -40,6 +43,7 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
   constructor(
     private toastService: ToastService,
     private authService: AuthService,
+    private communityService: CommunityService,
     private router: Router,
     private location: Location
   ) {}
@@ -124,15 +128,95 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
     this.authService.loginCommunity(email, password).subscribe({
       next: (response: LoginResponse) => {
         // --- BAŞARILI GİRİŞ ---
-        this.isLoading = false;
-        this.toastService.show(
-          'Giriş başarılı! Topluluk paneline yönlendiriliyorsunuz...',
-          'success'
-        );
+        // Giriş başarılı olduktan sonra, kullanıcının e-postasının bir topluluğun başkan e-postası olup olmadığını kontrol et
+        const normalizedEmail = email.trim().toLowerCase();
 
-        setTimeout(() => {
-          this.router.navigate(['/community-dashboard']);
-        }, 1500);
+        // Aktif toplulukları getir ve kullanıcının e-postasının ComLeadMail ile eşleşip eşleşmediğini kontrol et
+        // CommunityMiniDto'da ComLeadMail yok, bu yüzden her topluluğun detayını kontrol etmemiz gerekiyor
+        this.communityService
+          .getAllCommunities({ status: 'active' })
+          .pipe(
+            take(1), // İlk sonucu al ve tamamla
+            switchMap((communities) => {
+              if (!communities || communities.length === 0) {
+                // Topluluk bulunamadı
+                return of(null);
+              }
+
+              // Tüm toplulukların detaylarını paralel olarak çek (ComLeadMail kontrolü için)
+              const checkPromises = communities.map((community) =>
+                this.communityService.getCommunityById(community.id).pipe(
+                  catchError(() => of(null)),
+                  take(1)
+                )
+              );
+
+              // Tüm topluluk detaylarını paralel olarak kontrol et
+              return forkJoin(checkPromises).pipe(
+                take(1),
+                switchMap((communityDetails) => {
+                  // Kullanıcının e-postasının bir topluluğun ComLeadMail'i ile eşleşip eşleşmediğini kontrol et
+                  const matchingCommunity = communityDetails.find(
+                    (detail) =>
+                      detail && detail.comLeadMail?.trim().toLowerCase() === normalizedEmail
+                  );
+
+                  return of(matchingCommunity ? true : null);
+                })
+              );
+            }),
+            catchError((error) => {
+              // Topluluk kontrolü sırasında hata oluşursa
+              console.error('Topluluk kontrolü hatası:', error);
+              return of(null);
+            })
+          )
+          .subscribe({
+            next: (hasCommunity) => {
+              if (hasCommunity === true) {
+                // Kullanıcı bir topluluğun başkanı, dashboard'a yönlendir
+                this.isLoading = false;
+                this.toastService.show(
+                  'Giriş başarılı! Topluluk paneline yönlendiriliyorsunuz...',
+                  'success'
+                );
+
+                setTimeout(() => {
+                  this.router.navigate(['/community-dashboard']);
+                }, 1500);
+              } else {
+                // Kullanıcı hiçbir topluluğun başkanı değil, girişi engelle
+                this.isLoading = false;
+
+                // Token'ı temizle (giriş yapılmış gibi görünmesin)
+                localStorage.removeItem('auth_token');
+                localStorage.removeItem('refresh_token');
+                localStorage.removeItem('user_info');
+                localStorage.removeItem('user_type');
+
+                this.toastService.show(
+                  'Bu e-posta adresi ile ilişkili bir topluluk bulunamadı. Topluluk girişi için topluluk başkanı e-postası ile giriş yapmanız gerekmektedir.',
+                  'error'
+                );
+              }
+            },
+            error: (error) => {
+              // Topluluk kontrolü sırasında hata oluşursa, girişi engelle
+              this.isLoading = false;
+              console.error('Topluluk kontrolü hatası:', error);
+
+              // Token'ı temizle
+              localStorage.removeItem('auth_token');
+              localStorage.removeItem('refresh_token');
+              localStorage.removeItem('user_info');
+              localStorage.removeItem('user_type');
+
+              this.toastService.show(
+                'Topluluk bilgileri kontrol edilirken bir hata oluştu. Lütfen tekrar deneyiniz.',
+                'error'
+              );
+            },
+          });
       },
       error: (error: HttpErrorResponse) => {
         // --- HATALI GİRİŞ ---

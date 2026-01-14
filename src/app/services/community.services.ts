@@ -156,7 +156,7 @@ export class CommunityService {
           miniAbout: 'Teknoloji ve yazılım meraklılarını bir araya getiren topluluk.',
           email: 'demo@community.com',
           presidentEmail: 'baskan@demo.com',
-          comLeadMail: 'baskan@demo.com'
+          comLeadMail: 'baskan@demo.com',
         };
         return of([mockCommunity]);
       })
@@ -190,32 +190,32 @@ export class CommunityService {
     return this.http.get<CommunityDetailDto>(`${this.apiUrl}/${id}`, { headers }).pipe(
       map((response) => this.mapDetailDtoToCommunity(response)),
       catchError((error) => {
-         // Hata durumunda mock data döndür (Demo için)
-         if (id === 'mock-id-1' || error.status === 0 || error.status === 404) {
-            const mockCommunity: Community = {
-              id: 'mock-id-1',
-              name: 'Yazılım ve Teknoloji Topluluğu (Demo)',
-              university: 'Demo Üniversitesi',
-              category: 'Teknoloji',
-              description: 'Teknoloji ve yazılım meraklılarını bir araya getiren topluluk.',
-              logo: 'assets/img/placeholder-logo.svg',
-              banner: 'assets/img/placeholder-cover.svg',
-              coverImage: 'assets/img/placeholder-cover.svg',
-              memberCount: 150,
-              city: 'İstanbul',
-              about: 'Bu bir demo topluluktur. Detayları inceleyebilirsiniz.',
-              status: 'Aktif',
-              isActivity: true,
-              miniAbout: 'Teknoloji ve yazılım meraklılarını bir araya getiren topluluk.',
-              email: 'demo@community.com',
-              presidentEmail: 'baskan@demo.com',
-              comLeadMail: 'baskan@demo.com',
-              webSiteUrl: 'https://demo.com',
-              instagramUrl: 'https://instagram.com/demo',
-              events: []
-            };
-            return of(mockCommunity);
-         }
+        // Hata durumunda mock data döndür (Demo için)
+        if (id === 'mock-id-1' || error.status === 0 || error.status === 404) {
+          const mockCommunity: Community = {
+            id: 'mock-id-1',
+            name: 'Yazılım ve Teknoloji Topluluğu (Demo)',
+            university: 'Demo Üniversitesi',
+            category: 'Teknoloji',
+            description: 'Teknoloji ve yazılım meraklılarını bir araya getiren topluluk.',
+            logo: 'assets/img/placeholder-logo.svg',
+            banner: 'assets/img/placeholder-cover.svg',
+            coverImage: 'assets/img/placeholder-cover.svg',
+            memberCount: 150,
+            city: 'İstanbul',
+            about: 'Bu bir demo topluluktur. Detayları inceleyebilirsiniz.',
+            status: 'Aktif',
+            isActivity: true,
+            miniAbout: 'Teknoloji ve yazılım meraklılarını bir araya getiren topluluk.',
+            email: 'demo@community.com',
+            presidentEmail: 'baskan@demo.com',
+            comLeadMail: 'baskan@demo.com',
+            webSiteUrl: 'https://demo.com',
+            instagramUrl: 'https://instagram.com/demo',
+            events: [],
+          };
+          return of(mockCommunity);
+        }
         // Hata durumunda throw ediyoruz
         throw error;
       })
@@ -352,7 +352,7 @@ export class CommunityService {
     );
   }
 
-  // Üye Ekle (Backend: POST /api/Communities/{id:guid}/members)
+  // Üye Ekle (Backend: POST /api/Communities/me/members)
   addMember(id: string, dto: AddCommunityMemberDto): Observable<void> {
     // Get auth token for authenticated request
     const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
@@ -363,34 +363,84 @@ export class CommunityService {
         })
       : new HttpHeaders({ 'Content-Type': 'application/json' });
 
-    return this.http
-      .post<{ message?: string }>(`${this.apiUrl}/${id}/members`, dto, { headers })
-      .pipe(
-        map(() => {
-          // Membership is stored in backend CommunitiesUsers table
-          // No need for localStorage tracking
-          return undefined;
-        }),
-        catchError((error) => {
-          // Hata zaten throw ediliyor
-          throw error;
-        })
-      );
+    return this.http.post<{ message?: string }>(`${this.apiUrl}/me/members`, dto, { headers }).pipe(
+      map(() => {
+        // Membership is stored in backend CommunitiesUsers table
+        // No need for localStorage tracking
+        return undefined;
+      }),
+      catchError((error) => {
+        // Hata zaten throw ediliyor
+        throw error;
+      })
+    );
   }
 
-  // Topluluk Üyelerini Getir (Backend: GET /api/Communities/{id:guid}/members)
-  // Not: Backend'de bu endpoint henüz yok (sadece POST ve DELETE var)
-  // Bu yüzden şimdilik direkt boş array döndürüyoruz, backend'e istek atmıyoruz
-  // Backend'de GET endpoint'i eklendiğinde bu metod güncellenmeli
+  // Topluluk Üyelerini Getir (Backend: GET /api/Communities/me/members)
+  // Mevcut liderin topluluğunun üyelerini getirir
   getCommunityMembers(id: string): Observable<any[]> {
-    // Backend'de GET /api/Communities/{id:guid}/members endpoint'i yok
-    // Sadece POST (AddMember) ve DELETE (RemoveMember) var
-    // Bu yüzden direkt boş array döndürüyoruz
-    // TODO: Backend'de GET endpoint'i eklendiğinde bu metod güncellenmeli
-    return of([]);
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    if (!token) {
+      return of([]);
+    }
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    });
+
+    return this.http.get<any[]>(`${this.apiUrl}/me/members`, { headers }).pipe(
+      map((response) => {
+        // Backend'den gelen CommunityMemberDto formatını dönüştür
+        return response.map((dto: any) => ({
+          id: dto.userId || dto.UserId || 0,
+          name: dto.name || dto.Name || '',
+          email: dto.email || dto.Email || '',
+          role: 'Üye', // Backend'den role gelmiyor, default 'Üye'
+          department: '',
+          phone: '',
+          grade: '',
+          status: 'Aktif',
+          university: '',
+        }));
+      }),
+      catchError((error) => {
+        console.error('Topluluk üyeleri yüklenirken hata:', error);
+        return of([]);
+      })
+    );
   }
 
-  // Üye Çıkar (Backend: DELETE /api/Communities/{id:guid}/members)
+  // Topluluğa üye olmayan öğrencileri ara (Backend: GET /api/Communities/me/search-students?query=...)
+  searchNonMemberStudents(query: string): Observable<any[]> {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    if (!token || !query || query.trim().length < 2) {
+      return of([]);
+    }
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    });
+
+    const params = new HttpParams().set('query', query.trim());
+
+    return this.http.get<any[]>(`${this.apiUrl}/me/search-students`, { headers, params }).pipe(
+      map((response) => {
+        return response.map((s: any) => ({
+          id: s.userId || s.UserId || 0,
+          name: s.name || s.Name || '',
+          email: s.email || s.Email || '',
+        }));
+      }),
+      catchError((error) => {
+        console.error('Öğrenci arama hatası:', error);
+        return of([]);
+      })
+    );
+  }
+
+  // Üye Çıkar (Backend: DELETE /api/Communities/me/members)
   removeMember(id: string, dto: RemoveCommunityMemberDto): Observable<void> {
     // Get auth token for authenticated request
     const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
@@ -401,7 +451,7 @@ export class CommunityService {
         })
       : new HttpHeaders({ 'Content-Type': 'application/json' });
 
-    return this.http.delete<void>(`${this.apiUrl}/${id}/members`, { body: dto, headers }).pipe(
+    return this.http.delete<void>(`${this.apiUrl}/me/members`, { body: dto, headers }).pipe(
       map(() => {
         // Membership is removed from backend CommunitiesUsers table
         // No need for localStorage tracking

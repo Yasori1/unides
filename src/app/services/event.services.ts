@@ -16,6 +16,7 @@ export interface EventItem {
   imageUrl?: string;
   status?: 'Onaylandı' | 'Beklemede' | 'Reddedildi' | 'Revize';
   capacity?: string;
+  quota?: number; // Kontenjan (number olarak)
   city?: string; // Şehir bilgisi
 }
 
@@ -62,14 +63,15 @@ interface EventListItemDto {
 }
 
 interface CreateEventDto {
-  etkinlikAdi: string;
-  resimUrl?: string;
-  kisaAciklama?: string;
-  detayliAciklama?: string;
-  baslangicTarihi: string;
-  bitisTarihi: string;
-  konum?: string;
-  comId: string; // Guid
+  eventName: string; // Backend: EventName (required)
+  eventPictureLink?: string; // Backend: EventPictureLink (optional)
+  eventDate: string; // Backend: EventDate (DateOnly, required) - Format: "dd.MM.yyyy" (örn: "02.01.2026")
+  eventClock: string; // Backend: EventClock (TimeOnly, required) - Format: "HH:mm"
+  eventLocation?: string; // Backend: EventLocation (optional)
+  eventKontenjan?: number; // Backend: EventKontenjan (optional)
+  eventAbout?: string; // Backend: EventAbout (optional)
+  miniAbout?: string; // Backend: MiniAbout (optional)
+  // comId backend'de otomatik olarak creator'ın topluluğundan alınıyor
 }
 
 interface UpdateEventDto {
@@ -305,17 +307,20 @@ export class EventService {
         const mockEvent: EventItem = {
           id: 999,
           title: 'Kampüs Kodluyor Hackathonu (Demo)',
-          shortDescription: '48 saat sürecek maratonda takımlar en iyi dijital çözümü üretmek için yarışıyor.',
-          description: '48 saat sürecek maratonda takımlar en iyi dijital çözümü üretmek için yarışıyor. Detaylı bilgi için web sitemizi ziyaret edin.',
+          shortDescription:
+            '48 saat sürecek maratonda takımlar en iyi dijital çözümü üretmek için yarışıyor.',
+          description:
+            '48 saat sürecek maratonda takımlar en iyi dijital çözümü üretmek için yarışıyor. Detaylı bilgi için web sitemizi ziyaret edin.',
           startDate: new Date().toISOString(),
           endDate: new Date(new Date().getTime() + 86400000).toISOString(), // Yarın
           location: 'İstanbul Kampüs',
           communityId: 1,
           communityName: 'Yazılım Kulübü',
-          imageUrl: 'https://images.unsplash.com/photo-1504384308090-c54be3852f33?q=80&w=1000&auto=format&fit=crop',
+          imageUrl:
+            'https://images.unsplash.com/photo-1504384308090-c54be3852f33?q=80&w=1000&auto=format&fit=crop',
           status: 'Onaylandı',
           capacity: '100',
-          city: 'İstanbul'
+          city: 'İstanbul',
         };
         return of([mockEvent]);
       })
@@ -450,22 +455,25 @@ export class EventService {
         console.error('Etkinlik detayı yüklenemedi, mock data dönülüyor:', error);
         // Eğer id mock event id ise mock event dön
         if (id === 999) {
-             const mockEvent: EventItem = {
-              id: 999,
-              title: 'Kampüs Kodluyor Hackathonu (Demo)',
-              shortDescription: '48 saat sürecek maratonda takımlar en iyi dijital çözümü üretmek için yarışıyor.',
-              description: '48 saat sürecek maratonda takımlar en iyi dijital çözümü üretmek için yarışıyor. Detaylı bilgi için web sitemizi ziyaret edin.',
-              startDate: new Date().toISOString(),
-              endDate: new Date(new Date().getTime() + 86400000).toISOString(), // Yarın
-              location: 'İstanbul Kampüs',
-              communityId: 1,
-              communityName: 'Yazılım Kulübü',
-              imageUrl: 'https://images.unsplash.com/photo-1504384308090-c54be3852f33?q=80&w=1000&auto=format&fit=crop',
-              status: 'Onaylandı',
-              capacity: '100',
-              city: 'İstanbul'
-            };
-            return of(mockEvent);
+          const mockEvent: EventItem = {
+            id: 999,
+            title: 'Kampüs Kodluyor Hackathonu (Demo)',
+            shortDescription:
+              '48 saat sürecek maratonda takımlar en iyi dijital çözümü üretmek için yarışıyor.',
+            description:
+              '48 saat sürecek maratonda takımlar en iyi dijital çözümü üretmek için yarışıyor. Detaylı bilgi için web sitemizi ziyaret edin.',
+            startDate: new Date().toISOString(),
+            endDate: new Date(new Date().getTime() + 86400000).toISOString(), // Yarın
+            location: 'İstanbul Kampüs',
+            communityId: 1,
+            communityName: 'Yazılım Kulübü',
+            imageUrl:
+              'https://images.unsplash.com/photo-1504384308090-c54be3852f33?q=80&w=1000&auto=format&fit=crop',
+            status: 'Onaylandı',
+            capacity: '100',
+            city: 'İstanbul',
+          };
+          return of(mockEvent);
         }
         throw error;
       })
@@ -473,7 +481,8 @@ export class EventService {
   }
 
   // Yeni etkinlik ekleme (Backend: POST /api/Events/create)
-  createEvent(event: Partial<EventItem> & { comId: string }): Observable<{ eventId: number }> {
+  // comId backend'de otomatik olarak creator'ın topluluğundan alınıyor, bu yüzden artık gerekli değil
+  createEvent(event: Partial<EventItem>): Observable<{ eventId: number }> {
     const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
     if (!token) {
       throw new Error('Etkinlik oluşturmak için giriş yapmanız gerekiyor.');
@@ -484,25 +493,47 @@ export class EventService {
       Authorization: `Bearer ${token}`,
     });
 
+    // Tarih ve saat formatlarını backend'in beklediği formata çevir
+    // Backend DateOnlyJsonConverter "dd.MM.yyyy" formatını bekliyor!
+    let eventDate = '';
+    let eventClock = '';
+
+    if (event.startDate) {
+      const startDateObj =
+        typeof event.startDate === 'string' ? new Date(event.startDate) : new Date(event.startDate);
+
+      // Backend DateOnlyJsonConverter "dd.MM.yyyy" formatını bekliyor (örn: "02.01.2026")
+      const day = String(startDateObj.getDate()).padStart(2, '0');
+      const month = String(startDateObj.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
+      const year = startDateObj.getFullYear();
+      eventDate = `${day}.${month}.${year}`; // Format: "dd.MM.yyyy"
+
+      // TimeOnly formatı: "HH:mm" (local timezone'da)
+      const hours = String(startDateObj.getHours()).padStart(2, '0');
+      const minutes = String(startDateObj.getMinutes()).padStart(2, '0');
+      eventClock = `${hours}:${minutes}`;
+    } else {
+      // Fallback: bugünün tarihi ve saati
+      const now = new Date();
+      const day = String(now.getDate()).padStart(2, '0');
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const year = now.getFullYear();
+      eventDate = `${day}.${month}.${year}`; // Format: "dd.MM.yyyy"
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      eventClock = `${hours}:${minutes}`;
+    }
+
     const createDto: CreateEventDto = {
-      etkinlikAdi: event.title || '',
-      resimUrl: event.imageUrl,
-      kisaAciklama: event.shortDescription || event.description,
-      detayliAciklama: event.description,
-      baslangicTarihi: event.startDate
-        ? typeof event.startDate === 'string'
-          ? event.startDate
-          : new Date(event.startDate).toISOString()
-        : new Date().toISOString(),
-      bitisTarihi: event.endDate
-        ? typeof event.endDate === 'string'
-          ? event.endDate
-          : new Date(event.endDate).toISOString()
-        : new Date().toISOString(),
-      konum: event.location,
-      comId:
-        event.comId ||
-        (typeof event.communityId === 'string' ? event.communityId : String(event.communityId)),
+      eventName: event.title || '',
+      eventPictureLink: event.imageUrl || undefined, // Fotoğraf optional
+      eventDate: eventDate, // DateOnly format: "dd.MM.yyyy" (Backend DateOnlyJsonConverter bekliyor)
+      eventClock: eventClock, // TimeOnly format: "HH:mm"
+      eventLocation: event.location || undefined,
+      eventKontenjan: event.quota || undefined,
+      eventAbout: event.description || undefined, // Detaylı açıklama
+      miniAbout: event.shortDescription || event.description || undefined, // Kısa açıklama
+      // comId backend'de otomatik olarak creator'ın topluluğundan alınıyor
     };
 
     return this.http
