@@ -177,12 +177,12 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
                 // Kullanıcı bir topluluğun başkanı, dashboard'a yönlendir
                 this.isLoading = false;
                 this.toastService.show(
-                  'Giriş başarılı! Topluluk paneline yönlendiriliyorsunuz...',
+                  'Giriş başarılı! Ana sayfaya yönlendiriliyorsunuz...',
                   'success'
                 );
 
                 setTimeout(() => {
-                  this.router.navigate(['/community-dashboard']);
+                  this.router.navigate(['/']);
                 }, 1500);
               } else {
                 // Kullanıcı hiçbir topluluğun başkanı değil, girişi engelle

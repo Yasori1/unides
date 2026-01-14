@@ -17,7 +17,7 @@
 
   <!-- SIDEBAR -->
   <aside class="sidebar" [class.collapsed]="isSidebarCollapsed">
-    <div class="brand" (click)="switchTab('overview')">
+    <div class="brand" (click)="navigateToHome()" style="cursor: pointer;">
       <div class="logo-badge">
         <img class="brand-logo" src="assets/unides1.png" alt="Ünides Dijital Portal" />
       </div>
@@ -1009,14 +1009,6 @@
                 <p class="value">{{ formatEventTime(selectedEvent.startDate) }}</p>
               </div>
               <div class="item">
-                <span class="label">Bitiş Tarihi</span>
-                <p class="value">{{ formatEventDateOnly(selectedEvent.endDate) }}</p>
-              </div>
-              <div class="item">
-                <span class="label">Bitiş Saati</span>
-                <p class="value">{{ formatEventTime(selectedEvent.endDate) }}</p>
-              </div>
-              <div class="item">
                 <span class="label">Kontenjan</span>
                 <p class="value">{{ selectedEvent.capacity || '—' }}</p>
               </div>
@@ -1037,7 +1029,8 @@
             <!-- Spam Kontrol Loading -->
             <div *ngIf="checkingSpamEvents.has(selectedEvent.id)" class="spam-checking-box">
               <div class="spinner"></div>
-              <span>Spam kontrolü yapılıyor...</span>
+              <span *ngIf="selectedEvent.status === 'Beklemede'">İçerik kontrol ediliyor...</span>
+              <span *ngIf="selectedEvent.status !== 'Beklemede'">Spam kontrolü yapılıyor...</span>
             </div>
 
             <!-- Spam Kontrol Sonucu -->
@@ -1047,42 +1040,65 @@
                  [class.spam]="!isEventClean(selectedEvent.id)">
               <span class="material-symbols-outlined">{{ isEventClean(selectedEvent.id) ? 'check_circle' : 'warning' }}</span>
               <span>{{ getSpamMessage(selectedEvent.id) }}</span>
+              <!-- İçerik Kontrolünü İncele Butonu (Beklemede etkinlikler için) -->
+              <button 
+                *ngIf="selectedEvent.status === 'Beklemede'"
+                class="btn-info"
+                style="margin-top: 12px; width: 100%;"
+                (click)="openSpamReportModal(selectedEvent.id)"
+              >
+                <span class="material-symbols-outlined">description</span> İçerik Kontrolünü İncele
+              </button>
             </div>
 
-            <div class="modal-actions spaced">
+            <!-- Beklemede olan etkinlikler için İçeriği Kontrol Et butonu (üstte) -->
+            <div class="modal-actions spaced" *ngIf="selectedEvent.status === 'Beklemede' && !inspectedEvents.has(selectedEvent.id)">
               <button class="btn-secondary" (click)="closeModal()">Kapat</button>
-              
-              <ng-container *ngIf="selectedEvent.status === 'Beklemede'">
-                <!-- Analiz Raporunu İncele Butonu -->
-                <button 
-                  class="btn-info"
-                  (click)="openSpamReportModal(selectedEvent.id)"
-                >
-                  <span class="material-symbols-outlined">fact_check</span> Analiz Raporunu İncele
-                </button>
+              <button 
+                class="btn-info"
+                *ngIf="!checkingSpamEvents.has(selectedEvent.id)"
+                (click)="performSpamCheck(selectedEvent.id)"
+              >
+                <span class="material-symbols-outlined">fact_check</span> İçeriği Kontrol Et
+              </button>
+            </div>
 
-                <!-- Onayla Butonu (Sadece spam analizi yapıldıysa ve temizse) -->
-                <button 
-                  class="btn-success" 
-                  *ngIf="inspectedEvents.has(selectedEvent.id) && !checkingSpamEvents.has(selectedEvent.id) && isEventClean(selectedEvent.id)"
-                  (click)="approveEvent(selectedEvent.id)"
-                >
-                  <span class="material-symbols-outlined">check</span> Onayla
-                </button>
-              </ng-container>
+            <!-- Beklemede olan etkinlikler için Onayla/Reddet butonları (içerik kontrolü yapıldıktan sonra) -->
+            <div class="modal-actions spaced" *ngIf="selectedEvent.status === 'Beklemede' && inspectedEvents.has(selectedEvent.id) && !checkingSpamEvents.has(selectedEvent.id)">
+              <button class="btn-secondary" (click)="closeModal()">Kapat</button>
+              <button 
+                class="btn-success" 
+                *ngIf="isEventClean(selectedEvent.id)"
+                (click)="approveEvent(selectedEvent.id)"
+              >
+                <span class="material-symbols-outlined">check</span> Onayla
+              </button>
+              <button 
+                class="btn-danger" 
+                (click)="rejectEvent(selectedEvent.id)"
+              >
+                <span class="material-symbols-outlined">close</span> Reddet
+              </button>
+            </div>
 
-              <!-- Onaylanan Etkinlikler için Spam Kontrolü Butonu -->
-              <ng-container *ngIf="selectedEvent.status === 'Onaylandı'">
-                <button 
-                  class="btn-info"
-                  *ngIf="!checkingSpamEvents.has(selectedEvent.id)"
-                  (click)="performSpamCheck(selectedEvent.id)"
-                >
-                  <span class="material-symbols-outlined">security</span> Spam Kontrolü Kontrol Et
-                </button>
-              </ng-container>
+            <!-- Reddedilmiş etkinlikler için Revize butonu -->
+            <div class="modal-actions spaced" *ngIf="selectedEvent.status === 'Reddedildi'">
+              <button class="btn-secondary" (click)="closeModal()">Kapat</button>
+              <button 
+                class="btn-warning"
+                (click)="rejectEvent(selectedEvent.id)"
+              >
+                <span class="material-symbols-outlined">edit_note</span> Revize
+              </button>
+              <button class="btn-danger" (click)="deleteEvent(selectedEvent.id)">
+                <span class="material-symbols-outlined">delete</span> Etkinliği Sil
+              </button>
+            </div>
 
-              <button class="btn-danger" *ngIf="selectedEvent.status !== 'Beklemede'" (click)="deleteEvent(selectedEvent.id)">
+            <!-- Onaylanmış etkinlikler için -->
+            <div class="modal-actions spaced" *ngIf="selectedEvent.status === 'Onaylandı'">
+              <button class="btn-secondary" (click)="closeModal()">Kapat</button>
+              <button class="btn-danger" (click)="deleteEvent(selectedEvent.id)">
                 <span class="material-symbols-outlined">delete</span> Etkinliği Sil
               </button>
             </div>

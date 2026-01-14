@@ -14,6 +14,8 @@ export interface CommunityMiniDto {
   logoUrl?: string;
   miniAbout?: string;
   isActivity: boolean;
+  comCreatedAt?: string; // ISO date string
+  ComCreatedAt?: string; // PascalCase variant
 }
 
 // Backend: CommunityEventDto
@@ -117,4 +119,5 @@ export interface Community {
   miniAbout?: string;
   isActivity?: boolean;
   events?: CommunityEventDto[];
+  upcomingEventCount?: number; // Featured communities için
 }

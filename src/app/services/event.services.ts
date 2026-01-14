@@ -282,6 +282,19 @@ export class EventService {
     };
   }
 
+  // Anasayfa için yaklaşan etkinlikleri getir (Backend: GET /api/Events/upcoming/home)
+  getHomeUpcomingEvents(limit: number = 6): Observable<EventItem[]> {
+    return this.http.get<EventListItemDto[]>(`${this.apiUrl}/upcoming/home`).pipe(
+      map((list) => {
+        return list.slice(0, limit).map((dto) => this.mapToEvent(dto));
+      }),
+      catchError((error) => {
+        console.error('Home upcoming events yüklenemedi:', error);
+        return of([]);
+      })
+    );
+  }
+
   // Tüm etkinlikleri getir (Backend: GET /api/Events/all)
   getAll(): Observable<EventItem[]> {
     // Get auth token if available
@@ -557,6 +570,36 @@ export class EventService {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     });
+
+    // Backend'in beklediği formata çevir (dd.MM.yyyy ve HH:mm)
+    let eventDate = '';
+    let eventClock = '';
+
+    if (event.startDate) {
+      const startDateObj =
+        typeof event.startDate === 'string' ? new Date(event.startDate) : new Date(event.startDate);
+
+      // DateOnly formatı: "dd.MM.yyyy" (local timezone'da)
+      const year = startDateObj.getFullYear();
+      const month = String(startDateObj.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
+      const day = String(startDateObj.getDate()).padStart(2, '0');
+      eventDate = `${day}.${month}.${year}`; // Format: "dd.MM.yyyy"
+
+      // TimeOnly formatı: "HH:mm" (local timezone'da)
+      const hours = String(startDateObj.getHours()).padStart(2, '0');
+      const minutes = String(startDateObj.getMinutes()).padStart(2, '0');
+      eventClock = `${hours}:${minutes}`;
+    } else {
+      // Fallback: bugünün tarihi ve saati
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      eventDate = `${day}.${month}.${year}`; // Format: "dd.MM.yyyy"
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      eventClock = `${hours}:${minutes}`;
+    }
 
     const updateDto: UpdateEventDto = {
       etkinlikAdi: event.title || '',

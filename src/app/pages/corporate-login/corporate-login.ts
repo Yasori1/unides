@@ -112,17 +112,17 @@ export class CorporateLoginComponent implements OnInit, OnDestroy {
         // --- BAŞARILI ---
         // 1. Toast Mesajı
         this.toastService.show(
-          'Giriş başarılı! Yönetim paneline yönlendiriliyorsunuz...',
+          'Giriş başarılı! Ana sayfaya yönlendiriliyorsunuz...',
           'success'
         );
 
-        // 2. Yönlendirme ve Buton Durumu
+        // 2. Yönlendirme - Anasayfaya yönlendir
         setTimeout(() => {
           this.isLoading = false; // Spinner durur, yazı geri gelir
-          this.router.navigateByUrl('/corporate-dashboard').catch((err) => {
+          this.router.navigateByUrl('/').catch((err) => {
             // Navigation hatası durumunda window.location kullan
             if (isPlatformBrowser(this.platformId)) {
-              window.location.href = '/corporate-dashboard';
+              window.location.href = '/';
             }
           });
         }, 1500);

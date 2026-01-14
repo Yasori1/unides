@@ -1,4 +1,4 @@
-import { Component, OnInit, HostListener, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -7,6 +7,7 @@ import { ImageUploadComponent } from '../../components/ui/image-upload/image-upl
 import { CommunityService, Community } from '../../services/community.services';
 import { EventService } from '../../services/event.services';
 import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
+import { AfkDetectionService } from '../../services/afk-detection.service';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 
@@ -79,7 +80,7 @@ interface DashboardEvent {
   templateUrl: './community-dashboard.component.html',
   styleUrls: ['./community-dashboard.component.scss'],
 })
-export class CommunityDashboardComponent implements OnInit {
+export class CommunityDashboardComponent implements OnInit, OnDestroy {
   activeTab: string = 'overview';
 
   // UI State
@@ -108,6 +109,8 @@ export class CommunityDashboardComponent implements OnInit {
 
   // Eksik olan değişken eklendi
   selectedEvent: DashboardEvent | null = null;
+  isEditingEventDetail = false; // Event detail modal'da inline editing için
+  editedEventData: any = {}; // Düzenlenen event verileri
 
   // Rejection reason modal
   showRejectionModal = false;
@@ -387,11 +390,15 @@ export class CommunityDashboardComponent implements OnInit {
     private communityService: CommunityService,
     private eventService: EventService,
     private http: HttpClient,
+    private afkDetectionService: AfkDetectionService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
+      // AFK Detection'ı başlat
+      this.afkDetectionService.start();
+
       this.loadCommunityProfile();
       this.loadCommunities();
     }
@@ -886,6 +893,10 @@ export class CommunityDashboardComponent implements OnInit {
     this.logout();
   }
 
+  navigateToHome() {
+    this.router.navigate(['/']);
+  }
+
   toggleRowMenu(id: number, event: MouseEvent) {
     event.stopPropagation();
     this.activeRowMenuId = this.activeRowMenuId === id ? null : id;
@@ -984,14 +995,16 @@ export class CommunityDashboardComponent implements OnInit {
 
   logout() {
     if (isPlatformBrowser(this.platformId)) {
+      this.showToast('Çıkış yapılıyor...', 'success');
+      // Local storage'ı temizle
       localStorage.removeItem('auth_token');
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('user_info');
       localStorage.removeItem('user_type');
-      this.showToast('Çıkış yapıldı', 'success');
+      // Anasayfaya yönlendir
       setTimeout(() => {
         this.router.navigate(['/']);
-      }, 1000);
+      }, 1500);
     }
   }
 
@@ -1139,24 +1152,22 @@ export class CommunityDashboardComponent implements OnInit {
           description: this.newEventData.description,
           shortDescription: this.newEventData.shortDescription || this.newEventData.description,
           imageUrl: this.newEventData.image || undefined, // Fotoğraf optional
-          // Status backend tarafından 'Beklemede'ye çekilebilir, biz burada belirtmiyoruz
+          quota: this.newEventData.quota ? Number(this.newEventData.quota) : undefined,
+          // Status backend tarafından otomatik olarak 'pending' (Beklemede) yapılacak
         })
         .subscribe({
           next: (response) => {
             console.log('Event updated successfully:', response);
             this.showToast(
-              "Etkinlik güncellendi! Kurumsal Dashboard'a yönlendiriliyorsunuz...",
+              "Etkinlik güncellendi ve tekrar onaya gönderildi! Kurumsal Dashboard'daki etkinlik onaylama ekranına iletildi.",
               'success'
             );
             this.closeModal();
+            this.editingEventId = null; // Reset editing state
             if (this.clubInfo.id) {
               this.loadCommunityEvents(this.clubInfo.id);
             }
-            setTimeout(() => {
-              this.router.navigate(['/corporate-dashboard'], {
-                queryParams: { from: 'community-dashboard', eventUpdated: 'true' },
-              });
-            }, 1500);
+            // Route yapma - sadece etkinlik güncellendi, kurumsal dashboard'a yönlendirme yok
           },
           error: (err: any) => {
             console.error('Etkinlik güncellenemedi:', err);
@@ -1231,13 +1242,29 @@ export class CommunityDashboardComponent implements OnInit {
   }
 
   onEventFileSelected(file: File) {
-    if (file) this.readFileToBase64(file);
+    if (file) {
+      if (this.isEditingEventDetail) {
+        // Event detail modal'da düzenleme modunda
+        this.readFileToBase64ForEdit(file);
+      } else {
+        // Event creation modal'da
+        this.readFileToBase64(file);
+      }
+    }
   }
 
   private readFileToBase64(file: File) {
     const reader = new FileReader();
     reader.onload = () => {
       this.newEventData.image = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  private readFileToBase64ForEdit(file: File) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.editedEventData.image = reader.result as string;
     };
     reader.readAsDataURL(file);
   }
@@ -1325,28 +1352,50 @@ export class CommunityDashboardComponent implements OnInit {
   }
 
   onMemberSearch() {
-    const term = this.memberSearchQuery.trim();
-    if (!term || term.length < 2) {
+    const term = this.memberSearchQuery?.trim() || '';
+
+    // İlk harf yazıldığında aramayı başlat (minimum 1 karakter)
+    if (!term || term.length < 1) {
       this.memberSearchResults = [];
+      this.isSearchingMembers = false;
       return;
     }
 
+    // İlk harf yazıldığında aramayı başlat
     this.isSearchingMembers = true;
+
+    // Debug: İlk harf yazıldığında arama yapıldığını kontrol et
+    console.log('Arama başlatıldı, terim:', term, 'Uzunluk:', term.length);
 
     // Backend'den topluluğa üye olmayan öğrencileri ara
     this.communityService.searchNonMemberStudents(term).subscribe({
       next: (students) => {
         // Backend'den gelen öğrencileri filtrele (mevcut üyeler hariç)
         const memberEmails = new Set(this.members.map((m) => m.email.toLowerCase()));
-        this.memberSearchResults = students
+        const filteredStudents = students
           .filter((s: any) => {
             const email = (s.email || s.Email || '').toLowerCase();
             return !memberEmails.has(email);
           })
-          .map((s: any) => ({
-            name: s.name || s.Name || this.getNameFromEmail(s.email || s.Email || ''),
-            email: s.email || s.Email || '',
-          }));
+          .map((s: any) => {
+            const name = s.name || s.Name || this.getNameFromEmail(s.email || s.Email || '');
+            const email = s.email || s.Email || '';
+            return {
+              name,
+              email,
+              relevanceScore: this.calculateRelevanceScore(name, email, term),
+            };
+          })
+          .sort((a, b) => b.relevanceScore - a.relevanceScore); // En ilgili sonuçtan ilgisiz sonuca doğru sırala
+
+        // Minimum 5 sonuç göster, eğer 5'ten az varsa tüm sonuçları göster
+        if (filteredStudents.length >= 5) {
+          this.memberSearchResults = filteredStudents.slice(0, 5);
+        } else {
+          // 5'ten az sonuç varsa, tüm sonuçları göster (en ilgili sonuçtan ilgisiz sonuca doğru)
+          this.memberSearchResults = filteredStudents;
+        }
+
         this.isSearchingMembers = false;
       },
       error: (err) => {
@@ -1355,6 +1404,52 @@ export class CommunityDashboardComponent implements OnInit {
         this.isSearchingMembers = false;
       },
     });
+  }
+
+  // Relevance scoring: Daha ilgili sonuçları önce getir
+  private calculateRelevanceScore(name: string, email: string, query: string): number {
+    let score = 0;
+    const queryLower = query.toLowerCase();
+    const nameLower = name.toLowerCase();
+    const emailLower = email.toLowerCase();
+
+    // İsim tam eşleşmesi (en yüksek öncelik)
+    if (nameLower === queryLower) {
+      score += 1000;
+    }
+    // İsim başlangıcı eşleşmesi
+    else if (nameLower.startsWith(queryLower)) {
+      score += 500;
+    }
+    // İsim içinde eşleşme
+    else if (nameLower.includes(queryLower)) {
+      score += 200;
+    }
+
+    // Email tam eşleşmesi
+    if (emailLower === queryLower) {
+      score += 1000;
+    }
+    // Email başlangıcı eşleşmesi
+    else if (emailLower.startsWith(queryLower)) {
+      score += 500;
+    }
+    // Email içinde eşleşme
+    else if (emailLower.includes(queryLower)) {
+      score += 200;
+    }
+
+    // Email'de @ öncesi kısım eşleşmesi (local part)
+    const emailLocalPart = emailLower.split('@')[0];
+    if (emailLocalPart === queryLower) {
+      score += 400;
+    } else if (emailLocalPart.startsWith(queryLower)) {
+      score += 300;
+    } else if (emailLocalPart.includes(queryLower)) {
+      score += 150;
+    }
+
+    return score;
   }
 
   selectMemberSuggestion(user: UserSearchResult) {
@@ -1756,8 +1851,202 @@ export class CommunityDashboardComponent implements OnInit {
     };
   }
 
+  // Onaya Gönderilen (pending) etkinlik için düzenleme - inline editing
+  editEventFromDetail() {
+    if (this.selectedEvent) {
+      this.isEditingEventDetail = true;
+      this.initializeEditedEventData();
+    }
+  }
+
+  // Onaylanmış (approved) etkinlik için düzenleme - yayından çek ve düzenle - inline editing
+  editApprovedEventFromDetail() {
+    if (this.selectedEvent) {
+      this.isEditingEventDetail = true;
+      this.initializeEditedEventData();
+      // Not: Status backend'de updateEvent çağrıldığında otomatik olarak 'pending' yapılacak
+    }
+  }
+
+  // Reddedilmiş (rejected) etkinlik için düzenleme - inline editing
+  editRejectedEventFromDetail() {
+    if (this.selectedEvent) {
+      this.isEditingEventDetail = true;
+      this.initializeEditedEventData();
+    }
+  }
+
+  // Düzenlenen event verilerini başlat
+  initializeEditedEventData() {
+    if (!this.selectedEvent) return;
+
+    // Parse date and time from ISO string
+    let dateStr = '';
+    let timeStr = '';
+    if (this.selectedEvent.startDateIso) {
+      try {
+        const d = new Date(this.selectedEvent.startDateIso);
+        // YYYY-MM-DD
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        dateStr = `${year}-${month}-${day}`;
+
+        // HH:mm
+        const hour = String(d.getHours()).padStart(2, '0');
+        const minute = String(d.getMinutes()).padStart(2, '0');
+        timeStr = `${hour}:${minute}`;
+      } catch (e) {
+        console.error('Date parsing error', e);
+      }
+    }
+
+    this.editedEventData = {
+      title: this.selectedEvent.title,
+      shortDescription: this.selectedEvent.description?.substring(0, 70) || '',
+      date: dateStr,
+      time: timeStr,
+      location: this.selectedEvent.location,
+      quota: this.selectedEvent.quota ? String(this.selectedEvent.quota) : '',
+      description: this.selectedEvent.description || '',
+      image: this.selectedEvent.imageUrl || '',
+    };
+  }
+
+  // Event detail modal'da kaydet
+  saveEventFromDetail() {
+    if (!this.selectedEvent || !this.isEditingEventDetail) return;
+
+    // Validation
+    if (
+      !this.editedEventData.title?.trim() ||
+      !this.editedEventData.date ||
+      !this.editedEventData.time ||
+      !this.editedEventData.location?.trim() ||
+      !this.editedEventData.quota ||
+      !this.editedEventData.description?.trim()
+    ) {
+      this.showToast('Lütfen tüm alanları doldurun.', 'error');
+      return;
+    }
+
+    // Parse date and time
+    let startDate: Date;
+    let endDate: Date;
+
+    try {
+      const dateStr = this.editedEventData.date;
+      const timeStr = this.editedEventData.time;
+
+      if (!dateStr || !timeStr) {
+        throw new Error('Tarih ve saat gereklidir');
+      }
+
+      const [year, month, day] = dateStr.split('-').map(Number);
+      const [hour, minute] = timeStr.split(':').map(Number);
+
+      startDate = new Date(year, month - 1, day, hour, minute);
+      endDate = new Date(startDate);
+
+      if (isNaN(startDate.getTime())) {
+        throw new Error('Geçersiz tarih formatı');
+      }
+    } catch (error) {
+      this.showToast('Lütfen geçerli bir tarih ve saat girin.', 'error');
+      return;
+    }
+
+    // Update event
+    this.eventService
+      .updateEvent(this.selectedEvent.id, {
+        title: this.editedEventData.title,
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        location: this.editedEventData.location,
+        description: this.editedEventData.description,
+        shortDescription: this.editedEventData.shortDescription || this.editedEventData.description,
+        imageUrl: this.editedEventData.image || undefined,
+        quota: this.editedEventData.quota ? Number(this.editedEventData.quota) : undefined,
+      })
+      .subscribe({
+        next: (response) => {
+          console.log('Event updated successfully:', response);
+          this.showToast(
+            "Etkinlik güncellendi ve tekrar onaya gönderildi! Kurumsal Dashboard'daki etkinlik onaylama ekranına iletildi.",
+            'success'
+          );
+          this.isEditingEventDetail = false;
+          this.editedEventData = {};
+
+          // Reload events
+          if (this.clubInfo.id) {
+            this.loadCommunityEvents(this.clubInfo.id);
+          }
+
+          // Close modal and reopen with updated data
+          const eventId = this.selectedEvent?.id;
+          this.closeEventDetail();
+
+          // Reopen with updated event after a short delay
+          setTimeout(() => {
+            if (eventId && this.clubInfo.id) {
+              this.eventService.getCommunityEvents(this.clubInfo.id, [0, 1, 2]).subscribe({
+                next: (events) => {
+                  const updatedEvent = events.find((e) => e.id === eventId);
+                  if (updatedEvent) {
+                    const dashboardEvent: DashboardEvent = {
+                      id: updatedEvent.id,
+                      title: updatedEvent.title,
+                      status:
+                        updatedEvent.status === 'Onaylandı'
+                          ? 'approved'
+                          : updatedEvent.status === 'Reddedildi'
+                          ? 'rejected'
+                          : 'pending',
+                      imageUrl: updatedEvent.imageUrl || '',
+                      date: updatedEvent.startDate
+                        ? new Date(updatedEvent.startDate).toLocaleDateString('tr-TR', {
+                            day: 'numeric',
+                            month: 'long',
+                          })
+                        : '',
+                      startDateIso: updatedEvent.startDate || '',
+                      location: updatedEvent.location || '',
+                      category: updatedEvent.communityName || '',
+                      description: updatedEvent.description || '',
+                      time: updatedEvent.startDate
+                        ? new Date(updatedEvent.startDate).toLocaleTimeString('tr-TR', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })
+                        : '',
+                      quota: updatedEvent.quota || 0,
+                    };
+                    this.openEventDetail(dashboardEvent);
+                  }
+                },
+              });
+            }
+          }, 500);
+        },
+        error: (err: any) => {
+          console.error('Etkinlik güncellenemedi:', err);
+          const errorMessage = err.error?.message || 'Etkinlik güncellenirken bir hata oluştu';
+          this.showToast(errorMessage, 'error');
+        },
+      });
+  }
+
+  // Event detail modal'da iptal
+  cancelEditEventDetail() {
+    this.isEditingEventDetail = false;
+    this.editedEventData = {};
+  }
+
   closeEventDetail() {
     this.selectedEvent = null;
+    this.isEditingEventDetail = false;
+    this.editedEventData = {};
     if (isPlatformBrowser(this.platformId)) {
       document.body.style.overflow = 'auto';
     }
@@ -1886,5 +2175,10 @@ export class CommunityDashboardComponent implements OnInit {
           },
         });
     });
+  }
+
+  ngOnDestroy(): void {
+    // AFK Detection'ı durdur
+    this.afkDetectionService.stop();
   }
 }

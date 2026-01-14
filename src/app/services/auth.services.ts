@@ -192,12 +192,59 @@ export class AuthService {
 
     // Local temizlik her durumda yapılır
     localStorage.removeItem('auth_token');
+    localStorage.removeItem('refresh_token');
     localStorage.removeItem('user_info');
     localStorage.removeItem('user_type');
-    this.router.navigate(['/login']);
+    // Anasayfaya yönlendir
+    this.router.navigate(['/']);
   }
 
   isAuthenticated(): boolean {
     return !!this.getToken();
+  }
+
+  /**
+   * Update user profile (name)
+   * Uses backend endpoint: PUT /api/Auth/update-profile
+   * Backend'de bu endpoint oluşturulmalı
+   */
+  updateProfile(name: string): Observable<{ message: string }> {
+    const token = this.getToken();
+    if (!token) {
+      throw new Error('Profil güncellemek için giriş yapmanız gerekiyor.');
+    }
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    });
+
+    const payload = {
+      fullName: name,
+    };
+
+    // Backend endpoint: PUT /api/Auth/update-profile
+    return this.http.put<{ message: string }>(`${this.apiUrl}/Auth/update-profile`, payload, { headers }).pipe(
+      tap((response) => {
+        // Backend'den başarılı yanıt geldiğinde localStorage'ı da güncelle
+        const user = this.getUser();
+        if (user) {
+          user.name = name;
+          this.saveUser(user);
+        }
+      }),
+      catchError((error) => {
+        // Backend endpoint yoksa veya hata varsa, sadece localStorage'a kaydet
+        if (error.status === 404) {
+          const user = this.getUser();
+          if (user) {
+            user.name = name;
+            this.saveUser(user);
+            return of({ message: 'Profil başarıyla güncellendi (localStorage).' });
+          }
+        }
+        throw error;
+      })
+    );
   }
 }

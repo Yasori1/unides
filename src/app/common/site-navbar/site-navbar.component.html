@@ -57,12 +57,12 @@
 
       <!-- Mobile Menu Footer -->
       <div class="mobile-menu-footer">
-        <div class="mobile-auth-footer" *ngIf="!isLoggedIn">
+        <div class="mobile-auth-footer" *ngIf="isLoggedIn === false">
           <a routerLink="/login" class="btn-outline-custom small static-btn" (click)="closeMobileMenu()">Giriş Yap</a>
           <a routerLink="/register" class="btn-solid-custom small" (click)="closeMobileMenu()">Kayıt Ol</a>
         </div>
 
-        <div class="mobile-auth-footer" *ngIf="isLoggedIn">
+        <div class="mobile-auth-footer" *ngIf="isLoggedIn === true">
            <a *ngIf="userRole === 'student'" routerLink="/profile" class="btn-solid-custom small" (click)="closeMobileMenu()">Profilim</a>
            <a *ngIf="userRole === 'corporate'" routerLink="/corporate-dashboard" class="btn-solid-custom small" (click)="closeMobileMenu()">Panelim</a>
            <a *ngIf="userRole === 'community'" routerLink="/community-dashboard" class="btn-solid-custom small" (click)="closeMobileMenu()">Panelim</a>

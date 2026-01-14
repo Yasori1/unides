@@ -1,4 +1,4 @@
-import { Component, OnInit, HostListener, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -6,6 +6,8 @@ import { ToastService } from '../../services/toast.services';
 import { ToastComponent } from '../../components/ui/toast/toast.component';
 import { EventService, EventItem } from '../../services/event.services';
 import { CommunityService, Community } from '../../services/community.services';
+import { AfkDetectionService } from '../../services/afk-detection.service';
+import { AuthService } from '../../services/auth.services';
 
 interface Stat {
   label: string;
@@ -46,7 +48,7 @@ interface EventCard {
   templateUrl: './student-profile.component.html',
   styleUrls: ['./student-profile.component.scss'],
 })
-export class StudentProfileComponent implements OnInit {
+export class StudentProfileComponent implements OnInit, OnDestroy {
   activeTab: 'overview' | 'communities' | 'events' | 'settings' = 'overview';
   isSidebarCollapsed: boolean = false;
   selectedCommunityForLeave: ProfileCommunity | null = null;
@@ -114,6 +116,8 @@ export class StudentProfileComponent implements OnInit {
     public toastService: ToastService,
     private eventService: EventService,
     private communityService: CommunityService,
+    private afkDetectionService: AfkDetectionService,
+    private authService: AuthService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -476,6 +480,10 @@ export class StudentProfileComponent implements OnInit {
     this.logout();
   }
 
+  navigateToHome() {
+    this.router.navigate(['/']);
+  }
+
   logout(): void {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.removeItem('auth_token');
@@ -490,9 +498,33 @@ export class StudentProfileComponent implements OnInit {
   }
 
   leaveCommunity(communityId: string): void {
-    this.myCommunities = this.myCommunities.filter((c) => c.id !== communityId);
-    this.toastService.show('Topluluktan ayrıldınız', 'success');
-    this.stats[0].value = this.myCommunities.length;
+    // Backend'e istek gönder
+    const communityIdStr = typeof communityId === 'string' ? communityId : String(communityId);
+    
+    this.communityService.leaveCommunity(communityIdStr).subscribe({
+      next: () => {
+        // Backend'den başarılı yanıt geldi, frontend'de de kaldır
+        this.myCommunities = this.myCommunities.filter((c) => {
+          const cId = typeof c.id === 'string' ? c.id : String(c.id);
+          return cId !== communityIdStr;
+        });
+        this.toastService.show('Topluluktan ayrıldınız', 'success');
+        this.stats[0].value = this.myCommunities.length;
+        
+        // Etkinlikleri de güncelle (ayrılan topluluğun etkinliklerini kaldır)
+        const communityIdNum = typeof communityId === 'string' ? parseInt(communityId, 10) : communityId;
+        this.communityEvents = this.communityEvents.filter((e) => {
+          const eCommunityId = typeof e.communityId === 'string' ? parseInt(e.communityId, 10) : e.communityId;
+          return eCommunityId !== communityIdNum;
+        });
+        this.stats[1].value = this.communityEvents.length;
+      },
+      error: (err) => {
+        console.error('Topluluktan ayrılma hatası:', err);
+        const errorMessage = err.error?.message || err.message || 'Topluluktan ayrılırken bir hata oluştu.';
+        this.toastService.show(errorMessage, 'error');
+      },
+    });
   }
 
   openLeaveConfirm(community: ProfileCommunity): void {
@@ -706,15 +738,36 @@ export class StudentProfileComponent implements OnInit {
   }
 
   saveSettings(): void {
-    // Save user info to localStorage (without password fields)
-    if (isPlatformBrowser(this.platformId)) {
-      const userInfoToSave = {
-        name: this.userInfo.name,
-        email: this.userInfo.email,
-      };
-      localStorage.setItem('user_info', JSON.stringify(userInfoToSave));
-      this.toastService.show('Ayarlar başarıyla kaydedildi', 'success');
+    // Validate name
+    if (!this.userInfo.name || !this.userInfo.name.trim()) {
+      this.toastService.show('Ad Soyad alanı boş bırakılamaz', 'error');
+      return;
     }
+
+    // Backend'e istek gönder
+    this.authService.updateProfile(this.userInfo.name.trim()).subscribe({
+      next: (response) => {
+        // Backend'den başarılı yanıt geldi, localStorage'ı güncelle
+        if (isPlatformBrowser(this.platformId)) {
+          const userInfoToSave = {
+            name: this.userInfo.name.trim(),
+            email: this.userInfo.email,
+            id: this.userInfo.id,
+            role: this.userInfo.role,
+          };
+          localStorage.setItem('user_info', JSON.stringify(userInfoToSave));
+          
+          // AuthService'deki user bilgisini de güncelle
+          this.authService.saveUser(userInfoToSave);
+        }
+        this.toastService.show(response.message || 'Ad Soyad başarıyla güncellendi', 'success');
+      },
+      error: (err) => {
+        console.error('Profil güncelleme hatası:', err);
+        const errorMessage = err.error?.message || err.message || 'Profil güncellenirken bir hata oluştu.';
+        this.toastService.show(errorMessage, 'error');
+      },
+    });
   }
 
   async changePassword(): Promise<void> {
@@ -896,5 +949,10 @@ export class StudentProfileComponent implements OnInit {
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(
       initials
     )}&background=14d2cc&color=fff&size=128&font-size=0.4`;
+  }
+
+  ngOnDestroy(): void {
+    // AFK Detection'ı durdur
+    this.afkDetectionService.stop();
   }
 }

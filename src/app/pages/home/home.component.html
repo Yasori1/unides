@@ -70,7 +70,7 @@
           <span class="comm-category">{{ comm.category }}</span>
           
           <div class="comm-stats">
-            <span class="comm-email-display">{{ comm.email }}</span>
+            <span class="comm-email-display" *ngIf="comm.email">{{ comm.email }}</span>
             <span class="stat">📅 {{ comm.eventCount }} Etkinlik</span>
           </div>
           </div>

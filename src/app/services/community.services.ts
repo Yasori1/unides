@@ -41,6 +41,107 @@ export class CommunityService {
     };
   }
 
+  // Featured communities için endpoint
+  getFeaturedCommunities(limit: number = 6): Observable<Community[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/featured`).pipe(
+      map((list) => {
+        return list.slice(0, limit).map((dto) => {
+          const community = this.mapFeaturedDtoToCommunity(dto);
+          return this.ensureCommunityAssets(community);
+        });
+      }),
+      catchError((error) => {
+        console.error('Featured communities yüklenemedi:', error);
+        return of([]);
+      })
+    );
+  }
+
+  // FeaturedCommunityDto'yu Community'ye dönüştür
+  private mapFeaturedDtoToCommunity(dto: any): Community {
+    const isActivity =
+      dto.isActivity !== undefined
+        ? dto.isActivity
+        : dto.IsActivity !== undefined
+        ? dto.IsActivity
+        : true;
+
+    // ID'yi string olarak sakla (Guid olabilir)
+    const communityId = dto.communityId || dto.CommunityId;
+    const idString = typeof communityId === 'string' ? communityId : String(communityId);
+
+    // Backend'den gelen tüm alanları map et
+    return {
+      id: idString,
+      name: dto.comName || dto.ComName || '',
+      university: dto.university || dto.University || '',
+      category: dto.comCategory || dto.ComCategory || 'Genel',
+      description: dto.miniAbout || dto.MiniAbout || '',
+      logo:
+        (dto.logoUrl || dto.LogoUrl) && String(dto.logoUrl || dto.LogoUrl).trim()
+          ? dto.logoUrl || dto.LogoUrl
+          : this.placeholderLogo,
+      memberCount: dto.memberCount || dto.MemberCount || 0,
+      city: dto.city || dto.City || '',
+      about: dto.miniAbout || dto.MiniAbout || '',
+      banner:
+        (dto.bannerUrl || dto.BannerUrl) && String(dto.bannerUrl || dto.BannerUrl).trim()
+          ? dto.bannerUrl || dto.BannerUrl
+          : this.placeholderCover,
+      coverImage:
+        (dto.bannerUrl || dto.BannerUrl) && String(dto.bannerUrl || dto.BannerUrl).trim()
+          ? dto.bannerUrl || dto.BannerUrl
+          : this.placeholderCover,
+      status: isActivity ? 'Aktif' : 'Pasif',
+      miniAbout: dto.miniAbout || dto.MiniAbout || '',
+      isActivity: isActivity,
+      email: dto.comMail || dto.ComMail || dto.email || dto.Email || '', // Backend'den gelirse kullan
+      comMail: dto.comMail || dto.ComMail || '', // Backend'den gelen email
+      upcomingEventCount: dto.upcomingEventCount || dto.UpcomingEventCount || 0, // Backend'den gelen event sayısı
+    };
+  }
+
+  // Yeni katılanlar için - en son eklenen aktif toplulukları getir
+  getNewestCommunities(limit: number = 12): Observable<Community[]> {
+    return this.http.get<CommunityMiniDto[]>(`${this.apiUrl}?status=active`).pipe(
+      map((list) => {
+        // Backend'den gelen listeyi ComCreatedAt'e göre sırala (eğer varsa)
+        // Not: Backend'den ComCreatedAt gelmiyorsa, backend'in döndürdüğü sırayı kullanıyoruz
+        const sorted = [...list].sort((a, b) => {
+          // ComCreatedAt varsa ona göre sırala (yeni kurulanlar önce - descending)
+          const dateA = a.comCreatedAt || a.ComCreatedAt;
+          const dateB = b.comCreatedAt || b.ComCreatedAt;
+
+          if (dateA && dateB) {
+            try {
+              const timeA = new Date(dateA).getTime();
+              const timeB = new Date(dateB).getTime();
+              // Yeni tarihli (büyük) önce gelsin (descending - yeni kurulanlar önce)
+              return timeB - timeA;
+            } catch (e) {
+              // Tarih parse edilemezse sıralama yapma
+              return 0;
+            }
+          }
+
+          // ComCreatedAt yoksa, backend'in döndürdüğü sırayı koru
+          // Backend'de zaten sıralama yapılıyorsa, doğru sırada gelecektir
+          return 0;
+        });
+
+        // İlk N tanesini al (en yeni kurulanlar)
+        return sorted.slice(0, limit).map((dto) => {
+          const community = this.mapMiniDtoToCommunity(dto);
+          return this.ensureCommunityAssets(community);
+        });
+      }),
+      catchError((error) => {
+        console.error('Newest communities yüklenemedi:', error);
+        return of([]);
+      })
+    );
+  }
+
   // CommunityMiniDto'yu Community'ye dönüştür (List için)
   private mapMiniDtoToCommunity(dto: CommunityMiniDto | any): Community {
     // Backend'den PascalCase (IsActivity) veya camelCase (isActivity) gelebilir
@@ -363,17 +464,70 @@ export class CommunityService {
         })
       : new HttpHeaders({ 'Content-Type': 'application/json' });
 
-    return this.http.post<{ message?: string }>(`${this.apiUrl}/me/members`, dto, { headers }).pipe(
-      map(() => {
-        // Membership is stored in backend CommunitiesUsers table
-        // No need for localStorage tracking
-        return undefined;
-      }),
-      catchError((error) => {
-        // Hata zaten throw ediliyor
-        throw error;
-      })
-    );
+    // Backend PascalCase bekliyor (Email), frontend camelCase gönderiyor (email)
+    // Email'i temizle: parantez içindeki email'i çıkar veya sadece email kısmını al
+    let cleanEmail = dto.email.trim();
+
+    // Parantez içindeki email'i çıkar (örn: "isim (email@edu.tr)" -> "email@edu.tr")
+    const emailInParens = cleanEmail.match(/\(([^)]+@[^)]+)\)/);
+    if (emailInParens && emailInParens[1]) {
+      cleanEmail = emailInParens[1].trim();
+    } else {
+      // Parantez yoksa, email formatında olmayan kısımları temizle
+      // Sadece @ işareti içeren kısmı al
+      const emailMatch = cleanEmail.match(/([^\s()]+@[^\s()]+)/);
+      if (emailMatch && emailMatch[1]) {
+        cleanEmail = emailMatch[1].trim();
+      }
+      // Parantez ve boşlukları temizle
+      cleanEmail = cleanEmail.replace(/[()]/g, '').trim();
+    }
+
+    // Tüm görünmeyen karakterleri ve boşlukları temizle
+    cleanEmail = cleanEmail
+      .replace(/\s+/g, '')
+      .replace(/[\u200B-\u200D\uFEFF]/g, '')
+      .trim();
+
+    // Email'in sonundaki nokta, virgül, parantez gibi karakterleri temizle
+    cleanEmail = cleanEmail.replace(/[.,;:!?)\]}]+$/, '').trim();
+
+    // Email formatını doğrula ve sadece geçerli email karakterlerini tut
+    // Email formatı: local@domain
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(cleanEmail)) {
+      // Eğer email formatı geçersizse, sadece @ işareti içeren kısmı al
+      const emailParts = cleanEmail.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
+      if (emailParts && emailParts[1]) {
+        cleanEmail = emailParts[1].trim();
+      }
+    }
+
+    // Debug için console.log (production'da kaldırılabilir)
+    console.log('Original email:', JSON.stringify(dto.email));
+    console.log('Cleaned email:', JSON.stringify(cleanEmail));
+    console.log('Email length:', cleanEmail.length);
+    console.log('Email ends with .edu.tr:', cleanEmail.toLowerCase().endsWith('.edu.tr'));
+    console.log('Last 7 chars:', JSON.stringify(cleanEmail.slice(-7)));
+
+    // DTO'yu backend'in beklediği formata çevir
+    const backendDto = {
+      Email: cleanEmail,
+    };
+
+    return this.http
+      .post<{ message?: string }>(`${this.apiUrl}/me/members`, backendDto, { headers })
+      .pipe(
+        map(() => {
+          // Membership is stored in backend CommunitiesUsers table
+          // No need for localStorage tracking
+          return undefined;
+        }),
+        catchError((error) => {
+          // Hata zaten throw ediliyor
+          throw error;
+        })
+      );
   }
 
   // Topluluk Üyelerini Getir (Backend: GET /api/Communities/me/members)
@@ -414,7 +568,9 @@ export class CommunityService {
   // Topluluğa üye olmayan öğrencileri ara (Backend: GET /api/Communities/me/search-students?query=...)
   searchNonMemberStudents(query: string): Observable<any[]> {
     const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-    if (!token || !query || query.trim().length < 2) {
+    const trimmedQuery = query?.trim() || '';
+    // İlk harf yazıldığında aramayı başlat (minimum 1 karakter)
+    if (!token || !trimmedQuery || trimmedQuery.length < 1) {
       return of([]);
     }
 
@@ -451,7 +607,13 @@ export class CommunityService {
         })
       : new HttpHeaders({ 'Content-Type': 'application/json' });
 
-    return this.http.delete<void>(`${this.apiUrl}/me/members`, { body: dto, headers }).pipe(
+    // Backend PascalCase bekliyor (Email), frontend camelCase gönderiyor (email)
+    // DTO'yu backend'in beklediği formata çevir
+    const backendDto = {
+      Email: dto.email,
+    };
+
+    return this.http.delete<void>(`${this.apiUrl}/me/members`, { body: backendDto, headers }).pipe(
       map(() => {
         // Membership is removed from backend CommunitiesUsers table
         // No need for localStorage tracking
@@ -477,6 +639,38 @@ export class CommunityService {
    * NOTE: This relies on backend properly filtering based on JWT token.
    * If backend doesn't filter, we fallback to president-only filtering.
    */
+  /**
+   * Leave a community (for students)
+   * Uses backend endpoint: DELETE /api/Communities/me/memberships/{communityId}
+   * Note: This endpoint needs to be created in the backend
+   * For now, we'll try to use this endpoint and handle 404 if it doesn't exist
+   */
+  leaveCommunity(communityId: string): Observable<void> {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    if (!token) {
+      throw new Error('Topluluktan ayrılmak için giriş yapmanız gerekiyor.');
+    }
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    });
+
+    // Backend'de bu endpoint oluşturulmalı: DELETE /api/Communities/me/memberships/{communityId}
+    // Şimdilik bu endpoint'i kullanıyoruz, eğer yoksa 404 hatası alacağız
+    return this.http.delete<void>(`${this.apiUrl}/me/memberships/${communityId}`, { headers }).pipe(
+      catchError((error) => {
+        // Eğer endpoint yoksa (404), backend'de bu endpoint oluşturulmalı
+        if (error.status === 404) {
+          throw new Error(
+            "Topluluktan ayrılma işlemi için backend endpoint'i bulunamadı. Backend'de DELETE /api/Communities/me/memberships/{communityId} endpoint'i oluşturulmalı."
+          );
+        }
+        throw error;
+      })
+    );
+  }
+
   /**
    * Get communities where the current user is a member (for students)
    * Uses backend endpoint: GET /api/Communities/me/memberships

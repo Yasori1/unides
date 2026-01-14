@@ -6,10 +6,12 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
 import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
 import { TurkeySkylineComponent } from '../../components/ui/turkey-skyline/turkey-skyline.component';
+import { CommunityService } from '../../services/community.services';
+import { EventService } from '../../services/event.services';
 
 // --- Veri Tipleri (Interfaces) ---
 interface Community {
-  id: number;
+  id: string | number; // Guid (string) veya number
   name: string;
   image: string;
   category: string;
@@ -31,7 +33,7 @@ interface UpcomingEvent {
 }
 
 interface NewCommunity {
-  id: number;
+  id: string | number; // Guid (string) veya number
   name: string;
   university: string;
   image: string;
@@ -87,7 +89,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
     private router: Router,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private communityService: CommunityService,
+    private eventService: EventService
   ) {
     this.safeVideoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
       'https://www.youtube.com/embed/z-3j8kP0D48?autoplay=1'
@@ -159,161 +163,112 @@ export class HomeComponent implements OnInit, OnDestroy {
     return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
   }
 
-  // --- Veri Yükleme (Simülasyon) ---
+  // --- Veri Yükleme (Backend'den) ---
   loadData() {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
     this.isLoading = true;
-    setTimeout(() => {
-      this.featuredCommunities = [
-        {
-          id: 1,
-          name: 'Yapay Zeka Kulübü',
-          category: 'Teknoloji',
-          memberCount: 1250,
-          eventCount: 45,
-          email: 'yapayzeka@uni.edu.tr',
-          image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=600',
-        },
-        {
-          id: 2,
-          name: 'Girişimcilik',
-          category: 'Kariyer',
-          memberCount: 980,
-          eventCount: 32,
-          email: 'girisimcilik@uni.edu.tr',
-          image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=600',
-        },
-        {
-          id: 3,
-          name: 'Doğa Sporları',
-          category: 'Spor',
-          memberCount: 650,
-          eventCount: 12,
-          email: 'dogasporlari@uni.edu.tr',
-          image: 'https://images.unsplash.com/photo-1501555088652-021faa106b9b?q=80&w=600',
-        },
-        {
-          id: 4,
-          name: 'Müzik Atölyesi',
-          category: 'Sanat',
-          memberCount: 820,
-          eventCount: 28,
-          email: 'muzik@uni.edu.tr',
-          image: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=600',
-        },
-        {
-          id: 5,
-          name: 'Siber Güvenlik',
-          category: 'Teknoloji',
-          memberCount: 1100,
-          eventCount: 50,
-          email: 'siberguvenlik@uni.edu.tr',
-          image: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=600',
-        },
-        {
-          id: 6,
-          name: 'Fotoğrafçılık',
-          category: 'Sanat',
-          memberCount: 450,
-          eventCount: 15,
-          email: 'fotografcilik@uni.edu.tr',
-          image: 'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?q=80&w=600',
-        },
-      ];
 
-      const rawEvents: UpcomingEvent[] = [
-        {
-          id: 1,
-          title: 'Hackathon 2025',
-          date: new Date('2025-12-30T22:33:00'),
-          location: 'İTÜ Kampüsü',
-          time: '22:33',
-          description: '48 saatlik kodlama maratonunda projeni geliştir, ödülleri kazan!',
-          communityName: 'Yazılım Kulübü',
-          communityLogo: 'assets/img/placeholder-avatar.svg',
-        },
-        {
-          id: 2,
-          title: 'Girişimcilik Zirvesi',
-          date: new Date('2026-01-01T14:00:00'),
-          location: 'ODTÜ Kültür Merkezi',
-          time: '14:00',
-          description: 'Yatırımcılarla buluşma fırsatı.',
-          communityName: 'Girişimcilik K.',
-          communityLogo: 'assets/img/placeholder-avatar.svg',
-        },
-        {
-          id: 3,
-          title: 'Tasarım Workshop',
-          date: new Date('2026-01-01T10:00:00'),
-          location: 'Online',
-          time: '10:00',
-          description: 'UI/UX tasarımın temelleri.',
-          communityName: 'Sanat Topluluğu',
-          communityLogo: 'assets/img/placeholder-avatar.svg',
-        },
-        {
-          id: 4,
-          title: 'Robotik Yarışması',
-          date: new Date('2026-01-25T13:30:00'),
-          location: 'Teknopark',
-          time: '13:30',
-          description: 'Otonom robotların mücadelesi.',
-          communityName: 'Robotik K.',
-          communityLogo: 'assets/img/placeholder-avatar.svg',
-        },
-        {
-          id: 5,
-          title: 'Bahar Festivali',
-          date: new Date('2026-05-20'),
-          location: 'Ana Kampüs',
-          time: '12:00',
-          description: 'Eğlence dolu bir gün.',
-          communityName: 'Müzik Kulübü',
-          communityLogo: 'assets/img/placeholder-avatar.svg',
-        },
-        {
-          id: 6,
-          title: 'Kariyer Zirvesi',
-          date: new Date('2026-06-01'),
-          location: 'Konferans Salonu',
-          time: '09:00',
-          description: 'Sektör devleriyle buluşma.',
-          communityName: 'İK Kulübü',
-          communityLogo: 'assets/img/placeholder-avatar.svg',
-        },
-      ];
-      this.upcomingEvents = rawEvents.sort((a, b) => a.date.getTime() - b.date.getTime());
-      
-      // Performans optimizasyonu: Template içinde fonksiyon çağırmak yerine hesaplayıp sakla
-      this.upcomingEvents.forEach(e => {
-        e.remainingTimeStr = this.getRemainingTime(e.date);
-      });
+    // Öne Çıkan Topluluklar
+    this.communityService.getFeaturedCommunities(6).subscribe({
+      next: (communities) => {
+        this.featuredCommunities = communities.map((c: any) => {
+          // Backend'den gelen ID'yi direkt kullan (Guid string veya number)
+          const id = c.id || '';
 
-      const placeholderProfile = 'assets/img/placeholder-avatar.svg';
-      const mockCommunityNames = [
-        'Yazılım ve Teknoloji Topluluğu',
-        'Girişimcilik Kulübü',
-        'Siber Güvenlik Kulübü',
-        'Robotik ve Otomasyon Topluluğu',
-        'Müzik Atölyesi Topluluğu',
-        'Fotoğrafçılık Kulübü',
-        'Doğa Sporları Kulübü',
-        'Kariyer ve Networking Topluluğu',
-        'Veri Bilimi Kulübü',
-        'Mimarlık ve Tasarım Kulübü',
-        'Havacılık ve Uzay Topluluğu',
-        'Münazara ve Hitabet Topluluğu',
-      ];
-      this.newestCommunities = Array.from({ length: 12 }, (_, i) => ({
-        id: i + 1,
-        name: mockCommunityNames[i] || `Topluluk ${i + 1}`,
-        university: 'İstanbul Üni.',
-        email: `topluluk${i + 1}@uni.edu.tr`,
-        image: placeholderProfile,
-      }));
+          // Backend'den gelen tüm alanları kullan
+          return {
+            id, // Backend'den gelen gerçek ID (Guid string)
+            name: c.name || '',
+            category: c.category || 'Genel',
+            memberCount: c.memberCount || 0,
+            eventCount: c.upcomingEventCount || 0, // Backend'den gelen event sayısı
+            email: c.email || c.comMail || '', // Backend'den gelen email (varsa)
+            image: c.banner || c.coverImage || c.logo || 'assets/img/placeholder-cover.svg',
+          };
+        });
+      },
+      error: (error) => {
+        console.error('Featured communities yüklenemedi:', error);
+        this.featuredCommunities = [];
+      },
+    });
 
-      this.isLoading = false;
-    }, 1000);
+    // Yaklaşan Etkinlikler
+    this.eventService.getHomeUpcomingEvents(20).subscribe({
+      // Backend'den daha fazla alıp frontend'de filtrele ve sırala
+      next: (events) => {
+        const now = new Date();
+        now.setHours(0, 0, 0, 0); // Bugünün başlangıcı
+
+        // Etkinlikleri map et ve geçici olarak dateOnly ekle
+        const eventsWithDateOnly = events.map((e) => {
+          const eventDate = e.startDate ? new Date(e.startDate) : new Date();
+          // Sadece tarih kısmını al (saat bilgisini sıfırla)
+          const eventDateOnly = new Date(eventDate);
+          eventDateOnly.setHours(0, 0, 0, 0);
+          
+          return {
+            id: e.id,
+            title: e.title,
+            date: eventDate,
+            location: e.location || 'Konum belirtilmemiş',
+            time: eventDate.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+            description: e.shortDescription || e.description || 'Açıklama belirtilmemiş',
+            communityName: e.communityName || 'Topluluk',
+            communityLogo: e.imageUrl || 'assets/img/placeholder-avatar.svg',
+            dateOnly: eventDateOnly, // Sıralama için
+          };
+        });
+
+        // Geçmiş etkinlikleri filtrele (bugün ve gelecekteki etkinlikler)
+        const futureEvents = eventsWithDateOnly.filter((e) => e.dateOnly.getTime() >= now.getTime());
+
+        // Bugüne en yakın etkinlikten en uzağa doğru sırala
+        futureEvents.sort((a, b) => a.dateOnly.getTime() - b.dateOnly.getTime());
+
+        // İlk 6 tanesini al ve dateOnly'yi kaldır
+        this.upcomingEvents = futureEvents.slice(0, 6).map((e) => {
+          const { dateOnly, ...rest } = e;
+          return rest as UpcomingEvent;
+        });
+
+        // Performans optimizasyonu: Template içinde fonksiyon çağırmak yerine hesaplayıp sakla
+        this.upcomingEvents.forEach((e) => {
+          e.remainingTimeStr = this.getRemainingTime(e.date);
+        });
+      },
+      error: (error) => {
+        console.error('Upcoming events yüklenemedi:', error);
+        this.upcomingEvents = [];
+      },
+    });
+
+    // Aramıza Yeni Katılanlar
+    this.communityService.getNewestCommunities(12).subscribe({
+      next: (communities) => {
+        this.newestCommunities = communities.map((c: any) => {
+          // Backend'den gelen ID'yi direkt kullan (Guid string veya number)
+          const id = c.id || '';
+
+          return {
+            id, // Backend'den gelen gerçek ID (Guid string)
+            name: c.name || '',
+            university: c.university || 'Üniversite',
+            email: c.email || c.comMail || '',
+            image: c.logo || 'assets/img/placeholder-avatar.svg',
+          };
+        });
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Newest communities yüklenemedi:', error);
+        this.newestCommunities = [];
+        this.isLoading = false;
+      },
+    });
   }
 
   // --- GELİŞMİŞ AKILLI ARAMA ALGORİTMASI ---
@@ -384,7 +339,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   // --- Yönlendirme Yardımcıları ---
-  goToCommunityDetail(id: number) {
+  goToCommunityDetail(id: string | number) {
+    // Backend'den gelen Guid string'ini veya number'ı direkt kullan
     this.router.navigate(['/communities', id]);
   }
   goToEventDetail(id: number) {

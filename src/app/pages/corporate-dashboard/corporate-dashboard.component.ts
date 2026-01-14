@@ -1,4 +1,4 @@
-import { Component, OnInit, HostListener, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -9,6 +9,7 @@ import { AnnouncementService } from '../../services/announcement.services';
 import { EventService, EventItem } from '../../services/event.services';
 import { ToastService } from '../../services/toast.services';
 import { ToastComponent } from '../../components/ui/toast/toast.component';
+import { AfkDetectionService } from '../../services/afk-detection.service';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 
@@ -70,7 +71,7 @@ interface Notification {
   templateUrl: './corporate-dashboard.component.html',
   styleUrls: ['./corporate-dashboard.component.scss'],
 })
-export class CorporateDashboardComponent implements OnInit {
+export class CorporateDashboardComponent implements OnInit, OnDestroy {
   isSidebarCollapsed = false;
   activeTab = 'overview';
   showNotifications = false;
@@ -283,6 +284,7 @@ export class CorporateDashboardComponent implements OnInit {
     private announcementService: AnnouncementService,
     private eventService: EventService,
     private http: HttpClient,
+    private afkDetectionService: AfkDetectionService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -291,6 +293,9 @@ export class CorporateDashboardComponent implements OnInit {
     if (!isPlatformBrowser(this.platformId)) {
       return;
     }
+
+    // AFK Detection'ı başlat
+    this.afkDetectionService.start();
 
     // Query parametrelerini kontrol et
     const urlParams = new URLSearchParams(window.location.search);
@@ -1133,6 +1138,10 @@ export class CorporateDashboardComponent implements OnInit {
     this.logout();
   }
 
+  navigateToHome() {
+    this.router.navigate(['/']);
+  }
+
   @HostListener('document:click', ['$event'])
   clickout(event: MouseEvent) {
     const target = event.target as HTMLElement;
@@ -1159,20 +1168,31 @@ export class CorporateDashboardComponent implements OnInit {
 
   logout() {
     this.showToast('Çıkış yapılıyor...', 'success');
-    // Toast mesajının okunması için 1.5 saniye bekleyip anasayfaya yönlendiriyoruz
+    // AuthService'i kullanarak logout yap ve anasayfaya yönlendir
     setTimeout(() => {
+      // Local storage'ı temizle
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('user_info');
+      localStorage.removeItem('user_type');
+      // Anasayfaya yönlendir
       this.router.navigate(['/']);
     }, 1500);
   }
 
-  // Spam kontrolünü yapan metod (onaylanan etkinlikler için public)
+  // Spam kontrolünü yapan metod (beklemede olan etkinlikler için)
   performSpamCheck(id: number) {
     const ev = this.allEvents.find((e) => e.id === id);
     if (!ev) return;
 
     // Spam kontrolü başladı
     this.checkingSpamEvents.add(id);
-    this.showToast('Spam kontrolü yapılıyor...', 'success');
+    // Beklemede olan etkinlikler için farklı toast mesajı
+    if (ev.status === 'Beklemede') {
+      this.showToast('İçerik kontrol ediliyor...', 'success');
+    } else {
+      this.showToast('Spam kontrolü yapılıyor...', 'success');
+    }
 
     // Status'u backend formatına çevir
     let status = 'pending';
@@ -1308,7 +1328,12 @@ export class CorporateDashboardComponent implements OnInit {
             highlighted: response.highlighted,
           });
 
-          this.showToast(message, isClean ? 'success' : 'error');
+          // Beklemede olan etkinlikler için farklı toast mesajı
+          if (ev.status === 'Beklemede') {
+            this.showToast('İçerik Kontrolü Tamamlandı', 'success');
+          } else {
+            this.showToast(message, isClean ? 'success' : 'error');
+          }
           this.checkingSpamEvents.delete(id);
           this.inspectedEvents.add(id);
         },
@@ -1826,5 +1851,10 @@ export class CorporateDashboardComponent implements OnInit {
       return desc.substring(0, limit) + '...';
     }
     return desc;
+  }
+
+  ngOnDestroy(): void {
+    // AFK Detection'ı durdur
+    this.afkDetectionService.stop();
   }
 }
