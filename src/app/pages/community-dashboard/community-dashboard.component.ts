@@ -2,9 +2,13 @@ import { Component, OnInit, HostListener, Inject, PLATFORM_ID } from '@angular/c
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ImageUploadComponent } from '../../components/ui/image-upload/image-upload';
 import { CommunityService, Community } from '../../services/community.services';
 import { EventService } from '../../services/event.services';
+import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
+import { catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 // --- Interfaces ---
 interface Project {
@@ -71,7 +75,7 @@ interface DashboardEvent {
 @Component({
   selector: 'app-community-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, ImageUploadComponent],
+  imports: [CommonModule, FormsModule, ImageUploadComponent, LumaSpinComponent],
   templateUrl: './community-dashboard.component.html',
   styleUrls: ['./community-dashboard.component.scss'],
 })
@@ -368,10 +372,21 @@ export class CommunityDashboardComponent implements OnInit {
   categories: string[] = [];
   isLoading = true;
 
+  // Loading states for different data
+  isLoadingCommunity = true;
+  isLoadingEvents = true;
+  isLoadingMembers = true;
+
+  // Spam kontrolü için değişkenler
+  inspectedEvents: Set<number> = new Set();
+  checkingSpamEvents: Set<number> = new Set();
+  spamResults: Map<number, { clean: boolean; message: string }> = new Map();
+
   constructor(
     private router: Router,
     private communityService: CommunityService,
     private eventService: EventService,
+    private http: HttpClient,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -478,6 +493,11 @@ export class CommunityDashboardComponent implements OnInit {
               // Update initialClubInfo for change detection
               this.initialClubInfo = JSON.parse(JSON.stringify(this.clubInfo));
 
+              // Loading state'leri başlat
+              this.isLoadingCommunity = false;
+              this.isLoadingEvents = true;
+              this.isLoadingMembers = true;
+
               // Load events for this community
               this.loadCommunityEvents(communityDetail.id);
 
@@ -503,12 +523,14 @@ export class CommunityDashboardComponent implements OnInit {
     Promise.all(checkPromises).then(() => {
       if (!found) {
         console.warn('No community found for user email:', userEmail);
+        this.isLoadingCommunity = false;
       }
     });
   }
 
   // Load members for the community (Backend: GET /api/Communities/{id:guid}/members)
   private loadCommunityMembers(communityId: string): void {
+    this.isLoadingMembers = true;
     this.communityService.getCommunityMembers(communityId).subscribe({
       next: (backendMembers) => {
         if (backendMembers && backendMembers.length > 0) {
@@ -536,15 +558,18 @@ export class CommunityDashboardComponent implements OnInit {
           // Stats'ı güncelle
           this.stats.totalMembers = this.members.length;
         } else {
-          // Backend'den üye gelmezse, mevcut mock data'yı kullan
-          // (Backend endpoint henüz eklenmediği için)
-          console.log("Backend'den üye gelmedi, mevcut veriler kullanılıyor");
+          // Backend'den üye gelmezse boş array kullan
+          this.members = [];
+          this.stats.totalMembers = 0;
         }
+        this.isLoadingMembers = false;
       },
       error: (err: any) => {
         console.error('Topluluk üyeleri yüklenemedi:', err);
-        // Hata durumunda mevcut mock data'yı kullan
-        console.log('Hata nedeniyle mevcut veriler kullanılıyor');
+        // Hata durumunda boş array kullan
+        this.members = [];
+        this.stats.totalMembers = 0;
+        this.isLoadingMembers = false;
       },
     });
   }
@@ -575,6 +600,7 @@ export class CommunityDashboardComponent implements OnInit {
   // Load events for the community (Backend: GET /api/Events/community/{communityId}/events)
   // Sadece giriş yapılan topluluğun etkinliklerini getirir
   private loadCommunityEvents(communityId: string): void {
+    this.isLoadingEvents = true;
     // Backend'den topluluk bazlı etkinlikleri çek (tüm status'ler: 0, 1, 2)
     this.eventService.getCommunityEvents(communityId, [0, 1, 2]).subscribe({
       next: (communityEvents) => {
@@ -614,11 +640,13 @@ export class CommunityDashboardComponent implements OnInit {
         // İstatistikler zaten loadLeaderStats() ile backend'den geliyor
         // Etkinlikler yüklendikten sonra istatistikleri tekrar yükle (güncel veriler için)
         this.loadLeaderStats();
+        this.isLoadingEvents = false;
       },
       error: (err: any) => {
         console.error('Etkinlikler yüklenemedi:', err);
         // Hata durumunda boş array kullan
         this.dashboardEvents = [];
+        this.isLoadingEvents = false;
       },
     });
   }
@@ -1727,5 +1755,114 @@ export class CommunityDashboardComponent implements OnInit {
     if (isPlatformBrowser(this.platformId)) {
       document.body.style.overflow = 'auto';
     }
+  }
+
+  // Spam kontrolünü yapan private metod (Community Dashboard için)
+  private performSpamCheck(eventData: {
+    title: string;
+    description: string;
+    shortDescription?: string;
+    location?: string;
+    startDate?: string;
+    communityName?: string;
+  }): Promise<{ clean: boolean; message: string }> {
+    return new Promise((resolve, reject) => {
+      // Status'u backend formatına çevir
+      const status = 'pending';
+
+      // Body'yi oluştur (description + shortDescription birleşimi)
+      const bodyParts: string[] = [];
+      if (eventData.shortDescription) {
+        bodyParts.push(eventData.shortDescription);
+      }
+      if (eventData.description) {
+        bodyParts.push(eventData.description);
+      }
+      const body = bodyParts.join('\n\n');
+
+      // Notes'u oluştur (ek bilgiler)
+      const notesParts: string[] = [];
+      if (eventData.location) {
+        notesParts.push(`Konum: ${eventData.location}`);
+      }
+      if (eventData.startDate) {
+        notesParts.push(`Başlangıç: ${eventData.startDate}`);
+      }
+      if (eventData.communityName) {
+        notesParts.push(`Topluluk: ${eventData.communityName}`);
+      }
+      const notes = notesParts.join('\n');
+
+      // Backend'in beklediği formata göre veriyi hazırla
+      const spamCheckData = {
+        id: 0, // Yeni event için 0
+        title: eventData.title || '',
+        body: body || '',
+        category: eventData.communityName || '',
+        notes: notes || '',
+        status: status,
+        created_at: eventData.startDate || new Date().toISOString(),
+      };
+
+      // API'ye istek gönder (proxy üzerinden - CORS hatası önlemek için)
+      const apiUrl = '/spam-check'; // Proxy bu isteği http://72.62.37.160:5002/check adresine yönlendirecek
+      const headers = new HttpHeaders({
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      });
+
+      this.http
+        .post(apiUrl, spamCheckData, {
+          headers,
+          responseType: 'json', // Backend JSON döndürüyor
+        })
+        .pipe(
+          catchError((error) => {
+            // Hata durumunda
+            let errorMessage = 'Spam kontrolü sırasında bir hata oluştu.';
+
+            if (
+              error.error &&
+              typeof error.error === 'string' &&
+              error.error.includes('<!DOCTYPE')
+            ) {
+              errorMessage = 'Backend bağlantı hatası. Lütfen daha sonra tekrar deneyin.';
+            } else if (error.error && typeof error.error === 'object' && error.error.message) {
+              errorMessage = error.error.message;
+            } else if (error.message) {
+              errorMessage = error.message;
+            }
+
+            reject({ clean: false, message: errorMessage });
+            return of(null);
+          })
+        )
+        .subscribe({
+          next: (response: any) => {
+            if (!response) {
+              reject({ clean: false, message: 'Backend yanıtı boş.' });
+              return;
+            }
+
+            // Backend formatı: { result: { status: "kabul", reason: "Temiz" }, ... }
+            const result = response.result;
+            if (result) {
+              const isClean = result.status === 'kabul';
+              const message =
+                result.reason || (isClean ? 'İçerik temizdir.' : 'Spam içerik tespit edildi.');
+              resolve({ clean: isClean, message });
+            } else {
+              // Eski format desteği (fallback)
+              const isClean = response.clean !== false;
+              const message =
+                response.message || (isClean ? 'İçerik temizdir.' : 'Spam içerik tespit edildi.');
+              resolve({ clean: isClean, message });
+            }
+          },
+          error: (error) => {
+            reject({ clean: false, message: 'Spam kontrolü başarısız.' });
+          },
+        });
+    });
   }
 }

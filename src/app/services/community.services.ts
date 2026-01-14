@@ -138,7 +138,27 @@ export class CommunityService {
         return mapped;
       }),
       catchError((error) => {
-        return of([]);
+        // Hata durumunda mock data döndür
+        const mockCommunity: Community = {
+          id: 'mock-id-1',
+          name: 'Yazılım ve Teknoloji Topluluğu (Demo)',
+          university: 'Demo Üniversitesi',
+          category: 'Teknoloji',
+          description: 'Teknoloji ve yazılım meraklılarını bir araya getiren topluluk.',
+          logo: 'assets/img/placeholder-logo.svg',
+          banner: 'assets/img/placeholder-cover.svg',
+          coverImage: 'assets/img/placeholder-cover.svg',
+          memberCount: 150,
+          city: 'İstanbul',
+          about: 'Bu bir demo topluluktur. Detayları inceleyebilirsiniz.',
+          status: 'Aktif',
+          isActivity: true,
+          miniAbout: 'Teknoloji ve yazılım meraklılarını bir araya getiren topluluk.',
+          email: 'demo@community.com',
+          presidentEmail: 'baskan@demo.com',
+          comLeadMail: 'baskan@demo.com'
+        };
+        return of([mockCommunity]);
       })
     );
   }
@@ -170,6 +190,32 @@ export class CommunityService {
     return this.http.get<CommunityDetailDto>(`${this.apiUrl}/${id}`, { headers }).pipe(
       map((response) => this.mapDetailDtoToCommunity(response)),
       catchError((error) => {
+         // Hata durumunda mock data döndür (Demo için)
+         if (id === 'mock-id-1' || error.status === 0 || error.status === 404) {
+            const mockCommunity: Community = {
+              id: 'mock-id-1',
+              name: 'Yazılım ve Teknoloji Topluluğu (Demo)',
+              university: 'Demo Üniversitesi',
+              category: 'Teknoloji',
+              description: 'Teknoloji ve yazılım meraklılarını bir araya getiren topluluk.',
+              logo: 'assets/img/placeholder-logo.svg',
+              banner: 'assets/img/placeholder-cover.svg',
+              coverImage: 'assets/img/placeholder-cover.svg',
+              memberCount: 150,
+              city: 'İstanbul',
+              about: 'Bu bir demo topluluktur. Detayları inceleyebilirsiniz.',
+              status: 'Aktif',
+              isActivity: true,
+              miniAbout: 'Teknoloji ve yazılım meraklılarını bir araya getiren topluluk.',
+              email: 'demo@community.com',
+              presidentEmail: 'baskan@demo.com',
+              comLeadMail: 'baskan@demo.com',
+              webSiteUrl: 'https://demo.com',
+              instagramUrl: 'https://instagram.com/demo',
+              events: []
+            };
+            return of(mockCommunity);
+         }
         // Hata durumunda throw ediyoruz
         throw error;
       })
@@ -381,6 +427,52 @@ export class CommunityService {
    * NOTE: This relies on backend properly filtering based on JWT token.
    * If backend doesn't filter, we fallback to president-only filtering.
    */
+  /**
+   * Get communities where the current user is a member (for students)
+   * Uses backend endpoint: GET /api/Communities/me/memberships
+   * Returns communities with their events
+   */
+  getMyMemberships(): Observable<any[]> {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    if (!token) {
+      return of([]);
+    }
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+
+    return this.http.get<any[]>(`${this.apiUrl}/me/memberships`, { headers }).pipe(
+      map((response) => {
+        // Backend MemberCommunityDto formatını Community formatına çevir
+        return response.map((dto: any) => ({
+          id: dto.communityId || dto.CommunityId,
+          name: dto.comName || dto.ComName,
+          university: dto.university || dto.University || '',
+          category: dto.comCategory || dto.ComCategory || 'Genel',
+          description: dto.comAbout || dto.ComAbout || dto.miniAbout || dto.MiniAbout,
+          logo: dto.logoUrl || dto.LogoUrl || this.placeholderLogo,
+          memberCount: 0,
+          city: dto.city || dto.City || '',
+          about: dto.comAbout || dto.ComAbout,
+          banner: dto.bannerUrl || dto.BannerUrl || this.placeholderCover,
+          coverImage: dto.bannerUrl || dto.BannerUrl || this.placeholderCover,
+          status: 'Aktif',
+          isActivity: true,
+          events: dto.events || dto.Events || [], // Topluluk etkinlikleri
+          joinedDate: dto.joinedDate || dto.JoinedDate, // Üyelik tarihi
+        }));
+      }),
+      catchError((error) => {
+        console.error('Error fetching memberships:', error);
+        if (error.status === 401 || error.status === 403) {
+          // Unauthorized access - returning empty list
+        }
+        return of([]);
+      })
+    );
+  }
+
   getMyCommunities(): Observable<Community[]> {
     // Get current user info from localStorage
     if (typeof window === 'undefined') {

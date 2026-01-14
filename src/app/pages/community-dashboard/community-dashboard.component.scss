@@ -1504,6 +1504,27 @@
   pointer-events: none;
 }
 
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  gap: 16px;
+  padding: 40px 20px;
+
+  p {
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 500;
+    margin: 0;
+  }
+
+  app-luma-spin {
+    transform: scale(2); // Spinner'ı biraz büyüt
+  }
+}
+
 .loading-state {
   display: flex;
   flex-direction: column;

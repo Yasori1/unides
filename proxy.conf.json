@@ -5,5 +5,18 @@
         "changeOrigin": true,
         "logLevel": "debug",
         "ws": true
+    },
+    "/spam-check": {
+        "target": "http://72.62.37.160:5002",
+        "secure": false,
+        "changeOrigin": true,
+        "logLevel": "debug",
+        "pathRewrite": {
+            "^/spam-check": "/check"
+        },
+        "headers": {
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+        }
     }
 }

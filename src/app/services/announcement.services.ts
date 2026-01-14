@@ -180,9 +180,8 @@ export class AnnouncementService {
       }),
       catchError((error) => {
         console.error('Duyurular yüklenemedi, mock data dönülüyor:', error);
-        // Hata durumunda boş liste dönmek yerine mock datayı dönebiliriz veya boş dönebiliriz.
-        // Listeleme sayfası zaten kendi mock datasına sahip, ama burası da dönebilir.
-        return of([]); 
+        // Hata durumunda mock datayı dön
+        return of(MOCK_ANNOUNCEMENTS); 
       })
     );
   }

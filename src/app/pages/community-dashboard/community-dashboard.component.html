@@ -103,6 +103,14 @@
     </div>
     
     <div class="view-container" *ngIf="activeTab === 'overview'">
+      <!-- Loading State for Overview -->
+      <div class="loading-container" *ngIf="isLoadingCommunity || isLoadingEvents || isLoadingMembers">
+        <app-luma-spin></app-luma-spin>
+        <p>Veriler yükleniyor...</p>
+      </div>
+
+      <!-- Content when loaded -->
+      <div *ngIf="!isLoadingCommunity && !isLoadingEvents && !isLoadingMembers">
        <div class="stats-grid-compact">
         <div
           class="stat-card-mini"
@@ -177,7 +185,14 @@
           </div>
         </div>
 
-        <div class="events-grid compact" *ngIf="displayedDashboardEvents.length; else emptyEvents">
+        <!-- Loading State -->
+        <div class="loading-container" *ngIf="isLoadingEvents">
+          <app-luma-spin></app-luma-spin>
+          <p>Etkinlikler yükleniyor...</p>
+        </div>
+
+        <!-- Events Grid -->
+        <div class="events-grid compact" *ngIf="!isLoadingEvents && displayedDashboardEvents.length; else emptyEvents">
           <div class="event-card" *ngFor="let event of displayedDashboardEvents" (click)="onEventCardClick(event)" [class.rejected-card]="event.status === 'rejected'">
             <div class="card-image">
               <img [src]="event.imageUrl" [alt]="event.title" loading="lazy" />
@@ -203,11 +218,12 @@
           </div>
         </div>
         <ng-template #emptyEvents>
-          <div class="empty-state">
+          <div class="empty-state" *ngIf="!isLoadingEvents">
             <span class="material-symbols-outlined">event_busy</span>
             <p>Henüz listelenecek etkinlik yok.</p>
           </div>
         </ng-template>
+      </div>
       </div>
     </div>
 
@@ -251,9 +267,16 @@
         </div>
       </div>
 
+      <!-- Loading State -->
+      <div class="loading-container" *ngIf="isLoadingEvents">
+        <app-luma-spin></app-luma-spin>
+        <p>Etkinlikler yükleniyor...</p>
+      </div>
+
+      <!-- Events Grid -->
       <div
         class="events-grid compact"
-        *ngIf="filteredDashboardEvents.length; else emptyProjectEvents"
+        *ngIf="!isLoadingEvents && filteredDashboardEvents.length; else emptyProjectEvents"
       >
         <div class="event-card" *ngFor="let event of filteredDashboardEvents" (click)="onEventCardClick(event)" [class.rejected-card]="event.status === 'rejected'">
           <div class="card-image">
@@ -280,7 +303,7 @@
         </div>
       </div>
       <ng-template #emptyProjectEvents>
-        <div class="empty-state">
+        <div class="empty-state" *ngIf="!isLoadingEvents">
           <span class="material-symbols-outlined">event_busy</span>
           <p>Henüz listelenecek etkinlik yok.</p>
         </div>
@@ -303,7 +326,14 @@
           <button class="btn-primary" (click)="openModal('new-member')">Üye Ekle</button>
         </div>
       </div>
-      <div *ngIf="pagedMembers.length; else noMembers" class="members-table-container">
+      <!-- Loading State -->
+      <div class="loading-container" *ngIf="isLoadingMembers">
+        <app-luma-spin></app-luma-spin>
+        <p>Üyeler yükleniyor...</p>
+      </div>
+
+      <!-- Members Table -->
+      <div *ngIf="!isLoadingMembers && pagedMembers.length; else noMembers" class="members-table-container">
         <table class="members-table">
           <thead>
             <tr>
@@ -338,7 +368,7 @@
         </table>
       </div>
       <ng-template #noMembers>
-        <div class="empty-state">
+        <div class="empty-state" *ngIf="!isLoadingMembers">
           <span class="material-symbols-outlined">group_off</span>
           <p>Listelenecek üye bulunamadı.</p>
         </div>
@@ -460,8 +490,8 @@
         </div>
         
         <label class="stacked">
-          <span>Etkinlik İsmi</span>
-          <input type="text" placeholder="Etkinlik İsmi" [(ngModel)]="newEventData.title" />
+          <span>Etkinlik İsmi (Maks. 90)</span>
+          <input type="text" placeholder="Etkinlik İsmi" [(ngModel)]="newEventData.title" maxlength="90" />
         </label>
 
         <div class="row two-cols">
@@ -475,16 +505,17 @@
           </label>
         </div>
         <label class="stacked">
-          <span>Konum</span>
-          <input type="text" placeholder="Konum" [(ngModel)]="newEventData.location" />
+          <span>Konum (Maks. 100)</span>
+          <input type="text" placeholder="Konum" [(ngModel)]="newEventData.location" maxlength="100" />
         </label>
         <label class="stacked">
-          <span>Kontenjan</span>
+          <span>Kontenjan (Maks. 4 Hane)</span>
           <input 
             type="number" 
             placeholder="Kontenjan" 
             [(ngModel)]="newEventData.quota" 
-            oninput="if(this.value.length > 4) this.value = this.value.slice(0, 4);"
+            oninput="if(this.value.length > 4) this.value = this.value.slice(0, 4); this.value = this.value.replace(/[^0-9]/g, '');"
+            min="0"
           />
         </label>
         
@@ -499,7 +530,7 @@
         </label>
 
         <label class="stacked">
-          <span>Etkinlik Açıklaması</span>
+          <span>Etkinlik Açıklaması (Maks. 500)</span>
           <textarea
             rows="3"
             placeholder="Etkinlik Açıklaması"
