@@ -142,10 +142,10 @@ export class LoginPageComponent implements OnInit {
         }));
         localStorage.setItem('user_type', 'student');
 
-        this.toastService.show('Giriş başarılı! Dashboard\'a yönlendiriliyorsunuz...', 'success');
+        this.toastService.show('Giriş başarılı! Ana sayfaya yönlendiriliyorsunuz...', 'success');
 
         setTimeout(() => {
-          this.router.navigateByUrl('/student-dashboard');
+          this.router.navigateByUrl('/');
         }, 1500);
       })
       .catch((e: any) => {

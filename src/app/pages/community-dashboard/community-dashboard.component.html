@@ -1,4 +1,7 @@
 <div class="dashboard-container">
+  <!-- Mobile Sidebar Overlay -->
+  <div class="sidebar-mobile-overlay" [class.active]="isSidebarCollapsed" (click)="toggleSidebar()"></div>
+
   <aside class="sidebar" [class.collapsed]="isSidebarCollapsed">
     <div class="brand" (click)="switchTab('overview')">
       <div class="logo-badge">

@@ -9,6 +9,9 @@
 />
 
 <div class="dashboard-container">
+  <!-- Mobile Sidebar Overlay -->
+  <div class="sidebar-mobile-overlay" [class.active]="isSidebarCollapsed" (click)="toggleSidebar()"></div>
+
   <!-- Toast Component Entegrasyonu -->
   <app-toast></app-toast>
 
