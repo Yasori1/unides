@@ -823,16 +823,39 @@ $border-color: #e2e8f0; // Slate 200
 
 // Responsive
 @media (max-width: 992px) {
-  .hero-container {
-    grid-template-columns: 1fr;
-    text-align: center;
+  .hero-section {
+    .hero-container {
+      grid-template-columns: 1fr;
+      text-align: center;
+      gap: 20px;
+      display: block; // Changed to block to ensure full width stacking
+    }
+
+    .hero-visual-side {
+      display: none !important; // Hide floating cards on mobile
+    }
+
+    .hero-text-side {
+      padding: 0 10px; 
+      width: 100%;
+      
+      h1 {
+        font-size: 2rem; 
+        br {
+          display: none; // Let text flow naturally
+        }
+      }
+      
+      .lead {
+        font-size: 1rem;
+      }
+    }
   }
-  .hero-visual-side {
-    display: none;
-  }
+
   .guide-grid {
     grid-template-columns: 1fr !important;
   }
+
 
   // Mobilde GSB Logo hizalaması
   .clean-logo-wrapper {
@@ -849,7 +872,7 @@ $border-color: #e2e8f0; // Slate 200
     }
   }
 }
-@media (max-width: 768px) {
+@media (max-width: 576px) {
   .page-spacer {
     padding-top: 120px;
     .page-title {
