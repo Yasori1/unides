@@ -363,9 +363,6 @@
               loading="lazy"
               onerror="this.src='assets/images/page-title1.jpg'"
             />
-            <div class="date-badge">
-              {{ e.date }}
-            </div>
             <div class="tap-hint">
               <span class="material-symbols-outlined">visibility</span> İncele
             </div>
@@ -378,9 +375,13 @@
               </div>
 
               <h3 class="event-title">{{ e.eventName }}</h3>
-              <p class="short-desc">{{ getShortDesc(e.description) }}</p>
+              <p class="short-desc">{{ e.shortDescription || getShortDesc(e.description) }}</p>
 
               <div class="bottom-meta column-layout">
+                <div class="mini-location" *ngIf="e.city">
+                  <span class="material-symbols-outlined">map</span>
+                  {{ e.city }}
+                </div>
                 <div class="mini-location">
                   <span class="material-symbols-outlined">location_on</span>
                   {{ e.location }}
@@ -994,10 +995,6 @@
 
             <div class="event-detail-grid">
               <div class="item">
-                <span class="label">Etkinlik ID</span>
-                <p class="value">{{ selectedEvent.id || '—' }}</p>
-              </div>
-              <div class="item">
                 <span class="label">Durum</span>
                 <p class="value">
                   <span [ngClass]="{
@@ -1010,17 +1007,13 @@
                   </span>
                 </p>
               </div>
-              <div class="item full">
+              <div class="item">
                 <span class="label">Etkinlik Adı</span>
                 <p class="value">{{ selectedEvent.eventName || '—' }}</p>
               </div>
-              <div class="item">
+              <div class="item full">
                 <span class="label">Topluluk Adı</span>
                 <p class="value">{{ selectedEvent.communityName || '—' }}</p>
-              </div>
-              <div class="item">
-                <span class="label">Topluluk ID</span>
-                <p class="value">{{ selectedEvent.communityId || '—' }}</p>
               </div>
               <div class="item">
                 <span class="label">Şehir</span>
@@ -1064,6 +1057,21 @@
               </div>
             </div>
 
+            <!-- Spam Kontrol Loading -->
+            <div *ngIf="checkingSpamEvents.has(selectedEvent.id)" class="spam-checking-box">
+              <div class="spinner"></div>
+              <span>Spam kontrolü yapılıyor...</span>
+            </div>
+
+            <!-- Spam Kontrol Sonucu -->
+            <div *ngIf="inspectedEvents.has(selectedEvent.id) && !checkingSpamEvents.has(selectedEvent.id)" 
+                 class="spam-result-box" 
+                 [class.clean]="isEventClean(selectedEvent.id)" 
+                 [class.spam]="!isEventClean(selectedEvent.id)">
+              <span class="material-symbols-outlined">{{ isEventClean(selectedEvent.id) ? 'check_circle' : 'warning' }}</span>
+              <span>{{ getSpamMessage(selectedEvent.id) }}</span>
+            </div>
+
             <div class="modal-actions spaced">
               <button class="btn-secondary" (click)="closeModal()">Kapat</button>
               
@@ -1079,7 +1087,7 @@
                 <!-- Onayla Butonu (Sadece spam analizi yapıldıysa ve temizse) -->
                 <button 
                   class="btn-success" 
-                  *ngIf="inspectedEvents.has(selectedEvent.id) && isEventClean(selectedEvent.id)"
+                  *ngIf="inspectedEvents.has(selectedEvent.id) && !checkingSpamEvents.has(selectedEvent.id) && isEventClean(selectedEvent.id)"
                   (click)="approveEvent(selectedEvent.id)"
                 >
                   <span class="material-symbols-outlined">check</span> Onayla

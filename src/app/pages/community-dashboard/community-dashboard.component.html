@@ -309,7 +309,6 @@
             <tr>
               <th>İsim Soyad</th>
               <th>E-Posta</th>
-              <th>Üniversite</th>
               <th class="action-column">İşlem</th>
             </tr>
           </thead>
@@ -328,12 +327,7 @@
                 </div>
               </td>
               <td class="member-email-cell">{{ m.email }}</td>
-              <td class="member-university-cell">{{ m.university || '-' }}</td>
               <td class="member-action-cell">
-                <button class="member-edit-btn-table" (click)="editMember(m)" title="Üyeyi Düzenle">
-                  <span class="material-symbols-outlined">edit</span>
-                  <span>Düzenle</span>
-                </button>
                 <button class="member-delete-btn-table" (click)="openDeleteConfirm(m.id)" title="Üyeyi Sil">
                   <span class="material-symbols-outlined">delete</span>
                   <span>Sil</span>
@@ -372,16 +366,10 @@
       <div class="card settings-card">
         <div class="settings-hero">
           <div class="hero-banner" [style.background-image]="'url(' + clubInfo.banner + ')'">
-            <button class="edit-btn" (click)="showBannerModal = true">
-              <span class="material-symbols-outlined">edit</span>
-            </button>
           </div>
           <div class="hero-profile">
             <div class="avatar-wrapper">
               <img [src]="clubInfo.logo" alt="Logo" />
-              <button class="edit-btn small" (click)="showAvatarModal = true">
-                <span class="material-symbols-outlined">edit</span>
-              </button>
             </div>
             <div class="hero-text">
               <p class="eyebrow">Profil</p>
@@ -415,7 +403,7 @@
               </label>
               <label>
                 <span>E-Posta</span>
-                <input type="email" [(ngModel)]="clubInfo.email" />
+                <input type="email" [(ngModel)]="clubInfo.email" disabled />
               </label>
             </div>
             <label class="stacked">
@@ -430,54 +418,10 @@
                 maxlength="500" 
                 [(ngModel)]="clubInfo.description"
                 placeholder="Topluluğunuzu anlatan kısa bir yazı yazın..."
+                disabled
               ></textarea>
             </label>
           </div>
-        </div>
-        <div class="action-footer">
-          <button
-            class="btn-primary"
-            [disabled]="!isSettingsValid || !isSettingsChanged"
-            (click)="updateSettings()"
-          >
-            Değişiklikleri Kaydet
-          </button>
-        </div>
-      </div>
-
-      <div class="simple-modal-overlay" *ngIf="showBannerModal" (click)="showBannerModal = false">
-        <div class="simple-modal-card" (click)="$event.stopPropagation()">
-          <div class="modal-head">
-            <h3>Banner Güncelle</h3>
-            <button class="icon-btn ghost close-modern" (click)="showBannerModal = false">
-              <span class="material-symbols-outlined">close</span>
-            </button>
-          </div>
-          <p class="modal-hint">Önerilen ölçü: 1200 x 400 px</p>
-          <app-image-upload
-            label="Banner seç / sürükle"
-            [previewUrl]="clubInfo.banner"
-            [allowUrl]="false"
-            (onImageSelected)="onBannerSelected($event)"
-          ></app-image-upload>
-        </div>
-      </div>
-
-      <div class="simple-modal-overlay" *ngIf="showAvatarModal" (click)="showAvatarModal = false">
-        <div class="simple-modal-card" (click)="$event.stopPropagation()">
-          <div class="modal-head">
-            <h3>Profil Fotoğrafı Güncelle</h3>
-            <button class="icon-btn ghost close-modern" (click)="showAvatarModal = false">
-              <span class="material-symbols-outlined">close</span>
-            </button>
-          </div>
-          <p class="modal-hint">Önerilen ölçü: 400 x 400 px</p>
-          <app-image-upload
-            label="Fotoğraf seç / sürükle"
-            [previewUrl]="clubInfo.logo"
-            [allowUrl]="false"
-            (onImageSelected)="onLogoSelected($event)"
-          ></app-image-upload>
         </div>
       </div>
     </div>
@@ -621,7 +565,7 @@
             <span>E-posta Adresleri</span>
             <textarea
               rows="8"
-              placeholder="E-posta adreslerini virgül, noktalı virgül veya yeni satır ile ayırarak yapıştırın:&#10;abc@itu.edu.tr, bbb@bogazici.edu.tr, xxx@odtu.edu.tr"
+              placeholder="E-posta adreslerini virgül ile ayırarak yapıştırın:&#10;abc@itu.edu.tr, bbb@bogazici.edu.tr, xxx@odtu.edu.tr"
               [(ngModel)]="bulkEmailsText"
               class="bulk-emails-textarea"
             ></textarea>
