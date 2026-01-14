@@ -22,38 +22,34 @@ $dark-text: #0f172a;
   border-bottom: none;
 
   .nav-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    /* Branding bileşeni absolute değil, flow içinde yer almalı ve tüm alanı kaplamalı */
+    display: block; 
+    width: 100%;
     height: 100%;
-    padding: 0 5%;
     position: relative;
+    padding: 0;
   }
 
-  .brand {
-    margin-left: 0;
-  }
-
-  .brand img.logo-transparent {
-    height: 58px;
-    width: auto;
-    mix-blend-mode: multiply;
-    display: block;
-  }
-
-    .nav-links {
+  /* Navigasyon linkleri mutlak pozisyonla ortalanır */
+  .nav-links {
     display: flex;
     justify-content: center;
     gap: 30px;
     list-style: none;
     margin: 0;
     padding: 0;
-    flex: 1;
+    
     position: absolute;
+    top: 50%;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translate(-50%, -50%);
+    
+    /* Kullanıcı isteği: Navigasyon linklerini 2cm (yaklaşık 75px) sola kaydır */
+    margin-left: -100px;
+    
     width: auto;
     min-width: fit-content;
+    z-index: 10; /* Branding'in üzerinde kalmalı ama branding pointer-events:none olduğu için sorun çıkmaz */
 
     li {
       position: relative;
@@ -130,49 +126,9 @@ $dark-text: #0f172a;
       }
     }
   }
-
-  .auth-buttons {
-    flex: 0 0 auto;
-    display: flex;
-    gap: 12px;
-    margin-left: 50px; // Menüden uzaklaştırmak için margin eklendi
-  }
-
-  /* Mobile Toggle Button (Hidden on Desktop) */
-  .mobile-toggle {
-      display: none;
-      flex-direction: column;
-      justify-content: space-between;
-      width: 30px;
-      height: 21px;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      z-index: 1101;
-      padding: 0;
-      
-      .bar {
-          width: 100%;
-          height: 3px;
-          background-color: $primary;
-          border-radius: 3px;
-          transition: all 0.3s ease;
-      }
-      
-      &.active {
-          .bar:nth-child(1) {
-              transform: translateY(9px) rotate(45deg);
-          }
-          .bar:nth-child(2) {
-              opacity: 0;
-          }
-          .bar:nth-child(3) {
-              transform: translateY(-9px) rotate(-45deg);
-          }
-      }
-  }
 }
 
+/* Button Styles kept for Mobile Menu */
 .btn-outline-custom {
   display: inline-flex;
   justify-content: center;
@@ -262,6 +218,8 @@ $dark-text: #0f172a;
         box-shadow: -5px 0 15px rgba(0,0,0,0.1);
         z-index: 1000;
         display: flex; /* Ensure display flex so transition works */
+        transform: none; /* Reset center transform for mobile menu */
+        left: auto; /* Reset left positioning */
         
         &.active {
             right: 0;
@@ -304,14 +262,6 @@ $dark-text: #0f172a;
             width: 100%;
             text-align: center;
         }
-      }
-      
-      .mobile-toggle {
-          display: flex;
-      }
-      
-      .desktop-auth {
-          display: none;
       }
   }
 }

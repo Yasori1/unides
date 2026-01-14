@@ -37,10 +37,14 @@ export class CommunitiesPageComponent implements OnInit {
   
   categories: string[] = [];
 
+  // Yeni Tag Filtresi (Kullanıcı isteği)
+  tags: string[] = ['Teknoloji', 'Sanat', 'Spor', 'Müzik', 'Bilim'];
+
   // Filtreleme Değişkenleri
   searchText: string = '';
   selectedCity: string = '';
   selectedCategory: string = '';
+  selectedTag: string = ''; // Yeni tag seçimi
   sortOrder: 'default' | 'member_desc' | 'member_asc' = 'default';
 
   // Sayfalama
@@ -160,12 +164,20 @@ export class CommunitiesPageComponent implements OnInit {
       temp = temp.filter((c) => c.city === this.selectedCity);
     }
 
-    // 3. Kategori Filtresi
+    // 3. Kategori Filtresi (URL'den gelen)
     if (this.selectedCategory) {
       temp = temp.filter((c) => c.category === this.selectedCategory);
     }
+    
+    // 4. Tag Filtresi (Yeni eklenen - Kategoriye göre filtreler)
+    if (this.selectedTag) {
+      // Not: Şu an için tag'ler kategori alanında tutuluyor varsayıyoruz veya kategori ile eşleşiyor
+      // İleride ayrı bir tag alanı olursa burası güncellenebilir.
+      // Şimdilik kategori içinde arama yapıyoruz veya tam eşleşme
+      temp = temp.filter((c) => c.category === this.selectedTag || c.category.includes(this.selectedTag));
+    }
 
-    // 4. Sıralama
+    // 5. Sıralama
     if (this.sortOrder === 'member_desc') {
       temp.sort((a, b) => b.memberCount - a.memberCount);
     } else if (this.sortOrder === 'member_asc') {
@@ -181,6 +193,7 @@ export class CommunitiesPageComponent implements OnInit {
     this.searchText = '';
     this.selectedCity = '';
     this.selectedCategory = '';
+    this.selectedTag = '';
     this.sortOrder = 'default';
     this.applyFilters();
   }

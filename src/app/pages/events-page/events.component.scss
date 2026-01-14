@@ -112,6 +112,7 @@ $border-color: #e2e8f0;
   }
 
   .page-subtitle {
+    font-family: 'Inter', sans-serif; /* Kullanıcı isteği: Fontu Inter yapıldı */
     font-size: 1.05rem;
     color: $text-gray;
     max-width: 600px;

@@ -1,0 +1,22 @@
+<div class="header-branding-wrapper">
+  <div class="brand">
+    <a routerLink="/">
+      <img src="assets/unides1.png" alt="ÜNİDES Logosu" class="logo-transparent" />
+    </a>
+  </div>
+
+  <div class="right-actions">
+    <!-- Mobile Toggle Button -->
+    <button class="mobile-toggle" (click)="onToggleMenu()" [class.active]="isMobileMenuOpen">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </button>
+
+    <!-- Desktop Auth Buttons -->
+    <div class="auth-buttons desktop-auth">
+      <a routerLink="/login" class="btn-outline-custom small static-btn"><span>Giriş Yap</span></a>
+      <a routerLink="/register" class="btn-solid-custom small"><span>Kayıt Ol</span></a>
+    </div>
+  </div>
+</div>

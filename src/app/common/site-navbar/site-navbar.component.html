@@ -1,17 +1,9 @@
 <nav class="navbar glass-transparent">
   <div class="container nav-content">
-    <div class="brand">
-      <a routerLink="/">
-        <img src="assets/unides1.png" alt="ÜNİDES Logosu" class="logo-transparent" />
-      </a>
-    </div>
-
-    <!-- Mobile Toggle Button -->
-    <button class="mobile-toggle" (click)="toggleMobileMenu()" [class.active]="isMobileMenuOpen">
-      <span class="bar"></span>
-      <span class="bar"></span>
-      <span class="bar"></span>
-    </button>
+    <app-header-branding
+      [isMobileMenuOpen]="isMobileMenuOpen"
+      (toggleMenu)="toggleMobileMenu()">
+    </app-header-branding>
 
     <ul class="nav-links" [class.active]="isMobileMenuOpen">
       <li><a routerLink="/" (click)="closeMobileMenu()">Ana Sayfa</a></li>
@@ -35,11 +27,5 @@
         <a routerLink="/register" class="btn-solid-custom small" (click)="closeMobileMenu()">Kayıt Ol</a>
       </li>
     </ul>
-
-    <!-- Desktop Auth Buttons -->
-    <div class="auth-buttons desktop-auth">
-      <a routerLink="/login" class="btn-outline-custom small static-btn"><span>Giriş Yap</span></a>
-      <a routerLink="/register" class="btn-solid-custom small"><span>Kayıt Ol</span></a>
-    </div>
   </div>
 </nav>

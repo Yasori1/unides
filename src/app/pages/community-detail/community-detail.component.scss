@@ -229,7 +229,7 @@
         letter-spacing: -0.3px;
       }
 
-      .upcoming-events-grid {
+          .upcoming-events-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
         gap: 20px;
@@ -320,6 +320,34 @@
                 }
               }
             }
+          }
+        }
+      }
+
+      .no-events-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 0;
+        
+        .no-events-message {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 16px;
+          text-align: center;
+          color: var(--secondary-color);
+          
+          i {
+            font-size: 3rem;
+            color: var(--secondary-color);
+            opacity: 0.5;
+          }
+          
+          p {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin: 0;
           }
         }
       }
