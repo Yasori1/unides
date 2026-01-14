@@ -3026,3 +3026,113 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
     padding: 15px;
   }
 }
+
+// ================= SPAM FİLTRESİ RAPORU =================
+.spam-report-section {
+  margin-top: 24px;
+  padding: 20px;
+  background: $bg-body;
+  border-radius: 8px;
+  border: 1px solid $border;
+
+  .spam-report-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid $border;
+
+    &.clean {
+      border-bottom-color: $success;
+      
+      .material-symbols-outlined {
+        color: $success;
+      }
+    }
+
+    &.not-clean {
+      border-bottom-color: $danger;
+      
+      .material-symbols-outlined {
+        color: $danger;
+      }
+    }
+
+    .material-symbols-outlined {
+      font-size: 28px;
+      font-weight: 600;
+    }
+
+    h4 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: $text-main;
+    }
+  }
+
+  .spam-report-content {
+    .spam-report-message {
+      font-size: 15px;
+      font-weight: 500;
+      margin-bottom: 16px;
+      padding: 12px;
+      border-radius: 6px;
+
+      &.success {
+        background: rgba(16, 185, 129, 0.1);
+        color: #059669;
+        border-left: 4px solid $success;
+      }
+
+      &.error {
+        background: rgba(239, 68, 68, 0.1);
+        color: #dc2626;
+        border-left: 4px solid $danger;
+      }
+    }
+
+    .spam-reasons,
+    .spam-details {
+      margin-top: 16px;
+
+      h5 {
+        font-size: 14px;
+        font-weight: 600;
+        color: $text-main;
+        margin-bottom: 12px;
+      }
+
+      ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+
+        li {
+          padding: 10px 12px;
+          margin-bottom: 8px;
+          background: $surface;
+          border-left: 3px solid $warning;
+          border-radius: 4px;
+          font-size: 13px;
+          color: $text-main;
+          line-height: 1.5;
+
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
+      }
+    }
+
+    .spam-details {
+      ul li {
+        border-left-color: $text-muted;
+        background: rgba($text-muted, 0.05);
+        color: $text-muted;
+        font-size: 12px;
+      }
+    }
+  }
+}

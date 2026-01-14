@@ -81,8 +81,13 @@ export class CorporateDashboardComponent implements OnInit {
   eventStatusFilter: string = ''; // Etkinlik durum filtresi
   filteredEvents: EventRequest[] = []; // Filtrelenmiş etkinlikler
   inspectedEvents: Set<number> = new Set();
-  spamResults: Map<number, { clean: boolean; message: string }> = new Map();
+  spamResults: Map<number, { clean: boolean; message: string; details?: string[]; reasons?: string[] }> = new Map();
   forbiddenWords: string[] = ['yasak', 'illegal', 'spam', 'kötü', 'bahis', 'kumar'];
+  
+  // Confirmation modal properties
+  isConfirmModalOpen = false;
+  confirmMessage = '';
+  confirmCallback: (() => void) | null = null;
 
   // Pagination için değişkenler
   currentPage = 1;
@@ -360,6 +365,13 @@ export class CorporateDashboardComponent implements OnInit {
   loadEventsFromService() {
     if (!isPlatformBrowser(this.platformId)) return;
 
+    // TEST İÇİN: Geçici olarak backend çağrısını atlayıp direkt örnek etkinlik göster
+    // Spam filtresi butonunu test etmek için
+    this.allEvents = [this.getMockEventForTesting()];
+    this.attachCommunityNamesToEvents();
+    this.filterEvents();
+    return;
+
     // Filtreye göre backend'den etkinlikleri çek
     let statusNumbers: number[] = [];
 
@@ -380,8 +392,10 @@ export class CorporateDashboardComponent implements OnInit {
         // Backend'den gelen etkinlikleri map et
         // EventService zaten EventConfirm (0,1,2) değerlerini 'Beklemede', 'Onaylandı', 'Reddedildi' olarak map ediyor
         if (!data || data.length === 0) {
-          this.allEvents = [];
-          this.filteredEvents = [];
+          // Örnek etkinlik ekle (spam filtresi butonunu görmek için)
+          this.allEvents = [this.getMockEventForTesting()];
+          this.attachCommunityNamesToEvents();
+          this.filterEvents();
           return;
         }
 
@@ -444,12 +458,34 @@ export class CorporateDashboardComponent implements OnInit {
             this.filterEvents();
           },
           error: () => {
-            this.allEvents = [];
-            this.filteredEvents = [];
+            // Hata durumunda örnek etkinlik ekle (spam filtresi butonunu görmek için)
+            this.allEvents = [this.getMockEventForTesting()];
+            this.attachCommunityNamesToEvents();
+            this.filterEvents();
           },
         });
       },
     });
+  }
+
+  // Örnek etkinlik oluştur (spam filtresi testi için)
+  getMockEventForTesting(): EventRequest {
+    return {
+      id: 999,
+      communityId: this.allCommunities.length > 0 ? this.allCommunities[0].id : '1',
+      communityName: this.allCommunities.length > 0 ? this.allCommunities[0].name : 'İTÜ - Yazılım ve Teknoloji Kulübü',
+      eventName: 'ÖRNEK ETKİNLİK - SPAM FİLTRESİ TESTİ!!!',
+      date: new Date().toISOString(),
+      startDate: new Date().toISOString(),
+      endDate: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(), // 2 saat sonra
+      location: 'Kültür Merkezi',
+      imageUrl: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=800&auto=format&fit=crop',
+      description: 'Bu bir örnek etkinliktir. Spam filtresi analiz butonunu test etmek için oluşturulmuştur. Etkinlik detaylarını görmek için karta tıklayın ve "Kontrol Et" butonunu kullanın. Bu etkinlikte spam kelimeler var: bahis ve kumar kelimeleri içeriyor. Ayrıca çok fazla link var: https://example.com https://test.com https://demo.com https://sample.com',
+      shortDescription: 'Test',
+      status: 'Beklemede',
+      capacity: '100',
+      city: this.allCommunities.length > 0 ? this.allCommunities[0].city || 'İstanbul' : 'İstanbul',
+    };
   }
 
   // Demo verileri döndüren yardımcı metod
@@ -1054,16 +1090,84 @@ export class CorporateDashboardComponent implements OnInit {
 
     // Simüle edilmiş spam kontrolü (1 saniye gecikme)
     setTimeout(() => {
-      const textToCheck = (ev.eventName + ' ' + (ev.description || '')).toLowerCase();
-      const foundForbiddenWords = this.forbiddenWords.filter((word) => textToCheck.includes(word));
-
+      const reasons: string[] = [];
+      const details: string[] = [];
+      
+      // Tüm metinleri birleştir
+      const fullText = (
+        (ev.eventName || '') + ' ' + 
+        (ev.shortDescription || '') + ' ' + 
+        (ev.description || '')
+      ).toLowerCase();
+      
+      // 1. Yasaklı kelime kontrolü
+      const foundForbiddenWords = this.forbiddenWords.filter((word) => fullText.includes(word));
       if (foundForbiddenWords.length > 0) {
-        const message = `Yasaklı kelimeler tespit edildi: ${foundForbiddenWords.join(', ')}`;
-        this.spamResults.set(id, { clean: false, message });
-        this.showToast(message, 'error');
+        reasons.push('Yasaklı kelimeler tespit edildi');
+        details.push(`Tespit edilen yasaklı kelimeler: ${foundForbiddenWords.map(w => `"${w}"`).join(', ')}`);
+        foundForbiddenWords.forEach(word => {
+          const occurrences = (fullText.match(new RegExp(word, 'g')) || []).length;
+          details.push(`"${word}" kelimesi ${occurrences} kez kullanılmıştır`);
+        });
+      }
+      
+      // 2. Büyük harf kontrolü (spam göstergesi)
+      const uppercaseRatio = (fullText.match(/[A-ZĞÜŞİÖÇ]/g) || []).length / Math.max(fullText.length, 1);
+      if (uppercaseRatio > 0.3 && fullText.length > 20) {
+        reasons.push('Aşırı büyük harf kullanımı tespit edildi');
+        details.push(`Metnin %${Math.round(uppercaseRatio * 100)}'i büyük harf içermektedir (Normal: <%30)`);
+      }
+      
+      // 3. Tekrarlayan karakter kontrolü
+      const repeatedChars = fullText.match(/(.)\1{4,}/g);
+      if (repeatedChars && repeatedChars.length > 0) {
+        reasons.push('Tekrarlayan karakterler tespit edildi');
+        details.push(`Tekrarlayan karakter dizileri bulundu: ${repeatedChars.slice(0, 3).join(', ')}`);
+      }
+      
+      // 4. Link kontrolü (çok fazla link spam göstergesi)
+      const linkCount = (fullText.match(/https?:\/\//g) || []).length;
+      if (linkCount > 3) {
+        reasons.push('Aşırı link kullanımı tespit edildi');
+        details.push(`Metinde ${linkCount} adet link bulunmaktadır (Normal: ≤3)`);
+      }
+      
+      // 5. Kısa açıklama kontrolü
+      if (!ev.shortDescription || ev.shortDescription.trim().length < 10) {
+        reasons.push('Kısa açıklama eksik veya çok kısa');
+        details.push('Etkinlik kısa açıklaması yeterli değildir (Minimum 10 karakter gerekli)');
+      }
+      
+      // 6. Uzun açıklama kontrolü
+      if (!ev.description || ev.description.trim().length < 20) {
+        reasons.push('Detaylı açıklama eksik veya çok kısa');
+        details.push('Etkinlik detaylı açıklaması yeterli değildir (Minimum 20 karakter gerekli)');
+      }
+
+      // Sonuç değerlendirmesi
+      if (reasons.length > 0) {
+        const mainMessage = `Spam filtresinden geçemedi (${reasons.length} sorun tespit edildi)`;
+        const detailedMessage = `SPAM FİLTRESİ RAPORU:\n\n` +
+          `Etkinlik spam filtresinden geçemedi. Tespit edilen sorunlar:\n\n` +
+          reasons.map((r, i) => `${i + 1}. ${r}`).join('\n') +
+          `\n\nDetaylar:\n` +
+          details.map((d, i) => `• ${d}`).join('\n');
+        
+        this.spamResults.set(id, { 
+          clean: false, 
+          message: mainMessage,
+          reasons: reasons,
+          details: details
+        });
+        this.showToast(mainMessage, 'error');
       } else {
-        const message = 'İçerik temizdir.';
-        this.spamResults.set(id, { clean: true, message });
+        const message = 'İçerik temizdir. Spam filtresinden başarıyla geçti.';
+        this.spamResults.set(id, { 
+          clean: true, 
+          message,
+          reasons: [],
+          details: ['Tüm kontroller başarıyla geçildi.']
+        });
         this.showToast(message, 'success');
       }
 
@@ -1074,6 +1178,10 @@ export class CorporateDashboardComponent implements OnInit {
   isEventClean(id: number): boolean {
     const result = this.spamResults.get(id);
     return result ? result.clean : false;
+  }
+
+  getSpamReport(id: number): { clean: boolean; message: string; reasons?: string[]; details?: string[] } | null {
+    return this.spamResults.get(id) || null;
   }
 
   approveEvent(id: number) {
@@ -1126,6 +1234,100 @@ export class CorporateDashboardComponent implements OnInit {
       this.modalType = 'reject-event'; // Set modal type for rejection
       this.isModalOpen = true;
     }
+  }
+
+  openSpamReportModal(id: number) {
+    const event = this.allEvents.find((e) => e.id === id);
+    if (!event) return;
+
+    // Eğer daha önce analiz yapılmadıysa, önce analiz yap
+    if (!this.inspectedEvents.has(id)) {
+      this.showToast('Spam kontrolü yapılıyor...', 'success');
+      
+      // Analiz yap
+      const ev = this.allEvents.find((e) => e.id === id);
+      if (!ev) return;
+
+      // Spam analizi yap
+      const reasons: string[] = [];
+      const details: string[] = [];
+      
+      const fullText = (
+        (ev.eventName || '') + ' ' + 
+        (ev.shortDescription || '') + ' ' + 
+        (ev.description || '')
+      ).toLowerCase();
+      
+      // 1. Yasaklı kelime kontrolü
+      const foundForbiddenWords = this.forbiddenWords.filter((word) => fullText.includes(word));
+      if (foundForbiddenWords.length > 0) {
+        reasons.push('Yasaklı kelimeler tespit edildi');
+        details.push(`Tespit edilen yasaklı kelimeler: ${foundForbiddenWords.map(w => `"${w}"`).join(', ')}`);
+        foundForbiddenWords.forEach(word => {
+          const occurrences = (fullText.match(new RegExp(word, 'g')) || []).length;
+          details.push(`"${word}" kelimesi ${occurrences} kez kullanılmıştır`);
+        });
+      }
+      
+      // 2. Büyük harf kontrolü
+      const uppercaseRatio = (fullText.match(/[A-ZĞÜŞİÖÇ]/g) || []).length / Math.max(fullText.length, 1);
+      if (uppercaseRatio > 0.3 && fullText.length > 20) {
+        reasons.push('Aşırı büyük harf kullanımı tespit edildi');
+        details.push(`Metnin %${Math.round(uppercaseRatio * 100)}'i büyük harf içermektedir (Normal: <%30)`);
+      }
+      
+      // 3. Tekrarlayan karakter kontrolü
+      const repeatedChars = fullText.match(/(.)\1{4,}/g);
+      if (repeatedChars && repeatedChars.length > 0) {
+        reasons.push('Tekrarlayan karakterler tespit edildi');
+        details.push(`Tekrarlayan karakter dizileri bulundu: ${repeatedChars.slice(0, 3).join(', ')}`);
+      }
+      
+      // 4. Link kontrolü
+      const linkCount = (fullText.match(/https?:\/\//g) || []).length;
+      if (linkCount > 3) {
+        reasons.push('Aşırı link kullanımı tespit edildi');
+        details.push(`Metinde ${linkCount} adet link bulunmaktadır (Normal: ≤3)`);
+      }
+      
+      // 5. Kısa açıklama kontrolü
+      if (!ev.shortDescription || ev.shortDescription.trim().length < 10) {
+        reasons.push('Kısa açıklama eksik veya çok kısa');
+        details.push('Etkinlik kısa açıklaması yeterli değildir (Minimum 10 karakter gerekli)');
+      }
+      
+      // 6. Uzun açıklama kontrolü
+      if (!ev.description || ev.description.trim().length < 20) {
+        reasons.push('Detaylı açıklama eksik veya çok kısa');
+        details.push('Etkinlik detaylı açıklaması yeterli değildir (Minimum 20 karakter gerekli)');
+      }
+
+      // Sonuç değerlendirmesi
+      if (reasons.length > 0) {
+        const mainMessage = `Spam filtresinden geçemedi (${reasons.length} sorun tespit edildi)`;
+        this.spamResults.set(id, { 
+          clean: false, 
+          message: mainMessage,
+          reasons: reasons,
+          details: details
+        });
+      } else {
+        const message = 'İçerik temizdir. Spam filtresinden başarıyla geçti.';
+        this.spamResults.set(id, { 
+          clean: true, 
+          message,
+          reasons: [],
+          details: ['Tüm kontroller başarıyla geçildi.']
+        });
+      }
+
+      this.inspectedEvents.add(id);
+    }
+
+    // Modal'ı aç
+    this.selectedEvent = event;
+    this.modalType = 'spam-report';
+    this.isModalOpen = true;
   }
 
   confirmRejection() {
@@ -1290,6 +1492,26 @@ export class CorporateDashboardComponent implements OnInit {
     this.isModalOpen = false;
     this.editingAnnouncement = null;
     this.selectedAnnouncement = null;
+  }
+
+  // Confirmation modal methods
+  openConfirmModal(message: string, callback: () => void) {
+    this.confirmMessage = message;
+    this.confirmCallback = callback;
+    this.isConfirmModalOpen = true;
+  }
+
+  closeConfirmModal() {
+    this.isConfirmModalOpen = false;
+    this.confirmMessage = '';
+    this.confirmCallback = null;
+  }
+
+  onConfirmYes() {
+    if (this.confirmCallback) {
+      this.confirmCallback();
+    }
+    this.closeConfirmModal();
   }
 
   // Duyuru detay ve güncelleme
