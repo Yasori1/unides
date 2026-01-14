@@ -479,8 +479,47 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     return uniName.split(' ')[0].toUpperCase();
   }
 
+  // Test etkinliğini ekleyen helper metod
+  private addTestEvent() {
+    const testEvent: EventRequest = {
+      id: 9999, // Test etkinliği için özel ID
+      communityId: this.allCommunities[0]?.id || '',
+      communityName: this.allCommunities[0]?.name || 'Test Topluluğu',
+      eventName: 'Test Etkinliği - Spam Filtresi Kontrolü',
+      date: new Date().toISOString(),
+      startDate: new Date().toISOString(),
+      endDate: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(), // 2 saat sonra
+      location: 'Test Konum - Kampüs Merkezi',
+      imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=800&auto=format&fit=crop',
+      description: 'Bu bir test etkinliğidir. Spam filtresi kontrolü için oluşturulmuştur. Bu etkinlikte bazı spam kriterleri test edilmektedir: YASAK kelimesi, çok fazla büyük harf (SPAM TEST), tekrarlayan karakterler (aaaaaa), ve fazla link içeriği.',
+      shortDescription: 'Test etkinliği - Spam filtresi kontrolü için',
+      status: 'Beklemede',
+      capacity: '100',
+      city: 'İstanbul',
+    };
+    
+    // Test etkinliğini allEvents'e ekle (eğer zaten yoksa)
+    const existingTestEvent = this.allEvents.find(e => e.id === 9999);
+    if (!existingTestEvent) {
+      this.allEvents.unshift(testEvent);
+    }
+    
+    // Test etkinliğini filteredEvents'e de ekle (eğer zaten yoksa)
+    const testEventInFiltered = this.filteredEvents.find(e => e.id === 9999);
+    if (!testEventInFiltered) {
+      this.filteredEvents.unshift(testEvent);
+    }
+  }
+
   loadEventsFromService() {
-    if (!isPlatformBrowser(this.platformId)) return;
+    if (!isPlatformBrowser(this.platformId)) {
+      // Browser'da değilse bile test etkinliğini ekle
+      this.addTestEvent();
+      return;
+    }
+
+    // Test etkinliğini başta ekle (her durumda görünmesi için)
+    this.addTestEvent();
 
     // Filtreye göre backend'den etkinlikleri çek
     let statusNumbers: number[] = [];
@@ -502,12 +541,10 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         // Backend'den gelen etkinlikleri map et
         // EventService zaten EventConfirm (0,1,2) değerlerini 'Beklemede', 'Onaylandı', 'Reddedildi' olarak map ediyor
         if (!data || data.length === 0) {
+          // Backend'den veri gelmediğinde bile test etkinliğini ekle
           this.allEvents = [];
-          this.filteredEvents = [];
-          return;
-        }
-
-        this.allEvents = data.map((e) => {
+        } else {
+          this.allEvents = data.map((e) => {
           // Community name'i bulmak için communities listesini kullan
           const community = this.allCommunities.find((c) => String(c.id) === String(e.communityId));
 
@@ -528,14 +565,23 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
             capacity: e.capacity || '',
             city: e.city || community?.city || '',
           };
-        });
+          });
+        }
 
-        // Topluluk isimlerini eşleştir
-        this.attachCommunityNamesToEvents();
+        // Test etkinliğini ekle (her zaman)
+        this.addTestEvent();
+
+        // Topluluk isimlerini eşleştir (allCommunities boş olsa bile test etkinliği görünmeli)
+        if (this.allCommunities?.length > 0) {
+          this.attachCommunityNamesToEvents();
+        }
 
         // Etkinlik filtrelerini uygula (metin araması için)
         // filterEvents() metodu filteredEvents'i güncelliyor
         this.filterEvents();
+        
+        // Test etkinliğinin filteredEvents'te olduğundan emin ol
+        this.addTestEvent();
       },
       error: (err) => {
         // Hata durumunda getAll() metodunu fallback olarak kullan
@@ -562,12 +608,23 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
                 city: e.city || community?.city || '',
               };
             });
-            this.attachCommunityNamesToEvents();
+
+            // Test amaçlı etkinlik ekle
+            // Test etkinliğini ekle
+            this.addTestEvent();
+
+            // Topluluk isimlerini eşleştir (allCommunities boş olsa bile test etkinliği görünmeli)
+            if (this.allCommunities?.length > 0) {
+              this.attachCommunityNamesToEvents();
+            }
             this.filterEvents();
+            
+            // Test etkinliğinin filteredEvents'te olduğundan emin ol
+            this.addTestEvent();
           },
           error: () => {
-            this.allEvents = [];
-            this.filteredEvents = [];
+            // Hata durumunda bile test etkinliğini ekle
+            this.addTestEvent();
           },
         });
       },

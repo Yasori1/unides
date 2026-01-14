@@ -13,14 +13,14 @@
         "target": "https://localhost:7069",
         "secure": false,
         "changeOrigin": true,
-        "logLevel": "debug",
+        "logLevel": "warn",
         "ws": true
     },
     "/spam-check": {
         "target": "http://72.62.37.160:5002",
         "secure": false,
         "changeOrigin": true,
-        "logLevel": "debug",
+        "logLevel": "warn",
         "pathRewrite": {
             "^/spam-check": "/check"
         },

@@ -239,12 +239,19 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
 
   &:hover {
     z-index: 10;
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
-    border-color: color.adjust($primary, $lightness: 25%);
-    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+    border-color: var(--accent-color, #2563eb);
+    transform: translateY(-8px);
     .tap-hint {
       opacity: 1;
       transform: translateY(0);
+    }
+    // İkonları mavi yap
+    .mini-location .material-symbols-outlined {
+      color: var(--accent-color, #2563eb);
+    }
+    .tap-hint .material-symbols-outlined {
+      color: $surface;
     }
   }
 
@@ -398,12 +405,19 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
         gap: 4px;
         font-size: 0.75rem;
         color: $text-muted;
+        transition: color 0.3s ease;
         
         // Tek satır kısıtlaması
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         width: 100%;
+        
+        .material-symbols-outlined {
+          font-size: 1rem;
+          color: $text-muted;
+          transition: color 0.3s ease;
+        }
       }
 
       .status-badge-inline {
