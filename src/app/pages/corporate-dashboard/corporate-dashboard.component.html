@@ -528,6 +528,8 @@
                 ? 'Topluluk Güncelle'
                 : modalType === 'reject-event'
                 ? 'Revize İste'
+                : modalType === 'spam-report'
+                ? 'Spam Analiz Raporu'
                 : 'İşlem'
             }}
           </h3>
@@ -1074,28 +1076,22 @@
               <button class="btn-secondary" (click)="closeModal()">Kapat</button>
               
               <ng-container *ngIf="selectedEvent.status === 'Beklemede'">
-                <!-- Kontrol Et Butonu -->
+                <!-- Analiz Raporunu İncele Butonu -->
                 <button 
                   class="btn-info"
-                  *ngIf="!inspectedEvents.has(selectedEvent.id) && !checkingSpamEvents.has(selectedEvent.id)"
-                  (click)="inspectEvent(selectedEvent.id, $event)"
+                  (click)="openSpamReportModal(selectedEvent.id)"
                 >
-                  <span class="material-symbols-outlined">fact_check</span> Kontrol Et
+                  <span class="material-symbols-outlined">fact_check</span> Analiz Raporunu İncele
                 </button>
 
-                <!-- Onay/Revize Butonları (Sadece İncelendiyse ve Kontrol bitmişse) -->
-                <ng-container *ngIf="inspectedEvents.has(selectedEvent.id) && !checkingSpamEvents.has(selectedEvent.id)">
-                  <button class="btn-danger" (click)="rejectEvent(selectedEvent.id)">
-                    <span class="material-symbols-outlined">edit_note</span> Revize İste
-                  </button>
-                  <button 
-                    class="btn-success" 
-                    *ngIf="isEventClean(selectedEvent.id)"
-                    (click)="approveEvent(selectedEvent.id)"
-                  >
-                    <span class="material-symbols-outlined">check</span> Onayla
-                  </button>
-                </ng-container>
+                <!-- Onayla Butonu (Sadece spam analizi yapıldıysa ve temizse) -->
+                <button 
+                  class="btn-success" 
+                  *ngIf="inspectedEvents.has(selectedEvent.id) && !checkingSpamEvents.has(selectedEvent.id) && isEventClean(selectedEvent.id)"
+                  (click)="approveEvent(selectedEvent.id)"
+                >
+                  <span class="material-symbols-outlined">check</span> Onayla
+                </button>
               </ng-container>
 
               <button class="btn-danger" *ngIf="selectedEvent.status !== 'Beklemede'" (click)="deleteEvent(selectedEvent.id)">
@@ -1144,6 +1140,65 @@
               <span class="material-symbols-outlined">save</span> Kaydet
             </button>
             <button class="btn-secondary" (click)="closeModal()">Vazgeç</button>
+          </div>
+        </div>
+
+        <!-- Spam Analiz Raporu Modal -->
+        <div class="modal-body modal-body-scrollable" *ngIf="modalType === 'spam-report' && selectedEvent">
+          <div class="spam-report-section">
+            <div class="spam-report-header" [ngClass]="{'clean': getSpamReport(selectedEvent.id)?.clean, 'not-clean': !getSpamReport(selectedEvent.id)?.clean}">
+              <span class="material-symbols-outlined">
+                {{ getSpamReport(selectedEvent.id)?.clean ? 'check_circle' : 'error' }}
+              </span>
+              <h4>Spam Filtresi Analiz Raporu</h4>
+            </div>
+            <div class="spam-report-content">
+              <p class="spam-report-message" [ngClass]="{'success': getSpamReport(selectedEvent.id)?.clean, 'error': !getSpamReport(selectedEvent.id)?.clean}">
+                {{ getSpamReport(selectedEvent.id)?.message }}
+              </p>
+              
+              <div *ngIf="!getSpamReport(selectedEvent.id)?.clean && getSpamReport(selectedEvent.id)?.reasons && getSpamReport(selectedEvent.id)!.reasons!.length > 0" class="spam-reasons">
+                <h5>Tespit Edilen Sorunlar:</h5>
+                <ul>
+                  <li *ngFor="let reason of getSpamReport(selectedEvent.id)!.reasons">{{ reason }}</li>
+                </ul>
+              </div>
+
+              <div *ngIf="!getSpamReport(selectedEvent.id)?.clean && getSpamReport(selectedEvent.id)?.details && getSpamReport(selectedEvent.id)!.details!.length > 0" class="spam-details">
+                <h5>Detaylı Açıklamalar:</h5>
+                <ul>
+                  <li *ngFor="let detail of getSpamReport(selectedEvent.id)!.details">{{ detail }}</li>
+                </ul>
+              </div>
+
+              <div *ngIf="getSpamReport(selectedEvent.id)?.clean && getSpamReport(selectedEvent.id)?.details" class="spam-details">
+                <ul>
+                  <li *ngFor="let detail of getSpamReport(selectedEvent.id)!.details">{{ detail }}</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button class="btn-secondary" (click)="closeModal()">Kapat</button>
+            
+            <!-- Revize İste Butonu (Sadece spam filtresinden geçemediyse) -->
+            <button 
+              class="btn-danger" 
+              *ngIf="!getSpamReport(selectedEvent.id)?.clean"
+              (click)="rejectEvent(selectedEvent.id)"
+            >
+              <span class="material-symbols-outlined">edit_note</span> Revize İste
+            </button>
+
+            <!-- Onayla Butonu (Sadece spam filtresinden geçtiyse) -->
+            <button 
+              class="btn-success" 
+              *ngIf="getSpamReport(selectedEvent.id)?.clean"
+              (click)="approveEvent(selectedEvent.id); closeModal()"
+            >
+              <span class="material-symbols-outlined">check</span> Onayla
+            </button>
           </div>
         </div>
 
