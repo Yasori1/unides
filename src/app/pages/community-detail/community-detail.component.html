@@ -60,9 +60,11 @@
           -->
 
           <!-- Yaklaşan Etkinlikler Section -->
-          <div class="upcoming-events-main-section" *ngIf="upcomingEvents.length > 0">
+          <div class="upcoming-events-main-section">
             <h2 class="section-title">Yaklaşan Etkinlikler</h2>
-            <div class="upcoming-events-grid">
+            
+            <!-- Etkinlik Varsa -->
+            <div class="upcoming-events-grid" *ngIf="upcomingEvents.length > 0">
               <div class="upcoming-event-card" *ngFor="let event of upcomingEvents">
                 <div class="event-card-image" *ngIf="event.imageUrl">
                   <img [src]="event.imageUrl" [alt]="event.title" />
@@ -81,6 +83,14 @@
                     </span>
                   </div>
                 </div>
+              </div>
+            </div>
+            
+            <!-- Etkinlik Yoksa -->
+            <div class="no-events-container" *ngIf="upcomingEvents.length === 0">
+              <div class="no-events-message">
+                <i class="bx bx-calendar-x"></i>
+                <p>Bu topluluğun henüz bir etkinliği bulunmamaktadır.</p>
               </div>
             </div>
           </div>

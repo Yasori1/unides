@@ -93,6 +93,25 @@ export class CorporateDashboardComponent implements OnInit {
   confirmMessage = '';
   confirmCallback: (() => void) | null = null;
 
+  openConfirmModal(message: string, callback: () => void) {
+    this.confirmMessage = message;
+    this.confirmCallback = callback;
+    this.isConfirmModalOpen = true;
+  }
+
+  closeConfirmModal() {
+    this.isConfirmModalOpen = false;
+    this.confirmCallback = null;
+    this.confirmMessage = '';
+  }
+
+  onConfirmYes() {
+    if (this.confirmCallback) {
+      this.confirmCallback();
+    }
+    this.closeConfirmModal();
+  }
+
   // Pagination için değişkenler
   currentPage = 1;
   itemsPerPage = 15;

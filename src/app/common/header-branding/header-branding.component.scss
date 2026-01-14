@@ -1,0 +1,139 @@
+$primary: #1e3a8a;
+$primary-dark: #0f172a;
+
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.header-branding-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  /* Kullanıcı isteği: Soldan ve sağdan 26 piksel boşluk (13px padding) */
+  padding: 0 6px;
+  box-sizing: border-box;
+  
+  /* Navigasyon linklerinin (ortada duran) tıklanabilir olması için wrapper tıklamaları engellemeli */
+  pointer-events: none;
+}
+
+.brand {
+  margin-left: 0;
+  pointer-events: auto; /* Logo tıklanabilir olmalı */
+  
+  img.logo-transparent {
+    height: 58px;
+    width: auto;
+    mix-blend-mode: multiply;
+    display: block;
+  }
+}
+
+.right-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  pointer-events: auto; /* Butonlar tıklanabilir olmalı */
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+/* Mobile Toggle Button */
+.mobile-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 30px;
+  height: 21px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  z-index: 1101;
+  padding: 0;
+  pointer-events: auto;
+  
+  .bar {
+    width: 100%;
+    height: 3px;
+    background-color: $primary;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+  }
+  
+  &.active {
+    .bar:nth-child(1) { transform: translateY(9px) rotate(45deg); }
+    .bar:nth-child(2) { opacity: 0; }
+    .bar:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
+  }
+}
+
+/* Buttons */
+.btn-outline-custom {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 20px;
+  border: 1.5px solid $primary;
+  border-radius: 50px;
+  background: transparent;
+  color: $primary;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: $primary;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba($primary, 0.3);
+  }
+
+  &.static-btn:hover {
+    transform: translateY(-2px);
+    background: transparent;
+    color: $primary;
+    box-shadow: none;
+  }
+}
+
+.btn-solid-custom {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 20px;
+  border: 1.5px solid $primary;
+  border-radius: 50px;
+  background: $primary;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: $primary-dark;
+    border-color: $primary-dark;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba($primary, 0.25);
+  }
+}
+
+@media (max-width: 1024px) {
+  .mobile-toggle {
+    display: flex;
+  }
+  
+  .desktop-auth {
+    display: none;
+  }
+}
