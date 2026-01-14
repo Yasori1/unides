@@ -83,6 +83,11 @@ export class CorporateDashboardComponent implements OnInit {
   inspectedEvents: Set<number> = new Set();
   spamResults: Map<number, { clean: boolean; message: string }> = new Map();
   forbiddenWords: string[] = ['yasak', 'illegal', 'spam', 'kötü', 'bahis', 'kumar'];
+  
+  // Confirmation modal için
+  isConfirmModalOpen = false;
+  confirmMessage = '';
+  confirmCallback: (() => void) | null = null;
 
   // Pagination için değişkenler
   currentPage = 1;
@@ -1575,5 +1580,25 @@ export class CorporateDashboardComponent implements OnInit {
       return desc.substring(0, limit) + '...';
     }
     return desc;
+  }
+
+  // Confirmation modal methods
+  openConfirmModal(message: string, callback: () => void) {
+    this.confirmMessage = message;
+    this.confirmCallback = callback;
+    this.isConfirmModalOpen = true;
+  }
+
+  closeConfirmModal() {
+    this.isConfirmModalOpen = false;
+    this.confirmMessage = '';
+    this.confirmCallback = null;
+  }
+
+  onConfirmYes() {
+    if (this.confirmCallback) {
+      this.confirmCallback();
+    }
+    this.closeConfirmModal();
   }
 }
