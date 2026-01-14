@@ -2,12 +2,15 @@ import { Component, OnInit, HostListener, Inject, PLATFORM_ID } from '@angular/c
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ImageUploadComponent } from '../../components/ui/image-upload/image-upload';
 import { CommunityService, Community } from '../../services/community.services';
 import { AnnouncementService } from '../../services/announcement.services';
 import { EventService, EventItem } from '../../services/event.services';
 import { ToastService } from '../../services/toast.services';
 import { ToastComponent } from '../../components/ui/toast/toast.component';
+import { catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 // ==========================================
 // MAIN DASHBOARD COMPONENT
@@ -81,9 +84,10 @@ export class CorporateDashboardComponent implements OnInit {
   eventStatusFilter: string = ''; // Etkinlik durum filtresi
   filteredEvents: EventRequest[] = []; // Filtrelenmiş etkinlikler
   inspectedEvents: Set<number> = new Set();
+  checkingSpamEvents: Set<number> = new Set(); // Spam kontrolü yapılan event'ler
   spamResults: Map<number, { clean: boolean; message: string }> = new Map();
   forbiddenWords: string[] = ['yasak', 'illegal', 'spam', 'kötü', 'bahis', 'kumar'];
-  
+
   // Confirmation modal için
   isConfirmModalOpen = false;
   confirmMessage = '';
@@ -174,6 +178,7 @@ export class CorporateDashboardComponent implements OnInit {
     private communityService: CommunityService,
     private announcementService: AnnouncementService,
     private eventService: EventService,
+    private http: HttpClient,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -353,10 +358,13 @@ export class CorporateDashboardComponent implements OnInit {
     if (lower.includes('koç')) return 'KOÇ';
     if (lower.includes('sabancı')) return 'SABANCI';
     if (lower.includes('bilkent')) return 'BİLKENT';
-    
+
     // Eğer bilinen bir kısaltma değilse ve "Üniversitesi" içeriyorsa, onu atıp kalanı döndür
     if (lower.includes('üniversitesi')) {
-        return uniName.replace(/Üniversitesi/i, '').trim().toUpperCase();
+      return uniName
+        .replace(/Üniversitesi/i, '')
+        .trim()
+        .toUpperCase();
     }
 
     return uniName.split(' ')[0].toUpperCase();
@@ -467,7 +475,8 @@ export class CorporateDashboardComponent implements OnInit {
         eventName: 'Geleceğin Teknolojileri Zirvesi',
         date: '25 Ekim 2025',
         location: 'Kültür Merkezi',
-        imageUrl: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=800&auto=format&fit=crop',
+        imageUrl:
+          'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=800&auto=format&fit=crop',
         description: 'Yapay zeka ve blockchain teknolojilerinin konuşulacağı dev zirve.',
         status: 'Beklemede',
         capacity: '500',
@@ -479,7 +488,8 @@ export class CorporateDashboardComponent implements OnInit {
         eventName: 'Kampüs Caz Festivali',
         date: '15 Kasım 2025',
         location: 'Çim Amfi',
-        imageUrl: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?q=80&w=800&auto=format&fit=crop',
+        imageUrl:
+          'https://images.unsplash.com/photo-1511192336575-5a79af67a629?q=80&w=800&auto=format&fit=crop',
         description: 'Sonbaharın tadını caz müzikle çıkarıyoruz.',
         status: 'Onaylandı',
         capacity: '1200',
@@ -491,7 +501,8 @@ export class CorporateDashboardComponent implements OnInit {
         eventName: 'İstanbul Sokakları Gezisi',
         date: '01 Aralık 2025',
         location: 'Eminönü Meydanı',
-        imageUrl: 'https://images.unsplash.com/photo-1552168324-d612d77725e3?q=80&w=800&auto=format&fit=crop',
+        imageUrl:
+          'https://images.unsplash.com/photo-1552168324-d612d77725e3?q=80&w=800&auto=format&fit=crop',
         description: 'Tarihi yarımadada fotoğraf turu.',
         status: 'Revize',
         rejectionReason: 'Etkinlik tarihi sınav haftasına denk gelmektedir.',
@@ -504,7 +515,8 @@ export class CorporateDashboardComponent implements OnInit {
         eventName: 'Startup Pitching Day',
         date: '20 Aralık 2025',
         location: 'Kuluçka Merkezi',
-        imageUrl: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=800&auto=format&fit=crop',
+        imageUrl:
+          'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=800&auto=format&fit=crop',
         description: 'Yatırımcılarla girişimcileri buluşturuyoruz.',
         status: 'Beklemede',
         capacity: '100',
@@ -1055,30 +1067,147 @@ export class CorporateDashboardComponent implements OnInit {
     const ev = this.allEvents.find((e) => e.id === id);
     if (!ev) return;
 
-    this.showToast('Spam kontrolü yapılıyor...', 'success'); // Info type olmadığı için success kullanıyoruz
+    // Spam kontrolü başladı
+    this.checkingSpamEvents.add(id);
+    this.showToast('Spam kontrolü yapılıyor...', 'success');
 
-    // Simüle edilmiş spam kontrolü (1 saniye gecikme)
-    setTimeout(() => {
-      const textToCheck = (ev.eventName + ' ' + (ev.description || '')).toLowerCase();
-      const foundForbiddenWords = this.forbiddenWords.filter((word) => textToCheck.includes(word));
+    // Status'u backend formatına çevir
+    let status = 'pending';
+    if (ev.status === 'Onaylandı') {
+      status = 'approved';
+    } else if (ev.status === 'Reddedildi') {
+      status = 'rejected';
+    }
 
-      if (foundForbiddenWords.length > 0) {
-        const message = `Yasaklı kelimeler tespit edildi: ${foundForbiddenWords.join(', ')}`;
-        this.spamResults.set(id, { clean: false, message });
-        this.showToast(message, 'error');
-      } else {
-        const message = 'İçerik temizdir.';
-        this.spamResults.set(id, { clean: true, message });
-        this.showToast(message, 'success');
-      }
+    // Body'yi oluştur (description + shortDescription birleşimi)
+    const bodyParts: string[] = [];
+    if (ev.shortDescription) {
+      bodyParts.push(ev.shortDescription);
+    }
+    if (ev.description) {
+      bodyParts.push(ev.description);
+    }
+    const body = bodyParts.join('\n\n');
 
-      this.inspectedEvents.add(id);
-    }, 1000);
+    // Notes'u oluştur (ek bilgiler)
+    const notesParts: string[] = [];
+    if (ev.location) {
+      notesParts.push(`Konum: ${ev.location}`);
+    }
+    if (ev.city) {
+      notesParts.push(`Şehir: ${ev.city}`);
+    }
+    if (ev.capacity) {
+      notesParts.push(`Kontenjan: ${ev.capacity}`);
+    }
+    if (ev.startDate) {
+      notesParts.push(`Başlangıç: ${ev.startDate}`);
+    }
+    if (ev.endDate) {
+      notesParts.push(`Bitiş: ${ev.endDate}`);
+    }
+    if (ev.communityName) {
+      notesParts.push(`Topluluk: ${ev.communityName}`);
+    }
+    const notes = notesParts.join('\n');
+
+    // Backend'in beklediği formata göre veriyi hazırla
+    const eventData = {
+      id: ev.id,
+      title: ev.eventName || '',
+      body: body || '',
+      category: ev.communityName || '',
+      notes: notes || '',
+      status: status,
+      created_at: ev.startDate || ev.date || new Date().toISOString(),
+    };
+
+    // API'ye istek gönder (proxy üzerinden - CORS hatası önlemek için)
+    const apiUrl = '/spam-check'; // Proxy bu isteği http://72.62.37.160:5002/ adresine yönlendirecek
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    });
+
+    this.http
+      .post(apiUrl, eventData, {
+        headers,
+        responseType: 'text', // Önce text olarak al, sonra parse et
+      })
+      .pipe(
+        catchError((error) => {
+          // Hata durumunda
+          let errorMessage = 'Spam kontrolü sırasında bir hata oluştu.';
+
+          // HTML yanıtı gelirse (JSON parse hatası)
+          if (error.error && typeof error.error === 'string' && error.error.includes('<!DOCTYPE')) {
+            errorMessage = 'Backend bağlantı hatası. Lütfen daha sonra tekrar deneyin.';
+          } else if (error.error && typeof error.error === 'object' && error.error.message) {
+            errorMessage = error.error.message;
+          } else if (error.message) {
+            errorMessage = error.message;
+          }
+
+          this.spamResults.set(id, { clean: false, message: errorMessage });
+          this.showToast(errorMessage, 'error');
+          this.checkingSpamEvents.delete(id);
+          return of(null);
+        })
+      )
+      .subscribe({
+        next: (response: any) => {
+          // Response text olarak geldi, JSON'a çevir
+          let parsedResponse: any = null;
+
+          try {
+            // Eğer HTML gelirse
+            if (typeof response === 'string' && response.includes('<!DOCTYPE')) {
+              throw new Error('Backend HTML yanıtı döndürdü. Proxy yapılandırmasını kontrol edin.');
+            }
+
+            // JSON parse et
+            parsedResponse = typeof response === 'string' ? JSON.parse(response) : response;
+          } catch (parseError: any) {
+            // Parse hatası - muhtemelen HTML geldi
+            const errorMessage =
+              'Backend yanıtı beklenmeyen formatta. Lütfen daha sonra tekrar deneyin.';
+            this.spamResults.set(id, { clean: false, message: errorMessage });
+            this.showToast(errorMessage, 'error');
+            this.checkingSpamEvents.delete(id);
+            this.inspectedEvents.add(id);
+            return;
+          }
+
+          if (parsedResponse) {
+            // Başarılı yanıt
+            const isClean = parsedResponse.clean !== false; // clean true veya undefined ise temiz
+            const message =
+              parsedResponse.message ||
+              (isClean ? 'İçerik temizdir.' : 'Spam içerik tespit edildi.');
+
+            this.spamResults.set(id, { clean: isClean, message });
+            this.showToast(message, isClean ? 'success' : 'error');
+          }
+
+          // Spam kontrolü bitti
+          this.checkingSpamEvents.delete(id);
+          this.inspectedEvents.add(id);
+        },
+        error: (error) => {
+          // Bu durumda catchError zaten handle ediyor ama yine de buraya düşerse
+          this.checkingSpamEvents.delete(id);
+        },
+      });
   }
 
   isEventClean(id: number): boolean {
     const result = this.spamResults.get(id);
     return result ? result.clean : false;
+  }
+
+  getSpamMessage(id: number): string {
+    const result = this.spamResults.get(id);
+    return result ? result.message : '';
   }
 
   approveEvent(id: number) {
@@ -1107,7 +1236,7 @@ export class CorporateDashboardComponent implements OnInit {
 
           this.showToast('Etkinlik onaylandı ve anasayfada görüntülenecek', 'success');
           this.closeModal(); // Detay modalını kapat
-          
+
           // Filtreleri yeniden uygula
           this.applyFilters();
         },
@@ -1148,46 +1277,10 @@ export class CorporateDashboardComponent implements OnInit {
   }
 
   openEventDetail(ev: EventRequest) {
-    // Backend'den tam etkinlik detayını çek
-    if (ev.id) {
-      this.eventService.getById(ev.id).subscribe({
-        next: (eventDetail: EventItem) => {
-          // EventItem'ı EventRequest formatına çevir
-          const community = this.allCommunities.find(
-            (c) => String(c.id) === String(eventDetail.communityId)
-          );
-          this.selectedEvent = {
-            id: eventDetail.id,
-            communityId: eventDetail.communityId,
-            communityName: community?.name || eventDetail.communityName || '',
-            eventName: eventDetail.title,
-            date: eventDetail.startDate || '',
-            startDate: eventDetail.startDate,
-            endDate: eventDetail.endDate,
-            location: eventDetail.location || '',
-            imageUrl: eventDetail.imageUrl || '',
-            description: eventDetail.description || '',
-            shortDescription: eventDetail.shortDescription || '',
-            status: eventDetail.status || 'Beklemede',
-            capacity: eventDetail.capacity || '',
-            city: eventDetail.city || community?.city || '',
-          };
-          this.modalType = 'event-detail';
-          this.isModalOpen = true;
-        },
-        error: () => {
-          // Hata durumunda mevcut veriyi kullan
-          this.selectedEvent = ev;
-          this.modalType = 'event-detail';
-          this.isModalOpen = true;
-        },
-      });
-    } else {
-      // ID yoksa mevcut veriyi kullan
-      this.selectedEvent = ev;
-      this.modalType = 'event-detail';
-      this.isModalOpen = true;
-    }
+    // Mevcut veriyi direkt kullan (backend'den çekmeye gerek yok, zaten listede var)
+    this.selectedEvent = ev;
+    this.modalType = 'event-detail';
+    this.isModalOpen = true;
   }
 
   formatEventDate(dateString?: string): string {

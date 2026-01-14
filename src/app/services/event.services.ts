@@ -432,8 +432,8 @@ export class EventService {
     return this.http.get<any>(`${this.apiUrl}/${id}`, { headers }).pipe(
       map((dto) => this.mapToEvent(dto)),
       catchError((error) => {
-        console.error('Etkinlik detayı yüklenemedi:', error);
-        throw error;
+        // Hata durumunda sessizce handle et, component'te fallback var
+        return of(null as any);
       })
     );
   }
