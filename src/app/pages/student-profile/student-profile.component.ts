@@ -36,6 +36,7 @@ interface EventCard {
   semester?: string;
   quota?: string | number;
   communityId?: number;
+  startDateISO?: string; // ISO formatında tarih (takvim için)
 }
 
 @Component({
@@ -140,94 +141,174 @@ export class StudentProfileComponent implements OnInit {
   }
 
   loadData(): void {
-    // 1. Fetch ONLY communities where the current user is a member
-    // This uses localStorage tracking from Community Dashboard's Add Member action
-    this.communityService.getMyCommunities().subscribe({
-      next: (myCommunities) => {
-        if (myCommunities && myCommunities.length > 0) {
+    // Backend'den öğrencinin üye olduğu toplulukları ve etkinliklerini çek
+    // GET /api/Communities/me/memberships endpoint'i hem toplulukları hem de etkinlikleri döndürüyor
+    this.communityService.getMyMemberships().subscribe({
+      next: (memberships) => {
+        if (memberships && memberships.length > 0) {
           // Map to ProfileCommunity format
-          this.myCommunities = myCommunities.map((c) => ({
+          this.myCommunities = memberships.map((c: any) => ({
             ...c,
-            joinedDate: new Date().toISOString().split('T')[0], // Current date as placeholder
+            joinedDate: c.joinedDate || new Date().toISOString().split('T')[0],
           }));
+
+          // Tüm toplulukların etkinliklerini birleştir
+          const allEvents: any[] = [];
+          memberships.forEach((community: any) => {
+            if (community.events && Array.isArray(community.events)) {
+              community.events.forEach((event: any) => {
+                // Backend MemberCommunityEventDto formatını EventCard formatına çevir
+                const eventDate = event.eventDate || event.EventDate;
+                const eventClock = event.eventClock || event.EventClock || '00:00:00';
+                let startDate: Date;
+
+                if (eventDate) {
+                  try {
+                    // Backend DateOnly formatı: "dd.MM.yyyy" (örn: "15.01.2025")
+                    // Backend TimeOnly formatı: "HH:mm" (örn: "14:30")
+                    let dateStr = typeof eventDate === 'string' ? eventDate : eventDate.toString();
+                    let timeStr = typeof eventClock === 'string' ? eventClock : eventClock.toString();
+
+                    // DateOnly formatını kontrol et ve parse et
+                    let day: number, month: number, year: number;
+                    
+                    // "dd.MM.yyyy" formatını parse et
+                    if (dateStr.includes('.')) {
+                      const parts = dateStr.split('.');
+                      if (parts.length === 3) {
+                        day = parseInt(parts[0], 10);
+                        month = parseInt(parts[1], 10) - 1; // JavaScript month is 0-indexed
+                        year = parseInt(parts[2], 10);
+                      } else {
+                        throw new Error('Invalid date format');
+                      }
+                    } 
+                    // "YYYY-MM-DD" formatını parse et (fallback)
+                    else if (dateStr.includes('-')) {
+                      const parts = dateStr.split('-');
+                      if (parts.length === 3) {
+                        year = parseInt(parts[0], 10);
+                        month = parseInt(parts[1], 10) - 1; // JavaScript month is 0-indexed
+                        day = parseInt(parts[2], 10);
+                      } else {
+                        throw new Error('Invalid date format');
+                      }
+                    } else {
+                      throw new Error('Invalid date format');
+                    }
+
+                    // TimeOnly formatını parse et
+                    let hour: number, minute: number;
+                    if (timeStr.includes(':')) {
+                      const timeParts = timeStr.split(':');
+                      hour = parseInt(timeParts[0], 10);
+                      minute = parseInt(timeParts[1], 10) || 0;
+                    } else {
+                      hour = 0;
+                      minute = 0;
+                    }
+
+                    // Date objesi oluştur (local timezone)
+                    startDate = new Date(year, month, day, hour, minute, 0);
+
+                    // Geçerlilik kontrolü
+                    if (isNaN(startDate.getTime())) {
+                      console.warn('Invalid date after parsing:', { eventDate, eventClock, day, month, year, hour, minute });
+                      startDate = new Date();
+                    }
+                  } catch (error) {
+                    console.error('Error parsing date:', error, { eventDate, eventClock });
+                    startDate = new Date();
+                  }
+                } else {
+                  startDate = new Date();
+                }
+
+                // Türkçe tarih formatı: "15 Oca 2025"
+                const formattedDate = startDate.toLocaleDateString('tr-TR', {
+                  day: '2-digit',
+                  month: 'short',
+                  year: 'numeric',
+                });
+
+                // Türkçe saat formatı: "14:30"
+                const formattedTime = startDate.toLocaleTimeString('tr-TR', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  hour12: false, // 24 saat formatı
+                });
+
+                // Local timezone'da ISO formatı (YYYY-MM-DD) - UTC'ye çevirmeden
+                const yearStr = startDate.getFullYear();
+                const monthStr = String(startDate.getMonth() + 1).padStart(2, '0');
+                const dayStr = String(startDate.getDate()).padStart(2, '0');
+                const localISO = `${yearStr}-${monthStr}-${dayStr}`;
+
+                allEvents.push({
+                  id: event.eventId || event.EventId,
+                  title: event.eventName || event.EventName,
+                  date: formattedDate,
+                  time: formattedTime,
+                  location: event.eventLocation || event.EventLocation || 'Konum Belirtilmemiş',
+                  community: community.name || 'Topluluk',
+                  status: 'upcoming' as const,
+                  imageUrl: event.eventPictureLink || event.EventPictureLink,
+                  category: 'Etkinlik',
+                  university: community.university || '',
+                  description: event.miniAbout || event.MiniAbout || event.eventAbout || event.EventAbout,
+                  communityId: community.id,
+                  startDateISO: localISO, // Local timezone'da ISO formatı (takvim için)
+                });
+              });
+            }
+          });
+
+          this.communityEvents = allEvents;
         } else {
           // No memberships found - show empty state
           this.myCommunities = [];
-          // Don't load mock data - show empty state to user
+          this.communityEvents = [];
         }
 
+        // Stats'ları güncelle
         this.stats[0].value = this.myCommunities.length;
-
-        // 2. Fetch all events and filter by joined communities
-        this.eventService.getAll().subscribe({
-          next: (allEvents) => {
-            if (allEvents && allEvents.length > 0) {
-              // Filter events where communityId matches one of myCommunities
-              const myCommunityIds = this.myCommunities.map((c) => c.id);
-
-              // Note: In a real app, backend would filter this.
-              // Since we are mocking "joined" status, we filter the mock/fetched events.
-              // If event.communityId matches, or if we want to show some events anyway:
-
-              const filteredEvents = allEvents.filter(
-                (e) =>
-                  myCommunityIds.includes(String(e.communityId)) ||
-                  // Fallback: if mock data IDs don't match exactly (number vs string issues),
-                  // we might want to just show some events for demo purposes.
-                  // Let's assume for this task we show events that "belong" to the mocked joined communities.
-                  // If the event service returns events with IDs that don't match our "joined" community IDs (which might be from a different mock source),
-                  // we might end up with 0 events.
-                  // For robust demo: let's try to match by name if ID fails, or just take a subset.
-                  this.myCommunities.some((c) => c.name === e.communityName)
-              );
-
-              // Map to EventCard format
-              this.communityEvents = filteredEvents.map((e) => this.mapToEventCard(e));
-
-              // If no events found (e.g. fresh mock data mismatch), let's fallback to some mock events for visual confirmation
-              if (this.communityEvents.length === 0) {
-                this.loadMockEvents();
-              }
-            } else {
-              this.loadMockEvents();
-            }
-
-            this.stats[1].value = this.communityEvents.length;
-          },
-          error: (err) => {
-            console.error('Events yüklenemedi:', err);
-            // Handle 401/403 gracefully
-            if (err.status === 401 || err.status === 403) {
-              this.toastService.show('Etkinliklere erişim için giriş yapmanız gerekiyor.', 'error');
-            } else {
-              this.loadMockEvents();
-            }
-            this.stats[1].value = this.communityEvents.length;
-          },
-        });
+        this.stats[1].value = this.communityEvents.length;
       },
       error: (err) => {
-        console.error('Communities yüklenemedi:', err);
+        console.error('Memberships yüklenemedi:', err);
         // Handle 401/403 gracefully - show empty state instead of mock data
         if (err.status === 401 || err.status === 403) {
-          this.toastService.show('Topluluklara erişim için giriş yapmanız gerekiyor.', 'error');
+          this.toastService.show(
+            'Topluluklara erişim için giriş yapmanız gerekiyor.',
+            'error'
+          );
           this.myCommunities = [];
+          this.communityEvents = [];
         } else {
           // Other errors - show empty state
           this.myCommunities = [];
+          this.communityEvents = [];
         }
         this.stats[0].value = this.myCommunities.length;
+        this.stats[1].value = this.communityEvents.length;
       },
     });
   }
 
   private mapToEventCard(e: EventItem): EventCard {
     const start = e.startDate ? new Date(e.startDate) : new Date();
+    
+    // Local timezone'da ISO formatı (YYYY-MM-DD) - UTC'ye çevirmeden
+    const year = start.getFullYear();
+    const month = String(start.getMonth() + 1).padStart(2, '0');
+    const day = String(start.getDate()).padStart(2, '0');
+    const localISO = `${year}-${month}-${day}`;
+    
     return {
       id: e.id,
       title: e.title,
       date: start.toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric' }),
-      time: start.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+      time: start.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', hour12: false }),
       location: e.location || 'Konum Belirtilmemiş',
       community: e.communityName || 'Topluluk',
       status: 'upcoming', // Default to upcoming for now
@@ -236,6 +317,7 @@ export class StudentProfileComponent implements OnInit {
       university: '', // Service might not provide this directly in EventItem
       description: e.shortDescription || e.description,
       communityId: typeof e.communityId === 'number' ? e.communityId : (typeof e.communityId === 'string' ? parseInt(e.communityId, 10) : undefined),
+      startDateISO: localISO, // Local timezone'da ISO formatı (takvim için)
     };
   }
 
@@ -459,10 +541,38 @@ export class StudentProfileComponent implements OnInit {
     const end = new Date(this.calendarMonth.getFullYear(), this.calendarMonth.getMonth() + 1, 0);
     const days = [];
     for (let d = 1; d <= end.getDate(); d++) {
-      const iso = this.toIso(
-        new Date(this.calendarMonth.getFullYear(), this.calendarMonth.getMonth(), d)
-      );
-      const hasEvent = this.communityEvents.some((ev) => ev.date === iso);
+      const dayDate = new Date(this.calendarMonth.getFullYear(), this.calendarMonth.getMonth(), d);
+      const iso = this.toIso(dayDate);
+      
+      // Etkinliklerin tarihlerini ISO formatına çevirerek karşılaştır
+      const hasEvent = this.communityEvents.some((ev) => {
+        if (ev.startDateISO) {
+          // startDateISO varsa direkt kullan
+          const eventIso = this.toIso(new Date(ev.startDateISO));
+          return eventIso === iso;
+        } else if (ev.date) {
+          // ev.date Türkçe formatında, parse et
+          try {
+            // "15 Oca 2025" formatını parse et
+            const dateParts = ev.date.split(' ');
+            if (dateParts.length === 3) {
+              const day = parseInt(dateParts[0], 10);
+              const monthNames = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+              const month = monthNames.indexOf(dateParts[1]);
+              const year = parseInt(dateParts[2], 10);
+              if (month !== -1) {
+                const eventDate = new Date(year, month, day);
+                const eventIso = this.toIso(eventDate);
+                return eventIso === iso;
+              }
+            }
+          } catch (e) {
+            console.warn('Error parsing event date:', ev.date, e);
+          }
+        }
+        return false;
+      });
+      
       const isToday = iso === this.toIso(new Date());
       days.push({ label: d, iso, hasEvent, isToday });
     }
@@ -483,11 +593,42 @@ export class StudentProfileComponent implements OnInit {
 
   get eventsOnSelectedDate() {
     if (!this.calendarSelectedDate) return [];
-    return this.communityEvents.filter((ev) => ev.date === this.calendarSelectedDate);
+    return this.communityEvents.filter((ev) => {
+      if (ev.startDateISO) {
+        // startDateISO varsa direkt kullan
+        const eventIso = this.toIso(new Date(ev.startDateISO));
+        return eventIso === this.calendarSelectedDate;
+      } else if (ev.date) {
+        // ev.date Türkçe formatında, parse et
+        try {
+          // "15 Oca 2025" formatını parse et
+          const dateParts = ev.date.split(' ');
+          if (dateParts.length === 3) {
+            const day = parseInt(dateParts[0], 10);
+            const monthNames = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+            const month = monthNames.indexOf(dateParts[1]);
+            const year = parseInt(dateParts[2], 10);
+            if (month !== -1) {
+              const eventDate = new Date(year, month, day);
+              const eventIso = this.toIso(eventDate);
+              return eventIso === this.calendarSelectedDate;
+            }
+          }
+        } catch (e) {
+          console.warn('Error parsing event date:', ev.date, e);
+        }
+      }
+      return false;
+    });
   }
 
   private toIso(date: Date) {
-    return date.toISOString().split('T')[0];
+    // Local timezone'da ISO formatı (YYYY-MM-DD) - UTC'ye çevirmeden
+    // Bu sayede timezone kaynaklı bir günlük kayma olmaz
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   viewEvent(eventId: number): void {
@@ -502,6 +643,66 @@ export class StudentProfileComponent implements OnInit {
       month: 'long',
       day: 'numeric',
     });
+  }
+
+  // Takvim için etkinlik gününü al (Türkçe formatından)
+  getEventDay(ev: EventCard): string {
+    if (ev.startDateISO) {
+      // ISO formatından günü al
+      const date = new Date(ev.startDateISO + 'T00:00:00');
+      return String(date.getDate()).padStart(2, '0');
+    } else if (ev.date) {
+      // Türkçe formatından parse et: "15 Oca 2025"
+      try {
+        const parts = ev.date.split(' ');
+        if (parts.length >= 1) {
+          return parts[0].padStart(2, '0');
+        }
+      } catch (e) {
+        console.warn('Error parsing day from date:', ev.date);
+      }
+    }
+    return '01';
+  }
+
+  // Takvim için etkinlik ayını al (Türkçe formatından)
+  getEventMonth(ev: EventCard): string {
+    if (ev.startDateISO) {
+      // ISO formatından ayı al ve Türkçe'ye çevir
+      const date = new Date(ev.startDateISO + 'T00:00:00');
+      const monthNames = [
+        'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+        'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
+      ];
+      return monthNames[date.getMonth()];
+    } else if (ev.date) {
+      // Türkçe formatından parse et: "15 Oca 2025"
+      try {
+        const parts = ev.date.split(' ');
+        if (parts.length >= 2) {
+          const monthShort = parts[1];
+          // Kısa ay isimlerini uzun ay isimlerine çevir
+          const monthMap: { [key: string]: string } = {
+            'Oca': 'Ocak',
+            'Şub': 'Şubat',
+            'Mar': 'Mart',
+            'Nis': 'Nisan',
+            'May': 'Mayıs',
+            'Haz': 'Haziran',
+            'Tem': 'Temmuz',
+            'Ağu': 'Ağustos',
+            'Eyl': 'Eylül',
+            'Eki': 'Ekim',
+            'Kas': 'Kasım',
+            'Ara': 'Aralık'
+          };
+          return monthMap[monthShort] || monthShort;
+        }
+      } catch (e) {
+        console.warn('Error parsing month from date:', ev.date);
+      }
+    }
+    return 'Ocak';
   }
 
   saveSettings(): void {

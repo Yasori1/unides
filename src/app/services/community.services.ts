@@ -379,46 +379,15 @@ export class CommunityService {
   }
 
   // Topluluk Üyelerini Getir (Backend: GET /api/Communities/{id:guid}/members)
-  // Not: Backend'de bu endpoint henüz yok, bu yüzden şimdilik boş array döndürüyoruz
-  // Backend'de endpoint eklendiğinde bu metod güncellenmeli
+  // Not: Backend'de bu endpoint henüz yok (sadece POST ve DELETE var)
+  // Bu yüzden şimdilik direkt boş array döndürüyoruz, backend'e istek atmıyoruz
+  // Backend'de GET endpoint'i eklendiğinde bu metod güncellenmeli
   getCommunityMembers(id: string): Observable<any[]> {
-    // Get auth token for authenticated request
-    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-    const headers = token
-      ? new HttpHeaders({
-          Authorization: `Bearer ${token}`,
-        })
-      : undefined;
-
-    // Backend'de bu endpoint henüz yok, bu yüzden şimdilik boş array döndürüyoruz
-    // TODO: Backend'de GET /api/Communities/{id:guid}/members endpoint'i eklendiğinde bu metod güncellenmeli
-    // Şimdilik backend'e istek atıyoruz, 404 dönerse boş array döndürüyoruz
-    return this.http.get<any[]>(`${this.apiUrl}/${id}/members`, { headers }).pipe(
-      map((members) => {
-        // Backend'den gelen üyeleri map et
-        return members.map((m) => ({
-          id: m.userId || m.id || 0,
-          name: m.userName || m.name || '',
-          email: m.userMail || m.email || '',
-          role: m.role || 'Üye',
-          department: m.department || '',
-          phone: m.phone || '',
-          grade: m.grade || '',
-          avatar:
-            m.avatar ||
-            `https://ui-avatars.com/api/?name=${encodeURIComponent(
-              (m.userName || m.name || 'U').substring(0, 2)
-            )}&background=e2e8f0&color=1e293b`,
-          status: m.status || 'Aktif',
-          university: m.university || '',
-        }));
-      }),
-      catchError((error) => {
-        // Backend'de endpoint yoksa veya hata varsa boş array döndür
-        // Endpoint henüz mevcut değil veya hata oluştu
-        return of([]);
-      })
-    );
+    // Backend'de GET /api/Communities/{id:guid}/members endpoint'i yok
+    // Sadece POST (AddMember) ve DELETE (RemoveMember) var
+    // Bu yüzden direkt boş array döndürüyoruz
+    // TODO: Backend'de GET endpoint'i eklendiğinde bu metod güncellenmeli
+    return of([]);
   }
 
   // Üye Çıkar (Backend: DELETE /api/Communities/{id:guid}/members)
@@ -458,6 +427,52 @@ export class CommunityService {
    * NOTE: This relies on backend properly filtering based on JWT token.
    * If backend doesn't filter, we fallback to president-only filtering.
    */
+  /**
+   * Get communities where the current user is a member (for students)
+   * Uses backend endpoint: GET /api/Communities/me/memberships
+   * Returns communities with their events
+   */
+  getMyMemberships(): Observable<any[]> {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    if (!token) {
+      return of([]);
+    }
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+
+    return this.http.get<any[]>(`${this.apiUrl}/me/memberships`, { headers }).pipe(
+      map((response) => {
+        // Backend MemberCommunityDto formatını Community formatına çevir
+        return response.map((dto: any) => ({
+          id: dto.communityId || dto.CommunityId,
+          name: dto.comName || dto.ComName,
+          university: dto.university || dto.University || '',
+          category: dto.comCategory || dto.ComCategory || 'Genel',
+          description: dto.comAbout || dto.ComAbout || dto.miniAbout || dto.MiniAbout,
+          logo: dto.logoUrl || dto.LogoUrl || this.placeholderLogo,
+          memberCount: 0,
+          city: dto.city || dto.City || '',
+          about: dto.comAbout || dto.ComAbout,
+          banner: dto.bannerUrl || dto.BannerUrl || this.placeholderCover,
+          coverImage: dto.bannerUrl || dto.BannerUrl || this.placeholderCover,
+          status: 'Aktif',
+          isActivity: true,
+          events: dto.events || dto.Events || [], // Topluluk etkinlikleri
+          joinedDate: dto.joinedDate || dto.JoinedDate, // Üyelik tarihi
+        }));
+      }),
+      catchError((error) => {
+        console.error('Error fetching memberships:', error);
+        if (error.status === 401 || error.status === 403) {
+          // Unauthorized access - returning empty list
+        }
+        return of([]);
+      })
+    );
+  }
+
   getMyCommunities(): Observable<Community[]> {
     // Get current user info from localStorage
     if (typeof window === 'undefined') {
@@ -606,17 +621,22 @@ export class CommunityService {
 
     return this.http
       .get<{
-        TotalMembers: number;
-        ApprovedEvents: number;
-        PendingEvents: number;
-        TotalEvents: number;
+        TotalMembers?: number;
+        ApprovedEvents?: number;
+        PendingEvents?: number;
+        TotalEvents?: number;
+        totalMembers?: number;
+        approvedEvents?: number;
+        pendingEvents?: number;
+        totalEvents?: number;
       }>(`${this.apiUrl}/leader-stats`, { headers })
       .pipe(
         map((response) => ({
-          totalMembers: response.TotalMembers || 0,
-          approvedEvents: response.ApprovedEvents || 0,
-          pendingEvents: response.PendingEvents || 0,
-          totalEvents: response.TotalEvents || 0,
+          // Backend'den hem PascalCase hem camelCase gelebilir
+          totalMembers: response.TotalMembers ?? response.totalMembers ?? 0,
+          approvedEvents: response.ApprovedEvents ?? response.approvedEvents ?? 0,
+          pendingEvents: response.PendingEvents ?? response.pendingEvents ?? 0,
+          totalEvents: response.TotalEvents ?? response.totalEvents ?? 0,
         })),
         catchError((error) => {
           // Hata durumunda varsayılan değerler döndür

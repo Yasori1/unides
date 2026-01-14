@@ -103,6 +103,14 @@
     </div>
     
     <div class="view-container" *ngIf="activeTab === 'overview'">
+      <!-- Loading State for Overview -->
+      <div class="loading-container" *ngIf="isLoadingCommunity || isLoadingEvents || isLoadingMembers">
+        <app-luma-spin></app-luma-spin>
+        <p>Veriler yükleniyor...</p>
+      </div>
+
+      <!-- Content when loaded -->
+      <div *ngIf="!isLoadingCommunity && !isLoadingEvents && !isLoadingMembers">
        <div class="stats-grid-compact">
         <div
           class="stat-card-mini"
@@ -177,7 +185,14 @@
           </div>
         </div>
 
-        <div class="events-grid compact" *ngIf="displayedDashboardEvents.length; else emptyEvents">
+        <!-- Loading State -->
+        <div class="loading-container" *ngIf="isLoadingEvents">
+          <app-luma-spin></app-luma-spin>
+          <p>Etkinlikler yükleniyor...</p>
+        </div>
+
+        <!-- Events Grid -->
+        <div class="events-grid compact" *ngIf="!isLoadingEvents && displayedDashboardEvents.length; else emptyEvents">
           <div class="event-card" *ngFor="let event of displayedDashboardEvents" (click)="onEventCardClick(event)" [class.rejected-card]="event.status === 'rejected'">
             <div class="card-image">
               <img [src]="event.imageUrl" [alt]="event.title" loading="lazy" />
@@ -203,11 +218,12 @@
           </div>
         </div>
         <ng-template #emptyEvents>
-          <div class="empty-state">
+          <div class="empty-state" *ngIf="!isLoadingEvents">
             <span class="material-symbols-outlined">event_busy</span>
             <p>Henüz listelenecek etkinlik yok.</p>
           </div>
         </ng-template>
+      </div>
       </div>
     </div>
 
@@ -251,9 +267,16 @@
         </div>
       </div>
 
+      <!-- Loading State -->
+      <div class="loading-container" *ngIf="isLoadingEvents">
+        <app-luma-spin></app-luma-spin>
+        <p>Etkinlikler yükleniyor...</p>
+      </div>
+
+      <!-- Events Grid -->
       <div
         class="events-grid compact"
-        *ngIf="filteredDashboardEvents.length; else emptyProjectEvents"
+        *ngIf="!isLoadingEvents && filteredDashboardEvents.length; else emptyProjectEvents"
       >
         <div class="event-card" *ngFor="let event of filteredDashboardEvents" (click)="onEventCardClick(event)" [class.rejected-card]="event.status === 'rejected'">
           <div class="card-image">
@@ -280,7 +303,7 @@
         </div>
       </div>
       <ng-template #emptyProjectEvents>
-        <div class="empty-state">
+        <div class="empty-state" *ngIf="!isLoadingEvents">
           <span class="material-symbols-outlined">event_busy</span>
           <p>Henüz listelenecek etkinlik yok.</p>
         </div>
@@ -303,13 +326,19 @@
           <button class="btn-primary" (click)="openModal('new-member')">Üye Ekle</button>
         </div>
       </div>
-      <div *ngIf="pagedMembers.length; else noMembers" class="members-table-container">
+      <!-- Loading State -->
+      <div class="loading-container" *ngIf="isLoadingMembers">
+        <app-luma-spin></app-luma-spin>
+        <p>Üyeler yükleniyor...</p>
+      </div>
+
+      <!-- Members Table -->
+      <div *ngIf="!isLoadingMembers && pagedMembers.length; else noMembers" class="members-table-container">
         <table class="members-table">
           <thead>
             <tr>
               <th>İsim Soyad</th>
               <th>E-Posta</th>
-              <th>Üniversite</th>
               <th class="action-column">İşlem</th>
             </tr>
           </thead>
@@ -328,12 +357,7 @@
                 </div>
               </td>
               <td class="member-email-cell">{{ m.email }}</td>
-              <td class="member-university-cell">{{ m.university || '-' }}</td>
               <td class="member-action-cell">
-                <button class="member-edit-btn-table" (click)="editMember(m)" title="Üyeyi Düzenle">
-                  <span class="material-symbols-outlined">edit</span>
-                  <span>Düzenle</span>
-                </button>
                 <button class="member-delete-btn-table" (click)="openDeleteConfirm(m.id)" title="Üyeyi Sil">
                   <span class="material-symbols-outlined">delete</span>
                   <span>Sil</span>
@@ -344,7 +368,7 @@
         </table>
       </div>
       <ng-template #noMembers>
-        <div class="empty-state">
+        <div class="empty-state" *ngIf="!isLoadingMembers">
           <span class="material-symbols-outlined">group_off</span>
           <p>Listelenecek üye bulunamadı.</p>
         </div>
@@ -372,16 +396,10 @@
       <div class="card settings-card">
         <div class="settings-hero">
           <div class="hero-banner" [style.background-image]="'url(' + clubInfo.banner + ')'">
-            <button class="edit-btn" (click)="showBannerModal = true">
-              <span class="material-symbols-outlined">edit</span>
-            </button>
           </div>
           <div class="hero-profile">
             <div class="avatar-wrapper">
               <img [src]="clubInfo.logo" alt="Logo" />
-              <button class="edit-btn small" (click)="showAvatarModal = true">
-                <span class="material-symbols-outlined">edit</span>
-              </button>
             </div>
             <div class="hero-text">
               <p class="eyebrow">Profil</p>
@@ -415,7 +433,7 @@
               </label>
               <label>
                 <span>E-Posta</span>
-                <input type="email" [(ngModel)]="clubInfo.email" />
+                <input type="email" [(ngModel)]="clubInfo.email" disabled />
               </label>
             </div>
             <label class="stacked">
@@ -430,54 +448,10 @@
                 maxlength="500" 
                 [(ngModel)]="clubInfo.description"
                 placeholder="Topluluğunuzu anlatan kısa bir yazı yazın..."
+                disabled
               ></textarea>
             </label>
           </div>
-        </div>
-        <div class="action-footer">
-          <button
-            class="btn-primary"
-            [disabled]="!isSettingsValid || !isSettingsChanged"
-            (click)="updateSettings()"
-          >
-            Değişiklikleri Kaydet
-          </button>
-        </div>
-      </div>
-
-      <div class="simple-modal-overlay" *ngIf="showBannerModal" (click)="showBannerModal = false">
-        <div class="simple-modal-card" (click)="$event.stopPropagation()">
-          <div class="modal-head">
-            <h3>Banner Güncelle</h3>
-            <button class="icon-btn ghost close-modern" (click)="showBannerModal = false">
-              <span class="material-symbols-outlined">close</span>
-            </button>
-          </div>
-          <p class="modal-hint">Önerilen ölçü: 1200 x 400 px</p>
-          <app-image-upload
-            label="Banner seç / sürükle"
-            [previewUrl]="clubInfo.banner"
-            [allowUrl]="false"
-            (onImageSelected)="onBannerSelected($event)"
-          ></app-image-upload>
-        </div>
-      </div>
-
-      <div class="simple-modal-overlay" *ngIf="showAvatarModal" (click)="showAvatarModal = false">
-        <div class="simple-modal-card" (click)="$event.stopPropagation()">
-          <div class="modal-head">
-            <h3>Profil Fotoğrafı Güncelle</h3>
-            <button class="icon-btn ghost close-modern" (click)="showAvatarModal = false">
-              <span class="material-symbols-outlined">close</span>
-            </button>
-          </div>
-          <p class="modal-hint">Önerilen ölçü: 400 x 400 px</p>
-          <app-image-upload
-            label="Fotoğraf seç / sürükle"
-            [previewUrl]="clubInfo.logo"
-            [allowUrl]="false"
-            (onImageSelected)="onLogoSelected($event)"
-          ></app-image-upload>
         </div>
       </div>
     </div>
@@ -622,7 +596,7 @@
             <span>E-posta Adresleri</span>
             <textarea
               rows="8"
-              placeholder="E-posta adreslerini virgül, noktalı virgül veya yeni satır ile ayırarak yapıştırın:&#10;abc@itu.edu.tr, bbb@bogazici.edu.tr, xxx@odtu.edu.tr"
+              placeholder="E-posta adreslerini virgül ile ayırarak yapıştırın:&#10;abc@itu.edu.tr, bbb@bogazici.edu.tr, xxx@odtu.edu.tr"
               [(ngModel)]="bulkEmailsText"
               class="bulk-emails-textarea"
             ></textarea>

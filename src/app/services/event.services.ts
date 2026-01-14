@@ -382,6 +382,59 @@ export class EventService {
       );
   }
 
+  // Topluluk bazlı etkinlikleri getir (Backend: GET /api/Events/community/{communityId}/events?status=0&status=1&status=2)
+  // [Authorize(Policy = "CommunityAdminOnly")] - Sadece topluluk lideri görebilir
+  getCommunityEvents(communityId: string, statuses?: number[]): Observable<EventItem[]> {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    if (!token) {
+      throw new Error('Etkinlikleri görmek için giriş yapmanız gerekiyor.');
+    }
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+
+    // Query parametrelerini oluştur: ?status=0&status=1&status=2
+    let params = new HttpParams();
+    if (statuses && statuses.length > 0) {
+      statuses.forEach((status) => {
+        params = params.append('status', status.toString());
+      });
+    }
+
+    // Backend EventsByStatusDto döndürüyor: { Pending: [], Accepted: [], Rejected: [] }
+    return this.http
+      .get<{
+        Pending: EventListItemDto[];
+        Accepted: EventListItemDto[];
+        Rejected: EventListItemDto[];
+      }>(`${this.apiUrl}/community/${communityId}/events`, { headers, params })
+      .pipe(
+        map((response: any) => {
+          if (!response) {
+            return [];
+          }
+
+          // EventsByStatusDto: { Pending: EventListItemDto[], Accepted: EventListItemDto[], Rejected: EventListItemDto[] }
+          const pending = response.Pending || response.pending || [];
+          const accepted = response.Accepted || response.accepted || [];
+          const rejected = response.Rejected || response.rejected || [];
+
+          // Tüm status'leri birleştir
+          const allEvents: EventListItemDto[] = [...pending, ...accepted, ...rejected];
+
+          // EventListItemDto'ları EventItem'a map et
+          const mappedEvents = allEvents.map((dto) => this.mapToEvent(dto));
+
+          return mappedEvents;
+        }),
+        catchError((error) => {
+          // Hata durumunda boş array döndür
+          return of([]);
+        })
+      );
+  }
+
   // Etkinlik detayını getir (Backend: GET /api/Events/{id})
   getById(id: number): Observable<EventItem> {
     const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;

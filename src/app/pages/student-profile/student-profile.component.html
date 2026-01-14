@@ -571,8 +571,8 @@
     <div class="calendar-events" *ngIf="eventsOnSelectedDate.length > 0; else noEventsOnDay">
       <div class="calendar-item" *ngFor="let ev of eventsOnSelectedDate">
         <div class="calendar-date">
-          <span class="day">{{ ev.date.split('-')[2] }}</span>
-          <span class="month">{{ formatDate(ev.date).split(' ')[1] }}</span>
+          <span class="day">{{ getEventDay(ev) }}</span>
+          <span class="month">{{ getEventMonth(ev) }}</span>
         </div>
         <div class="calendar-info">
           <h4>{{ ev.title }}</h4>
