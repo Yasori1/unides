@@ -14,9 +14,20 @@
     </button>
 
     <!-- Desktop Auth Buttons -->
-    <div class="auth-buttons desktop-auth">
+    <div class="auth-buttons desktop-auth" *ngIf="!isLoggedIn">
       <a routerLink="/login" class="btn-outline-custom small static-btn"><span>Giriş Yap</span></a>
       <a routerLink="/register" class="btn-solid-custom small"><span>Kayıt Ol</span></a>
+    </div>
+
+    <!-- Student Profile Button -->
+    <div class="auth-buttons desktop-auth" *ngIf="isLoggedIn && userRole === 'student'">
+      <a routerLink="/profile" class="btn-solid-custom small"><span>Profilim</span></a>
+    </div>
+
+    <!-- Corporate/Community Dashboard Button (Optional fallback) -->
+    <div class="auth-buttons desktop-auth" *ngIf="isLoggedIn && userRole !== 'student'">
+       <a *ngIf="userRole === 'corporate'" routerLink="/corporate-dashboard" class="btn-solid-custom small"><span>Panelim</span></a>
+       <a *ngIf="userRole === 'community'" routerLink="/community-dashboard" class="btn-solid-custom small"><span>Panelim</span></a>
     </div>
   </div>
 </div>
