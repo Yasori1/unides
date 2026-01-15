@@ -392,7 +392,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     private http: HttpClient,
     private afkDetectionService: AfkDetectionService,
     @Inject(PLATFORM_ID) private platformId: Object
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
@@ -561,22 +561,22 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
           // Backend'den gelen üyeleri map et
           this.members = backendMembers.map(
             (m) =>
-              ({
-                id: m.id || 0,
-                name: m.name || this.getNameFromEmail(m.email),
-                role: m.role || 'Üye',
-                department: m.department || '',
-                email: m.email || '',
-                phone: m.phone || '',
-                grade: m.grade || '',
-                avatar:
-                  m.avatar ||
-                  `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                    (m.name || this.getNameFromEmail(m.email) || 'U').substring(0, 2)
-                  )}&background=e2e8f0&color=1e293b`,
-                status: m.status || 'Aktif',
-                university: m.university || this.getUniversityFromEmail(m.email),
-              } as Member)
+            ({
+              id: m.id || 0,
+              name: m.name || this.getNameFromEmail(m.email),
+              role: m.role || 'Üye',
+              department: m.department || '',
+              email: m.email || '',
+              phone: m.phone || '',
+              grade: m.grade || '',
+              avatar:
+                m.avatar ||
+                `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                  (m.name || this.getNameFromEmail(m.email) || 'U').substring(0, 2)
+                )}&background=e2e8f0&color=1e293b`,
+              status: m.status || 'Aktif',
+              university: m.university || this.getUniversityFromEmail(m.email),
+            } as Member)
           );
 
           // Stats'ı güncelle
@@ -894,7 +894,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
   }
 
   navigateToHome() {
-    this.router.navigate(['/']);
+    this.switchTab('overview');
   }
 
   toggleRowMenu(id: number, event: MouseEvent) {
@@ -2001,14 +2001,14 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
                         updatedEvent.status === 'Onaylandı'
                           ? 'approved'
                           : updatedEvent.status === 'Reddedildi'
-                          ? 'rejected'
-                          : 'pending',
+                            ? 'rejected'
+                            : 'pending',
                       imageUrl: updatedEvent.imageUrl || '',
                       date: updatedEvent.startDate
                         ? new Date(updatedEvent.startDate).toLocaleDateString('tr-TR', {
-                            day: 'numeric',
-                            month: 'long',
-                          })
+                          day: 'numeric',
+                          month: 'long',
+                        })
                         : '',
                       startDateIso: updatedEvent.startDate || '',
                       location: updatedEvent.location || '',
@@ -2016,9 +2016,9 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
                       description: updatedEvent.description || '',
                       time: updatedEvent.startDate
                         ? new Date(updatedEvent.startDate).toLocaleTimeString('tr-TR', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })
                         : '',
                       quota: updatedEvent.quota || 0,
                     };

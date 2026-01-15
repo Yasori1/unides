@@ -286,7 +286,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     private http: HttpClient,
     private afkDetectionService: AfkDetectionService,
     @Inject(PLATFORM_ID) private platformId: Object
-  ) {}
+  ) { }
 
   ngOnInit() {
     // SSR sırasında HTTP istekleri yapma, sadece browser'da yap
@@ -409,8 +409,8 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
                   rest.isActivity !== undefined
                     ? rest.isActivity
                     : c.isActivity !== undefined
-                    ? c.isActivity
-                    : true;
+                      ? c.isActivity
+                      : true;
                 return {
                   ...rest,
                   about: c.description || c.about || '',
@@ -497,13 +497,13 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       capacity: '100',
       city: 'İstanbul',
     };
-    
+
     // Test etkinliğini allEvents'e ekle (eğer zaten yoksa)
     const existingTestEvent = this.allEvents.find(e => e.id === 9999);
     if (!existingTestEvent) {
       this.allEvents.unshift(testEvent);
     }
-    
+
     // Test etkinliğini filteredEvents'e de ekle (eğer zaten yoksa)
     const testEventInFiltered = this.filteredEvents.find(e => e.id === 9999);
     if (!testEventInFiltered) {
@@ -521,19 +521,9 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     // Test etkinliğini başta ekle (her durumda görünmesi için)
     this.addTestEvent();
 
-    // Filtreye göre backend'den etkinlikleri çek
-    let statusNumbers: number[] = [];
-
-    if (this.eventStatusFilter === 'Onaylandı') {
-      statusNumbers = [1]; // Onaylandı
-    } else if (this.eventStatusFilter === 'Beklemede') {
-      statusNumbers = [0]; // Beklemede
-    } else if (this.eventStatusFilter === 'Reddedildi') {
-      statusNumbers = [2]; // Reddedildi
-    } else {
-      // Tümü veya boş -> tüm status'leri çek
-      statusNumbers = [0, 1, 2];
-    }
+    // Her zaman tüm etkinlikleri backend'den çek (filtreleme frontend'de yapılacak)
+    // Revize durumu backend'de ayrı bir status değeri olmadığından tüm verileri çekiyoruz
+    const statusNumbers: number[] = [0, 1, 2]; // Beklemede, Onaylandı, Reddedildi/Revize
 
     // Backend'den status'e göre etkinlikleri çek
     this.eventService.getByStatus(statusNumbers).subscribe({
@@ -545,26 +535,26 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
           this.allEvents = [];
         } else {
           this.allEvents = data.map((e) => {
-          // Community name'i bulmak için communities listesini kullan
-          const community = this.allCommunities.find((c) => String(c.id) === String(e.communityId));
+            // Community name'i bulmak için communities listesini kullan
+            const community = this.allCommunities.find((c) => String(c.id) === String(e.communityId));
 
-          return {
-            id: e.id,
-            communityId: e.communityId,
-            communityName: community?.name || e.communityName || '',
-            eventName: e.title,
-            date: e.startDate || '',
-            startDate: e.startDate,
-            endDate: e.endDate,
-            location: e.location || '',
-            imageUrl: e.imageUrl || '',
-            description: e.description || '',
-            shortDescription: e.shortDescription || '',
-            // EventService'ten gelen status değeri zaten doğru format: 'Beklemede', 'Onaylandı', 'Reddedildi'
-            status: e.status || 'Beklemede',
-            capacity: e.capacity || '',
-            city: e.city || community?.city || '',
-          };
+            return {
+              id: e.id,
+              communityId: e.communityId,
+              communityName: community?.name || e.communityName || '',
+              eventName: e.title,
+              date: e.startDate || '',
+              startDate: e.startDate,
+              endDate: e.endDate,
+              location: e.location || '',
+              imageUrl: e.imageUrl || '',
+              description: e.description || '',
+              shortDescription: e.shortDescription || '',
+              // EventService'ten gelen status değeri zaten doğru format: 'Beklemede', 'Onaylandı', 'Reddedildi'
+              status: e.status || 'Beklemede',
+              capacity: e.capacity || '',
+              city: e.city || community?.city || '',
+            };
           });
         }
 
@@ -579,7 +569,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         // Etkinlik filtrelerini uygula (metin araması için)
         // filterEvents() metodu filteredEvents'i güncelliyor
         this.filterEvents();
-        
+
         // Test etkinliğinin filteredEvents'te olduğundan emin ol
         this.addTestEvent();
       },
@@ -618,7 +608,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
               this.attachCommunityNamesToEvents();
             }
             this.filterEvents();
-            
+
             // Test etkinliğinin filteredEvents'te olduğundan emin ol
             this.addTestEvent();
           },
@@ -785,6 +775,11 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   filterEvents() {
     let temp = [...this.allEvents];
 
+    // Durum filtresi
+    if (this.eventStatusFilter && this.eventStatusFilter.trim() !== '') {
+      temp = temp.filter((e) => e.status === this.eventStatusFilter);
+    }
+
     // Metin araması
     if (this.eventSearchText.trim()) {
       const term = this.eventSearchText.toLowerCase();
@@ -804,8 +799,9 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   // Etkinlik durum filtresi ayarla
   setEventStatusFilter(status: string) {
     this.eventStatusFilter = status;
-    // Backend'den filtreye göre etkinlikleri çek
-    this.loadEventsFromService();
+    // Frontend'de filtreleme yap (allEvents zaten yüklü olmalı)
+    // Revize durumu backend'de tanımlı olmadığından frontend'de filtreliyoruz
+    this.filterEvents();
   }
 
   // Topluluklar sayfasına onay bekleyen filtresiyle yönlendir
@@ -919,8 +915,8 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
           this.editingCommunity.status === 'Pasif'
             ? false
             : this.editingCommunity.status === 'Aktif'
-            ? true
-            : undefined,
+              ? true
+              : undefined,
       };
 
       this.communityService.addOrUpdateCommunity(communityForService).subscribe({
@@ -1196,7 +1192,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   }
 
   navigateToHome() {
-    this.router.navigate(['/']);
+    this.switchTab('overview');
   }
 
   @HostListener('document:click', ['$event'])

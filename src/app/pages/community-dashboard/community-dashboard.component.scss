@@ -1125,7 +1125,7 @@
 
 // ================= RESPONSIVE OPTIMIZATIONS =================
 .sidebar-mobile-overlay {
-  display: none;
+  display: none !important; // Always hidden on desktop, even when active
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
@@ -1135,15 +1135,20 @@
   pointer-events: none;
   transition: opacity 0.3s ease;
 
+  // Desktop: Never show overlay, even when active
   &.active {
-    opacity: 1;
-    pointer-events: auto;
+    display: none !important; // Keep hidden on desktop
   }
 }
 
 @media (max-width: 768px) {
   .sidebar-mobile-overlay {
     display: block;
+
+    &.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
   }
 
   .sidebar {
