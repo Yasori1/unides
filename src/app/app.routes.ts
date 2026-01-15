@@ -42,6 +42,7 @@ import { LoginPageComponent } from './pages/login-page/login-page.component';
 import { RegisterPageComponent } from './pages/register-page/register-page.component';
 import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
 import { KvkkPageComponent } from './pages/kvkk-page/kvkk-page.component';
+import { roleGuard } from './guards/role.guard';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -71,11 +72,11 @@ export const routes: Routes = [
 
   // SADECE ÖĞRENCİ KAYDI AKTİF
   { path: 'register', component: RegisterPageComponent },
-  
+
   // YAPIM AŞAMASINDA - İlk etap için devre dışı
   { path: 'corporate-register', component: ComingSoonComponent, data: { title: 'Kurumsal Kayıt' } },
   { path: 'community-register', component: ComingSoonComponent, data: { title: 'Topluluk Kayıt' } },
-  
+
   // YAPIM AŞAMASINDA - Gelecekte lazım olabilir (yorum satırında tutuldu)
   // { path: 'corporate-register', component: CorporateRegisterComponent },
   // { path: 'community-register', component: CommunityRegisterComponent },
@@ -91,13 +92,33 @@ export const routes: Routes = [
   { path: 'reset-password', component: ResetPasswordComponent },
 
   // KURUMSAL DASHBOARD
-  { path: 'corporate-dashboard', component: CorporateDashboardComponent },
+  {
+    path: 'corporate-dashboard',
+    component: CorporateDashboardComponent,
+    canActivate: [roleGuard],
+    data: { expectedRole: 'corporate' }
+  },
   // TOPLULUK DASHBOARD
-  { path: 'community-dashboard', component: CommunityDashboardComponent },
+  {
+    path: 'community-dashboard',
+    component: CommunityDashboardComponent,
+    canActivate: [roleGuard],
+    data: { expectedRole: 'community' }
+  },
 
   // ÖĞRENCİ DASHBOARD
-  { path: 'student-dashboard', component: StudentProfileComponent },
-  { path: 'profile', component: StudentProfileComponent }, // Alias for student-dashboard
+  {
+    path: 'student-dashboard',
+    component: StudentProfileComponent,
+    canActivate: [roleGuard],
+    data: { expectedRole: 'student' }
+  },
+  {
+    path: 'profile',
+    component: StudentProfileComponent, // Alias for student-dashboard
+    canActivate: [roleGuard],
+    data: { expectedRole: 'student' }
+  },
 
   // Admin Dashboard (Eski/Mevcut)
   /*

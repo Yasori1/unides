@@ -2031,7 +2031,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         return 'Duyurular';
       // Mesajlar case'i silindi
       case 'settings':
-        return 'Ayarlar';
+        return 'Profilim';
       default:
         return '';
     }
