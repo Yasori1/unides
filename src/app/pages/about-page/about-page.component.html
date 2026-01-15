@@ -6,10 +6,7 @@
 <div class="page-spacer" (mousemove)="onHeroMouseMove($event)">
   <!-- Arka Plan Animasyonu -->
   <div class="background-wrapper">
-    <div
-      class="interactive-blob"
-      [style.transform]="'translate(' + -heroMoveX + 'px, ' + -heroMoveY + 'px)'"
-    ></div>
+    <div class="interactive-blob" [style.transform]="'translate(' + -heroMoveX + 'px, ' + -heroMoveY + 'px)'"></div>
     <div class="noise-overlay"></div>
   </div>
 
@@ -47,10 +44,8 @@
 
         <div class="hero-visual-side" #animItem>
           <!-- Kart 1: Topluluk İş Birlikleri -->
-          <div
-            class="floating-wrapper pos-1"
-            [style.transform]="'translate(' + heroMoveX * 0.5 + 'px, ' + heroMoveY * 0.5 + 'px)'"
-          >
+          <div class="floating-wrapper pos-1"
+            [style.transform]="'translate(' + heroMoveX * 0.5 + 'px, ' + heroMoveY * 0.5 + 'px)'">
             <div class="glass-card float-anim-1">
               <span class="material-symbols-outlined icon">hub</span>
               <span>Topluluk İş Birlikleri</span>
@@ -58,10 +53,8 @@
           </div>
 
           <!-- Kart 2: Proje Yönetimi -->
-          <div
-            class="floating-wrapper pos-2"
-            [style.transform]="'translate(' + heroMoveX * -0.5 + 'px, ' + heroMoveY * -0.5 + 'px)'"
-          >
+          <div class="floating-wrapper pos-2"
+            [style.transform]="'translate(' + heroMoveX * -0.5 + 'px, ' + heroMoveY * -0.5 + 'px)'">
             <div class="glass-card float-anim-2">
               <span class="material-symbols-outlined icon">rocket_launch</span>
               <span>Proje Yönetimi</span>
@@ -69,10 +62,8 @@
           </div>
 
           <!-- Kart 3: Sponsorluk Süreçleri (Beyaz Tema) -->
-          <div
-            class="floating-wrapper pos-3"
-            [style.transform]="'translate(' + heroMoveX * 0.3 + 'px, ' + heroMoveY * 0.3 + 'px)'"
-          >
+          <div class="floating-wrapper pos-3"
+            [style.transform]="'translate(' + heroMoveX * 0.3 + 'px, ' + heroMoveY * 0.3 + 'px)'">
             <div class="glass-card theme-white float-anim-3">
               <span class="material-symbols-outlined icon">handshake</span>
               <span>Sponsorluk Süreçleri</span>
@@ -80,10 +71,8 @@
           </div>
 
           <!-- Kart 4: Etkinlik Takvimi -->
-          <div
-            class="floating-wrapper pos-4"
-            [style.transform]="'translate(' + heroMoveX * -0.35 + 'px, ' + heroMoveY * 0.35 + 'px)'"
-          >
+          <div class="floating-wrapper pos-4"
+            [style.transform]="'translate(' + heroMoveX * -0.35 + 'px, ' + heroMoveY * 0.35 + 'px)'">
             <div class="glass-card float-anim-4">
               <span class="material-symbols-outlined icon">event</span>
               <span>Etkinlik Takvimi</span>
@@ -91,10 +80,8 @@
           </div>
 
           <!-- Kart 5: Duyurular -->
-          <div
-            class="floating-wrapper pos-5"
-            [style.transform]="'translate(' + heroMoveX * 0.2 + 'px, ' + heroMoveY * -0.2 + 'px)'"
-          >
+          <div class="floating-wrapper pos-5"
+            [style.transform]="'translate(' + heroMoveX * 0.2 + 'px, ' + heroMoveY * -0.2 + 'px)'">
             <div class="glass-card float-anim-5">
               <span class="material-symbols-outlined icon">campaign</span>
               <span>Duyurular</span>
@@ -102,10 +89,8 @@
           </div>
 
           <!-- Kart 6: Network -->
-          <div
-            class="floating-wrapper pos-6"
-            [style.transform]="'translate(' + heroMoveX * 0.55 + 'px, ' + heroMoveY * -0.1 + 'px)'"
-          >
+          <div class="floating-wrapper pos-6"
+            [style.transform]="'translate(' + heroMoveX * 0.55 + 'px, ' + heroMoveY * -0.1 + 'px)'">
             <div class="glass-card theme-white float-anim-6">
               <span class="material-symbols-outlined icon">groups</span>
               <span>Güçlü Network</span>
@@ -144,12 +129,8 @@
 
           <div class="col-lg-5 offset-lg-2 col-md-12">
             <div class="about-image clean-logo-wrapper">
-              <img
-                [src]="gsbLogoUrl"
-                alt="GSB Logo"
-                class="gsb-main-logo"
-                onerror="this.src='assets/images/logos/gsb.png'"
-              />
+              <img [src]="gsbLogoUrl" alt="GSB Logo" class="gsb-main-logo"
+                onerror="this.src='assets/images/logos/gsb.png'" />
             </div>
           </div>
         </div>
@@ -241,13 +222,8 @@
     <section class="innovative-guide-section">
       <div class="container">
         <div class="guide-grid">
-          <div
-            class="holo-card project-theme"
-            #animItem
-            (mousemove)="cardTilt($event, card1)"
-            (mouseleave)="cardReset(card1)"
-            #card1
-          >
+          <div class="holo-card project-theme" #animItem (mousemove)="cardTilt($event, card1)"
+            (mouseleave)="cardReset(card1)" #card1>
             <div class="card-content">
               <div class="icon-glow">
                 <span class="material-symbols-outlined">architecture</span>
@@ -263,13 +239,8 @@
             <div class="holo-bg"></div>
           </div>
 
-          <div
-            class="holo-card report-theme"
-            #animItem
-            (mousemove)="cardTilt($event, card2)"
-            (mouseleave)="cardReset(card2)"
-            #card2
-          >
+          <div class="holo-card report-theme" #animItem (mousemove)="cardTilt($event, card2)"
+            (mouseleave)="cardReset(card2)" #card2>
             <div class="card-content">
               <div class="icon-glow"><span class="material-symbols-outlined">analytics</span></div>
               <h3>Sonuç Raporu</h3>
@@ -286,37 +257,11 @@
       </div>
     </section>
 
-    <!-- MARQUEE (Partnerler) -->
-    <section class="marquee-section">
-      <p class="marquee-header"></p>
-      <div class="marquee-wrapper">
-        <div class="marquee-content">
-          <div class="logo-item" *ngFor="let item of marqueeItems">
-            <img
-              [src]="item.img"
-              [alt]="item.name"
-              title="{{ item.name }}"
-              onerror="this.style.display='none'"
-            />
-          </div>
-          <div class="logo-item" *ngFor="let item of marqueeItems">
-            <img
-              [src]="item.img"
-              [alt]="item.name"
-              title="{{ item.name }}"
-              onerror="this.style.display='none'"
-            />
-          </div>
-        </div>
-      </div>
-    </section>
   </div>
 </div>
 
 <!-- MEVCUT FOOTER -->
 <app-site-footer />
 
-<link
-  rel="stylesheet"
-  href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
-/>
+<link rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
