@@ -172,19 +172,19 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
 
   // Full HD
   @media (min-width: 1440px) {
-    padding-top: 140px;
+    padding-top: 220px; // Daha da aşağı alındı
     padding-bottom: 350px;
   }
 
   // Large screens
   @media (min-width: 1920px) {
-    padding-top: 160px;
+    padding-top: 200px; // Daha da aşağı alındı
     padding-bottom: 400px;
   }
 
   // Extra large screens
   @media (min-width: 2560px) {
-    padding-top: 200px;
+    padding-top: 320px;
     padding-bottom: 500px;
   }
 
@@ -437,19 +437,19 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
     margin-top: -120px;
   }
 
-  // Full HD
+  // Full HD - Resmin altında olması için margin sıfırlandı/azaltıldı
   @media (min-width: 1440px) {
-    margin-top: -140px;
+    margin-top: -50px;
   }
 
-  // Large screens
+  // Large screens - Resmin altında olması için margin sıfırlandı/azaltıldı
   @media (min-width: 1920px) {
-    margin-top: -180px;
+    margin-top: -30px;
   }
 
   // Extra large screens
   @media (min-width: 2560px) {
-    margin-top: -220px;
+    margin-top: 0px;
   }
 }
 
