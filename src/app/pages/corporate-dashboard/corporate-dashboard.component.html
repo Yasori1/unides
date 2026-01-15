@@ -10,14 +10,18 @@
 
 <div class="dashboard-container">
   <!-- Mobile Sidebar Overlay -->
-  <div class="sidebar-mobile-overlay" [class.active]="isSidebarCollapsed" (click)="toggleSidebar()"></div>
+  <div
+    class="sidebar-mobile-overlay"
+    [class.active]="isSidebarCollapsed"
+    (click)="toggleSidebar()"
+  ></div>
 
   <!-- Toast Component Entegrasyonu -->
   <app-toast></app-toast>
 
   <!-- SIDEBAR -->
   <aside class="sidebar" [class.collapsed]="isSidebarCollapsed">
-    <div class="brand" (click)="navigateToHome()" style="cursor: pointer;">
+    <div class="brand" (click)="navigateToHome()" style="cursor: pointer">
       <div class="logo-badge">
         <img class="brand-logo" src="assets/unides1.png" alt="Ünides Dijital Portal" />
       </div>
@@ -112,7 +116,6 @@
       </div>
 
       <div class="header-right">
-
         <div class="profile-wrapper">
           <div class="profile-pic" (click)="toggleProfileDropdown($event)">
             <img [src]="corporateInfo.logo" alt="Logo" />
@@ -201,7 +204,11 @@
               (input)="applyFilters()"
             />
           </div>
-          <select class="status-filter" [(ngModel)]="statusFilter" (change)="onStatusFilterChange()">
+          <select
+            class="status-filter"
+            [(ngModel)]="statusFilter"
+            (change)="onStatusFilterChange()"
+          >
             <option value="">Tüm Durumlar</option>
             <option value="Aktif">Aktif</option>
             <option value="Pasif">Pasif</option>
@@ -348,7 +355,12 @@
       </div>
 
       <div class="events-grid" *ngIf="filteredEvents.length > 0">
-        <div *ngFor="let e of filteredEvents" class="event-card-modern" [ngClass]="e.status" (click)="openEventDetail(e)">
+        <div
+          *ngFor="let e of filteredEvents"
+          class="event-card-modern"
+          [ngClass]="e.status"
+          (click)="openEventDetail(e)"
+        >
           <div class="card-image">
             <img
               [src]="e.imageUrl || 'assets/images/page-title1.jpg'"
@@ -974,12 +986,14 @@
               <div class="item">
                 <span class="label">Durum</span>
                 <p class="value">
-                  <span [ngClass]="{
-                    'status-badge': true,
-                    'status-pending': selectedEvent.status === 'Beklemede',
-                    'status-approved': selectedEvent.status === 'Onaylandı',
-                    'status-rejected': selectedEvent.status === 'Reddedildi'
-                  }">
+                  <span
+                    [ngClass]="{
+                      'status-badge': true,
+                      'status-pending': selectedEvent.status === 'Beklemede',
+                      'status-approved': selectedEvent.status === 'Onaylandı',
+                      'status-rejected': selectedEvent.status === 'Reddedildi'
+                    }"
+                  >
                     {{ selectedEvent.status || 'Beklemede' }}
                   </span>
                 </p>
@@ -1034,17 +1048,23 @@
             </div>
 
             <!-- Spam Kontrol Sonucu -->
-            <div *ngIf="inspectedEvents.has(selectedEvent.id) && !checkingSpamEvents.has(selectedEvent.id)" 
-                 class="spam-result-box" 
-                 [class.clean]="isEventClean(selectedEvent.id)" 
-                 [class.spam]="!isEventClean(selectedEvent.id)">
-              <span class="material-symbols-outlined">{{ isEventClean(selectedEvent.id) ? 'check_circle' : 'warning' }}</span>
+            <div
+              *ngIf="
+                inspectedEvents.has(selectedEvent.id) && !checkingSpamEvents.has(selectedEvent.id)
+              "
+              class="spam-result-box"
+              [class.clean]="isEventClean(selectedEvent.id)"
+              [class.spam]="!isEventClean(selectedEvent.id)"
+            >
+              <span class="material-symbols-outlined">{{
+                isEventClean(selectedEvent.id) ? 'check_circle' : 'warning'
+              }}</span>
               <span>{{ getSpamMessage(selectedEvent.id) }}</span>
               <!-- İçerik Kontrolünü İncele Butonu (Beklemede etkinlikler için) -->
-              <button 
+              <button
                 *ngIf="selectedEvent.status === 'Beklemede'"
                 class="btn-info"
-                style="margin-top: 12px; width: 100%;"
+                style="margin-top: 12px; width: 100%"
                 (click)="openSpamReportModal(selectedEvent.id)"
               >
                 <span class="material-symbols-outlined">description</span> İçerik Kontrolünü İncele
@@ -1052,9 +1072,12 @@
             </div>
 
             <!-- Beklemede olan etkinlikler için İçeriği Kontrol Et butonu (üstte) -->
-            <div class="modal-actions spaced" *ngIf="selectedEvent.status === 'Beklemede' && !inspectedEvents.has(selectedEvent.id)">
+            <div
+              class="modal-actions spaced"
+              *ngIf="selectedEvent.status === 'Beklemede' && !inspectedEvents.has(selectedEvent.id)"
+            >
               <button class="btn-secondary" (click)="closeModal()">Kapat</button>
-              <button 
+              <button
                 class="btn-info"
                 *ngIf="!checkingSpamEvents.has(selectedEvent.id)"
                 (click)="performSpamCheck(selectedEvent.id)"
@@ -1064,19 +1087,23 @@
             </div>
 
             <!-- Beklemede olan etkinlikler için Onayla/Reddet butonları (içerik kontrolü yapıldıktan sonra) -->
-            <div class="modal-actions spaced" *ngIf="selectedEvent.status === 'Beklemede' && inspectedEvents.has(selectedEvent.id) && !checkingSpamEvents.has(selectedEvent.id)">
+            <div
+              class="modal-actions spaced"
+              *ngIf="
+                selectedEvent.status === 'Beklemede' &&
+                inspectedEvents.has(selectedEvent.id) &&
+                !checkingSpamEvents.has(selectedEvent.id)
+              "
+            >
               <button class="btn-secondary" (click)="closeModal()">Kapat</button>
-              <button 
-                class="btn-success" 
+              <button
+                class="btn-success"
                 *ngIf="isEventClean(selectedEvent.id)"
                 (click)="approveEvent(selectedEvent.id)"
               >
                 <span class="material-symbols-outlined">check</span> Onayla
               </button>
-              <button 
-                class="btn-danger" 
-                (click)="rejectEvent(selectedEvent.id)"
-              >
+              <button class="btn-danger" (click)="rejectEvent(selectedEvent.id)">
                 <span class="material-symbols-outlined">close</span> Reddet
               </button>
             </div>
@@ -1084,10 +1111,7 @@
             <!-- Reddedilmiş etkinlikler için Revize butonu -->
             <div class="modal-actions spaced" *ngIf="selectedEvent.status === 'Reddedildi'">
               <button class="btn-secondary" (click)="closeModal()">Kapat</button>
-              <button 
-                class="btn-warning"
-                (click)="rejectEvent(selectedEvent.id)"
-              >
+              <button class="btn-warning" (click)="rejectEvent(selectedEvent.id)">
                 <span class="material-symbols-outlined">edit_note</span> Revize
               </button>
               <button class="btn-danger" (click)="deleteEvent(selectedEvent.id)">
@@ -1148,36 +1172,190 @@
         </div>
 
         <!-- Spam Analiz Raporu Modal -->
-        <div class="modal-body modal-body-scrollable" *ngIf="modalType === 'spam-report' && selectedEvent">
+        <div
+          class="modal-body modal-body-scrollable"
+          *ngIf="modalType === 'spam-report' && selectedEvent"
+        >
           <div class="spam-report-section">
-            <div class="spam-report-header" [ngClass]="{'clean': getSpamReport(selectedEvent.id)?.clean, 'not-clean': !getSpamReport(selectedEvent.id)?.clean}">
+            <div
+              class="spam-report-header"
+              [ngClass]="{
+                clean: getSpamReport(selectedEvent.id)?.clean,
+                'not-clean': !getSpamReport(selectedEvent.id)?.clean
+              }"
+            >
               <span class="material-symbols-outlined">
                 {{ getSpamReport(selectedEvent.id)?.clean ? 'check_circle' : 'error' }}
               </span>
               <h4>Spam Filtresi Analiz Raporu</h4>
             </div>
             <div class="spam-report-content">
-              <p class="spam-report-message" [ngClass]="{'success': getSpamReport(selectedEvent.id)?.clean, 'error': !getSpamReport(selectedEvent.id)?.clean}">
+              <!-- Status Bilgisi -->
+              <div class="spam-status-info" *ngIf="getSpamReport(selectedEvent.id)?.status">
+                <span
+                  class="status-badge"
+                  [ngClass]="{
+                    'status-kabul':
+                      getSpamReport(selectedEvent.id)?.status === 'kabul' ||
+                      getSpamReport(selectedEvent.id)?.status === 'accept' ||
+                      getSpamReport(selectedEvent.id)?.status === 'approved',
+                    'status-red':
+                      getSpamReport(selectedEvent.id)?.status === 'red' ||
+                      getSpamReport(selectedEvent.id)?.status === 'reject' ||
+                      getSpamReport(selectedEvent.id)?.status === 'rejected',
+                    'status-beklemede':
+                      getSpamReport(selectedEvent.id)?.status === 'beklemede' ||
+                      getSpamReport(selectedEvent.id)?.status === 'pending'
+                  }"
+                >
+                  {{
+                    getSpamReport(selectedEvent.id)?.status === 'kabul' ||
+                    getSpamReport(selectedEvent.id)?.status === 'accept' ||
+                    getSpamReport(selectedEvent.id)?.status === 'approved'
+                      ? 'Kabul Edildi'
+                      : getSpamReport(selectedEvent.id)?.status === 'red' ||
+                        getSpamReport(selectedEvent.id)?.status === 'reject' ||
+                        getSpamReport(selectedEvent.id)?.status === 'rejected'
+                      ? 'Reddedildi'
+                      : 'Beklemede'
+                  }}
+                </span>
+              </div>
+
+              <p
+                class="spam-report-message"
+                [ngClass]="{
+                  success: getSpamReport(selectedEvent.id)?.clean,
+                  error: !getSpamReport(selectedEvent.id)?.clean
+                }"
+              >
                 {{ getSpamReport(selectedEvent.id)?.message }}
               </p>
-              
-              <div *ngIf="!getSpamReport(selectedEvent.id)?.clean && getSpamReport(selectedEvent.id)?.reasons && getSpamReport(selectedEvent.id)!.reasons!.length > 0" class="spam-reasons">
+
+              <!-- Reason (Backend'den gelen açıklama) -->
+              <div *ngIf="getSpamReport(selectedEvent.id)?.reason" class="spam-reason-box">
+                <h5>Açıklama:</h5>
+                <p>{{ getSpamReport(selectedEvent.id)?.reason }}</p>
+              </div>
+
+              <!-- Tespit Edilen Sorunlar -->
+              <div
+                *ngIf="
+                  !getSpamReport(selectedEvent.id)?.clean &&
+                  getSpamReport(selectedEvent.id)?.reasons &&
+                  getSpamReport(selectedEvent.id)!.reasons!.length > 0
+                "
+                class="spam-reasons"
+              >
                 <h5>Tespit Edilen Sorunlar:</h5>
                 <ul>
-                  <li *ngFor="let reason of getSpamReport(selectedEvent.id)!.reasons">{{ reason }}</li>
+                  <li *ngFor="let reason of getSpamReport(selectedEvent.id)!.reasons">
+                    {{ reason }}
+                  </li>
                 </ul>
               </div>
 
-              <div *ngIf="!getSpamReport(selectedEvent.id)?.clean && getSpamReport(selectedEvent.id)?.details && getSpamReport(selectedEvent.id)!.details!.length > 0" class="spam-details">
-                <h5>Detaylı Açıklamalar:</h5>
-                <ul>
-                  <li *ngFor="let detail of getSpamReport(selectedEvent.id)!.details">{{ detail }}</li>
-                </ul>
+              <!-- Detaylı Analiz (Yasak Kelimeler, Spam, Siyasi İçerik) -->
+              <div *ngIf="!getSpamReport(selectedEvent.id)?.clean" class="spam-analysis-details">
+                <!-- Yasak Kelimeler -->
+                <div
+                  *ngIf="
+                    getSpamReport(selectedEvent.id)?.forbidden &&
+                    getSpamReport(selectedEvent.id)!.forbidden!.count > 0
+                  "
+                  class="analysis-item forbidden"
+                >
+                  <h5>
+                    <span class="material-symbols-outlined">block</span>
+                    Yasak Kelimeler ({{ getSpamReport(selectedEvent.id)!.forbidden!.count }})
+                  </h5>
+                  <div
+                    class="keywords-list"
+                    *ngIf="
+                      getSpamReport(selectedEvent.id)!.forbidden!.words &&
+                      getSpamReport(selectedEvent.id)!.forbidden!.words!.length > 0
+                    "
+                  >
+                    <span
+                      class="keyword-tag"
+                      *ngFor="let word of getSpamReport(selectedEvent.id)!.forbidden!.words"
+                      >{{ word }}</span
+                    >
+                  </div>
+                </div>
+
+                <!-- Spam Kelimeler -->
+                <div
+                  *ngIf="
+                    getSpamReport(selectedEvent.id)?.spam &&
+                    getSpamReport(selectedEvent.id)!.spam!.count > 0
+                  "
+                  class="analysis-item spam"
+                >
+                  <h5>
+                    <span class="material-symbols-outlined">warning</span>
+                    Spam Kelimeler ({{ getSpamReport(selectedEvent.id)!.spam!.count }})
+                  </h5>
+                  <div
+                    class="keywords-list"
+                    *ngIf="
+                      getSpamReport(selectedEvent.id)!.spam!.keywords &&
+                      getSpamReport(selectedEvent.id)!.spam!.keywords!.length > 0
+                    "
+                  >
+                    <span
+                      class="keyword-tag"
+                      *ngFor="let keyword of getSpamReport(selectedEvent.id)!.spam!.keywords"
+                      >{{ keyword }}</span
+                    >
+                  </div>
+                </div>
+
+                <!-- Siyasi İçerik -->
+                <div
+                  *ngIf="
+                    getSpamReport(selectedEvent.id)?.politics &&
+                    getSpamReport(selectedEvent.id)!.politics!.count > 0
+                  "
+                  class="analysis-item politics"
+                >
+                  <h5>
+                    <span class="material-symbols-outlined">gavel</span>
+                    Siyasi İçerik ({{ getSpamReport(selectedEvent.id)!.politics!.count }})
+                  </h5>
+                  <div
+                    class="keywords-list"
+                    *ngIf="
+                      getSpamReport(selectedEvent.id)!.politics!.keywords &&
+                      getSpamReport(selectedEvent.id)!.politics!.keywords!.length > 0
+                    "
+                  >
+                    <span
+                      class="keyword-tag"
+                      *ngFor="let keyword of getSpamReport(selectedEvent.id)!.politics!.keywords"
+                      >{{ keyword }}</span
+                    >
+                  </div>
+                </div>
               </div>
 
-              <div *ngIf="getSpamReport(selectedEvent.id)?.clean && getSpamReport(selectedEvent.id)?.details" class="spam-details">
+              <!-- Detaylı Açıklamalar (Genel) -->
+              <div
+                *ngIf="
+                  getSpamReport(selectedEvent.id)?.details &&
+                  getSpamReport(selectedEvent.id)!.details!.length > 0
+                "
+                class="spam-details"
+              >
+                <h5>
+                  {{
+                    getSpamReport(selectedEvent.id)?.clean ? 'Detaylar:' : 'Detaylı Açıklamalar:'
+                  }}
+                </h5>
                 <ul>
-                  <li *ngFor="let detail of getSpamReport(selectedEvent.id)!.details">{{ detail }}</li>
+                  <li *ngFor="let detail of getSpamReport(selectedEvent.id)!.details">
+                    {{ detail }}
+                  </li>
                 </ul>
               </div>
             </div>
@@ -1185,10 +1363,10 @@
 
           <div class="modal-actions">
             <button class="btn-secondary" (click)="closeModal()">Kapat</button>
-            
+
             <!-- Revize İste Butonu (Sadece spam filtresinden geçemediyse) -->
-            <button 
-              class="btn-danger" 
+            <button
+              class="btn-danger"
               *ngIf="!getSpamReport(selectedEvent.id)?.clean"
               (click)="rejectEvent(selectedEvent.id)"
             >
@@ -1196,8 +1374,8 @@
             </button>
 
             <!-- Onayla Butonu (Sadece spam filtresinden geçtiyse) -->
-            <button 
-              class="btn-success" 
+            <button
+              class="btn-success"
               *ngIf="getSpamReport(selectedEvent.id)?.clean"
               (click)="approveEvent(selectedEvent.id); closeModal()"
             >
@@ -1232,7 +1410,11 @@
       </div>
     </div>
     <!-- CONFIRMATION MODAL -->
-    <div class="modal-backdrop confirm-modal" *ngIf="isConfirmModalOpen" (click)="closeConfirmModal()">
+    <div
+      class="modal-backdrop confirm-modal"
+      *ngIf="isConfirmModalOpen"
+      (click)="closeConfirmModal()"
+    >
       <div class="modal-content confirm-content" (click)="$event.stopPropagation()">
         <div class="confirm-icon-wrapper">
           <span class="material-symbols-outlined">help_outline</span>
@@ -1245,6 +1427,5 @@
         </div>
       </div>
     </div>
-
   </main>
 </div>

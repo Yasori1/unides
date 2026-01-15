@@ -86,8 +86,20 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   filteredEvents: EventRequest[] = []; // Filtrelenmiş etkinlikler
   inspectedEvents: Set<number> = new Set();
   checkingSpamEvents: Set<number> = new Set(); // Spam kontrolü yapılan event'ler
-  spamResults: Map<number, { clean: boolean; message: string; analysis?: any; highlighted?: any }> =
-    new Map();
+  spamResults: Map<
+    number,
+    {
+      clean: boolean;
+      message: string;
+      status?: string;
+      reason?: string;
+      analysis?: any;
+      highlighted?: any;
+      forbidden?: { count: number; words: string[] };
+      spam?: { count: number; keywords: string[] };
+      politics?: { count: number; keywords: string[] };
+    }
+  > = new Map();
   forbiddenWords: string[] = ['yasak', 'illegal', 'spam', 'kötü', 'bahis', 'kumar'];
 
   // Confirmation modal için
@@ -479,47 +491,10 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     return uniName.split(' ')[0].toUpperCase();
   }
 
-  // Test etkinliğini ekleyen helper metod
-  private addTestEvent() {
-    const testEvent: EventRequest = {
-      id: 9999, // Test etkinliği için özel ID
-      communityId: this.allCommunities[0]?.id || '',
-      communityName: this.allCommunities[0]?.name || 'Test Topluluğu',
-      eventName: 'Test Etkinliği - Spam Filtresi Kontrolü',
-      date: new Date().toISOString(),
-      startDate: new Date().toISOString(),
-      endDate: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(), // 2 saat sonra
-      location: 'Test Konum - Kampüs Merkezi',
-      imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=800&auto=format&fit=crop',
-      description: 'Bu bir test etkinliğidir. Spam filtresi kontrolü için oluşturulmuştur. Bu etkinlikte bazı spam kriterleri test edilmektedir: YASAK kelimesi, çok fazla büyük harf (SPAM TEST), tekrarlayan karakterler (aaaaaa), ve fazla link içeriği.',
-      shortDescription: 'Test etkinliği - Spam filtresi kontrolü için',
-      status: 'Beklemede',
-      capacity: '100',
-      city: 'İstanbul',
-    };
-    
-    // Test etkinliğini allEvents'e ekle (eğer zaten yoksa)
-    const existingTestEvent = this.allEvents.find(e => e.id === 9999);
-    if (!existingTestEvent) {
-      this.allEvents.unshift(testEvent);
-    }
-    
-    // Test etkinliğini filteredEvents'e de ekle (eğer zaten yoksa)
-    const testEventInFiltered = this.filteredEvents.find(e => e.id === 9999);
-    if (!testEventInFiltered) {
-      this.filteredEvents.unshift(testEvent);
-    }
-  }
-
   loadEventsFromService() {
     if (!isPlatformBrowser(this.platformId)) {
-      // Browser'da değilse bile test etkinliğini ekle
-      this.addTestEvent();
       return;
     }
-
-    // Test etkinliğini başta ekle (her durumda görünmesi için)
-    this.addTestEvent();
 
     // Filtreye göre backend'den etkinlikleri çek
     let statusNumbers: number[] = [];
@@ -528,8 +503,8 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       statusNumbers = [1]; // Onaylandı
     } else if (this.eventStatusFilter === 'Beklemede') {
       statusNumbers = [0]; // Beklemede
-    } else if (this.eventStatusFilter === 'Reddedildi') {
-      statusNumbers = [2]; // Reddedildi
+    } else if (this.eventStatusFilter === 'Reddedildi' || this.eventStatusFilter === 'Revize') {
+      statusNumbers = [2]; // Reddedildi / Revize
     } else {
       // Tümü veya boş -> tüm status'leri çek
       statusNumbers = [0, 1, 2];
@@ -541,37 +516,35 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         // Backend'den gelen etkinlikleri map et
         // EventService zaten EventConfirm (0,1,2) değerlerini 'Beklemede', 'Onaylandı', 'Reddedildi' olarak map ediyor
         if (!data || data.length === 0) {
-          // Backend'den veri gelmediğinde bile test etkinliğini ekle
           this.allEvents = [];
         } else {
           this.allEvents = data.map((e) => {
-          // Community name'i bulmak için communities listesini kullan
-          const community = this.allCommunities.find((c) => String(c.id) === String(e.communityId));
+            // Community name'i bulmak için communities listesini kullan
+            const community = this.allCommunities.find(
+              (c) => String(c.id) === String(e.communityId)
+            );
 
-          return {
-            id: e.id,
-            communityId: e.communityId,
-            communityName: community?.name || e.communityName || '',
-            eventName: e.title,
-            date: e.startDate || '',
-            startDate: e.startDate,
-            endDate: e.endDate,
-            location: e.location || '',
-            imageUrl: e.imageUrl || '',
-            description: e.description || '',
-            shortDescription: e.shortDescription || '',
-            // EventService'ten gelen status değeri zaten doğru format: 'Beklemede', 'Onaylandı', 'Reddedildi'
-            status: e.status || 'Beklemede',
-            capacity: e.capacity || '',
-            city: e.city || community?.city || '',
-          };
+            return {
+              id: e.id,
+              communityId: e.communityId,
+              communityName: community?.name || e.communityName || '',
+              eventName: e.title,
+              date: e.startDate || '',
+              startDate: e.startDate,
+              endDate: e.endDate,
+              location: e.location || '',
+              imageUrl: e.imageUrl || '',
+              description: e.description || '',
+              shortDescription: e.shortDescription || '',
+              // EventService'ten gelen status değeri zaten doğru format: 'Beklemede', 'Onaylandı', 'Reddedildi'
+              status: e.status || 'Beklemede',
+              capacity: e.capacity || '',
+              city: e.city || community?.city || '',
+            };
           });
         }
 
-        // Test etkinliğini ekle (her zaman)
-        this.addTestEvent();
-
-        // Topluluk isimlerini eşleştir (allCommunities boş olsa bile test etkinliği görünmeli)
+        // Topluluk isimlerini eşleştir
         if (this.allCommunities?.length > 0) {
           this.attachCommunityNamesToEvents();
         }
@@ -579,9 +552,6 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         // Etkinlik filtrelerini uygula (metin araması için)
         // filterEvents() metodu filteredEvents'i güncelliyor
         this.filterEvents();
-        
-        // Test etkinliğinin filteredEvents'te olduğundan emin ol
-        this.addTestEvent();
       },
       error: (err) => {
         // Hata durumunda getAll() metodunu fallback olarak kullan
@@ -609,22 +579,16 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
               };
             });
 
-            // Test amaçlı etkinlik ekle
-            // Test etkinliğini ekle
-            this.addTestEvent();
-
-            // Topluluk isimlerini eşleştir (allCommunities boş olsa bile test etkinliği görünmeli)
+            // Topluluk isimlerini eşleştir
             if (this.allCommunities?.length > 0) {
               this.attachCommunityNamesToEvents();
             }
             this.filterEvents();
-            
-            // Test etkinliğinin filteredEvents'te olduğundan emin ol
-            this.addTestEvent();
           },
           error: () => {
-            // Hata durumunda bile test etkinliğini ekle
-            this.addTestEvent();
+            // Hata durumunda boş liste
+            this.allEvents = [];
+            this.filteredEvents = [];
           },
         });
       },
@@ -784,6 +748,13 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   // Burada sadece metin araması yapılıyor
   filterEvents() {
     let temp = [...this.allEvents];
+
+    // Status filtresi (Revize butonu için Reddedildi status'ünü göster)
+    if (this.eventStatusFilter === 'Revize') {
+      temp = temp.filter((e) => e.status === 'Reddedildi' || e.status === 'Revize');
+    } else if (this.eventStatusFilter) {
+      temp = temp.filter((e) => e.status === this.eventStatusFilter);
+    }
 
     // Metin araması
     if (this.eventSearchText.trim()) {
@@ -1291,23 +1262,27 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     }
     const notes = notesParts.join('\n');
 
-    // Python API'sinin beklediği formata göre veriyi hazırla
-    const eventData = {
+    // Backend'in beklediği formata göre veriyi hazırla (Community Dashboard ile aynı format)
+    const spamCheckData = {
+      id: ev.id || 0,
       title: ev.eventName || '',
-      category: ev.communityName || '',
       body: body || '',
+      category: ev.communityName || '',
       notes: notes || '',
+      status: status,
+      created_at: ev.startDate || new Date().toISOString(),
     };
 
-    // Python API'sine istek gönder (proxy üzerinden - CORS hatası önlemek için)
-    const apiUrl = '/api/moderate'; // Proxy bu isteği http://72.62.37.160:5002/api/moderate adresine yönlendirecek
+    // API'ye istek gönder (proxy üzerinden - CORS hatası önlemek için)
+    // Proxy bu isteği http://72.62.37.160:5002/api/moderate adresine yönlendirecek
+    const apiUrl = '/api/moderate';
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
       Accept: 'application/json',
     });
 
     this.http
-      .post(apiUrl, eventData, {
+      .post(apiUrl, spamCheckData, {
         headers,
         responseType: 'json',
       })
@@ -1316,7 +1291,11 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
           // Hata durumunda
           let errorMessage = 'Spam kontrolü sırasında bir hata oluştu.';
 
-          if (error.error && typeof error.error === 'object' && error.error.error) {
+          if (error.error && typeof error.error === 'string' && error.error.includes('<!DOCTYPE')) {
+            errorMessage = 'Backend bağlantı hatası. Lütfen daha sonra tekrar deneyin.';
+          } else if (error.error && typeof error.error === 'object' && error.error.message) {
+            errorMessage = error.error.message;
+          } else if (error.error && typeof error.error === 'object' && error.error.error) {
             errorMessage = error.error.error;
           } else if (error.error && typeof error.error === 'string') {
             errorMessage = error.error;
@@ -1341,48 +1320,77 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
             return;
           }
 
-          // Python API response formatı:
-          // {
-          //   moderation: { ... },
-          //   analysis: {
-          //     forbidden: { count: number, words: string[] },
-          //     spam: { count: number, keywords: string[] },
-          //     politics: { count: number, keywords: string[] }
-          //   },
-          //   highlighted: { ... }
-          // }
-
-          const analysis = response.analysis || {};
-          const forbiddenCount = analysis.forbidden?.count || 0;
-          const spamCount = analysis.spam?.count || 0;
-          const politicsCount = analysis.politics?.count || 0;
-
-          // Eğer hiçbir sorun yoksa içerik temizdir
-          const isClean = forbiddenCount === 0 && spamCount === 0 && politicsCount === 0;
-
+          // Backend formatı: { result: { status: "kabul" | "red" | "beklemede", reason: "..." }, ... }
+          // veya eski format: { analysis: { forbidden: {...}, spam: {...}, politics: {...} }, ... }
+          const result = response.result;
+          let isClean = false;
           let message = '';
-          if (isClean) {
-            message = 'İçerik temizdir. Spam, yasak kelime veya siyasi içerik tespit edilmedi.';
+          let status = '';
+          let reason = '';
+          let forbiddenData: { count: number; words: string[] } | undefined;
+          let spamData: { count: number; keywords: string[] } | undefined;
+          let politicsData: { count: number; keywords: string[] } | undefined;
+
+          if (result) {
+            // Yeni format (Community Dashboard ile uyumlu)
+            status = result.status || '';
+            reason = result.reason || '';
+            isClean = status === 'kabul' || status === 'accept' || status === 'approved';
+
+            if (isClean) {
+              message =
+                reason || 'İçerik temizdir. Spam, yasak kelime veya siyasi içerik tespit edilmedi.';
+            } else {
+              message = reason || 'Spam içerik tespit edildi.';
+            }
+          } else if (response.analysis) {
+            // Eski format (fallback)
+            const analysis = response.analysis || {};
+            forbiddenData = analysis.forbidden;
+            spamData = analysis.spam;
+            politicsData = analysis.politics;
+
+            const forbiddenCount = forbiddenData?.count || 0;
+            const spamCount = spamData?.count || 0;
+            const politicsCount = politicsData?.count || 0;
+
+            isClean = forbiddenCount === 0 && spamCount === 0 && politicsCount === 0;
+            status = isClean ? 'kabul' : 'red';
+
+            if (isClean) {
+              message = 'İçerik temizdir. Spam, yasak kelime veya siyasi içerik tespit edilmedi.';
+            } else {
+              const issues: string[] = [];
+              if (forbiddenCount > 0) {
+                issues.push(`${forbiddenCount} yasak kelime`);
+              }
+              if (spamCount > 0) {
+                issues.push(`${spamCount} spam kelimesi`);
+              }
+              if (politicsCount > 0) {
+                issues.push(`${politicsCount} siyasi içerik`);
+              }
+              message = `İçerikte sorun tespit edildi: ${issues.join(', ')}.`;
+            }
           } else {
-            const issues: string[] = [];
-            if (forbiddenCount > 0) {
-              issues.push(`${forbiddenCount} yasak kelime`);
-            }
-            if (spamCount > 0) {
-              issues.push(`${spamCount} spam kelimesi`);
-            }
-            if (politicsCount > 0) {
-              issues.push(`${politicsCount} siyasi içerik`);
-            }
-            message = `İçerikte sorun tespit edildi: ${issues.join(', ')}.`;
+            // Fallback: response.clean kontrolü
+            isClean = response.clean !== false;
+            status = isClean ? 'kabul' : 'red';
+            message =
+              response.message || (isClean ? 'İçerik temizdir.' : 'Spam içerik tespit edildi.');
           }
 
-          // Spam sonuçlarını kaydet (analiz detaylarını da sakla)
+          // Spam sonuçlarını kaydet (tüm detayları sakla)
           this.spamResults.set(id, {
             clean: isClean,
             message: message,
-            analysis: analysis,
+            status: status,
+            reason: reason,
+            analysis: response.analysis || result,
             highlighted: response.highlighted,
+            forbidden: forbiddenData,
+            spam: spamData,
+            politics: politicsData,
           });
 
           // Beklemede olan etkinlikler için farklı toast mesajı
@@ -1411,20 +1419,74 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     return result ? result.message : '';
   }
 
-  getSpamReport(
-    id: number
-  ): { clean: boolean; message: string; reasons?: string[]; details?: string[] } | null {
+  getSpamReport(id: number): {
+    clean: boolean;
+    message: string;
+    status?: string;
+    reason?: string;
+    reasons?: string[];
+    details?: string[];
+    forbidden?: { count: number; words: string[] };
+    spam?: { count: number; keywords: string[] };
+    politics?: { count: number; keywords: string[] };
+  } | null {
     const result = this.spamResults.get(id);
     if (!result) {
       return null;
     }
-    // Template'in beklediği formatta döndür
-    // Şimdilik reasons ve details boş, gelecekte backend'den gelebilir
+
+    // Status'a göre detaylı bilgileri hazırla
+    const reasons: string[] = [];
+    const details: string[] = [];
+
+    if (!result.clean) {
+      // Yasak kelimeler
+      if (result.forbidden && result.forbidden.count > 0) {
+        reasons.push(`${result.forbidden.count} yasak kelime tespit edildi`);
+        if (result.forbidden.words && result.forbidden.words.length > 0) {
+          details.push(`Yasak kelimeler: ${result.forbidden.words.join(', ')}`);
+        }
+      }
+
+      // Spam kelimeler
+      if (result.spam && result.spam.count > 0) {
+        reasons.push(`${result.spam.count} spam kelimesi tespit edildi`);
+        if (result.spam.keywords && result.spam.keywords.length > 0) {
+          details.push(`Spam kelimeler: ${result.spam.keywords.join(', ')}`);
+        }
+      }
+
+      // Siyasi içerik
+      if (result.politics && result.politics.count > 0) {
+        reasons.push(`${result.politics.count} siyasi içerik tespit edildi`);
+        if (result.politics.keywords && result.politics.keywords.length > 0) {
+          details.push(`Siyasi içerik: ${result.politics.keywords.join(', ')}`);
+        }
+      }
+
+      // Eğer hiçbir detay yoksa, genel mesajı kullan
+      if (reasons.length === 0 && result.reason) {
+        reasons.push(result.reason);
+      }
+    } else {
+      // Temiz içerik için detaylar
+      if (result.reason) {
+        details.push(result.reason);
+      } else {
+        details.push('İçerik spam filtresinden başarıyla geçti.');
+      }
+    }
+
     return {
       clean: result.clean,
       message: result.message,
-      reasons: result.clean ? undefined : [], // Spam tespit edildiyse boş array
-      details: [], // Detaylar şimdilik boş
+      status: result.status,
+      reason: result.reason,
+      reasons: reasons.length > 0 ? reasons : undefined,
+      details: details.length > 0 ? details : undefined,
+      forbidden: result.forbidden,
+      spam: result.spam,
+      politics: result.politics,
     };
   }
 
@@ -1451,15 +1513,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       // Backend'e onay isteği gönder
       this.eventService.approveEvent(id).subscribe({
         next: () => {
-          // Backend'den başarılı yanıt geldi, local state'i güncelle
-          event.status = 'Onaylandı';
-
-          // Filtered events'i güncelle
-          const filteredIndex = this.filteredEvents.findIndex((e) => e.id === id);
-          if (filteredIndex !== -1) {
-            this.filteredEvents[filteredIndex].status = 'Onaylandı';
-          }
-
+          // Backend'den başarılı yanıt geldi
           // LocalStorage'a onaylanan etkinlik ID'lerini kaydet (Anasayfa için)
           if (isPlatformBrowser(this.platformId)) {
             const approvedEvents = JSON.parse(localStorage.getItem('approved_events') || '[]');
@@ -1472,12 +1526,19 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
           this.showToast('Etkinlik onaylandı ve anasayfada görüntülenecek', 'success');
           this.closeModal(); // Detay modalını kapat
 
-          // Filtreleri yeniden uygula
-          this.applyFilters();
+          // Backend'den güncel etkinlik listesini çek (mevcut filtreyi koru)
+          // Bu sayede onaylanan etkinlik doğru filtreye göre görünecek
+          this.loadEventsFromService();
         },
         error: (err: any) => {
-          // Hata zaten toast ile gösteriliyor
-          this.showToast('Etkinlik onaylanırken bir hata oluştu', 'error');
+          console.error('Etkinlik onaylanamadı:', err);
+          let errorMessage = 'Etkinlik onaylanırken bir hata oluştu.';
+          if (err.error && err.error.message) {
+            errorMessage = err.error.message;
+          } else if (err.error && typeof err.error === 'string') {
+            errorMessage = err.error;
+          }
+          this.showToast(errorMessage, 'error');
         },
       });
     }
@@ -1498,17 +1559,51 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   }
 
   confirmRejection() {
-    if (this.eventToReject) {
-      this.eventToReject.status = 'Revize';
-      this.eventToReject.rejectionReason = this.rejectionReason;
-
-      // Burada normalde backend'e rejectionReason ile birlikte güncelleme isteği atılır
-
-      this.showToast('Etkinlik revizeye gönderildi', 'success'); // 'error' yerine 'success' çünkü işlem başarılı
-      this.closeModal();
-      this.eventToReject = null;
-      this.rejectionReason = '';
+    if (!this.eventToReject || !this.rejectionReason || !this.rejectionReason.trim()) {
+      this.showToast('Lütfen revize nedenini belirtiniz', 'error');
+      return;
     }
+
+    // Backend'e reddetme isteği gönder
+    this.eventService.rejectEvent(this.eventToReject.id, this.rejectionReason).subscribe({
+      next: () => {
+        // Backend'den başarılı yanıt geldi, local state'i güncelle
+        this.eventToReject!.status = 'Reddedildi';
+        this.eventToReject!.rejectionReason = this.rejectionReason;
+
+        // Filtered events'i güncelle
+        const filteredIndex = this.filteredEvents.findIndex((e) => e.id === this.eventToReject!.id);
+        if (filteredIndex !== -1) {
+          this.filteredEvents[filteredIndex].status = 'Reddedildi';
+          this.filteredEvents[filteredIndex].rejectionReason = this.rejectionReason;
+        }
+
+        // AllEvents'i de güncelle
+        const allEventsIndex = this.allEvents.findIndex((e) => e.id === this.eventToReject!.id);
+        if (allEventsIndex !== -1) {
+          this.allEvents[allEventsIndex].status = 'Reddedildi';
+          this.allEvents[allEventsIndex].rejectionReason = this.rejectionReason;
+        }
+
+        this.showToast('Etkinlik reddedildi ve revizeye gönderildi', 'success');
+        this.closeModal();
+        this.eventToReject = null;
+        this.rejectionReason = '';
+
+        // Etkinlik listesini yeniden yükle (backend'den güncel veriyi al)
+        this.loadEventsFromService();
+      },
+      error: (err) => {
+        console.error('Etkinlik reddedilemedi:', err);
+        let errorMessage = 'Etkinlik reddedilirken bir hata oluştu.';
+        if (err.error && err.error.message) {
+          errorMessage = err.error.message;
+        } else if (err.error && typeof err.error === 'string') {
+          errorMessage = err.error;
+        }
+        this.showToast(errorMessage, 'error');
+      },
+    });
   }
 
   openEventDetail(ev: EventRequest) {

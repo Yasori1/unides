@@ -2582,6 +2582,38 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
   }
 
   .spam-report-content {
+    .spam-status-info {
+      margin-bottom: 16px;
+
+      .status-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+
+        &.status-kabul {
+          background: rgba(16, 185, 129, 0.15);
+          color: #059669;
+          border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        &.status-red {
+          background: rgba(239, 68, 68, 0.15);
+          color: #dc2626;
+          border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        &.status-beklemede {
+          background: rgba(251, 191, 36, 0.15);
+          color: #d97706;
+          border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+      }
+    }
+
     .spam-report-message {
       font-size: 15px;
       font-weight: 500;
@@ -2599,6 +2631,96 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
         background: rgba(239, 68, 68, 0.1);
         color: #dc2626;
         border-left: 4px solid $danger;
+      }
+    }
+
+    .spam-reason-box {
+      margin-top: 16px;
+      padding: 12px;
+      background: rgba($text-muted, 0.05);
+      border-radius: 6px;
+      border-left: 3px solid $primary;
+
+      h5 {
+        font-size: 13px;
+        font-weight: 600;
+        color: $text-main;
+        margin-bottom: 8px;
+      }
+
+      p {
+        font-size: 14px;
+        color: $text-main;
+        margin: 0;
+        line-height: 1.6;
+      }
+    }
+
+    .spam-analysis-details {
+      margin-top: 20px;
+
+      .analysis-item {
+        margin-bottom: 16px;
+        padding: 16px;
+        border-radius: 8px;
+        border-left: 4px solid;
+
+        &.forbidden {
+          background: rgba(239, 68, 68, 0.05);
+          border-left-color: #dc2626;
+
+          h5 {
+            color: #dc2626;
+          }
+        }
+
+        &.spam {
+          background: rgba(251, 191, 36, 0.05);
+          border-left-color: #d97706;
+
+          h5 {
+            color: #d97706;
+          }
+        }
+
+        &.politics {
+          background: rgba(139, 92, 246, 0.05);
+          border-left-color: #7c3aed;
+
+          h5 {
+            color: #7c3aed;
+          }
+        }
+
+        h5 {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 14px;
+          font-weight: 600;
+          margin-bottom: 12px;
+
+          .material-symbols-outlined {
+            font-size: 18px;
+          }
+        }
+
+        .keywords-list {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+
+          .keyword-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            background: $surface;
+            border: 1px solid $border;
+            border-radius: 4px;
+            font-size: 12px;
+            color: $text-main;
+            font-weight: 500;
+          }
+        }
       }
     }
 

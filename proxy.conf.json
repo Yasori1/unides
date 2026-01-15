@@ -1,32 +1,32 @@
 {
-    "/api/moderate": {
-        "target": "http://72.62.37.160:5002",
-        "secure": false,
-        "changeOrigin": true,
-        "logLevel": "debug",
-        "headers": {
-            "Accept": "application/json",
-            "Content-Type": "application/json"
-        }
-    },
-    "/api": {
-        "target": "https://localhost:7069",
-        "secure": false,
-        "changeOrigin": true,
-        "logLevel": "warn",
-        "ws": true
-    },
-    "/spam-check": {
-        "target": "http://72.62.37.160:5002",
-        "secure": false,
-        "changeOrigin": true,
-        "logLevel": "warn",
-        "pathRewrite": {
-            "^/spam-check": "/check"
-        },
-        "headers": {
-            "Accept": "application/json",
-            "Content-Type": "application/json"
-        }
+  "/api/moderate": {
+    "target": "http://72.62.37.160:5002",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "headers": {
+      "Accept": "application/json",
+      "Content-Type": "application/json"
     }
+  },
+  "/api": {
+    "target": "https://localhost:7069",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "warn",
+    "ws": true
+  },
+  "/spam-check": {
+    "target": "http://72.62.37.160:5002",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "warn",
+    "pathRewrite": {
+      "^/spam-check": "/check"
+    },
+    "headers": {
+      "Accept": "application/json",
+      "Content-Type": "application/json"
+    }
+  }
 }
