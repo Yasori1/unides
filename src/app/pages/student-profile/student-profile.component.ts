@@ -67,23 +67,23 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
     link?: string;
     tab?: string;
   }> = [
-    {
-      id: 1,
-      text: 'Yeni etkinlik duyurusu',
-      time: '10 dk önce',
-      read: false,
-      type: 'event',
-      tab: 'events',
-    },
-    {
-      id: 2,
-      text: 'Topluluk güncellemesi',
-      time: '1 saat önce',
-      read: false,
-      type: 'community',
-      tab: 'communities',
-    },
-  ];
+      {
+        id: 1,
+        text: 'Yeni etkinlik duyurusu',
+        time: '10 dk önce',
+        read: false,
+        type: 'event',
+        tab: 'events',
+      },
+      {
+        id: 2,
+        text: 'Topluluk güncellemesi',
+        time: '1 saat önce',
+        read: false,
+        type: 'community',
+        tab: 'communities',
+      },
+    ];
 
   // User Info
   userInfo: any = {
@@ -119,7 +119,7 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
     private afkDetectionService: AfkDetectionService,
     private authService: AuthService,
     @Inject(PLATFORM_ID) private platformId: Object
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
@@ -175,7 +175,7 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
 
                     // DateOnly formatını kontrol et ve parse et
                     let day: number, month: number, year: number;
-                    
+
                     // "dd.MM.yyyy" formatını parse et
                     if (dateStr.includes('.')) {
                       const parts = dateStr.split('.');
@@ -186,7 +186,7 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
                       } else {
                         throw new Error('Invalid date format');
                       }
-                    } 
+                    }
                     // "YYYY-MM-DD" formatını parse et (fallback)
                     else if (dateStr.includes('-')) {
                       const parts = dateStr.split('-');
@@ -301,13 +301,13 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
 
   private mapToEventCard(e: EventItem): EventCard {
     const start = e.startDate ? new Date(e.startDate) : new Date();
-    
+
     // Local timezone'da ISO formatı (YYYY-MM-DD) - UTC'ye çevirmeden
     const year = start.getFullYear();
     const month = String(start.getMonth() + 1).padStart(2, '0');
     const day = String(start.getDate()).padStart(2, '0');
     const localISO = `${year}-${month}-${day}`;
-    
+
     return {
       id: e.id,
       title: e.title,
@@ -481,7 +481,7 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
   }
 
   navigateToHome() {
-    this.router.navigate(['/']);
+    this.switchTab('overview');
   }
 
   logout(): void {
@@ -500,7 +500,7 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
   leaveCommunity(communityId: string): void {
     // Backend'e istek gönder
     const communityIdStr = typeof communityId === 'string' ? communityId : String(communityId);
-    
+
     this.communityService.leaveCommunity(communityIdStr).subscribe({
       next: () => {
         // Backend'den başarılı yanıt geldi, frontend'de de kaldır
@@ -510,7 +510,7 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
         });
         this.toastService.show('Topluluktan ayrıldınız', 'success');
         this.stats[0].value = this.myCommunities.length;
-        
+
         // Etkinlikleri de güncelle (ayrılan topluluğun etkinliklerini kaldır)
         const communityIdNum = typeof communityId === 'string' ? parseInt(communityId, 10) : communityId;
         this.communityEvents = this.communityEvents.filter((e) => {
@@ -575,7 +575,7 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
     for (let d = 1; d <= end.getDate(); d++) {
       const dayDate = new Date(this.calendarMonth.getFullYear(), this.calendarMonth.getMonth(), d);
       const iso = this.toIso(dayDate);
-      
+
       // Etkinliklerin tarihlerini ISO formatına çevirerek karşılaştır
       const hasEvent = this.communityEvents.some((ev) => {
         if (ev.startDateISO) {
@@ -604,7 +604,7 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
         }
         return false;
       });
-      
+
       const isToday = iso === this.toIso(new Date());
       days.push({ label: d, iso, hasEvent, isToday });
     }
@@ -756,7 +756,7 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
             role: this.userInfo.role,
           };
           localStorage.setItem('user_info', JSON.stringify(userInfoToSave));
-          
+
           // AuthService'deki user bilgisini de güncelle
           this.authService.saveUser(userInfoToSave);
         }
