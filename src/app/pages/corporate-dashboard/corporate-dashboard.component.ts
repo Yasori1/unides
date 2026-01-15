@@ -10,6 +10,7 @@ import { EventService, EventItem } from '../../services/event.services';
 import { ToastService } from '../../services/toast.services';
 import { ToastComponent } from '../../components/ui/toast/toast.component';
 import { AfkDetectionService } from '../../services/afk-detection.service';
+import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 
@@ -67,7 +68,7 @@ interface Notification {
 @Component({
   selector: 'app-corporate-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, ToastComponent, ImageUploadComponent],
+  imports: [CommonModule, FormsModule, ToastComponent, ImageUploadComponent, LumaSpinComponent],
   templateUrl: './corporate-dashboard.component.html',
   styleUrls: ['./corporate-dashboard.component.scss'],
 })
@@ -86,6 +87,12 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   filteredEvents: EventRequest[] = []; // Filtrelenmiş etkinlikler
   inspectedEvents: Set<number> = new Set();
   checkingSpamEvents: Set<number> = new Set(); // Spam kontrolü yapılan event'ler
+
+  // Loading states
+  isLoadingCommunities = false;
+  isLoadingEvents = false;
+  isLoadingAnnouncements = false;
+  isLoadingOverview = false;
   spamResults: Map<
     number,
     {
@@ -326,10 +333,16 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       // İlk yüklemede filtresiz (Tüm Durumlar) tüm toplulukları getir
       this.loadCommunitiesFromService('');
     }
+    // Overview için loading state'i başlat
+    this.isLoadingOverview = true;
+
     // AnnouncementService'ten duyuruları çek (announcements-page ile aynı kaynak)
     this.loadAnnouncementsFromService();
     // Events'i backend'den çek
     this.loadEventsFromService();
+
+    // Overview loading state'ini kontrol et (tüm veriler yüklendikten sonra)
+    // Her load metodu kendi loading state'ini yönetiyor, overview için ayrı kontrol gerekli
   }
 
   loadCommunitiesFromService(statusFilter?: string) {
@@ -337,6 +350,9 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     if (!isPlatformBrowser(this.platformId)) {
       return;
     }
+
+    // Loading state'i başlat
+    this.isLoadingCommunities = true;
 
     // Dropdown'dan gelen filtreye göre backend'den toplulukları çağır
     // statusFilter: '' (Tüm Durumlar) -> 'all', 'Aktif' -> 'active', 'Pasif' -> 'passive'
@@ -405,6 +421,8 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         this.applyFilters();
         // Topluluk isimleri yüklendikten sonra etkinlikleri eşle
         this.attachCommunityNamesToEvents();
+        // Loading state'i bitir
+        this.isLoadingCommunities = false;
       },
       error: (err) => {
         // Eğer 403 hatası alırsak (GSB yetkisi yoksa), kullanıcıya uyarı göster ve aktif toplulukları göster
@@ -446,12 +464,14 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
               // Filtreleri uygula
               this.applyFilters();
               this.attachCommunityNamesToEvents();
+              this.isLoadingCommunities = false;
             },
             error: () => {
               this.communities = [...this.allCommunities];
               // Filtreleri uygula
               this.applyFilters();
               this.attachCommunityNamesToEvents();
+              this.isLoadingCommunities = false;
             },
           });
         } else {
@@ -461,6 +481,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
           this.applyFilters();
           this.attachCommunityNamesToEvents();
         }
+        this.isLoadingCommunities = false;
       },
     });
   }
@@ -495,6 +516,9 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     if (!isPlatformBrowser(this.platformId)) {
       return;
     }
+
+    // Loading state'i başlat
+    this.isLoadingEvents = true;
 
     // Filtreye göre backend'den etkinlikleri çek
     let statusNumbers: number[] = [];
@@ -552,6 +576,8 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         // Etkinlik filtrelerini uygula (metin araması için)
         // filterEvents() metodu filteredEvents'i güncelliyor
         this.filterEvents();
+        // Loading state'i bitir
+        this.isLoadingEvents = false;
       },
       error: (err) => {
         // Hata durumunda getAll() metodunu fallback olarak kullan
@@ -584,11 +610,13 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
               this.attachCommunityNamesToEvents();
             }
             this.filterEvents();
+            this.isLoadingEvents = false;
           },
           error: () => {
             // Hata durumunda boş liste
             this.allEvents = [];
             this.filteredEvents = [];
+            this.isLoadingEvents = false;
           },
         });
       },
@@ -1791,17 +1819,24 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Loading state'i başlat
+    this.isLoadingAnnouncements = true;
+
     this.announcementService.getAllAnnouncements().subscribe({
       next: (data) => {
         this.announcements = data;
         this.filteredAnnouncements = [...data];
         this.applyAnnouncementFilters();
+        // Loading state'i bitir
+        this.isLoadingAnnouncements = false;
       },
       error: (err) => {
         // Hata durumunda boş array kullanılıyor
         // Hata durumunda boş liste kullan
         this.announcements = [];
         this.filteredAnnouncements = [];
+        // Loading state'i bitir
+        this.isLoadingAnnouncements = false;
       },
     });
   }

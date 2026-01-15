@@ -1,5 +1,39 @@
 @use 'sass:color';
 
+// ================= LOADING CONTAINER =================
+.loading-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  min-height: 100vh;
+
+  p {
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 500;
+    margin: 0;
+  }
+
+  app-luma-spin {
+    transform: scale(2); // Spinner'ı biraz büyüt
+
+    // LumaSpin rengini #1e3a8a yap
+    ::ng-deep .spin-shape {
+      box-shadow: inset 0 0 0 2px #1e3a8a !important;
+    }
+  }
+}
+
 // ================= DEĞİŞKENLER =================
 $primary: #14d2cc;
 $primary-hover: #0fb9b4;
@@ -1192,12 +1226,20 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
 
     &.left-fade {
       left: 0;
-      background: linear-gradient(to right, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0) 100%);
+      background: linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0.95) 0%,
+        rgba(255, 255, 255, 0) 100%
+      );
     }
 
     &.right-fade {
       right: 0;
-      background: linear-gradient(to left, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0) 100%);
+      background: linear-gradient(
+        to left,
+        rgba(255, 255, 255, 0.95) 0%,
+        rgba(255, 255, 255, 0) 100%
+      );
     }
 
     @media (max-width: 768px) {
@@ -1338,7 +1380,6 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
 }
 
 @keyframes pulse {
-
   0%,
   100% {
     transform: scale(1);

@@ -1,50 +1,73 @@
 <!-- Fontlar -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-  rel="stylesheet" />
+<link
+  href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+  rel="stylesheet"
+/>
 <link
   href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
-  rel="stylesheet" />
+  rel="stylesheet"
+/>
 
 <div class="dashboard-container">
   <!-- Mobile Sidebar Overlay -->
-  <div class="sidebar-mobile-overlay" [class.active]="isSidebarCollapsed" (click)="toggleSidebar()"></div>
+  <div
+    class="sidebar-mobile-overlay"
+    [class.active]="isSidebarCollapsed"
+    (click)="toggleSidebar()"
+  ></div>
 
   <!-- Toast Component -->
   <app-toast></app-toast>
 
   <!-- SIDEBAR -->
   <aside class="sidebar" [class.collapsed]="isSidebarCollapsed">
-    <div class="brand" (click)="navigateToHome()" style="cursor: pointer;">
+    <div class="brand" (click)="navigateToHome()" style="cursor: pointer">
       <div class="logo-badge">
         <img class="brand-logo" src="assets/unides1.png" alt="Ünides Dijital Portal" />
       </div>
     </div>
 
     <nav class="menu">
-      <button class="menu-item" [class.active]="activeTab === 'overview'" (click)="switchTab('overview')"
-        title="Genel Bakış">
+      <button
+        class="menu-item"
+        [class.active]="activeTab === 'overview'"
+        (click)="switchTab('overview')"
+        title="Genel Bakış"
+      >
         <span class="material-symbols-outlined">dashboard</span>
         <span class="menu-text">Genel Bakış</span>
       </button>
 
       <div class="menu-divider">AKTİVİTELER</div>
 
-      <button class="menu-item" [class.active]="activeTab === 'communities'" (click)="switchTab('communities')"
-        title="Topluluklar">
+      <button
+        class="menu-item"
+        [class.active]="activeTab === 'communities'"
+        (click)="switchTab('communities')"
+        title="Topluluklar"
+      >
         <span class="material-symbols-outlined">groups</span>
         <span class="menu-text">Topluluklarım</span>
       </button>
 
-      <button class="menu-item" [class.active]="activeTab === 'events'" (click)="switchTab('events')"
-        title="Etkinlikler">
+      <button
+        class="menu-item"
+        [class.active]="activeTab === 'events'"
+        (click)="switchTab('events')"
+        title="Etkinlikler"
+      >
         <span class="material-symbols-outlined">event_available</span>
         <span class="menu-text">Etkinliklerim</span>
       </button>
 
       <div class="menu-divider">HESAP</div>
 
-      <button class="menu-item" [class.active]="activeTab === 'settings'" (click)="switchTab('settings')"
-        title="Ayarlar">
+      <button
+        class="menu-item"
+        [class.active]="activeTab === 'settings'"
+        (click)="switchTab('settings')"
+        title="Ayarlar"
+      >
         <span class="material-symbols-outlined">settings</span>
         <span class="menu-text">Ayarlar</span>
       </button>
@@ -64,7 +87,9 @@
     <header class="top-header">
       <div class="header-left">
         <button class="icon-btn toggle-sidebar" (click)="toggleSidebar()">
-          <span class="material-symbols-outlined">{{ isSidebarCollapsed ? 'menu' : 'menu_open' }}</span>
+          <span class="material-symbols-outlined">{{
+            isSidebarCollapsed ? 'menu' : 'menu_open'
+          }}</span>
         </button>
         <div class="breadcrumb">
           <span class="material-symbols-outlined home-icon">school</span>
@@ -73,23 +98,26 @@
           <span class="sep">/</span>
           <span class="current">{{
             activeTab === 'overview'
-            ? 'Genel Bakış'
-            : activeTab === 'communities'
-            ? 'Topluluklarım'
-            : activeTab === 'events'
-            ? 'Etkinliklerim'
-            : 'Ayarlar'
-            }}</span>
+              ? 'Genel Bakış'
+              : activeTab === 'communities'
+              ? 'Topluluklarım'
+              : activeTab === 'events'
+              ? 'Etkinliklerim'
+              : 'Ayarlar'
+          }}</span>
         </div>
       </div>
 
       <div class="header-right">
-
         <div class="profile-wrapper">
           <div class="profile-pic" (click)="toggleProfileDropdown($event)">
             <img [src]="userInfo.avatar || getDefaultAvatar()" alt="Profile" />
           </div>
-          <div class="dropdown-menu profile-dropdown" *ngIf="isProfileOpen" (click)="$event.stopPropagation()">
+          <div
+            class="dropdown-menu profile-dropdown"
+            *ngIf="isProfileOpen"
+            (click)="$event.stopPropagation()"
+          >
             <div class="dd-header">{{ userInfo.name || 'Öğrenci' }}</div>
             <ul>
               <li (click)="handleSettingsClick()">
@@ -106,262 +134,371 @@
 
     <!-- 1. TAB: GENEL BAKIŞ -->
     <div class="view-container" *ngIf="activeTab === 'overview'">
-      <div class="stats-grid-compact">
-        <div class="stat-card-mini" *ngFor="let stat of stats">
-          <div class="icon-box" [style.background]="stat.color + '20'" [style.color]="stat.color">
-            <span class="material-symbols-outlined">{{ stat.icon }}</span>
-          </div>
-          <div class="text">
-            <span>{{ stat.label }}</span>
-            <h3>{{ stat.value }}</h3>
-          </div>
-        </div>
+      <!-- Loading State for Overview -->
+      <div
+        class="loading-container"
+        *ngIf="isLoadingOverview || isLoadingCommunities || isLoadingEvents"
+      >
+        <app-luma-spin></app-luma-spin>
+        <p>Veriler yükleniyor...</p>
       </div>
 
-      <!-- Topluluklarımın Etkinlikleri -->
-      <div class="card table-card">
-        <div class="card-header">
-          <h3>Topluluklarımın Etkinlikleri</h3>
-          <button class="btn-text" (click)="switchTab('events')">Tümünü Gör</button>
+      <!-- Content when loaded -->
+      <div *ngIf="!isLoadingOverview && !isLoadingCommunities && !isLoadingEvents">
+        <div class="stats-grid-compact">
+          <div class="stat-card-mini" *ngFor="let stat of stats">
+            <div class="icon-box" [style.background]="stat.color + '20'" [style.color]="stat.color">
+              <span class="material-symbols-outlined">{{ stat.icon }}</span>
+            </div>
+            <div class="text">
+              <span>{{ stat.label }}</span>
+              <h3>{{ stat.value }}</h3>
+            </div>
+          </div>
         </div>
 
-        <div class="events-carousel-wrapper" *ngIf="communityEvents.length > 0">
-          <!-- Gradient Fade Overlays -->
-          <div class="carousel-fade left-fade" *ngIf="canScrollEventsLeft()"></div>
-          <div class="carousel-fade right-fade" *ngIf="canScrollEventsRight()"></div>
+        <!-- Topluluklarımın Etkinlikleri -->
+        <div class="card table-card">
+          <div class="card-header">
+            <h3>Topluluklarımın Etkinlikleri</h3>
+            <button class="btn-text" (click)="switchTab('events')">Tümünü Gör</button>
+          </div>
 
-          <button class="carousel-nav-btn left" (click)="scrollEvents('left')" [disabled]="!canScrollEventsLeft()"
-            title="Önceki">
-            <span class="material-symbols-outlined">chevron_left</span>
-          </button>
-          <div class="events-carousel-container" (scroll)="onEventsScroll($event)">
-            <div class="events-grid cards small">
-              <div class="event-card modern-card" *ngFor="let event of communityEvents; let i = index"
-                (click)="openEventDetail(event)" [style.animation-delay]="i * 0.1 + 's'">
-                <div class="card-image">
-                  <img [src]="event.imageUrl || 'assets/images/page-title1.jpg'" [alt]="event.title" loading="lazy" />
-                  <div class="date-badge">
-                    {{ event.date }}
-                  </div>
-                  <div class="status-chip" [ngClass]="event.status">
-                    {{
-                    event.status === 'upcoming'
-                    ? 'Yaklaşan'
-                    : event.status === 'completed'
-                    ? 'Tamamlandı'
-                    : 'İptal'
-                    }}
-                  </div>
-                  <div class="tap-hint">
-                    <span class="material-symbols-outlined">visibility</span> İncele
-                  </div>
-                </div>
+          <div class="events-carousel-wrapper" *ngIf="communityEvents.length > 0">
+            <!-- Gradient Fade Overlays -->
+            <div class="carousel-fade left-fade" *ngIf="canScrollEventsLeft()"></div>
+            <div class="carousel-fade right-fade" *ngIf="canScrollEventsRight()"></div>
 
-                <div class="card-info">
-                  <div class="tags-row">
-                    <span class="tag uni" *ngIf="event.university">{{ event.university }}</span>
-                    <span class="tag category" *ngIf="event.category" [style.color]="event.color || '#2563eb'">
-                      {{ event.category }}
-                    </span>
+            <button
+              class="carousel-nav-btn left"
+              (click)="scrollEvents('left')"
+              [disabled]="!canScrollEventsLeft()"
+              title="Önceki"
+            >
+              <span class="material-symbols-outlined">chevron_left</span>
+            </button>
+            <div class="events-carousel-container" (scroll)="onEventsScroll($event)">
+              <div class="events-grid cards small">
+                <div
+                  class="event-card modern-card"
+                  *ngFor="let event of communityEvents; let i = index"
+                  (click)="openEventDetail(event)"
+                  [style.animation-delay]="i * 0.1 + 's'"
+                >
+                  <div class="card-image">
+                    <img
+                      [src]="event.imageUrl || 'assets/images/page-title1.jpg'"
+                      [alt]="event.title"
+                      loading="lazy"
+                    />
+                    <div class="date-badge">
+                      {{ event.date }}
+                    </div>
+                    <div class="status-chip" [ngClass]="event.status">
+                      {{
+                        event.status === 'upcoming'
+                          ? 'Yaklaşan'
+                          : event.status === 'completed'
+                          ? 'Tamamlandı'
+                          : 'İptal'
+                      }}
+                    </div>
+                    <div class="tap-hint">
+                      <span class="material-symbols-outlined">visibility</span> İncele
+                    </div>
                   </div>
 
-                  <h3>{{ event.title }}</h3>
-                  <p class="short-desc" *ngIf="event.description">{{ event.description }}</p>
+                  <div class="card-info">
+                    <div class="tags-row">
+                      <span class="tag uni" *ngIf="event.university">{{ event.university }}</span>
+                      <span
+                        class="tag category"
+                        *ngIf="event.category"
+                        [style.color]="event.color || '#2563eb'"
+                      >
+                        {{ event.category }}
+                      </span>
+                    </div>
 
-                  <div class="bottom-meta">
-                    <span class="category" *ngIf="event.category" [style.color]="event.color || '#2563eb'">
-                      {{ event.category }}
-                    </span>
-                    <div class="mini-location">
-                      <span class="material-symbols-outlined">location_on</span>
-                      {{ event.location }}
+                    <h3>{{ event.title }}</h3>
+                    <p class="short-desc" *ngIf="event.description">{{ event.description }}</p>
+
+                    <div class="bottom-meta">
+                      <span
+                        class="category"
+                        *ngIf="event.category"
+                        [style.color]="event.color || '#2563eb'"
+                      >
+                        {{ event.category }}
+                      </span>
+                      <div class="mini-location">
+                        <span class="material-symbols-outlined">location_on</span>
+                        {{ event.location }}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
+            <button
+              class="carousel-nav-btn right"
+              (click)="scrollEvents('right')"
+              [disabled]="!canScrollEventsRight()"
+              title="Sonraki"
+            >
+              <span class="material-symbols-outlined">chevron_right</span>
+            </button>
           </div>
-          <button class="carousel-nav-btn right" (click)="scrollEvents('right')" [disabled]="!canScrollEventsRight()"
-            title="Sonraki">
-            <span class="material-symbols-outlined">chevron_right</span>
-          </button>
+
+          <div class="empty-state" *ngIf="communityEvents.length === 0">
+            <span class="material-symbols-outlined">event_available</span>
+            <p>Katıldığınız toplulukların henüz etkinliği yok</p>
+          </div>
         </div>
 
-        <div class="empty-state" *ngIf="communityEvents.length === 0">
-          <span class="material-symbols-outlined">event_available</span>
-          <p>Katıldığınız toplulukların henüz etkinliği yok</p>
-        </div>
-      </div>
-
-      <!-- Katıldığım Topluluklar -->
-      <div class="card table-card">
-        <div class="card-header">
-          <h3>Katıldığım Topluluklar</h3>
-          <button class="btn-text" (click)="switchTab('communities')">Tümünü Gör</button>
-        </div>
-        <div class="community-cards-mini" *ngIf="myCommunities.length > 0">
-          <div class="community-card" *ngFor="let community of myCommunities.slice(0, 3)"
-            (click)="goCommunityDetail(community)">
-            <div class="cover-area">
-              <img [src]="community.coverImage || community.banner || 'assets/img/placeholder-cover.svg'"
-                [alt]="community.name" class="cover-img" onerror="this.src='assets/img/placeholder-cover.svg'" />
-              <span class="category-badge">{{ community.category }}</span>
-            </div>
-            <div class="card-content">
-              <div class="header-row">
-                <div class="logo-wrapper">
-                  <img [src]="community.logo || 'assets/img/placeholder-logo.svg'" [alt]="community.name"
-                    class="logo-img" onerror="this.src='assets/img/placeholder-logo.svg'" />
-                </div>
-                <div class="title-wrapper">
-                  <h3 class="community-name">{{ community.name }}</h3>
-                </div>
+        <!-- Katıldığım Topluluklar -->
+        <div class="card table-card">
+          <div class="card-header">
+            <h3>Katıldığım Topluluklar</h3>
+            <button class="btn-text" (click)="switchTab('communities')">Tümünü Gör</button>
+          </div>
+          <div class="community-cards-mini" *ngIf="myCommunities.length > 0">
+            <div
+              class="community-card"
+              *ngFor="let community of myCommunities.slice(0, 3)"
+              (click)="goCommunityDetail(community)"
+            >
+              <div class="cover-area">
+                <img
+                  [src]="
+                    community.coverImage || community.banner || 'assets/img/placeholder-cover.svg'
+                  "
+                  [alt]="community.name"
+                  class="cover-img"
+                  onerror="this.src='assets/img/placeholder-cover.svg'"
+                />
+                <span class="category-badge">{{ community.category }}</span>
               </div>
-              <p class="description" *ngIf="community.description || community.about">{{ community.description ||
-                community.about }}</p>
+              <div class="card-content">
+                <div class="header-row">
+                  <div class="logo-wrapper">
+                    <img
+                      [src]="community.logo || 'assets/img/placeholder-logo.svg'"
+                      [alt]="community.name"
+                      class="logo-img"
+                      onerror="this.src='assets/img/placeholder-logo.svg'"
+                    />
+                  </div>
+                  <div class="title-wrapper">
+                    <h3 class="community-name">{{ community.name }}</h3>
+                  </div>
+                </div>
+                <p class="description" *ngIf="community.description || community.about">
+                  {{ community.description || community.about }}
+                </p>
 
-              <div class="card-footer">
-                <div class="footer-info">
-                  <span class="city-tag" *ngIf="community.city">
-                    <span class="material-symbols-outlined" style="font-size: 16px;">location_on</span> {{
-                    community.city }}
+                <div class="card-footer">
+                  <div class="footer-info">
+                    <span class="city-tag" *ngIf="community.city">
+                      <span class="material-symbols-outlined" style="font-size: 16px"
+                        >location_on</span
+                      >
+                      {{ community.city }}
+                    </span>
+                  </div>
+                  <span class="action-text">
+                    İncele
+                    <span class="material-symbols-outlined" style="font-size: 18px"
+                      >arrow_forward</span
+                    >
                   </span>
                 </div>
-                <span class="action-text">
-                  İncele
-                  <span class="material-symbols-outlined" style="font-size: 18px;">arrow_forward</span>
-                </span>
               </div>
             </div>
           </div>
-        </div>
-        <div class="empty-state" *ngIf="myCommunities.length === 0">
-          <span class="material-symbols-outlined">groups</span>
-          <p>Henüz hiçbir topluluğa katılmadınız</p>
+          <div class="empty-state" *ngIf="myCommunities.length === 0">
+            <span class="material-symbols-outlined">groups</span>
+            <p>Henüz hiçbir topluluğa katılmadınız</p>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- 2. TAB: TOPLULUKLAR -->
     <div class="view-container" *ngIf="activeTab === 'communities'">
-      <div class="page-header">
-        <h2>Katıldığım Topluluklar</h2>
+      <!-- Loading State for Communities -->
+      <div class="loading-container" *ngIf="isLoadingCommunities">
+        <app-luma-spin></app-luma-spin>
+        <p>Topluluklar yükleniyor...</p>
       </div>
 
-      <div class="community-card-grid" *ngIf="myCommunities.length > 0">
-        <div class="community-card" *ngFor="let community of myCommunities" (click)="goCommunityDetail(community)">
-          <button class="leave-btn" (click)="openLeaveConfirm(community); $event.stopPropagation()">
-            Topluluktan Ayrıl
-          </button>
-          <div class="cover-area">
-            <img [src]="community.coverImage || community.banner || 'assets/img/placeholder-cover.svg'"
-              [alt]="community.name" class="cover-img" onerror="this.src='assets/img/placeholder-cover.svg'" />
-            <span class="category-badge">{{ community.category }}</span>
-          </div>
+      <!-- Content when loaded -->
+      <div *ngIf="!isLoadingCommunities">
+        <div class="page-header">
+          <h2>Katıldığım Topluluklar</h2>
+        </div>
 
-          <div class="card-content">
-            <div class="header-row">
-              <div class="logo-wrapper">
-                <img [src]="community.logo || 'assets/img/placeholder-logo.svg'" [alt]="community.name" class="logo-img"
-                  onerror="this.src='assets/img/placeholder-logo.svg'" />
-              </div>
-              <div class="title-wrapper">
-                <h3 class="community-name">{{ community.name }}</h3>
-              </div>
+        <div class="community-card-grid" *ngIf="myCommunities.length > 0">
+          <div
+            class="community-card"
+            *ngFor="let community of myCommunities"
+            (click)="goCommunityDetail(community)"
+          >
+            <button
+              class="leave-btn"
+              (click)="openLeaveConfirm(community); $event.stopPropagation()"
+            >
+              Topluluktan Ayrıl
+            </button>
+            <div class="cover-area">
+              <img
+                [src]="
+                  community.coverImage || community.banner || 'assets/img/placeholder-cover.svg'
+                "
+                [alt]="community.name"
+                class="cover-img"
+                onerror="this.src='assets/img/placeholder-cover.svg'"
+              />
+              <span class="category-badge">{{ community.category }}</span>
             </div>
 
-            <p class="description">{{ community.description || community.about }}</p>
+            <div class="card-content">
+              <div class="header-row">
+                <div class="logo-wrapper">
+                  <img
+                    [src]="community.logo || 'assets/img/placeholder-logo.svg'"
+                    [alt]="community.name"
+                    class="logo-img"
+                    onerror="this.src='assets/img/placeholder-logo.svg'"
+                  />
+                </div>
+                <div class="title-wrapper">
+                  <h3 class="community-name">{{ community.name }}</h3>
+                </div>
+              </div>
 
-            <div class="card-footer">
-              <div class="footer-info">
-                <span class="city-tag" *ngIf="community.city">
-                  <span class="material-symbols-outlined" style="font-size: 16px;">location_on</span> {{ community.city
-                  }}
-                </span>
-                <span class="university-name" *ngIf="community.university">
-                  {{ community.university }}
+              <p class="description">{{ community.description || community.about }}</p>
+
+              <div class="card-footer">
+                <div class="footer-info">
+                  <span class="city-tag" *ngIf="community.city">
+                    <span class="material-symbols-outlined" style="font-size: 16px"
+                      >location_on</span
+                    >
+                    {{ community.city }}
+                  </span>
+                  <span class="university-name" *ngIf="community.university">
+                    {{ community.university }}
+                  </span>
+                </div>
+                <span class="action-text">
+                  İncele
+                  <span class="material-symbols-outlined" style="font-size: 18px"
+                    >arrow_forward</span
+                  >
                 </span>
               </div>
-              <span class="action-text">
-                İncele
-                <span class="material-symbols-outlined" style="font-size: 18px;">arrow_forward</span>
-              </span>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="empty-state-large" *ngIf="myCommunities.length === 0">
-        <span class="material-symbols-outlined">groups</span>
-        <h3>Henüz hiçbir topluluğa katılmadınız</h3>
-        <p>Topluluklar sayfasından ilginizi çeken toplulukları inceleyebilirsiniz</p>
-        <button class="btn-primary" (click)="router.navigate(['/communities'])">
-          Toplulukları Keşfet
-        </button>
+        <div class="empty-state-large" *ngIf="myCommunities.length === 0">
+          <span class="material-symbols-outlined">groups</span>
+          <h3>Henüz hiçbir topluluğa katılmadınız</h3>
+          <p>Topluluklar sayfasından ilginizi çeken toplulukları inceleyebilirsiniz</p>
+          <button class="btn-primary" (click)="router.navigate(['/communities'])">
+            Toplulukları Keşfet
+          </button>
+        </div>
       </div>
     </div>
 
     <!-- 3. TAB: ETKİNLİKLER -->
     <div class="view-container" *ngIf="activeTab === 'events'">
-      <div class="page-header">
-        <h2>Topluluklarımın Etkinlikleri</h2>
-        <button class="icon-btn ghost" (click)="toggleEventCalendar()" title="Etkinlik Takvimi">
-          <span class="material-symbols-outlined">calendar_month</span>
-        </button>
+      <!-- Loading State for Events -->
+      <div class="loading-container" *ngIf="isLoadingEvents">
+        <app-luma-spin></app-luma-spin>
+        <p>Etkinlikler yükleniyor...</p>
       </div>
 
-      <div class="events-grid cards" *ngIf="communityEvents.length > 0">
-        <div class="event-card" *ngFor="let event of communityEvents" (click)="openEventDetail(event)">
-          <div class="card-image">
-            <img [src]="event.imageUrl || 'assets/images/page-title1.jpg'" [alt]="event.title" loading="lazy" />
-            <div class="date-badge">
-              {{ event.date }}
-            </div>
-            <div class="status-chip" [ngClass]="event.status">
-              {{
-              event.status === 'upcoming'
-              ? 'Yaklaşan'
-              : event.status === 'completed'
-              ? 'Tamamlandı'
-              : 'İptal'
-              }}
-            </div>
-            <div class="tap-hint">
-              <span class="material-symbols-outlined">visibility</span> İncele
-            </div>
-          </div>
+      <!-- Content when loaded -->
+      <div *ngIf="!isLoadingEvents">
+        <div class="page-header">
+          <h2>Topluluklarımın Etkinlikleri</h2>
+          <button class="icon-btn ghost" (click)="toggleEventCalendar()" title="Etkinlik Takvimi">
+            <span class="material-symbols-outlined">calendar_month</span>
+          </button>
+        </div>
 
-          <div class="card-info">
-            <div class="tags-row">
-              <span class="tag uni" *ngIf="event.university">{{ event.university }}</span>
-              <span class="tag category" *ngIf="event.category" [style.color]="event.color || '#2563eb'">
-                {{ event.category }}
-              </span>
+        <div class="events-grid cards" *ngIf="communityEvents.length > 0">
+          <div
+            class="event-card"
+            *ngFor="let event of communityEvents"
+            (click)="openEventDetail(event)"
+          >
+            <div class="card-image">
+              <img
+                [src]="event.imageUrl || 'assets/images/page-title1.jpg'"
+                [alt]="event.title"
+                loading="lazy"
+              />
+              <div class="date-badge">
+                {{ event.date }}
+              </div>
+              <div class="status-chip" [ngClass]="event.status">
+                {{
+                  event.status === 'upcoming'
+                    ? 'Yaklaşan'
+                    : event.status === 'completed'
+                    ? 'Tamamlandı'
+                    : 'İptal'
+                }}
+              </div>
+              <div class="tap-hint">
+                <span class="material-symbols-outlined">visibility</span> İncele
+              </div>
             </div>
 
-            <h3>{{ event.title }}</h3>
-            <p class="short-desc" *ngIf="event.description">{{ event.description }}</p>
+            <div class="card-info">
+              <div class="tags-row">
+                <span class="tag uni" *ngIf="event.university">{{ event.university }}</span>
+                <span
+                  class="tag category"
+                  *ngIf="event.category"
+                  [style.color]="event.color || '#2563eb'"
+                >
+                  {{ event.category }}
+                </span>
+              </div>
 
-            <div class="bottom-meta">
-              <span class="category" *ngIf="event.category" [style.color]="event.color || '#2563eb'">
-                {{ event.category }}
-              </span>
-              <div class="mini-location">
-                <span class="material-symbols-outlined">location_on</span>
-                {{ event.location }}
+              <h3>{{ event.title }}</h3>
+              <p class="short-desc" *ngIf="event.description">{{ event.description }}</p>
+
+              <div class="bottom-meta">
+                <span
+                  class="category"
+                  *ngIf="event.category"
+                  [style.color]="event.color || '#2563eb'"
+                >
+                  {{ event.category }}
+                </span>
+                <div class="mini-location">
+                  <span class="material-symbols-outlined">location_on</span>
+                  {{ event.location }}
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="empty-state-large" *ngIf="communityEvents.length === 0">
-        <span class="material-symbols-outlined">event_available</span>
-        <h3>Katıldığınız toplulukların henüz etkinliği yok</h3>
-        <p>Topluluklarınız yeni etkinlikler düzenlediğinde burada görünecek</p>
-        <button class="btn-primary" (click)="router.navigate(['/events'])">
-          Tüm Etkinlikleri Görüntüle
-        </button>
+        <div class="empty-state-large" *ngIf="communityEvents.length === 0">
+          <span class="material-symbols-outlined">event_available</span>
+          <h3>Katıldığınız toplulukların henüz etkinliği yok</h3>
+          <p>Topluluklarınız yeni etkinlikler düzenlediğinde burada görünecek</p>
+          <button class="btn-primary" (click)="router.navigate(['/events'])">
+            Tüm Etkinlikleri Görüntüle
+          </button>
+        </div>
       </div>
     </div>
 
@@ -376,13 +513,24 @@
           <h3>Hesap Ayarları</h3>
           <div class="form-group">
             <label>Ad Soyad</label>
-            <input type="text" [(ngModel)]="userInfo.name" placeholder="Ad Soyad" class="editable-input" />
+            <input
+              type="text"
+              [(ngModel)]="userInfo.name"
+              placeholder="Ad Soyad"
+              class="editable-input"
+            />
             <small>Ad ve soyadınızı düzenleyebilirsiniz</small>
           </div>
           <div class="form-group">
             <label>Öğrenci E-posta</label>
-            <input type="email" [(ngModel)]="userInfo.email" placeholder="E-posta" readonly disabled
-              class="readonly-input" />
+            <input
+              type="email"
+              [(ngModel)]="userInfo.email"
+              placeholder="E-posta"
+              readonly
+              disabled
+              class="readonly-input"
+            />
             <small>E-posta adresi değiştirilemez</small>
           </div>
           <div class="form-actions">
@@ -394,18 +542,30 @@
           <h3>Şifre Değiştir</h3>
           <div class="form-group">
             <label>Mevcut Şifre</label>
-            <input type="password" [(ngModel)]="userInfo.currentPassword" placeholder="Mevcut şifrenizi giriniz"
-              class="editable-input" />
+            <input
+              type="password"
+              [(ngModel)]="userInfo.currentPassword"
+              placeholder="Mevcut şifrenizi giriniz"
+              class="editable-input"
+            />
           </div>
           <div class="form-group">
             <label>Yeni Şifre</label>
-            <input type="password" [(ngModel)]="userInfo.newPassword" placeholder="Yeni şifrenizi giriniz"
-              class="editable-input" />
+            <input
+              type="password"
+              [(ngModel)]="userInfo.newPassword"
+              placeholder="Yeni şifrenizi giriniz"
+              class="editable-input"
+            />
           </div>
           <div class="form-group">
             <label>Yeni Şifre (Tekrar)</label>
-            <input type="password" [(ngModel)]="userInfo.confirmPassword" placeholder="Yeni şifrenizi tekrar giriniz"
-              class="editable-input" />
+            <input
+              type="password"
+              [(ngModel)]="userInfo.confirmPassword"
+              placeholder="Yeni şifrenizi tekrar giriniz"
+              class="editable-input"
+            />
             <small>Şifrenizi değiştirmek için mevcut şifrenizi ve yeni şifrenizi giriniz</small>
           </div>
           <div class="form-actions">
@@ -435,7 +595,6 @@
   </div>
 </div>
 
-
 <div class="calendar-overlay" *ngIf="showEventDates" (click)="toggleEventCalendar(false)">
   <div class="calendar-modal" (click)="$event.stopPropagation()">
     <div class="calendar-head">
@@ -454,9 +613,14 @@
     </div>
 
     <div class="calendar-grid">
-      <div class="calendar-day" *ngFor="let day of calendarDays" [class.today]="day.isToday"
-        [class.has-event]="day.hasEvent" [class.selected]="day.iso === calendarSelectedDate"
-        (click)="selectCalendarDate(day.iso)">
+      <div
+        class="calendar-day"
+        *ngFor="let day of calendarDays"
+        [class.today]="day.isToday"
+        [class.has-event]="day.hasEvent"
+        [class.selected]="day.iso === calendarSelectedDate"
+        (click)="selectCalendarDate(day.iso)"
+      >
         <span>{{ day.label }}</span>
       </div>
     </div>

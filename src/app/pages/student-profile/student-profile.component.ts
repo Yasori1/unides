@@ -8,6 +8,7 @@ import { EventService, EventItem } from '../../services/event.services';
 import { CommunityService, Community } from '../../services/community.services';
 import { AfkDetectionService } from '../../services/afk-detection.service';
 import { AuthService } from '../../services/auth.services';
+import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
 
 interface Stat {
   label: string;
@@ -44,7 +45,7 @@ interface EventCard {
 @Component({
   selector: 'app-student-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, ToastComponent],
+  imports: [CommonModule, FormsModule, ToastComponent, LumaSpinComponent],
   templateUrl: './student-profile.component.html',
   styleUrls: ['./student-profile.component.scss'],
 })
@@ -58,6 +59,11 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
   calendarSelectedDate: string | null = null;
   showNotifications: boolean = false;
   isProfileOpen: boolean = false;
+  
+  // Loading states
+  isLoadingCommunities = false;
+  isLoadingEvents = false;
+  isLoadingOverview = false;
   notifications: Array<{
     id: number;
     text: string;
@@ -145,6 +151,11 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
   }
 
   loadData(): void {
+    // Loading state'leri başlat
+    this.isLoadingOverview = true;
+    this.isLoadingCommunities = true;
+    this.isLoadingEvents = true;
+    
     // Backend'den öğrencinin üye olduğu toplulukları ve etkinliklerini çek
     // GET /api/Communities/me/memberships endpoint'i hem toplulukları hem de etkinlikleri döndürüyor
     this.communityService.getMyMemberships().subscribe({
@@ -277,6 +288,11 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
         // Stats'ları güncelle
         this.stats[0].value = this.myCommunities.length;
         this.stats[1].value = this.communityEvents.length;
+        
+        // Loading state'leri bitir
+        this.isLoadingOverview = false;
+        this.isLoadingCommunities = false;
+        this.isLoadingEvents = false;
       },
       error: (err) => {
         console.error('Memberships yüklenemedi:', err);
@@ -295,6 +311,11 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
         }
         this.stats[0].value = this.myCommunities.length;
         this.stats[1].value = this.communityEvents.length;
+        
+        // Loading state'leri bitir
+        this.isLoadingOverview = false;
+        this.isLoadingCommunities = false;
+        this.isLoadingEvents = false;
       },
     });
   }
