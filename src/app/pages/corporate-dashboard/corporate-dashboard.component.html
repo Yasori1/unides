@@ -77,7 +77,7 @@
     <header class="top-header">
       <div class="header-left">
         <button class="icon-btn toggle-sidebar" (click)="toggleSidebar()">
-          <span class="material-symbols-outlined">menu_open</span>
+          <span class="material-symbols-outlined">{{ isSidebarCollapsed ? 'menu' : 'menu_open' }}</span>
         </button>
         <div class="breadcrumb">
           <span class="material-symbols-outlined home-icon">domain</span>

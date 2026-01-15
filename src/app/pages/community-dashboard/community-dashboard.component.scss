@@ -1143,9 +1143,10 @@
 
 @media (max-width: 768px) {
   .sidebar-mobile-overlay {
-    display: block;
+    display: block !important; // Override desktop hidden state for mobile
 
     &.active {
+      display: block !important;
       opacity: 1;
       pointer-events: auto;
     }
