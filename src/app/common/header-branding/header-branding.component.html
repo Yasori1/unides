@@ -5,7 +5,7 @@
     </a>
   </div>
 
-  <div class="right-actions">
+  <div class="right-actions" [class.initialized]="isInitialized">
     <!-- Mobile Toggle Button -->
     <button class="mobile-toggle" (click)="onToggleMenu()" [class.active]="isMobileMenuOpen">
       <span class="bar"></span>
@@ -14,13 +14,13 @@
     </button>
 
     <!-- Desktop Auth Buttons -->
-    <div class="auth-buttons desktop-auth" *ngIf="isLoggedIn === false">
+    <div class="auth-buttons desktop-auth" *ngIf="isInitialized && isLoggedIn === false">
       <a routerLink="/login" class="btn-outline-custom small static-btn"><span>Giriş Yap</span></a>
       <a routerLink="/register" class="btn-solid-custom small"><span>Kayıt Ol</span></a>
     </div>
 
     <!-- Profile Dropdown (Logged In Users) -->
-    <div class="profile-wrapper desktop-auth" *ngIf="isLoggedIn === true">
+    <div class="profile-wrapper desktop-auth" *ngIf="isInitialized && isLoggedIn === true && (userRole !== 'community' || isCommunityNameLoaded)">
       <div class="profile-info" (click)="toggleProfileDropdown($event)">
         <div class="profile-pic">
           <div class="profile-initial">{{ userInitial }}</div>
