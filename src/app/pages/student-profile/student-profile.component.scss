@@ -1,9 +1,9 @@
 @use 'sass:color';
 
 // ================= DEĞİŞKENLER =================
-$primary: #2563eb;
-$primary-hover: #1d4ed8;
-$primary-soft: rgba(37, 99, 235, 0.1);
+$primary: #14d2cc;
+$primary-hover: #0fb9b4;
+$primary-soft: rgba(20, 210, 204, 0.1);
 $dark: #0f172a;
 $bg-body: #f8fafc;
 $surface: #ffffff;
@@ -711,19 +711,19 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
         font-weight: 800;
         color: #0f172a;
         margin: 0;
-        background: linear-gradient(135deg, #2563eb 0%, #14d2cc 100%);
+        background: linear-gradient(135deg, #0fb9b4 0%, #14d2cc 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
       }
 
       .btn-text {
-        color: #2563eb;
+        color: #14d2cc;
         font-weight: 600;
         transition: all 0.3s ease;
 
         &:hover {
-          color: #1e40af;
+          color: #0fb9b4;
           transform: translateX(4px);
         }
       }
@@ -752,7 +752,7 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     &:hover {
-      background: rgba(37, 99, 235, 0.08);
+      background: rgba(20, 210, 204, 0.08);
     }
 
     border: none;
@@ -2396,6 +2396,49 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
     margin: 0 0 25px 0;
     color: $text-muted;
   }
+}
+
+// ================= HEADERS & TEXTS =================
+.page-header h2 {
+  color: $primary !important;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+
+  h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: $primary !important;
+  }
+
+  .btn-text {
+    background: none;
+    border: none;
+    color: $primary !important;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: 0.2s;
+
+    &:hover {
+      color: $primary-hover !important;
+      text-decoration: underline;
+    }
+  }
+}
+
+// Ensure table-card headers also get the color
+.card.table-card .card-header h3 {
+  color: $primary !important;
+}
+
+.table-card .card-header h3 {
+  color: $primary !important;
 }
 
 // ================= RESPONSIVE =================
