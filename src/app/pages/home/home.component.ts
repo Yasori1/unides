@@ -57,7 +57,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   // --- Animasyon Değişkenleri ---
   typingText: string = 'Toplulukları';
-  words: string[] = ['Toplulukları', 'Etkinlikleri', 'Duyuruları', 'Fırsatları'];
+  words: string[] = ['Toplulukları', 'Etkinlikleri', 'Duyuruları'];
   wordIndex = 0;
   charIndex = 0;
   isDeleting = false;
@@ -209,7 +209,7 @@ export class HomeComponent implements OnInit, OnDestroy {
           // Sadece tarih kısmını al (saat bilgisini sıfırla)
           const eventDateOnly = new Date(eventDate);
           eventDateOnly.setHours(0, 0, 0, 0);
-          
+
           return {
             id: e.id,
             title: e.title,
