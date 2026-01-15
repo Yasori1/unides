@@ -172,8 +172,8 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
 
   // Full HD
   @media (min-width: 1440px) {
-    padding-top: 220px; // Daha da aşağı alındı
-    padding-bottom: 350px;
+    padding-top: 100px; // 10px daha yukarı (110 -> 100)
+    padding-bottom: 410px; // Yükseklik korundu (400 -> 410)
   }
 
   // Large screens
@@ -437,9 +437,9 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
     margin-top: -120px;
   }
 
-  // Full HD - Resmin altında olması için margin sıfırlandı/azaltıldı
+  // Full HD - Resmin altında olması için margin ayarlandı
   @media (min-width: 1440px) {
-    margin-top: -50px;
+    margin-top: -160px; // Dengeleme için yukarı çekildi (-150 -> -160)
   }
 
   // Large screens - Resmin altında olması için margin sıfırlandı/azaltıldı
