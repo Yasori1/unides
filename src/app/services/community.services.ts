@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Observable, map, catchError, of, switchMap, forkJoin } from 'rxjs';
+import { environment } from '../../environments/environment';
 import {
   CommunityMiniDto,
   CommunityDetailDto,
@@ -19,7 +20,7 @@ export type { Community } from '../models/community.models';
   providedIn: 'root',
 })
 export class CommunityService {
-  private apiUrl = '/api/Communities';
+  private apiUrl = `${environment.apiUrl}/Communities`;
   private readonly placeholderLogo = 'assets/img/placeholder-logo.svg';
   private readonly placeholderCover = 'assets/img/placeholder-cover.svg';
 
@@ -656,16 +657,19 @@ export class CommunityService {
       Authorization: `Bearer ${token}`,
     });
 
-    // Backend'de bu endpoint oluşturulmalı: DELETE /api/Communities/me/memberships/{communityId}
-    // Şimdilik bu endpoint'i kullanıyoruz, eğer yoksa 404 hatası alacağız
-    return this.http.delete<void>(`${this.apiUrl}/me/memberships/${communityId}`, { headers }).pipe(
+    // Backend endpoint: DELETE /api/Communities/me/memberships
+    // Body'de { CommunityId: Guid } gönderilmeli
+    // HttpClient.delete() body kabul etmediği için request() kullanıyoruz
+    const body = {
+      CommunityId: communityId
+    };
+
+    return this.http.request<void>('DELETE', `${this.apiUrl}/me/memberships`, {
+      headers,
+      body
+    }).pipe(
       catchError((error) => {
-        // Eğer endpoint yoksa (404), backend'de bu endpoint oluşturulmalı
-        if (error.status === 404) {
-          throw new Error(
-            "Topluluktan ayrılma işlemi için backend endpoint'i bulunamadı. Backend'de DELETE /api/Communities/me/memberships/{communityId} endpoint'i oluşturulmalı."
-          );
-        }
+        console.error('Leave community error:', error);
         throw error;
       })
     );

@@ -9,7 +9,7 @@
       "Content-Type": "application/json"
     }
   },
-  "/api": {
+  "/api/**": {
     "target": "http://72.62.37.160:8080",
     "secure": false,
     "changeOrigin": true,

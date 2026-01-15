@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, tap, catchError, of } from 'rxjs';
 import { Router } from '@angular/router';
+import { environment } from '../../environments/environment';
 
 export interface LoginResponse {
   // Eski/varsayılan alanlar
@@ -35,11 +36,8 @@ export interface RegisterRequest {
   providedIn: 'root',
 })
 export class AuthService {
-  // Swagger görseline göre Base URL
-  // Endpointler /api/Auth/... şeklinde olduğu için base url:
-  // Lokal geliştirmede proxy.conf.json ile aynı origin üzerinden /api
-  // Canlıda domain reverse proxy de /api'yi backend'e yönlendirmeli.
-  private apiUrl = '/api';
+  // Backend API URL - environment'tan alınıyor
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient, private router: Router) {}
 

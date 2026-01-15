@@ -8,6 +8,7 @@ import { SiteFooterComponent } from '../../common/site-footer/site-footer.compon
 import { TurkeySkylineComponent } from '../../components/ui/turkey-skyline/turkey-skyline.component';
 import { CommunityService } from '../../services/community.services';
 import { EventService } from '../../services/event.services';
+import { SearchService } from '../../services/search.services';
 
 // --- Veri Tipleri (Interfaces) ---
 interface Community {
@@ -48,7 +49,14 @@ interface Announcement {
 @Component({
   selector: 'app-home', // DÜZELTİLDİ
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, SiteNavbarComponent, SiteFooterComponent, TurkeySkylineComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    FormsModule,
+    SiteNavbarComponent,
+    SiteFooterComponent,
+    TurkeySkylineComponent,
+  ],
   templateUrl: './home.component.html', // DÜZELTİLDİ
   styleUrls: ['./home.component.scss'], // DÜZELTİLDİ
 })
@@ -91,7 +99,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     private router: Router,
     private sanitizer: DomSanitizer,
     private communityService: CommunityService,
-    private eventService: EventService
+    private eventService: EventService,
+    private searchService: SearchService
   ) {
     this.safeVideoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
       'https://www.youtube.com/embed/z-3j8kP0D48?autoplay=1'
@@ -224,7 +233,9 @@ export class HomeComponent implements OnInit, OnDestroy {
         });
 
         // Geçmiş etkinlikleri filtrele (bugün ve gelecekteki etkinlikler)
-        const futureEvents = eventsWithDateOnly.filter((e) => e.dateOnly.getTime() >= now.getTime());
+        const futureEvents = eventsWithDateOnly.filter(
+          (e) => e.dateOnly.getTime() >= now.getTime()
+        );
 
         // Bugüne en yakın etkinlikten en uzağa doğru sırala
         futureEvents.sort((a, b) => a.dateOnly.getTime() - b.dateOnly.getTime());
@@ -246,8 +257,8 @@ export class HomeComponent implements OnInit, OnDestroy {
       },
     });
 
-    // Aramıza Yeni Katılanlar
-    this.communityService.getNewestCommunities(12).subscribe({
+    // Aramıza Yeni Katılanlar - 24 topluluk
+    this.communityService.getNewestCommunities(24).subscribe({
       next: (communities) => {
         this.newestCommunities = communities.map((c: any) => {
           // Backend'den gelen ID'yi direkt kullan (Guid string veya number)
@@ -271,71 +282,62 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
   }
 
-  // --- GELİŞMİŞ AKILLI ARAMA ALGORİTMASI ---
+  // --- BACKEND'E BAĞLI ARAMA ---
   onSearch() {
     if (!this.searchText || !this.searchText.trim()) return;
 
-    const query = this.searchText.trim().toLocaleLowerCase('tr-TR');
+    const query = this.searchText.trim();
 
-    // 1. ADIM: Kesin Yönlendirmeler
-    if (['etkinlik', 'event', 'takvim'].some((k) => query.includes(k))) {
-      this.router.navigate(['/events'], { queryParams: { search: query } });
-      return;
-    }
-    if (['topluluk', 'kulüp', 'club'].some((k) => query.includes(k))) {
-      this.router.navigate(['/communities'], { queryParams: { search: query } });
-      return;
-    }
-    if (['duyuru', 'burs', 'staj'].some((k) => query.includes(k))) {
-      this.router.navigate(['/announcements'], { queryParams: { search: query } });
-      return;
-    }
+    // Backend'den arama sonuçlarını al
+    this.searchService.search(query).subscribe({
+      next: (result) => {
+        // Best match varsa ona yönlendir
+        if (result.bestMatch) {
+          if (result.bestMatch.type === 'community' || result.bestMatch.type === 'communities') {
+            if (result.bestMatch.id === 'all') {
+              this.router.navigate(['/communities'], { queryParams: { search: query } });
+            } else {
+              this.router.navigate(['/communities', result.bestMatch.id]);
+            }
+            return;
+          } else if (result.bestMatch.type === 'events' || result.bestMatch.type === 'event') {
+            this.router.navigate(['/events'], { queryParams: { search: query } });
+            return;
+          } else if (
+            result.bestMatch.type === 'announcements' ||
+            result.bestMatch.type === 'announcement'
+          ) {
+            this.router.navigate(['/announcements'], { queryParams: { search: query } });
+            return;
+          }
+        }
 
-    // 2. ADIM: Ağırlıklı Puanlama
+        // Best match yoksa sonuç sayılarına göre yönlendir
+        const communityCount = result.communities.length;
+        const eventCount = result.events.length;
+        const announcementCount = result.announcements.length;
 
-    // -- Etkinlik Puanı --
-    let eventScore = 0;
-    this.upcomingEvents.forEach((e) => {
-      if (e.title.toLocaleLowerCase('tr-TR').includes(query)) eventScore += 10;
-      else if (e.description.toLocaleLowerCase('tr-TR').includes(query)) eventScore += 1;
-      else if (e.location.toLocaleLowerCase('tr-TR').includes(query)) eventScore += 1;
+        if (eventCount > 0 && eventCount >= communityCount && eventCount >= announcementCount) {
+          this.router.navigate(['/events'], { queryParams: { search: query } });
+        } else if (
+          communityCount > 0 &&
+          communityCount > eventCount &&
+          communityCount >= announcementCount
+        ) {
+          this.router.navigate(['/communities'], { queryParams: { search: query } });
+        } else if (announcementCount > 0) {
+          this.router.navigate(['/announcements'], { queryParams: { search: query } });
+        } else {
+          // Sonuç yoksa topluluklar sayfasına yönlendir
+          this.router.navigate(['/communities'], { queryParams: { search: query } });
+        }
+      },
+      error: (error) => {
+        console.error('Search error:', error);
+        // Hata durumunda varsayılan olarak topluluklar sayfasına yönlendir
+        this.router.navigate(['/communities'], { queryParams: { search: query } });
+      },
     });
-
-    // -- Topluluk Puanı --
-    let communityScore = 0;
-    const allCommunities = [...this.featuredCommunities, ...this.newestCommunities];
-    allCommunities.forEach((c) => {
-      if (c.name.toLocaleLowerCase('tr-TR').includes(query)) {
-        communityScore += 10;
-      } else if (
-        'category' in c &&
-        (c as Community).category.toLocaleLowerCase('tr-TR').includes(query)
-      ) {
-        communityScore += 2;
-      }
-    });
-
-    // -- Duyuru Puanı --
-    let announcementScore = 0;
-    this.mockAnnouncements.forEach((a) => {
-      if (a.title.toLocaleLowerCase('tr-TR').includes(query)) announcementScore += 10;
-      else if (a.content.toLocaleLowerCase('tr-TR').includes(query)) announcementScore += 1;
-    });
-
-    // 3. ADIM: Yönlendirme
-    if (eventScore > 0 && eventScore >= communityScore && eventScore >= announcementScore) {
-      this.router.navigate(['/events'], { queryParams: { search: query } });
-    } else if (
-      communityScore > 0 &&
-      communityScore > eventScore &&
-      communityScore >= announcementScore
-    ) {
-      this.router.navigate(['/communities'], { queryParams: { search: query } });
-    } else if (announcementScore > 0) {
-      this.router.navigate(['/announcements'], { queryParams: { search: query } });
-    } else {
-      this.router.navigate(['/communities'], { queryParams: { search: query } });
-    }
   }
 
   // --- Yönlendirme Yardımcıları ---

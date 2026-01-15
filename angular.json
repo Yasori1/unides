@@ -92,7 +92,8 @@
               "buildTarget": "unides:build:production"
             },
             "development": {
-              "buildTarget": "unides:build:development"
+              "buildTarget": "unides:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

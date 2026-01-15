@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, map, catchError, of } from 'rxjs';
 import { AuthService } from './auth.services';
+import { environment } from '../../environments/environment';
 
 export interface Announcement {
   id: number;
@@ -97,7 +98,7 @@ const MOCK_ANNOUNCEMENTS: Announcement[] = [
   providedIn: 'root',
 })
 export class AnnouncementService {
-  private apiUrl = '/api/Announcements';
+  private apiUrl = `${environment.apiUrl}/Announcements`;
 
   constructor(
     private http: HttpClient,

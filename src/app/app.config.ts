@@ -19,17 +19,22 @@ const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, next: Htt
   const authService = inject(AuthService);
   const token = authService.getToken();
 
+  // CORS için gerekli header'ları ekle (backend'de CORS açık olmalı)
+  const headers: { [key: string]: string } = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  };
+
   // Eğer token varsa, Authorization header'ını ekle
   if (token) {
-    const cloned = req.clone({
-      setHeaders: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return next(cloned);
+    headers['Authorization'] = `Bearer ${token}`;
   }
 
-  return next(req);
+  const cloned = req.clone({
+    setHeaders: headers,
+  });
+
+  return next(cloned);
 };
 
 export const appConfig: ApplicationConfig = {

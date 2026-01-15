@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, catchError, map, of, switchMap } from 'rxjs';
 import { delay } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 export interface EventItem {
   id: number;
@@ -100,7 +101,7 @@ export interface Project {
   providedIn: 'root',
 })
 export class EventService {
-  private apiUrl = '/api/Events';
+  private apiUrl = `${environment.apiUrl}/Events`;
   // Magic-card ve swipe-stack için mock veri havuzu
   private baseProjects: Project[] = [
     {
