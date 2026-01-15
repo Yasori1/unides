@@ -291,7 +291,11 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
     max-width: 550px;
     margin-left: auto;
     margin-right: auto;
+
     // Arama motoru boyutu korundu, sadece margin ile konumlandı
+    @media (min-width: 1440px) {
+      margin-top: 40px; // 10px aşağı alındı (30 -> 40)
+    }
 
     .input-search {
       display: block;
