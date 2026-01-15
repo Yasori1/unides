@@ -28,8 +28,8 @@
       </button>
 
       <button class="menu-item" [class.active]="activeTab === 'settings'" (click)="switchTab('settings')">
-        <span class="material-symbols-outlined">settings</span>
-        <span class="menu-text">Profil</span>
+        <span class="material-symbols-outlined">person</span>
+        <span class="menu-text">Profilim</span>
       </button>
     </nav>
 
@@ -65,7 +65,7 @@
             <div class="dd-header">{{ clubInfo.name }}</div>
             <ul>
               <li (click)="handleSettingsClick()">
-                <span class="material-symbols-outlined small-icon">settings</span> Profil
+                <span class="material-symbols-outlined small-icon">person</span> Profilim
               </li>
               <li (click)="handleLogoutClick()" class="danger-item">
                 <span class="material-symbols-outlined small-icon">logout</span> Çıkış

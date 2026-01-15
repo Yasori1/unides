@@ -30,11 +30,7 @@
           <div class="profile-role">{{ getRoleDisplayName() }}</div>
         </div>
       </div>
-      <div
-        class="dropdown-menu profile-dropdown"
-        *ngIf="isProfileOpen"
-        (click)="$event.stopPropagation()"
-      >
+      <div class="dropdown-menu profile-dropdown" *ngIf="isProfileOpen" (click)="$event.stopPropagation()">
         <div class="dd-header">{{ displayName || userName }}</div>
         <ul>
           <li (click)="navigateToDashboard()">
@@ -42,8 +38,8 @@
             <span class="menu-text">{{ userRole === 'student' ? 'Profilim' : 'Panelim' }}</span>
           </li>
           <li (click)="handleSettingsClick()">
-            <span class="material-symbols-outlined small-icon">settings</span>
-            <span class="menu-text">Ayarlar</span>
+            <span class="material-symbols-outlined small-icon">person</span>
+            <span class="menu-text">Profilim</span>
           </li>
           <li (click)="handleLogoutClick()" class="danger-item">
             <span class="material-symbols-outlined small-icon">logout</span>

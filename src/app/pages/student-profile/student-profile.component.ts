@@ -59,7 +59,7 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
   calendarSelectedDate: string | null = null;
   showNotifications: boolean = false;
   isProfileOpen: boolean = false;
-  
+
   // Loading states
   isLoadingCommunities = false;
   isLoadingEvents = false;
@@ -146,6 +146,13 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
         }
       }
 
+      // Check query params for tab
+      this.router.routerState.root.queryParams.subscribe(params => {
+        if (params['tab']) {
+          this.switchTab(params['tab']);
+        }
+      });
+
       this.loadData();
     }
   }
@@ -155,7 +162,7 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
     this.isLoadingOverview = true;
     this.isLoadingCommunities = true;
     this.isLoadingEvents = true;
-    
+
     // Backend'den öğrencinin üye olduğu toplulukları ve etkinliklerini çek
     // GET /api/Communities/me/memberships endpoint'i hem toplulukları hem de etkinlikleri döndürüyor
     this.communityService.getMyMemberships().subscribe({
@@ -288,7 +295,7 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
         // Stats'ları güncelle
         this.stats[0].value = this.myCommunities.length;
         this.stats[1].value = this.communityEvents.length;
-        
+
         // Loading state'leri bitir
         this.isLoadingOverview = false;
         this.isLoadingCommunities = false;
@@ -311,7 +318,7 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
         }
         this.stats[0].value = this.myCommunities.length;
         this.stats[1].value = this.communityEvents.length;
-        
+
         // Loading state'leri bitir
         this.isLoadingOverview = false;
         this.isLoadingCommunities = false;

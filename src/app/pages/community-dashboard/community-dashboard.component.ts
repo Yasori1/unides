@@ -399,6 +399,13 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       // AFK Detection'ı başlat
       this.afkDetectionService.start();
 
+      // Check query params for tab
+      const urlParams = new URLSearchParams(window.location.search);
+      const tabParam = urlParams.get('tab');
+      if (tabParam) {
+        this.activeTab = tabParam;
+      }
+
       this.loadCommunityProfile();
       this.loadCommunities();
     }
@@ -822,7 +829,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       projects: 'Etkinliklerim',
       network: 'Diğer Topluluklar',
       members: 'Üyeler',
-      settings: 'Profil',
+      settings: 'Profilim',
     };
     return titles[this.activeTab] || 'Panel';
   }

@@ -30,12 +30,12 @@ export class HeaderBrandingComponent implements OnInit, OnDestroy {
     private communityService: CommunityService,
     private router: Router,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     // İlk kontrolü yap
     this.checkLoginStatus();
-    
+
     // Router events'i dinle - sayfa değiştiğinde login durumunu kontrol et
     this.routerSubscription = this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
@@ -56,15 +56,15 @@ export class HeaderBrandingComponent implements OnInit, OnDestroy {
   checkLoginStatus() {
     const wasLoggedIn = this.isLoggedIn;
     const oldUserRole = this.userRole;
-    
+
     this.isLoggedIn = this.authService.isAuthenticated();
     this.userRole = this.authService.getUserType();
-    
+
     // Kullanıcı bilgilerini al
     if (this.isLoggedIn) {
       const user = this.authService.getUser();
       this.userName = user?.name || user?.fullName || 'Kullanıcı';
-      
+
       // Topluluk kullanıcısı ise topluluk adını göster
       if (this.userRole === 'community') {
         this.loadCommunityName();
@@ -78,7 +78,7 @@ export class HeaderBrandingComponent implements OnInit, OnDestroy {
       this.displayName = '';
       this.userInitial = '';
     }
-    
+
     // Değerler değiştiyse change detection'ı tetikle
     if (wasLoggedIn !== this.isLoggedIn || oldUserRole !== this.userRole) {
       this.cdr.detectChanges();
@@ -105,7 +105,7 @@ export class HeaderBrandingComponent implements OnInit, OnDestroy {
     // localStorage'da yoksa backend'den çek
     const user = this.authService.getUser();
     const userEmail = user?.email?.trim().toLowerCase();
-    
+
     if (!userEmail) {
       // Email yoksa kullanıcı adını göster
       this.displayName = this.userName;
@@ -191,7 +191,7 @@ export class HeaderBrandingComponent implements OnInit, OnDestroy {
     this.isProfileOpen = false;
     // Kullanıcı rolüne göre dashboard'a yönlendir
     if (this.userRole === 'student') {
-      this.router.navigate(['/profile']);
+      this.router.navigate(['/profile'], { queryParams: { tab: 'settings' } });
     } else if (this.userRole === 'corporate') {
       this.router.navigate(['/corporate-dashboard'], { queryParams: { tab: 'settings' } });
     } else if (this.userRole === 'community') {
@@ -248,7 +248,7 @@ export class HeaderBrandingComponent implements OnInit, OnDestroy {
   @HostListener('document:click', ['$event'])
   clickout(event: MouseEvent) {
     const target = event.target as HTMLElement;
-    
+
     // Profil dropdown kontrolü - profile-info veya profile-wrapper içindeki tıklamaları kontrol et
     if (!target.closest('.profile-wrapper') && !target.closest('.profile-dropdown') && !target.closest('.profile-info')) {
       this.isProfileOpen = false;
