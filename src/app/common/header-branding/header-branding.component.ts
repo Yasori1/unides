@@ -23,6 +23,8 @@ export class HeaderBrandingComponent implements OnInit, OnDestroy {
   userName: string = '';
   userInitial: string = '';
   displayName: string = ''; // Gösterilecek isim (kullanıcı adı veya topluluk adı)
+  isInitialized = false; // Auth durumu kontrol edilene kadar navbar'ı gizle
+  isCommunityNameLoaded = false; // Topluluk adı yüklenene kadar profil bilgisini gizle
   private routerSubscription?: Subscription;
 
   constructor(
@@ -67,20 +69,28 @@ export class HeaderBrandingComponent implements OnInit, OnDestroy {
       
       // Topluluk kullanıcısı ise topluluk adını göster
       if (this.userRole === 'community') {
+        this.isCommunityNameLoaded = false; // Yükleme başladı, henüz tamamlanmadı
         this.loadCommunityName();
       } else {
         // Öğrenci veya Kurumsal için kullanıcı adını göster
         this.displayName = this.userName;
         this.userInitial = this.userName.charAt(0).toUpperCase();
+        this.isCommunityNameLoaded = true; // Topluluk değil, direkt göster
       }
     } else {
       this.userName = '';
       this.displayName = '';
       this.userInitial = '';
+      this.isCommunityNameLoaded = false; // Logout olduğunda sıfırla
+    }
+    
+    // İlk kontrol tamamlandı, navbar'ı göster
+    if (!this.isInitialized) {
+      this.isInitialized = true;
     }
     
     // Değerler değiştiyse change detection'ı tetikle
-    if (wasLoggedIn !== this.isLoggedIn || oldUserRole !== this.userRole) {
+    if (wasLoggedIn !== this.isLoggedIn || oldUserRole !== this.userRole || !this.isInitialized) {
       this.cdr.detectChanges();
     }
   }
@@ -94,6 +104,7 @@ export class HeaderBrandingComponent implements OnInit, OnDestroy {
         if (communityInfo.name) {
           this.displayName = communityInfo.name;
           this.userInitial = communityInfo.name.charAt(0).toUpperCase();
+          this.isCommunityNameLoaded = true; // Yükleme tamamlandı
           this.cdr.detectChanges();
           return;
         }
@@ -110,6 +121,7 @@ export class HeaderBrandingComponent implements OnInit, OnDestroy {
       // Email yoksa kullanıcı adını göster
       this.displayName = this.userName;
       this.userInitial = this.userName.charAt(0).toUpperCase();
+      this.isCommunityNameLoaded = true; // Yükleme tamamlandı (fallback)
       this.cdr.detectChanges();
       return;
     }
@@ -162,12 +174,14 @@ export class HeaderBrandingComponent implements OnInit, OnDestroy {
           this.displayName = this.userName;
           this.userInitial = this.userName.charAt(0).toUpperCase();
         }
+        this.isCommunityNameLoaded = true; // Yükleme tamamlandı
         this.cdr.detectChanges();
       },
       error: () => {
         // Hata durumunda kullanıcı adını göster
         this.displayName = this.userName;
         this.userInitial = this.userName.charAt(0).toUpperCase();
+        this.isCommunityNameLoaded = true; // Yükleme tamamlandı (hata durumu)
         this.cdr.detectChanges();
       }
     });

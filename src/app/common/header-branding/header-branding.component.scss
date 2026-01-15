@@ -38,6 +38,12 @@ $primary-dark: #0f172a;
   align-items: center;
   gap: 15px;
   pointer-events: auto; /* Butonlar tıklanabilir olmalı */
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  
+  &.initialized {
+    opacity: 1;
+  }
 }
 
 .auth-buttons {

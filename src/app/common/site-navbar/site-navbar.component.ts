@@ -16,6 +16,7 @@ export class SiteNavbarComponent implements OnInit, OnDestroy {
   isMobileMenuOpen = false;
   isLoggedIn = false;
   userRole: string | null = null;
+  isInitialized = false; // Auth durumu kontrol edilene kadar navbar'ı gizle
   private routerSubscription?: Subscription;
 
   constructor(
@@ -52,8 +53,13 @@ export class SiteNavbarComponent implements OnInit, OnDestroy {
     this.isLoggedIn = this.authService.isAuthenticated();
     this.userRole = this.authService.getUserType();
     
+    // İlk kontrol tamamlandı, navbar'ı göster
+    if (!this.isInitialized) {
+      this.isInitialized = true;
+    }
+    
     // Değerler değiştiyse change detection'ı tetikle
-    if (wasLoggedIn !== this.isLoggedIn || oldUserRole !== this.userRole) {
+    if (wasLoggedIn !== this.isLoggedIn || oldUserRole !== this.userRole || !this.isInitialized) {
       this.cdr.detectChanges();
     }
   }
