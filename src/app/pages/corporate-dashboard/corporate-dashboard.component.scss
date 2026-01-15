@@ -3041,6 +3041,7 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
         width: auto;
       }
 
+      .city-filter,
       .status-filter,
       .events-filters {
         order: 2;
@@ -3055,4 +3056,34 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
       }
     }
   }
+}
+
+// ================= ŞEHİR VE DURUM FİLTRE DROPDOWNLARI =================
+.city-filter,
+.status-filter {
+  padding: 10px 14px;
+  border: 1px solid $border;
+  border-radius: 8px;
+  background: $surface;
+  color: $text-main;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  min-width: 140px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: $primary;
+  }
+
+  &:focus {
+    border-color: $primary;
+    box-shadow: 0 0 0 2px rgba($primary, 0.15);
+  }
+}
+
+// Şehir dropdown'unda max 5 seçenek görünür, diğerleri için kaydırma
+.city-filter {
+  max-height: 200px; // Yaklaşık 5 seçenek için yeterli yükseklik
 }

@@ -80,6 +80,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   modalType = '';
   searchText = '';
   statusFilter: string = ''; // Aktif/Pasif filtre
+  cityFilter: string = ''; // Şehir filtresi
   announcementSearchText = ''; // Duyuru arama metni
   eventSearchText = ''; // Etkinlik arama metni
   eventStatusFilter: string = ''; // Etkinlik durum filtresi
@@ -298,7 +299,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     private http: HttpClient,
     private afkDetectionService: AfkDetectionService,
     @Inject(PLATFORM_ID) private platformId: Object
-  ) {}
+  ) { }
 
   ngOnInit() {
     // SSR sırasında HTTP istekleri yapma, sadece browser'da yap
@@ -421,8 +422,8 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
                   rest.isActivity !== undefined
                     ? rest.isActivity
                     : c.isActivity !== undefined
-                    ? c.isActivity
-                    : true;
+                      ? c.isActivity
+                      : true;
                 return {
                   ...rest,
                   about: c.description || c.about || '',
@@ -714,6 +715,11 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       );
     }
 
+    // Şehir filtresi
+    if (this.cityFilter) {
+      temp = temp.filter((c) => c.city && c.city === this.cityFilter);
+    }
+
     // Durum filtresi - sadece "Onay Bekleyen" için frontend'de filtreleme yap
     // "Aktif" ve "Pasif" filtreleri backend'den geliyor, burada sadece "Onay Bekleyen" kontrolü yapılıyor
     // if (this.statusFilter === 'Onay Bekleyen') {
@@ -890,8 +896,8 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
           this.editingCommunity.status === 'Pasif'
             ? false
             : this.editingCommunity.status === 'Aktif'
-            ? true
-            : undefined,
+              ? true
+              : undefined,
       };
 
       this.communityService.addOrUpdateCommunity(communityForService).subscribe({
