@@ -19,23 +19,21 @@ $ministry-color: #1e3a8a;
 
 // --- ARKA PLAN (AURORA / AKIŞKAN) ---
 .global-background {
-  position: fixed; 
-  top: 0; 
-  left: 0; 
-  width: 100vw; 
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
   height: 100vh;
-  z-index: -1; 
+  z-index: -1;
   /* Opaque gradient: Left Turquoise (#e0fbfc) -> Right White (#ffffff) */
-  background: 
-    repeating-linear-gradient(
-      90deg,
+  background:
+    repeating-linear-gradient(90deg,
       transparent,
       transparent 1px,
       rgba(224, 251, 252, 0.15) 1px,
-      rgba(224, 251, 252, 0.15) 2px
-    ),
+      rgba(224, 251, 252, 0.15) 2px),
     linear-gradient(to right, #e0fbfc 0%, #ffffff 100%);
-  overflow: hidden; 
+  overflow: hidden;
   pointer-events: none;
 }
 
@@ -47,7 +45,7 @@ $ministry-color: #1e3a8a;
   justify-content: center;
   min-height: 60vh;
   gap: 16px;
-  
+
   .spinner {
     width: 40px;
     height: 40px;
@@ -56,7 +54,7 @@ $ministry-color: #1e3a8a;
     border-top-color: $primary-blue;
     animation: spin 1s linear infinite;
   }
-  
+
   p {
     color: $text-gray;
     font-weight: 500;
@@ -64,7 +62,9 @@ $ministry-color: #1e3a8a;
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 // Hero Section
@@ -77,12 +77,12 @@ $ministry-color: #1e3a8a;
   .background-wrapper {
     position: absolute;
     inset: 0;
-    
+
     .hero-image {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      object-position: center 42%;
+      object-position: center 65%;
       opacity: 0.9;
     }
   }
@@ -91,16 +91,16 @@ $ministry-color: #1e3a8a;
     position: absolute;
     inset: 0; // Covers top, right, bottom, left
     background: transparent; // Removed blue gradient filter
-    padding: 30px 0 80px; 
+    padding: 30px 0 80px;
     z-index: 1;
     display: flex;
     align-items: flex-end;
 
     .container {
-        width: 100%;
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 20px;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
     }
 
     .breadcrumb {
@@ -115,10 +115,16 @@ $ministry-color: #1e3a8a;
         text-decoration: none;
         opacity: 0.9;
         transition: opacity 0.2s;
-        &:hover { opacity: 1; }
+
+        &:hover {
+          opacity: 1;
+        }
       }
 
-      i { font-size: 0.8rem; opacity: 0.7; }
+      i {
+        font-size: 0.8rem;
+        opacity: 0.7;
+      }
 
       span {
         opacity: 0.8;
@@ -128,7 +134,7 @@ $ministry-color: #1e3a8a;
 
   .custom-shape-divider-bottom {
     position: absolute;
-    bottom: -1px; 
+    bottom: -1px;
     left: 0;
     width: 100%;
     overflow: hidden;
@@ -138,25 +144,25 @@ $ministry-color: #1e3a8a;
   }
 
   .custom-shape-divider-bottom svg {
-      position: relative;
-      display: block;
-      width: calc(100% + 1.3px);
-      height: 60px;
-      transform: none; // Reset transform
+    position: relative;
+    display: block;
+    width: calc(100% + 1.3px);
+    height: 60px;
+    transform: none; // Reset transform
   }
 
   .custom-shape-divider-bottom .shape-fill-white {
-      fill: $white;
+    fill: $white;
   }
-  
+
   .custom-shape-divider-bottom .shape-fill-blue-medium {
-      fill: $primary-blue;
-      opacity: 0.5;
+    fill: $primary-blue;
+    opacity: 0.5;
   }
-  
+
   .custom-shape-divider-bottom .shape-fill-blue-light {
-      fill: $primary-blue;
-      opacity: 0.25;
+    fill: $primary-blue;
+    opacity: 0.25;
   }
 }
 
@@ -164,7 +170,7 @@ $ministry-color: #1e3a8a;
   padding: 20px 0 100px;
   position: relative;
   z-index: 10;
-  
+
   .container-wide {
     max-width: 1400px;
     margin: 0 auto;
@@ -174,7 +180,7 @@ $ministry-color: #1e3a8a;
   // Breadcrumb
   .breadcrumb-container {
     margin-bottom: 20px;
-    
+
     .breadcrumb {
       display: flex;
       align-items: center;
@@ -187,10 +193,16 @@ $ministry-color: #1e3a8a;
         text-decoration: none;
         font-weight: 500;
         transition: opacity 0.2s;
-        &:hover { opacity: 0.8; }
+
+        &:hover {
+          opacity: 0.8;
+        }
       }
 
-      i { font-size: 0.9rem; color: $text-gray; }
+      i {
+        font-size: 0.9rem;
+        color: $text-gray;
+      }
 
       span {
         color: $text-dark;
@@ -202,6 +214,7 @@ $ministry-color: #1e3a8a;
 
 .back-button-top {
   margin-bottom: 30px;
+
   .back-button {
     display: inline-flex;
     align-items: center;
@@ -216,16 +229,20 @@ $ministry-color: #1e3a8a;
     background: $bg-light;
     border: 1px solid $border-color;
 
-    &:hover { 
+    &:hover {
       gap: 12px;
-      background: $white; 
+      background: $white;
       border-color: $primary-blue;
       color: color.adjust($primary-blue, $lightness: -10%);
-      
-      i { transform: translateX(-4px); }
+
+      i {
+        transform: translateX(-4px);
+      }
     }
-    
-    i { transition: transform 0.3s; }
+
+    i {
+      transition: transform 0.3s;
+    }
   }
 }
 
@@ -269,14 +286,17 @@ $ministry-color: #1e3a8a;
       gap: 24px;
       color: $text-gray;
       font-size: 0.95rem;
-      
+
       .meta-item {
         display: flex;
         align-items: center;
         gap: 8px;
         font-weight: 400;
-        
-        i { color: $primary-blue; font-size: 1.1rem; }
+
+        i {
+          color: $primary-blue;
+          font-size: 1.1rem;
+        }
       }
     }
   }
@@ -288,7 +308,7 @@ $ministry-color: #1e3a8a;
       border-radius: 12px;
       overflow: hidden;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      
+
       img {
         width: 100%;
         height: auto;
@@ -312,12 +332,13 @@ $ministry-color: #1e3a8a;
       font-size: 1.05rem;
       color: #334155;
       line-height: 1.8;
-      
+
       ::ng-deep p {
         margin-bottom: 20px;
       }
-      
-      ::ng-deep ul, ::ng-deep ol {
+
+      ::ng-deep ul,
+      ::ng-deep ol {
         margin-bottom: 20px;
         padding-left: 20px;
       }
@@ -333,25 +354,26 @@ $ministry-color: #1e3a8a;
     }
 
     .action-buttons {
-        margin-top: 40px;
-        .external-link-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            background: $primary-blue;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 12px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.2s;
-            
-            &:hover {
-                background: color.adjust($primary-blue, $lightness: -5%);
-                transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-            }
+      margin-top: 40px;
+
+      .external-link-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: $primary-blue;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s;
+
+        &:hover {
+          background: color.adjust($primary-blue, $lightness: -5%);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
         }
+      }
     }
   }
 }
@@ -364,14 +386,16 @@ $ministry-color: #1e3a8a;
     display: flex;
     flex-direction: column;
     gap: 24px;
-    
+
     &.sticky-sidebar {
       position: sticky;
       top: 20px;
     }
   }
 
-  .mt-4 { margin-top: 24px; }
+  .mt-4 {
+    margin-top: 24px;
+  }
 
   .info-card {
     background: $white;
@@ -381,101 +405,104 @@ $ministry-color: #1e3a8a;
     border: 1px solid $border-color;
 
     .card-header {
-        margin-bottom: 24px;
-        padding-bottom: 16px;
-        border-bottom: 2px solid $border-color;
-        
-        .card-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: $text-dark;
-            margin: 0;
-            letter-spacing: -0.3px;
-        }
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid $border-color;
+
+      .card-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: $text-dark;
+        margin: 0;
+        letter-spacing: -0.3px;
+      }
     }
 
     .share-btn {
-          width: 100%;
-          padding: 14px 24px;
-          border: none;
-          background: $primary-blue;
-          border-radius: 12px;
-          color: white;
-          font-weight: 600;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          transition: all 0.2s;
-          box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+      width: 100%;
+      padding: 14px 24px;
+      border: none;
+      background: $primary-blue;
+      border-radius: 12px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 
-          &:hover {
-              background: color.adjust($primary-blue, $lightness: -5%);
-              transform: translateY(-2px);
-              box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
-          }
-
-          &.copied {
-              background: #10b981;
-              box-shadow: none;
-          }
+      &:hover {
+        background: color.adjust($primary-blue, $lightness: -5%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
       }
 
+      &.copied {
+        background: #10b981;
+        box-shadow: none;
+      }
+    }
+
     .sidebar-list {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
     }
 
     .sidebar-item {
-        display: flex;
-        gap: 15px;
-        text-decoration: none;
-        align-items: flex-start;
-        transition: all 0.2s;
+      display: flex;
+      gap: 15px;
+      text-decoration: none;
+      align-items: flex-start;
+      transition: all 0.2s;
 
-        &:hover {
-            transform: translateX(5px);
-            .item-info h4 { color: $primary-blue; }
+      &:hover {
+        transform: translateX(5px);
+
+        .item-info h4 {
+          color: $primary-blue;
+        }
+      }
+
+      .item-image {
+        width: 80px;
+        height: 80px;
+        flex-shrink: 0;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid $border-color;
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+      }
+
+      .item-info {
+        h4 {
+          font-size: 0.95rem;
+          font-weight: 600;
+          color: $text-dark;
+          margin: 0 0 6px;
+          line-height: 1.4;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          transition: color 0.2s;
         }
 
-        .item-image {
-            width: 80px;
-            height: 80px;
-            flex-shrink: 0;
-            border-radius: 12px;
-            overflow: hidden;
-            border: 1px solid $border-color;
-            
-            img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-            }
+        .item-date {
+          font-size: 0.8rem;
+          color: $text-gray;
+          font-weight: 500;
         }
-
-        .item-info {
-            h4 {
-                font-size: 0.95rem;
-                font-weight: 600;
-                color: $text-dark;
-                margin: 0 0 6px;
-                line-height: 1.4;
-                display: -webkit-box;
-                -webkit-line-clamp: 2;
-                line-clamp: 2;
-                -webkit-box-orient: vertical;
-                overflow: hidden;
-                transition: color 0.2s;
-            }
-
-            .item-date {
-                font-size: 0.8rem;
-                color: $text-gray;
-                font-weight: 500;
-            }
-        }
+      }
     }
   }
 }
@@ -483,30 +510,30 @@ $ministry-color: #1e3a8a;
 .not-found {
   text-align: center;
   padding: 100px 0;
-  
+
   .not-found-content {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 20px;
-    
+
     i {
       font-size: 5rem;
       color: #cbd5e1;
     }
-    
+
     h2 {
       margin: 0;
       font-size: 2rem;
       color: $text-dark;
     }
-    
+
     p {
       color: $text-gray;
       font-size: 1.1rem;
       margin: 0;
     }
-    
+
     .back-button {
       margin-top: 10px;
       padding: 12px 30px;
@@ -516,7 +543,7 @@ $ministry-color: #1e3a8a;
       text-decoration: none;
       font-weight: 600;
       transition: all 0.2s;
-      
+
       &:hover {
         background: color.adjust($primary-blue, $lightness: -10%);
         transform: translateY(-2px);
@@ -540,10 +567,13 @@ $ministry-color: #1e3a8a;
       transform: none;
     }
   }
-  
+
   .content-section.layout-option-a {
     padding: 40px 0 60px;
-    .container-wide { padding: 0 20px; }
+
+    .container-wide {
+      padding: 0 20px;
+    }
   }
 
   .main-content .announcement-header .announcement-title {
