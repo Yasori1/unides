@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, catchError, map, of, switchMap } from 'rxjs';
-import { delay } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 export interface EventItem {
@@ -75,14 +74,16 @@ interface CreateEventDto {
   // comId backend'de otomatik olarak creator'ın topluluğundan alınıyor
 }
 
+// Backend UpdateEventDto (PascalCase)
 interface UpdateEventDto {
-  etkinlikAdi: string;
-  resimUrl?: string;
-  kisaAciklama?: string;
-  detayliAciklama?: string;
-  baslangicTarihi: string;
-  bitisTarihi: string;
-  konum?: string;
+  EventName?: string;
+  EventPictureLink?: string;
+  EventDate?: string; // DateOnly format: "dd.MM.yyyy" veya ISO string
+  EventClock?: string; // TimeOnly format: "HH:mm"
+  EventLocation?: string;
+  EventKontenjan?: number;
+  EventAbout?: string;
+  MiniAbout?: string;
 }
 
 // Swipe/magic-card bileşenleri için kullanılan mock Project tipi
@@ -102,36 +103,6 @@ export interface Project {
 })
 export class EventService {
   private apiUrl = `${environment.apiUrl}/Events`;
-  // Magic-card ve swipe-stack için mock veri havuzu
-  private baseProjects: Project[] = [
-    {
-      id: 1,
-      title: 'Kampüs Kodluyor Hackathonu',
-      category: 'Yazılım & Teknoloji',
-      date: '25 Kasım 2025',
-      description:
-        '48 saat sürecek maratonda takımlar en iyi dijital çözümü üretmek için yarışıyor.',
-      image:
-        'https://images.unsplash.com/photo-1504384308090-c54be3852f33?q=80&w=1000&auto=format&fit=crop',
-      status: 'active',
-      location: 'İstanbul Kampüs',
-    },
-    {
-      id: 2,
-      title: 'Sürdürülebilir Kampüs Zirvesi',
-      category: 'Sosyal Sorumluluk',
-      date: '10 Aralık 2025',
-      description: 'Yeşil bir gelecek için üniversiteler arası işbirliği projeleri konuşuluyor.',
-      image:
-        'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?q=80&w=1000&auto=format&fit=crop',
-      status: 'upcoming',
-      location: 'Ankara',
-    },
-    // ...
-  ];
-
-  // In-memory mock events for cross-component communication demo
-  private mockEvents: EventItem[] = [];
 
   constructor(private http: HttpClient) {}
 
@@ -297,16 +268,9 @@ export class EventService {
   }
 
   // Tüm etkinlikleri getir (Backend: GET /api/Events/all)
+  // Auth interceptor automatically adds Authorization header if token exists
   getAll(): Observable<EventItem[]> {
-    // Get auth token if available
-    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-    const headers = token
-      ? new HttpHeaders({
-          Authorization: `Bearer ${token}`,
-        })
-      : undefined;
-
-    return this.http.get<EventListItemDto[]>(`${this.apiUrl}/all`, { headers }).pipe(
+    return this.http.get<EventListItemDto[]>(`${this.apiUrl}/all`).pipe(
       map((list) => {
         // Backend'den gelen etkinlikleri map et
         const apiEvents = list.map((dto) => {
@@ -317,42 +281,16 @@ export class EventService {
         return apiEvents;
       }),
       catchError((error) => {
-        // Hata durumunda mock data döndür
-        const mockEvent: EventItem = {
-          id: 999,
-          title: 'Kampüs Kodluyor Hackathonu (Demo)',
-          shortDescription:
-            '48 saat sürecek maratonda takımlar en iyi dijital çözümü üretmek için yarışıyor.',
-          description:
-            '48 saat sürecek maratonda takımlar en iyi dijital çözümü üretmek için yarışıyor. Detaylı bilgi için web sitemizi ziyaret edin.',
-          startDate: new Date().toISOString(),
-          endDate: new Date(new Date().getTime() + 86400000).toISOString(), // Yarın
-          location: 'İstanbul Kampüs',
-          communityId: 1,
-          communityName: 'Yazılım Kulübü',
-          imageUrl:
-            'https://images.unsplash.com/photo-1504384308090-c54be3852f33?q=80&w=1000&auto=format&fit=crop',
-          status: 'Onaylandı',
-          capacity: '100',
-          city: 'İstanbul',
-        };
-        return of([mockEvent]);
+        console.error('Etkinlikler yüklenemedi:', error);
+        return of([]);
       })
     );
   }
 
   // Status'e göre etkinlikleri getir (Backend: GET /api/Events/status?status=0&status=1&status=2)
   // status: 0=Beklemede, 1=Onaylandı, 2=Reddedildi
+  // Auth interceptor automatically adds Authorization header if token exists
   getByStatus(statuses: number[]): Observable<EventItem[]> {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-    if (!token) {
-      throw new Error('Etkinlikleri görmek için giriş yapmanız gerekiyor.');
-    }
-
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`,
-    });
-
     // Query parametrelerini oluştur: ?status=0&status=1&status=2
     let params = new HttpParams();
     statuses.forEach((status) => {
@@ -366,7 +304,7 @@ export class EventService {
         Pending: EventListItemDto[];
         Accepted: EventListItemDto[];
         Rejected: EventListItemDto[];
-      }>(`${this.apiUrl}/status`, { headers, params })
+      }>(`${this.apiUrl}/status`, { params })
       .pipe(
         map((response: any) => {
           // Backend EventsByStatusDto döndürüyor: { Pending: [], Accepted: [], Rejected: [] }
@@ -404,15 +342,7 @@ export class EventService {
   // Topluluk bazlı etkinlikleri getir (Backend: GET /api/Events/community/{communityId}/events?status=0&status=1&status=2)
   // [Authorize(Policy = "CommunityAdminOnly")] - Sadece topluluk lideri görebilir
   getCommunityEvents(communityId: string, statuses?: number[]): Observable<EventItem[]> {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-    if (!token) {
-      throw new Error('Etkinlikleri görmek için giriş yapmanız gerekiyor.');
-    }
-
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`,
-    });
-
+    // Auth interceptor automatically adds Authorization header if token exists
     // Query parametrelerini oluştur: ?status=0&status=1&status=2
     let params = new HttpParams();
     if (statuses && statuses.length > 0) {
@@ -422,12 +352,13 @@ export class EventService {
     }
 
     // Backend EventsByStatusDto döndürüyor: { Pending: [], Accepted: [], Rejected: [] }
+    // Auth interceptor automatically adds Authorization header if token exists
     return this.http
       .get<{
         Pending: EventListItemDto[];
         Accepted: EventListItemDto[];
         Rejected: EventListItemDto[];
-      }>(`${this.apiUrl}/community/${communityId}/events`, { headers, params })
+      }>(`${this.apiUrl}/community/${communityId}/events`, { params })
       .pipe(
         map((response: any) => {
           if (!response) {
@@ -455,40 +386,12 @@ export class EventService {
   }
 
   // Etkinlik detayını getir (Backend: GET /api/Events/{id})
+  // Auth interceptor automatically adds Authorization header if token exists
   getById(id: number): Observable<EventItem> {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-    const headers = token
-      ? new HttpHeaders({
-          Authorization: `Bearer ${token}`,
-        })
-      : undefined;
-
-    return this.http.get<any>(`${this.apiUrl}/${id}`, { headers }).pipe(
+    return this.http.get<any>(`${this.apiUrl}/${id}`).pipe(
       map((dto) => this.mapToEvent(dto)),
       catchError((error) => {
-        console.error('Etkinlik detayı yüklenemedi, mock data dönülüyor:', error);
-        // Eğer id mock event id ise mock event dön
-        if (id === 999) {
-          const mockEvent: EventItem = {
-            id: 999,
-            title: 'Kampüs Kodluyor Hackathonu (Demo)',
-            shortDescription:
-              '48 saat sürecek maratonda takımlar en iyi dijital çözümü üretmek için yarışıyor.',
-            description:
-              '48 saat sürecek maratonda takımlar en iyi dijital çözümü üretmek için yarışıyor. Detaylı bilgi için web sitemizi ziyaret edin.',
-            startDate: new Date().toISOString(),
-            endDate: new Date(new Date().getTime() + 86400000).toISOString(), // Yarın
-            location: 'İstanbul Kampüs',
-            communityId: 1,
-            communityName: 'Yazılım Kulübü',
-            imageUrl:
-              'https://images.unsplash.com/photo-1504384308090-c54be3852f33?q=80&w=1000&auto=format&fit=crop',
-            status: 'Onaylandı',
-            capacity: '100',
-            city: 'İstanbul',
-          };
-          return of(mockEvent);
-        }
+        console.error('Etkinlik detayı yüklenemedi:', error);
         throw error;
       })
     );
@@ -496,17 +399,8 @@ export class EventService {
 
   // Yeni etkinlik ekleme (Backend: POST /api/Events/create)
   // comId backend'de otomatik olarak creator'ın topluluğundan alınıyor, bu yüzden artık gerekli değil
+  // Auth interceptor automatically adds Authorization header and Content-Type if token exists
   createEvent(event: Partial<EventItem>): Observable<{ eventId: number }> {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-    if (!token) {
-      throw new Error('Etkinlik oluşturmak için giriş yapmanız gerekiyor.');
-    }
-
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    });
-
     // Tarih ve saat formatlarını backend'in beklediği formata çevir
     // Backend DateOnlyJsonConverter "dd.MM.yyyy" formatını bekliyor!
     let eventDate = '';
@@ -550,28 +444,17 @@ export class EventService {
       // comId backend'de otomatik olarak creator'ın topluluğundan alınıyor
     };
 
-    return this.http
-      .post<{ eventId: number }>(`${this.apiUrl}/create`, createDto, { headers })
-      .pipe(
-        catchError((error) => {
-          console.error('Etkinlik oluşturulamadı:', error);
-          throw error;
-        })
-      );
+    return this.http.post<{ eventId: number }>(`${this.apiUrl}/create`, createDto).pipe(
+      catchError((error) => {
+        console.error('Etkinlik oluşturulamadı:', error);
+        throw error;
+      })
+    );
   }
 
   // Etkinlik güncelle (Backend: PUT /api/Events/update/{id})
+  // Auth interceptor automatically adds Authorization header and Content-Type if token exists
   updateEvent(id: number, event: Partial<EventItem>): Observable<{ updated: number }> {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-    if (!token) {
-      throw new Error('Etkinlik güncellemek için giriş yapmanız gerekiyor.');
-    }
-
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    });
-
     // Backend'in beklediği formata çevir (dd.MM.yyyy ve HH:mm)
     let eventDate = '';
     let eventClock = '';
@@ -602,46 +485,30 @@ export class EventService {
       eventClock = `${hours}:${minutes}`;
     }
 
+    // Backend UpdateEventDto formatına çevir (PascalCase)
     const updateDto: UpdateEventDto = {
-      etkinlikAdi: event.title || '',
-      resimUrl: event.imageUrl,
-      kisaAciklama: event.shortDescription || event.description,
-      detayliAciklama: event.description,
-      baslangicTarihi: event.startDate
-        ? typeof event.startDate === 'string'
-          ? event.startDate
-          : new Date(event.startDate).toISOString()
-        : new Date().toISOString(),
-      bitisTarihi: event.endDate
-        ? typeof event.endDate === 'string'
-          ? event.endDate
-          : new Date(event.endDate).toISOString()
-        : new Date().toISOString(),
-      konum: event.location,
+      EventName: event.title || undefined,
+      EventPictureLink: event.imageUrl || undefined,
+      EventDate: eventDate || undefined, // DateOnly format: "dd.MM.yyyy"
+      EventClock: eventClock || undefined, // TimeOnly format: "HH:mm"
+      EventLocation: event.location || undefined,
+      EventKontenjan: event.quota ? Number(event.quota) : undefined,
+      EventAbout: event.description || undefined, // Detaylı açıklama
+      MiniAbout: event.shortDescription || event.description || undefined, // Kısa açıklama
     };
 
-    return this.http
-      .put<{ updated: number }>(`${this.apiUrl}/update/${id}`, updateDto, { headers })
-      .pipe(
-        catchError((error) => {
-          console.error('Etkinlik güncellenemedi:', error);
-          throw error;
-        })
-      );
+    return this.http.put<{ updated: number }>(`${this.apiUrl}/update/${id}`, updateDto).pipe(
+      catchError((error) => {
+        console.error('Etkinlik güncellenemedi:', error);
+        throw error;
+      })
+    );
   }
 
   // Etkinlik sil (Backend: DELETE /api/Events/delete/{id})
+  // Auth interceptor automatically adds Authorization header if token exists
   deleteEvent(id: number): Observable<{ deleted: boolean }> {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-    if (!token) {
-      throw new Error('Etkinlik silmek için giriş yapmanız gerekiyor.');
-    }
-
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`,
-    });
-
-    return this.http.delete<{ deleted: boolean }>(`${this.apiUrl}/delete/${id}`, { headers }).pipe(
+    return this.http.delete<{ deleted: boolean }>(`${this.apiUrl}/delete/${id}`).pipe(
       catchError((error) => {
         console.error('Etkinlik silinemedi:', error);
         throw error;
@@ -650,82 +517,28 @@ export class EventService {
   }
 
   // Etkinlik onayla (Backend: POST /api/Events/{id}/approve)
+  // Auth interceptor automatically adds Authorization header and Content-Type if token exists
   approveEvent(id: number, comment?: string): Observable<{ approved: boolean }> {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-    if (!token) {
-      throw new Error('Etkinlik onaylamak için giriş yapmanız gerekiyor.');
-    }
-
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    });
-
     const body = comment ? { comment } : {};
 
-    return this.http
-      .post<{ approved: boolean }>(`${this.apiUrl}/${id}/approve`, body, { headers })
-      .pipe(
-        catchError((error) => {
-          console.error('Etkinlik onaylanamadı:', error);
-          throw error;
-        })
-      );
+    return this.http.post<{ approved: boolean }>(`${this.apiUrl}/${id}/approve`, body).pipe(
+      catchError((error) => {
+        console.error('Etkinlik onaylanamadı:', error);
+        throw error;
+      })
+    );
   }
 
   // Etkinlik reddet (Backend: POST /api/Events/{id}/reject)
+  // Auth interceptor automatically adds Authorization header and Content-Type if token exists
   rejectEvent(id: number, comment?: string): Observable<{ approved: boolean }> {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-    if (!token) {
-      throw new Error('Etkinlik reddetmek için giriş yapmanız gerekiyor.');
-    }
-
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    });
-
     const body = comment ? { comment } : {};
 
-    return this.http
-      .post<{ approved: boolean }>(`${this.apiUrl}/${id}/reject`, body, { headers })
-      .pipe(
-        catchError((error) => {
-          console.error('Etkinlik reddedilemedi:', error);
-          throw error;
-        })
-      );
-  }
-
-  // --- Magic-card / swipe-stack mock veri kaynakları ---
-  getEvents(): Observable<Project[]> {
-    let bigData: Project[] = [];
-    for (let i = 0; i < 15; i++) {
-      const batch = this.baseProjects.map((p) => ({
-        ...p,
-        id: p.id + i * 100,
-        title: i === 0 ? p.title : `${p.title} #${i}`,
-      }));
-      bigData = [...bigData, ...batch];
-    }
-    return of(bigData).pipe(delay(300));
-  }
-
-  getRandomSwipeEvents(count: number, excludedIds: number[]): Observable<Project[]> {
-    let bigData: Project[] = [];
-    for (let i = 0; i < 15; i++) {
-      const batch = this.baseProjects.map((p) => ({
-        ...p,
-        id: p.id + i * 100,
-        title: `${p.title} (Öneri)`,
-      }));
-      bigData = [...bigData, ...batch];
-    }
-
-    const available = bigData.filter((p) => !excludedIds.includes(p.id));
-    const shuffled = available.sort(() => 0.5 - Math.random());
-    const selected = shuffled.slice(0, count);
-
-    return of(selected).pipe(delay(300));
+    return this.http.post<{ approved: boolean }>(`${this.apiUrl}/${id}/reject`, body).pipe(
+      catchError((error) => {
+        console.error('Etkinlik reddedilemedi:', error);
+        throw error;
+      })
+    );
   }
 }

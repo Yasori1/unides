@@ -86,13 +86,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   upcomingEvents: UpcomingEvent[] = [];
   newestCommunities: NewCommunity[] = [];
 
-  // Arama için Mock Duyuru Verileri
-  mockAnnouncements: Announcement[] = [
-    { title: 'TÜBİTAK Proje Çağrısı', content: '2209-A Öğrenci projeleri başvuruları başladı.' },
-    { title: 'Burs Başvuruları', content: '2025 dönemi bursları' },
-    { title: 'Staj Programı', content: 'Yaz stajı başvuruları' },
-    { title: 'Yurt Sonuçları', content: 'Yedek yurt başvuru sonuçları açıklandı.' },
-  ];
+  // mockAnnouncements kaldırıldı - artık backend'den veri çekiliyor
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,

@@ -353,114 +353,6 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
     };
   }
 
-  loadMockCommunities(): void {
-    this.myCommunities = [
-      {
-        id: '1',
-        name: 'Yazılım Geliştirme Kulübü',
-        logo: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=100',
-        coverImage: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800',
-        university: 'İTÜ',
-        city: 'Ankara',
-        memberCount: 150,
-        category: 'Teknoloji',
-        description: 'Kodlama kampları, hackathonlar ve proje geliştirme odaklı bir topluluk.',
-        instagram: 'https://instagram.com/ituai',
-        joinedDate: '2024-01-15',
-        status: 'Aktif',
-        banner: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800',
-      },
-      {
-        id: '2',
-        name: 'Girişimcilik Topluluğu',
-        logo: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=100',
-        coverImage: 'https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?w=800',
-        university: 'Hacettepe',
-        city: 'Ankara',
-        memberCount: 89,
-        category: 'İş Dünyası',
-        description: 'Start-up kültürü, yatırımcı buluşmaları ve pitch yarışmaları düzenler.',
-        instagram: 'https://instagram.com/hacettepegirisim',
-        joinedDate: '2024-02-20',
-        status: 'Aktif',
-        banner: 'https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?w=800',
-      },
-    ];
-  }
-
-  loadMockEvents(): void {
-    // Tarihler bugüne göre ayarlanıyor ki takvimde hemen görülsün
-    const isoInDays = (offset: number) => {
-      const d = new Date();
-      d.setHours(12, 0, 0, 0); // timezone kaymasını önlemek için
-      d.setDate(d.getDate() + offset);
-      return d.toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric' });
-    };
-
-    // ISO format for calendar matching
-    const isoDate = (offset: number) => {
-      const d = new Date();
-      d.setDate(d.getDate() + offset);
-      return d.toISOString().split('T')[0];
-    };
-
-    this.communityEvents = [
-      {
-        id: 1,
-        title: 'Yapay Zeka Workshop',
-        date: isoInDays(2),
-        time: '14:00',
-        location: 'Kampüs Merkez',
-        community: 'Yazılım Geliştirme Kulübü',
-        status: 'upcoming',
-        imageUrl:
-          'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=900&q=60',
-        category: 'Teknoloji',
-        university: 'İTÜ',
-        description: 'Uygulamalı AI oturumları ve canlı demo.',
-        color: '#2563eb',
-        club: 'Yazılım Geliştirme Kulübü',
-        semester: 'Yazılım Geliştirme Kulübü',
-        quota: '120',
-      },
-      {
-        id: 2,
-        title: 'Web Geliştirme Bootcamp',
-        date: isoInDays(5),
-        time: '09:00',
-        location: 'Bilgisayar Laboratuvarı',
-        community: 'Yazılım Geliştirme Kulübü',
-        status: 'upcoming',
-        imageUrl:
-          'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=900&q=60',
-        category: 'Eğitim',
-        university: 'İTÜ',
-        description: 'Frontend ve backend hızlandırma kampı.',
-        color: '#0ea5e9',
-        club: 'Yazılım Geliştirme Kulübü',
-        semester: 'Yazılım Geliştirme Kulübü',
-        quota: '80',
-      },
-      {
-        id: 3,
-        title: 'Girişimcilik Zirvesi',
-        date: isoInDays(12),
-        time: '10:00',
-        location: 'Konferans Salonu',
-        community: 'Girişimcilik Topluluğu',
-        status: 'upcoming',
-        imageUrl:
-          'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=900&q=60',
-        category: 'İş Dünyası',
-        university: 'Hacettepe',
-        description: 'Startup panelleri ve yatırımcı sohbetleri.',
-        color: '#f59e0b',
-        club: 'Girişimcilik Topluluğu',
-        semester: 'Girişimcilik Topluluğu',
-        quota: '250',
-      },
-    ];
-  }
 
   switchTab(tab: string): void {
     this.activeTab = tab as 'overview' | 'communities' | 'events' | 'settings';
@@ -509,7 +401,7 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
   }
 
   navigateToHome() {
-    this.switchTab('overview');
+    this.router.navigate(['/']);
   }
 
   logout(): void {
@@ -792,13 +684,22 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error('Profil güncelleme hatası:', err);
-        const errorMessage = err.error?.message || err.message || 'Profil güncellenirken bir hata oluştu.';
-        this.toastService.show(errorMessage, 'error');
+        
+        // 404 hatası için özel mesaj (backend endpoint henüz mevcut değil)
+        if (err.status === 404) {
+          this.toastService.show(
+            'Profil güncelleme özelliği şu anda kullanılamıyor. Backend\'de update-profile endpoint\'i oluşturulması gerekiyor.',
+            'error'
+          );
+        } else {
+          const errorMessage = err.error?.message || err.message || 'Profil güncellenirken bir hata oluştu.';
+          this.toastService.show(errorMessage, 'error');
+        }
       },
     });
   }
 
-  async changePassword(): Promise<void> {
+  changePassword(): void {
     // Validate password change
     if (
       !this.userInfo.currentPassword ||
@@ -819,51 +720,33 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Backend'e şifre değiştirme isteği gönder
-    try {
-      const token = localStorage.getItem('auth_token');
-      if (!token) {
-        this.toastService.show('Oturum bilgisi bulunamadı. Lütfen tekrar giriş yapın.', 'error');
-        return;
-      }
+    // Backend'e şifre değiştirme isteği gönder (AuthService üzerinden)
+    this.authService
+      .changePassword(
+        this.userInfo.email,
+        this.userInfo.currentPassword,
+        this.userInfo.newPassword,
+        this.userInfo.confirmPassword
+      )
+      .subscribe({
+        next: (response) => {
+          this.toastService.show(
+            response.message || 'Şifreniz başarıyla değiştirildi',
+            'success'
+          );
 
-      const response = await fetch('/api/Auth/change-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          // Clear password fields
+          this.userInfo.currentPassword = '';
+          this.userInfo.newPassword = '';
+          this.userInfo.confirmPassword = '';
         },
-        body: JSON.stringify({
-          email: this.userInfo.email,
-          oldPassword: this.userInfo.currentPassword,
-          newPassword: this.userInfo.newPassword,
-          confirmNewPassword: this.userInfo.confirmPassword,
-        }),
+        error: (err) => {
+          console.error('Şifre değiştirme hatası:', err);
+          const errorMessage =
+            err.error?.message || err.message || 'Şifre değiştirme işlemi başarısız oldu.';
+          this.toastService.show(errorMessage, 'error');
+        },
       });
-
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        this.toastService.show('Sunucuya bağlanılamadı. Lütfen tekrar deneyiniz.', 'error');
-        return;
-      }
-
-      const data = await response.json();
-
-      if (response.ok) {
-        this.toastService.show('Şifreniz başarıyla değiştirildi', 'success');
-
-        // Clear password fields
-        this.userInfo.currentPassword = '';
-        this.userInfo.newPassword = '';
-        this.userInfo.confirmPassword = '';
-      } else {
-        const errorMessage = data?.message || 'Şifre değiştirme işlemi başarısız oldu.';
-        this.toastService.show(errorMessage, 'error');
-      }
-    } catch (error: any) {
-      console.error('Şifre değiştirme hatası:', error);
-      this.toastService.show('Bir hata oluştu. Lütfen tekrar deneyiniz.', 'error');
-    }
   }
 
   toggleProfileDropdown(event?: MouseEvent): void {

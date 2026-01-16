@@ -83,7 +83,8 @@ export class AuthService {
   // --- 1. ÖĞRENCİ GİRİŞİ ---
   // Componentlerdeki mevcut yapıyı bozmamak için wrapper kullanıyoruz.
   loginStudent(email: string, password: string): Observable<LoginResponse> {
-    return this.login(email, password, 1).pipe( // 1 = Öğrenci
+    return this.login(email, password, 1).pipe(
+      // 1 = Öğrenci
       tap(() => {
         // Frontend tarafında 'student' olduğunu garantiye alıyoruz
         // (Backend response.role dönmezse varsayılan olarak set edilebilir)
@@ -94,14 +95,16 @@ export class AuthService {
 
   // --- 2. KURUMSAL GİRİŞ ---
   loginCorporate(email: string, password: string): Observable<LoginResponse> {
-    return this.login(email, password, 2).pipe( // 2 = Kurumsal (GSB)
+    return this.login(email, password, 2).pipe(
+      // 2 = Kurumsal (GSB)
       tap(() => this.saveUserType('corporate'))
     );
   }
 
   // --- 3. TOPLULUK GİRİŞİ ---
   loginCommunity(email: string, password: string): Observable<LoginResponse> {
-    return this.login(email, password, 3).pipe( // 3 = Topluluk
+    return this.login(email, password, 3).pipe(
+      // 3 = Topluluk
       tap(() => this.saveUserType('community'))
     );
   }
@@ -115,7 +118,7 @@ export class AuthService {
       fullName: data.name,
       email: data.email,
       password: data.password,
-      roleId: 1 // 1 = Öğrenci
+      roleId: 1, // 1 = Öğrenci
     };
     return this.http.post(`${this.apiUrl}/Auth/register`, backendData);
   }
@@ -126,7 +129,7 @@ export class AuthService {
       fullName: data.name,
       email: data.email,
       password: data.password,
-      roleId: 2 // 2 = Kurumsal (GSB)
+      roleId: 2, // 2 = Kurumsal (GSB)
     };
     return this.http.post(`${this.apiUrl}/Auth/register`, backendData);
   }
@@ -137,7 +140,7 @@ export class AuthService {
       fullName: data.name,
       email: data.email,
       password: data.password,
-      roleId: 3 // 3 = Topluluk
+      roleId: 3, // 3 = Topluluk
     };
     return this.http.post(`${this.apiUrl}/Auth/register`, backendData);
   }
@@ -204,45 +207,50 @@ export class AuthService {
   /**
    * Update user profile (name)
    * Uses backend endpoint: PUT /api/Auth/update-profile
-   * Backend'de bu endpoint oluşturulmalı
+   * Backend endpoint must exist - no localStorage fallback
    */
   updateProfile(name: string): Observable<{ message: string }> {
-    const token = this.getToken();
-    if (!token) {
-      throw new Error('Profil güncellemek için giriş yapmanız gerekiyor.');
-    }
-
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    });
-
     const payload = {
       fullName: name,
     };
 
     // Backend endpoint: PUT /api/Auth/update-profile
-    return this.http.put<{ message: string }>(`${this.apiUrl}/Auth/update-profile`, payload, { headers }).pipe(
+    // Auth interceptor automatically adds Authorization header and Content-Type if token exists
+    return this.http.put<{ message: string }>(`${this.apiUrl}/Auth/update-profile`, payload).pipe(
       tap((response) => {
-        // Backend'den başarılı yanıt geldiğinde localStorage'ı da güncelle
+        // Backend'den başarılı yanıt geldiğinde localStorage'ı da güncelle (sync için)
         const user = this.getUser();
         if (user) {
           user.name = name;
           this.saveUser(user);
         }
-      }),
-      catchError((error) => {
-        // Backend endpoint yoksa veya hata varsa, sadece localStorage'a kaydet
-        if (error.status === 404) {
-          const user = this.getUser();
-          if (user) {
-            user.name = name;
-            this.saveUser(user);
-            return of({ message: 'Profil başarıyla güncellendi (localStorage).' });
-          }
-        }
-        throw error;
       })
+      // No catchError - let error interceptor handle errors
+      // If backend endpoint doesn't exist, error interceptor will show error message
     );
+  }
+
+  /**
+   * Change user password
+   * Uses backend endpoint: POST /api/Auth/change-password
+   * Backend expects: { Email, OldPassword, NewPassword, ConfirmNewPassword }
+   */
+  changePassword(
+    email: string,
+    oldPassword: string,
+    newPassword: string,
+    confirmNewPassword: string
+  ): Observable<{ message: string }> {
+    // Backend PascalCase format bekliyor
+    const payload = {
+      Email: email,
+      OldPassword: oldPassword,
+      NewPassword: newPassword,
+      ConfirmNewPassword: confirmNewPassword,
+    };
+
+    // Backend endpoint: POST /api/Auth/change-password
+    // Auth interceptor automatically adds Authorization header and Content-Type if token exists
+    return this.http.post<{ message: string }>(`${this.apiUrl}/Auth/change-password`, payload);
   }
 }

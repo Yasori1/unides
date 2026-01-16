@@ -484,21 +484,32 @@
 
         <!-- Normal Arama Modu -->
         <div *ngIf="!isBulkAddMode && modalType === 'new-member'">
-          <div class="member-search-box">
-            <span class="material-symbols-outlined search-icon">search</span>
-            <input type="text" placeholder="Ad veya e-posta ile ara" [(ngModel)]="memberSearchQuery"
-              (ngModelChange)="onMemberSearch()" (input)="onMemberSearch()" />
-            <span class="spinner" *ngIf="isSearchingMembers"></span>
-          </div>
-          <ul class="member-search-results" *ngIf="memberSearchResults.length">
-            <li *ngFor="let u of memberSearchResults" (click)="selectMemberSuggestion(u)">
-              <div class="avatar-chip">{{ getInitials(u.name) }}</div>
-              <div class="meta">
-                <strong>{{ u.name }}</strong>
-                <span>{{ u.email }}</span>
+          <!-- Email Input with Validation -->
+          <div class="email-input-wrapper" style="margin-bottom: 15px;">
+            <label class="stacked">
+              <span>E-posta Adresi</span>
+              <div class="email-input-container" style="position: relative;">
+                <input type="email" placeholder="E-posta adresi girin" [(ngModel)]="newMemberData.email"
+                  (ngModelChange)="onEmailInputChange()" (input)="onEmailInputChange()"
+                  style="padding-right: 40px; width: 100%;" />
+                <span class="email-validation-icon" *ngIf="newMemberData.email && emailValid && !emailChecking && emailInputComplete"
+                  [class.valid]="emailExists" [class.invalid]="!emailExists">
+                  <span class="material-symbols-outlined" *ngIf="emailExists" style="color: #10b981;">check_circle</span>
+                  <span class="material-symbols-outlined" *ngIf="!emailExists" style="color: #ef4444;">cancel</span>
+                </span>
+                <span class="email-validation-icon" *ngIf="emailChecking">
+                  <span class="spinner" style="width: 20px; height: 20px;"></span>
+                </span>
               </div>
-            </li>
-          </ul>
+              <small *ngIf="newMemberData.email && emailValid && !emailChecking && emailInputComplete && !emailExists" style="color: #ef4444;">
+                Bu e-posta adresi ile kayıtlı kullanıcı bulunamadı.
+              </small>
+              <!-- "Kullanıcı bulundu" mesajı sadece email tam girildiğinde gösterilsin -->
+              <small *ngIf="newMemberData.email && emailValid && emailInputComplete && emailExists && !emailChecking" style="color: #10b981;">
+                Kullanıcı bulundu.
+              </small>
+            </label>
+          </div>
         </div>
 
         <!-- Toplu Ekleme Modu -->
@@ -528,7 +539,7 @@
         </div>
 
         <button class="btn-primary full"
-          [disabled]="isBulkAddMode ? !bulkEmailsText.trim() : (!newMemberData.name || !newMemberData.email)"
+          [disabled]="isBulkAddMode ? !bulkEmailsText.trim() : (!newMemberData.email || !emailValid || (emailValid && !emailExists && !emailChecking))"
           (click)="saveMember()">
           {{ isBulkAddMode ? 'Toplu Ekle' : 'Kaydet' }}
         </button>

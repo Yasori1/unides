@@ -439,7 +439,7 @@
   </main>
 
   <!-- MODAL -->
-  <div class="modal-backdrop" *ngIf="isModalOpen" (click)="closeModal()">
+  <div class="modal-backdrop" *ngIf="isModalOpen" (click)="handleBackdropClick($event)">
     <div class="modal-content" [class.wide]="
         modalType === 'edit-community' ||
         modalType === 'new-community' ||
@@ -652,11 +652,11 @@
                 maxlength="60" />
             </div>
             <div class="form-group">
-              <label>Topluluk Başkanı E-posta (Maks. 60) <span style="color: red">*</span></label>
+              <label>Topluluk Başkanı E-posta <span style="color: red">*</span></label>
               <input type="email" [(ngModel)]="newCommunity.presidentEmail" class="modern-input"
                 placeholder="baskan@mail.com" required maxlength="60" />
               <small style="color: #666; font-size: 12px; margin-top: 4px; display: block">
-                Topluluk başkanının sistemde kayıtlı email adresi
+                Topluluk başkanının sistemde kayıtlı e-posta adresi. Bu e-posta adresi ile sistemde kayıtlı bir kullanıcı olmalıdır.
               </small>
             </div>
             <!-- Website field removed for Corporate Dashboard -->
@@ -722,6 +722,11 @@
           </div>
 
           <div class="form-group full-width">
+            <label>Topluluk Kısa Açıklama (Max 70 Karakter)</label>
+            <input type="text" [(ngModel)]="editingCommunity.shortDescription" class="modern-input"
+              placeholder="Kısa açıklama..." maxlength="70" />
+          </div>
+          <div class="form-group full-width">
             <label>Topluluk Hakkında (Maks. 500)</label>
             <textarea [(ngModel)]="editingCommunity.about" class="modern-input" rows="3"
               placeholder="Topluluk hakkında kısa bir açıklama yazın..." maxlength="500"></textarea>
@@ -753,6 +758,14 @@
               <label>E-posta (Maks. 60)</label>
               <input type="email" [(ngModel)]="editingCommunity.email" class="modern-input"
                 placeholder="topluluk@mail.com" maxlength="60" />
+            </div>
+            <div class="form-group">
+              <label>Topluluk Başkanı E-posta</label>
+              <input type="email" [value]="editingCommunity.presidentEmail || editingCommunity.comLeadMail || ''" 
+                class="modern-input" placeholder="baskan@mail.com" readonly disabled />
+              <small style="color: #666; font-size: 12px; margin-top: 4px; display: block">
+                Bu alan değiştirilemez. Topluluk başkanının sistemde kayıtlı e-posta adresidir.
+              </small>
             </div>
             <!-- Website and Social Media fields removed for Corporate Dashboard -->
           </div>
@@ -861,34 +874,30 @@
             </button>
           </div>
 
-          <!-- Beklemede olan etkinlikler için İçeriği Kontrol Et butonu (üstte) -->
-          <div class="modal-actions spaced"
-            *ngIf="selectedEvent.status === 'Beklemede' && !inspectedEvents.has(selectedEvent.id)">
-            <button class="btn-secondary" (click)="closeModal()">Kapat</button>
-            <button class="btn-info" *ngIf="!checkingSpamEvents.has(selectedEvent.id)"
-              (click)="performSpamCheck(selectedEvent.id)">
-              <span class="material-symbols-outlined">fact_check</span> İçeriği Kontrol Et
-            </button>
-          </div>
-
-          <!-- Beklemede olan etkinlikler için Onayla/Reddet butonları (içerik kontrolü yapıldıktan sonra) -->
-          <div class="modal-actions spaced" *ngIf="
-              selectedEvent.status === 'Beklemede' &&
-              inspectedEvents.has(selectedEvent.id) &&
-              !checkingSpamEvents.has(selectedEvent.id)
-            ">
-            <button class="btn-secondary" (click)="closeModal()">Kapat</button>
-            <button class="btn-success" *ngIf="isEventClean(selectedEvent.id)" (click)="approveEvent(selectedEvent.id)">
-              <span class="material-symbols-outlined">check</span> Onayla
-            </button>
-            <button class="btn-danger" (click)="rejectEvent(selectedEvent.id)">
-              <span class="material-symbols-outlined">close</span> Reddet
-            </button>
+          <!-- Beklemede olan etkinlikler için butonlar -->
+          <div class="modal-actions-column" *ngIf="selectedEvent.status === 'Beklemede'">
+            <!-- Üst satır: İçeriği Kontrol Et -->
+            <div class="modal-actions-row" *ngIf="!checkingSpamEvents.has(selectedEvent.id) && !inspectedEvents.has(selectedEvent.id)">
+              <!-- İçeriği Kontrol Et butonu (opsiyonel - kullanıcı isterse kullanabilir) -->
+              <button class="btn-info" (click)="performSpamCheck(selectedEvent.id)">
+                <span class="material-symbols-outlined">fact_check</span> İçeriği Kontrol Et
+              </button>
+            </div>
+            <!-- Alt satır: Onayla ve Reddet -->
+            <div class="modal-actions-row">
+              <!-- Onayla butonu (her zaman görünür) -->
+              <button class="btn-success" (click)="approveEvent(selectedEvent.id)">
+                <span class="material-symbols-outlined">check</span> Onayla
+              </button>
+              <!-- Reddet butonu (her zaman görünür) -->
+              <button class="btn-danger" (click)="rejectEvent(selectedEvent.id)">
+                <span class="material-symbols-outlined">close</span> Reddet
+              </button>
+            </div>
           </div>
 
           <!-- Reddedilmiş etkinlikler için Revize butonu -->
           <div class="modal-actions spaced" *ngIf="selectedEvent.status === 'Reddedildi'">
-            <button class="btn-secondary" (click)="closeModal()">Kapat</button>
             <button class="btn-warning" (click)="rejectEvent(selectedEvent.id)">
               <span class="material-symbols-outlined">edit_note</span> Revize
             </button>
@@ -899,7 +908,6 @@
 
           <!-- Onaylanmış etkinlikler için -->
           <div class="modal-actions spaced" *ngIf="selectedEvent.status === 'Onaylandı'">
-            <button class="btn-secondary" (click)="closeModal()">Kapat</button>
             <button class="btn-danger" (click)="deleteEvent(selectedEvent.id)">
               <span class="material-symbols-outlined">delete</span> Etkinliği Sil
             </button>

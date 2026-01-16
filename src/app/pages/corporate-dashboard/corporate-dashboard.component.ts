@@ -397,6 +397,9 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
             // Backend'den gelen email/comMail'i email'e map et
             email: c.email || c.comMail || '',
             comMail: c.comMail || c.email || '', // comMail'i de koru
+            // Backend'den gelen miniAbout'u shortDescription'a map et
+            miniAbout: c.miniAbout || '',
+            shortDescription: c.miniAbout || (c as any).shortDescription || '',
             // Backend'den gelen isActivity değerini status'a çevir
             // CommunityService içinde zaten dto.isActivity doğru map ediliyor
             status: c.status || (isActivity ? 'Aktif' : 'Pasif'),
@@ -456,6 +459,8 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
                   category: c.category || 'Genel',
                   email: c.email || c.comMail || '',
                   comMail: c.comMail || c.email || '',
+                  miniAbout: c.miniAbout || '',
+                  shortDescription: c.miniAbout || (c as any).shortDescription || '',
                   status: isActivity ? 'Aktif' : 'Pasif',
                   isActivity: isActivity,
                   website: undefined,
@@ -628,64 +633,6 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Demo verileri döndüren yardımcı metod
-  getMockDashboardEvents(): EventRequest[] {
-    return [
-      {
-        id: 101,
-        communityId: '1',
-        communityName: 'İTÜ - Yazılım ve Teknoloji Kulübü',
-        eventName: 'Geleceğin Teknolojileri Zirvesi',
-        date: '25 Ekim 2025',
-        location: 'Kültür Merkezi',
-        imageUrl:
-          'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=800&auto=format&fit=crop',
-        description: 'Yapay zeka ve blockchain teknolojilerinin konuşulacağı dev zirve.',
-        status: 'Beklemede',
-        capacity: '500',
-      },
-      {
-        id: 102,
-        communityId: '2',
-        communityName: 'BOUN - Müzik Topluluğu',
-        eventName: 'Kampüs Caz Festivali',
-        date: '15 Kasım 2025',
-        location: 'Çim Amfi',
-        imageUrl:
-          'https://images.unsplash.com/photo-1511192336575-5a79af67a629?q=80&w=800&auto=format&fit=crop',
-        description: 'Sonbaharın tadını caz müzikle çıkarıyoruz.',
-        status: 'Onaylandı',
-        capacity: '1200',
-      },
-      {
-        id: 103,
-        communityId: '3',
-        communityName: 'YTÜ - Fotoğrafçılık Kulübü',
-        eventName: 'İstanbul Sokakları Gezisi',
-        date: '01 Aralık 2025',
-        location: 'Eminönü Meydanı',
-        imageUrl:
-          'https://images.unsplash.com/photo-1552168324-d612d77725e3?q=80&w=800&auto=format&fit=crop',
-        description: 'Tarihi yarımadada fotoğraf turu.',
-        status: 'Revize',
-        rejectionReason: 'Etkinlik tarihi sınav haftasına denk gelmektedir.',
-        capacity: '50',
-      },
-      {
-        id: 104,
-        communityId: '4',
-        communityName: 'ODTÜ - Girişimcilik Kulübü',
-        eventName: 'Startup Pitching Day',
-        date: '20 Aralık 2025',
-        location: 'Kuluçka Merkezi',
-        imageUrl:
-          'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=800&auto=format&fit=crop',
-        description: 'Yatırımcılarla girişimcileri buluşturuyoruz.',
-        status: 'Beklemede',
-        capacity: '100',
-      },
-    ];
-  }
 
   attachCommunityNamesToEvents() {
     if (!this.allCommunities?.length || !this.allEvents?.length) return;
@@ -832,7 +779,8 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     this.selectedCommunity = community;
 
     // Backend'den detaylı veriyi çek (about ve email alanlarının doğru gelmesi için)
-    if (community.id) {
+    // ID kontrolü - geçerli bir GUID olmalı ve mock-id içermemeli
+    if (community.id && community.id !== '' && !community.id.includes('mock')) {
       this.communityService.getCommunityById(community.id).subscribe({
         next: (detailedCommunity) => {
           // Backend'den gelen detaylı veriyi editingCommunity'ye map et
@@ -842,6 +790,11 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
             about: detailedCommunity.description || detailedCommunity.about || '',
             // Backend'den gelen comMail'i email'e map et
             email: detailedCommunity.email || detailedCommunity.comMail || '',
+            // Backend'den gelen comLeadMail'i presidentEmail'e map et
+            presidentEmail: detailedCommunity.comLeadMail || (detailedCommunity as any).presidentEmail || '',
+            // Backend'den gelen miniAbout'u shortDescription'a map et
+            shortDescription: detailedCommunity.miniAbout || (detailedCommunity as any).shortDescription || '',
+            miniAbout: detailedCommunity.miniAbout || (detailedCommunity as any).shortDescription || '',
             // Diğer alanları da map et
             banner: detailedCommunity.coverImage || detailedCommunity.banner || '',
             coverImage: detailedCommunity.coverImage || detailedCommunity.banner || '',
@@ -864,15 +817,34 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
           this.isModalOpen = true;
         },
         error: (err) => {
-          // Hata durumunda mevcut veri kullanılıyor
-          // Hata durumunda mevcut veriyi kullan, ama yine de map et
+          // Backend'de pasif topluluklar için 404 döner (IsActivity kontrolü)
+          if (err.status === 404) {
+            this.showToast('Topluluk bulunamadı veya pasif durumda. Detay görüntülenemiyor.', 'error');
+            return;
+          }
+
+          // Diğer hatalar için mevcut veriyi kullan
+          console.error('Topluluk detayı yüklenirken hata:', err);
           this.editingCommunity = {
             ...community,
             about: community.description || community.about || '',
             email: community.email || (community as any).comMail || '',
+            presidentEmail: (community as any).comLeadMail || (community as any).presidentEmail || '',
+            shortDescription: community.miniAbout || (community as any).shortDescription || '',
+            miniAbout: community.miniAbout || (community as any).shortDescription || '',
             banner: community.coverImage || community.banner || '',
             coverImage: community.coverImage || community.banner || '',
             description: community.description || community.about || '',
+            status:
+              community.isActivity !== undefined
+                ? community.isActivity
+                  ? 'Aktif'
+                  : 'Pasif'
+                : community.status || 'Aktif',
+            isActivity:
+              community.isActivity !== undefined
+                ? community.isActivity
+                : community.status === 'Aktif',
           } as Community & { presidentEmail?: string; shortDescription?: string };
           this.modalType = 'edit-community';
           this.isModalOpen = true;
@@ -884,9 +856,22 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         ...community,
         about: community.description || community.about || '',
         email: community.email || (community as any).comMail || '',
+        presidentEmail: (community as any).comLeadMail || (community as any).presidentEmail || '',
+        shortDescription: community.miniAbout || (community as any).shortDescription || '',
+        miniAbout: community.miniAbout || (community as any).shortDescription || '',
         banner: community.coverImage || community.banner || '',
         coverImage: community.coverImage || community.banner || '',
         description: community.description || community.about || '',
+        status:
+          community.isActivity !== undefined
+            ? community.isActivity
+              ? 'Aktif'
+              : 'Pasif'
+            : community.status || 'Aktif',
+        isActivity:
+          community.isActivity !== undefined
+            ? community.isActivity
+            : community.status === 'Aktif',
       } as Community & { presidentEmail?: string; shortDescription?: string };
       this.modalType = 'edit-community';
       this.isModalOpen = true;
@@ -916,11 +901,21 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
 
   saveCommunity() {
     if (this.editingCommunity) {
+      // ID kontrolü - geçerli bir GUID olmalı
+      if (!this.editingCommunity.id || this.editingCommunity.id === '' || this.editingCommunity.id.includes('mock')) {
+        this.showToast('Topluluk ID\'si geçersiz. Lütfen sayfayı yenileyip tekrar deneyin.', 'error');
+        return;
+      }
+
       // CommunityService'e kaydet (communities-page'e otomatik eklenir)
       const communityForService = {
         ...this.editingCommunity,
-        description: this.editingCommunity.about || '',
-        coverImage: this.editingCommunity.banner || '',
+        id: this.editingCommunity.id, // ID'yi açıkça ekle
+        about: this.editingCommunity.about || this.editingCommunity.description || '', // Detaylı açıklama (backend ComAbout)
+        description: this.editingCommunity.about || this.editingCommunity.description || '', // description da about'a eşit
+        miniAbout: this.editingCommunity.miniAbout || (this.editingCommunity as any).shortDescription || '', // Kısa açıklama (backend MiniAbout)
+        coverImage: this.editingCommunity.banner || this.editingCommunity.coverImage || '',
+        banner: this.editingCommunity.banner || this.editingCommunity.coverImage || '',
         // Status alanını açıkça ekle (butonlardan gelen değer)
         status: this.editingCommunity.status || 'Aktif',
         // isActivity değerini status'a göre güncelle (status öncelikli)
@@ -948,6 +943,10 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
               description: updatedCommunity.description || updatedCommunity.about || '',
               city: updatedCommunity.city || '',
               category: updatedCommunity.category || 'Genel',
+              email: updatedCommunity.email || updatedCommunity.comMail || '',
+              comMail: updatedCommunity.comMail || updatedCommunity.email || '',
+              miniAbout: updatedCommunity.miniAbout || '',
+              shortDescription: updatedCommunity.miniAbout || (updatedCommunity as any).shortDescription || '',
               status:
                 updatedCommunity.isActivity !== undefined
                   ? updatedCommunity.isActivity
@@ -996,6 +995,8 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
             errorMessage = 'Oturum açmanız gerekiyor. Lütfen tekrar giriş yapın.';
           } else if (err.status === 403) {
             errorMessage = err.error?.message || 'Bu işlem için yetkiniz bulunmamaktadır.';
+          } else if (err.status === 404) {
+            errorMessage = 'Topluluk bulunamadı. Lütfen sayfayı yenileyip tekrar deneyin.';
           } else if (err.status === 500) {
             // Backend'den gelen hata mesajını göster
             const serverMessage = err.error?.message || err.error || 'Sunucu hatası oluştu.';
@@ -1042,14 +1043,51 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       const communityForService = {
         ...this.newCommunity,
         id: '', // Service otomatik ID (Guid) atayacak - string olmalı
-        description: (this.newCommunity as any).shortDescription || '', // Kısa açıklama description'a
-        about: this.newCommunity.about || '', // Detaylı açıklama about'a
+        miniAbout: (this.newCommunity as any).shortDescription || '', // Kısa açıklama miniAbout'a (backend MiniAbout)
+        about: this.newCommunity.about || '', // Detaylı açıklama about'a (backend ComAbout)
+        description: this.newCommunity.about || '', // description da about'a eşit
         coverImage: this.newCommunity.banner || '',
+        banner: this.newCommunity.banner || '',
         presidentEmail: presidentEmail.trim(),
-      } as Community & { presidentEmail?: string };
+        status: this.newCommunity.status || 'Aktif', // Status'u ekle
+      } as Community & { presidentEmail?: string; shortDescription?: string };
 
       this.communityService.addOrUpdateCommunity(communityForService).subscribe({
-        next: () => {
+        next: (createdCommunity) => {
+          // Backend'den dönen topluluğu listeye ekle
+          if (createdCommunity) {
+            const { website, webSiteUrl, instagram, instagramUrl, socialMedia, ...rest } = createdCommunity;
+            const mappedCommunity = {
+              ...rest,
+              about: createdCommunity.description || createdCommunity.about || '',
+              banner: createdCommunity.coverImage || createdCommunity.banner || '',
+              coverImage: createdCommunity.coverImage || createdCommunity.banner || '',
+              description: createdCommunity.description || createdCommunity.about || '',
+              city: createdCommunity.city || '',
+              category: createdCommunity.category || 'Genel',
+              email: createdCommunity.email || createdCommunity.comMail || '',
+              comMail: createdCommunity.comMail || createdCommunity.email || '',
+              miniAbout: createdCommunity.miniAbout || '',
+              shortDescription: createdCommunity.miniAbout || (createdCommunity as any).shortDescription || '',
+              status:
+                createdCommunity.isActivity !== undefined
+                  ? createdCommunity.isActivity
+                    ? 'Aktif'
+                    : 'Pasif'
+                  : createdCommunity.status || 'Aktif',
+              isActivity:
+                createdCommunity.isActivity !== undefined
+                  ? createdCommunity.isActivity
+                  : createdCommunity.status === 'Aktif',
+              website: undefined,
+              webSiteUrl: undefined,
+              instagram: undefined,
+              instagramUrl: undefined,
+              socialMedia: undefined,
+            } as Community;
+            this.allCommunities.push(mappedCommunity);
+            this.applyFilters();
+          }
           // Service'ten güncel veriyi tekrar yükle
           this.loadCommunitiesFromService();
           this.showToast('Topluluk başarıyla eklendi', 'success');
@@ -1737,19 +1775,59 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       capacity: this.newEvent.capacity || '',
     };
     this.allEvents = [newItem, ...this.allEvents];
-    this.showToast('Etkinlik eklendi (mock)', 'success');
+    this.showToast('Etkinlik eklendi', 'success');
     this.closeModal();
   }
 
   deleteEvent(id: number) {
     this.allEvents = this.allEvents.filter((e) => e.id !== id);
-    this.showToast('Etkinlik silindi (mock)', 'success');
+    this.showToast('Etkinlik silindi', 'success');
     this.closeModal();
   }
 
   openModal(type: string) {
     this.modalType = type;
     this.isModalOpen = true;
+  }
+
+  // Belirli modal tipleri için backdrop click ve ESC tuşu ile kapanmayı engelle
+  private shouldPreventAutoClose(): boolean {
+    const preventCloseTypes = [
+      'new-community',
+      'edit-community',
+      'new-event',
+      'event-detail',
+      'new-announcement',
+      'edit-announcement'
+    ];
+    return preventCloseTypes.includes(this.modalType);
+  }
+
+  // Backdrop'a tıklanınca çağrılır - belirli modal tipleri için kapanmayı engelle
+  handleBackdropClick(event: MouseEvent) {
+    if (this.shouldPreventAutoClose()) {
+      // Belirli modal tipleri için backdrop click ile kapanmayı engelle
+      event.stopPropagation();
+      return;
+    }
+    // Diğer modal tipleri için normal kapanma davranışı
+    this.closeModal();
+  }
+
+  // ESC tuşu ile kapanmayı engelle
+  @HostListener('document:keydown.escape', ['$event'])
+  handleEscapeKey(event: Event) {
+    const keyboardEvent = event as KeyboardEvent;
+    if (this.isModalOpen && this.shouldPreventAutoClose()) {
+      // Belirli modal tipleri için ESC tuşu ile kapanmayı engelle
+      keyboardEvent.preventDefault();
+      keyboardEvent.stopPropagation();
+      return;
+    }
+    // Diğer modal tipleri için normal kapanma davranışı
+    if (this.isModalOpen && !this.shouldPreventAutoClose()) {
+      this.closeModal();
+    }
   }
 
   closeModal() {

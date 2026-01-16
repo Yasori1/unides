@@ -14,7 +14,13 @@ import { routes } from './app.routes';
 import { provideClientHydration } from '@angular/platform-browser';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { AuthService } from './services/auth.services';
+import { errorInterceptor } from './interceptors/error.interceptor';
 
+/**
+ * Auth Interceptor
+ * Automatically attaches Authorization Bearer token to all HTTP requests
+ * Handles FormData requests correctly (doesn't set Content-Type for multipart)
+ */
 const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn) => {
   const authService = inject(AuthService);
   const token = authService.getToken();
@@ -50,7 +56,12 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideClientHydration(),
     provideAnimationsAsync(),
-    provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
+    // Interceptors are applied in order: authInterceptor first, then errorInterceptor
+    // NOTE: Ensure the remote server (72.62.37.160:8080) CORS policy allows 'http://localhost:4200' for development
+    provideHttpClient(
+      withFetch(), 
+      withInterceptors([authInterceptor, errorInterceptor])
+    ),
     { provide: LOCALE_ID, useValue: 'tr' },
   ],
 };

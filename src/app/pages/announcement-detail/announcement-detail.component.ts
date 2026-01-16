@@ -26,8 +26,8 @@ export class AnnouncementDetailComponent implements OnInit {
   heroMoveY = 0;
   copyLinkSuccess = false;
 
-  // Demo Data (Same as list page)
-  private demoMinistryData: ExtendedAnnouncement[] = [
+  // demoMinistryData kaldırıldı - artık backend'den veri çekiliyor
+  private demoMinistryData_DEPRECATED: ExtendedAnnouncement[] = [
     {
       id: 901,
       title: 'YÖK 2024-2025 Akademik Takvim Genelgesi Yayınlandı',
@@ -124,23 +124,13 @@ export class AnnouncementDetailComponent implements OnInit {
           this.loadRecentAnnouncements(id);
           this.isLoading = false;
         } else {
-          // Backend'den veri gelmediyse demo data'ya bak
-          const demo = this.demoMinistryData.find(a => Number(a.id) === Number(id));
-          if (demo) {
-            this.announcement = demo;
-            this.loadRecentAnnouncements(id);
-          }
+          // Backend'den veri gelmediyse hata göster
+          this.isLoading = false;
           this.isLoading = false;
         }
       },
       error: (err) => {
-        console.error('Duyuru detayı yüklenemedi, demo data aranıyor:', err);
-        // Hata durumunda demo data'ya fallback yap
-        const demo = this.demoMinistryData.find(a => Number(a.id) === Number(id));
-        if (demo) {
-          this.announcement = demo;
-          this.loadRecentAnnouncements(id);
-        }
+        console.error('Duyuru detayı yüklenemedi:', err);
         this.isLoading = false;
       }
     });
@@ -168,11 +158,8 @@ export class AnnouncementDetailComponent implements OnInit {
         }));
       },
       error: (err) => {
-        console.error('İlgili duyurular yüklenemedi, demo data kullanılıyor:', err);
-        // Hata durumunda demo data'dan fallback yap
-        this.recentAnnouncements = this.demoMinistryData
-          .filter(a => a.id !== currentId)
-          .slice(0, 4);
+        console.error('İlgili duyurular yüklenemedi:', err);
+        this.recentAnnouncements = [];
       }
     });
   }

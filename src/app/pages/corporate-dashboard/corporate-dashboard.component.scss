@@ -834,6 +834,106 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
   gap: 10px;
 }
 
+// İki satırlı buton düzeni için
+.modal-actions-column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 20px;
+  border-top: 1px solid $border;
+  margin-top: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  flex-shrink: 0;
+
+  .modal-actions-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 10px;
+
+      button {
+        width: 100%;
+      }
+    }
+
+    button {
+      flex: 1;
+      min-width: 0;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: 0.2s;
+      font-family: inherit;
+      border: none;
+    }
+
+    .btn-secondary {
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid #cbd5e1;
+
+      &:hover {
+        background: #e2e8f0;
+        border-color: #94a3b8;
+      }
+    }
+
+    .btn-info {
+      background: #3b82f6;
+      color: white;
+
+      &:hover {
+        background: #2563eb;
+      }
+    }
+
+    .btn-success {
+      background: #ecfdf5;
+      color: $success;
+      border: 1px solid #a7f3d0;
+
+      &:hover {
+        background: $success;
+        color: white;
+        border-color: $success;
+      }
+    }
+
+    .btn-danger {
+      background: #fff1f2;
+      color: $danger;
+      border: 1px solid #fecaca;
+
+      &:hover {
+        background: $danger;
+        color: white;
+        border-color: $danger;
+      }
+    }
+  }
+
+  // Üst satırdaki tek buton (İçeriği Kontrol Et) alt satırdaki iki butonun toplam genişliği kadar olsun
+  .modal-actions-row:first-child {
+    button:only-child {
+      width: 100%;
+      flex: 1 1 100%;
+      margin-left: 0;
+      max-width: 100%;
+    }
+  }
+}
+
 .top-header {
   height: 72px;
   background: rgba(255, 255, 255, 0.85);
