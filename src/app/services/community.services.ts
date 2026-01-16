@@ -523,7 +523,7 @@ export class CommunityService {
   // kullanıcının var olup olmadığını kontrol ediyoruz
   // NOT: Bu metod sadece kontrol amaçlıdır, ama eğer kullanıcı varsa ve üye değilse ekler
   // Bu yüzden sadece kontrol için kullanılmalı, gerçek ekleme işlemi için addMember kullanılmalı
-  checkUserExistsByEmail(email: string): Observable<{ exists: boolean; name?: string; message?: string }> {
+  checkUserExistsByEmail(email: string): Observable<{ exists: boolean; name?: string; message?: string; roleId?: number; isCorporate?: boolean }> {
     if (!email || !email.trim()) {
       return of({ exists: false, message: 'Email adresi boş olamaz' });
     }
@@ -546,20 +546,44 @@ export class CommunityService {
       map(() => {
         // Success: Kullanıcı var ve eklendi
         // NOT: Bu durumda kullanıcı gerçekten eklenmiş olur, bu yüzden dikkatli kullanılmalı
-        return { exists: true, message: 'Kullanıcı bulundu ve eklendi' };
+        return { exists: true, message: 'Kullanıcı bulundu ve eklendi', roleId: 1, isCorporate: false };
       }),
       catchError((error: any) => {
+        // 400: Bad Request - Email formatı hatası (örn: edu.tr uzantılı olmalı)
+        if (error.status === 400) {
+          // Backend'den gelen mesajı al
+          // error.error hem string hem de object olabilir
+          let errorMessage = 'Geçersiz e-posta formatı';
+          if (typeof error.error === 'string') {
+            errorMessage = error.error;
+          } else if (error.error?.error) {
+            errorMessage = error.error.error;
+          } else if (error.error?.message) {
+            errorMessage = error.error.message;
+          }
+          return of({ 
+            exists: false, 
+            message: errorMessage,
+            roleId: null,
+            isCorporate: false
+          });
+        }
         // 404: Kullanıcı bulunamadı
         if (error.status === 404) {
           return of({ exists: false, message: error.error?.message || 'Kullanıcı bulunamadı' });
         }
         // 409: Kullanıcı zaten üye (kullanıcı var demektir)
         if (error.status === 409) {
-          return of({ exists: true, message: 'Kullanıcı zaten üye' });
+          return of({ exists: true, message: 'Kullanıcı zaten üye', roleId: 1, isCorporate: false });
         }
-        // 403: GSB yetkilisi (kullanıcı var demektir)
+        // 403: GSB yetkilisi (Role ID: 2) - Kurumsal yetkililer eklenemez
         if (error.status === 403) {
-          return of({ exists: true, message: 'GSB yetkilisi eklenemez' });
+          return of({ 
+            exists: true, 
+            message: error.error?.message || 'GSB yetkilisi eklenemez',
+            roleId: 2,
+            isCorporate: true 
+          });
         }
         // Diğer hatalar: Kullanıcı var olabilir, ama başka bir sorun var
         // Bu durumda kullanıcının var olduğunu varsayalım

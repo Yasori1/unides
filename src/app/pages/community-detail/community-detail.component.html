@@ -65,7 +65,7 @@
             
             <!-- Etkinlik Varsa -->
             <div class="upcoming-events-grid" *ngIf="upcomingEvents.length > 0">
-              <div class="upcoming-event-card" *ngFor="let event of upcomingEvents">
+              <div class="upcoming-event-card" *ngFor="let event of upcomingEvents" (click)="navigateToEvent(event.id)" style="cursor: pointer;">
                 <div class="event-card-image" *ngIf="event.imageUrl">
                   <img [src]="event.imageUrl" [alt]="event.title" />
                 </div>

@@ -1,13 +1,15 @@
 .toast-container {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  pointer-events: none; // Tıklamalar arkadaki elemanlara geçsin (boşluklarda)
+  position: fixed !important;
+  bottom: 20px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  z-index: 999999 !important; // Modal'ların (z-index: 3000-10000) üzerinde görünmesi için çok yüksek z-index
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  pointer-events: none !important; // Tıklamalar arkadaki elemanlara geçsin (boşluklarda)
+  // Modal'ların dışında render edilmesini garanti et
+  isolation: isolate; // Yeni stacking context oluştur
 }
 
 .toast-card {

@@ -22,7 +22,7 @@ $primary-dark: #0f172a;
 }
 
 .brand {
-  margin-left: 0;
+  margin-left: -20px; /* Logo'yu sola kaydır */
   pointer-events: auto; /* Logo tıklanabilir olmalı */
   
   img.logo-transparent {
@@ -37,6 +37,7 @@ $primary-dark: #0f172a;
   display: flex;
   align-items: center;
   gap: 15px;
+  margin-right: -20px; /* Sağ taraftaki profil bilgisini sola kaydır */
   pointer-events: auto; /* Butonlar tıklanabilir olmalı */
   opacity: 0;
   transition: opacity 0.2s ease-in-out;

@@ -13,6 +13,7 @@ import { AfkDetectionService } from '../../services/afk-detection.service';
 import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 // ==========================================
 // MAIN DASHBOARD COMPONENT
@@ -1349,9 +1350,8 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       created_at: ev.startDate || new Date().toISOString(),
     };
 
-    // API'ye istek gönder (proxy üzerinden - CORS hatası önlemek için)
-    // Proxy bu isteği http://72.62.37.160:5002/api/moderate adresine yönlendirecek
-    const apiUrl = '/api/moderate';
+    // API'ye istek gönder (unidesportal.com üzerinden)
+    const apiUrl = environment.spamBotApiUrl || 'https://unidesportal.com/spam-check';
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
       Accept: 'application/json',

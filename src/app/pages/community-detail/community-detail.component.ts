@@ -221,6 +221,10 @@ export class CommunityDetailComponent implements OnInit {
     }
   }
 
+  navigateToEvent(eventId: number): void {
+    this.router.navigate(['/events', eventId]);
+  }
+
   formatEventDate(dateString: string): string {
     try {
       const date = new Date(dateString);

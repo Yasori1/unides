@@ -878,10 +878,16 @@
           <div class="modal-actions-column" *ngIf="selectedEvent.status === 'Beklemede'">
             <!-- Üst satır: İçeriği Kontrol Et -->
             <div class="modal-actions-row" *ngIf="!checkingSpamEvents.has(selectedEvent.id) && !inspectedEvents.has(selectedEvent.id)">
-              <!-- İçeriği Kontrol Et butonu (opsiyonel - kullanıcı isterse kullanabilir) -->
-              <button class="btn-info" (click)="performSpamCheck(selectedEvent.id)">
-                <span class="material-symbols-outlined">fact_check</span> İçeriği Kontrol Et
-              </button>
+              <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+                <!-- İçeriği Kontrol Et butonu (opsiyonel - kullanıcı isterse kullanabilir) -->
+                <button class="btn-info" (click)="performSpamCheck(selectedEvent.id)">
+                  <span class="material-symbols-outlined">fact_check</span> İçeriği Kontrol Et
+                </button>
+                <!-- Uyarı mesajı -->
+                <small style="color: #64748b; font-size: 11px; text-align: center; font-weight: 400;">
+                  spam kontrolü hata yapabilir. önemli bilgileri kontrol edin
+                </small>
+              </div>
             </div>
             <!-- Alt satır: Onayla ve Reddet -->
             <div class="modal-actions-row">

@@ -7,9 +7,11 @@ import { ImageUploadComponent } from '../../components/ui/image-upload/image-upl
 import { CommunityService, Community } from '../../services/community.services';
 import { EventService } from '../../services/event.services';
 import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
+import { ToastComponent } from '../../components/ui/toast/toast.component';
 import { AfkDetectionService } from '../../services/afk-detection.service';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 // --- Interfaces ---
 interface Project {
@@ -76,7 +78,7 @@ interface DashboardEvent {
 @Component({
   selector: 'app-community-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, ImageUploadComponent, LumaSpinComponent],
+  imports: [CommonModule, FormsModule, ImageUploadComponent, LumaSpinComponent, ToastComponent],
   templateUrl: './community-dashboard.component.html',
   styleUrls: ['./community-dashboard.component.scss'],
 })
@@ -100,6 +102,9 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
   emailExists = false;
   emailValid = false;
   emailInputComplete = false; // Email tam girildi mi kontrolü
+  emailUserRoleId: number | null = null; // Kullanıcının role ID'si (2 = GSB/Kurumsal)
+  emailIsCorporate: boolean = false; // Kullanıcı kurumsal yetkili mi?
+  emailErrorMessage: string | null = null; // Backend'den gelen hata mesajı
   private emailCheckTimeout: any;
   confirmDeleteId: number | null = null;
   confirmDeleteType: 'member' | 'event' = 'member';
@@ -916,6 +921,9 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     this.emailExists = false;
     this.emailValid = false;
     this.emailInputComplete = false;
+    this.emailUserRoleId = null;
+    this.emailIsCorporate = false;
+    this.emailErrorMessage = null;
     if (this.emailCheckTimeout) {
       clearTimeout(this.emailCheckTimeout);
       this.emailCheckTimeout = null;
@@ -1157,18 +1165,36 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // ALGORİTMA SIRALAMASI (ÖNEMLİ):
+    // 1. Email formatı kontrolü (zaten yapıldı - isValidEmail kontrolü)
+    // 2. GSB/Kurumsal yetkili kontrolü (EN ÖNCE - eklenemez)
+    // 3. Kullanıcı varlığı kontrolü
+    // 4. Ekleme işlemi
+    
+    // 1. Email formatı kontrolü (zaten yapıldı - isValidEmail kontrolü)
+    
+    // 2. GSB/Kurumsal yetkili kontrolü (EN ÖNCE - eklenemez)
+    if (this.emailIsCorporate || this.emailUserRoleId === 2) {
+      this.showToast('GSB Yetkilisi eklenemez.', 'error');
+      return;
+    }
+    
+    // 3. Kullanıcı varlığı kontrolü - Kullanıcı var mı?
     if (!this.emailExists) {
-      this.showToast('Bu e-posta adresi ile kayıtlı kullanıcı bulunamadı.', 'error');
+      // Backend'den gelen hata mesajını göster
+      const errorMsg = this.emailErrorMessage || 'Bu e-posta adresi ile kayıtlı kullanıcı bulunamadı.';
+      this.showToast(errorMsg, 'error');
       return;
     }
 
-    // Community ID kontrolü
+    // 4. Community ID kontrolü
     const communityId = this.clubInfo?.id;
     if (!communityId) {
       this.showToast('Topluluk bilgisi bulunamadı.', 'error');
       return;
     }
 
+    // 5. Ekleme işlemi
     this.proceedWithAddMember();
   }
 
@@ -1436,28 +1462,110 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     // Bu yüzden eğer kullanıcı eklendiyse (200 response), kullanıcı zaten üye olarak eklenmiş demektir
     this.communityService.checkUserExistsByEmail(email).subscribe({
       next: (result) => {
+        // Debug: Backend'den gelen sonucu logla
+        console.log('Email kontrol sonucu:', result);
+
+        // Backend'den gelen hata mesajını sakla
+        this.emailErrorMessage = result.message || null;
+
         // Email tam girildiyse emailExists'i güncelle (mesaj gösterilebilir)
         // Email tam girilmediyse emailExists'i false yap (mesaj gösterilmemeli)
         if (this.emailInputComplete) {
-          this.emailExists = result.exists;
+          // ALGORİTMA SIRALAMASI (ÖNEMLİ):
+          // 1. Önce GSB/Kurumsal yetkili kontrolü (403) - EN ÖNEMLİ
+          // 2. Sonra email formatı kontrolü (400)
+          // 3. Sonra kullanıcı varlığı kontrolü (404)
+          // 4. Sonra zaten üye kontrolü (409)
+          // 5. Sonra başarılı ekleme (200)
+
+          // 1. GSB/Kurumsal yetkili kontrolü (EN ÖNCE)
+          const isCorporateUser = result.roleId === 2 || result.isCorporate === true;
+          if (isCorporateUser) {
+            // GSB/Kurumsal yetkililer eklenemez
+            this.emailExists = false; // Eklenemez olduğu için false
+            this.emailIsCorporate = true;
+            this.emailUserRoleId = 2;
+            this.emailErrorMessage = result.message || 'GSB Yetkilisi eklenemez.';
+            console.log('GSB/Kurumsal yetkili tespit edildi - eklenemez', { 
+              roleId: result.roleId, 
+              isCorporate: result.isCorporate,
+              exists: result.exists 
+            });
+          }
+          // 2. Email formatı hatası (400) - exists: false döner
+          else if (result.exists === false && (result.message?.includes('edu.tr') || result.message?.includes('uzantılı'))) {
+            // Email formatı geçersiz (örn: edu.tr uzantılı olmalı)
+            this.emailExists = false;
+            this.emailIsCorporate = false;
+            this.emailUserRoleId = null;
+            this.emailErrorMessage = result.message || 'Sadece .edu.tr uzantılı e-posta adresleri eklenebilir.';
+            console.log('Email formatı geçersiz', { 
+              exists: result.exists, 
+              message: result.message 
+            });
+          }
+          // 3. Kullanıcı bulunamadı (404) - exists: false döner
+          else if (result.exists === false) {
+            // Kullanıcı bulunamadı
+            this.emailExists = false;
+            this.emailIsCorporate = false;
+            this.emailUserRoleId = null;
+            this.emailErrorMessage = result.message || 'Bu e-posta adresi ile kayıtlı kullanıcı bulunamadı.';
+            console.log('Kullanıcı bulunamadı', { 
+              exists: result.exists, 
+              message: result.message 
+            });
+          }
+          // 4. Zaten üye (409) - exists: true döner
+          else if (result.exists === true && result.message?.includes('zaten üye')) {
+            // Kullanıcı zaten üye
+            this.emailExists = true;
+            this.emailIsCorporate = false;
+            this.emailUserRoleId = result.roleId || 1;
+            this.emailErrorMessage = result.message || 'Kullanıcı zaten üye.';
+            console.log('Kullanıcı zaten üye', { 
+              exists: result.exists, 
+              message: result.message 
+            });
+          }
+          // 5. Başarılı ekleme (200) - exists: true döner
+          else if (result.exists === true) {
+            // Normal kullanıcı - eklenebilir (kontrol sırasında eklenmiş olabilir)
+            this.emailExists = true;
+            this.emailIsCorporate = false;
+            this.emailUserRoleId = result.roleId || 1;
+            this.emailErrorMessage = null; // Hata yok
+            console.log('Normal kullanıcı tespit edildi - eklenebilir', { 
+              roleId: result.roleId, 
+              isCorporate: result.isCorporate,
+              exists: result.exists 
+            });
+          }
+          // Diğer durumlar
+          else {
+            // Bilinmeyen durum
+            this.emailExists = false;
+            this.emailIsCorporate = false;
+            this.emailUserRoleId = null;
+            this.emailErrorMessage = result.message || 'Kullanıcı kontrol edilemedi.';
+            console.log('Bilinmeyen durum', { 
+              exists: result.exists, 
+              message: result.message 
+            });
+          }
         } else {
           // Email tam girilmedi, mesaj gösterilmemeli
           this.emailExists = false;
+          this.emailIsCorporate = false;
+          this.emailUserRoleId = null;
+          this.emailErrorMessage = null;
         }
         this.emailChecking = false;
 
         // Eğer kullanıcı bulunduysa ve isim yoksa, ismi email'den çıkar (sadece email tam girildiyse)
-        if (result.exists && !this.newMemberData.name && this.emailInputComplete) {
+        // Ama kurumsal yetkili değilse ve kullanıcı eklenebilir durumda
+        if (this.emailExists && !this.emailIsCorporate && !this.newMemberData.name && this.emailInputComplete) {
           this.newMemberData.name = this.getNameFromEmail(email);
-        }
-
-        // Eğer kullanıcı eklendiyse (result.message === 'Kullanıcı bulundu ve eklendi'),
-        // kullanıcı zaten üye olarak eklenmiş demektir
-        // Bu durumda kullanıcıya bilgi verilebilir, ama şimdilik sadece state'i güncelliyoruz
-        if (result.message === 'Kullanıcı bulundu ve eklendi') {
-          // Kullanıcı zaten eklenmiş, bu yüzden "Kaydet" butonuna tıklandığında
-          // backend "zaten ekli" hatası döndürecek, ama bu sorun değil
-          console.log('Kullanıcı kontrol sırasında zaten eklenmiş');
         }
       },
       error: (err) => {
@@ -1470,6 +1578,9 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
           // Email tam girildi ama hata var, emailExists'i false yap
           this.emailExists = false;
         }
+        // Role bilgilerini sıfırla
+        this.emailUserRoleId = null;
+        this.emailIsCorporate = false;
       },
     });
   }
@@ -2096,8 +2207,8 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
         created_at: eventData.startDate || new Date().toISOString(),
       };
 
-      // API'ye istek gönder (proxy üzerinden - CORS hatası önlemek için)
-      const apiUrl = '/spam-check'; // Proxy bu isteği http://72.62.37.160:5002/check adresine yönlendirecek
+      // API'ye istek gönder (unidesportal.com üzerinden)
+      const apiUrl = environment.spamBotApiUrl || 'https://unidesportal.com/spam-check';
       const headers = new HttpHeaders({
         'Content-Type': 'application/json',
         Accept: 'application/json',

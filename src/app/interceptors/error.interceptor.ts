@@ -13,9 +13,12 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
       // Skip error handling for certain endpoints (e.g., public endpoints that might return 404)
+      // Ayrıca email validation için kullanılan endpoint'ler için toast gösterilmemeli
+      // çünkü component'te zaten mesaj gösteriliyor
       const skipErrorHandling = req.url.includes('/api/Search') || 
                                 req.url.includes('/api/About') ||
-                                req.url.includes('/api/Forkod');
+                                req.url.includes('/api/Forkod') ||
+                                (req.url.includes('/api/Communities/me/members') && req.method === 'POST');
 
       if (skipErrorHandling) {
         return throwError(() => error);

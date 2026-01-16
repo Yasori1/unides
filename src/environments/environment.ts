@@ -1,7 +1,12 @@
 export const environment = {
   production: false,
-  // Backend API URL - Development (Direkt sunucu - CORS backend'de açık)
-  apiUrl: 'http://72.62.37.160:8080/api',
+  // Kendi bilgisayarında 'ng serve' yaparken burası çalışır
+  // Proxy kullanıyorsanız: http://localhost:4200/api (proxy.conf.json üzerinden backend'e yönlendirilir)
+  // Proxy kullanmıyorsanız ve backend localhost'ta çalışıyorsa: http://localhost:5000/api veya http://localhost:7001/api
+  // Remote sunucu kullanmak istiyorsanız: http://72.62.37.160:8080/api
+  apiUrl: 'https://unidesportal.com/api', // Proxy üzerinden çalışır (proxy.conf.json ile backend'e yönlendirilir)
   // Flask Chatbot API URL - Development
-  chatbotApiUrl: 'http://72.62.37.160:5001', // Chatbot sunucu URL'si
+  chatbotApiUrl: 'https://unidesportal.com/chatbot', // Chatbot sunucu URL'si
+  // Spam Bot API URL - Development
+  spamBotApiUrl: 'https://unidesportal.com/spam-check', // Spam kontrol sunucu URL'si
 };
