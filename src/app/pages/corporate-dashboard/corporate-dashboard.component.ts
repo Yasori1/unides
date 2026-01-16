@@ -273,6 +273,10 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     link: '',
   };
 
+  // Bekleyen görsel dosyaları - duyuru ID alındıktan sonra yüklenecek
+  pendingNewAnnouncementImage: File | null = null;
+  pendingEditAnnouncementImage: File | null = null;
+
   allEvents: EventRequest[] = [];
   selectedEvent: EventRequest | null = null;
   eventToReject: EventRequest | null = null;
@@ -1776,29 +1780,40 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         title: this.newAnnouncement.title.trim(),
         shortDescription: this.newAnnouncement.shortDescription?.trim(),
         content: this.newAnnouncement.content?.trim(),
-        image: this.newAnnouncement.image?.trim(),
+        image: '', // Görsel daha sonra yüklenecek
         link: this.newAnnouncement.link?.trim(),
         date: new Date().toISOString(), // ISO 8601 formatında tam tarih-saat
       })
       .subscribe({
         next: (announcementId) => {
-          // Başarılı - Duyuruları yeniden yükle (announcements-page'e otomatik eklenir)
-          this.loadAnnouncementsFromService();
-          this.showToast('Duyuru başarıyla yayınlandı', 'success');
-
-          // Formu temizle
-          this.newAnnouncement = {
-            title: '',
-            shortDescription: '',
-            content: '',
-            image: '',
-            link: '',
-          };
-          this.closeModal();
+          // Duyuru oluşturuldu, şimdi bekleyen görsel varsa yükle
+          if (this.pendingNewAnnouncementImage) {
+            this.announcementService.uploadImage(announcementId, this.pendingNewAnnouncementImage).subscribe({
+              next: (imagePath) => {
+                // Görsel yüklendi, duyuruları yeniden yükle
+                this.loadAnnouncementsFromService();
+                this.showToast('Duyuru ve görsel başarıyla yayınlandı', 'success');
+                this.resetNewAnnouncementForm();
+                this.closeModal();
+              },
+              error: (err) => {
+                // Görsel yüklenemedi ama duyuru oluşturuldu
+                console.error('Görsel yüklenemedi:', err);
+                this.loadAnnouncementsFromService();
+                this.showToast('Duyuru oluşturuldu ancak görsel yüklenemedi', 'error');
+                this.resetNewAnnouncementForm();
+                this.closeModal();
+              }
+            });
+          } else {
+            // Görsel yok, sadece duyuru oluşturuldu
+            this.loadAnnouncementsFromService();
+            this.showToast('Duyuru başarıyla yayınlandı', 'success');
+            this.resetNewAnnouncementForm();
+            this.closeModal();
+          }
         },
         error: (error) => {
-          // Hata zaten toast ile gösteriliyor
-
           // Daha detaylı hata mesajı
           let errorMessage = 'Duyuru oluşturulurken bir hata oluştu';
           if (error.error?.message) {
@@ -1816,6 +1831,18 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
           this.showToast(errorMessage, 'error');
         },
       });
+  }
+
+  // Yeni duyuru formunu temizle
+  private resetNewAnnouncementForm() {
+    this.newAnnouncement = {
+      title: '',
+      shortDescription: '',
+      content: '',
+      image: '',
+      link: '',
+    };
+    this.pendingNewAnnouncementImage = null;
   }
 
   // Duyuruları API'den yükle
@@ -1898,20 +1925,39 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         title: this.editingAnnouncement.title,
         shortDescription: this.editingAnnouncement.shortDescription,
         content: this.editingAnnouncement.content,
-        image: this.editingAnnouncement.image,
+        image: this.pendingEditAnnouncementImage ? '' : this.editingAnnouncement.image, // Yeni görsel yüklenecekse boş bırak
         link: this.editingAnnouncement.link,
         date: dateValue, // ISO formatında veya undefined
       })
       .subscribe({
         next: () => {
-          // Başarılı - Duyuruları yeniden yükle (announcements-page'e otomatik güncellenir)
-          this.loadAnnouncementsFromService();
-          this.showToast('Duyuru başarıyla güncellendi', 'success');
-          this.closeModal();
+          // Duyuru güncellendi, bekleyen görsel varsa yükle
+          if (this.pendingEditAnnouncementImage) {
+            this.announcementService.uploadImage(announcementId, this.pendingEditAnnouncementImage).subscribe({
+              next: (imagePath) => {
+                // Görsel yüklendi
+                this.loadAnnouncementsFromService();
+                this.showToast('Duyuru ve görsel başarıyla güncellendi', 'success');
+                this.pendingEditAnnouncementImage = null;
+                this.closeModal();
+              },
+              error: (err) => {
+                // Görsel yüklenemedi ama duyuru güncellendi
+                console.error('Görsel yüklenemedi:', err);
+                this.loadAnnouncementsFromService();
+                this.showToast('Duyuru güncellendi ancak görsel yüklenemedi', 'error');
+                this.pendingEditAnnouncementImage = null;
+                this.closeModal();
+              }
+            });
+          } else {
+            // Görsel yok, sadece duyuru güncellendi
+            this.loadAnnouncementsFromService();
+            this.showToast('Duyuru başarıyla güncellendi', 'success');
+            this.closeModal();
+          }
         },
         error: (error) => {
-          // Hata zaten toast ile gösteriliyor
-
           // Daha detaylı hata mesajı
           let errorMessage = 'Duyuru güncellenirken bir hata oluştu';
           if (error.error?.message) {
@@ -1987,32 +2033,29 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
 
   // Dosya yükleme handler'ları (backend'e upload için)
   onNewAnnouncementFileSelected(file: File) {
-    this.uploadAnnouncementImage(file, (imagePath: string) => {
-      this.newAnnouncement.image = imagePath;
-    });
+    // Dosyayı sakla, duyuru ID alındıktan sonra yüklenecek
+    this.pendingNewAnnouncementImage = file;
+    // Kullanıcıya önizleme göstermek için Base64'e çevir
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.newAnnouncement.image = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+    this.showToast('Görsel seçildi, duyuru kaydedildiğinde yüklenecek', 'success');
   }
 
   onAnnouncementFileSelected(file: File) {
-    this.uploadAnnouncementImage(file, (imagePath: string) => {
+    // Düzenleme modunda: Dosyayı sakla, güncelleme sırasında yüklenecek
+    this.pendingEditAnnouncementImage = file;
+    // Kullanıcıya önizleme göstermek için Base64'e çevir
+    const reader = new FileReader();
+    reader.onload = () => {
       if (this.editingAnnouncement) {
-        this.editingAnnouncement.image = imagePath;
+        this.editingAnnouncement.image = reader.result as string;
       }
-    });
-  }
-
-  private uploadAnnouncementImage(file: File, callback: (imagePath: string) => void) {
-    this.announcementService.uploadImage(file).subscribe({
-      next: (imagePath) => {
-        callback(imagePath);
-        this.showToast('Görsel başarıyla yüklendi', 'success');
-      },
-      error: (err) => {
-        // Hata zaten toast ile gösteriliyor
-        const errorMessage =
-          err.error?.message || err.message || 'Görsel yüklenirken bir hata oluştu';
-        this.showToast(errorMessage, 'error');
-      },
-    });
+    };
+    reader.readAsDataURL(file);
+    this.showToast('Görsel seçildi, duyuru güncellendiğinde yüklenecek', 'success');
   }
 
   showToast(msg: string, type: 'success' | 'error') {

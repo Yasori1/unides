@@ -103,7 +103,7 @@ export class AnnouncementService {
   constructor(
     private http: HttpClient,
     private authService: AuthService
-  ) {}
+  ) { }
 
   // Backend formatını frontend formatına dönüştür
   private mapToAnnouncement(dto: any): Announcement {
@@ -122,7 +122,7 @@ export class AnnouncementService {
 
     // Tarih alanı - hem camelCase hem PascalCase, hem annDate hem eventDate
     const dateField = dto.annDate || dto.AnnDate || dto.eventDate || dto.EventDate;
-    
+
     // Tarihi Date objesine çevir (ISO string ise) veya string olarak bırak
     let dateValue: string;
     if (dateField) {
@@ -152,13 +152,25 @@ export class AnnouncementService {
     // Image ve Link alanları
     let imagePath = dto.imagePath || dto.ImagePath || '';
     let link = dto.link || dto.Link || '';
-    
+
     // "string" placeholder değerlerini filtrele
     if (imagePath.toLowerCase().trim() === 'string') {
       imagePath = '';
     }
     if (link.toLowerCase().trim() === 'string') {
       link = '';
+    }
+
+    // Görsel path'i tam URL'ye çevir
+    // Backend relative path dönerse (örn: /uploads/xxx.jpg), tam URL'ye çevir
+    if (imagePath && !imagePath.startsWith('http://') && !imagePath.startsWith('https://') && !imagePath.startsWith('data:')) {
+      // Backend base URL'si (api kısmını çıkar)
+      const baseUrl = environment.apiUrl.replace('/api', '');
+      // Path'in başında / yoksa ekle
+      if (!imagePath.startsWith('/')) {
+        imagePath = '/' + imagePath;
+      }
+      imagePath = baseUrl + imagePath;
     }
 
     return {
@@ -182,7 +194,7 @@ export class AnnouncementService {
       catchError((error) => {
         console.error('Duyurular yüklenemedi, mock data dönülüyor:', error);
         // Hata durumunda mock datayı dön
-        return of(MOCK_ANNOUNCEMENTS); 
+        return of(MOCK_ANNOUNCEMENTS);
       })
     );
   }
@@ -264,11 +276,11 @@ export class AnnouncementService {
     // PUT /api/Announcements/update/{id} - NoContent döner
     // Authorization header'ını manuel olarak ekle
     const token = this.authService.getToken();
-    
+
     if (!token) {
       throw new Error('Oturum bilgisi bulunamadı. Lütfen tekrar giriş yapın.');
     }
-    
+
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`
@@ -288,11 +300,11 @@ export class AnnouncementService {
     // DELETE /api/Announcements/delete/{id} - NoContent döner
     // Authorization header'ını manuel olarak ekle
     const token = this.authService.getToken();
-    
+
     if (!token) {
       throw new Error('Oturum bilgisi bulunamadı. Lütfen tekrar giriş yapın.');
     }
-    
+
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}`
     });
@@ -306,29 +318,27 @@ export class AnnouncementService {
     );
   }
 
-  uploadImage(file: File): Observable<string> {
+  /**
+   * Duyuru görseli yükler
+   * @param announcementId - Duyuru ID'si (önce duyuru oluşturulmalı)
+   * @param file - Yüklenecek dosya
+   * @returns Görsel URL'si
+   */
+  uploadImage(announcementId: number, file: File): Observable<string> {
     const formData = new FormData();
-    formData.append('file', file);
-
-    // Authorization header'ını manuel olarak ekle
-    // FormData kullanıldığında Content-Type header'ını eklemeyiz (browser otomatik ekler)
-    const token = this.authService.getToken();
-    
-    if (!token) {
-      throw new Error('Oturum bilgisi bulunamadı. Lütfen tekrar giriş yapın.');
-    }
-    
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
+    // Backend'in beklediği parametre adı
+    formData.append('file', file, file.name);
 
     // Backend { imageUrl: string } formatında döndürüyor
     interface UploadResponse {
       imageUrl: string;
     }
 
-    return this.http.post<UploadResponse>(`${this.apiUrl}/upload-image`, formData, { headers }).pipe(
-      map((response) => response.imageUrl || response as any), // imageUrl varsa onu döndür, yoksa string olarak döndür
+    // TEST: Headers tamamen kaldırıldı - 415 hatasının kaynağını test ediyoruz
+    // Eğer bu çalışırsa, sorun headers'dan
+    // Eğer çalışmazsa, sorun backend'de
+    return this.http.post<UploadResponse>(`${this.apiUrl}/${announcementId}/image`, formData).pipe(
+      map((response) => response.imageUrl || response as any),
       catchError((error) => {
         console.error('Görsel yüklenemedi:', error);
         console.error('Hata detayı:', error.error);

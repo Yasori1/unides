@@ -19,11 +19,18 @@ const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, next: Htt
   const authService = inject(AuthService);
   const token = authService.getToken();
 
-  // CORS için gerekli header'ları ekle (backend'de CORS açık olmalı)
-  const headers: { [key: string]: string } = {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-  };
+  // FormData mı kontrol et - FormData ise Content-Type eklememeliyiz
+  // Browser otomatik olarak multipart/form-data boundary ekler
+  const isFormData = req.body instanceof FormData;
+
+  // Header'ları hazırla
+  const headers: { [key: string]: string } = {};
+
+  // Sadece FormData DEĞİLSE Content-Type ekle
+  if (!isFormData) {
+    headers['Content-Type'] = 'application/json';
+    headers['Accept'] = 'application/json';
+  }
 
   // Eğer token varsa, Authorization header'ını ekle
   if (token) {
