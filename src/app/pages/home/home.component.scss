@@ -160,13 +160,13 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
 
   // Laptop (küçük)
   @media (min-width: 1024px) {
-    padding-top: 120px;
+    padding-top: 100px;
     padding-bottom: 280px;
   }
 
   // Laptop (büyük)/Desktop
   @media (min-width: 1280px) {
-    padding-top: 130px;
+    padding-top: 100px;
     padding-bottom: 310px;
   }
 
@@ -184,7 +184,7 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
 
   // Extra large screens
   @media (min-width: 2560px) {
-    padding-top: 320px;
+    padding-top: 270px;
     padding-bottom: 500px;
   }
 
