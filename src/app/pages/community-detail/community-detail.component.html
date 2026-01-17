@@ -13,13 +13,8 @@
   <!-- Hero Banner -->
   <div class="hero-section" (mousemove)="onHeroMouseMove($event)">
     <div class="background-wrapper">
-      <img
-        [src]="community.banner || community.coverImage || 'assets/img/placeholder-cover.svg'"
-        [alt]="community.name"
-        class="hero-image"
-        loading="lazy"
-        onerror="this.src='assets/img/placeholder-cover.svg'"
-      />
+      <img [src]="community.banner || community.coverImage || 'assets/img/placeholder-cover.svg'" [alt]="community.name"
+        class="hero-image" loading="lazy" onerror="this.onerror=null; this.src='assets/img/placeholder-cover.svg'" />
     </div>
     <div class="hero-overlay">
       <div class="container">
@@ -62,10 +57,11 @@
           <!-- Yaklaşan Etkinlikler Section -->
           <div class="upcoming-events-main-section">
             <h2 class="section-title">Yaklaşan Etkinlikler</h2>
-            
+
             <!-- Etkinlik Varsa -->
             <div class="upcoming-events-grid" *ngIf="upcomingEvents.length > 0">
-              <div class="upcoming-event-card" *ngFor="let event of upcomingEvents" (click)="navigateToEvent(event.id)" style="cursor: pointer;">
+              <div class="upcoming-event-card" *ngFor="let event of upcomingEvents" (click)="navigateToEvent(event.id)"
+                style="cursor: pointer;">
                 <div class="event-card-image" *ngIf="event.imageUrl">
                   <img [src]="event.imageUrl" [alt]="event.title" />
                 </div>
@@ -85,7 +81,7 @@
                 </div>
               </div>
             </div>
-            
+
             <!-- Etkinlik Yoksa -->
             <div class="no-events-container" *ngIf="upcomingEvents.length === 0">
               <div class="no-events-message">
@@ -101,12 +97,8 @@
           <div class="sidebar-content sticky-sidebar">
             <!-- Profile Photo - Overlaps Banner -->
             <div class="profile-photo-container">
-              <img
-                [src]="community.logo"
-                [alt]="community.name"
-                class="community-logo"
-                onerror="this.src='assets/img/placeholder-logo.png'"
-              />
+              <img [src]="community.logo" [alt]="community.name" class="community-logo"
+                onerror="this.onerror=null; this.src='assets/img/placeholder-logo.png'" />
             </div>
 
             <!-- Topluluk Bilgileri Card -->
@@ -124,12 +116,9 @@
                   <div class="info-label">E-POSTA</div>
                   <div class="email-display">
                     <span class="email-text">{{ community.email }}</span>
-                    <button
-                      class="copy-email-btn"
-                      (click)="copyToClipboard(community.email!)"
+                    <button class="copy-email-btn" (click)="copyToClipboard(community.email!)"
                       [title]="copyEmailSuccess ? 'Kopyalandı!' : 'E-postayı kopyala'"
-                      [class.copied]="copyEmailSuccess"
-                    >
+                      [class.copied]="copyEmailSuccess">
                       <i class="bx" [class.bx-copy]="!copyEmailSuccess" [class.bx-check]="copyEmailSuccess"></i>
                     </button>
                   </div>
@@ -172,4 +161,3 @@
 </div>
 
 <app-site-footer />
-

@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, tap, catchError, of, map, switchMap } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
-import { isTokenExpired, getTokenRemainingTime, decodeJwtToken } from '../utils/security.utils';
+import { isTokenExpired, getTokenRemainingTime, decodeJwtToken, SafeStorage } from '../utils/security.utils';
 
 export interface LoginResponse {
   // Eski/varsayılan alanlar
@@ -254,35 +254,35 @@ export class AuthService {
   // --- ORTAK YARDIMCI METOTLAR ---
   saveToken(token: string): void {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('auth_token', token);
+      SafeStorage.set('auth_token', token);
     }
   }
 
   getToken(): string | null {
     if (typeof window === 'undefined') return null;
-    return localStorage.getItem('auth_token');
+    return SafeStorage.get('auth_token');
   }
 
   saveRefreshToken(token: string): void {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('refresh_token', token);
+      SafeStorage.set('refresh_token', token);
     }
   }
 
   getRefreshToken(): string | null {
     if (typeof window === 'undefined') return null;
-    return localStorage.getItem('refresh_token');
+    return SafeStorage.get('refresh_token');
   }
 
   saveUser(user: any): void {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('user_info', JSON.stringify(user));
+      SafeStorage.set('user_info', JSON.stringify(user));
     }
   }
 
   getUser(): any | null {
     if (typeof window === 'undefined') return null;
-    const user = localStorage.getItem('user_info');
+    const user = SafeStorage.get('user_info');
     try {
       return user ? JSON.parse(user) : null;
     } catch {
@@ -292,13 +292,13 @@ export class AuthService {
 
   saveUserType(type: string): void {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('user_type', type);
+      SafeStorage.set('user_type', type);
     }
   }
 
   getUserType(): string | null {
     if (typeof window === 'undefined') return null;
-    return localStorage.getItem('user_type');
+    return SafeStorage.get('user_type');
   }
 
   /**
@@ -332,16 +332,16 @@ export class AuthService {
     if (typeof window === 'undefined') return;
 
     // Ana auth verileri
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('user_info');
-    localStorage.removeItem('user_type');
+    SafeStorage.remove('auth_token');
+    SafeStorage.remove('refresh_token');
+    SafeStorage.remove('user_info');
+    SafeStorage.remove('user_type');
 
     // Ek güvenlik: olası diğer auth-related anahtarları da temizle
     const keysToRemove = ['session_id', 'remember_me', 'last_login'];
     keysToRemove.forEach(key => {
       try {
-        localStorage.removeItem(key);
+        SafeStorage.remove(key);
       } catch {
         // Ignore errors
       }

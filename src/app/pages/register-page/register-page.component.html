@@ -59,6 +59,7 @@
             <input type="password" (input)="checkPasswords($event, 'p1')" placeholder="Şifre" class="modern-input"
               required />
           </div>
+          <app-password-strength-meter [password]="password" [showRequirements]="true"></app-password-strength-meter>
 
           <div class="input-group">
             <div class="icon-wrapper" [class.error-icon]="passwordMismatch">

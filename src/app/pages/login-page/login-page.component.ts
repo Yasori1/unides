@@ -8,6 +8,7 @@ import { RateLimiterService } from '../../services/rate-limiter.service';
 // Bileşenler
 import { ToastComponent } from '../../components/ui/toast/toast.component';
 import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
+import { sanitizeEmail } from '../../utils/input-sanitization.utils';
 
 // Backend Response Interface
 interface AuthResponse {
@@ -123,7 +124,7 @@ export class LoginPageComponent implements OnInit {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        email: this.email,
+        email: sanitizeEmail(this.email),
         password: this.password,
         roleId: this.roleId // 1 = Öğrenci
       })

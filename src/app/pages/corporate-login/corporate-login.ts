@@ -8,6 +8,7 @@ import { AuthService } from '../../services/auth.services';
 import { ToastComponent } from '../../components/ui/toast/toast.component';
 // Spinner Bileşeni
 import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
+import { sanitizeEmail } from '../../utils/input-sanitization.utils';
 
 @Component({
   selector: 'app-corporate-login',
@@ -32,7 +33,7 @@ export class CorporateLoginComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private location: Location,
     @Inject(PLATFORM_ID) private platformId: Object
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     // SSR sırasında window kullanma, sadece browser'da çalıştır
@@ -107,7 +108,7 @@ export class CorporateLoginComponent implements OnInit, OnDestroy {
     // Yükleniyor durumunu başlat
     this.isLoading = true;
 
-    this.authService.loginCorporate(email, password).subscribe({
+    this.authService.loginCorporate(sanitizeEmail(email), password).subscribe({
       next: (response) => {
         // --- BAŞARILI ---
         // 1. Toast Mesajı
@@ -187,7 +188,7 @@ export class CorporateLoginComponent implements OnInit, OnDestroy {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email: this.forgotPasswordEmail.trim(),
+          email: sanitizeEmail(this.forgotPasswordEmail),
         }),
       });
 

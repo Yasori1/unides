@@ -214,14 +214,15 @@
               <div class="cover-area">
                 <img [src]="
                     community.coverImage || community.banner || 'assets/img/placeholder-cover.svg'
-                  " [alt]="community.name" class="cover-img" onerror="this.src='assets/img/placeholder-cover.svg'" />
+                  " [alt]="community.name" class="cover-img"
+                  onerror="this.onerror=null; this.src='assets/img/placeholder-cover.svg'" />
                 <span class="category-badge">{{ community.category }}</span>
               </div>
               <div class="card-content">
                 <div class="header-row">
                   <div class="logo-wrapper">
                     <img [src]="community.logo || 'assets/img/placeholder-logo.svg'" [alt]="community.name"
-                      class="logo-img" onerror="this.src='assets/img/placeholder-logo.svg'" />
+                      class="logo-img" onerror="this.onerror=null; this.src='assets/img/placeholder-logo.svg'" />
                   </div>
                   <div class="title-wrapper">
                     <h3 class="community-name">{{ community.name }}</h3>
@@ -276,7 +277,8 @@
             <div class="cover-area">
               <img [src]="
                   community.coverImage || community.banner || 'assets/img/placeholder-cover.svg'
-                " [alt]="community.name" class="cover-img" onerror="this.src='assets/img/placeholder-cover.svg'" />
+                " [alt]="community.name" class="cover-img"
+                onerror="this.onerror=null; this.src='assets/img/placeholder-cover.svg'" />
               <span class="category-badge">{{ community.category }}</span>
             </div>
 
@@ -284,7 +286,7 @@
               <div class="header-row">
                 <div class="logo-wrapper">
                   <img [src]="community.logo || 'assets/img/placeholder-logo.svg'" [alt]="community.name"
-                    class="logo-img" onerror="this.src='assets/img/placeholder-logo.svg'" />
+                    class="logo-img" onerror="this.onerror=null; this.src='assets/img/placeholder-logo.svg'" />
                 </div>
                 <div class="title-wrapper">
                   <h3 class="community-name">{{ community.name }}</h3>

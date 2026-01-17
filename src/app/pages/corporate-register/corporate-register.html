@@ -1,8 +1,5 @@
 <!-- Google Fonts & Icons -->
-<link
-  href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-  rel="stylesheet"
-/>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
 
 <div class="main-container">
@@ -29,55 +26,32 @@
         </div>
 
         <app-toast></app-toast>
-        
+
         <form (submit)="onSubmit($event)">
           <!-- Firma Bilgileri -->
           <div class="input-group">
             <div class="icon-wrapper"><i class="bx bx-building"></i></div>
-            <input 
-              type="text" 
-              placeholder="Firma / Kurum Adı" 
-              class="modern-input" 
-              (input)="updateCompanyName($event)"
-              required 
-            />
+            <input type="text" placeholder="Firma / Kurum Adı" class="modern-input" (input)="updateCompanyName($event)"
+              required />
           </div>
 
           <div class="input-group">
             <div class="icon-wrapper"><i class="bx bx-receipt"></i></div>
-            <input
-              type="text"
-              maxlength="10"
-              placeholder="Vergi Numarası"
-              class="modern-input"
-              (keypress)="onlyNumbers($event)"
-              (input)="updateTaxNumber($event)"
-              required
-            />
+            <input type="text" maxlength="10" placeholder="Vergi Numarası" class="modern-input"
+              (keypress)="onlyNumbers($event)" (input)="updateTaxNumber($event)" required />
           </div>
 
           <!-- Yetkili Bilgileri -->
           <div class="input-group">
             <div class="icon-wrapper"><i class="bx bx-user-voice"></i></div>
-            <input 
-              type="text" 
-              placeholder="Yetkili Ad Soyad" 
-              class="modern-input" 
-              (input)="updateFullName($event)"
-              required 
-            />
+            <input type="text" placeholder="Yetkili Ad Soyad" class="modern-input" (input)="updateFullName($event)"
+              required />
           </div>
 
           <div class="input-group">
             <div class="icon-wrapper" [class.error-icon]="emailError"><i class="bx bx-envelope"></i></div>
-            <input 
-              type="email" 
-              placeholder="Kurumsal E-Posta (xxx@gsb.gov.tr)" 
-              class="modern-input" 
-              [class.input-error]="emailError"
-              (input)="validateCorporateEmail($event)"
-              required 
-            />
+            <input type="email" placeholder="Kurumsal E-Posta (xxx@gsb.gov.tr)" class="modern-input"
+              [class.input-error]="emailError" (input)="validateCorporateEmail($event)" required />
           </div>
           <div *ngIf="emailError" class="error-message">
             <i class="bx bx-error-circle"></i> Lütfen geçerli bir kurumsal e-posta (gsb.gov.tr) giriniz.
@@ -86,27 +60,17 @@
           <!-- Şifre -->
           <div class="input-group">
             <div class="icon-wrapper"><i class="bx bx-lock-alt"></i></div>
-            <input
-              type="password"
-              (input)="checkPasswords($event, 'p1')"
-              placeholder="Şifre"
-              class="modern-input"
-              required
-            />
+            <input type="password" (input)="checkPasswords($event, 'p1')" placeholder="Şifre" class="modern-input"
+              required />
           </div>
+          <app-password-strength-meter [password]="password" [showRequirements]="true"></app-password-strength-meter>
 
           <div class="input-group">
             <div class="icon-wrapper" [class.error-icon]="passwordMismatch">
               <i class="bx bx-lock-alt"></i>
             </div>
-            <input
-              type="password"
-              (input)="checkPasswords($event, 'p2')"
-              placeholder="Şifreyi Onayla"
-              class="modern-input"
-              [class.input-error]="passwordMismatch"
-              required
-            />
+            <input type="password" (input)="checkPasswords($event, 'p2')" placeholder="Şifreyi Onayla"
+              class="modern-input" [class.input-error]="passwordMismatch" required />
           </div>
           <div *ngIf="passwordMismatch" class="error-message">
             <i class="bx bx-error-circle"></i> Şifreler eşleşmiyor.

@@ -136,7 +136,18 @@ export function sanitizeFilename(filename: string | null | undefined): string {
 }
 
 /**
+ * Remove ASCII Art and Block characters (░, ▒, ▓, █, etc.)
+ */
+export function removeBlockCharacters(input: string): string {
+    if (!input) return '';
+    // Block Elements (U+2580 - U+259F) and Geometric Shapes (U+25A0 - U+25FF)
+    // and some other common ASCII art symbols
+    return input.replace(/[\u2580-\u259F\u25A0-\u25FF\u2800-\u28FF]/g, '');
+}
+
+/**
  * Sanitize general user input (for forms, comments, etc.)
+ * Restricts to English/Turkish characters, numbers, and standard punctuation.
  */
 export function sanitizeUserInput(input: string | null | undefined): string {
     if (!input) return '';
@@ -144,11 +155,21 @@ export function sanitizeUserInput(input: string | null | undefined): string {
     // Strip HTML tags
     let sanitized = stripHtmlTags(input);
 
+    // Remove Block ASCII Art characters
+    sanitized = removeBlockCharacters(sanitized);
+
     // Trim whitespace
     sanitized = sanitized.trim();
 
     // Remove null bytes
     sanitized = sanitized.replace(/\0/g, '');
+
+    // Strict Filtering: Allow only English/Turkish characters, 
+    // numbers, spaces, and standard punctuation.
+    // TR: a-z, A-Z, 0-9, ç, ğ, ı, ö, ş, ü, Ç, Ğ, İ, Ö, Ş, Ü
+    // Symbols: space, ., ,, !, ?, @, #, $, %, &, *, (, ), -, _, +, =, :, ;, ', ", /, \, |, ~, `, ^
+    const allowedRegex = /[^a-zA-Z0-9çğışöüÇĞİŞÖÜ\s.,!?;:()\[\]{}'\"\-=_+@#$%^&*\/\\|~`^]/g;
+    sanitized = sanitized.replace(allowedRegex, '');
 
     // Normalize whitespace (multiple spaces to single)
     sanitized = sanitized.replace(/\s+/g, ' ');

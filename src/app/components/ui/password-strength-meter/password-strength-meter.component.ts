@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common';
 import { checkPasswordStrength, PasswordStrength } from '../../../utils/password-strength.utils';
 
 @Component({
-    selector: 'app-password-strength-meter',
-    standalone: true,
-    imports: [CommonModule],
-    template: `
+  selector: 'app-password-strength-meter',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
     <div class="password-strength" *ngIf="password">
       <!-- Strength Bar -->
       <div class="strength-bar-container">
@@ -51,9 +51,19 @@ import { checkPasswordStrength, PasswordStrength } from '../../../utils/password
           Rakam
         </div>
       </div>
+
+      <!-- Security Tip -->
+      <div class="security-tip">
+        <i class="bx bx-info-circle"></i>
+        <span>
+          Mailinle aynı olmamalı.<br>
+          Memleketin plakası olmamalı.<br>
+          Sonuna bir noktalama işareti koymayı düşünebilirsin.
+        </span>
+      </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     .password-strength {
       margin-top: 8px;
     }
@@ -131,39 +141,59 @@ import { checkPasswordStrength, PasswordStrength } from '../../../utils/password
     .requirement i {
       font-size: 1rem;
     }
+
+    .security-tip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+      padding: 10px 12px;
+      background: rgba(59, 130, 246, 0.05);
+      border-left: 3px solid #3b82f6;
+      border-radius: 4px;
+      color: #64748b;
+      font-size: 0.8rem;
+      line-height: 1.4;
+    }
+
+    .security-tip i {
+      font-size: 1.1rem;
+      color: #3b82f6;
+      flex-shrink: 0;
+    }
   `]
 })
 export class PasswordStrengthMeterComponent implements OnChanges {
-    @Input() password: string = '';
-    @Input() showFeedback: boolean = true;
-    @Input() showRequirements: boolean = false;
+  @Input() password: string = '';
+  @Input() showFeedback: boolean = true;
+  @Input() showRequirements: boolean = false;
 
-    strength: PasswordStrength = {
-        score: 0,
-        label: '',
-        color: '#cbd5e1',
-        feedback: [],
-        isValid: false,
-    };
+  strength: PasswordStrength = {
+    score: 0,
+    label: '',
+    color: '#cbd5e1',
+    feedback: [],
+    isValid: false,
+  };
 
-    hasMinLength = false;
-    hasUppercase = false;
-    hasLowercase = false;
-    hasNumber = false;
+  hasMinLength = false;
+  hasUppercase = false;
+  hasLowercase = false;
+  hasNumber = false;
 
-    ngOnChanges(changes: SimpleChanges): void {
-        if (changes['password']) {
-            this.updateStrength();
-        }
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['password']) {
+      this.updateStrength();
     }
+  }
 
-    private updateStrength(): void {
-        this.strength = checkPasswordStrength(this.password);
+  private updateStrength(): void {
+    this.strength = checkPasswordStrength(this.password);
 
-        // Update individual requirements
-        this.hasMinLength = this.password.length >= 8;
-        this.hasUppercase = /[A-Z]/.test(this.password);
-        this.hasLowercase = /[a-z]/.test(this.password);
-        this.hasNumber = /[0-9]/.test(this.password);
-    }
+    // Update individual requirements
+    this.hasMinLength = this.password.length >= 8;
+    this.hasUppercase = /[A-Z]/.test(this.password);
+    this.hasLowercase = /[a-z]/.test(this.password);
+    this.hasNumber = /[0-9]/.test(this.password);
+  }
 }

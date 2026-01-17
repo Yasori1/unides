@@ -13,6 +13,7 @@ import { FormsModule } from '@angular/forms';
 
 import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
 import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
+import { SafeHtmlPipe } from '../../pipes/safe-html.pipe';
 
 interface FaqItem {
   question: string;
@@ -30,7 +31,7 @@ interface FaqCategory {
 @Component({
   selector: 'app-faq-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, SiteNavbarComponent, SiteFooterComponent],
+  imports: [CommonModule, FormsModule, SiteNavbarComponent, SiteFooterComponent, SafeHtmlPipe],
   templateUrl: './faq-page.component.html',
   styleUrls: ['./faq-page.component.scss'],
 })
@@ -164,7 +165,7 @@ export class FaqPageComponent implements OnInit, AfterViewInit {
 
   @ViewChildren('animItem') animItems!: QueryList<ElementRef>;
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) { }
 
   ngOnInit(): void {
     this.filteredCategories = JSON.parse(JSON.stringify(this.allCategories));

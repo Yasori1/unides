@@ -3,6 +3,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 
 import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
 import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
+import { SafeHtmlPipe } from '../../pipes/safe-html.pipe';
 
 interface PolicyItem {
   id: number;
@@ -16,7 +17,7 @@ interface PolicyItem {
 @Component({
   selector: 'app-privacy-policy-page',
   standalone: true,
-  imports: [CommonModule, SiteNavbarComponent, SiteFooterComponent],
+  imports: [CommonModule, SiteNavbarComponent, SiteFooterComponent, SafeHtmlPipe],
   templateUrl: './privacy-policy-page.component.html',
   styleUrls: ['./privacy-policy-page.component.scss'],
 })
@@ -193,9 +194,9 @@ export class PrivacyPolicyPageComponent implements OnInit {
     },
   ];
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) { }
 
-  ngOnInit(): void {}
+  ngOnInit(): void { }
 
   openCard(item: PolicyItem): void {
     this.selectedPolicy = item;

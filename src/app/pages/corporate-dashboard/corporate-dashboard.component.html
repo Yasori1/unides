@@ -208,7 +208,7 @@
             style="cursor: pointer">
             <div class="cover-area">
               <img [src]="item.coverImage || item.banner || 'assets/img/placeholder-cover.svg'" [alt]="item.name"
-                class="cover-img" onerror="this.src='assets/img/placeholder-cover.svg'" />
+                class="cover-img" onerror="this.onerror=null; this.src='assets/img/placeholder-cover.svg'" />
               <span class="category-badge" *ngIf="item.category">{{ item.category }}</span>
             </div>
 
@@ -216,7 +216,7 @@
               <div class="header-row">
                 <div class="logo-wrapper">
                   <img [src]="item.logo" [alt]="item.name" class="logo-img"
-                    onerror="this.src='assets/img/placeholder-logo.svg'" />
+                    onerror="this.onerror=null; this.src='assets/img/placeholder-logo.svg'" />
                 </div>
                 <div class="title-wrapper">
                   <h3 class="community-name">{{ item.name }}</h3>
@@ -301,7 +301,7 @@
             (click)="openEventDetail(e)">
             <div class="card-image">
               <img [src]="e.imageUrl || 'assets/images/page-title1.jpg'" [alt]="e.eventName" loading="lazy"
-                onerror="this.src='assets/images/page-title1.jpg'" />
+                onerror="this.onerror=null; this.src='assets/images/page-title1.jpg'" />
               <div class="tap-hint">
                 <span class="material-symbols-outlined">visibility</span> İncele
               </div>
@@ -656,7 +656,8 @@
               <input type="email" [(ngModel)]="newCommunity.presidentEmail" class="modern-input"
                 placeholder="baskan@mail.com" required maxlength="60" />
               <small style="color: #666; font-size: 12px; margin-top: 4px; display: block">
-                Topluluk başkanının sistemde kayıtlı e-posta adresi. Bu e-posta adresi ile sistemde kayıtlı bir kullanıcı olmalıdır.
+                Topluluk başkanının sistemde kayıtlı e-posta adresi. Bu e-posta adresi ile sistemde kayıtlı bir
+                kullanıcı olmalıdır.
               </small>
             </div>
             <!-- Website field removed for Corporate Dashboard -->
@@ -761,7 +762,7 @@
             </div>
             <div class="form-group">
               <label>Topluluk Başkanı E-posta</label>
-              <input type="email" [value]="editingCommunity.presidentEmail || editingCommunity.comLeadMail || ''" 
+              <input type="email" [value]="editingCommunity.presidentEmail || editingCommunity.comLeadMail || ''"
                 class="modern-input" placeholder="baskan@mail.com" readonly disabled />
               <small style="color: #666; font-size: 12px; margin-top: 4px; display: block">
                 Bu alan değiştirilemez. Topluluk başkanının sistemde kayıtlı e-posta adresidir.
@@ -877,7 +878,8 @@
           <!-- Beklemede olan etkinlikler için butonlar -->
           <div class="modal-actions-column" *ngIf="selectedEvent.status === 'Beklemede'">
             <!-- Üst satır: İçeriği Kontrol Et -->
-            <div class="modal-actions-row" *ngIf="!checkingSpamEvents.has(selectedEvent.id) && !inspectedEvents.has(selectedEvent.id)">
+            <div class="modal-actions-row"
+              *ngIf="!checkingSpamEvents.has(selectedEvent.id) && !inspectedEvents.has(selectedEvent.id)">
               <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
                 <!-- İçeriği Kontrol Et butonu (opsiyonel - kullanıcı isterse kullanabilir) -->
                 <button class="btn-info" (click)="performSpamCheck(selectedEvent.id)">

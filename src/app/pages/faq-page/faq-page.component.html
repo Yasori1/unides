@@ -108,7 +108,7 @@
               </div>
 
               <div class="accordion-body">
-                <div class="answer-content" [innerHTML]="item.answer"></div>
+                <div class="answer-content" [innerHTML]="item.answer | safeHtml"></div>
               </div>
             </div>
           </div>

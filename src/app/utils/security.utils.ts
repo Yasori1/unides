@@ -167,7 +167,56 @@ export function getTokenRemainingTime(token: string): number {
 
     const expirationTime = payload.exp * 1000;
     const currentTime = Date.now();
-    const remaining = Math.max(0, Math.floor((expirationTime - currentTime) / 1000));
-
-    return remaining;
+    return Math.max(0, Math.floor((expirationTime - currentTime) / 1000));
 }
+
+/**
+ * Obfuscate sensitive data for LocalStorage
+ * Note: Not encryption, just making it harder for simple scripts/XSS to read directly
+ */
+export function obfuscateData(data: string): string {
+    if (!data) return '';
+    try {
+        const encoded = btoa(unescape(encodeURIComponent(data)));
+        // Add some noise and reverse to make it less obvious
+        return 'unides_' + encoded.split('').reverse().join('') + '_safe';
+    } catch {
+        return data;
+    }
+}
+
+/**
+ * De-obfuscate data from LocalStorage
+ */
+export function deobfuscateData(obfuscated: string): string {
+    if (!obfuscated || !obfuscated.startsWith('unides_')) return obfuscated;
+    try {
+        const clean = obfuscated.replace('unides_', '').replace('_safe', '');
+        const reversed = clean.split('').reverse().join('');
+        return decodeURIComponent(escape(atob(reversed)));
+    } catch {
+        return obfuscated;
+    }
+}
+
+/**
+ * Security storage wrapper
+ */
+export const SafeStorage = {
+    set: (key: string, value: string) => {
+        const sensitiveKeys = ['auth_token', 'refresh_token', 'user_info'];
+        if (sensitiveKeys.includes(key)) {
+            localStorage.setItem(key, obfuscateData(value));
+        } else {
+            localStorage.setItem(key, value);
+        }
+    },
+    get: (key: string): string | null => {
+        const value = localStorage.getItem(key);
+        if (value && value.startsWith('unides_')) {
+            return deobfuscateData(value);
+        }
+        return value;
+    },
+    remove: (key: string) => localStorage.removeItem(key)
+};

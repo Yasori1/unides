@@ -16,11 +16,8 @@
             <!-- Topluluk Kartı -->
             <a [routerLink]="['/communities', item.id]" class="community-card">
               <div class="card-header">
-                <img
-                  [src]="item.logo"
-                  [alt]="item.name"
-                  onerror="this.src='assets/img/placeholder.png'"
-                />
+                <img [src]="item.logo" [alt]="item.name"
+                  onerror="this.onerror=null; this.src='assets/img/placeholder.png'" />
                 <div class="meta">
                   <span class="category">{{ item.category }}</span>
                   <h3 class="name">{{ item.name }}</h3>
@@ -42,11 +39,8 @@
           <ng-container *ngFor="let item of secondColumn.concat(secondColumn)">
             <a [routerLink]="['/communities', item.id]" class="community-card">
               <div class="card-header">
-                <img
-                  [src]="item.logo"
-                  [alt]="item.name"
-                  onerror="this.src='assets/img/placeholder.png'"
-                />
+                <img [src]="item.logo" [alt]="item.name"
+                  onerror="this.onerror=null; this.src='assets/img/placeholder.png'" />
                 <div class="meta">
                   <span class="category">{{ item.category }}</span>
                   <h3 class="name">{{ item.name }}</h3>
@@ -68,11 +62,8 @@
           <ng-container *ngFor="let item of thirdColumn.concat(thirdColumn)">
             <a [routerLink]="['/communities', item.id]" class="community-card">
               <div class="card-header">
-                <img
-                  [src]="item.logo"
-                  [alt]="item.name"
-                  onerror="this.src='assets/img/placeholder.png'"
-                />
+                <img [src]="item.logo" [alt]="item.name"
+                  onerror="this.onerror=null; this.src='assets/img/placeholder.png'" />
                 <div class="meta">
                   <span class="category">{{ item.category }}</span>
                   <h3 class="name">{{ item.name }}</h3>

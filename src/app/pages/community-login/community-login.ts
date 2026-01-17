@@ -14,6 +14,7 @@ import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.compo
 import { HttpClientModule, HttpErrorResponse } from '@angular/common/http';
 import { switchMap, catchError, take } from 'rxjs/operators';
 import { of, forkJoin } from 'rxjs';
+import { sanitizeEmail } from '../../utils/input-sanitization.utils';
 
 @Component({
   selector: 'app-community-login',
@@ -137,7 +138,7 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
     // 3. BACKEND SORGUSU BAŞLIYOR
     this.isLoading = true;
 
-    this.authService.loginCommunity(email, password).subscribe({
+    this.authService.loginCommunity(sanitizeEmail(email), password).subscribe({
       next: (response: LoginResponse) => {
         // --- BAŞARILI GİRİŞ ---
         // Rate limit'i sıfırla

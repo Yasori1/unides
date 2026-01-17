@@ -14,13 +14,8 @@
   <!-- Hero Banner -->
   <div class="hero-section" (mousemove)="onHeroMouseMove($event)">
     <div class="background-wrapper">
-      <img
-        [src]="community.banner || community.coverImage || 'assets/img/placeholder-cover.svg'"
-        [alt]="community.name"
-        class="hero-image"
-        loading="lazy"
-        onerror="this.src='assets/img/placeholder-cover.svg'"
-      />
+      <img [src]="community.banner || community.coverImage || 'assets/img/placeholder-cover.svg'" [alt]="community.name"
+        class="hero-image" loading="lazy" onerror="this.onerror=null; this.src='assets/img/placeholder-cover.svg'" />
     </div>
     <div class="hero-overlay">
       <div class="container">
@@ -46,12 +41,8 @@
           </div>
           <div class="card-content">
             <div class="community-header-info">
-              <img
-                [src]="community.logo"
-                [alt]="community.name"
-                class="community-logo-small"
-                onerror="this.src='assets/img/placeholder-logo.png'"
-              />
+              <img [src]="community.logo" [alt]="community.name" class="community-logo-small"
+                onerror="this.onerror=null; this.src='assets/img/placeholder-logo.png'" />
               <div class="header-text">
                 <div class="category-badge">{{ community.category }}</div>
                 <h1 class="community-title">{{ community.name }}</h1>
@@ -107,9 +98,7 @@
         </div>
 
         <!-- Social Links Card -->
-        <div
-          class="info-card social-card"
-          *ngIf="
+        <div class="info-card social-card" *ngIf="
             community.website ||
             community.email ||
             community.instagram ||
@@ -117,21 +106,15 @@
             community.twitter ||
             community.tiktok ||
             community.socialMedia
-          "
-        >
+          ">
           <div class="card-header">
             <i class="bx bx-link"></i>
             <h2>İletişim & Linkler</h2>
           </div>
           <div class="card-content">
             <div class="social-grid">
-              <a
-                *ngIf="community.website"
-                [href]="community.website"
-                target="_blank"
-                class="social-item"
-                (click)="openLink(community.website!)"
-              >
+              <a *ngIf="community.website" [href]="community.website" target="_blank" class="social-item"
+                (click)="openLink(community.website!)">
                 <i class="bx bx-globe"></i>
                 <span>Websitesi</span>
               </a>
@@ -142,54 +125,31 @@
                   <span class="email-label">E-posta</span>
                   <div class="email-value-wrapper">
                     <span class="email-value">{{ community.email }}</span>
-                    <button
-                      class="copy-email-btn"
-                      (click)="copyToClipboard(community.email!)"
+                    <button class="copy-email-btn" (click)="copyToClipboard(community.email!)"
                       [title]="copyEmailSuccess ? 'Kopyalandı!' : 'E-postayı kopyala'"
-                      [class.copied]="copyEmailSuccess"
-                    >
+                      [class.copied]="copyEmailSuccess">
                       <i class="bx" [class.bx-copy]="!copyEmailSuccess" [class.bx-check]="copyEmailSuccess"></i>
                     </button>
                   </div>
                 </div>
               </div>
-              <a
-                *ngIf="community.instagram"
-                [href]="community.instagram"
-                target="_blank"
-                class="social-item social-instagram"
-                (click)="openLink(community.instagram!)"
-              >
+              <a *ngIf="community.instagram" [href]="community.instagram" target="_blank"
+                class="social-item social-instagram" (click)="openLink(community.instagram!)">
                 <i class="bx bxl-instagram"></i>
                 <span>Instagram</span>
               </a>
-              <a
-                *ngIf="community.youtube"
-                [href]="community.youtube"
-                target="_blank"
-                class="social-item social-youtube"
-                (click)="openLink(community.youtube!)"
-              >
+              <a *ngIf="community.youtube" [href]="community.youtube" target="_blank" class="social-item social-youtube"
+                (click)="openLink(community.youtube!)">
                 <i class="bx bxl-youtube"></i>
                 <span>Youtube</span>
               </a>
-              <a
-                *ngIf="community.twitter"
-                [href]="community.twitter"
-                target="_blank"
-                class="social-item social-twitter"
-                (click)="openLink(community.twitter!)"
-              >
+              <a *ngIf="community.twitter" [href]="community.twitter" target="_blank" class="social-item social-twitter"
+                (click)="openLink(community.twitter!)">
                 <i class="bx bxl-twitter"></i>
                 <span>Twitter</span>
               </a>
-              <a
-                *ngIf="community.tiktok"
-                [href]="community.tiktok"
-                target="_blank"
-                class="social-item social-tiktok"
-                (click)="openLink(community.tiktok!)"
-              >
+              <a *ngIf="community.tiktok" [href]="community.tiktok" target="_blank" class="social-item social-tiktok"
+                (click)="openLink(community.tiktok!)">
                 <i class="bx bxl-tiktok"></i>
                 <span>TikTok</span>
               </a>
@@ -255,4 +215,3 @@
 </div>
 
 <app-site-footer />
-

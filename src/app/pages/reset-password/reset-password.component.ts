@@ -5,11 +5,13 @@ import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../services/toast.services';
 import { ToastComponent } from '../../components/ui/toast/toast.component';
 import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
+import { PasswordStrengthMeterComponent } from '../../components/ui/password-strength-meter/password-strength-meter.component';
+import { checkPasswordStrength } from '../../utils/password-strength.utils';
 
 @Component({
   selector: 'app-reset-password',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, ToastComponent, LumaSpinComponent],
+  imports: [CommonModule, RouterLink, FormsModule, ToastComponent, LumaSpinComponent, PasswordStrengthMeterComponent],
   templateUrl: './reset-password.component.html',
   styleUrls: ['./reset-password.component.scss'],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -26,7 +28,7 @@ export class ResetPasswordComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private toastService: ToastService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     // Spline Viewer scriptini dinamik olarak yükle
@@ -101,6 +103,13 @@ export class ResetPasswordComponent implements OnInit {
       return;
     }
 
+    // Şifre gücü kontrolü
+    const passwordStrength = checkPasswordStrength(this.newPassword);
+    if (!passwordStrength.isValid) {
+      this.toastService.show('Şifre en az 8 karakter, büyük harf, küçük harf ve rakam içermelidir.', 'error');
+      return;
+    }
+
     this.isLoading = true;
 
     try {
@@ -132,7 +141,6 @@ export class ResetPasswordComponent implements OnInit {
         this.toastService.show(errorMessage, 'error');
       }
     } catch (error: any) {
-      console.error('Şifre sıfırlama hatası:', error);
       this.toastService.show(
         error.message || 'Bir hata oluştu. Lütfen tekrar deneyiniz.',
         'error'

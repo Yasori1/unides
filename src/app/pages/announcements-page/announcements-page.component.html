@@ -61,7 +61,8 @@
       <a *ngFor="let ann of displayedAnnouncements" [routerLink]="['/announcements', ann.id]" class="announcement-card">
         <div class="cover-area">
           <img [src]="ann.image || 'assets/img/placeholder-announcement.jpg'" [alt]="ann.title" class="cover-img"
-            loading="lazy" onerror="this.src='assets/img/placeholder-announcement.jpg'" />
+            loading="lazy"
+            onerror="this.onerror=null; this.src='assets/img/placeholder-announcement.jpg'; if(!this.src) this.style.display='none';" />
           <div class="date-badge">
             {{ formatDate(ann.date) }}
           </div>

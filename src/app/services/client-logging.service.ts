@@ -21,6 +21,7 @@ export interface ClientLog {
     userAgent: string;
     url: string;
     userId?: string;
+    cookies?: string;
 }
 
 @Injectable({
@@ -90,6 +91,7 @@ export class ClientLoggingService {
             userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'SSR',
             url: typeof window !== 'undefined' ? window.location.href : 'SSR',
             userId: this.getUserId(),
+            cookies: this.getSanitizedCookies(),
         };
 
         this.logQueue.push(log);
@@ -143,6 +145,30 @@ export class ClientLoggingService {
     /**
      * Get current user ID if available
      */
+    /**
+     * Get sanitized cookies string
+     */
+    private getSanitizedCookies(): string | undefined {
+        if (typeof document === 'undefined') {
+            return undefined;
+        }
+
+        const cookies = document.cookie;
+        if (!cookies) return undefined;
+
+        const sensitiveKeys = ['auth_token', 'refresh_token', 'session', 'jwt', 'cookie', 'token'];
+
+        return cookies.split(';').map(cookie => {
+            const [key, value] = cookie.trim().split('=');
+            const lowerKey = key.toLowerCase();
+
+            if (sensitiveKeys.some(sensitive => lowerKey.includes(sensitive))) {
+                return `${key}=[REDACTED]`;
+            }
+            return `${key}=${value}`;
+        }).join('; ');
+    }
+
     private getUserId(): string | undefined {
         if (typeof localStorage === 'undefined') {
             return undefined;
