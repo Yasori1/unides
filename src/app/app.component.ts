@@ -3,11 +3,12 @@ import { Component, Inject, PLATFORM_ID } from '@angular/core';
 import { RouterOutlet, Router, Event, NavigationEnd } from '@angular/router';
 import { ChatbotWidgetComponent } from './components/chatbot/chatbot-widget.component';
 import { SessionTimeoutWarningComponent } from './components/ui/session-timeout-warning/session-timeout-warning.component';
+import { CookieConsentComponent } from './components/ui/cookie-consent/cookie-consent.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, ChatbotWidgetComponent, SessionTimeoutWarningComponent],
+  imports: [RouterOutlet, ChatbotWidgetComponent, SessionTimeoutWarningComponent, CookieConsentComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
