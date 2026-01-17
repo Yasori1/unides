@@ -18,15 +18,6 @@
   overflow: hidden;
   background-color: #1e1e1e; // 3D model için koyu zemin
 
-  // 3D Model Arka Planı
-  .spline-background {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
-  }
 
   // İçerik (Yazılar)
   .content-wrapper {
@@ -77,16 +68,6 @@
   background-color: #ffffff; // Beyaz zemin
   overflow: hidden;
 
-  // Waves Efekti Konumu
-  .waves-wrapper {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0; // En altta
-    opacity: 0.6; // Çizgileri biraz daha soft yap
-  }
 
   .container {
     position: relative;
@@ -127,9 +108,9 @@
   width: 100%;
   opacity: 0;
   position: relative;
-  min-height: 480px;
-  max-height: 480px;
-  
+  min-height: 240px;
+  max-height: 240px;
+
   &:has(.developer-card.expanded) {
     z-index: 1000;
   }
@@ -145,6 +126,7 @@
     opacity: 0;
     transform: translateY(30px) scale(0.95);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -156,6 +138,7 @@
   .hero-section {
     min-height: auto;
     padding: 120px 0 80px;
+
     .hero-title {
       font-size: 2.5rem;
     }

@@ -40,7 +40,7 @@ $primary-dark: #0f172a;
   align-items: center;
   gap: 15px;
   margin-right: -20px;
-  /* Sağ taraftaki profil bilgisini sola kaydır */
+  /* Sağ taraftaki profil bilgisi için varsayılan değerler */
   pointer-events: auto;
   /* Butonlar tıklanabilir olmalı */
   opacity: 0;
@@ -151,6 +151,8 @@ $primary-dark: #0f172a;
 .profile-wrapper {
   position: relative;
   z-index: 101;
+  margin-right: -38px;
+  /* Sadece profil ikonunu chatbot ile hizalamak için sağa kaydır (Net shift: -58px) */
 
   .profile-info {
     display: flex;
@@ -368,6 +370,7 @@ $primary-dark: #0f172a;
       }
     }
   }
+
 }
 
 @media (max-width: 480px) {
@@ -389,4 +392,5 @@ $primary-dark: #0f172a;
       height: 2.5px;
     }
   }
+
 }

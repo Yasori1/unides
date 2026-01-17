@@ -36,29 +36,42 @@
       </div>
 
       <div class="filter-groups">
-        <div class="select-wrapper">
-          <select [(ngModel)]="selectedCity" (change)="applyFilters()">
-            <option value="">Tüm Şehirler</option>
-            <option *ngFor="let city of cities" [value]="city">{{ city }}</option>
-          </select>
-          <i class="bx bx-chevron-down"></i>
+        <div class="select-wrapper custom-dropdown" [class.open]="isCityDropdownOpen">
+          <div class="custom-select-trigger" (click)="toggleCityDropdown($event)">
+            <span>{{ selectedCity || 'Tüm Şehirler' }}</span>
+            <i class="bx bx-chevron-down"></i>
+          </div>
+          <div class="custom-options">
+            <div class="option" (click)="selectCity('')" [class.selected]="selectedCity === ''">Tüm Şehirler</div>
+            <div *ngFor="let city of cities" class="option" (click)="selectCity(city)" [class.selected]="selectedCity === city">
+              {{ city }}
+            </div>
+          </div>
         </div>
 
-        <div class="select-wrapper">
-          <select [(ngModel)]="selectedTag" (change)="applyFilters()">
-            <option value="">Etiketler</option>
-            <option *ngFor="let tag of tags" [value]="tag">{{ tag }}</option>
-          </select>
-          <i class="bx bx-chevron-down"></i>
+        <div class="select-wrapper custom-dropdown" [class.open]="isTagDropdownOpen">
+          <div class="custom-select-trigger" (click)="toggleTagDropdown($event)">
+            <span>{{ selectedTag || 'Etiketler' }}</span>
+            <i class="bx bx-chevron-down"></i>
+          </div>
+          <div class="custom-options">
+            <div class="option" (click)="selectTag('')" [class.selected]="selectedTag === ''">Etiketler</div>
+            <div *ngFor="let tag of tags" class="option" (click)="selectTag(tag)" [class.selected]="selectedTag === tag">
+              {{ tag }}
+            </div>
+          </div>
         </div>
 
-        <div class="select-wrapper">
-          <select [(ngModel)]="sortOrder" (change)="applyFilters()">
-            <option value="default">Önerilen Sıralama</option>
-            <option value="member_desc">Üye Sayısı (Çoktan Az)</option>
-            <option value="member_asc">Üye Sayısı (Azdan Çok)</option>
-          </select>
-          <i class="bx bx-sort-alt-2"></i>
+        <div class="select-wrapper custom-dropdown" [class.open]="isSortDropdownOpen">
+          <div class="custom-select-trigger" (click)="toggleSortDropdown($event)">
+            <span>{{ getSortLabel(sortOrder) }}</span>
+            <i class="bx bx-sort-alt-2"></i>
+          </div>
+          <div class="custom-options">
+            <div class="option" (click)="selectSort('default')" [class.selected]="sortOrder === 'default'">Önerilen Sıralama</div>
+            <div class="option" (click)="selectSort('member_desc')" [class.selected]="sortOrder === 'member_desc'">Üye Sayısı (Çoktan Az)</div>
+            <div class="option" (click)="selectSort('member_asc')" [class.selected]="sortOrder === 'member_asc'">Üye Sayısı (Azdan Çok)</div>
+          </div>
         </div>
       </div>
     </div>
