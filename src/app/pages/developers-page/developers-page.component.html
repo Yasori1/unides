@@ -20,29 +20,17 @@
   <div class="team-grid-section">
     <!-- NEURONS BACKGROUND (BEYAZ ZEMİN, SOFT NÖRON ANİMASYONU) -->
     <div class="neurons-wrapper">
-      <app-neurons-background
-        [nodeCount]="60"
-        [connectionDistance]="220"
-      ></app-neurons-background>
+      <app-neurons-background [nodeCount]="60" [connectionDistance]="220"></app-neurons-background>
     </div>
 
     <div class="container">
       <div class="grid-layout">
         <!-- Kartlar -->
-        <div
-          class="card-wrapper fade-in-up"
-          *ngFor="let dev of developers; let i = index"
-          [style.animation-delay]="i * 0.05 + 's'"
-        >
-          <app-profile-card
-            [name]="dev.name"
-            [title]="dev.title"
-            [image]="dev.image"
-            [work]="dev.work"
-            [description]="dev.description"
-            [backgroundImage]="dev.backgroundImage"
-            [socialLinks]="dev.socialLinks"
-          ></app-profile-card>
+        <div class="card-wrapper fade-in-up" *ngFor="let dev of developers; let i = index"
+          [style.animation-delay]="i * 0.05 + 's'">
+          <app-profile-card [name]="dev.name" [title]="dev.title" [image]="dev.image" [work]="dev.work"
+            [description]="dev.description" [backgroundImage]="dev.backgroundImage"
+            [socialLinks]="dev.socialLinks"></app-profile-card>
         </div>
       </div>
     </div>
