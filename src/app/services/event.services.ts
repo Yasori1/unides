@@ -287,8 +287,8 @@ export class EventService {
         const realEvents = list.slice(0, limit).map((dto) => this.mapToEvent(dto));
         return [this.DEMO_EVENT, ...realEvents];
       }),
-      catchError((error) => {
-        console.error('Home upcoming events yüklenemedi:', error);
+      catchError(() => {
+        // Error handling - logging is backend-only
         return of([this.DEMO_EVENT]);
       })
     );
@@ -307,8 +307,8 @@ export class EventService {
         // Demo etkinliği listenin başına ekle
         return [this.DEMO_EVENT, ...apiEvents];
       }),
-      catchError((error) => {
-        console.error('Etkinlikler yüklenemedi:', error);
+      catchError(() => {
+        // Error handling - logging is backend-only
         return of([this.DEMO_EVENT]);
       })
     );
@@ -423,7 +423,7 @@ export class EventService {
     return this.http.get<any>(`${this.apiUrl}/${id}`).pipe(
       map((dto) => this.mapToEvent(dto)),
       catchError((error) => {
-        console.error('Etkinlik detayı yüklenemedi:', error);
+        // Error handling - logging is backend-only
         throw error;
       })
     );
@@ -478,7 +478,7 @@ export class EventService {
 
     return this.http.post<{ eventId: number }>(`${this.apiUrl}/create`, createDto).pipe(
       catchError((error) => {
-        console.error('Etkinlik oluşturulamadı:', error);
+        // Error handling - logging is backend-only
         throw error;
       })
     );
@@ -531,7 +531,7 @@ export class EventService {
 
     return this.http.put<{ updated: number }>(`${this.apiUrl}/update/${id}`, updateDto).pipe(
       catchError((error) => {
-        console.error('Etkinlik güncellenemedi:', error);
+        // Error handling - logging is backend-only
         throw error;
       })
     );
@@ -542,7 +542,7 @@ export class EventService {
   deleteEvent(id: number): Observable<{ deleted: boolean }> {
     return this.http.delete<{ deleted: boolean }>(`${this.apiUrl}/delete/${id}`).pipe(
       catchError((error) => {
-        console.error('Etkinlik silinemedi:', error);
+        // Error handling - logging is backend-only
         throw error;
       })
     );
@@ -555,7 +555,7 @@ export class EventService {
 
     return this.http.post<{ approved: boolean }>(`${this.apiUrl}/${id}/approve`, body).pipe(
       catchError((error) => {
-        console.error('Etkinlik onaylanamadı:', error);
+        // Error handling - logging is backend-only
         throw error;
       })
     );
@@ -568,7 +568,7 @@ export class EventService {
 
     return this.http.post<{ approved: boolean }>(`${this.apiUrl}/${id}/reject`, body).pipe(
       catchError((error) => {
-        console.error('Etkinlik reddedilemedi:', error);
+        // Error handling - logging is backend-only
         throw error;
       })
     );

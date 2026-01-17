@@ -2,11 +2,12 @@ import { Component } from '@angular/core';
 import { ViewportScroller } from '@angular/common';
 import { RouterOutlet, Router, Event, NavigationEnd } from '@angular/router';
 import { ChatbotWidgetComponent } from './components/chatbot/chatbot-widget.component';
+import { SessionTimeoutWarningComponent } from './components/ui/session-timeout-warning/session-timeout-warning.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, ChatbotWidgetComponent],
+  imports: [RouterOutlet, ChatbotWidgetComponent, SessionTimeoutWarningComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
@@ -14,7 +15,7 @@ export class AppComponent {
 
   title = 'ÜNİDES - Gençlik ve Spor Bakanlığı';
 
-  constructor (
+  constructor(
     private router: Router,
     private viewportScroller: ViewportScroller
   ) {

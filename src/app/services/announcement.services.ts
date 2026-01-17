@@ -183,8 +183,8 @@ export class AnnouncementService {
         // Demo duyuruyu listenin başına ekle
         return [this.DEMO_ANNOUNCEMENT, ...realAnnouncements];
       }),
-      catchError((error) => {
-        console.error('Duyurular yüklenemedi:', error);
+      catchError(() => {
+        // Error handling - logging is backend-only
         // Hata durumunda en azından demo duyuruyu göster
         return of([this.DEMO_ANNOUNCEMENT]);
       })
@@ -199,8 +199,8 @@ export class AnnouncementService {
 
     return this.http.get<any>(`${this.apiUrl}/detail/${id}`).pipe(
       map((response) => this.mapToAnnouncement(response)),
-      catchError((error) => {
-        console.error('Duyuru detayı yüklenemedi:', error);
+      catchError(() => {
+        // Error handling - logging is backend-only
         return of(undefined);
       })
     );
@@ -232,9 +232,7 @@ export class AnnouncementService {
     // Auth interceptor automatically adds Authorization header and Content-Type if token exists
     return this.http.post<number>(`${this.apiUrl}/create`, request).pipe(
       catchError((error) => {
-        console.error('Duyuru oluşturulamadı:', error);
-        console.error('Hata detayı:', error.error);
-        console.error('Request body:', JSON.stringify(request, null, 2));
+        // Error handling - logging is backend-only
         throw error;
       })
     );
@@ -267,9 +265,7 @@ export class AnnouncementService {
     // Auth interceptor automatically adds Authorization header and Content-Type if token exists
     return this.http.put<void>(`${this.apiUrl}/update/${id}`, request).pipe(
       catchError((error) => {
-        console.error('Duyuru güncellenemedi:', error);
-        console.error('Hata detayı:', error.error);
-        console.error('Request body:', JSON.stringify(request, null, 2));
+        // Error handling - logging is backend-only
         throw error;
       })
     );
@@ -280,8 +276,7 @@ export class AnnouncementService {
     // Auth interceptor automatically adds Authorization header if token exists
     return this.http.delete<void>(`${this.apiUrl}/delete/${id}`).pipe(
       catchError((error) => {
-        console.error('Duyuru silinemedi:', error);
-        console.error('Hata detayı:', error.error);
+        // Error handling - logging is backend-only
         throw error;
       })
     );
@@ -309,8 +304,7 @@ export class AnnouncementService {
     return this.http.post<UploadResponse>(`${this.apiUrl}/${announcementId}/image`, formData).pipe(
       map((response) => response.imageUrl || response as any),
       catchError((error) => {
-        console.error('Görsel yüklenemedi:', error);
-        console.error('Hata detayı:', error.error);
+        // Error handling - logging is backend-only
         throw error;
       })
     );

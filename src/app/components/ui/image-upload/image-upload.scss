@@ -14,6 +14,24 @@
     display: none;
   }
 
+  /* VALIDATION ERROR */
+  .validation-error {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    color: #dc2626;
+    font-size: 0.85rem;
+
+    i {
+      font-size: 1.1rem;
+    }
+  }
+
   /* DROP ZONE */
   .drop-zone {
     border: 2px dashed #cbd5e1;

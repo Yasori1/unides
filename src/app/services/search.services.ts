@@ -48,7 +48,7 @@ export interface AnnouncementSearchItem {
 export class SearchService {
   private apiUrl = `${environment.apiUrl}/Search`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   search(query: string): Observable<SearchResult> {
     if (!query || !query.trim()) {
@@ -96,8 +96,8 @@ export class SearchService {
           bestMatch: response.BestMatch || response.bestMatch,
         };
       }),
-      catchError((error) => {
-        console.error('Search error:', error);
+      catchError(() => {
+        // Error handling - logging is backend-only
         return of({
           communities: [],
           events: [],

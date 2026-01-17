@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 // Servisler
 import { ToastService } from '../../services/toast.services';
+import { RateLimiterService } from '../../services/rate-limiter.service';
 // Bileşenler
 import { ToastComponent } from '../../components/ui/toast/toast.component';
 import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
@@ -43,7 +44,8 @@ export class LoginPageComponent implements OnInit {
 
   constructor(
     private toastService: ToastService,
-    private router: Router
+    private router: Router,
+    private rateLimiter: RateLimiterService
   ) { }
 
   ngOnInit(): void {
@@ -103,7 +105,17 @@ export class LoginPageComponent implements OnInit {
       return;
     }
 
-    // 2. BACKEND SORGUSU BAŞLIYOR
+    // 2. Rate limit kontrolü
+    const rateLimitKey = this.rateLimiter.getLoginKey(this.email);
+    const { allowed, retryAfterSeconds } = this.rateLimiter.checkLimit(rateLimitKey);
+
+    if (!allowed) {
+      const errorMsg = this.rateLimiter.getErrorMessage(retryAfterSeconds);
+      this.toastService.show(errorMsg, 'error');
+      return;
+    }
+
+    // 3. BACKEND SORGUSU BAŞLIYOR
     this.isLoading = true;
     this.loginError = '';
 
@@ -126,6 +138,9 @@ export class LoginPageComponent implements OnInit {
       })
       .then((data: AuthResponse) => {
         // --- BAŞARILI GİRİŞ ---
+        // Rate limit'i sıfırla
+        this.rateLimiter.recordAttempt(rateLimitKey, true);
+
         // Token'ı localStorage'a kaydet
         if (data.accessToken) {
           localStorage.setItem('auth_token', data.accessToken);
@@ -150,9 +165,21 @@ export class LoginPageComponent implements OnInit {
       })
       .catch((e: any) => {
         // --- HATALI GİRİŞ ---
-        this.loginError = e?.message || 'Giriş başarısız';
-        console.error('Giriş Hatası:', e);
-        this.toastService.show(this.loginError, 'error');
+        // Rate limit sayını artır
+        this.rateLimiter.recordAttempt(rateLimitKey, false);
+
+        // Kalan deneme hakkını kontrol et
+        const { remainingAttempts } = this.rateLimiter.checkLimit(rateLimitKey);
+
+        let errorMessage = e?.message || 'Giriş başarısız';
+        if (remainingAttempts > 0) {
+          errorMessage += ` (${remainingAttempts} deneme hakkınız kaldı)`;
+        } else {
+          errorMessage = 'Çok fazla hatalı deneme yaptınız. Lütfen 30 dakika sonra tekrar deneyin.';
+        }
+
+        this.loginError = errorMessage;
+        this.toastService.show(errorMessage, 'error');
       })
       .finally(() => {
         this.isLoading = false;

@@ -24,7 +24,7 @@ export class CommunityService {
   private readonly placeholderLogo = 'assets/img/placeholder-logo.svg';
   private readonly placeholderCover = 'assets/img/placeholder-cover.svg';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   private ensureCommunityAssets(c: Community): Community {
     const logo = c.logo && String(c.logo).trim() ? c.logo : this.placeholderLogo;
@@ -51,8 +51,8 @@ export class CommunityService {
           return this.ensureCommunityAssets(community);
         });
       }),
-      catchError((error) => {
-        console.error('Featured communities yüklenemedi:', error);
+      catchError(() => {
+        // Error handling - logging is backend-only
         return of([]);
       })
     );
@@ -64,8 +64,8 @@ export class CommunityService {
       dto.isActivity !== undefined
         ? dto.isActivity
         : dto.IsActivity !== undefined
-        ? dto.IsActivity
-        : true;
+          ? dto.IsActivity
+          : true;
 
     // ID'yi string olarak sakla (Guid olabilir)
     const communityId = dto.communityId || dto.CommunityId;
@@ -136,8 +136,8 @@ export class CommunityService {
           return this.ensureCommunityAssets(community);
         });
       }),
-      catchError((error) => {
-        console.error('Newest communities yüklenemedi:', error);
+      catchError(() => {
+        // Error handling - logging is backend-only
         return of([]);
       })
     );
@@ -150,8 +150,8 @@ export class CommunityService {
       dto.isActivity !== undefined
         ? dto.isActivity
         : dto.IsActivity !== undefined
-        ? dto.IsActivity
-        : true;
+          ? dto.IsActivity
+          : true;
 
     return {
       id: dto.communityId || dto.CommunityId,
@@ -223,8 +223,8 @@ export class CommunityService {
         dto.isActivity !== undefined
           ? dto.isActivity
           : dto.IsActivity !== undefined
-          ? dto.IsActivity
-          : true,
+            ? dto.IsActivity
+            : true,
       events: dto.events || dto.Events || [],
     };
   }
@@ -252,8 +252,8 @@ export class CommunityService {
         const mapped = response.map((dto) => this.mapMiniDtoToCommunity(dto));
         return mapped;
       }),
-      catchError((error) => {
-        console.error('Topluluklar yüklenemedi:', error);
+      catchError(() => {
+        // Error handling - logging is backend-only
         return of([]);
       })
     );
@@ -452,13 +452,6 @@ export class CommunityService {
       }
     }
 
-    // Debug için console.log (production'da kaldırılabilir)
-    console.log('Original email:', JSON.stringify(dto.email));
-    console.log('Cleaned email:', JSON.stringify(cleanEmail));
-    console.log('Email length:', cleanEmail.length);
-    console.log('Email ends with .edu.tr:', cleanEmail.toLowerCase().endsWith('.edu.tr'));
-    console.log('Last 7 chars:', JSON.stringify(cleanEmail.slice(-7)));
-
     // DTO'yu backend'in beklediği formata çevir
     const backendDto = {
       Email: cleanEmail,
@@ -502,8 +495,8 @@ export class CommunityService {
           university: '',
         }));
       }),
-      catchError((error) => {
-        console.error('Topluluk üyeleri yüklenirken hata:', error);
+      catchError(() => {
+        // Error handling - logging is backend-only
         return of([]);
       })
     );
@@ -514,7 +507,6 @@ export class CommunityService {
   // Gelecekte backend'de endpoint eklendiğinde buraya bağlanacak
   searchNonMemberStudents(query: string): Observable<any[]> {
     // Backend'de search-students endpoint'i yok, şimdilik boş array döndürüyoruz
-    console.warn("search-students endpoint backend'de henüz mevcut değil");
     return of([]);
   }
 
@@ -561,8 +553,8 @@ export class CommunityService {
           } else if (error.error?.message) {
             errorMessage = error.error.message;
           }
-          return of({ 
-            exists: false, 
+          return of({
+            exists: false,
             message: errorMessage,
             roleId: null,
             isCorporate: false
@@ -578,11 +570,11 @@ export class CommunityService {
         }
         // 403: GSB yetkilisi (Role ID: 2) - Kurumsal yetkililer eklenemez
         if (error.status === 403) {
-          return of({ 
-            exists: true, 
+          return of({
+            exists: true,
             message: error.error?.message || 'GSB yetkilisi eklenemez',
             roleId: 2,
-            isCorporate: true 
+            isCorporate: true
           });
         }
         // Diğer hatalar: Kullanıcı var olabilir, ama başka bir sorun var
@@ -692,7 +684,7 @@ export class CommunityService {
       })
       .pipe(
         catchError((error) => {
-          console.error('Leave community error:', error);
+          // Error handling - logging is backend-only
           throw error;
         })
       );
@@ -726,11 +718,8 @@ export class CommunityService {
           joinedDate: dto.joinedDate || dto.JoinedDate, // Üyelik tarihi
         }));
       }),
-      catchError((error) => {
-        console.error('Error fetching memberships:', error);
-        if (error.status === 401 || error.status === 403) {
-          // Unauthorized access - returning empty list
-        }
+      catchError(() => {
+        // Error handling - logging is backend-only
         return of([]);
       })
     );

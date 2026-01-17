@@ -13,12 +13,18 @@ import { Subject } from 'rxjs';
 })
 export class AfkDetectionService implements OnDestroy {
   private readonly AFK_TIMEOUT = 10 * 60 * 1000; // 10 dakika (milisaniye)
+  private readonly WARNING_BEFORE = 2 * 60 * 1000; // 2 dakika önce uyarı
   private inactivityTimer: any = null;
+  private warningTimer: any = null;
   private isActive = false;
   private lastActivityTime: number = Date.now();
 
   // AFK durumu değiştiğinde bildirim için
   public onAfkDetected = new Subject<void>();
+  // Uyarı gösterilecek (kalan saniye ile)
+  public onWarning = new Subject<number>();
+  // Uyarı iptal edildi (kullanıcı aktif oldu)
+  public onWarningDismissed = new Subject<void>();
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
@@ -53,6 +59,10 @@ export class AfkDetectionService implements OnDestroy {
       clearTimeout(this.inactivityTimer);
       this.inactivityTimer = null;
     }
+    if (this.warningTimer) {
+      clearTimeout(this.warningTimer);
+      this.warningTimer = null;
+    }
     this.isActive = false;
     this.removeEventListeners();
   }
@@ -63,18 +73,44 @@ export class AfkDetectionService implements OnDestroy {
   resetTimer(): void {
     if (!isPlatformBrowser(this.platformId) || !this.isActive) return;
 
-    // Mevcut timer'ı temizle
+    // Mevcut timer'ları temizle
     if (this.inactivityTimer) {
       clearTimeout(this.inactivityTimer);
+    }
+    if (this.warningTimer) {
+      clearTimeout(this.warningTimer);
+      // Uyarı gösteriliyorsa dismiss et
+      this.onWarningDismissed.next();
     }
 
     // Son aktivite zamanını güncelle
     this.lastActivityTime = Date.now();
 
-    // Yeni timer başlat
+    // Uyarı timer'ı başlat (logout'tan 2 dk önce)
+    this.warningTimer = setTimeout(() => {
+      this.showWarning();
+    }, this.AFK_TIMEOUT - this.WARNING_BEFORE);
+
+    // Logout timer'ı başlat
     this.inactivityTimer = setTimeout(() => {
       this.handleInactivity();
     }, this.AFK_TIMEOUT);
+  }
+
+  /**
+   * Uyarı göster (2 dk kaldı)
+   */
+  private showWarning(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    // Kullanıcı hala giriş yapmış mı kontrol et
+    if (!this.authService.isAuthenticated()) {
+      return;
+    }
+
+    // Kalan saniyeyi hesapla
+    const remainingSeconds = Math.floor(this.WARNING_BEFORE / 1000);
+    this.onWarning.next(remainingSeconds);
   }
 
   /**
@@ -130,7 +166,6 @@ export class AfkDetectionService implements OnDestroy {
     }
 
     // AFK tespit edildi - logout yap
-    console.log('AFK tespit edildi - otomatik logout yapılıyor...');
     this.onAfkDetected.next();
 
     // Logout yap

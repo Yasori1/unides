@@ -21,7 +21,7 @@ export interface ChatResponse {
 export class ChatbotService {
   private apiUrl = `${environment.chatbotApiUrl}/chat`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   sendMessage(
     message: string,
@@ -33,9 +33,6 @@ export class ChatbotService {
       type,
       context,
     };
-
-    console.log('Chatbot API URL:', this.apiUrl);
-    console.log('Sending payload:', payload);
 
     return this.http.post<ChatResponse>(this.apiUrl, payload, {
       headers: {

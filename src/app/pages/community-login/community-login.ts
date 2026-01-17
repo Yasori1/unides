@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../services/toast.services';
 import { AuthService, LoginResponse } from '../../services/auth.services';
 import { CommunityService } from '../../services/community.services';
+import { RateLimiterService } from '../../services/rate-limiter.service';
 // Bileşenler
 import { ToastComponent } from '../../components/ui/toast/toast.component';
 import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
@@ -45,8 +46,9 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private communityService: CommunityService,
     private router: Router,
-    private location: Location
-  ) {}
+    private location: Location,
+    private rateLimiter: RateLimiterService
+  ) { }
 
   ngOnInit(): void {
     // Spline Viewer scriptini dinamik olarak yükle
@@ -122,12 +124,25 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // 2. BACKEND SORGUSU BAŞLIYOR
+    // 2. Rate limit kontrolü
+    const rateLimitKey = this.rateLimiter.getLoginKey(email);
+    const { allowed, retryAfterSeconds } = this.rateLimiter.checkLimit(rateLimitKey);
+
+    if (!allowed) {
+      const errorMsg = this.rateLimiter.getErrorMessage(retryAfterSeconds);
+      this.toastService.show(errorMsg, 'error');
+      return;
+    }
+
+    // 3. BACKEND SORGUSU BAŞLIYOR
     this.isLoading = true;
 
     this.authService.loginCommunity(email, password).subscribe({
       next: (response: LoginResponse) => {
         // --- BAŞARILI GİRİŞ ---
+        // Rate limit'i sıfırla
+        this.rateLimiter.recordAttempt(rateLimitKey, true);
+
         // Giriş başarılı olduktan sonra, kullanıcının e-postasının bir topluluğun başkan e-postası olup olmadığını kontrol et
         const normalizedEmail = email.trim().toLowerCase();
 
@@ -165,9 +180,8 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
                 })
               );
             }),
-            catchError((error) => {
+            catchError(() => {
               // Topluluk kontrolü sırasında hata oluşursa
-              console.error('Topluluk kontrolü hatası:', error);
               return of(null);
             })
           )
@@ -200,10 +214,9 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
                 );
               }
             },
-            error: (error) => {
+            error: () => {
               // Topluluk kontrolü sırasında hata oluşursa, girişi engelle
               this.isLoading = false;
-              console.error('Topluluk kontrolü hatası:', error);
 
               // Token'ı temizle
               localStorage.removeItem('auth_token');
@@ -221,10 +234,21 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
       error: (error: HttpErrorResponse) => {
         // --- HATALI GİRİŞ ---
         this.isLoading = false;
-        console.error('Giriş Hatası:', error);
 
-        const message = error.error?.message || error.message || 'E-posta veya şifre hatalı!';
-        this.toastService.show(message, 'error');
+        // Rate limit sayını artır
+        this.rateLimiter.recordAttempt(rateLimitKey, false);
+
+        // Kalan deneme hakkını kontrol et
+        const { remainingAttempts } = this.rateLimiter.checkLimit(rateLimitKey);
+
+        let errorMessage = error.error?.message || error.message || 'E-posta veya şifre hatalı!';
+        if (remainingAttempts > 0) {
+          errorMessage += ` (${remainingAttempts} deneme hakkınız kaldı)`;
+        } else {
+          errorMessage = 'Çok fazla hatalı deneme yaptınız. Lütfen 30 dakika sonra tekrar deneyin.';
+        }
+
+        this.toastService.show(errorMessage, 'error');
       },
     });
   }
@@ -338,7 +362,6 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
         }
       }
     } catch (error: any) {
-      console.error('Şifre sıfırlama hatası:', error);
       // Network hatası veya fetch hatası
       if (error.message && error.message.includes('fetch')) {
         this.toastService.show('Sunucuya Bağlanılamadı', 'error');

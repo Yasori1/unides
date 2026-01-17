@@ -4,6 +4,7 @@ import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { AnnouncementService, Announcement } from '../../services/announcement.services';
 import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
 import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
+import { SafeHtmlPipe } from '../../pipes/safe-html.pipe';
 
 // Extended Announcement Interface to include link? and category?
 interface ExtendedAnnouncement extends Omit<Announcement, 'link'> {
@@ -14,7 +15,7 @@ interface ExtendedAnnouncement extends Omit<Announcement, 'link'> {
 @Component({
   selector: 'app-announcement-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, SiteNavbarComponent, SiteFooterComponent],
+  imports: [CommonModule, RouterModule, SiteNavbarComponent, SiteFooterComponent, SafeHtmlPipe],
   templateUrl: './announcement-detail.component.html',
   styleUrls: ['./announcement-detail.component.scss'],
 })
@@ -95,7 +96,7 @@ export class AnnouncementDetailComponent implements OnInit {
     private router: Router,
     private announcementService: AnnouncementService,
     @Inject(PLATFORM_ID) private platformId: Object
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
@@ -111,7 +112,7 @@ export class AnnouncementDetailComponent implements OnInit {
   loadAnnouncement(id: number) {
     this.isLoading = true;
     this.announcement = null;
-    
+
     // Önce backend'den veri çek
     this.announcementService.getAnnouncementById(id).subscribe({
       next: (data) => {
@@ -129,8 +130,8 @@ export class AnnouncementDetailComponent implements OnInit {
           this.isLoading = false;
         }
       },
-      error: (err) => {
-        console.error('Duyuru detayı yüklenemedi:', err);
+      error: () => {
+        // Error handling - logging is backend-only
         this.isLoading = false;
       }
     });
@@ -142,14 +143,14 @@ export class AnnouncementDetailComponent implements OnInit {
       next: (announcements) => {
         // Mevcut duyuruyu hariç tut
         const filtered = announcements.filter(a => a.id !== currentId);
-        
+
         // Tarihe göre sırala (en yeni en üstte - en son yayınlanan ilk sırada)
         const sorted = filtered.sort((a, b) => {
           const dateA = new Date(a.date).getTime();
           const dateB = new Date(b.date).getTime();
           return dateB - dateA; // Büyükten küçüğe (en yeni en üstte)
         });
-        
+
         // En son 4 tanesini al
         this.recentAnnouncements = sorted.slice(0, 4).map(a => ({
           ...a,
@@ -157,8 +158,8 @@ export class AnnouncementDetailComponent implements OnInit {
           link: a.link || ''
         }));
       },
-      error: (err) => {
-        console.error('İlgili duyurular yüklenemedi:', err);
+      error: () => {
+        // Error handling - logging is backend-only
         this.recentAnnouncements = [];
       }
     });

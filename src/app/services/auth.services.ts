@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, tap, catchError, of } from 'rxjs';
+import { Observable, tap, catchError, of, map, switchMap } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
+import { isTokenExpired, getTokenRemainingTime, decodeJwtToken } from '../utils/security.utils';
 
 export interface LoginResponse {
   // Eski/varsayılan alanlar
@@ -39,7 +40,55 @@ export class AuthService {
   // Backend API URL - environment'tan alınıyor
   private apiUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient, private router: Router) {}
+  // Token refresh durumu (çoklu refresh isteğini önlemek için)
+  private isRefreshing = false;
+
+  constructor(private http: HttpClient, private router: Router) {
+    // Token expiration kontrolü için periyodik kontrol başlat
+    if (typeof window !== 'undefined') {
+      this.startTokenExpirationCheck();
+    }
+  }
+
+  /**
+   * Periyodik token süresi kontrolü
+   * Token süresi dolmak üzereyse otomatik refresh dener
+   */
+  private startTokenExpirationCheck(): void {
+    // Her 60 saniyede token süresini kontrol et
+    setInterval(() => {
+      const token = this.getToken();
+      if (token) {
+        const remainingTime = getTokenRemainingTime(token);
+        // Token 5 dakikadan az kaldıysa refresh dene
+        if (remainingTime > 0 && remainingTime < 300) {
+          this.refreshTokenIfNeeded();
+        }
+      }
+    }, 60000);
+  }
+
+  /**
+   * Token'ı yenile (gerekirse)
+   */
+  private refreshTokenIfNeeded(): void {
+    if (this.isRefreshing) return;
+
+    const refreshToken = this.getRefreshToken();
+    if (!refreshToken) return;
+
+    this.isRefreshing = true;
+    this.refreshToken().subscribe({
+      next: () => {
+        this.isRefreshing = false;
+      },
+      error: () => {
+        this.isRefreshing = false;
+        // Refresh başarısız - kullanıcı tekrar giriş yapmalı
+        // Sessiz fail - kullanıcı mevcut token'la devam edebilir (süresi dolana kadar)
+      }
+    });
+  }
 
   // --- MERKEZİ GİRİŞ METODU (SWAGGER: POST /api/Auth/login) ---
   // Tüm kullanıcı tipleri aynı endpoint üzerinden giriş yapar,
@@ -62,7 +111,7 @@ export class AuthService {
           this.saveToken(token);
         }
         if (refresh) {
-          localStorage.setItem('refresh_token', refresh);
+          this.saveRefreshToken(refresh);
         }
 
         const userObj = {
@@ -145,63 +194,192 @@ export class AuthService {
     return this.http.post(`${this.apiUrl}/Auth/register`, backendData);
   }
 
-  // --- 5. REFRESH TOKEN (SWAGGER: POST /api/Auth/refresh) ---
-  refreshToken(): Observable<any> {
-    // Token yenileme ihtiyacı olursa bu metot kullanılabilir
-    return this.http.post(`${this.apiUrl}/Auth/refresh`, {});
+  // --- 7. REFRESH TOKEN (SWAGGER: POST /api/Auth/refresh) ---
+  /**
+   * Token yenileme - Mevcut refresh token'ı kullanarak yeni access token alır
+   */
+  refreshToken(): Observable<LoginResponse> {
+    const refreshTokenValue = this.getRefreshToken();
+    const currentToken = this.getToken();
+
+    if (!refreshTokenValue) {
+      return of({} as LoginResponse);
+    }
+
+    // Backend'e refresh token gönder
+    const payload = {
+      refreshToken: refreshTokenValue,
+      accessToken: currentToken, // Bazı backend'ler mevcut token'ı da ister
+    };
+
+    return this.http.post<LoginResponse>(`${this.apiUrl}/Auth/refresh`, payload).pipe(
+      tap((response: any) => {
+        const newToken =
+          response?.accessToken ||
+          response?.AccessToken ||
+          response?.token ||
+          response?.Token ||
+          null;
+        const newRefresh =
+          response?.refreshToken || response?.RefreshToken || response?.refresh || null;
+
+        if (newToken) {
+          this.saveToken(newToken);
+        }
+        if (newRefresh) {
+          this.saveRefreshToken(newRefresh);
+        }
+      }),
+      catchError(() => {
+        // Refresh token geçersiz veya süresi dolmuş
+        // Kullanıcıyı logout yapmıyoruz, sadece refresh'i durduruyoruz
+        // Mevcut token süresi dolduğunda kullanıcı otomatik logout olacak
+        return of({} as LoginResponse);
+      })
+    );
   }
 
-  // --- 6. ÇIKIŞ YAP (LOGOUT) ---
+  // --- 8. ÇIKIŞ YAP (LOGOUT) ---
   // Swagger: POST /api/Auth/logout
   private logoutBackend(): Observable<any> {
-    return this.http.post(`${this.apiUrl}/Auth/logout`, {});
+    const token = this.getToken();
+    const refreshTokenValue = this.getRefreshToken();
+
+    // Backend'e logout bildir (token invalidation için)
+    return this.http.post(`${this.apiUrl}/Auth/logout`, {
+      refreshToken: refreshTokenValue
+    });
   }
 
   // --- ORTAK YARDIMCI METOTLAR ---
   saveToken(token: string): void {
-    localStorage.setItem('auth_token', token);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('auth_token', token);
+    }
   }
+
   getToken(): string | null {
+    if (typeof window === 'undefined') return null;
     return localStorage.getItem('auth_token');
   }
+
+  saveRefreshToken(token: string): void {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('refresh_token', token);
+    }
+  }
+
+  getRefreshToken(): string | null {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem('refresh_token');
+  }
+
   saveUser(user: any): void {
-    localStorage.setItem('user_info', JSON.stringify(user));
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('user_info', JSON.stringify(user));
+    }
   }
+
   getUser(): any | null {
+    if (typeof window === 'undefined') return null;
     const user = localStorage.getItem('user_info');
-    return user ? JSON.parse(user) : null;
+    try {
+      return user ? JSON.parse(user) : null;
+    } catch {
+      return null;
+    }
   }
+
   saveUserType(type: string): void {
-    localStorage.setItem('user_type', type);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('user_type', type);
+    }
   }
+
   getUserType(): string | null {
+    if (typeof window === 'undefined') return null;
     return localStorage.getItem('user_type');
   }
 
+  /**
+   * Güvenli logout - tüm auth verilerini temizler
+   * Backend'e logout isteği atar ve local storage'ı temizler
+   */
   logout(): void {
-    // Önce backend'e logout isteği atıyoruz (Token'ı geçersiz kılmak için)
+    // Önce local temizliği yap (her durumda çalışmalı)
+    this.clearAllAuthData();
+
+    // Backend'e logout isteği at (sessiz - hata durumunda bile devam et)
     this.logoutBackend()
       .pipe(
         catchError((err) => {
-          console.warn('Backend logout hatası (önemsiz):', err);
-          return of(null); // Hata olsa bile local temizliğe devam et
+          // Backend logout hatası - önemsiz, local temizlik yapıldı
+          // Production'da log gösterme
+          return of(null);
         })
       )
-      .subscribe(() => {
-        // İstek tamamlanınca veya hata verince çalışır
-      });
+      .subscribe();
 
-    // Local temizlik her durumda yapılır
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('user_info');
-    localStorage.removeItem('user_type');
     // Anasayfaya yönlendir
     this.router.navigate(['/']);
   }
 
+  /**
+   * Tüm auth verilerini temizle
+   * Private metod - doğrudan çağırılmamalı, logout() kullan
+   */
+  private clearAllAuthData(): void {
+    if (typeof window === 'undefined') return;
+
+    // Ana auth verileri
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user_info');
+    localStorage.removeItem('user_type');
+
+    // Ek güvenlik: olası diğer auth-related anahtarları da temizle
+    const keysToRemove = ['session_id', 'remember_me', 'last_login'];
+    keysToRemove.forEach(key => {
+      try {
+        localStorage.removeItem(key);
+      } catch {
+        // Ignore errors
+      }
+    });
+
+    // Session storage'ı da temizle
+    try {
+      sessionStorage.clear();
+    } catch {
+      // Ignore errors
+    }
+  }
+
+  /**
+   * Kullanıcının giriş yapıp yapmadığını kontrol et
+   * Token varlığı VE geçerliliğini kontrol eder
+   */
   isAuthenticated(): boolean {
-    return !!this.getToken();
+    const token = this.getToken();
+    if (!token) return false;
+
+    // Token süresi dolmuş mu kontrol et
+    if (isTokenExpired(token)) {
+      // Token süresi dolmuş - temizle
+      this.clearAllAuthData();
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Token'ın kalan süresini saniye cinsinden döndür
+   */
+  getTokenRemainingSeconds(): number {
+    const token = this.getToken();
+    if (!token) return 0;
+    return getTokenRemainingTime(token);
   }
 
   /**

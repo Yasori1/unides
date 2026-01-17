@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, Output, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { validateImageFile, FileValidationResult } from '../../../utils/file-upload.utils';
 
 @Component({
   selector: 'app-image-upload',
@@ -16,6 +17,7 @@ export class ImageUploadComponent {
   @Input() allowUrl: boolean = true; // URL ile ekleme izni
   @Output() onImageSelected = new EventEmitter<string>(); // Parent'a image path/url gönder
   @Output() onFileSelected = new EventEmitter<File>(); // Parent'a File objesi gönder (upload için)
+  @Output() onValidationError = new EventEmitter<string>(); // Validation hatası için
 
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
@@ -23,6 +25,7 @@ export class ImageUploadComponent {
   fileName: string | null = null;
   urlInput: string = ''; // URL ile giriş için
   isUploading: boolean = false;
+  validationError: string | null = null;
 
   // --- DOSYA SEÇME İŞLEMLERİ ---
   triggerFileInput() {
@@ -32,7 +35,7 @@ export class ImageUploadComponent {
   handleFileChange(event: any) {
     const file = event.target.files[0];
     if (file) {
-      this.processFile(file);
+      this.validateAndProcessFile(file);
     }
   }
 
@@ -56,10 +59,31 @@ export class ImageUploadComponent {
 
     if (event.dataTransfer?.files && event.dataTransfer.files.length > 0) {
       const file = event.dataTransfer.files[0];
-      if (file.type.startsWith('image/')) {
-        this.processFile(file);
-      }
+      // Güvenlik kontrolü yap
+      this.validateAndProcessFile(file);
     }
+  }
+
+  // --- DOSYAYI DOĞRULA VE İŞLE ---
+  async validateAndProcessFile(file: File) {
+    this.validationError = null;
+
+    // Güvenlik doğrulaması
+    const validation: FileValidationResult = await validateImageFile(file);
+
+    if (!validation.valid) {
+      const errorMsg = validation.error || 'Geçersiz dosya';
+      this.validationError = errorMsg;
+      this.onValidationError.emit(errorMsg);
+      // Input'ı temizle
+      if (this.fileInput) {
+        this.fileInput.nativeElement.value = '';
+      }
+      return;
+    }
+
+    // Doğrulama başarılı, dosyayı işle
+    this.processFile(file);
   }
 
   // --- DOSYAYI İŞLEME VE ÖNİZLEME ---

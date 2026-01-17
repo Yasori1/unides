@@ -76,7 +76,7 @@
             </div>
 
             <p class="short-desc">{{ announcement.shortDescription }}</p>
-            <div class="full-content" [innerHTML]="announcement.content"></div>
+            <div class="full-content" [innerHTML]="announcement.content | safeHtml"></div>
 
             <!-- External Link Button (Optional) -->
             <div class="action-buttons" *ngIf="announcement.link">

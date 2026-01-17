@@ -2,24 +2,18 @@
   <label class="upload-label">{{ label }}</label>
 
   <!-- GİZLİ INPUT -->
-  <input
-    type="file"
-    accept="image/*"
-    class="hidden-input"
-    #fileInput
-    (change)="handleFileChange($event)"
-  />
+  <input type="file" accept=".jpg,.jpeg,.png,.gif,.webp,.svg" class="hidden-input" #fileInput
+    (change)="handleFileChange($event)" />
+
+  <!-- HATA MESAJI -->
+  <div class="validation-error" *ngIf="validationError">
+    <i class="bx bx-error-circle"></i>
+    <span>{{ validationError }}</span>
+  </div>
 
   <!-- DROP ZONE (Resim Yoksa) -->
-  <div
-    class="drop-zone"
-    [class.active]="isDragging"
-    *ngIf="!previewUrl"
-    (click)="triggerFileInput()"
-    (dragover)="onDragOver($event)"
-    (dragleave)="onDragLeave($event)"
-    (drop)="onDrop($event)"
-  >
+  <div class="drop-zone" [class.active]="isDragging" *ngIf="!previewUrl" (click)="triggerFileInput()"
+    (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
     <div class="icon-bg">
       <i class="bx bx-image-add"></i>
     </div>
@@ -52,12 +46,8 @@
   <div class="url-input-wrapper" *ngIf="allowUrl">
     <div class="divider"><span>veya URL gir</span></div>
     <div class="input-with-btn">
-      <input
-        type="text"
-        [(ngModel)]="urlInput"
-        placeholder="https://ornek-resim.com/logo.png"
-        (keyup.enter)="handleUrlInput()"
-      />
+      <input type="text" [(ngModel)]="urlInput" placeholder="https://ornek-resim.com/logo.png"
+        (keyup.enter)="handleUrlInput()" />
       <button type="button" (click)="handleUrlInput()">
         <i class="bx bx-check"></i>
       </button>

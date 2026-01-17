@@ -17,7 +17,7 @@ import {
 export class ForumService {
   private apiUrl = `${environment.apiUrl}/Forum`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   /**
    * Soru oluştur
@@ -31,7 +31,7 @@ export class ForumService {
       .post<{ message: string; questionId: number }>(`${this.apiUrl}/formAsk`, request)
       .pipe(
         catchError((error) => {
-          console.error('Soru oluşturulamadı:', error);
+          // Error handling - logging is backend-only
           throw error;
         })
       );
@@ -47,7 +47,7 @@ export class ForumService {
       .post<{ message: string }>(`${this.apiUrl}/formAnswer`, request)
       .pipe(
         catchError((error) => {
-          console.error('Cevap oluşturulamadı:', error);
+          // Error handling - logging is backend-only
           throw error;
         })
       );
@@ -60,8 +60,8 @@ export class ForumService {
    */
   getAllQuestions(): Observable<QuestionDto[]> {
     return this.http.get<QuestionDto[]>(`${this.apiUrl}/getAllQuestionsAndAnswer`).pipe(
-      catchError((error) => {
-        console.error('Sorular yüklenemedi:', error);
+      catchError(() => {
+        // Error handling - logging is backend-only
         return of([]);
       })
     );
@@ -77,7 +77,7 @@ export class ForumService {
       .put<{ message: string }>(`${this.apiUrl}/questionUpdate`, request)
       .pipe(
         catchError((error) => {
-          console.error('Soru güncellenemedi:', error);
+          // Error handling - logging is backend-only
           throw error;
         })
       );
@@ -93,7 +93,7 @@ export class ForumService {
       .delete<{ message: string }>(`${this.apiUrl}/questionDelete/${id}`)
       .pipe(
         catchError((error) => {
-          console.error('Soru silinemedi:', error);
+          // Error handling - logging is backend-only
           throw error;
         })
       );
@@ -109,7 +109,7 @@ export class ForumService {
       .put<{ message: string }>(`${this.apiUrl}/answerUpdate`, request)
       .pipe(
         catchError((error) => {
-          console.error('Cevap güncellenemedi:', error);
+          // Error handling - logging is backend-only
           throw error;
         })
       );
@@ -125,7 +125,7 @@ export class ForumService {
       .delete<{ message: string }>(`${this.apiUrl}/answerDelete/${id}`)
       .pipe(
         catchError((error) => {
-          console.error('Cevap silinemedi:', error);
+          // Error handling - logging is backend-only
           throw error;
         })
       );

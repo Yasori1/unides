@@ -1,22 +1,8 @@
 <!-- Floating Chat Button -->
-<button
-  *ngIf="!isOpen && isVisible"
-  class="chatbot-toggle-btn"
-  (click)="toggleChat()"
-  aria-label="Chatbot'u aç"
-  title="ÜNİDES Dijital Portal Asistanı"
->
-  <svg
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2Z"
-      fill="currentColor"
-    />
+<button *ngIf="!isOpen && isVisible" class="chatbot-toggle-btn" (click)="toggleChat()" aria-label="Chatbot'u aç"
+  title="ÜNİDES Dijital Portal Asistanı">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2Z" fill="currentColor" />
   </svg>
 </button>
 
@@ -28,19 +14,11 @@
       <div class="chatbot-avatar">
         <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <!-- Chat bubble background -->
-          <path
-            d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2Z"
-            fill="url(#avatarGradient)"
-          />
+          <path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2Z"
+            fill="url(#avatarGradient)" />
           <!-- Chat lines -->
-          <path
-            d="M7 9H17M7 13H14"
-            stroke="white"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            opacity="0.9"
-          />
+          <path d="M7 9H17M7 13H14" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            opacity="0.9" />
           <defs>
             <linearGradient id="avatarGradient" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
               <stop offset="0%" stop-color="#3b82f6" />
@@ -56,29 +34,17 @@
     </div>
     <button class="chatbot-close-btn" (click)="closeChat()" aria-label="Kapat">
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-        <path
-          d="M15 5L5 15M5 5L15 15"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-        />
+        <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
       </svg>
     </button>
   </div>
 
   <!-- Messages -->
   <div class="chat-messages">
-    <div
-      *ngFor="let msg of messages"
-      [class]="'message ' + (msg.isBot ? 'bot-message' : 'user-message')"
-    >
-      <div class="message-content" [innerHTML]="formatMessage(msg.text)"></div>
+    <div *ngFor="let msg of messages" [class]="'message ' + (msg.isBot ? 'bot-message' : 'user-message')">
+      <div class="message-content" [innerHTML]="formatMessage(msg.text) | safeHtml"></div>
       <div class="message-buttons" *ngIf="msg.buttons && msg.buttons.length > 0">
-        <button
-          *ngFor="let btn of msg.buttons"
-          class="message-button"
-          (click)="onButtonClick(btn)"
-        >
+        <button *ngFor="let btn of msg.buttons" class="message-button" (click)="onButtonClick(btn)">
           {{ btn }}
         </button>
       </div>
@@ -99,28 +65,13 @@
 
   <!-- Input -->
   <div class="chatbot-input-container">
-    <input
-      type="text"
-      class="chatbot-input"
-      [(ngModel)]="userInput"
-      placeholder="Mesajınızı yazın..."
-      (keydown.enter)="sendMessage()"
-      [disabled]="isLoading"
-    />
-    <button
-      class="chatbot-send-btn"
-      (click)="sendMessage()"
-      [disabled]="!userInput.trim() || isLoading"
-      aria-label="Gönder"
-    >
+    <input type="text" class="chatbot-input" [(ngModel)]="userInput" placeholder="Mesajınızı yazın..."
+      (keydown.enter)="sendMessage()" [disabled]="isLoading" />
+    <button class="chatbot-send-btn" (click)="sendMessage()" [disabled]="!userInput.trim() || isLoading"
+      aria-label="Gönder">
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-        <path
-          d="M18 2L9 11M18 2L12 18L9 11M18 2L2 8L9 11"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
+        <path d="M18 2L9 11M18 2L12 18L9 11M18 2L2 8L9 11" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round" />
       </svg>
     </button>
   </div>

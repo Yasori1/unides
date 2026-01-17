@@ -6,6 +6,7 @@ import { ChatbotService, ChatResponse } from '../../services/chatbot.service';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
+import { SafeHtmlPipe } from '../../pipes/safe-html.pipe';
 
 interface Message {
   text: string;
@@ -17,7 +18,7 @@ interface Message {
 @Component({
   selector: 'app-chatbot-widget',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, SafeHtmlPipe],
   templateUrl: './chatbot-widget.component.html',
   styleUrls: ['./chatbot-widget.component.scss'],
   animations: [
@@ -78,7 +79,7 @@ export class ChatbotWidgetComponent implements OnInit, OnDestroy {
     private chatbotService: ChatbotService,
     private router: Router,
     @Inject(PLATFORM_ID) private platformId: Object
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
@@ -153,14 +154,7 @@ export class ChatbotWidgetComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         this.isLoading = false;
-        console.error('Chatbot hatası:', error);
-        console.error('Hata detayları:', {
-          status: error.status,
-          statusText: error.statusText,
-          message: error.message,
-          error: error.error,
-          url: error.url,
-        });
+        // Error handling - logging is backend-only
 
         let errorMessage = 'Üzgünüm, bir hata oluştu. Lütfen daha sonra tekrar deneyin.';
 
