@@ -7,6 +7,7 @@ import {
   Inject,
   PLATFORM_ID,
   OnInit,
+  HostListener,
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
@@ -69,6 +70,10 @@ export class EventsComponent implements OnInit, AfterViewInit {
 
   // Sıralama
   sortOrder: 'date_asc' | 'date_desc' | 'name_asc' | 'name_desc' = 'date_asc';
+
+  // Custom Dropdown States
+  isCategoryDropdownOpen: boolean = false;
+  isSortDropdownOpen: boolean = false;
   // Removed old sort vars
 
   // Lightbox
@@ -468,7 +473,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
     private router: Router,
     private communityService: CommunityService,
     private eventService: EventService
-  ) {}
+  ) { }
 
   ngOnInit() {
     if (!isPlatformBrowser(this.platformId)) return;
@@ -492,7 +497,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
         // Backend'den gelen tüm etkinlikleri map et
         if (data && data.length) {
           const fetchedEvents = data.map((e) => this.mapToCard(e));
-          
+
           // Sadece onaylanan etkinlikleri göster (status === 'Onaylandı')
           // EventService zaten eventConfirm: 1 değerini 'Onaylandı' olarak map ediyor
           const approvedEventsList = fetchedEvents.filter((e) => {
@@ -500,7 +505,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
             const eventItem = data.find((item) => item.id === e.id);
             return eventItem?.status === 'Onaylandı';
           });
-          
+
           // Sadece backend'den gelen ve onaylanan verileri kullan
           this.baseEvents = approvedEventsList;
           this.attachCommunityNames();
@@ -731,8 +736,49 @@ export class EventsComponent implements OnInit, AfterViewInit {
     this.applyFiltersAndGoFirstPage();
   }
 
+  // --- CUSTOM DROPDOWN MANTIĞI ---
+  toggleCategoryDropdown(event: Event) {
+    event.stopPropagation();
+    this.isCategoryDropdownOpen = !this.isCategoryDropdownOpen;
+    this.isSortDropdownOpen = false;
+  }
+
+  toggleSortDropdown(event: Event) {
+    event.stopPropagation();
+    this.isSortDropdownOpen = !this.isSortDropdownOpen;
+    this.isCategoryDropdownOpen = false;
+  }
+
+  selectCategory(cat: string) {
+    this.activeCategory = cat;
+    this.applyFiltersAndGoFirstPage();
+    this.isCategoryDropdownOpen = false;
+  }
+
+  selectSort(order: 'date_asc' | 'date_desc' | 'name_asc' | 'name_desc') {
+    this.sortOrder = order;
+    this.applyFiltersAndGoFirstPage();
+    this.isSortDropdownOpen = false;
+  }
+
+  getSortLabel(order: string): string {
+    switch (order) {
+      case 'date_asc': return 'Tarih (Yakın-Uzak)';
+      case 'date_desc': return 'Tarih (Uzak-Yakın)';
+      case 'name_asc': return 'İsim (A-Z)';
+      case 'name_desc': return 'İsim (Z-A)';
+      default: return 'Gelişmiş Sıralama';
+    }
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    this.isCategoryDropdownOpen = false;
+    this.isSortDropdownOpen = false;
+  }
+
   // Old changeSortCriteria removed
-  
+
   trackByEventId(index: number, event: EventCard): number {
     return event.id;
   }

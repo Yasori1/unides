@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, Inject, PLATFORM_ID, HostListener } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -34,7 +34,7 @@ export class CommunitiesPageComponent implements OnInit {
     'Rize', 'Sakarya', 'Samsun', 'Siirt', 'Sinop', 'Sivas', 'Şanlıurfa', 'Şırnak',
     'Tekirdağ', 'Tokat', 'Trabzon', 'Tunceli', 'Uşak', 'Van', 'Yalova', 'Yozgat', 'Zonguldak'
   ];
-  
+
   categories: string[] = [];
 
   // Yeni Tag Filtresi (Kullanıcı isteği)
@@ -46,6 +46,11 @@ export class CommunitiesPageComponent implements OnInit {
   selectedCategory: string = '';
   selectedTag: string = ''; // Yeni tag seçimi
   sortOrder: 'default' | 'member_desc' | 'member_asc' = 'default';
+
+  // Custom Dropdown States
+  isCityDropdownOpen: boolean = false;
+  isTagDropdownOpen: boolean = false;
+  isSortDropdownOpen: boolean = false;
 
   // Sayfalama
   currentPage: number = 1;
@@ -60,7 +65,7 @@ export class CommunitiesPageComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     @Inject(PLATFORM_ID) private platformId: Object
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
@@ -168,7 +173,7 @@ export class CommunitiesPageComponent implements OnInit {
     if (this.selectedCategory) {
       temp = temp.filter((c) => c.category === this.selectedCategory);
     }
-    
+
     // 4. Tag Filtresi (Yeni eklenen - Kategoriye göre filtreler)
     if (this.selectedTag) {
       // Not: Şu an için tag'ler kategori alanında tutuluyor varsayıyoruz veya kategori ile eşleşiyor
@@ -223,6 +228,61 @@ export class CommunitiesPageComponent implements OnInit {
 
   navigateToDetail(id: string) {
     this.router.navigate(['/communities', id]);
+  }
+
+  // --- CUSTOM DROPDOWN MANTIĞI ---
+  toggleCityDropdown(event: Event) {
+    event.stopPropagation();
+    this.isCityDropdownOpen = !this.isCityDropdownOpen;
+    this.isTagDropdownOpen = false;
+    this.isSortDropdownOpen = false;
+  }
+
+  toggleTagDropdown(event: Event) {
+    event.stopPropagation();
+    this.isTagDropdownOpen = !this.isTagDropdownOpen;
+    this.isCityDropdownOpen = false;
+    this.isSortDropdownOpen = false;
+  }
+
+  toggleSortDropdown(event: Event) {
+    event.stopPropagation();
+    this.isSortDropdownOpen = !this.isSortDropdownOpen;
+    this.isCityDropdownOpen = false;
+    this.isTagDropdownOpen = false;
+  }
+
+  selectCity(city: string) {
+    this.selectedCity = city;
+    this.applyFilters();
+    this.isCityDropdownOpen = false;
+  }
+
+  selectTag(tag: string) {
+    this.selectedTag = tag;
+    this.applyFilters();
+    this.isTagDropdownOpen = false;
+  }
+
+  selectSort(order: 'default' | 'member_desc' | 'member_asc') {
+    this.sortOrder = order;
+    this.applyFilters();
+    this.isSortDropdownOpen = false;
+  }
+
+  getSortLabel(order: string): string {
+    switch (order) {
+      case 'member_desc': return 'Üye Sayısı (Çoktan Az)';
+      case 'member_asc': return 'Üye Sayısı (Azdan Çok)';
+      default: return 'Önerilen Sıralama';
+    }
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    this.isCityDropdownOpen = false;
+    this.isTagDropdownOpen = false;
+    this.isSortDropdownOpen = false;
   }
 
   onHeroMouseMove(event: MouseEvent) {

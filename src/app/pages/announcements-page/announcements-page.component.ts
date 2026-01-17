@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, Inject, PLATFORM_ID, HostListener } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -9,9 +9,8 @@ import { SiteFooterComponent } from '../../common/site-footer/site-footer.compon
 // --- Interface Tanımı (DÜZELTİLDİ) ---
 // Omit kullanarak Announcement içindeki orijinal 'link' tanımını çıkardık
 // ve aşağıda kendi isteğe bağlı 'link?' tanımımızı ekledik.
-interface ExtendedAnnouncement extends Omit<Announcement, 'link'> {
-  category?: 'Genel' | 'Bakanlık';
-  link?: string;
+interface ExtendedAnnouncement extends Announcement {
+  link: string;
 }
 
 @Component({
@@ -34,7 +33,9 @@ export class AnnouncementsPageComponent implements OnInit {
   // Filtreleme
   searchText: string = '';
   sortOrder: 'default' | 'date_desc' | 'date_asc' = 'default';
-  selectedCategory: 'all' | 'Genel' | 'Bakanlık' = 'all';
+
+  // Custom Dropdown States
+  isSortDropdownOpen: boolean = false;
 
   // Sayfalama
   currentPage: number = 1;
@@ -47,7 +48,7 @@ export class AnnouncementsPageComponent implements OnInit {
   constructor(
     private announcementService: AnnouncementService,
     @Inject(PLATFORM_ID) private platformId: Object
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
@@ -59,82 +60,16 @@ export class AnnouncementsPageComponent implements OnInit {
     this.isLoading = true;
     this.announcementService.getAllAnnouncements().subscribe({
       next: (data) => {
-        // Mevcut verilere 'Genel' kategorisi atayalım
         // data.map içinde gelen objeyi ExtendedAnnouncement tipine uyduruyoruz
-        const generalData: ExtendedAnnouncement[] = (data || []).map(item => ({ 
-          ...item, 
-          category: 'Genel',
+        const generalData: ExtendedAnnouncement[] = (data || []).map(item => ({
+          ...item,
           // Eğer servisten gelen veride link yoksa boş string veya undefined gelebilir
-          link: item.link || '' 
+          link: item.link || ''
         }));
-        
-        // --- DEMO BAKANLIK VERİLERİ ---
-        const ministryData: ExtendedAnnouncement[] = [
-          {
-            id: 901,
-            title: 'YÖK 2024-2025 Akademik Takvim Genelgesi Yayınlandı',
-            shortDescription: 'Yükseköğretim Kurulu tarafından üniversitelerin akademik takvimlerine ilişkin yeni usul ve esaslar belirlenmiştir.',
-            content: '', 
-            date: '2024-08-15',
-            image: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=1000&auto=format&fit=crop',
-            category: 'Bakanlık',
-            link: 'yok-akademik-takvim-2024'
-          },
-          {
-            id: 902,
-            title: 'Gençlik ve Spor Bakanlığı GSB Burs Başvuruları',
-            shortDescription: '2024-2025 eğitim öğretim yılı için GSB burs ve kredi başvuruları başlamıştır. Son başvuru tarihini kaçırmayın.',
-            content: '',
-            date: '2024-09-01',
-            image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=1000&auto=format&fit=crop',
-            category: 'Bakanlık',
-            link: 'gsb-burs-basvurulari'
-          },
-          {
-            id: 903,
-            title: 'TÜBİTAK 2209-A Proje Destek Miktarları Artırıldı',
-            shortDescription: 'Sanayi ve Teknoloji Bakanlığı, üniversite öğrencilerine yönelik proje destek limitlerinde güncellemeye gitti.',
-            content: '',
-            date: '2024-10-10',
-            image: 'https://images.unsplash.com/photo-1581093458791-9f3c3900df4b?q=80&w=1000&auto=format&fit=crop',
-            category: 'Bakanlık',
-            link: 'tubitak-destek-artisi'
-          },
-          {
-            id: 904,
-            title: 'ÜNİDES 2025 Destek Programı Başvuruları Açıldı',
-            shortDescription: 'Üniversite topluluklarının proje ve etkinliklerine yönelik destek programı için başvurular başladı.',
-            content: '',
-            date: '2024-11-05',
-            image: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?q=80&w=1000&auto=format&fit=crop',
-            category: 'Bakanlık',
-            link: 'unides-destek-programi-2025'
-          },
-          {
-            id: 905,
-            title: 'Genç Ofis Etkinlik Takvimi Güncellendi',
-            shortDescription: '81 ildeki Genç Ofis etkinlikleri için yeni takvim duyuruldu. Takvim üzerinden takip edebilirsiniz.',
-            content: '',
-            date: '2024-11-18',
-            image: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=1000&auto=format&fit=crop',
-            category: 'Bakanlık',
-            link: 'genc-ofis-etkinlik-takvimi'
-          },
-          {
-            id: 906,
-            title: 'Topluluklar Arası İş Birliği Çağrısı',
-            shortDescription: 'Üniversite toplulukları için ortak proje ve etkinlik çağrısı yayınlandı. Detaylar duyuruda.',
-            content: '',
-            date: '2024-12-02',
-            image: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?q=80&w=1000&auto=format&fit=crop',
-            category: 'Bakanlık',
-            link: 'topluluk-isbirligi-cagrisi'
-          }
-        ];
 
-        // Verileri birleştir
-        this.allAnnouncements = [...ministryData, ...generalData];
-        
+        // Verileri ata
+        this.allAnnouncements = generalData;
+
         this.applyFilters();
         this.isLoading = false;
       },
@@ -167,19 +102,14 @@ export class AnnouncementsPageComponent implements OnInit {
       );
     }
 
-    // 2. Kategori Filtresi
-    if (this.selectedCategory !== 'all') {
-      temp = temp.filter(a => a.category === this.selectedCategory);
-    }
-
-    // 3. Sıralama
+    // 2. Sıralama
     if (this.sortOrder === 'date_desc') {
       temp.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     } else if (this.sortOrder === 'date_asc') {
       temp.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     } else {
-       // Varsayılan: Tarihe göre (Yeni -> Eski)
-       temp.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      // Varsayılan: Tarihe göre (Yeni -> Eski)
+      temp.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     }
 
     this.filteredAnnouncements = temp;
@@ -198,18 +128,43 @@ export class AnnouncementsPageComponent implements OnInit {
     const start = (this.currentPage - 1) * this.itemsPerPage;
     const end = start + this.itemsPerPage;
     this.displayedAnnouncements = this.filteredAnnouncements.slice(start, end);
-    
+
     // Sayfa değiştiğinde yukarı kaydır
     if (isPlatformBrowser(this.platformId)) {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
 
   changePage(page: number) {
     if (page >= 1 && page <= this.totalPages) {
-        this.currentPage = page;
-        this.updateDisplayedData();
+      this.currentPage = page;
+      this.updateDisplayedData();
     }
+  }
+
+  // --- CUSTOM DROPDOWN MANTIĞI ---
+  toggleSortDropdown(event: Event) {
+    event.stopPropagation();
+    this.isSortDropdownOpen = !this.isSortDropdownOpen;
+  }
+
+  selectSort(order: 'default' | 'date_desc' | 'date_asc') {
+    this.sortOrder = order;
+    this.applyFilters();
+    this.isSortDropdownOpen = false;
+  }
+
+  getSortLabel(order: string): string {
+    switch (order) {
+      case 'date_desc': return 'Tarih (Yeni-Eski)';
+      case 'date_asc': return 'Tarih (Eski-Yeni)';
+      default: return 'Önerilen Sıralama';
+    }
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    this.isSortDropdownOpen = false;
   }
 
   // --- YARDIMCI FONKSİYONLAR ---

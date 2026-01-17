@@ -16,15 +16,17 @@ $primary-dark: #0f172a;
   /* Kullanıcı isteği: Soldan ve sağdan 26 piksel boşluk (13px padding) */
   padding: 0 6px;
   box-sizing: border-box;
-  
+
   /* Navigasyon linklerinin (ortada duran) tıklanabilir olması için wrapper tıklamaları engellemeli */
   pointer-events: none;
 }
 
 .brand {
-  margin-left: -20px; /* Logo'yu sola kaydır */
-  pointer-events: auto; /* Logo tıklanabilir olmalı */
-  
+  margin-left: -20px;
+  /* Logo'yu sola kaydır */
+  pointer-events: auto;
+  /* Logo tıklanabilir olmalı */
+
   img.logo-transparent {
     height: 58px;
     width: auto;
@@ -37,11 +39,13 @@ $primary-dark: #0f172a;
   display: flex;
   align-items: center;
   gap: 15px;
-  margin-right: -20px; /* Sağ taraftaki profil bilgisini sola kaydır */
-  pointer-events: auto; /* Butonlar tıklanabilir olmalı */
+  margin-right: -20px;
+  /* Logo'yu sola kaydırdığımız gibi sağ tarafı da dengelemek için varsayılan değer */
+  pointer-events: auto;
+  /* Butonlar tıklanabilir olmalı */
   opacity: 0;
   transition: opacity 0.2s ease-in-out;
-  
+
   &.initialized {
     opacity: 1;
   }
@@ -65,7 +69,7 @@ $primary-dark: #0f172a;
   z-index: 1101;
   padding: 0;
   pointer-events: auto;
-  
+
   .bar {
     width: 100%;
     height: 3px;
@@ -73,11 +77,19 @@ $primary-dark: #0f172a;
     border-radius: 3px;
     transition: all 0.3s ease;
   }
-  
+
   &.active {
-    .bar:nth-child(1) { transform: translateY(9px) rotate(45deg); }
-    .bar:nth-child(2) { opacity: 0; }
-    .bar:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
+    .bar:nth-child(1) {
+      transform: translateY(9px) rotate(45deg);
+    }
+
+    .bar:nth-child(2) {
+      opacity: 0;
+    }
+
+    .bar:nth-child(3) {
+      transform: translateY(-9px) rotate(-45deg);
+    }
   }
 }
 
@@ -139,6 +151,8 @@ $primary-dark: #0f172a;
 .profile-wrapper {
   position: relative;
   z-index: 101;
+  margin-right: -38px;
+  /* Sadece profil ikonunu chatbot ile hizalamak için sağa kaydır (Net shift: -58px) */
 
   .profile-info {
     display: flex;
@@ -298,6 +312,7 @@ $primary-dark: #0f172a;
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -308,7 +323,7 @@ $primary-dark: #0f172a;
   .mobile-toggle {
     display: flex;
   }
-  
+
   .desktop-auth {
     display: none;
   }
