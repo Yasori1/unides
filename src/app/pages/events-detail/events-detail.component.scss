@@ -67,7 +67,7 @@
 .hero-section {
   position: relative;
   width: 100%;
-  height: 500px; // Match announcement detail height
+  height: 350px; // Match announcement detail height
   overflow: hidden;
   background: var(--bg-light);
 
@@ -80,8 +80,9 @@
     .hero-image {
       width: 100%;
       height: 100%;
-      object-fit: cover;
-      object-position: center 35%; // Match announcement detail position
+      object-position: center 110%;
+      object-fit: cover; // Force image to stretch horizontally (x-axis) without zooming or changing height (y-axis)
+      // object-position: center 55%; // Irrelevant with object-fit: fill
       opacity: 0.5;
     }
   }
@@ -89,7 +90,7 @@
   .hero-overlay {
     position: absolute;
     inset: 0;
-    background: transparent; // Removed blue gradient filter
+    background: transparent; //% Removed blue gradient filter
     padding: 50px 0 100px;
     z-index: 1;
     display: flex;
@@ -588,6 +589,78 @@
       height: 40px;
       width: calc(100% + 1.3px);
       transform: none;
+    }
+  }
+
+  .content-section {
+    .main-content {
+      .event-featured-image-container {
+        float: none;
+        width: 100%;
+        margin: 0 0 24px 0;
+        max-width: 100%;
+      }
+
+      .event-header {
+        margin-top: 0;
+
+        .event-title {
+          font-size: 2rem;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .hero-section {
+    height: 250px;
+
+    .background-wrapper .hero-image {
+      object-position: center 80% !important; // Arka plan desenini yukarı kaydır
+    }
+  }
+
+  .content-section {
+    padding-top: 30px;
+
+    .container-wide {
+      padding: 0 16px;
+    }
+
+    .main-content {
+      .event-header .event-title {
+        font-size: 1.75rem;
+      }
+
+      .event-featured-image-container {
+        margin-top: -80px;
+        border-width: 2px;
+
+        img {
+          object-position: center 40% !important; // Fotoğrafın odağını yukarı kaydırır
+        }
+      }
+    }
+  }
+}
+
+// Full HD ve Üzeri (1920px+)
+@media (min-width: 1920px) {
+  .hero-section {
+    height: 350px; // Yüksekliği artır
+
+    .background-wrapper .hero-image {
+      object-fit: cover 30% !important;
+      object-position: center 103% !important;
+    }
+  }
+
+  .content-section {
+    margin-top: 0px; // İçeriği yukarı çek (üstüne binsin)
+
+    .container-wide {
+      max-width: 1600px; // İçerik genişliğini artır
     }
   }
 }
