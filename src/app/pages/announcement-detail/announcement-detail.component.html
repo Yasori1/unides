@@ -111,7 +111,8 @@
                 <a *ngFor="let item of recentAnnouncements" [routerLink]="['/announcements', item.id]"
                   class="sidebar-item">
                   <div class="item-image">
-                    <img [src]="item.image || 'assets/img/placeholder-thumb.jpg'" [alt]="item.title">
+                    <img [src]="item.image || 'assets/duyuru-statik.svg'" [alt]="item.title"
+                      onerror="this.onerror=null; this.src='assets/duyuru-statik.svg'">
                   </div>
                   <div class="item-info">
                     <h4>{{ item.title }}</h4>

@@ -32,17 +32,10 @@
               {
                 "glob": "**/*",
                 "input": "public"
-              },
-              "src/favicon.ico",
-              "src/assets",
-              {
-                "glob": ".htaccess",
-                "input": ".",
-                "output": "/"
               }
             ],
             "styles": [
-              "node_modules/bootstrap/dist/css/bootstrap.css",
+              "node_modules/bootstrap/scss/bootstrap.scss",
               "node_modules/animate.css/animate.min.css",
               "node_modules/magnific-popup/dist/magnific-popup.css",
               "node_modules/ngx-owl-carousel-o/lib/styles/prebuilt-themes/owl.carousel.min.css",
@@ -55,57 +48,47 @@
               "node_modules/apexcharts/dist/apexcharts.min.js"
             ],
             "server": "src/main.server.ts",
-            "prerender": false,
+            "prerender": true,
             "ssr": {
               "entry": "server.ts"
-            },
-            "allowedCommonJsDependencies": [
-              "apexcharts"
-            ]
+            }
           },
           "configurations": {
             "production": {
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "4MB",
-                  "maximumError": "6MB"
+                  "maximumWarning": "2.5MB",
+                  "maximumError": "5MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "128kB",
-                  "maximumError": "200kB"
+                  "maximumWarning": "32kB",
+                  "maximumError": "64kB"
                 }
               ],
-              "outputHashing": "all",
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.prod.ts"
-                }
-              ]
+              "outputHashing": "all"
             },
             "development": {
               "optimization": false,
               "extractLicenses": false,
-              "sourceMap": true,
-              "ssr": false
+              "sourceMap": true
             }
           },
           "defaultConfiguration": "production"
         },
         "serve": {
           "builder": "@angular/build:dev-server",
-          "options": {
-            "proxyConfig": "proxy.conf.json"
-          },
+<<<<<<< Updated upstream
+=======
+          "options": {},
+>>>>>>> Stashed changes
           "configurations": {
             "production": {
               "buildTarget": "unides:build:production"
             },
             "development": {
-              "buildTarget": "unides:build:development",
-              "proxyConfig": "proxy.conf.json"
+              "buildTarget": "unides:build:development"
             }
           },
           "defaultConfiguration": "development"

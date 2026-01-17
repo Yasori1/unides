@@ -795,7 +795,7 @@
           <img
             [src]="selectedEvent.imageUrl"
             [alt]="selectedEvent.title"
-            onerror="this.src='assets/images/placeholder.jpg'"
+            onerror="this.onerror=null; this.src='assets/etkinlik-statik.svg'"
           />
         </div>
         <app-image-upload

@@ -16,7 +16,19 @@ export const roleGuard: CanActivateFn = (route, state) => {
 
     // 2. Beklenen rolü kontrol et
     const expectedRole = route.data['expectedRole'];
-    const userType = authService.getUserType();
+    const rawUserType = authService.getUserType();
+    
+    // userType'ı normalize et: '1'/'student' → 'student', '2'/'corporate' → 'corporate', '3'/'community' → 'community'
+    let userType: string | null;
+    if (rawUserType === '1' || rawUserType === 'student') {
+        userType = 'student';
+    } else if (rawUserType === '2' || rawUserType === 'corporate') {
+        userType = 'corporate';
+    } else if (rawUserType === '3' || rawUserType === 'community') {
+        userType = 'community';
+    } else {
+        userType = rawUserType;
+    }
 
     // Rol kontrolü:
     // Eğer route data'da 'expectedRole' tanımlıysa, kullanıcının rolüyle eşleşmeli
@@ -26,6 +38,7 @@ export const roleGuard: CanActivateFn = (route, state) => {
         router.navigate(['/']); // Güvenli liman
         return false;
     }
+
 
     // Her şey yolunda
     return true;

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Observable, map, catchError, of, switchMap, forkJoin } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { CacheService } from './cache.service';
 import {
   CommunityMiniDto,
   CommunityDetailDto,
@@ -24,7 +25,10 @@ export class CommunityService {
   private readonly placeholderLogo = 'assets/img/placeholder-logo.svg';
   private readonly placeholderCover = 'assets/img/placeholder-cover.svg';
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private cacheService: CacheService
+  ) {}
 
   private ensureCommunityAssets(c: Community): Community {
     const logo = c.logo && String(c.logo).trim() ? c.logo : this.placeholderLogo;
@@ -311,6 +315,11 @@ export class CommunityService {
           // Backend Community entity döndürüyor, detayı çek
           return this.getCommunityById(response.communityId);
         }),
+        map((community) => {
+          // Yeni topluluk eklenince cache'i temizle
+          this.cacheService.invalidatePattern('communities');
+          return community;
+        }),
         catchError((error) => {
           // Hata zaten throw ediliyor
           throw error;
@@ -400,6 +409,12 @@ export class CommunityService {
   deleteCommunity(id: string): Observable<void> {
     // Auth interceptor automatically adds Authorization header if token exists
     return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
+      map(() => {
+        // Silme işlemi başarılı, cache'i temizle
+        if (this.cacheService) {
+          this.cacheService.invalidatePattern('communities');
+        }
+      }),
       catchError((error) => {
         // Hata zaten throw ediliyor
         throw error;

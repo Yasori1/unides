@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, catchError, map, of, switchMap } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { CacheService } from './cache.service';
 
 export interface EventItem {
   id: number;
@@ -86,7 +87,7 @@ interface UpdateEventDto {
   MiniAbout?: string;
 }
 
-// Swipe/magic-card bileşenleri için kullanılan mock Project tipi
+// Swipe/magic-card bileşenleri için kullanılan Project tipi
 export interface Project {
   id: number;
   title: string;
@@ -104,7 +105,10 @@ export interface Project {
 export class EventService {
   private apiUrl = `${environment.apiUrl}/Events`;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private cacheService: CacheService
+  ) {}
 
   private mapToEvent(dto: EventListItemDto | any): EventItem {
     // Backend'den gelen DTO'yu EventItem'a çevir
@@ -244,7 +248,7 @@ export class EventService {
       communityId:
         dto.comId || dto.ComId || dto.toplulukId || dto.ToplulukId || dto.communityId || 0,
       communityName: dto.communityName || dto.CommunityName || '',
-      imageUrl: dto.eventPictureLink || dto.EventPictureLink || dto.resimUrl || dto.ResimUrl || '',
+      imageUrl: dto.eventPictureLink || dto.EventPictureLink || dto.resimUrl || dto.ResimUrl || 'assets/etkinlik-statik.svg',
       status: status,
       capacity:
         dto.eventKontenjan || dto.EventKontenjan
@@ -277,7 +281,6 @@ export class EventService {
           const mapped = this.mapToEvent(dto);
           return mapped;
         });
-        // Mock events'i kaldırdık, sadece backend'den gelenleri döndürüyoruz
         return apiEvents;
       }),
       catchError((error) => {

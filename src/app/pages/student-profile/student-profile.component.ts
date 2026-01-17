@@ -303,19 +303,19 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error('Memberships yüklenemedi:', err);
-        // Handle 401/403 gracefully - show empty state instead of mock data
-        if (err.status === 401 || err.status === 403) {
+        // 403 hatası normal olabilir (backend role kontrolü yapıyor)
+        // Toast mesajı göstermiyoruz, sessizce empty state gösteriyoruz
+        if (err.status === 401) {
+          // Sadece 401 için toast göster
           this.toastService.show(
-            'Topluluklara erişim için giriş yapmanız gerekiyor.',
+            'Oturum süreniz dolmuş olabilir. Lütfen tekrar giriş yapın.',
             'error'
           );
-          this.myCommunities = [];
-          this.communityEvents = [];
-        } else {
-          // Other errors - show empty state
-          this.myCommunities = [];
-          this.communityEvents = [];
         }
+        
+        // Her durumda empty state göster
+        this.myCommunities = [];
+        this.communityEvents = [];
         this.stats[0].value = this.myCommunities.length;
         this.stats[1].value = this.communityEvents.length;
 

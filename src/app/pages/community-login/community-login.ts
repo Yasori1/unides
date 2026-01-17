@@ -128,8 +128,39 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
     this.authService.loginCommunity(email, password).subscribe({
       next: (response: LoginResponse) => {
         // --- BAŞARILI GİRİŞ ---
-        // Giriş başarılı olduktan sonra, kullanıcının e-postasının bir topluluğun başkan e-postası olup olmadığını kontrol et
-        const normalizedEmail = email.trim().toLowerCase();
+        // Token'lar zaten AuthService içinde kaydedildi
+        
+        // Basitleştirilmiş versiyon: Direkt yönlendir, community kontrolünü dashboard'da yap
+        this.toastService.show(
+          'Giriş başarılı! Yönlendiriliyorsunuz...',
+          'success'
+        );
+
+        setTimeout(() => {
+          this.isLoading = false;
+          this.router.navigateByUrl('/').catch((err) => {
+            window.location.href = '/';
+          });
+        }, 1500);
+      },
+      error: (error) => {
+        // --- HATA ---
+        
+        this.isLoading = false;
+        const errorMessage =
+          error?.error?.message ||
+          error?.message ||
+          'Giriş yapılamadı. Lütfen bilgilerinizi kontrol edip tekrar deneyiniz.';
+        this.toastService.show(errorMessage, 'error');
+      },
+      complete: () => {
+        // İşlem tamamlandı
+      }
+    });
+
+    /* ---- ESKİ KARMAŞIK KOD (YORUM SATIRI) ----
+    // Giriş başarılı olduktan sonra, kullanıcının e-postasının bir topluluğun başkan e-postası olup olmadığını kontrol et
+    const normalizedEmail = email.trim().toLowerCase();
 
         // Aktif toplulukları getir ve kullanıcının e-postasının ComLeadMail ile eşleşip eşleşmediğini kontrol et
         // CommunityMiniDto'da ComLeadMail yok, bu yüzden her topluluğun detayını kontrol etmemiz gerekiyor
@@ -227,6 +258,7 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
         this.toastService.show(message, 'error');
       },
     });
+    ---- ESKİ KARMAŞIK KOD SONU ---- */
   }
 
   openForgotPasswordModal() {

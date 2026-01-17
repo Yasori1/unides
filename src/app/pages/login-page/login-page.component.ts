@@ -1,9 +1,14 @@
+<<<<<<< Updated upstream
+import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
+=======
 import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 // Servisler
 import { ToastService } from '../../services/toast.services';
+import { AuthService } from '../../services/auth.services';
 // Bileşenler
 import { ToastComponent } from '../../components/ui/toast/toast.component';
 import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
@@ -17,15 +22,17 @@ interface AuthResponse {
   accessToken: string;
   refreshToken: string;
 }
+>>>>>>> Stashed changes
 
 @Component({
-  selector: 'app-login-page',
-  standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, ToastComponent, LumaSpinComponent],
-  templateUrl: './login-page.component.html',
-  styleUrls: ['./login-page.component.scss'],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+    selector: 'app-login-page',
+    imports: [RouterLink],
+    templateUrl: './login-page.component.html',
+    styleUrl: './login-page.component.scss'
 })
+<<<<<<< Updated upstream
+export class LoginPageComponent {}
+=======
 export class LoginPageComponent implements OnInit {
   emailError: boolean = false;
   email: string = '';
@@ -33,7 +40,7 @@ export class LoginPageComponent implements OnInit {
   roleId: number = 1; // öğrenci
   isLoading: boolean = false;
   loginError: string = '';
-
+  
   // Şifremi Unuttum Modal
   showForgotPasswordModal: boolean = false;
   forgotPasswordEmail: string = '';
@@ -43,8 +50,9 @@ export class LoginPageComponent implements OnInit {
 
   constructor(
     private toastService: ToastService,
-    private router: Router
-  ) { }
+    private router: Router,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
     const scriptCheck = document.querySelector(
@@ -103,60 +111,32 @@ export class LoginPageComponent implements OnInit {
       return;
     }
 
-    // 2. BACKEND SORGUSU BAŞLIYOR
+    // 2. BACKEND SORGUSU BAŞLIYOR (AuthService üzerinden)
     this.isLoading = true;
     this.loginError = '';
 
-    fetch('/api/Auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: this.email,
-        password: this.password,
-        roleId: this.roleId // 1 = Öğrenci
-      })
-    })
-      .then(async (res) => {
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          const message = err?.message || `HTTP ${res.status}`;
-          throw new Error(message);
-        }
-        return res.json();
-      })
-      .then((data: AuthResponse) => {
+    // AuthService'i kullan (interceptor'lardan geçer)
+    this.authService.loginStudent(this.email, this.password).subscribe({
+      next: (response: any) => {
         // --- BAŞARILI GİRİŞ ---
-        // Token'ı localStorage'a kaydet
-        if (data.accessToken) {
-          localStorage.setItem('auth_token', data.accessToken);
-        }
-        if (data.refreshToken) {
-          localStorage.setItem('refresh_token', data.refreshToken);
-        }
-        // Kullanıcı bilgilerini kaydet
-        localStorage.setItem('user_info', JSON.stringify({
-          id: data.id,
-          name: data.fullName,
-          email: data.email,
-          role: data.roleName
-        }));
-        localStorage.setItem('user_type', 'student');
-
+        // Token'lar zaten AuthService içinde kaydedildi
         this.toastService.show('Giriş başarılı! Ana sayfaya yönlendiriliyorsunuz...', 'success');
 
         setTimeout(() => {
           this.router.navigateByUrl('/');
         }, 1500);
-      })
-      .catch((e: any) => {
+      },
+      error: (error: any) => {
         // --- HATALI GİRİŞ ---
-        this.loginError = e?.message || 'Giriş başarısız';
-        console.error('Giriş Hatası:', e);
+        this.loginError = error?.error?.message || error?.message || 'Giriş başarısız';
+        console.error('Giriş Hatası:', error);
         this.toastService.show(this.loginError, 'error');
-      })
-      .finally(() => {
         this.isLoading = false;
-      });
+      },
+      complete: () => {
+        this.isLoading = false;
+      }
+    });
   }
 
   // Şifremi Unuttum Modal Fonksiyonları
@@ -177,12 +157,12 @@ export class LoginPageComponent implements OnInit {
   validateForgotEmail(event: any) {
     const email = event.target.value;
     this.forgotPasswordEmail = email;
-
+    
     if (!email) {
       this.forgotEmailError = false;
       return;
     }
-
+    
     // E-posta format kontrolü: .edu.tr ile bitmeli
     if (email.includes('@') && !email.endsWith('.edu.tr')) {
       this.forgotEmailError = true;
@@ -254,3 +234,4 @@ export class LoginPageComponent implements OnInit {
     }
   }
 }
+>>>>>>> Stashed changes

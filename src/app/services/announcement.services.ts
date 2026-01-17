@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, map, catchError, of } from 'rxjs';
 import { AuthService } from './auth.services';
 import { environment } from '../../environments/environment';
+import { CacheService } from './cache.service';
 
 export interface Announcement {
   id: number;
@@ -72,7 +73,8 @@ export class AnnouncementService {
 
   constructor(
     private http: HttpClient,
-    private authService: AuthService
+    private authService: AuthService,
+    private cacheService: CacheService
   ) { }
 
   // Backend formatını frontend formatına dönüştür
@@ -124,14 +126,14 @@ export class AnnouncementService {
     let link = dto.link || dto.Link || '';
 
     // "string" placeholder değerlerini filtrele
-    if (imagePath.toLowerCase().trim() === 'string') {
+    if (imagePath && imagePath.toLowerCase().trim() === 'string') {
       imagePath = '';
     }
-    if (link.toLowerCase().trim() === 'string') {
+    if (link && link.toLowerCase().trim() === 'string') {
       link = '';
     }
 
-    // Görsel path'i tam URL'ye çevir
+    // Görsel path'i tam URL'ye çevir ve HTTPS'e yönlendir
     // Backend relative path dönerse (örn: /uploads/xxx.jpg), tam URL'ye çevir
     if (imagePath && !imagePath.startsWith('http://') && !imagePath.startsWith('https://') && !imagePath.startsWith('data:')) {
       // Backend base URL'si (api kısmını çıkar)
@@ -141,6 +143,19 @@ export class AnnouncementService {
         imagePath = '/' + imagePath;
       }
       imagePath = baseUrl + imagePath;
+      // HTTP'yi HTTPS'ye çevir (production için)
+      if (imagePath.startsWith('http://') && environment.production) {
+        imagePath = imagePath.replace('http://', 'https://');
+      }
+    }
+    // Eğer imagePath zaten tam URL ise ve HTTP ise HTTPS'ye çevir
+    else if (imagePath && imagePath.startsWith('http://') && environment.production) {
+      imagePath = imagePath.replace('http://', 'https://');
+    }
+    
+    // Boş imagePath için frontend placeholder kullan
+    if (!imagePath || imagePath.trim() === '') {
+      imagePath = 'assets/duyuru-statik.svg'; // Frontend'de mevcut placeholder
     }
 
     return {
@@ -156,15 +171,20 @@ export class AnnouncementService {
   }
 
   getAllAnnouncements(): Observable<Announcement[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/list`).pipe(
-      map((response) => {
-        // Backend camelCase dönüyor: { annId, title, shortDescription, annDate, imagePath }
-        return response.map((dto) => this.mapToAnnouncement(dto));
-      }),
-      catchError((error) => {
-        console.error('Duyurular yüklenemedi:', error);
-        return of([]);
-      })
+    // Cache kullan - 30 saniyede bir yenile
+    return this.cacheService.get(
+      'announcements',
+      () => this.http.get<any[]>(`${this.apiUrl}/list`).pipe(
+        map((response) => {
+          // Backend camelCase dönüyor: { annId, title, shortDescription, annDate, imagePath }
+          return response.map((dto) => this.mapToAnnouncement(dto));
+        }),
+        catchError((error) => {
+          console.error('Duyurular yüklenemedi:', error);
+          return of([]);
+        })
+      ),
+      30000 // 30 saniye cache
     );
   }
 
@@ -203,6 +223,11 @@ export class AnnouncementService {
     // Swagger'a göre camelCase formatında gönderilmeli
     // Auth interceptor automatically adds Authorization header and Content-Type if token exists
     return this.http.post<number>(`${this.apiUrl}/create`, request).pipe(
+      map((annId: number) => {
+        // Yeni duyuru eklenince cache'i temizle
+        this.cacheService.invalidate('announcements');
+        return annId;
+      }),
       catchError((error) => {
         console.error('Duyuru oluşturulamadı:', error);
         console.error('Hata detayı:', error.error);

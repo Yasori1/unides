@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, tap, catchError, of } from 'rxjs';
+import { Observable, tap, catchError, of, throwError } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
 
@@ -85,10 +85,12 @@ export class AuthService {
   loginStudent(email: string, password: string): Observable<LoginResponse> {
     return this.login(email, password, 1).pipe(
       // 1 = Öğrenci
-      tap(() => {
-        // Frontend tarafında 'student' olduğunu garantiye alıyoruz
+      tap((response) => {
+        // Frontend tarafında hem '1' hem de 'student' olduğunu garantiye alıyoruz
         // (Backend response.role dönmezse varsayılan olarak set edilebilir)
-        this.saveUserType('student');
+        localStorage.setItem('user_type', '1'); // Backend roleId formatı
+        console.log('[AuthService] Student login başarılı, user_type=1 kaydedildi');
+        console.log('[AuthService] Response:', response);
       })
     );
   }
@@ -97,7 +99,10 @@ export class AuthService {
   loginCorporate(email: string, password: string): Observable<LoginResponse> {
     return this.login(email, password, 2).pipe(
       // 2 = Kurumsal (GSB)
-      tap(() => this.saveUserType('corporate'))
+      tap(() => {
+        localStorage.setItem('user_type', '2'); // Backend roleId formatı
+        console.log('[AuthService] Corporate login başarılı, user_type=2 kaydedildi');
+      })
     );
   }
 
@@ -105,7 +110,10 @@ export class AuthService {
   loginCommunity(email: string, password: string): Observable<LoginResponse> {
     return this.login(email, password, 3).pipe(
       // 3 = Topluluk
-      tap(() => this.saveUserType('community'))
+      tap(() => {
+        localStorage.setItem('user_type', '3'); // Backend roleId formatı
+        console.log('[AuthService] Community login başarılı, user_type=3 kaydedildi');
+      })
     );
   }
 
@@ -147,8 +155,38 @@ export class AuthService {
 
   // --- 5. REFRESH TOKEN (SWAGGER: POST /api/Auth/refresh) ---
   refreshToken(): Observable<any> {
-    // Token yenileme ihtiyacı olursa bu metot kullanılabilir
-    return this.http.post(`${this.apiUrl}/Auth/refresh`, {});
+    const refreshToken = localStorage.getItem('refresh_token');
+    
+    if (!refreshToken) {
+      return throwError(() => new Error('Refresh token bulunamadı'));
+    }
+
+    // Backend refresh token'ı body'de veya cookie'de bekliyor
+    // Cookie kullanıyorsak body boş gönderebiliriz
+    const payload = {
+      refreshToken: refreshToken
+    };
+
+    return this.http.post(`${this.apiUrl}/Auth/refresh`, payload).pipe(
+      tap((response: any) => {
+        // Yeni token'ları kaydet
+        const token =
+          response?.accessToken ||
+          response?.AccessToken ||
+          response?.token ||
+          response?.Token ||
+          null;
+        const refresh =
+          response?.refreshToken || response?.RefreshToken || response?.refresh || null;
+
+        if (token) {
+          this.saveToken(token);
+        }
+        if (refresh) {
+          localStorage.setItem('refresh_token', refresh);
+        }
+      })
+    );
   }
 
   // --- 6. ÇIKIŞ YAP (LOGOUT) ---
