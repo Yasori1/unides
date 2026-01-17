@@ -1,8 +1,6 @@
 <nav class="navbar glass-transparent">
   <div class="container nav-content">
-    <app-header-branding
-      [isMobileMenuOpen]="isMobileMenuOpen"
-      (toggleMenu)="toggleMobileMenu()">
+    <app-header-branding [isMobileMenuOpen]="isMobileMenuOpen" (toggleMenu)="toggleMobileMenu()">
     </app-header-branding>
 
     <!-- Backdrop -->
@@ -41,10 +39,10 @@
           </a>
         </li>
 
-        <li class="dropdown-parent">
-          <a href="javascript:void(0)">
+        <li class="dropdown-parent" [class.mobile-expanded]="isMobileDropdownOpen">
+          <a href="javascript:void(0)" (click)="toggleMobileDropdown()">
             <span class="material-symbols-outlined nav-icon">info</span>
-            Bilgi <i class="icon-arrow-down"></i>
+            Bilgi <i class="icon-arrow-down" [class.rotated]="isMobileDropdownOpen"></i>
           </a>
           <ul class="dropdown-content">
             <li><a routerLink="/about" (click)="closeMobileMenu()">Hakkımızda</a></li>
@@ -63,11 +61,15 @@
         </div>
 
         <div class="mobile-auth-footer" *ngIf="isInitialized && isLoggedIn === true">
-           <a *ngIf="userRole === 'student'" routerLink="/profile" class="btn-solid-custom small" (click)="closeMobileMenu()">Profilim</a>
-           <a *ngIf="userRole === 'corporate'" routerLink="/corporate-dashboard" class="btn-solid-custom small" (click)="closeMobileMenu()">Panelim</a>
-           <a *ngIf="userRole === 'community'" routerLink="/community-dashboard" class="btn-solid-custom small" (click)="closeMobileMenu()">Panelim</a>
-           
-           <button class="btn-outline-custom small static-btn" style="width: 100%; margin-top: 10px;" (click)="logout()">Çıkış Yap</button>
+          <a *ngIf="userRole === 'student'" routerLink="/profile" class="btn-solid-custom small"
+            (click)="closeMobileMenu()">Profilim</a>
+          <a *ngIf="userRole === 'corporate'" routerLink="/corporate-dashboard" class="btn-solid-custom small"
+            (click)="closeMobileMenu()">Panelim</a>
+          <a *ngIf="userRole === 'community'" routerLink="/community-dashboard" class="btn-solid-custom small"
+            (click)="closeMobileMenu()">Panelim</a>
+
+          <button class="btn-outline-custom small static-btn" style="width: 100%; margin-top: 10px;"
+            (click)="logout()">Çıkış Yap</button>
         </div>
 
         <p class="copyright">© 2026 ÜNİDES</p>

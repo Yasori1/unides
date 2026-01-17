@@ -14,21 +14,22 @@ import { Subscription, filter } from 'rxjs';
 })
 export class SiteNavbarComponent implements OnInit, OnDestroy {
   isMobileMenuOpen = false;
+  isMobileDropdownOpen = false;
   isLoggedIn = false;
   userRole: string | null = null;
   isInitialized = false; // Auth durumu kontrol edilene kadar navbar'ı gizle
   private routerSubscription?: Subscription;
 
   constructor(
-    private authService: AuthService, 
+    private authService: AuthService,
     private router: Router,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     // İlk kontrolü yap
     this.checkLoginStatus();
-    
+
     // Router events'i dinle - sayfa değiştiğinde login durumunu kontrol et
     this.routerSubscription = this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
@@ -49,15 +50,15 @@ export class SiteNavbarComponent implements OnInit, OnDestroy {
   checkLoginStatus() {
     const wasLoggedIn = this.isLoggedIn;
     const oldUserRole = this.userRole;
-    
+
     this.isLoggedIn = this.authService.isAuthenticated();
     this.userRole = this.authService.getUserType();
-    
+
     // İlk kontrol tamamlandı, navbar'ı göster
     if (!this.isInitialized) {
       this.isInitialized = true;
     }
-    
+
     // Değerler değiştiyse change detection'ı tetikle
     if (wasLoggedIn !== this.isLoggedIn || oldUserRole !== this.userRole || !this.isInitialized) {
       this.cdr.detectChanges();
@@ -70,8 +71,13 @@ export class SiteNavbarComponent implements OnInit, OnDestroy {
 
   closeMobileMenu() {
     this.isMobileMenuOpen = false;
+    this.isMobileDropdownOpen = false;
   }
-  
+
+  toggleMobileDropdown() {
+    this.isMobileDropdownOpen = !this.isMobileDropdownOpen;
+  }
+
   logout() {
     this.authService.logout();
     this.isLoggedIn = false;

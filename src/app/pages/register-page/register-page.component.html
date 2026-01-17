@@ -1,7 +1,4 @@
-<link
-  href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-  rel="stylesheet"
-/>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
 
 <!-- DÜZELTME: Artık input (message, type) göndermiyoruz. Servis üzerinden çalışıyor. -->
@@ -28,8 +25,9 @@
     <div class="form-side">
       <div class="form-wrapper">
         <div class="mobile-logo">
-          <div class="logo-box">
-            <img src="assets/unides1.png" alt="Ünides Logo" />
+          <div class="back-to-home" routerLink="/">
+            <i class='bx bx-left-arrow-alt'></i>
+            <span>Ana Sayfaya Dön</span>
           </div>
         </div>
 
@@ -41,27 +39,15 @@
         <form (submit)="onSubmit($event)">
           <div class="input-group">
             <div class="icon-wrapper"><i class="bx bx-user"></i></div>
-            <input
-              type="text"
-              placeholder="Ad Soyad"
-              class="modern-input"
-              (input)="updateName($event)"
-              required
-            />
+            <input type="text" placeholder="Ad Soyad" class="modern-input" (input)="updateName($event)" required />
           </div>
 
           <div class="input-group">
             <div class="icon-wrapper" [class.error-icon]="emailError">
               <i class="bx bx-envelope"></i>
             </div>
-            <input
-              type="email"
-              (input)="validateStudentEmail($event)"
-              placeholder="Öğrenci E-Posta (xxx@univ.edu.tr)"
-              class="modern-input"
-              [class.input-error]="emailError"
-              required
-            />
+            <input type="email" (input)="validateStudentEmail($event)" placeholder="Öğrenci E-Posta (xxx@univ.edu.tr)"
+              class="modern-input" [class.input-error]="emailError" required />
           </div>
           <div *ngIf="emailError" class="error-message">
             <i class="bx bx-error-circle"></i> Sadece <b>.edu.tr</b> uzantılı öğrenci mailleri kabul
@@ -70,27 +56,16 @@
 
           <div class="input-group">
             <div class="icon-wrapper"><i class="bx bx-lock-alt"></i></div>
-            <input
-              type="password"
-              (input)="checkPasswords($event, 'p1')"
-              placeholder="Şifre"
-              class="modern-input"
-              required
-            />
+            <input type="password" (input)="checkPasswords($event, 'p1')" placeholder="Şifre" class="modern-input"
+              required />
           </div>
 
           <div class="input-group">
             <div class="icon-wrapper" [class.error-icon]="passwordMismatch">
               <i class="bx bx-lock-alt"></i>
             </div>
-            <input
-              type="password"
-              (input)="checkPasswords($event, 'p2')"
-              placeholder="Şifreyi Onayla"
-              class="modern-input"
-              [class.input-error]="passwordMismatch"
-              required
-            />
+            <input type="password" (input)="checkPasswords($event, 'p2')" placeholder="Şifreyi Onayla"
+              class="modern-input" [class.input-error]="passwordMismatch" required />
           </div>
           <div *ngIf="passwordMismatch" class="error-message">
             <i class="bx bx-error-circle"></i> Şifreler eşleşmiyor.
@@ -106,12 +81,8 @@
             </label>
           </div>
 
-          <button
-            type="submit"
-            class="btn-primary"
-            [disabled]="isLoading"
-            [style.opacity]="emailError || passwordMismatch ? '0.7' : '1'"
-          >
+          <button type="submit" class="btn-primary" [disabled]="isLoading"
+            [style.opacity]="emailError || passwordMismatch ? '0.7' : '1'">
             <span *ngIf="!isLoading">
               Öğrenci Olarak Kayıt Ol <i class="bx bx-right-arrow-alt"></i>
             </span>

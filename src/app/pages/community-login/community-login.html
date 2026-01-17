@@ -1,8 +1,5 @@
 <!-- Google Fonts & Icons -->
-<link
-  href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-  rel="stylesheet"
-/>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
 
 <div class="main-container">
@@ -29,8 +26,9 @@
     <div class="form-side">
       <div class="form-wrapper">
         <div class="mobile-logo">
-          <div class="logo-box">
-            <img src="assets/unides1.png" alt="Ünides Logo" />
+          <div class="back-to-home" routerLink="/">
+            <i class='bx bx-left-arrow-alt'></i>
+            <span>Ana Sayfaya Dön</span>
           </div>
         </div>
 
@@ -45,13 +43,8 @@
             <div class="icon-wrapper" [class.error-icon]="emailError">
               <i class="bx bx-group"></i>
             </div>
-            <input
-              type="email"
-              (input)="validateCommunityEmail($event)"
-              placeholder="Topluluk E-Posta (xxx@univ.edu.tr)"
-              class="modern-input"
-              [class.input-error]="emailError"
-            />
+            <input type="email" (input)="validateCommunityEmail($event)"
+              placeholder="Topluluk E-Posta (xxx@univ.edu.tr)" class="modern-input" [class.input-error]="emailError" />
           </div>
 
           <div *ngIf="emailError" class="error-message">
@@ -76,12 +69,7 @@
           </div>
 
           <!-- Giriş Yap Butonu (Animasyonlu) -->
-          <button
-            type="submit"
-            class="btn-primary"
-            [style.opacity]="emailError ? '0.7' : '1'"
-            [disabled]="isLoading"
-          >
+          <button type="submit" class="btn-primary" [style.opacity]="emailError ? '0.7' : '1'" [disabled]="isLoading">
             <ng-container *ngIf="!isLoading">
               Topluluk Paneline Gir <i class="bx bx-right-arrow-alt"></i>
             </ng-container>
@@ -148,24 +136,16 @@
         <div class="icon-wrapper" [class.error-icon]="forgotEmailError">
           <i class="bx bx-envelope"></i>
         </div>
-        <input
-          type="email"
-          [(ngModel)]="forgotPasswordEmail"
-          (input)="validateForgotEmail($event)"
-          placeholder="Topluluk E-Posta (xxx@univ.edu.tr)"
-          class="modern-input"
-          [class.input-error]="forgotEmailError"
-        />
+        <input type="email" [(ngModel)]="forgotPasswordEmail" (input)="validateForgotEmail($event)"
+          placeholder="Topluluk E-Posta (xxx@univ.edu.tr)" class="modern-input"
+          [class.input-error]="forgotEmailError" />
       </div>
       <div *ngIf="forgotEmailError" class="error-message">
         <i class="bx bx-error-circle"></i> Sadece <b>.edu.tr</b> uzantılı topluluk mailleri kabul edilmektedir.
       </div>
-      <button
-        class="btn-primary"
-        (click)="sendPasswordResetEmail()"
+      <button class="btn-primary" (click)="sendPasswordResetEmail()"
         [disabled]="isSendingEmail || forgotEmailError || !forgotPasswordEmail"
-        [style.opacity]="isSendingEmail || forgotEmailError || !forgotPasswordEmail ? '0.7' : '1'"
-      >
+        [style.opacity]="isSendingEmail || forgotEmailError || !forgotPasswordEmail ? '0.7' : '1'">
         <ng-container *ngIf="!isSendingEmail">
           Şifre Sıfırlama Linki Gönder <i class="bx bx-right-arrow-alt"></i>
         </ng-container>

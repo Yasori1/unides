@@ -10,7 +10,8 @@
   --border-color: #e5e7eb;
   --official-color: #1e293b;
   --community-color: #2563eb;
-  --error-color: #ef4444; /* Kırmızı Hata Rengi */
+  --error-color: #ef4444;
+  /* Kırmızı Hata Rengi */
   --font-main: 'Poppins', sans-serif;
 
   font-family: var(--font-main);
@@ -30,6 +31,7 @@
   height: 100vh;
   background-color: var(--white);
 }
+
 .split-layout {
   display: flex;
   width: 100%;
@@ -73,7 +75,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  
+
   .logo-box {
     width: 120px;
     height: 60px;
@@ -112,6 +114,7 @@
     text-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     color: white;
   }
+
   p {
     font-size: 1.1rem;
     opacity: 0.9;
@@ -134,6 +137,7 @@
   background-color: var(--white);
   position: relative;
 }
+
 .form-wrapper {
   width: 100%;
   max-width: 420px;
@@ -144,11 +148,12 @@
   display: none;
   margin-bottom: 30px;
   justify-content: center;
-  
+
   .logo-box {
     width: 100px;
     height: 50px;
-    background: #f0f9ff; /* Light blue tint */
+    background: #f0f9ff;
+    /* Light blue tint */
     border: 1px solid #e0f2fe;
     border-radius: 40px;
     display: flex;
@@ -167,12 +172,14 @@
 
 .header-text {
   margin-bottom: 40px;
+
   h3 {
     font-size: 28px;
     color: var(--text-dark);
     font-weight: 600;
     margin-bottom: 8px;
   }
+
   p {
     color: var(--text-gray);
     font-size: 14px;
@@ -185,6 +192,7 @@
   text-decoration: none;
   transition: color 0.2s;
 }
+
 .register-link:hover {
   color: var(--primary-hover);
   text-decoration: underline;
@@ -195,6 +203,7 @@
   position: relative;
   margin-bottom: 0;
 }
+
 .mt-3 {
   margin-top: 20px;
 }
@@ -208,6 +217,7 @@
   font-size: 20px;
   pointer-events: none;
   transition: color 0.3s;
+
   &.error-icon {
     color: var(--error-color);
   }
@@ -228,10 +238,11 @@
   &:focus {
     background-color: var(--white);
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 4px rgba(20, 210, 204, 0.15); /* Primary color shadow */
+    box-shadow: 0 0 0 4px rgba(20, 210, 204, 0.15);
+    /* Primary color shadow */
   }
 
-  &:focus + .icon-wrapper,
+  &:focus+.icon-wrapper,
   .input-group:focus-within .icon-wrapper {
     color: var(--primary-color);
   }
@@ -239,7 +250,8 @@
   /* Hata Durumları */
   &.input-error {
     border-color: var(--error-color);
-    background-color: #fef2f2; /* Açık kırmızı arka plan */
+    background-color: #fef2f2;
+    /* Açık kırmızı arka plan */
 
     &:focus {
       box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
@@ -266,6 +278,7 @@
   margin-top: 20px;
   font-size: 14px;
 }
+
 .remember-me {
   display: flex;
   align-items: center;
@@ -274,12 +287,14 @@
   color: var(--text-gray);
   user-select: none;
 }
+
 .forgot-link {
   color: var(--text-gray);
   text-decoration: none;
   font-weight: 500;
   transition: color 0.2s;
 }
+
 .forgot-link:hover {
   color: var(--primary-color);
 }
@@ -308,9 +323,11 @@
     box-shadow: 0 10px 20px -5px rgba(30, 58, 138, 0.4);
     background-color: var(--primary-hover);
   }
+
   &:active:not(:disabled) {
     transform: translateY(0);
   }
+
   &:disabled {
     cursor: not-allowed;
     transform: none;
@@ -322,6 +339,7 @@
   margin: 30px 0;
   text-align: center;
   position: relative;
+
   &::before {
     content: '';
     position: absolute;
@@ -332,6 +350,7 @@
     background-color: var(--border-color);
     z-index: 1;
   }
+
   span {
     position: relative;
     z-index: 2;
@@ -363,10 +382,12 @@
   align-items: center;
   gap: 12px;
 }
+
 .text-col {
   display: flex;
   flex-direction: column;
 }
+
 .btn-label {
   font-size: 10px;
   text-transform: uppercase;
@@ -374,15 +395,18 @@
   letter-spacing: 0.5px;
   font-weight: 600;
 }
+
 .btn-title {
   font-size: 13px;
   font-weight: 600;
   color: var(--text-dark);
 }
+
 .icon-official {
   font-size: 24px;
   color: var(--official-color);
 }
+
 .emoji-icon {
   font-size: 20px;
   font-style: normal;
@@ -393,6 +417,7 @@
   border-color: var(--official-color);
   background-color: #f8fafc;
 }
+
 .btn-community:hover {
   border-color: var(--community-color);
   background-color: #eff6ff;
@@ -411,28 +436,64 @@
     display: block;
     width: 50%;
   }
+
   .form-side {
     width: 50%;
   }
 }
+
 @media (min-width: 1200px) {
   .visual-side {
     width: 55%;
   }
+
   .form-side {
     width: 45%;
   }
 }
+
 @media (max-width: 991px) {
   .form-wrapper {
     max-width: 100%;
   }
+
   .mobile-logo {
     display: flex;
+    margin-bottom: 20px;
+    justify-content: flex-start;
+    padding-left: 0;
+
+    .back-to-home {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--primary-color);
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      padding: 8px 12px;
+      background: #f0f9ff;
+      border-radius: 8px;
+      border: 1px solid #e0f2fe;
+
+      i {
+        font-size: 1.2rem;
+      }
+
+      &:active {
+        background: #e0f2fe;
+      }
+    }
+
+    .logo-box {
+      display: none; // Hidden as per request
+    }
   }
+
   .header-text h3 {
     font-size: 24px;
   }
+
   .social-login-grid {
     grid-template-columns: 1fr;
   }
@@ -444,16 +505,19 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
+
 @keyframes fadeInUp {
   from {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -543,6 +607,7 @@
     font-size: 20px;
     pointer-events: none;
     transition: color 0.3s;
+
     &.error-icon {
       color: var(--error-color);
     }
@@ -566,7 +631,7 @@
       box-shadow: 0 0 0 4px rgba(20, 210, 204, 0.15);
     }
 
-    &:focus + .icon-wrapper,
+    &:focus+.icon-wrapper,
     .input-group:focus-within .icon-wrapper {
       color: var(--primary-color);
     }
@@ -574,6 +639,7 @@
     &.input-error {
       border-color: var(--error-color);
       background-color: #fef2f2;
+
       &:focus {
         box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
         border-color: var(--error-color);
@@ -614,9 +680,11 @@
       transform: translateY(-2px);
       box-shadow: 0 10px 20px -5px rgba(20, 210, 204, 0.4);
     }
+
     &:active:not(:disabled) {
       transform: translateY(0);
     }
+
     &:disabled {
       cursor: not-allowed;
       transform: none;
@@ -655,6 +723,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
