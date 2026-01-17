@@ -78,6 +78,12 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   activeTab = 'overview';
   showNotifications = false;
   isProfileOpen = false;
+
+  // Unified Profile Dropdown Identity
+  userRole: string = 'corporate';
+  userName: string = '';
+  displayName: string = '';
+  userInitial: string = '';
   isModalOpen = false;
   modalType = '';
   searchText = '';
@@ -347,8 +353,10 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     // Events'i backend'den çek
     this.loadEventsFromService();
 
-    // Overview loading state'ini kontrol et (tüm veriler yüklendikten sonra)
-    // Her load metodu kendi loading state'ini yönetiyor, overview için ayrı kontrol gerekli
+    // Unified Profile Dropdown Initialization
+    this.userName = this.corporateInfo.name || 'Kurumsal';
+    this.displayName = this.userName;
+    this.userInitial = this.userName.charAt(0).toUpperCase();
   }
 
   loadCommunitiesFromService(statusFilter?: string) {
@@ -1230,7 +1238,6 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       event.preventDefault();
     }
     this.isProfileOpen = !this.isProfileOpen;
-    this.showNotifications = false;
   }
 
   handleSettingsClick() {
@@ -1243,7 +1250,15 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     this.logout();
   }
 
-  navigateToHome() {
+  logout() {
+    // Local storage'ı temizle
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user_info');
+    localStorage.removeItem('user_type');
+    localStorage.removeItem('community_info');
+
+    // Anasayfaya yönlendir
     this.router.navigate(['/']);
   }
 
@@ -1255,7 +1270,8 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     if (
       target.closest('.icon-btn.notification') ||
       target.closest('.notification-btn') ||
-      target.closest('.profile-pic')
+      target.closest('.profile-pic') ||
+      target.closest('.profile-info')
     ) {
       return;
     }
@@ -1271,18 +1287,27 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  logout() {
-    this.showToast('Çıkış yapılıyor...', 'success');
-    // AuthService'i kullanarak logout yap ve anasayfaya yönlendir
-    setTimeout(() => {
-      // Local storage'ı temizle
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('refresh_token');
-      localStorage.removeItem('user_info');
-      localStorage.removeItem('user_type');
-      // Anasayfaya yönlendir
-      this.router.navigate(['/']);
-    }, 1500);
+  // Unified Profile Dropdown Helpers
+  navigateToDashboard() {
+    this.isProfileOpen = false;
+    this.activeTab = 'overview';
+    this.switchTab('overview');
+  }
+
+  navigateToHome() {
+    this.router.navigate(['/']);
+  }
+
+  getRoleDisplayName(): string {
+    return 'Kurumsal Hesap';
+  }
+
+  getDashboardLabel(): string {
+    return 'Panelim';
+  }
+
+  getDashboardIcon(): string {
+    return 'business';
   }
 
   // Spam kontrolünü yapan metod (beklemede olan etkinlikler için)

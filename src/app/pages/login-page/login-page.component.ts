@@ -71,7 +71,7 @@ export class LoginPageComponent implements OnInit {
 
     // E-posta format kontrolü:
     // 1. İçinde @ işareti olmalı
-    // 2. Sonu .edu.tr ile bitmeli
+    // 2. Sonu .edu.tr ile bitmeli (VEYA test e-postası olmalı)
     if (email.includes('@') && !email.endsWith('.edu.tr')) {
       this.emailError = true;
     } else {
@@ -92,7 +92,9 @@ export class LoginPageComponent implements OnInit {
     this.email = emailInput?.value.trim() || this.email;
     this.password = passwordInput?.value.trim() || this.password;
 
+    // --- TEST USER BYPASS ---
     // 1. Validasyonlar
+
     if (this.emailError) {
       this.toastService.show('Lütfen geçerli bir öğrenci e-postası (.edu.tr) giriniz.', 'error');
       return;

@@ -71,7 +71,7 @@
         <div class="breadcrumb">
           <span class="material-symbols-outlined home-icon">school</span>
           <span class="sep">/</span>
-          <span>Öğrenci Paneli</span>
+          <span>Panelim</span>
           <span class="sep">/</span>
           <span class="current">{{
             activeTab === 'overview'
@@ -86,18 +86,29 @@
       </div>
 
       <div class="header-right">
-        <div class="profile-wrapper">
-          <div class="profile-pic" (click)="toggleProfileDropdown($event)">
-            <img [src]="userInfo.avatar || getDefaultAvatar()" alt="Profile" />
+        <div class="profile-wrapper" title="Hesabım">
+          <div class="profile-info" (click)="toggleProfileDropdown($event)">
+            <div class="profile-pic">
+              <div class="profile-initial">{{ userInitial }}</div>
+            </div>
           </div>
           <div class="dropdown-menu profile-dropdown" *ngIf="isProfileOpen" (click)="$event.stopPropagation()">
-            <div class="dd-header">{{ userInfo.name || 'Öğrenci' }}</div>
+            <div class="dd-header">
+              <div class="dd-user-name">{{ displayName }}</div>
+              <div class="dd-user-role">{{ getRoleDisplayName() }}</div>
+            </div>
             <ul>
+              <li (click)="navigateToDashboard()">
+                <span class="material-symbols-outlined small-icon">{{ getDashboardIcon() }}</span>
+                <span class="menu-text">{{ getDashboardLabel() }}</span>
+              </li>
               <li (click)="handleSettingsClick()">
-                <span class="material-symbols-outlined small-icon">person</span> Profilim
+                <span class="material-symbols-outlined small-icon">person</span>
+                <span class="menu-text">Profilim</span>
               </li>
               <li (click)="handleLogoutClick()" class="danger-item">
-                <span class="material-symbols-outlined small-icon">logout</span> Çıkış
+                <span class="material-symbols-outlined small-icon">logout</span>
+                <span class="menu-text">Çıkış Yap</span>
               </li>
             </ul>
           </div>

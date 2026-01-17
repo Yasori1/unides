@@ -32,7 +32,7 @@ export class CorporateLoginComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private location: Location,
     @Inject(PLATFORM_ID) private platformId: Object
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     // SSR sırasında window kullanma, sadece browser'da çalıştır

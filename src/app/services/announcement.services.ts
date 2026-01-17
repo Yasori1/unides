@@ -70,25 +70,7 @@ interface UpdateAnnouncementRequest {
 export class AnnouncementService {
   private apiUrl = `${environment.apiUrl}/Announcements`;
 
-  private DEMO_ANNOUNCEMENT: Announcement = {
-    id: 9999,
-    title: 'Demo Duyuru: Unides Platformu Yayında!',
-    shortDescription: 'Unides platformunun ilk demo duyurusu yayında. Detaylar için tıklayınız.',
-    content: `
-      <p>Merhaba Değerli Kullanıcılarımız,</p>
-      <p>Unides platformunu sizler için geliştirmeye devam ediyoruz. Bu, sistemin çalışıp çalışmadığını kontrol etmek amacıyla oluşturulmuş bir <strong>demo duyurudur</strong>.</p>
-      <p>Platformumuz üzerinden yapabileceğiniz işlemler:</p>
-      <ul>
-        <li>Toplulukları keşfetme</li>
-        <li>Etkinliklere katılma</li>
-        <li>Duyuruları takip etme</li>
-      </ul>
-      <p>Keyifli kullanımlar dileriz!</p>
-    `,
-    date: new Date().toISOString().split('T')[0],
-    image: 'assets/images/duyuru-statik.png', // Eğer bu dosya yoksa placeholder görünebilir veya kırık link olabilir
-    link: '/announcements/9999'
-  };
+
 
   constructor(
     private http: HttpClient,
@@ -180,22 +162,17 @@ export class AnnouncementService {
       map((response) => {
         // Backend camelCase dönüyor: { annId, title, shortDescription, annDate, imagePath }
         const realAnnouncements = response.map((dto) => this.mapToAnnouncement(dto));
-        // Demo duyuruyu listenin başına ekle
-        return [this.DEMO_ANNOUNCEMENT, ...realAnnouncements];
+        return realAnnouncements;
       }),
       catchError((error) => {
         console.error('Duyurular yüklenemedi:', error);
-        // Hata durumunda en azından demo duyuruyu göster
-        return of([this.DEMO_ANNOUNCEMENT]);
+        return of([]);
       })
     );
   }
 
   getAnnouncementById(id: number): Observable<Announcement | undefined> {
-    // Eğer ID demo ID ise direkt mock datayı dön
-    if (Number(id) === this.DEMO_ANNOUNCEMENT.id) {
-      return of(this.DEMO_ANNOUNCEMENT);
-    }
+
 
     return this.http.get<any>(`${this.apiUrl}/detail/${id}`).pipe(
       map((response) => this.mapToAnnouncement(response)),

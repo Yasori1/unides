@@ -78,6 +78,10 @@ export class SiteNavbarComponent implements OnInit, OnDestroy {
     this.isMobileDropdownOpen = !this.isMobileDropdownOpen;
   }
 
+  getDashboardLabel(): string {
+    return 'Panelim';
+  }
+
   logout() {
     this.authService.logout();
     this.isLoggedIn = false;

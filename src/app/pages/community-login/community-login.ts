@@ -46,7 +46,7 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
     private communityService: CommunityService,
     private router: Router,
     private location: Location
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     // Spline Viewer scriptini dinamik olarak yükle

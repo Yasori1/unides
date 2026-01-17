@@ -82,25 +82,36 @@
         <div class="breadcrumb">
           <span class="material-symbols-outlined home-icon">domain</span>
           <span class="sep">/</span>
-          <span>Kurumsal Panel</span>
+          <span>Panelim</span>
           <span class="sep">/</span>
           <span class="current">{{ getTabTitle() }}</span>
         </div>
       </div>
 
       <div class="header-right">
-        <div class="profile-wrapper">
-          <div class="profile-pic" (click)="toggleProfileDropdown($event)">
-            <img [src]="corporateInfo.logo" alt="Logo" />
+        <div class="profile-wrapper" title="Hesabım">
+          <div class="profile-info" (click)="toggleProfileDropdown($event)">
+            <div class="profile-pic">
+              <div class="profile-initial">{{ userInitial }}</div>
+            </div>
           </div>
           <div class="dropdown-menu profile-dropdown" *ngIf="isProfileOpen" (click)="$event.stopPropagation()">
-            <div class="dd-header">{{ corporateInfo.name }}</div>
+            <div class="dd-header">
+              <div class="dd-user-name">{{ displayName || userName }}</div>
+              <div class="dd-user-role">{{ getRoleDisplayName() }}</div>
+            </div>
             <ul>
+              <li (click)="navigateToDashboard()">
+                <span class="material-symbols-outlined small-icon">{{ getDashboardIcon() }}</span>
+                <span class="menu-text">{{ getDashboardLabel() }}</span>
+              </li>
               <li (click)="handleSettingsClick()">
-                <span class="material-symbols-outlined small-icon">person</span> Profilim
+                <span class="material-symbols-outlined small-icon">person</span>
+                <span class="menu-text">Profilim</span>
               </li>
               <li (click)="handleLogoutClick()" class="danger-item">
-                <span class="material-symbols-outlined small-icon">logout</span> Çıkış
+                <span class="material-symbols-outlined small-icon">logout</span>
+                <span class="menu-text">Çıkış Yap</span>
               </li>
             </ul>
           </div>
@@ -483,19 +494,19 @@
         <div class="form-section">
           <h5 class="section-title">Duyuru Bilgileri</h5>
           <div class="form-group">
-            <label>Başlık</label>
-            <input type="text" [(ngModel)]="newAnnouncement.title" class="modern-input"
-              placeholder="Duyuru başlığı..." />
+            <label>Başlık (Maks. 100)</label>
+            <input type="text" [(ngModel)]="newAnnouncement.title" class="modern-input" placeholder="Duyuru başlığı..."
+              maxlength="100" />
           </div>
           <div class="form-group">
-            <label>Kısa Açıklama</label>
+            <label>Kısa Açıklama (Maks. 100)</label>
             <textarea [(ngModel)]="newAnnouncement.shortDescription" class="modern-input" rows="2"
-              placeholder="Duyurunun kısa özeti..."></textarea>
+              placeholder="Duyurunun kısa özeti..." maxlength="100"></textarea>
           </div>
           <div class="form-group">
-            <label>Detaylı İçerik</label>
+            <label>Detaylı İçerik (Maks. 500)</label>
             <textarea [(ngModel)]="newAnnouncement.content" class="modern-input" rows="6"
-              placeholder="Duyurunun tam metnini buraya yazın..."></textarea>
+              placeholder="Duyurunun tam metnini buraya yazın..." maxlength="500"></textarea>
           </div>
           <div class="form-group">
             <label>Duyuru Linki (Opsiyonel)</label>
@@ -524,19 +535,19 @@
         <div class="form-section">
           <h5 class="section-title">Duyuru Bilgileri</h5>
           <div class="form-group">
-            <label>Başlık</label>
+            <label>Başlık (Maks. 100)</label>
             <input type="text" [(ngModel)]="editingAnnouncement.title" class="modern-input"
-              placeholder="Duyuru başlığı..." />
+              placeholder="Duyuru başlığı..." maxlength="100" />
           </div>
           <div class="form-group">
-            <label>Kısa Açıklama</label>
+            <label>Kısa Açıklama (Maks. 100)</label>
             <textarea [(ngModel)]="editingAnnouncement.shortDescription" class="modern-input" rows="2"
-              placeholder="Duyurunun kısa özeti..."></textarea>
+              placeholder="Duyurunun kısa özeti..." maxlength="100"></textarea>
           </div>
           <div class="form-group">
-            <label>Detaylı İçerik</label>
+            <label>Detaylı İçerik (Maks. 500)</label>
             <textarea [(ngModel)]="editingAnnouncement.content" class="modern-input" rows="8"
-              placeholder="Duyurunun tam metnini buraya yazın..."></textarea>
+              placeholder="Duyurunun tam metnini buraya yazın..." maxlength="500"></textarea>
           </div>
           <div class="form-group">
             <label>Duyuru Linki (Opsiyonel)</label>
@@ -656,7 +667,8 @@
               <input type="email" [(ngModel)]="newCommunity.presidentEmail" class="modern-input"
                 placeholder="baskan@mail.com" required maxlength="60" />
               <small style="color: #666; font-size: 12px; margin-top: 4px; display: block">
-                Topluluk başkanının sistemde kayıtlı e-posta adresi. Bu e-posta adresi ile sistemde kayıtlı bir kullanıcı olmalıdır.
+                Topluluk başkanının sistemde kayıtlı e-posta adresi. Bu e-posta adresi ile sistemde kayıtlı bir
+                kullanıcı olmalıdır.
               </small>
             </div>
             <!-- Website field removed for Corporate Dashboard -->
@@ -761,7 +773,7 @@
             </div>
             <div class="form-group">
               <label>Topluluk Başkanı E-posta</label>
-              <input type="email" [value]="editingCommunity.presidentEmail || editingCommunity.comLeadMail || ''" 
+              <input type="email" [value]="editingCommunity.presidentEmail || editingCommunity.comLeadMail || ''"
                 class="modern-input" placeholder="baskan@mail.com" readonly disabled />
               <small style="color: #666; font-size: 12px; margin-top: 4px; display: block">
                 Bu alan değiştirilemez. Topluluk başkanının sistemde kayıtlı e-posta adresidir.
@@ -877,7 +889,8 @@
           <!-- Beklemede olan etkinlikler için butonlar -->
           <div class="modal-actions-column" *ngIf="selectedEvent.status === 'Beklemede'">
             <!-- Üst satır: İçeriği Kontrol Et -->
-            <div class="modal-actions-row" *ngIf="!checkingSpamEvents.has(selectedEvent.id) && !inspectedEvents.has(selectedEvent.id)">
+            <div class="modal-actions-row"
+              *ngIf="!checkingSpamEvents.has(selectedEvent.id) && !inspectedEvents.has(selectedEvent.id)">
               <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
                 <!-- İçeriği Kontrol Et butonu (opsiyonel - kullanıcı isterse kullanabilir) -->
                 <button class="btn-info" (click)="performSpamCheck(selectedEvent.id)">

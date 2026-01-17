@@ -62,11 +62,11 @@
 
         <div class="mobile-auth-footer" *ngIf="isInitialized && isLoggedIn === true">
           <a *ngIf="userRole === 'student'" routerLink="/profile" class="btn-solid-custom small"
-            (click)="closeMobileMenu()">Profilim</a>
+            (click)="closeMobileMenu()">{{ getDashboardLabel() }}</a>
           <a *ngIf="userRole === 'corporate'" routerLink="/corporate-dashboard" class="btn-solid-custom small"
-            (click)="closeMobileMenu()">Panelim</a>
+            (click)="closeMobileMenu()">{{ getDashboardLabel() }}</a>
           <a *ngIf="userRole === 'community'" routerLink="/community-dashboard" class="btn-solid-custom small"
-            (click)="closeMobileMenu()">Panelim</a>
+            (click)="closeMobileMenu()">{{ getDashboardLabel() }}</a>
 
           <button class="btn-outline-custom small static-btn" style="width: 100%; margin-top: 10px;"
             (click)="logout()">Çıkış Yap</button>

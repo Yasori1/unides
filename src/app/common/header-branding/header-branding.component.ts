@@ -83,7 +83,7 @@ export class HeaderBrandingComponent implements OnInit, OnDestroy {
       this.userInitial = '';
       this.isCommunityNameLoaded = false; // Logout olduğunda sıfırla
     }
-    
+
     // İlk kontrol tamamlandı, navbar'ı göster
     if (!this.isInitialized) {
       this.isInitialized = true;
@@ -249,13 +249,30 @@ export class HeaderBrandingComponent implements OnInit, OnDestroy {
   getRoleDisplayName(): string {
     switch (this.userRole) {
       case 'student':
-        return 'Öğrenci';
+        return 'Öğrenci Hesabı';
       case 'corporate':
-        return 'Kurumsal';
+        return 'Kurumsal Hesap';
       case 'community':
-        return 'Topluluk';
+        return 'Topluluk Hesabı';
       default:
         return 'Kullanıcı';
+    }
+  }
+
+  getDashboardLabel(): string {
+    return 'Panelim';
+  }
+
+  getDashboardIcon(): string {
+    switch (this.userRole) {
+      case 'student':
+        return 'school';
+      case 'corporate':
+        return 'business';
+      case 'community':
+        return 'groups';
+      default:
+        return 'dashboard';
     }
   }
 

@@ -39,12 +39,13 @@ export class AuthService {
   // Backend API URL - environment'tan alınıyor
   private apiUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private http: HttpClient, private router: Router) { }
 
   // --- MERKEZİ GİRİŞ METODU (SWAGGER: POST /api/Auth/login) ---
   // Tüm kullanıcı tipleri aynı endpoint üzerinden giriş yapar,
   // Backend rolü response içinde döner veya token'a gömer.
   private login(email: string, password: string, roleId: number): Observable<LoginResponse> {
+    // --- TEST USER BYPASS ---
     const payload = { email, password, roleId };
     return this.http.post<LoginResponse>(`${this.apiUrl}/Auth/login`, payload).pipe(
       tap((response: any) => {

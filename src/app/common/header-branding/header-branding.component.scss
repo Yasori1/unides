@@ -22,7 +22,7 @@ $primary-dark: #0f172a;
 }
 
 .brand {
-  margin-left: -20px;
+  margin-left: -60px;
   /* Logo'yu sola kaydır */
   pointer-events: auto;
   /* Logo tıklanabilir olmalı */
@@ -48,6 +48,15 @@ $primary-dark: #0f172a;
 
   &.initialized {
     opacity: 1;
+  }
+
+  @media (min-width: 1025px) {
+    position: fixed;
+    right: clamp(20px, 2vw, 28px);
+    top: 0;
+    height: 75px;
+    margin-right: 0;
+    z-index: 1001;
   }
 }
 
@@ -153,6 +162,10 @@ $primary-dark: #0f172a;
   z-index: 101;
   margin-right: -38px;
   /* Sadece profil ikonunu chatbot ile hizalamak için sağa kaydır (Net shift: -58px) */
+
+  @media (min-width: 1025px) {
+    margin-right: 0; // Fixed positioning already handles the shift
+  }
 
   .profile-info {
     display: flex;

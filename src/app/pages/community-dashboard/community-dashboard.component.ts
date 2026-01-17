@@ -90,6 +90,12 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
   isModalOpen: boolean = false;
   isProfileOpen: boolean = false;
   showNotifications: boolean = false;
+
+  // Unified Profile Dropdown Identity
+  userRole: string = 'community';
+  userName: string = '';
+  displayName: string = '';
+  userInitial: string = '';
   activeRowMenuId: number | null = null;
   modalType: 'new-event' | 'new-project' | 'new-member' | 'edit-member' | null = null;
   isSearchingMembers = false;
@@ -242,7 +248,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     private http: HttpClient,
     private afkDetectionService: AfkDetectionService,
     @Inject(PLATFORM_ID) private platformId: Object
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
@@ -258,9 +264,19 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
 
       this.loadCommunityProfile();
       this.loadCommunities();
+      // Unified Profile Dropdown Initialization
+      const userInfoStr = localStorage.getItem('user_info');
+      if (userInfoStr) {
+        try {
+          const userInfo = JSON.parse(userInfoStr);
+          this.userName = userInfo.name || userInfo.fullName || 'Topluluk';
+          this.displayName = this.userName;
+          this.userInitial = this.userName.charAt(0).toUpperCase();
+        } catch (e) {
+          console.error('Error parsing user info:', e);
+        }
+      }
     }
-    // snapshot for settings change detection
-    this.initialClubInfo = JSON.parse(JSON.stringify(this.clubInfo));
   }
 
   /**
@@ -418,22 +434,22 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
           // Backend'den gelen üyeleri map et
           this.members = backendMembers.map(
             (m) =>
-              ({
-                id: m.id || 0,
-                name: m.name || this.getNameFromEmail(m.email),
-                role: m.role || 'Üye',
-                department: m.department || '',
-                email: m.email || '',
-                phone: m.phone || '',
-                grade: m.grade || '',
-                avatar:
-                  m.avatar ||
-                  `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                    (m.name || this.getNameFromEmail(m.email) || 'U').substring(0, 2)
-                  )}&background=e2e8f0&color=1e293b`,
-                status: m.status || 'Aktif',
-                university: m.university || this.getUniversityFromEmail(m.email),
-              } as Member)
+            ({
+              id: m.id || 0,
+              name: m.name || this.getNameFromEmail(m.email),
+              role: m.role || 'Üye',
+              department: m.department || '',
+              email: m.email || '',
+              phone: m.phone || '',
+              grade: m.grade || '',
+              avatar:
+                m.avatar ||
+                `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                  (m.name || this.getNameFromEmail(m.email) || 'U').substring(0, 2)
+                )}&background=e2e8f0&color=1e293b`,
+              status: m.status || 'Aktif',
+              university: m.university || this.getUniversityFromEmail(m.email),
+            } as Member)
           );
 
           // Stats'ı güncelle
@@ -615,20 +631,16 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
   clickout(event: MouseEvent) {
     const target = event.target as HTMLElement;
 
-    // Buton tıklaması ise işlem yapma
-    if (target.closest('.icon-btn.notification') || target.closest('.profile-pic')) {
-      return;
-    }
-
     // Profil dropdown kontrolü
-    if (!target.closest('.profile-wrapper') && !target.closest('.profile-dropdown')) {
+    if (!target.closest('.profile-wrapper') && !target.closest('.profile-dropdown') && !target.closest('.profile-info')) {
       this.isProfileOpen = false;
     }
 
     // Bildirimler dropdown kontrolü
     if (
       !target.closest('.notification-wrapper') &&
-      !target.closest('.dropdown-menu.notifications')
+      !target.closest('.dropdown-menu.notifications') &&
+      !target.closest('.icon-btn.notification')
     ) {
       this.showNotifications = false;
     }
@@ -731,25 +743,6 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  toggleProfileDropdown(event?: MouseEvent) {
-    if (event) {
-      event.stopPropagation();
-      event.preventDefault();
-    }
-    this.isProfileOpen = !this.isProfileOpen;
-    this.showNotifications = false;
-  }
-
-  handleSettingsClick() {
-    this.isProfileOpen = false;
-    this.switchTab('settings');
-  }
-
-  handleLogoutClick() {
-    this.isProfileOpen = false;
-    this.logout();
-  }
-
   navigateToHome() {
     this.router.navigate(['/']);
   }
@@ -850,20 +843,6 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     reader.readAsDataURL(file);
   }
 
-  logout() {
-    if (isPlatformBrowser(this.platformId)) {
-      this.showToast('Çıkış yapılıyor...', 'success');
-      // Local storage'ı temizle
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('refresh_token');
-      localStorage.removeItem('user_info');
-      localStorage.removeItem('user_type');
-      // Anasayfaya yönlendir
-      setTimeout(() => {
-        this.router.navigate(['/']);
-      }, 1500);
-    }
-  }
 
   updateSettings() {
     if (!this.isSettingsValid) {
@@ -1170,15 +1149,15 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     // 2. GSB/Kurumsal yetkili kontrolü (EN ÖNCE - eklenemez)
     // 3. Kullanıcı varlığı kontrolü
     // 4. Ekleme işlemi
-    
+
     // 1. Email formatı kontrolü (zaten yapıldı - isValidEmail kontrolü)
-    
+
     // 2. GSB/Kurumsal yetkili kontrolü (EN ÖNCE - eklenemez)
     if (this.emailIsCorporate || this.emailUserRoleId === 2) {
       this.showToast('GSB Yetkilisi eklenemez.', 'error');
       return;
     }
-    
+
     // 3. Kullanıcı varlığı kontrolü - Kullanıcı var mı?
     if (!this.emailExists) {
       // Backend'den gelen hata mesajını göster
@@ -1374,10 +1353,10 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
   // Email validation ve backend kontrolü
   onEmailInputChange() {
     const email = this.newMemberData.email?.trim() || '';
-    
+
     // Email formatını kontrol et
     this.emailValid = this.isValidEmail(email);
-    
+
     // Email formatı geçersizse veya boşsa, state'leri sıfırla
     if (!email) {
       this.emailExists = false;
@@ -1391,14 +1370,14 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     // @ işareti olmalı, @'den sonra en az 2 nokta olmalı (domain.tld formatı)
     const emailParts = email.split('@');
     const hasAtSymbol = emailParts.length === 2;
-    
+
     if (hasAtSymbol) {
       const domainPart = emailParts[1];
       // Domain kısmında en az 2 nokta olmalı (örn: aksaray.edu.tr)
       const dotCount = (domainPart.match(/\./g) || []).length;
       const hasFullDomain = dotCount >= 2 && domainPart.split('.').length >= 3;
       const lastPart = domainPart.split('.').pop() || '';
-      
+
       // Email tam girildi mi kontrol et (örn: safa@aksaray.edu.tr)
       // Son kısım (TLD) en az 2 karakter olmalı (tr, com, org vs.)
       this.emailInputComplete = hasFullDomain && lastPart.length >= 2 && this.emailValid;
@@ -1486,10 +1465,10 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
             this.emailIsCorporate = true;
             this.emailUserRoleId = 2;
             this.emailErrorMessage = result.message || 'GSB Yetkilisi eklenemez.';
-            console.log('GSB/Kurumsal yetkili tespit edildi - eklenemez', { 
-              roleId: result.roleId, 
+            console.log('GSB/Kurumsal yetkili tespit edildi - eklenemez', {
+              roleId: result.roleId,
               isCorporate: result.isCorporate,
-              exists: result.exists 
+              exists: result.exists
             });
           }
           // 2. Email formatı hatası (400) - exists: false döner
@@ -1499,9 +1478,9 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
             this.emailIsCorporate = false;
             this.emailUserRoleId = null;
             this.emailErrorMessage = result.message || 'Sadece .edu.tr uzantılı e-posta adresleri eklenebilir.';
-            console.log('Email formatı geçersiz', { 
-              exists: result.exists, 
-              message: result.message 
+            console.log('Email formatı geçersiz', {
+              exists: result.exists,
+              message: result.message
             });
           }
           // 3. Kullanıcı bulunamadı (404) - exists: false döner
@@ -1511,9 +1490,9 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
             this.emailIsCorporate = false;
             this.emailUserRoleId = null;
             this.emailErrorMessage = result.message || 'Bu e-posta adresi ile kayıtlı kullanıcı bulunamadı.';
-            console.log('Kullanıcı bulunamadı', { 
-              exists: result.exists, 
-              message: result.message 
+            console.log('Kullanıcı bulunamadı', {
+              exists: result.exists,
+              message: result.message
             });
           }
           // 4. Zaten üye (409) - exists: true döner
@@ -1523,9 +1502,9 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
             this.emailIsCorporate = false;
             this.emailUserRoleId = result.roleId || 1;
             this.emailErrorMessage = result.message || 'Kullanıcı zaten üye.';
-            console.log('Kullanıcı zaten üye', { 
-              exists: result.exists, 
-              message: result.message 
+            console.log('Kullanıcı zaten üye', {
+              exists: result.exists,
+              message: result.message
             });
           }
           // 5. Başarılı ekleme (200) - exists: true döner
@@ -1535,10 +1514,10 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
             this.emailIsCorporate = false;
             this.emailUserRoleId = result.roleId || 1;
             this.emailErrorMessage = null; // Hata yok
-            console.log('Normal kullanıcı tespit edildi - eklenebilir', { 
-              roleId: result.roleId, 
+            console.log('Normal kullanıcı tespit edildi - eklenebilir', {
+              roleId: result.roleId,
               isCorporate: result.isCorporate,
-              exists: result.exists 
+              exists: result.exists
             });
           }
           // Diğer durumlar
@@ -1548,9 +1527,9 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
             this.emailIsCorporate = false;
             this.emailUserRoleId = null;
             this.emailErrorMessage = result.message || 'Kullanıcı kontrol edilemedi.';
-            console.log('Bilinmeyen durum', { 
-              exists: result.exists, 
-              message: result.message 
+            console.log('Bilinmeyen durum', {
+              exists: result.exists,
+              message: result.message
             });
           }
         } else {
@@ -2093,14 +2072,14 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
                         updatedEvent.status === 'Onaylandı'
                           ? 'approved'
                           : updatedEvent.status === 'Reddedildi'
-                          ? 'rejected'
-                          : 'pending',
+                            ? 'rejected'
+                            : 'pending',
                       imageUrl: updatedEvent.imageUrl || '',
                       date: updatedEvent.startDate
                         ? new Date(updatedEvent.startDate).toLocaleDateString('tr-TR', {
-                            day: 'numeric',
-                            month: 'long',
-                          })
+                          day: 'numeric',
+                          month: 'long',
+                        })
                         : '',
                       startDateIso: updatedEvent.startDate || '',
                       location: updatedEvent.location || '',
@@ -2108,9 +2087,9 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
                       description: updatedEvent.description || '',
                       time: updatedEvent.startDate
                         ? new Date(updatedEvent.startDate).toLocaleTimeString('tr-TR', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })
                         : '',
                       quota: updatedEvent.quota || 0,
                     };
@@ -2268,6 +2247,58 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
         });
     });
   }
+  toggleProfileDropdown(event?: MouseEvent) {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    this.isProfileOpen = !this.isProfileOpen;
+  }
+
+  handleSettingsClick() {
+    this.isProfileOpen = false;
+    this.activeTab = 'settings';
+  }
+
+  handleLogoutClick() {
+    this.isProfileOpen = false;
+    this.logout();
+  }
+
+  logout() {
+    if (isPlatformBrowser(this.platformId)) {
+      this.showToast('Çıkış yapılıyor...', 'success');
+      // Local storage'ı temizle
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('user_info');
+      localStorage.removeItem('user_type');
+      localStorage.removeItem('community_info');
+
+      // Anasayfaya yönlendir
+      setTimeout(() => {
+        this.router.navigate(['/']);
+      }, 1000);
+    }
+  }
+
+  navigateToDashboard() {
+    this.isProfileOpen = false;
+    this.activeTab = 'overview';
+  }
+
+  getRoleDisplayName(): string {
+    return 'Topluluk Hesabı';
+  }
+
+  getDashboardLabel(): string {
+    return 'Panelim';
+  }
+
+  getDashboardIcon(): string {
+    return 'groups';
+  }
+
 
   ngOnDestroy(): void {
     // AFK Detection'ı durdur

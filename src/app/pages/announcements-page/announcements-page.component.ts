@@ -93,7 +93,7 @@ export class AnnouncementsPageComponent implements OnInit {
     let temp = [...this.allAnnouncements];
 
     // 1. Arama Metni (Türkçe Karakter Destekli)
-    if (this.searchText.trim()) {
+    if (this.searchText && this.searchText.trim()) {
       const term = this.searchText.toLocaleLowerCase('tr-TR');
       temp = temp.filter(
         (a) =>

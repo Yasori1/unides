@@ -104,31 +104,7 @@ export interface Project {
 export class EventService {
   private apiUrl = `${environment.apiUrl}/Events`;
 
-  private DEMO_EVENT: EventItem = {
-    id: 9999,
-    title: 'Demo Etkinlik: Unides Platform Açılışı',
-    shortDescription: 'Unides platformunun büyük açılış etkinliği. Tüm üyelerimiz davetlidir.',
-    description: `
-      <p>Merhaba Değerli Kullanıcılarımız,</p>
-      <p>Unides platformunun resmi açılışını kutluyoruz. Bu, sistemin çalışıp çalışmadığını kontrol etmek amacıyla oluşturulmuş bir <strong>demo etkinliktir</strong>.</p>
-      <p>Etkinlik Detayları:</p>
-      <ul>
-        <li>Tarih: 20 Mayıs 2026</li>
-        <li>Saat: 14:00</li>
-        <li>Yer: Ana Kampüs Konferans Salonu</li>
-      </ul>
-      <p>Katılımınızı bekliyoruz!</p>
-    `,
-    startDate: new Date('2026-05-20T14:00:00').toISOString(),
-    endDate: new Date('2026-05-20T17:00:00').toISOString(),
-    location: 'Ana Kampüs Konferans Salonu',
-    communityId: 1,
-    communityName: 'Unides Topluluğu',
-    imageUrl: 'assets/images/etkinlik-statik.png',
-    status: 'Onaylandı',
-    quota: 100,
-    city: 'İstanbul'
-  };
+
 
   constructor(private http: HttpClient) { }
 
@@ -285,11 +261,11 @@ export class EventService {
     return this.http.get<EventListItemDto[]>(`${this.apiUrl}/upcoming/home`).pipe(
       map((list) => {
         const realEvents = list.slice(0, limit).map((dto) => this.mapToEvent(dto));
-        return [this.DEMO_EVENT, ...realEvents];
+        return realEvents;
       }),
       catchError((error) => {
         console.error('Home upcoming events yüklenemedi:', error);
-        return of([this.DEMO_EVENT]);
+        return of([]);
       })
     );
   }
@@ -304,12 +280,11 @@ export class EventService {
           const mapped = this.mapToEvent(dto);
           return mapped;
         });
-        // Demo etkinliği listenin başına ekle
-        return [this.DEMO_EVENT, ...apiEvents];
+        return apiEvents;
       }),
       catchError((error) => {
         console.error('Etkinlikler yüklenemedi:', error);
-        return of([this.DEMO_EVENT]);
+        return of([]);
       })
     );
   }
@@ -415,10 +390,7 @@ export class EventService {
   // Etkinlik detayını getir (Backend: GET /api/Events/{id})
   // Auth interceptor automatically adds Authorization header if token exists
   getById(id: number): Observable<EventItem> {
-    // Eğer ID demo ID ise direkt mock datayı dön
-    if (Number(id) === this.DEMO_EVENT.id) {
-      return of(this.DEMO_EVENT);
-    }
+
 
     return this.http.get<any>(`${this.apiUrl}/${id}`).pipe(
       map((dto) => this.mapToEvent(dto)),

@@ -21,7 +21,8 @@
 
     <!-- Profile Dropdown (Logged In Users) -->
     <!-- Sadece ikon görünür, tıklandığında kullanıcı adı dropdown içinde gösterilir -->
-    <div class="profile-wrapper desktop-auth" *ngIf="isInitialized && isLoggedIn === true && (userRole !== 'community' || isCommunityNameLoaded)">
+    <div class="profile-wrapper desktop-auth"
+      *ngIf="isInitialized && isLoggedIn === true && (userRole !== 'community' || isCommunityNameLoaded)">
       <div class="profile-info" (click)="toggleProfileDropdown($event)" title="Hesabım">
         <div class="profile-pic">
           <div class="profile-initial">{{ userInitial }}</div>
@@ -36,12 +37,12 @@
         </div>
         <ul>
           <li (click)="navigateToDashboard()">
-            <span class="material-symbols-outlined small-icon">dashboard</span>
-            <span class="menu-text">{{ userRole === 'student' ? 'Profilim' : 'Panelim' }}</span>
+            <span class="material-symbols-outlined small-icon">{{ getDashboardIcon() }}</span>
+            <span class="menu-text">{{ getDashboardLabel() }}</span>
           </li>
           <li (click)="handleSettingsClick()">
-            <span class="material-symbols-outlined small-icon">settings</span>
-            <span class="menu-text">Ayarlar</span>
+            <span class="material-symbols-outlined small-icon">person</span>
+            <span class="menu-text">Profilim</span>
           </li>
           <li (click)="handleLogoutClick()" class="danger-item">
             <span class="material-symbols-outlined small-icon">logout</span>

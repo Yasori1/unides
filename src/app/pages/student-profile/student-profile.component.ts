@@ -117,6 +117,10 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
   eventsScrollPosition: number = 0;
   communitiesScrollPosition: number = 0;
 
+  // Unified Profile Properties
+  displayName: string = '';
+  userInitial: string = '';
+
   constructor(
     public router: Router,
     public toastService: ToastService,
@@ -145,6 +149,10 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
           console.error('Error parsing user info:', e);
         }
       }
+
+      // Initialize Unified Profile Properties
+      this.displayName = this.userInfo.name || 'Öğrenci';
+      this.userInitial = this.displayName.charAt(0).toUpperCase();
 
       // Check query params for tab
       this.router.routerState.root.queryParams.subscribe(params => {
@@ -369,13 +377,6 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
     this.isProfileOpen = false;
   }
 
-  @HostListener('document:click', ['$event'])
-  closeDropdowns(event: any): void {
-    if (!event.target.closest('.profile-wrapper') && !event.target.closest('.notification')) {
-      this.isProfileOpen = false;
-      this.showNotifications = false;
-    }
-  }
 
   handleNotificationClick(notification: any) {
     this.showNotifications = false;
@@ -390,32 +391,6 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
     notification.read = true;
   }
 
-  handleSettingsClick() {
-    this.isProfileOpen = false;
-    this.switchTab('settings');
-  }
-
-  handleLogoutClick() {
-    this.isProfileOpen = false;
-    this.logout();
-  }
-
-  navigateToHome() {
-    this.router.navigate(['/']);
-  }
-
-  logout(): void {
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('refresh_token');
-      localStorage.removeItem('user_info');
-      localStorage.removeItem('user_type');
-      this.toastService.show('Çıkış yapıldı', 'success');
-      setTimeout(() => {
-        this.router.navigate(['/']);
-      }, 1000);
-    }
-  }
 
   leaveCommunity(communityId: string): void {
     // Backend'e istek gönder
@@ -684,7 +659,7 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error('Profil güncelleme hatası:', err);
-        
+
         // 404 hatası için özel mesaj (backend endpoint henüz mevcut değil)
         if (err.status === 404) {
           this.toastService.show(
@@ -750,7 +725,10 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
   }
 
   toggleProfileDropdown(event?: MouseEvent): void {
-    if (event) event.stopPropagation();
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
     this.isProfileOpen = !this.isProfileOpen;
   }
 
@@ -759,9 +737,64 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
     const target = event.target as HTMLElement;
 
     // Profil dropdown kontrolü
-    if (!target.closest('.profile-wrapper') && !target.closest('.profile-dropdown')) {
+    if (!target.closest('.profile-wrapper') && !target.closest('.profile-dropdown') && !target.closest('.profile-info')) {
       this.isProfileOpen = false;
     }
+
+    // Bildirimler kontrolü
+    if (!target.closest('.notification') && !target.closest('.notification-btn')) {
+      this.showNotifications = false;
+    }
+  }
+
+  // Unified Profile Dropdown Methods
+  navigateToDashboard() {
+    this.isProfileOpen = false;
+    this.activeTab = 'overview';
+    this.switchTab('overview');
+  }
+
+  handleSettingsClick() {
+    this.isProfileOpen = false;
+    this.activeTab = 'settings';
+    this.switchTab('settings');
+  }
+
+  handleLogoutClick() {
+    this.isProfileOpen = false;
+    this.logout();
+  }
+
+  logout() {
+    if (isPlatformBrowser(this.platformId)) {
+      this.toastService.show('Çıkış yapılıyor...', 'success');
+      // Local storage'ı temizle
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('user_info');
+      localStorage.removeItem('user_type');
+
+      // Anasayfaya yönlendir
+      setTimeout(() => {
+        this.router.navigate(['/']);
+      }, 1000);
+    }
+  }
+
+  navigateToHome() {
+    this.router.navigate(['/']);
+  }
+
+  getRoleDisplayName(): string {
+    return 'Öğrenci Hesabı';
+  }
+
+  getDashboardLabel(): string {
+    return 'Panelim';
+  }
+
+  getDashboardIcon(): string {
+    return 'school';
   }
 
   // Carousel navigation methods
