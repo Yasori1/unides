@@ -33,7 +33,7 @@ export class LoginPageComponent implements OnInit {
   roleId: number = 1; // öğrenci
   isLoading: boolean = false;
   loginError: string = '';
-  
+
   // Şifremi Unuttum Modal
   showForgotPasswordModal: boolean = false;
   forgotPasswordEmail: string = '';
@@ -44,7 +44,7 @@ export class LoginPageComponent implements OnInit {
   constructor(
     private toastService: ToastService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     const scriptCheck = document.querySelector(
@@ -177,12 +177,12 @@ export class LoginPageComponent implements OnInit {
   validateForgotEmail(event: any) {
     const email = event.target.value;
     this.forgotPasswordEmail = email;
-    
+
     if (!email) {
       this.forgotEmailError = false;
       return;
     }
-    
+
     // E-posta format kontrolü: .edu.tr ile bitmeli
     if (email.includes('@') && !email.endsWith('.edu.tr')) {
       this.forgotEmailError = true;

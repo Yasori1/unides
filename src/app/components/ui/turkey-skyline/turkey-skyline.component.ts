@@ -86,22 +86,28 @@ import { CommonModule } from '@angular/common';
 
       @media (min-width: 2560px) {
         .skyline-container {
-          width: 100vw;
-          left: 0;
-          transform: none;
+          width: 100vw !important;
+          max-width: 100vw !important;
+          left: 0 !important;
+          right: 0 !important;
+          transform: none !important;
           overflow: hidden;
+          height: auto;
+          min-height: 400px;
+          position: absolute;
         }
         
         .skyline-image {
-          width: 100%;
-          min-width: 2560px;
-          max-width: none;
+          width: 100vw !important;
+          min-width: 100vw !important;
+          height: auto;
+          min-height: 350px;
           max-height: none;
           object-fit: cover;
           object-position: bottom center;
-          opacity: 0.55;
-          transform: scale(1.2);
-          transform-origin: bottom center;
+          opacity: 0.6;
+          transform: scaleX(1.8);
+          transform-origin: center bottom;
         }
       }
       
