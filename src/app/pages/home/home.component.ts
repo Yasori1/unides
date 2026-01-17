@@ -1,25 +1,65 @@
-import { Component } from '@angular/core';
-import { BannerComponent } from './banner/banner.component';
-import { ListingsComponent } from '../../common/listings/listings.component';
-import { DestinationsComponent } from '../../common/destinations/destinations.component';
-import { HowItWorksComponent } from '../../common/how-it-works/how-it-works.component';
-import { PlacesComponent } from '../../common/places/places.component';
-import { VideoComponent } from '../../common/video/video.component';
-import { FeedbackComponent } from '../../common/feedback/feedback.component';
-import { DownloadAppComponent } from '../../common/download-app/download-app.component';
-import { FooterComponent } from '../../common/footer/footer.component';
-import { HeaderComponent } from '../../common/header/header.component';
-import { LatestCommunitiesComponent } from '../../common/latest-communities/latest-communities.component';
+import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { RouterModule, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
+import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
+import { TurkeySkylineComponent } from '../../components/ui/turkey-skyline/turkey-skyline.component';
+import { CommunityService } from '../../services/community.services';
+import { EventService } from '../../services/event.services';
+import { SearchService } from '../../services/search.services';
+
+// --- Veri Tipleri (Interfaces) ---
+interface Community {
+  id: string | number; // Guid (string) veya number
+  name: string;
+  image: string;
+  category: string;
+  memberCount: number;
+  eventCount: number;
+  email: string;
+}
+
+interface UpcomingEvent {
+  id: number;
+  title: string;
+  date: Date;
+  location: string;
+  time: string;
+  description: string;
+  communityName: string;
+  communityLogo: string;
+  remainingTimeStr?: string; // Performans için eklendi
+}
+
+interface NewCommunity {
+  id: string | number; // Guid (string) veya number
+  name: string;
+  university: string;
+  image: string;
+  email: string;
+}
+
+interface Announcement {
+  title: string;
+  content: string;
+}
 
 @Component({
-    selector: 'app-home',
-    imports: [HeaderComponent, BannerComponent, LatestCommunitiesComponent, DestinationsComponent, HowItWorksComponent, PlacesComponent, VideoComponent, FeedbackComponent, DownloadAppComponent, FooterComponent],
-    templateUrl: './home.component.html',
-    styleUrl: './home.component.scss'
+  selector: 'app-home', // DÜZELTİLDİ
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    FormsModule,
+    SiteNavbarComponent,
+    SiteFooterComponent,
+    TurkeySkylineComponent,
+  ],
+  templateUrl: './home.component.html', // DÜZELTİLDİ
+  styleUrls: ['./home.component.scss'], // DÜZELTİLDİ
 })
-<<<<<<< Updated upstream
-export class HomeComponent {}
-=======
 export class HomeComponent implements OnInit, OnDestroy {
   // DÜZELTİLDİ (Home3Component -> HomeComponent)
 
@@ -46,6 +86,15 @@ export class HomeComponent implements OnInit, OnDestroy {
   upcomingEvents: UpcomingEvent[] = [];
   newestCommunities: NewCommunity[] = [];
 
+  // --- Responsive Placeholder ---
+  isMobile: boolean = false;
+
+  // mockAnnouncements kaldırıldı - artık backend'den veri çekiliyor
+
+  get searchPlaceholder(): string {
+    return this.isMobile ? 'Yapay zeka, çevre ya da daha fazlası...' : 'Ne arıyorsun? (Yapay Zeka, Kampüs Etkinliği...)';
+  }
+
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
     private router: Router,
@@ -62,12 +111,21 @@ export class HomeComponent implements OnInit, OnDestroy {
   ngOnInit() {
     if (isPlatformBrowser(this.platformId)) {
       this.startTypewriter();
+      this.checkMobile();
+      window.addEventListener('resize', () => this.checkMobile());
     }
     this.loadData();
   }
 
   ngOnDestroy() {
     if (this.typewriterInterval) clearTimeout(this.typewriterInterval);
+    if (isPlatformBrowser(this.platformId)) {
+      window.removeEventListener('resize', () => this.checkMobile());
+    }
+  }
+
+  checkMobile() {
+    this.isMobile = window.innerWidth < 768;
   }
 
   // --- Video İşlemleri ---
@@ -310,4 +368,3 @@ export class HomeComponent implements OnInit, OnDestroy {
     return `${days} Gün`;
   }
 }
->>>>>>> Stashed changes

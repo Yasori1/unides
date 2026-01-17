@@ -6,7 +6,7 @@ import { SiteFooterComponent } from '../../common/site-footer/site-footer.compon
 import { CommunityService, Community } from '../../services/community.services';
 import { EventService, EventItem } from '../../services/event.services';
 
-// CommunityEvent interface
+// CommunityEvent interface for mock data
 export interface CommunityEvent {
   id: number;
   title: string;

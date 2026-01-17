@@ -6,8 +6,6 @@ import { ToastService } from '../services/toast.services';
 /**
  * Global Error Interceptor
  * Catches HTTP errors and displays user-friendly toast notifications
- * NOT: 401 errors are handled by auth.interceptor for token refresh
- * This interceptor only shows user-friendly messages
  */
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const toastService = inject(ToastService);
@@ -20,27 +18,26 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       const skipErrorHandling = req.url.includes('/api/Search') || 
                                 req.url.includes('/api/About') ||
                                 req.url.includes('/api/Forkod') ||
-                                (req.url.includes('/api/Communities/me/members') && req.method === 'POST') || // Email check ve 409 conflict için
-                                (req.url.includes('/api/Communities/me/memberships') && error.status === 403); // Membership 403 hatalarını suppress et
+                                (req.url.includes('/api/Communities/me/members') && req.method === 'POST');
 
       if (skipErrorHandling) {
         return throwError(() => error);
       }
 
       let errorMessage = 'Bir hata oluştu. Lütfen tekrar deneyin.';
-      let shouldShowToast = true;
 
       // Handle different error types
       if (error.status === 0) {
         // Network error or CORS issue
         errorMessage = 'Sunucuya bağlanılamıyor. İnternet bağlantınızı kontrol edin.';
-        // Network hatalarında logout yapma - auth.interceptor zaten handle ediyor
       } else if (error.status === 401) {
         // Unauthorized - token expired or invalid
-        // auth.interceptor zaten token refresh denedi ve başarısız oldu
-        // Sadece mesaj göster, logout'u auth.interceptor halletti
-        errorMessage = 'Oturum süreniz doldu. Lütfen tekrar giriş yapın.';
-        shouldShowToast = false; // auth.interceptor zaten yönlendirme yaptı
+        errorMessage = 'Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.';
+        // Optionally clear token and redirect to login
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('auth_token');
+          localStorage.removeItem('user_info');
+        }
       } else if (error.status === 403) {
         // Forbidden
         errorMessage = error.error?.message || 'Bu işlem için yetkiniz bulunmamaktadır.';
@@ -67,7 +64,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       }
 
       // Show toast notification
-      if (typeof window !== 'undefined' && shouldShowToast) {
+      if (typeof window !== 'undefined') {
         toastService.show(errorMessage, 'error');
       }
 

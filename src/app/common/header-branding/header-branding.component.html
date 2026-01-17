@@ -20,27 +20,28 @@
     </div>
 
     <!-- Profile Dropdown (Logged In Users) -->
+    <!-- Sadece ikon görünür, tıklandığında kullanıcı adı dropdown içinde gösterilir -->
     <div class="profile-wrapper desktop-auth" *ngIf="isInitialized && isLoggedIn === true && (userRole !== 'community' || isCommunityNameLoaded)">
-      <div class="profile-info" (click)="toggleProfileDropdown($event)">
+      <div class="profile-info" (click)="toggleProfileDropdown($event)" title="Hesabım">
         <div class="profile-pic">
           <div class="profile-initial">{{ userInitial }}</div>
         </div>
-        <!-- Profile text sadece dropdown açıkken gösterilsin -->
-        <div class="profile-text" *ngIf="isProfileOpen">
-          <div class="profile-name">{{ displayName || userName }}</div>
-          <div class="profile-role">{{ getRoleDisplayName() }}</div>
-        </div>
+        <!-- Kullanıcı adı burada artık gösterilmiyor, dropdown içinde gösterilecek -->
       </div>
       <div class="dropdown-menu profile-dropdown" *ngIf="isProfileOpen" (click)="$event.stopPropagation()">
-        <div class="dd-header">{{ displayName || userName }}</div>
+        <!-- Kullanıcı adı ve rolü dropdown header'ında gösteriliyor -->
+        <div class="dd-header">
+          <div class="dd-user-name">{{ displayName || userName }}</div>
+          <div class="dd-user-role">{{ getRoleDisplayName() }}</div>
+        </div>
         <ul>
           <li (click)="navigateToDashboard()">
             <span class="material-symbols-outlined small-icon">dashboard</span>
             <span class="menu-text">{{ userRole === 'student' ? 'Profilim' : 'Panelim' }}</span>
           </li>
           <li (click)="handleSettingsClick()">
-            <span class="material-symbols-outlined small-icon">person</span>
-            <span class="menu-text">Profilim</span>
+            <span class="material-symbols-outlined small-icon">settings</span>
+            <span class="menu-text">Ayarlar</span>
           </li>
           <li (click)="handleLogoutClick()" class="danger-item">
             <span class="material-symbols-outlined small-icon">logout</span>

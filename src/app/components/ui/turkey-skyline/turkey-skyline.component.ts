@@ -7,32 +7,41 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   template: `
     <div class="skyline-container">
-      <!-- Turkey skyline image removed to prevent 404 errors -->
+      <img 
+        src="assets/turkey-skyline.png" 
+        alt="Türkiye Skyline" 
+        class="skyline-image"
+        onerror="this.style.display='none'"
+      />
     </div>
   `,
   styles: [
     `
       .skyline-container {
-        width: 100%;
+        width: 100vw;
         height: 100%;
+        min-height: 300px;
         display: flex;
         align-items: flex-end;
         justify-content: center;
         position: absolute;
         bottom: 0;
-        left: 0;
-        right: 0;
+        left: 50%;
+        transform: translateX(-50%);
         z-index: 0;
         pointer-events: none;
+        overflow: hidden;
       }
 
       .skyline-image {
         width: 100%;
+        min-width: 100vw;
         height: auto;
-        max-height: 500px;
-        object-fit: contain;
+        min-height: 100%;
+        max-height: none;
+        object-fit: cover;
         object-position: bottom center;
-        opacity: 0.4;
+        opacity: 0.6;
       }
 
       // Tablet: Arka plan görselini optimize et
@@ -45,40 +54,82 @@ import { CommonModule } from '@angular/common';
         }
       }
 
-      // Mobil: Görseli alt kısma sabitle, küçült
+      // Mobil: Görseli tam genişlikte göster, kenar boşluğu olmasın
       @media (max-width: 767px) {
         .skyline-container {
           align-items: flex-end;
           justify-content: center;
-          height: 50%;
+          height: 100%;
           bottom: 0;
+          width: 100vw;
+          overflow: hidden;
         }
         
         .skyline-image {
-          max-height: 200px;
-          opacity: 0.25;
-          object-fit: contain;
-          object-position: center bottom;
+          min-width: 100vw;
           width: 100%;
+          height: auto;
+          min-height: 100%;
+          opacity: 0.55;
+          object-fit: cover;
+          object-position: center bottom;
         }
       }
 
       @media (min-width: 1400px) {
         .skyline-image {
-          max-height: 600px;
-          opacity: 0.45;
-          object-fit: contain;
+          max-height: none;
+          opacity: 0.55;
+          object-fit: cover;
         }
       }
 
       @media (min-width: 2560px) {
+        .skyline-container {
+          width: 100vw !important;
+          max-width: 100vw !important;
+          left: 0 !important;
+          right: 0 !important;
+          transform: none !important;
+          overflow: hidden;
+          height: auto;
+          min-height: 400px;
+          position: absolute;
+        }
+        
         .skyline-image {
-          max-height: 700px;
-          object-fit: contain;
-          opacity: 0.45;
+          width: 100vw !important;
+          min-width: 100vw !important;
+          height: auto;
+          min-height: 350px;
+          max-height: none;
+          object-fit: cover;
+          object-position: bottom center;
+          opacity: 0.6;
+          transform: scaleX(1.8);
+          transform-origin: center bottom;
+        }
+      }
+      
+      @media (min-width: 3840px) {
+        .skyline-container {
+          width: 100vw;
+          left: 0;
+          transform: none;
+          overflow: hidden;
+        }
+        
+        .skyline-image {
+          width: 100%;
+          min-width: 3840px;
+          max-width: none;
+          object-fit: cover;
+          object-position: bottom center;
+          transform: scale(1.3);
+          transform-origin: bottom center;
         }
       }
     `,
   ],
 })
-export class TurkeySkylineComponent {}
+export class TurkeySkylineComponent { }

@@ -110,7 +110,7 @@ export class CorporateLoginComponent implements OnInit, OnDestroy {
     this.authService.loginCorporate(email, password).subscribe({
       next: (response) => {
         // --- BAŞARILI ---
-        // Token'lar zaten AuthService içinde kaydedildi
+        // 1. Toast Mesajı
         this.toastService.show(
           'Giriş başarılı! Ana sayfaya yönlendiriliyorsunuz...',
           'success'
@@ -118,7 +118,7 @@ export class CorporateLoginComponent implements OnInit, OnDestroy {
 
         // 2. Yönlendirme - Anasayfaya yönlendir
         setTimeout(() => {
-          this.isLoading = false;
+          this.isLoading = false; // Spinner durur, yazı geri gelir
           this.router.navigateByUrl('/').catch((err) => {
             // Navigation hatası durumunda window.location kullan
             if (isPlatformBrowser(this.platformId)) {
@@ -129,20 +129,16 @@ export class CorporateLoginComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         // --- HATA ---
-        
+
         // 1. Spinner'ı durdur, butonu eski haline getir
         this.isLoading = false;
 
         // 2. Özel Hata Mesajı
         const errorMessage =
-          error?.error?.message ||
-          error?.message ||
+          error.error?.message ||
           'Giriş yapılamadı. Lütfen bilgilerinizi kontrol edip tekrar deneyiniz.';
         this.toastService.show(errorMessage, 'error');
       },
-      complete: () => {
-        // İşlem tamamlandı
-      }
     });
   }
 

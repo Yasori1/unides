@@ -1,27 +1,20 @@
 import { Component } from '@angular/core';
-<<<<<<< Updated upstream
-import { RouterLink } from '@angular/router';
-=======
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 // Servis ve UI Bileşenleri
 import { ToastService } from '../../services/toast.services';
-import { AuthService } from '../../services/auth.services';
 import { ToastComponent } from '../../components/ui/toast/toast.component';
 import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
->>>>>>> Stashed changes
 
 @Component({
-    selector: 'app-register-page',
-    imports: [RouterLink],
-    templateUrl: './register-page.component.html',
-    styleUrl: './register-page.component.scss'
+  selector: 'app-register-page',
+  standalone: true,
+  imports: [CommonModule, RouterModule, ToastComponent, LumaSpinComponent, FormsModule],
+  templateUrl: './register-page.component.html',
+  styleUrls: ['./register-page.component.scss'],
 })
-<<<<<<< Updated upstream
-export class RegisterPageComponent {}
-=======
 export class RegisterPageComponent {
   emailError: boolean = false;
   passwordMismatch: boolean = false;
@@ -34,11 +27,7 @@ export class RegisterPageComponent {
   private password: string = '';
   private confirmPassword: string = '';
 
-  constructor(
-    private router: Router,
-    private toastService: ToastService,
-    private authService: AuthService
-  ) {}
+  constructor(private router: Router, private toastService: ToastService) {}
 
   updateName(event: any) {
     this.name = event.target.value;
@@ -89,14 +78,38 @@ export class RegisterPageComponent {
     // Yükleniyor durumunu başlat (Spinner görünür)
     this.isLoading = true;
 
-    // AuthService üzerinden kayıt (interceptor'lardan geçer)
-    this.authService.registerStudent({
-      name: this.name,
-      email: this.email,
-      password: this.password
-    }).subscribe({
-      next: (response: any) => {
-        console.log('Kayıt Başarılı:', response);
+    try {
+      const response = await fetch('/api/Auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          fullName: this.name,
+          email: this.email,
+          password: this.password,
+          roleId: 1 // 1 = Öğrenci
+        }),
+      });
+
+      // Response'un JSON olup olmadığını kontrol et
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        console.error('Backend HTML döndü (Register):', text.substring(0, 200));
+        this.isLoading = false;
+        this.toastService.show(
+          "Backend'den beklenmeyen yanıt alındı. Lütfen backend servisinin çalıştığından emin olun.",
+          'error'
+        );
+        return;
+      }
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log('Kayıt Başarılı:', data);
 
         // BAŞARILI DURUM:
         // 1. Kullanıcıya bilgi ver
@@ -109,18 +122,18 @@ export class RegisterPageComponent {
         setTimeout(() => {
           this.router.navigate(['/login']);
         }, 2000);
-      },
-      error: (error: any) => {
+      } else {
         // BAŞARISIZ DURUM:
         this.isLoading = false;
-        const errorMessage = error?.error?.message || error?.message || 'Kayıt sırasında bir hata oluştu.';
-        console.error('Kayıt Hatası:', error);
+        const errorMessage = data?.message || 'Kayıt sırasında bir hata oluştu.';
         this.toastService.show(errorMessage, 'error');
-      },
-      complete: () => {
-        // İşlem tamamlandı
       }
-    });
+    } catch (error: any) {
+      console.error('Kayıt Hatası:', error);
+      this.isLoading = false;
+      const message = error?.message || 'Kayıt sırasında bir hata oluştu.';
+      this.toastService.show(message, 'error');
+    }
   }
 
   openTermsModal() {
@@ -147,4 +160,3 @@ export class RegisterPageComponent {
     document.body.style.overflow = '';
   }
 }
->>>>>>> Stashed changes

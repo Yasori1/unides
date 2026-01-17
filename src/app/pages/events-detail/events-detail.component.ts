@@ -49,10 +49,12 @@ export class EventsDetailComponent implements OnInit {
                 this.event = this.mapToCard(found);
                 this.isLoading = false;
             } else {
+                // Mock event kaldırıldı
                 this.isLoading = false;
             }
         },
         error: () => {
+             // Mock event kaldırıldı
             this.isLoading = false;
         }
     })
@@ -81,6 +83,8 @@ export class EventsDetailComponent implements OnInit {
       if (!date) return '';
       return date.toLocaleDateString('tr-TR', { month: 'short' });
   }
+
+  // Deprecated mock method removed - data now loaded from backend
 
   private mapToCard(e: EventItem): any {
     const start = e.startDate ? new Date(e.startDate) : null;

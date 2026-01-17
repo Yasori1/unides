@@ -110,8 +110,14 @@
 
     <!-- 1. TAB: GENEL BAKIŞ -->
     <div class="view-container" *ngIf="activeTab === 'overview'">
-      <!-- Content -->
-      <div class="split-grid">
+      <!-- Loading State for Overview -->
+      <div class="loading-container" *ngIf="isLoadingEvents || isLoadingCommunities || isLoadingAnnouncements">
+        <app-luma-spin></app-luma-spin>
+        <p>Veriler yükleniyor...</p>
+      </div>
+
+      <!-- Content when loaded -->
+      <div class="split-grid" *ngIf="!isLoadingEvents && !isLoadingCommunities && !isLoadingAnnouncements">
         <!-- Bekleyen Onaylar -->
         <div class="card table-card">
           <div class="card-header">
@@ -162,8 +168,14 @@
 
     <!-- 2. TAB: TOPLULUKLAR -->
     <div class="view-container communities-view" *ngIf="activeTab === 'communities'">
-      <!-- Content -->
-      <div>
+      <!-- Loading State for Communities -->
+      <div class="loading-container" *ngIf="isLoadingCommunities">
+        <app-luma-spin></app-luma-spin>
+        <p>Topluluklar yükleniyor...</p>
+      </div>
+
+      <!-- Content when loaded -->
+      <div *ngIf="!isLoadingCommunities">
         <div class="page-header">
           <h2>Bağlı Topluluklar</h2>
           <div class="header-controls">
@@ -211,25 +223,7 @@
                 </div>
               </div>
 
-              <!-- Kısa Açıklama -->
-              <p class="short-description" *ngIf="item.miniAbout" style="font-size: 13px; color: #666; margin-bottom: 8px; font-weight: 500;">
-                {{ item.miniAbout }}
-              </p>
-
-              <!-- Hakkında / Detaylı Açıklama -->
               <p class="description">{{ item.description || item.about }}</p>
-
-              <!-- İletişim Bilgileri -->
-              <div class="contact-info" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #eee;">
-                <div class="contact-item" *ngIf="item.email || item.comMail" style="margin-bottom: 6px; font-size: 12px; color: #555;">
-                  <i class="bx bx-envelope" style="margin-right: 6px;"></i>
-                  <strong>E-posta:</strong> {{ item.email || item.comMail }}
-                </div>
-                <div class="contact-item" *ngIf="item.presidentEmail || item.comLeadMail" style="margin-bottom: 6px; font-size: 12px; color: #555;">
-                  <i class="bx bx-user" style="margin-right: 6px;"></i>
-                  <strong>Başkan:</strong> {{ item.presidentEmail || item.comLeadMail }}
-                </div>
-              </div>
 
               <div class="card-footer">
                 <div class="footer-info">
@@ -267,8 +261,14 @@
 
     <!-- 3. TAB: ETKİNLİKLER -->
     <div class="view-container" *ngIf="activeTab === 'events'">
-      <!-- Content -->
-      <div>
+      <!-- Loading State for Events -->
+      <div class="loading-container" *ngIf="isLoadingEvents">
+        <app-luma-spin></app-luma-spin>
+        <p>Etkinlikler yükleniyor...</p>
+      </div>
+
+      <!-- Content when loaded -->
+      <div *ngIf="!isLoadingEvents">
         <div class="page-header">
           <h2>Etkinlik Yönetimi</h2>
           <div class="header-controls">
@@ -300,8 +300,8 @@
           <div *ngFor="let e of filteredEvents" class="event-card-modern" [ngClass]="e.status"
             (click)="openEventDetail(e)">
             <div class="card-image">
-              <img [src]="e.imageUrl || 'assets/etkinlik-statik.svg'" [alt]="e.eventName" loading="lazy"
-                onerror="this.onerror=null; this.src='assets/etkinlik-statik.svg'" />
+              <img [src]="e.imageUrl || 'assets/images/page-title1.jpg'" [alt]="e.eventName" loading="lazy"
+                onerror="this.src='assets/images/page-title1.jpg'" />
               <div class="tap-hint">
                 <span class="material-symbols-outlined">visibility</span> İncele
               </div>
@@ -341,8 +341,14 @@
 
     <!-- 4. TAB: DUYURULAR -->
     <div class="view-container" *ngIf="activeTab === 'announcements'">
-      <!-- Content -->
-      <div>
+      <!-- Loading State for Announcements -->
+      <div class="loading-container" *ngIf="isLoadingAnnouncements">
+        <app-luma-spin></app-luma-spin>
+        <p>Duyurular yükleniyor...</p>
+      </div>
+
+      <!-- Content when loaded -->
+      <div *ngIf="!isLoadingAnnouncements">
         <div class="page-header">
           <h2>Duyuru Merkezi</h2>
           <div class="header-controls">
@@ -499,10 +505,7 @@
 
         <div class="modal-actions">
           <button class="btn-secondary" (click)="closeModal()">İptal</button>
-          <button class="btn-primary" (click)="saveAnnouncement()" [disabled]="isSavingAnnouncement">
-            <span class="material-symbols-outlined" *ngIf="!isSavingAnnouncement">send</span>
-            <span class="spinner" *ngIf="isSavingAnnouncement" style="width: 20px; height: 20px; border-width: 2px; margin-right: 8px;"></span>
-            {{ isSavingAnnouncement ? 'Yayınlanıyor...' : 'Yayınla' }}
+          <button class="btn-primary" (click)="saveAnnouncement()">
             <span class="material-symbols-outlined">publish</span>
             Yayınla
           </button>
@@ -606,36 +609,36 @@
           <div class="form-grid-2col">
             <div class="form-group">
               <label>Topluluk İsmi <span class="required">*</span></label>
-              <input type="text" [(ngModel)]="newCommunity.name" class="modern-input" placeholder="Topluluk adı..." required />
+              <input type="text" [(ngModel)]="newCommunity.name" class="modern-input" placeholder="Topluluk adı..." />
             </div>
             <div class="form-group">
               <label>Kategori <span class="required">*</span></label>
-              <select [(ngModel)]="newCommunity.category" class="modern-input" required>
+              <select [(ngModel)]="newCommunity.category" class="modern-input">
                 <option value="">Kategori Seçin</option>
                 <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
               </select>
             </div>
             <div class="form-group full-width">
-              <label>Topluluk Kısa Açıklama (Max 70 Karakter) <span class="required">*</span></label>
+              <label>Topluluk Kısa Açıklama (Max 70 Karakter)</label>
               <input type="text" [(ngModel)]="newCommunity.shortDescription" class="modern-input"
-                placeholder="Kısa açıklama..." maxlength="70" required />
+                placeholder="Kısa açıklama..." maxlength="70" />
             </div>
             <div class="form-group full-width">
-              <label>Topluluk Hakkında (Maks. 500) <span class="required">*</span></label>
+              <label>Topluluk Hakkında (Maks. 500)</label>
               <textarea [(ngModel)]="newCommunity.about" class="modern-input" rows="4"
-                placeholder="Topluluğunuz hakkında bilgi verin..." maxlength="500" required></textarea>
+                placeholder="Topluluğunuz hakkında bilgi verin..." maxlength="500"></textarea>
             </div>
             <div class="form-group">
-              <label>Şehir <span class="required">*</span></label>
-              <select [(ngModel)]="newCommunity.city" class="modern-input" required>
+              <label>Şehir</label>
+              <select [(ngModel)]="newCommunity.city" class="modern-input">
                 <option value="">Şehir Seçin</option>
                 <option *ngFor="let city of cities" [value]="city">{{ city }}</option>
               </select>
             </div>
             <div class="form-group">
-              <label>Üniversite (Maks. 40) <span class="required">*</span></label>
+              <label>Üniversite (Maks. 40)</label>
               <input type="text" [(ngModel)]="newCommunity.university" class="modern-input"
-                placeholder="Üniversite adı..." maxlength="40" required />
+                placeholder="Üniversite adı..." maxlength="40" />
             </div>
           </div>
         </div>
@@ -644,12 +647,12 @@
           <h5 class="section-title">İletişim Bilgileri</h5>
           <div class="form-grid-2col">
             <div class="form-group">
-              <label>E-posta (Maks. 60) <span class="required">*</span></label>
+              <label>E-posta (Maks. 60)</label>
               <input type="email" [(ngModel)]="newCommunity.email" class="modern-input" placeholder="topluluk@mail.com"
-                maxlength="60" required />
+                maxlength="60" />
             </div>
             <div class="form-group">
-              <label>Topluluk Başkanı E-posta <span class="required">*</span></label>
+              <label>Topluluk Başkanı E-posta <span style="color: red">*</span></label>
               <input type="email" [(ngModel)]="newCommunity.presidentEmail" class="modern-input"
                 placeholder="baskan@mail.com" required maxlength="60" />
               <small style="color: #666; font-size: 12px; margin-top: 4px; display: block">
@@ -662,10 +665,8 @@
 
         <div class="modal-actions">
           <button class="btn-secondary" (click)="closeModal()">İptal</button>
-          <button class="btn-primary" (click)="saveNewCommunity()" [disabled]="isSavingCommunity">
-            <span class="material-symbols-outlined" *ngIf="!isSavingCommunity">save</span>
-            <span class="spinner" *ngIf="isSavingCommunity" style="width: 20px; height: 20px; border-width: 2px; margin-right: 8px;"></span>
-            {{ isSavingCommunity ? 'Kaydediliyor...' : 'Kaydet' }}
+          <button class="btn-primary" (click)="saveNewCommunity()">
+            <span class="material-symbols-outlined">save</span>
             Topluluk Ekle
           </button>
         </div>
@@ -690,19 +691,16 @@
           <label>Topluluk Durumu</label>
           <div class="status-toggle-buttons">
             <button class="status-btn" [class.active]="editingCommunity.status === 'Aktif'"
-              (click)="toggleCommunityStatus('Aktif')">
+              (click)="editingCommunity.status = 'Aktif'">
               <span class="material-symbols-outlined">check_circle</span>
               Aktif
             </button>
             <button class="status-btn passive" [class.active]="editingCommunity.status === 'Pasif'"
-              (click)="toggleCommunityStatus('Pasif')">
+              (click)="editingCommunity.status = 'Pasif'">
               <span class="material-symbols-outlined">cancel</span>
               Pasif
             </button>
           </div>
-          <small *ngIf="isSavingCommunity" style="color: #666; font-size: 12px; margin-top: 8px; display: block;">
-            Durum güncelleniyor...
-          </small>
         </div>
 
         <!-- Form Alanları -->
@@ -762,11 +760,11 @@
                 placeholder="topluluk@mail.com" maxlength="60" />
             </div>
             <div class="form-group">
-              <label>Topluluk Başkanı E-posta <span style="color: red">*</span></label>
-              <input type="email" [(ngModel)]="editingCommunity.presidentEmail" 
-                class="modern-input" placeholder="baskan@mail.com" required maxlength="60" />
+              <label>Topluluk Başkanı E-posta</label>
+              <input type="email" [value]="editingCommunity.presidentEmail || editingCommunity.comLeadMail || ''" 
+                class="modern-input" placeholder="baskan@mail.com" readonly disabled />
               <small style="color: #666; font-size: 12px; margin-top: 4px; display: block">
-                Topluluk başkanının sistemde kayıtlı e-posta adresi. Bu e-posta adresi ile sistemde kayıtlı bir kullanıcı olmalıdır.
+                Bu alan değiştirilemez. Topluluk başkanının sistemde kayıtlı e-posta adresidir.
               </small>
             </div>
             <!-- Website and Social Media fields removed for Corporate Dashboard -->
@@ -774,14 +772,13 @@
         </div>
 
         <div class="modal-actions">
-          <button class="btn-danger" (click)="deleteCommunity()" [disabled]="isSavingCommunity || isLoadingCommunities">
+          <button class="btn-danger" (click)="deleteCommunity()">
             <span class="material-symbols-outlined">delete</span>
             Topluluğu Sil
           </button>
-          <button class="btn-primary" (click)="saveCommunity()" [disabled]="isSavingCommunity">
-            <span class="material-symbols-outlined" *ngIf="!isSavingCommunity">save</span>
-            <span class="spinner" *ngIf="isSavingCommunity" style="width: 20px; height: 20px; border-width: 2px; margin-right: 8px;"></span>
-            {{ isSavingCommunity ? 'Güncelleniyor...' : 'Topluluk Kaydet' }}
+          <button class="btn-primary" (click)="saveCommunity()">
+            <span class="material-symbols-outlined">save</span>
+            Topluluk Kaydet
           </button>
         </div>
       </div>

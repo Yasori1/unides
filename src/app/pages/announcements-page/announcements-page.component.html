@@ -4,10 +4,7 @@
 
 <div class="page-spacer" (mousemove)="onHeroMouseMove($event)">
   <div class="background-wrapper">
-    <div
-      class="interactive-blob"
-      [style.transform]="'translate(' + -heroMoveX + 'px, ' + -heroMoveY + 'px)'"
-    ></div>
+    <div class="interactive-blob" [style.transform]="'translate(' + -heroMoveX + 'px, ' + -heroMoveY + 'px)'"></div>
     <div class="noise-overlay"></div>
   </div>
 
@@ -27,22 +24,24 @@
     <div class="filters-bar">
       <div class="search-group">
         <i class="bx bx-search"></i>
-        <input
-          type="text"
-          placeholder="Duyuru ara..."
-          [(ngModel)]="searchText"
-          (input)="applyFilters()"
-        />
+        <input type="text" placeholder="Duyuru ara..." [(ngModel)]="searchText" (input)="applyFilters()" />
       </div>
 
       <div class="filter-groups">
-        <div class="select-wrapper">
-          <select [(ngModel)]="sortOrder" (change)="applyFilters()">
-            <option value="default">Önerilen Sıralama</option>
-            <option value="date_desc">Tarih (Yeni-Eski)</option>
-            <option value="date_asc">Tarih (Eski-Yeni)</option>
-          </select>
-          <i class="bx bx-sort-alt-2"></i>
+        <!-- Sort Filter (Expanded) -->
+        <div class="select-wrapper custom-dropdown expanded" [class.open]="isSortDropdownOpen">
+          <div class="custom-select-trigger" (click)="toggleSortDropdown($event)">
+            <span>{{ getSortLabel(sortOrder) }}</span>
+            <i class="bx bx-sort-alt-2"></i>
+          </div>
+          <div class="custom-options">
+            <div class="option" (click)="selectSort('default')" [class.selected]="sortOrder === 'default'">Önerilen
+              Sıralama</div>
+            <div class="option" (click)="selectSort('date_desc')" [class.selected]="sortOrder === 'date_desc'">Tarih
+              (Yeni-Eski)</div>
+            <div class="option" (click)="selectSort('date_asc')" [class.selected]="sortOrder === 'date_asc'">Tarih
+              (Eski-Yeni)</div>
+          </div>
         </div>
       </div>
     </div>
@@ -59,20 +58,10 @@
     </div>
 
     <div class="grid-container" *ngIf="!isLoading && displayedAnnouncements.length > 0">
-      <a
-        *ngFor="let ann of displayedAnnouncements"
-        [routerLink]="['/announcements', ann.id]"
-        class="announcement-card"
-        [class.ministry-card]="ann.category === 'Bakanlık'"
-      >
+      <a *ngFor="let ann of displayedAnnouncements" [routerLink]="['/announcements', ann.id]" class="announcement-card">
         <div class="cover-area">
-          <img
-            [src]="ann.image || 'assets/duyuru-statik.svg'"
-            [alt]="ann.title"
-            class="cover-img"
-            loading="lazy"
-            onerror="this.onerror=null; this.src='assets/duyuru-statik.svg'"
-          />
+          <img [src]="ann.image || 'assets/img/placeholder-announcement.jpg'" [alt]="ann.title" class="cover-img"
+            loading="lazy" onerror="this.src='assets/img/placeholder-announcement.jpg'" />
           <div class="date-badge">
             {{ formatDate(ann.date) }}
           </div>
@@ -80,7 +69,8 @@
 
         <div class="card-content">
           <h3 class="announcement-title">{{ ann.title }}</h3>
-          <p class="description" *ngIf="ann.shortDescription && ann.shortDescription.trim()">{{ ann.shortDescription }}</p>
+          <p class="description" *ngIf="ann.shortDescription && ann.shortDescription.trim()">{{ ann.shortDescription }}
+          </p>
           <div class="card-footer">
             <span class="action-text">Devamını Oku <i class='bx bx-right-arrow-alt'></i></span>
           </div>
@@ -93,33 +83,21 @@
       <h3>Sonuç Bulunamadı</h3>
       <p>Aradığınız kriterlere uygun duyuru bulunamadı. Filtreleri temizlemeyi deneyin.</p>
       <!-- resetFilters metodu TS tarafında eksik olabilir, applyFilters ile sıfırlama yapılabilir veya metot eklenebilir -->
-      <button class="reset-btn" (click)="searchText=''; selectedCategory='all'; sortOrder='default'; applyFilters()">Filtreleri Temizle</button>
+      <button class="reset-btn" (click)="searchText=''; sortOrder='default'; applyFilters()">Filtreleri Temizle</button>
     </div>
 
     <div class="pagination-area" *ngIf="!isLoading && totalPages > 1">
-      <button
-        class="page-btn prev"
-        [disabled]="currentPage === 1"
-        (click)="changePage(currentPage - 1)"
-      >
+      <button class="page-btn prev" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">
         <i class="bx bx-chevron-left"></i>
       </button>
 
       <ng-container *ngFor="let page of pages">
-        <button
-          class="page-btn number"
-          [class.active]="page === currentPage"
-          (click)="changePage(page)"
-        >
+        <button class="page-btn number" [class.active]="page === currentPage" (click)="changePage(page)">
           {{ page }}
         </button>
       </ng-container>
 
-      <button
-        class="page-btn next"
-        [disabled]="currentPage === totalPages"
-        (click)="changePage(currentPage + 1)"
-      >
+      <button class="page-btn next" [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)">
         <i class="bx bx-chevron-right"></i>
       </button>
     </div>

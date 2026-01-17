@@ -60,18 +60,7 @@ export class HeaderBrandingComponent implements OnInit, OnDestroy {
     const oldUserRole = this.userRole;
 
     this.isLoggedIn = this.authService.isAuthenticated();
-    const rawUserType = this.authService.getUserType();
-    
-    // userType'ı normalize et: '1'/'student' → 'student', '2'/'corporate' → 'corporate', '3'/'community' → 'community'
-    if (rawUserType === '1' || rawUserType === 'student') {
-      this.userRole = 'student';
-    } else if (rawUserType === '2' || rawUserType === 'corporate') {
-      this.userRole = 'corporate';
-    } else if (rawUserType === '3' || rawUserType === 'community') {
-      this.userRole = 'community';
-    } else {
-      this.userRole = rawUserType;
-    }
+    this.userRole = this.authService.getUserType();
 
     // Kullanıcı bilgilerini al
     if (this.isLoggedIn) {
@@ -247,13 +236,13 @@ export class HeaderBrandingComponent implements OnInit, OnDestroy {
 
   navigateToDashboard() {
     this.isProfileOpen = false;
-    // Dashboard'a yönlendir
+    // Dashboard'ın "Genel Bakış" sekmesine yönlendir
     if (this.userRole === 'student') {
-      this.router.navigate(['/student-dashboard']);
+      this.router.navigate(['/profile']);
     } else if (this.userRole === 'corporate') {
-      this.router.navigate(['/corporate-dashboard']);
+      this.router.navigate(['/corporate-dashboard'], { queryParams: { tab: 'overview' } });
     } else if (this.userRole === 'community') {
-      this.router.navigate(['/community-dashboard']);
+      this.router.navigate(['/community-dashboard'], { queryParams: { tab: 'overview' } });
     }
   }
 

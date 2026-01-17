@@ -1,18 +1,4 @@
-:host {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
 
-// Router animation container
-div {
-  &:has(router-outlet) {
-    position: relative;
-    width: 100%;
-    min-height: 100vh;
-    overflow-x: hidden; // Animasyon sırasında yatay scroll engelleme
-  }
-}
 
 /* Max width 767px */
 @media only screen and (max-width : 767px) {}
