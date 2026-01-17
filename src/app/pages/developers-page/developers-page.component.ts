@@ -3,7 +3,6 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
 import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
 import { ProfileCardComponent } from '../../components/ui/profile-card/profile-card';
-import { NeuronsBackgroundComponent } from '../../components/ui/neurons-background/neurons-background';
 import { DeveloperStreamComponent } from '../../components/ui/developer-stream/developer-stream.component';
 
 interface SocialLinks {
@@ -32,7 +31,6 @@ interface Developer {
     SiteNavbarComponent,
     SiteFooterComponent,
     ProfileCardComponent,
-    NeuronsBackgroundComponent,
     DeveloperStreamComponent,
   ],
   templateUrl: './developers-page.component.html',
@@ -41,58 +39,38 @@ interface Developer {
 export class DevelopersPageComponent implements OnInit {
   expandedCardIndex: number | null = null;
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) { }
 
   // Geliştiriciler
-  developers: Developer[] = [
-    {
-      name: 'Ad Soyad',
-      title: 'Yazılım Geliştirici',
-      image: 'assets/img/placeholder-avatar.svg',
-      work: 'Backend / Frontend Geliştirme',
-      description: 'Ünides projesinde yazılım geliştirme süreçlerinde yer almaktadır.',
-      backgroundImage: 'assets/img/placeholder-cover.svg',
-      socialLinks: {
-        github: '#',
-        linkedin: '#',
-      },
-    },
-    {
-      name: 'Ad Soyad',
-      title: 'Yazılım Geliştirici',
-      image: 'assets/img/placeholder-avatar.svg',
-      work: 'Sistem Mimarisi',
-      description: 'Ünides projesinde yazılım geliştirme süreçlerinde yer almaktadır.',
-      backgroundImage: 'assets/img/placeholder-cover.svg',
-      socialLinks: {
-        github: '#',
-        linkedin: '#',
-      },
-    },
-    {
-      name: 'Ad Soyad',
-      title: 'Tasarımcı',
-      image: 'assets/img/placeholder-avatar.svg',
-      work: 'UI/UX Tasarım',
-      description: 'Ünides projesinde tasarım süreçlerinde yer almaktadır.',
-      backgroundImage: 'assets/img/placeholder-cover.svg',
-      socialLinks: {
-        linkedin: '#',
-      },
-    },
-    {
-      name: 'Ad Soyad',
-      title: 'Yazılım Geliştirici',
-      image: 'assets/img/placeholder-avatar.svg',
-      work: 'Full Stack Development',
-      description: 'Ünides projesinde yazılım geliştirme süreçlerinde yer almaktadır.',
-      backgroundImage: 'assets/img/placeholder-cover.svg',
-      socialLinks: {
-        github: '#',
-        linkedin: '#',
-      },
-    },
+  // Geliştiriciler
+  developers: Developer[] = Array(12).fill(null).map((_, index) => ({
+    name: 'Ad Soyad',
+    title: 'Geliştirici',
+    image: 'assets/img/placeholder-avatar.svg',
+    work: 'Development',
+    description: '',
+    backgroundImage: '',
+    socialLinks: {
+      github: '#',
+      linkedin: '#',
+      twitter: '#'
+    }
+  }));
+
+  // Destek Verenler Listesi (Buradan güncellenebilir)
+  supporters: string[] = [
+    'Destekçi Ad Soyad 1',
+    'Destekçi Ad Soyad 2',
+    'Destekçi Ad Soyad 3',
+    'Destekçi Ad Soyad 4',
+    'Destekçi Ad Soyad 5'
   ];
+
+  isSupportersOpen: boolean = false;
+
+  toggleSupporters(): void {
+    this.isSupportersOpen = !this.isSupportersOpen;
+  }
 
   // Developer names for stream animation
   get developerNames(): string[] {
