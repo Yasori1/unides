@@ -16,15 +16,17 @@ $primary-dark: #0f172a;
   /* Kullanıcı isteği: Soldan ve sağdan 26 piksel boşluk (13px padding) */
   padding: 0 6px;
   box-sizing: border-box;
-  
+
   /* Navigasyon linklerinin (ortada duran) tıklanabilir olması için wrapper tıklamaları engellemeli */
   pointer-events: none;
 }
 
 .brand {
-  margin-left: -20px; /* Logo'yu sola kaydır */
-  pointer-events: auto; /* Logo tıklanabilir olmalı */
-  
+  margin-left: -20px;
+  /* Logo'yu sola kaydır */
+  pointer-events: auto;
+  /* Logo tıklanabilir olmalı */
+
   img.logo-transparent {
     height: 58px;
     width: auto;
@@ -37,11 +39,13 @@ $primary-dark: #0f172a;
   display: flex;
   align-items: center;
   gap: 15px;
-  margin-right: -20px; /* Sağ taraftaki profil bilgisini sola kaydır */
-  pointer-events: auto; /* Butonlar tıklanabilir olmalı */
+  margin-right: -20px;
+  /* Sağ taraftaki profil bilgisini sola kaydır */
+  pointer-events: auto;
+  /* Butonlar tıklanabilir olmalı */
   opacity: 0;
   transition: opacity 0.2s ease-in-out;
-  
+
   &.initialized {
     opacity: 1;
   }
@@ -65,7 +69,7 @@ $primary-dark: #0f172a;
   z-index: 1101;
   padding: 0;
   pointer-events: auto;
-  
+
   .bar {
     width: 100%;
     height: 3px;
@@ -73,11 +77,19 @@ $primary-dark: #0f172a;
     border-radius: 3px;
     transition: all 0.3s ease;
   }
-  
+
   &.active {
-    .bar:nth-child(1) { transform: translateY(9px) rotate(45deg); }
-    .bar:nth-child(2) { opacity: 0; }
-    .bar:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
+    .bar:nth-child(1) {
+      transform: translateY(9px) rotate(45deg);
+    }
+
+    .bar:nth-child(2) {
+      opacity: 0;
+    }
+
+    .bar:nth-child(3) {
+      transform: translateY(-9px) rotate(-45deg);
+    }
   }
 }
 
@@ -298,6 +310,7 @@ $primary-dark: #0f172a;
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -308,7 +321,7 @@ $primary-dark: #0f172a;
   .mobile-toggle {
     display: flex;
   }
-  
+
   .desktop-auth {
     display: none;
   }
@@ -320,9 +333,35 @@ $primary-dark: #0f172a;
       }
     }
   }
+
+  .brand {
+    margin-left: 0;
+
+    img.logo-transparent {
+      height: 48px;
+    }
+  }
+
+  .right-actions {
+    margin-right: 0;
+  }
+
+  .header-branding-wrapper {
+    padding: 0 16px;
+  }
 }
 
 @media (max-width: 768px) {
+  .brand {
+    img.logo-transparent {
+      height: 40px;
+    }
+  }
+
+  .header-branding-wrapper {
+    padding: 0 12px;
+  }
+
   .profile-wrapper {
     .profile-info {
       padding: 2px 4px;
@@ -336,6 +375,27 @@ $primary-dark: #0f172a;
           font-size: 0.95rem;
         }
       }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .brand {
+    img.logo-transparent {
+      height: 36px;
+    }
+  }
+
+  .header-branding-wrapper {
+    padding: 0 10px;
+  }
+
+  .mobile-toggle {
+    width: 26px;
+    height: 18px;
+
+    .bar {
+      height: 2.5px;
     }
   }
 }

@@ -24,7 +24,7 @@ $border-color: #e2e8f0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.5);
 
   .nav-content {
-    display: block; 
+    display: block;
     width: 100%;
     height: 100%;
     position: relative;
@@ -54,7 +54,8 @@ $border-color: #e2e8f0;
     position: static;
   }
 
-  .mobile-menu-header, .mobile-menu-footer {
+  .mobile-menu-header,
+  .mobile-menu-footer {
     display: none; // Hidden on desktop
   }
 
@@ -66,15 +67,15 @@ $border-color: #e2e8f0;
     list-style: none;
     margin: 0;
     padding: 0;
-    
+
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    
+
     /* Kullanıcı isteği: Navigasyon linklerini 2cm (yaklaşık 75px) sola kaydır */
     margin-left: 5px;
-    
+
     width: auto;
     min-width: fit-content;
     z-index: 10;
@@ -117,9 +118,9 @@ $border-color: #e2e8f0;
         }
       }
     }
-    
+
     .mobile-auth {
-        display: none;
+      display: none;
     }
 
     .dropdown-parent:hover .dropdown-content {
@@ -252,7 +253,7 @@ $border-color: #e2e8f0;
       -webkit-backdrop-filter: blur(15px);
       z-index: 1000;
       transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-      box-shadow: -10px 0 30px rgba(0,0,0,0.15);
+      box-shadow: -10px 0 30px rgba(0, 0, 0, 0.15);
       display: flex;
       flex-direction: column;
 
@@ -265,10 +266,12 @@ $border-color: #e2e8f0;
     .mobile-menu-header {
       display: flex;
       align-items: center;
-      justify-content: flex-start; /* Left aligned since close button removed */
+      justify-content: flex-start;
+      /* Left aligned since close button removed */
       padding: 24px;
-      padding-top: 32px; /* Add more top padding to account for status bar area */
-      
+      padding-top: 32px;
+      /* Add more top padding to account for status bar area */
+
       .menu-title {
         font-size: 1.4rem;
         font-weight: 800;
@@ -326,90 +329,104 @@ $border-color: #e2e8f0;
         width: 100%;
         opacity: 0;
         animation: slideIn 0.4s ease forwards;
-        
+
         @for $i from 1 through 8 {
           &:nth-child(#{$i}) {
             animation-delay: #{$i * 0.05}s;
           }
-        }
 
-        a {
-          padding: 12px 16px;
-          border-radius: 12px;
-          color: $dark-text;
-          font-size: 1rem;
-          font-weight: 600;
-          background: transparent;
-          justify-content: flex-start;
-
-          .nav-icon {
-            display: inline-block;
-            font-size: 1.3rem;
-            color: $text-muted;
-            margin-right: 12px;
-            transition: color 0.3s;
-          }
-
-          &:hover, &.active-link {
-            background: #eff6ff;
-            color: $primary;
+          // Ana Sayfa - first item more prominent in mobile
+          &:first-child a {
+            background: linear-gradient(135deg, rgba($primary, 0.1) 0%, rgba($primary, 0.05) 100%);
+            border-left: 3px solid $primary;
+            font-weight: 700;
 
             .nav-icon {
               color: $primary;
             }
           }
 
-          &::after {
-            display: none; // Disable underline effect on mobile
+          a {
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: $dark-text;
+            font-size: 1rem;
+            font-weight: 600;
+            background: transparent;
+            justify-content: flex-start;
+
+            .nav-icon {
+              display: inline-block;
+              font-size: 1.3rem;
+              color: $text-muted;
+              margin-right: 12px;
+              transition: color 0.3s;
+            }
+
+            &:hover,
+            &.active-link {
+              background: #eff6ff;
+              color: $primary;
+
+              .nav-icon {
+                color: $primary;
+              }
+            }
+
+            &::after {
+              display: none; // Disable underline effect on mobile
+            }
           }
         }
-      }
 
-      /* Mobile Dropdown */
-      .dropdown-parent {
-        .dropdown-content {
-          position: static;
-          visibility: visible;
-          opacity: 1;
-          transform: none;
-          box-shadow: none;
-          padding: 0 0 0 20px; /* Indent sub-items */
-          margin-top: 2px;
-          background: transparent;
-          width: 100%;
-          display: block;
+        /* Mobile Dropdown */
+        .dropdown-parent {
+          .dropdown-content {
+            position: static;
+            visibility: visible;
+            opacity: 1;
+            transform: none;
+            box-shadow: none;
+            padding: 0 0 0 20px;
+            /* Indent sub-items */
+            margin-top: 2px;
+            background: transparent;
+            width: 100%;
+            display: block;
 
-          li {
-             a {
-               font-size: 0.9rem;
-               padding: 10px 16px;
-               color: $text-muted;
-               
-               &:hover {
-                 color: $primary;
-                 background: transparent;
-               }
-             }
+            li {
+              a {
+                font-size: 0.9rem;
+                padding: 10px 16px;
+                color: $text-muted;
+
+                &:hover {
+                  color: $primary;
+                  background: transparent;
+                }
+              }
+            }
           }
-        }
-        
-        a {
-          .icon-arrow-down {
-            display: none;
+
+          a {
+            .icon-arrow-down {
+              display: none;
+            }
           }
         }
       }
     }
   }
-}
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
   }
 }

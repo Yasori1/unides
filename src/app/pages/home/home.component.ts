@@ -86,7 +86,14 @@ export class HomeComponent implements OnInit, OnDestroy {
   upcomingEvents: UpcomingEvent[] = [];
   newestCommunities: NewCommunity[] = [];
 
+  // --- Responsive Placeholder ---
+  isMobile: boolean = false;
+
   // mockAnnouncements kaldırıldı - artık backend'den veri çekiliyor
+
+  get searchPlaceholder(): string {
+    return this.isMobile ? 'Yapay zeka, çevre ya da daha fazlası...' : 'Ne arıyorsun? (Yapay Zeka, Kampüs Etkinliği...)';
+  }
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
@@ -104,12 +111,21 @@ export class HomeComponent implements OnInit, OnDestroy {
   ngOnInit() {
     if (isPlatformBrowser(this.platformId)) {
       this.startTypewriter();
+      this.checkMobile();
+      window.addEventListener('resize', () => this.checkMobile());
     }
     this.loadData();
   }
 
   ngOnDestroy() {
     if (this.typewriterInterval) clearTimeout(this.typewriterInterval);
+    if (isPlatformBrowser(this.platformId)) {
+      window.removeEventListener('resize', () => this.checkMobile());
+    }
+  }
+
+  checkMobile() {
+    this.isMobile = window.innerWidth < 768;
   }
 
   // --- Video İşlemleri ---

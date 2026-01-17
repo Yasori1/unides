@@ -321,6 +321,16 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
           color: transparent;
         }
       }
+
+      // Mobilde placeholder fontunu küçültelim
+      @media (max-width: 767px) {
+        font-size: 0.85rem;
+        padding-right: 100px;
+
+        &::placeholder {
+          font-size: 0.85rem;
+        }
+      }
     }
 
     button {
@@ -422,9 +432,7 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
   position: relative;
   z-index: 2;
 
-  // Tüm ekran boyutları için tutarlı margin-top değerleri (clamp ile akışkan)
-  // Mobil varsayılan
-  margin-top: -50px;
+  // Tüm ekran boyutları için tutarlı margin-top değerleri (clamp ile akışkan)\n  // Mobil varsayılan\n  margin-top: 20px;
 
   // Tablet
   @media (min-width: 768px) {

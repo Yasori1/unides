@@ -85,10 +85,42 @@ import { CommonModule } from '@angular/common';
       }
 
       @media (min-width: 2560px) {
+        .skyline-container {
+          width: 100vw;
+          left: 0;
+          transform: none;
+          overflow: hidden;
+        }
+        
         .skyline-image {
+          width: 100%;
+          min-width: 2560px;
+          max-width: none;
           max-height: none;
           object-fit: cover;
+          object-position: bottom center;
           opacity: 0.55;
+          transform: scale(1.2);
+          transform-origin: bottom center;
+        }
+      }
+      
+      @media (min-width: 3840px) {
+        .skyline-container {
+          width: 100vw;
+          left: 0;
+          transform: none;
+          overflow: hidden;
+        }
+        
+        .skyline-image {
+          width: 100%;
+          min-width: 3840px;
+          max-width: none;
+          object-fit: cover;
+          object-position: bottom center;
+          transform: scale(1.3);
+          transform-origin: bottom center;
         }
       }
     `,
