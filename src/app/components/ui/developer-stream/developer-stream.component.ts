@@ -73,21 +73,21 @@ export class DeveloperStreamComponent implements AfterViewInit, OnDestroy {
   private numbers = '0123456789';
   private symbols = '@#$%^&*()_+-=[]{}|;:,.<>?';
 
-  // Matrix tarzı renkler - siteye uygun ama Matrix görünümü
+  // Site temasına uygun yumuşak turkuaz/mavi tonları
   private colors = [
-    { r: 0, g: 255, b: 150 },    // Parlak Cyan/Green (Matrix tarzı)
-    { r: 0, g: 200, b: 255 },     // Parlak Cyan Blue
-    { r: 100, g: 255, b: 200 },   // Açık Turquoise
-    { r: 0, g: 255, b: 100 },     // Parlak Green
-    { r: 150, g: 100, b: 255 },   // Parlak Purple
-    { r: 100, g: 150, b: 255 },   // Parlak Blue
+    { r: 37, g: 99, b: 235 },    // Blue 600 - site ana rengi
+    { r: 14, g: 165, b: 233 },   // Sky 500 - turkuaz tonu
+    { r: 6, g: 182, b: 212 },    // Cyan 500 - açık turkuaz
+    { r: 59, g: 130, b: 246 },   // Blue 500 - açık mavi
+    { r: 96, g: 165, b: 250 },   // Blue 400 - çok açık mavi
+    { r: 34, g: 211, b: 238 },   // Cyan 400 - parlak turkuaz
   ];
 
-  // Geliştirici isimleri için daha açık/silik renkler (Matrix tarzı ama silik)
+  // Geliştirici isimleri için daha açık/silik renkler
   private developerColors = [
     { r: 100, g: 116, b: 139 },  // Slate 500 - silik
-    { r: 71, g: 85, b: 105 },    // Slate 600 - daha silik
-    { r: 51, g: 65, b: 85 },     // Slate 700 - çok silik
+    { r: 148, g: 163, b: 184 },  // Slate 400 - daha açık
+    { r: 71, g: 85, b: 105 },    // Slate 600 - orta ton
   ];
 
   ngAfterViewInit(): void {
@@ -215,9 +215,8 @@ export class DeveloperStreamComponent implements AfterViewInit, OnDestroy {
 
     this.frameCount++;
 
-    // Siyah arkaplan - trail effect yok, sadece temiz siyah
-    this.ctx.fillStyle = '#000000';
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    // Şeffaf arkaplan - hero-section'ın gradient arka planı görünsün
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     this.ctx.font = `${this.fontSize}px 'Courier New', monospace`;
     this.ctx.textAlign = 'center';

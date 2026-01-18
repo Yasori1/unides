@@ -108,6 +108,23 @@ export class EventService {
 
   constructor(private http: HttpClient) { }
 
+  // Backend'den gelen relative path'i tam URL'ye çevir
+  private convertImagePathToFullUrl(imagePath: string): string {
+    if (!imagePath) return '';
+    
+    // Zaten tam URL ise (http://, https://, data:) olduğu gibi döndür
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://') || imagePath.startsWith('data:')) {
+      return imagePath;
+    }
+    
+    // Relative path ise tam URL'ye çevir
+    const baseUrl = environment.apiUrl.replace('/api', '');
+    if (!imagePath.startsWith('/')) {
+      imagePath = '/' + imagePath;
+    }
+    return baseUrl + imagePath;
+  }
+
   private mapToEvent(dto: EventListItemDto | any): EventItem {
     // Backend'den gelen DTO'yu EventItem'a çevir
     // Backend EventListItemDto: EventId, EventName, EventPictureLink, EventDate, EventClock, EventLocation, EventKontenjan, EventAbout, MiniAbout, CommunityName, City, EventConfirm
@@ -164,14 +181,44 @@ export class EventService {
             ? eventClock
             : eventClock.toString()
           : '00:00:00';
-        // DateOnly ve TimeOnly'yi birleştir
-        const dateTimeStr = `${dateStr}T${timeStr}`;
-        const dateObj = new Date(dateTimeStr);
-        // Geçerlilik kontrolü
-        if (!isNaN(dateObj.getTime())) {
-          startDate = dateObj.toISOString();
+        
+        let dateObj: Date | null = null;
+        
+        // Backend'den "dd.MM.yyyy" formatı gelebilir (örn: "17.01.2026")
+        if (dateStr.includes('.')) {
+          // "dd.MM.yyyy" formatını parse et
+          const parts = dateStr.split('.');
+          if (parts.length === 3) {
+            const day = parseInt(parts[0], 10);
+            const month = parseInt(parts[1], 10) - 1; // JavaScript month is 0-indexed
+            const year = parseInt(parts[2], 10);
+            
+            // Saat bilgisini parse et
+            const timeParts = timeStr.split(':');
+            const hour = parseInt(timeParts[0] || '0', 10) || 0;
+            const minute = parseInt(timeParts[1] || '0', 10) || 0;
+            
+            dateObj = new Date(year, month, day, hour, minute);
+            
+            // Geçerlilik kontrolü
+            if (!isNaN(dateObj.getTime())) {
+              startDate = dateObj.toISOString();
+            } else {
+              startDate = '';
+            }
+          } else {
+            startDate = '';
+          }
         } else {
-          startDate = typeof eventDate === 'string' ? eventDate : '';
+          // ISO format veya diğer formatları dene
+          const dateTimeStr = `${dateStr}T${timeStr}`;
+          dateObj = new Date(dateTimeStr);
+          // Geçerlilik kontrolü
+          if (!isNaN(dateObj.getTime())) {
+            startDate = dateObj.toISOString();
+          } else {
+            startDate = typeof eventDate === 'string' ? eventDate : '';
+          }
         }
       } catch {
         startDate = typeof eventDate === 'string' ? eventDate : '';
@@ -246,7 +293,9 @@ export class EventService {
       communityId:
         dto.comId || dto.ComId || dto.toplulukId || dto.ToplulukId || dto.communityId || 0,
       communityName: dto.communityName || dto.CommunityName || '',
-      imageUrl: dto.eventPictureLink || dto.EventPictureLink || dto.resimUrl || dto.ResimUrl || '',
+      imageUrl: this.convertImagePathToFullUrl(
+        dto.eventPictureLink || dto.EventPictureLink || dto.resimUrl || dto.ResimUrl || ''
+      ),
       status: status,
       capacity:
         dto.eventKontenjan || dto.EventKontenjan
@@ -515,6 +564,22 @@ export class EventService {
     return this.http.delete<{ deleted: boolean }>(`${this.apiUrl}/delete/${id}`).pipe(
       catchError((error) => {
         console.error('Etkinlik silinemedi:', error);
+        throw error;
+      })
+    );
+  }
+
+  // Etkinlik görseli yükle (Backend: POST /api/Events/{id}/image)
+  // Auth interceptor automatically adds Authorization header if token exists
+  uploadEventImage(eventId: number, file: File): Observable<{ ImagePath: string }> {
+    const formData = new FormData();
+    // Backend'in beklediği parametre adı
+    formData.append('file', file, file.name);
+
+    return this.http.post<{ ImagePath: string }>(`${this.apiUrl}/${eventId}/image`, formData).pipe(
+      catchError((error) => {
+        console.error('Etkinlik görseli yüklenemedi:', error);
+        console.error('Hata detayı:', error.error);
         throw error;
       })
     );

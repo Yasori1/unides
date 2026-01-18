@@ -16,8 +16,22 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background-color: #1e1e1e; // 3D model için koyu zemin
-
+  // Site temasına uygun turkuaz-beyaz gradient arka plan
+  background: linear-gradient(135deg, #e0fbfc 0%, #b2f5ea 30%, #ffffff 100%);
+  
+  // Yumuşak desen efekti için overlay
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+      radial-gradient(circle at 20% 50%, rgba(37, 99, 235, 0.08) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(14, 165, 233, 0.06) 0%, transparent 50%);
+    pointer-events: none;
+  }
 
   // İçerik (Yazılar)
   .content-wrapper {
@@ -30,10 +44,10 @@
   .badge {
     display: inline-block;
     padding: 6px 16px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(37, 99, 235, 0.1);
+    border: 1px solid rgba(37, 99, 235, 0.2);
     border-radius: 30px;
-    color: #ffffff;
+    color: #1e3a8a;
     font-weight: 600;
     font-size: 0.85rem;
     margin-bottom: 25px;
@@ -43,21 +57,19 @@
   .hero-title {
     font-size: 3.5rem;
     font-weight: 800;
-    color: #ffffff;
+    color: #0f172a;
     margin-bottom: 20px;
     letter-spacing: -1px;
     line-height: 1.1;
-    text-shadow: 0 4px 30px rgba(0, 0, 0, 0.6);
   }
 
   .hero-subtitle {
     font-size: 1.2rem;
-    color: #e2e8f0;
+    color: #475569;
     max-width: 600px;
     margin: 0 auto 80px;
     font-weight: 500;
     line-height: 1.6;
-    text-shadow: 0 2px 15px rgba(0, 0, 0, 0.6);
   }
 }
 

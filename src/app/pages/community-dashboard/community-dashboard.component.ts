@@ -146,7 +146,8 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     location: '',
     quota: '',
     description: '',
-    image: '',
+    image: '', // Base64 preview için
+    imageFile: null as File | null, // Backend'e yüklenecek dosya
   };
 
   eventCategories: string[] = [
@@ -518,11 +519,30 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
               // ISO string formatında gelebilir veya farklı formatlarda
               const dateValue = typeof e.startDate === 'string' ? e.startDate : String(e.startDate);
 
-              // Tarih parse et
-              startDate = new Date(dateValue);
+              // Tarih parse et - farklı formatları destekle
+              // Backend'den "dd.MM.yyyy" formatı gelebilir (örn: "17.01.2026")
+              // veya ISO formatı gelebilir (örn: "2026-01-17T00:00:00")
+              let parsedDate: Date | null = null;
+
+              // Önce ISO formatını dene
+              parsedDate = new Date(dateValue);
+              
+              // Eğer ISO formatı geçersizse, "dd.MM.yyyy" formatını dene
+              if (isNaN(parsedDate.getTime())) {
+                // "dd.MM.yyyy" formatını parse et (örn: "17.01.2026")
+                if (dateValue.includes('.')) {
+                  const parts = dateValue.split('.');
+                  if (parts.length === 3) {
+                    const day = parseInt(parts[0], 10);
+                    const month = parseInt(parts[1], 10) - 1; // JavaScript month is 0-indexed
+                    const year = parseInt(parts[2], 10);
+                    parsedDate = new Date(year, month, day);
+                  }
+                }
+              }
 
               // Geçerlilik kontrolü
-              if (isNaN(startDate.getTime())) {
+              if (!parsedDate || isNaN(parsedDate.getTime())) {
                 // Geçersiz tarih, varsayılan değer kullan
                 console.warn('Geçersiz tarih formatı:', e.startDate, 'Event ID:', e.id);
                 startDate = new Date();
@@ -530,7 +550,9 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
                 timeStr = 'Saat belirtilmemiş';
                 startDateIso = new Date().toISOString();
               } else {
-                // Geçerli tarih, formatla
+                // Geçerli tarih, kullan
+                startDate = parsedDate;
+                
                 // Türkçe tarih formatı: "15 Ocak 2026" (tam tarih)
                 dateStr = startDate.toLocaleDateString('tr-TR', { 
                   day: 'numeric', 
@@ -544,9 +566,6 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
                   hour12: false, // 24 saat formatı
                 });
                 startDateIso = startDate.toISOString();
-                
-                // Debug: Tarih ve saat parse edildiğini kontrol et
-                console.log('Event parsed - ID:', e.id, 'Date:', dateStr, 'Time:', timeStr);
               }
             } catch (error) {
               console.error('Tarih parse hatası:', error, 'Event ID:', e.id, 'startDate:', e.startDate);
@@ -683,11 +702,28 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
   }
 
   get filteredDashboardEvents() {
-    if (this.statusFilter === 'all') return this.dashboardEvents;
-    return this.dashboardEvents.filter((e) => e.status === this.statusFilter);
+    let filtered: DashboardEvent[] = [];
+    
+    // Status'e göre filtrele
+    if (this.statusFilter === 'all') {
+      filtered = [...this.dashboardEvents];
+    } else {
+      filtered = this.dashboardEvents.filter((e) => e.status === this.statusFilter);
+    }
+    
+    // Kronolojik sıraya göre sırala (en yeniden en eskiye - startDateIso'ya göre)
+    filtered.sort((a, b) => {
+      const dateA = a.startDateIso ? new Date(a.startDateIso).getTime() : 0;
+      const dateB = b.startDateIso ? new Date(b.startDateIso).getTime() : 0;
+      // En yeni tarih önce (büyükten küçüğe)
+      return dateB - dateA;
+    });
+    
+    return filtered;
   }
 
   get displayedDashboardEvents() {
+    // En son 5 etkinliği göster (zaten filteredDashboardEvents sıralı)
     return this.filteredDashboardEvents.slice(0, 5);
   }
 
@@ -896,6 +932,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       quota: '',
       description: '',
       image: '',
+      imageFile: null,
     };
     this.newProjectData = { name: '', category: 'Teknoloji', budget: 0, deadline: '' };
     this.newMemberData = {
@@ -1017,23 +1054,74 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
           location: this.newEventData.location,
           description: this.newEventData.description,
           shortDescription: this.newEventData.shortDescription || this.newEventData.description,
-          imageUrl: this.newEventData.image || undefined, // Fotoğraf optional
+          // imageUrl artık gönderilmiyor - ayrı endpoint ile yüklenecek
           quota: this.newEventData.quota ? Number(this.newEventData.quota) : undefined,
           // Status backend tarafından otomatik olarak 'pending' (Beklemede) yapılacak
         })
         .subscribe({
           next: (response) => {
             console.log('Event updated successfully:', response);
-            this.showToast(
-              "Etkinlik güncellendi ve tekrar onaya gönderildi! Kurumsal Dashboard'daki etkinlik onaylama ekranına iletildi.",
-              'success'
-            );
-            this.closeModal();
-            this.editingEventId = null; // Reset editing state
-            if (this.clubInfo.id) {
-              this.loadCommunityEvents(this.clubInfo.id);
+            
+            // Eğer fotoğraf seçildiyse, ayrı endpoint ile yükle
+            if (this.newEventData.imageFile && this.editingEventId) {
+              this.eventService.uploadEventImage(this.editingEventId, this.newEventData.imageFile).subscribe({
+                next: (uploadResponse) => {
+                  console.log('Event image uploaded successfully:', uploadResponse);
+                  console.log('Uploaded image path:', uploadResponse.ImagePath);
+                  
+                  // Backend'den gelen ImagePath'i tam URL'ye çevir (relative path ise)
+                  let imageUrl = uploadResponse.ImagePath || '';
+                  if (imageUrl && !imageUrl.startsWith('http://') && !imageUrl.startsWith('https://') && !imageUrl.startsWith('data:')) {
+                    // Backend base URL'si (api kısmını çıkar)
+                    const baseUrl = environment.apiUrl.replace('/api', '');
+                    if (!imageUrl.startsWith('/')) {
+                      imageUrl = '/' + imageUrl;
+                    }
+                    imageUrl = baseUrl + imageUrl;
+                  }
+                  
+                  // Backend'den gelen ImagePath'i event listesinde güncelle
+                  const eventInList = this.dashboardEvents.find((e) => e.id === this.editingEventId);
+                  if (eventInList && imageUrl) {
+                    eventInList.imageUrl = imageUrl;
+                  }
+                  
+                  this.showToast(
+                    "Etkinlik ve fotoğrafı güncellendi ve tekrar onaya gönderildi! Kurumsal Dashboard'daki etkinlik onaylama ekranına iletildi.",
+                    'success'
+                  );
+                  this.closeModal();
+                  this.editingEventId = null; // Reset editing state
+                  if (this.clubInfo.id) {
+                    this.loadCommunityEvents(this.clubInfo.id);
+                  }
+                },
+                error: (uploadErr: any) => {
+                  console.error('Etkinlik fotoğrafı yüklenemedi:', uploadErr);
+                  // Etkinlik güncellendi ama fotoğraf yüklenemedi
+                  this.showToast(
+                    "Etkinlik güncellendi ancak fotoğraf yüklenirken bir hata oluştu. Etkinliği düzenleyerek fotoğrafı tekrar yükleyebilirsiniz.",
+                    'error'
+                  );
+                  this.closeModal();
+                  this.editingEventId = null; // Reset editing state
+                  if (this.clubInfo.id) {
+                    this.loadCommunityEvents(this.clubInfo.id);
+                  }
+                },
+              });
+            } else {
+              // Fotoğraf yok, sadece etkinlik güncellendi
+              this.showToast(
+                "Etkinlik güncellendi ve tekrar onaya gönderildi! Kurumsal Dashboard'daki etkinlik onaylama ekranına iletildi.",
+                'success'
+              );
+              this.closeModal();
+              this.editingEventId = null; // Reset editing state
+              if (this.clubInfo.id) {
+                this.loadCommunityEvents(this.clubInfo.id);
+              }
             }
-            // Route yapma - sadece etkinlik güncellendi, kurumsal dashboard'a yönlendirme yok
           },
           error: (err: any) => {
             console.error('Etkinlik güncellenemedi:', err);
@@ -1057,28 +1145,80 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
         location: this.newEventData.location,
         description: this.newEventData.description,
         shortDescription: this.newEventData.shortDescription || this.newEventData.description,
-        imageUrl: this.newEventData.image || undefined, // Fotoğraf optional
+        // imageUrl artık gönderilmiyor - ayrı endpoint ile yüklenecek
         quota: this.newEventData.quota ? Number(this.newEventData.quota) : undefined,
         // comId backend'de otomatik olarak creator'ın topluluğundan alınıyor
       })
       .subscribe({
         next: (response) => {
           console.log('Event created successfully:', response);
-          this.showToast(
-            "Etkinlik başarıyla oluşturuldu! Kurumsal Dashboard'daki etkinlik onaylama ekranına iletildi.",
-            'success'
-          );
+          const eventId = response.eventId;
 
-          // Modal'ı kapat
-          this.closeModal();
-
-          // Etkinlikleri yeniden yükle (asenkron olarak)
-          if (this.clubInfo.id) {
-            this.loadCommunityEvents(this.clubInfo.id);
+          // Eğer fotoğraf seçildiyse, ayrı endpoint ile yükle
+          if (this.newEventData.imageFile && eventId) {
+            this.eventService.uploadEventImage(eventId, this.newEventData.imageFile).subscribe({
+              next: (uploadResponse) => {
+                console.log('Event image uploaded successfully:', uploadResponse);
+                console.log('Uploaded image path:', uploadResponse.ImagePath);
+                
+                // Backend'den gelen ImagePath'i tam URL'ye çevir (relative path ise)
+                let imageUrl = uploadResponse.ImagePath || '';
+                if (imageUrl && !imageUrl.startsWith('http://') && !imageUrl.startsWith('https://') && !imageUrl.startsWith('data:')) {
+                  // Backend base URL'si (api kısmını çıkar)
+                  const baseUrl = environment.apiUrl.replace('/api', '');
+                  if (!imageUrl.startsWith('/')) {
+                    imageUrl = '/' + imageUrl;
+                  }
+                  imageUrl = baseUrl + imageUrl;
+                }
+                
+                // Yeni oluşturulan event'i listede bul ve imageUrl'ini güncelle
+                setTimeout(() => {
+                  const newEventInList = this.dashboardEvents.find((e) => e.id === eventId);
+                  if (newEventInList && imageUrl) {
+                    newEventInList.imageUrl = imageUrl;
+                  }
+                }, 100);
+                
+                this.showToast(
+                  "Etkinlik ve fotoğrafı başarıyla oluşturuldu! Kurumsal Dashboard'daki etkinlik onaylama ekranına iletildi.",
+                  'success'
+                );
+                // Modal'ı kapat
+                this.closeModal();
+                // Etkinlikleri yeniden yükle (backend'den güncel veri ile)
+                if (this.clubInfo.id) {
+                  this.loadCommunityEvents(this.clubInfo.id);
+                }
+              },
+              error: (uploadErr: any) => {
+                console.error('Etkinlik fotoğrafı yüklenemedi:', uploadErr);
+                // Etkinlik oluşturuldu ama fotoğraf yüklenemedi
+                this.showToast(
+                  "Etkinlik oluşturuldu ancak fotoğraf yüklenirken bir hata oluştu. Etkinliği düzenleyerek fotoğrafı tekrar yükleyebilirsiniz.",
+                  'error'
+                );
+                // Modal'ı kapat
+                this.closeModal();
+                // Etkinlikleri yeniden yükle
+                if (this.clubInfo.id) {
+                  this.loadCommunityEvents(this.clubInfo.id);
+                }
+              },
+            });
+          } else {
+            // Fotoğraf yok, sadece etkinlik oluşturuldu
+            this.showToast(
+              "Etkinlik başarıyla oluşturuldu! Kurumsal Dashboard'daki etkinlik onaylama ekranına iletildi.",
+              'success'
+            );
+            // Modal'ı kapat
+            this.closeModal();
+            // Etkinlikleri yeniden yükle
+            if (this.clubInfo.id) {
+              this.loadCommunityEvents(this.clubInfo.id);
+            }
           }
-
-          // Route yapma - sadece etkinlik oluşturuldu, kurumsal dashboard'a yönlendirme yok
-          // Etkinlik otomatik olarak kurumsal dashboard'daki onaylama ekranına iletildi
         },
         error: (err: any) => {
           console.error('Etkinlik oluşturulamadı:', err);
@@ -1125,9 +1265,13 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       if (this.isEditingEventDetail) {
         // Event detail modal'da düzenleme modunda
         this.readFileToBase64ForEdit(file);
+        // File objesini de sakla (backend'e yüklemek için)
+        this.editedEventData.imageFile = file;
       } else {
         // Event creation modal'da
         this.readFileToBase64(file);
+        // File objesini de sakla (backend'e yüklemek için)
+        this.newEventData.imageFile = file;
       }
     }
   }
@@ -1135,7 +1279,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
   private readFileToBase64(file: File) {
     const reader = new FileReader();
     reader.onload = () => {
-      this.newEventData.image = reader.result as string;
+      this.newEventData.image = reader.result as string; // Preview için base64
     };
     reader.readAsDataURL(file);
   }
@@ -1143,7 +1287,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
   private readFileToBase64ForEdit(file: File) {
     const reader = new FileReader();
     reader.onload = () => {
-      this.editedEventData.image = reader.result as string;
+      this.editedEventData.image = reader.result as string; // Preview için base64
     };
     reader.readAsDataURL(file);
   }
@@ -1981,7 +2125,8 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       location: event.location,
       quota: event.quota ? String(event.quota) : '',
       description: event.description,
-      image: event.imageUrl,
+      image: event.imageUrl, // Preview için
+      imageFile: null, // Yeni dosya seçilmediyse null
     };
   }
 
@@ -2069,7 +2214,8 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       location: this.selectedEvent.location || '',
       quota: this.selectedEvent.quota ? String(this.selectedEvent.quota) : '',
       description: this.selectedEvent.description || '',
-      image: this.selectedEvent.imageUrl || '',
+      image: this.selectedEvent.imageUrl || '', // Preview için
+      imageFile: null as File | null, // Backend'e yüklenecek dosya
     };
   }
 
@@ -2128,48 +2274,132 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     }
 
     // Update event
+    const eventId = this.selectedEvent.id; // Store eventId to avoid null checks in callbacks
     this.eventService
-      .updateEvent(this.selectedEvent.id, {
+      .updateEvent(eventId, {
         title: this.editedEventData.title,
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString(),
         location: this.editedEventData.location,
         description: this.editedEventData.description,
         shortDescription: this.editedEventData.shortDescription || this.editedEventData.description,
-        imageUrl: this.editedEventData.image || undefined,
+        // imageUrl artık gönderilmiyor - ayrı endpoint ile yüklenecek
         quota: this.editedEventData.quota ? Number(this.editedEventData.quota) : undefined,
       })
       .subscribe({
         next: (response) => {
           console.log('Event updated successfully:', response);
-          this.showToast(
-            "Etkinlik güncellendi ve tekrar onaya gönderildi! Kurumsal Dashboard'daki etkinlik onaylama ekranına iletildi.",
-            'success'
-          );
-          this.isEditingEventDetail = false;
-          this.editedEventData = {};
-
-          // Reload events from backend
-          if (this.clubInfo.id) {
-            this.loadCommunityEvents(this.clubInfo.id);
-            
-            // After reload, update the selected event if it's still open
-            const eventId = this.selectedEvent?.id;
-            if (eventId) {
-              // Wait for events to reload, then update selected event
-              setTimeout(() => {
-                const updatedEvent = this.dashboardEvents.find((e) => e.id === eventId);
-                if (updatedEvent) {
-                  // Event'i güncelle ve tarih/saat bilgilerinin doğru yüklendiğinden emin ol
-                  this.selectedEvent = { ...updatedEvent };
-                  console.log('Selected event updated:', this.selectedEvent.date, this.selectedEvent.time);
-                  // Reinitialize edited data in case user wants to edit again
-                  this.initializeEditedEventData();
-                } else {
-                  // Event not found (might have been deleted or status changed), close modal
-                  this.closeEventDetail();
+          
+          // Eğer fotoğraf seçildiyse, ayrı endpoint ile yükle
+          if (this.editedEventData.imageFile && eventId) {
+            this.eventService.uploadEventImage(eventId, this.editedEventData.imageFile).subscribe({
+              next: (uploadResponse) => {
+                console.log('Event image uploaded successfully:', uploadResponse);
+                
+                // Backend'den gelen ImagePath'i tam URL'ye çevir (relative path ise)
+                let imageUrl = uploadResponse.ImagePath || '';
+                if (imageUrl && !imageUrl.startsWith('http://') && !imageUrl.startsWith('https://') && !imageUrl.startsWith('data:')) {
+                  // Backend base URL'si (api kısmını çıkar)
+                  const baseUrl = environment.apiUrl.replace('/api', '');
+                  if (!imageUrl.startsWith('/')) {
+                    imageUrl = '/' + imageUrl;
+                  }
+                  imageUrl = baseUrl + imageUrl;
                 }
-              }, 500); // Timeout'u biraz artırdık, events yüklenene kadar beklemek için
+                
+                // Backend'den gelen ImagePath'i direkt olarak selectedEvent'e ata
+                if (this.selectedEvent && imageUrl) {
+                  this.selectedEvent.imageUrl = imageUrl;
+                  // Dashboard events listesinde de güncelle
+                  const eventInList = this.dashboardEvents.find((e) => e.id === eventId);
+                  if (eventInList) {
+                    eventInList.imageUrl = imageUrl;
+                  }
+                }
+                
+                this.showToast(
+                  "Etkinlik ve fotoğrafı güncellendi ve tekrar onaya gönderildi! Kurumsal Dashboard'daki etkinlik onaylama ekranına iletildi.",
+                  'success'
+                );
+                this.isEditingEventDetail = false;
+                this.editedEventData = {};
+
+                // Reload events from backend to get fresh data
+                if (this.clubInfo.id) {
+                  this.loadCommunityEvents(this.clubInfo.id);
+                  
+                  // After reload, update the selected event if it's still open
+                  const eventIdForUpdate = this.selectedEvent?.id;
+                  if (eventIdForUpdate) {
+                    setTimeout(() => {
+                      const updatedEvent = this.dashboardEvents.find((e) => e.id === eventIdForUpdate);
+                      if (updatedEvent) {
+                        this.selectedEvent = { ...updatedEvent };
+                        console.log('Selected event updated:', this.selectedEvent.date, this.selectedEvent.time, this.selectedEvent.imageUrl);
+                        this.initializeEditedEventData();
+                      } else {
+                        this.closeEventDetail();
+                      }
+                    }, 800); // Timeout'u artırdık, backend'den veri gelene kadar beklemek için
+                  }
+                }
+              },
+              error: (uploadErr: any) => {
+                console.error('Etkinlik fotoğrafı yüklenemedi:', uploadErr);
+                // Etkinlik güncellendi ama fotoğraf yüklenemedi
+                this.showToast(
+                  "Etkinlik güncellendi ancak fotoğraf yüklenirken bir hata oluştu. Etkinliği düzenleyerek fotoğrafı tekrar yükleyebilirsiniz.",
+                  'error'
+                );
+                this.isEditingEventDetail = false;
+                this.editedEventData = {};
+
+                // Reload events from backend
+                if (this.clubInfo.id) {
+                  this.loadCommunityEvents(this.clubInfo.id);
+                  
+                  const eventId = this.selectedEvent?.id;
+                  if (eventId) {
+                    setTimeout(() => {
+                      const updatedEvent = this.dashboardEvents.find((e) => e.id === eventId);
+                      if (updatedEvent) {
+                        this.selectedEvent = { ...updatedEvent };
+                        this.initializeEditedEventData();
+                      } else {
+                        this.closeEventDetail();
+                      }
+                    }, 500);
+                  }
+                }
+              },
+            });
+          } else {
+            // Fotoğraf yok, sadece etkinlik güncellendi
+            this.showToast(
+              "Etkinlik güncellendi ve tekrar onaya gönderildi! Kurumsal Dashboard'daki etkinlik onaylama ekranına iletildi.",
+              'success'
+            );
+            this.isEditingEventDetail = false;
+            this.editedEventData = {};
+
+            // Reload events from backend
+            if (this.clubInfo.id) {
+              this.loadCommunityEvents(this.clubInfo.id);
+              
+              // After reload, update the selected event if it's still open
+              const eventId = this.selectedEvent?.id;
+              if (eventId) {
+                setTimeout(() => {
+                  const updatedEvent = this.dashboardEvents.find((e) => e.id === eventId);
+                  if (updatedEvent) {
+                    this.selectedEvent = { ...updatedEvent };
+                    console.log('Selected event updated:', this.selectedEvent.date, this.selectedEvent.time);
+                    this.initializeEditedEventData();
+                  } else {
+                    this.closeEventDetail();
+                  }
+                }, 500);
+              }
             }
           }
         },
@@ -2189,7 +2419,9 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
   // Event detail modal'da iptal
   cancelEditEventDetail() {
     this.isEditingEventDetail = false;
-    this.editedEventData = {};
+    this.editedEventData = {
+      imageFile: null, // Reset imageFile
+    };
   }
 
   closeEventDetail() {

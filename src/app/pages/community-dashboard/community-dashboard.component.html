@@ -156,7 +156,7 @@
             </div>
             <div class="status-filters">
               <button class="filter-chip" [class.active]="statusFilter === 'all'" (click)="setStatusFilter('all')">
-                Tümü
+                En Son
               </button>
               <button class="filter-chip" [class.active]="statusFilter === 'approved'"
                 (click)="setStatusFilter('approved')">
@@ -639,7 +639,7 @@
         </div>
         <div class="image-preview" *ngIf="!isEditingEventDetail">
           <img [src]="selectedEvent.imageUrl" [alt]="selectedEvent.title"
-            onerror="this.onImageError($event)" />
+            (error)="onImageError($event)" />
         </div>
         <app-image-upload *ngIf="isEditingEventDetail" label="Fotoğraf seç / sürükle"
           [previewUrl]="editedEventData.image || selectedEvent.imageUrl || null"
