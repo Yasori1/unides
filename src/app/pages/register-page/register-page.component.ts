@@ -7,6 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../services/toast.services';
 import { ToastComponent } from '../../components/ui/toast/toast.component';
 import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
+import { AuthService } from '../../services/auth.services';
 
 @Component({
   selector: 'app-register-page',
@@ -27,7 +28,11 @@ export class RegisterPageComponent {
   private password: string = '';
   private confirmPassword: string = '';
 
-  constructor(private router: Router, private toastService: ToastService) {}
+  constructor(
+    private router: Router,
+    private toastService: ToastService,
+    private authService: AuthService
+  ) {}
 
   updateName(event: any) {
     this.name = event.target.value;
@@ -56,7 +61,7 @@ export class RegisterPageComponent {
     this.passwordMismatch = !!this.confirmPassword && this.password !== this.confirmPassword;
   }
 
-  async onSubmit(event: Event) {
+  onSubmit(event: Event) {
     event.preventDefault();
 
     // Validasyon Kontrolleri
@@ -78,62 +83,41 @@ export class RegisterPageComponent {
     // Yükleniyor durumunu başlat (Spinner görünür)
     this.isLoading = true;
 
-    try {
-      const response = await fetch('/api/Auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
+    // AuthService üzerinden kayıt işlemi
+    this.authService
+      .registerStudent({
+        name: this.name,
+        email: this.email,
+        password: this.password,
+      })
+      .subscribe({
+        next: (response) => {
+          console.log('Kayıt Başarılı:', response);
+
+          // BAŞARILI DURUM:
+          // 1. Kullanıcıya bilgi ver
+          this.toastService.show(
+            'Kayıt işleminiz başarıyla tamamlandı! Giriş sayfasına yönlendiriliyorsunuz...',
+            'success'
+          );
+
+          // 2. Yönlendirme yap (Kullanıcı mesajı okuyabilsin diye kısa bir gecikme ekledik)
+          setTimeout(() => {
+            this.router.navigate(['/login']);
+          }, 2000);
         },
-        body: JSON.stringify({
-          fullName: this.name,
-          email: this.email,
-          password: this.password,
-          roleId: 1 // 1 = Öğrenci
-        }),
+        error: (error: any) => {
+          console.error('Kayıt Hatası:', error);
+          this.isLoading = false;
+
+          // Backend'den gelen hata mesajını göster
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Kayıt sırasında bir hata oluştu.';
+          this.toastService.show(errorMessage, 'error');
+        },
       });
-
-      // Response'un JSON olup olmadığını kontrol et
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        const text = await response.text();
-        console.error('Backend HTML döndü (Register):', text.substring(0, 200));
-        this.isLoading = false;
-        this.toastService.show(
-          "Backend'den beklenmeyen yanıt alındı. Lütfen backend servisinin çalıştığından emin olun.",
-          'error'
-        );
-        return;
-      }
-
-      const data = await response.json();
-
-      if (response.ok) {
-        console.log('Kayıt Başarılı:', data);
-
-        // BAŞARILI DURUM:
-        // 1. Kullanıcıya bilgi ver
-        this.toastService.show(
-          'Kayıt işleminiz başarıyla tamamlandı! Giriş sayfasına yönlendiriliyorsunuz...',
-          'success'
-        );
-
-        // 2. Yönlendirme yap (Kullanıcı mesajı okuyabilsin diye kısa bir gecikme ekledik)
-        setTimeout(() => {
-          this.router.navigate(['/login']);
-        }, 2000);
-      } else {
-        // BAŞARISIZ DURUM:
-        this.isLoading = false;
-        const errorMessage = data?.message || 'Kayıt sırasında bir hata oluştu.';
-        this.toastService.show(errorMessage, 'error');
-      }
-    } catch (error: any) {
-      console.error('Kayıt Hatası:', error);
-      this.isLoading = false;
-      const message = error?.message || 'Kayıt sırasında bir hata oluştu.';
-      this.toastService.show(message, 'error');
-    }
   }
 
   openTermsModal() {

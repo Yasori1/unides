@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, HostListener, Inject, PLATFORM_ID } from 
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { forkJoin, of } from 'rxjs';
 import { ToastService } from '../../services/toast.services';
 import { ToastComponent } from '../../components/ui/toast/toast.component';
 import { EventService, EventItem } from '../../services/event.services';
@@ -171,8 +172,8 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
     this.isLoadingCommunities = true;
     this.isLoadingEvents = true;
 
-    // Backend'den öğrencinin üye olduğu toplulukları ve etkinliklerini çek
-    // GET /api/Communities/me/memberships endpoint'i hem toplulukları hem de etkinlikleri döndürüyor
+    // Topluluk başkanları aynı zamanda öğrenci oldukları için, her iki durumda da getMyMemberships() kullanılır
+    // GET /api/Communities/me/memberships endpoint'i hem öğrencilerin hem de topluluk başkanlarının üye olduğu toplulukları döndürür
     this.communityService.getMyMemberships().subscribe({
       next: (memberships) => {
         if (memberships && memberships.length > 0) {
@@ -182,10 +183,18 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
             joinedDate: c.joinedDate || new Date().toISOString().split('T')[0],
           }));
 
-          // Tüm toplulukların etkinliklerini birleştir
+          // Stats'ları hesapla: Topluluk sayısı ve toplam etkinlik sayısı
+          this.stats[0].value = memberships.length;
+          
+          // Tüm toplulukların etkinliklerini birleştir ve say
           const allEvents: any[] = [];
+          let totalEventCount = 0;
+          
           memberships.forEach((community: any) => {
             if (community.events && Array.isArray(community.events)) {
+              // Her topluluğun etkinlik sayısını ekle
+              totalEventCount += community.events.length;
+              
               community.events.forEach((event: any) => {
                 // Backend MemberCommunityEventDto formatını EventCard formatına çevir
                 const eventDate = event.eventDate || event.EventDate;
@@ -238,7 +247,9 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
                       minute = 0;
                     }
 
-                    // Date objesi oluştur (local timezone)
+                    // Date objesi oluştur (UTC+3 - Türkiye saati için)
+                    // Türkiye saati UTC+3 olduğu için, tarihi UTC+3 olarak oluşturuyoruz
+                    // JavaScript Date objesi local timezone'da çalışır, bu yüzden UTC+3 offset'ini manuel olarak ekliyoruz
                     startDate = new Date(year, month, day, hour, minute, 0);
 
                     // Geçerlilik kontrolü
@@ -294,45 +305,138 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
           });
 
           this.communityEvents = allEvents;
+          
+          // Stats'ları güncelle: Topluluk sayısı ve toplam etkinlik sayısı
+          this.stats[0].value = memberships.length;
+          this.stats[1].value = totalEventCount;
         } else {
           // No memberships found - show empty state
           this.myCommunities = [];
           this.communityEvents = [];
+          this.stats[0].value = 0;
+          this.stats[1].value = 0;
         }
 
-        // Stats'ları güncelle
-        this.stats[0].value = this.myCommunities.length;
-        this.stats[1].value = this.communityEvents.length;
-
-        // Loading state'leri bitir
-        this.isLoadingOverview = false;
-        this.isLoadingCommunities = false;
-        this.isLoadingEvents = false;
+        this.updateStatsAndLoading();
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Memberships yüklenemedi:', err);
-        // Handle 401/403 gracefully - show empty state instead of mock data
-        if (err.status === 401 || err.status === 403) {
+        // Handle 401/403 gracefully
+        if (err.status === 401) {
           this.toastService.show(
             'Topluluklara erişim için giriş yapmanız gerekiyor.',
             'error'
           );
           this.myCommunities = [];
           this.communityEvents = [];
+          this.updateStatsAndLoading();
+        } else if (err.status === 403) {
+          // 403 hatası: Backend'de role kontrolü nedeniyle olabilir
+          // Backend sadece RoleId == 1 (Öğrenci) için izin veriyor
+          // Topluluk başkanları (RoleId == 3) için alternatif endpoint kullan
+          // Kullanıcı hem öğrenci hem de topluluk başkanı olabilir
+          console.log('403 hatası alındı, kullanıcı rolü kontrol ediliyor ve alternatif endpoint deneniyor...');
+          this.loadDataForLeaderOrMixedRole();
         } else {
           // Other errors - show empty state
           this.myCommunities = [];
           this.communityEvents = [];
+          this.updateStatsAndLoading();
         }
-        this.stats[0].value = this.myCommunities.length;
-        this.stats[1].value = this.communityEvents.length;
-
-        // Loading state'leri bitir
-        this.isLoadingOverview = false;
-        this.isLoadingCommunities = false;
-        this.isLoadingEvents = false;
       },
     });
+  }
+
+  private loadDataForLeaderOrMixedRole(): void {
+    // 403 hatası geldi: Kullanıcı topluluk başkanı (RoleId == 3) veya hem öğrenci hem topluluk başkanı olabilir
+    // Backend'de GetUserCommunitiesAsync metodu var ama sadece RoleId == 1 için çalışıyor
+    // Bu yüzden alternatif endpoint kullanıyoruz: getMyCommunities() - başkan olduğu toplulukları getirir
+    
+    console.log('loadDataForLeaderOrMixedRole: Alternatif endpoint deneniyor, kullanıcı email:', this.userInfo.email);
+    
+    this.communityService.getMyCommunities().subscribe({
+      next: (communities) => {
+        console.log('loadDataForLeaderOrMixedRole: Topluluklar yüklendi:', communities.length);
+        if (communities && communities.length > 0) {
+          // Map to ProfileCommunity format
+          this.myCommunities = communities.map((c: any) => ({
+            ...c,
+            joinedDate: new Date().toISOString().split('T')[0], // Başkan olduğu tarih
+          }));
+
+          // Stats'ları hesapla
+          this.stats[0].value = this.myCommunities.length;
+
+          // Her topluluk için etkinlikleri çek
+          this.loadEventsForCommunities(this.myCommunities);
+        } else {
+          console.warn('loadDataForLeaderOrMixedRole: Başkan olduğu topluluk bulunamadı');
+          this.myCommunities = [];
+          this.communityEvents = [];
+          this.stats[0].value = 0;
+          this.stats[1].value = 0;
+          this.updateStatsAndLoading();
+        }
+      },
+      error: (err: any) => {
+        console.error('loadDataForLeaderOrMixedRole: Communities yüklenemedi:', err);
+        this.myCommunities = [];
+        this.communityEvents = [];
+        this.stats[0].value = 0;
+        this.stats[1].value = 0;
+        this.updateStatsAndLoading();
+      },
+    });
+  }
+
+  private loadEventsForCommunities(communities: any[]): void {
+    // Her topluluk için etkinlikleri çek
+    const eventObservables = communities.map((community: any) => {
+      const communityId = community.id || community.communityId;
+      if (!communityId) return of([]);
+      return this.eventService.getCommunityEvents(String(communityId), [0, 1, 2]); // Tüm status'ler
+    });
+
+    // Tüm etkinlikleri birleştir
+    if (eventObservables.length > 0) {
+      forkJoin(eventObservables).subscribe({
+        next: (eventArrays) => {
+          const allEvents: EventCard[] = [];
+          eventArrays.forEach((events, index) => {
+            const community = communities[index];
+            events.forEach((event: EventItem) => {
+              const eventCard = this.mapToEventCard(event);
+              eventCard.community = community.name || 'Topluluk';
+              allEvents.push(eventCard);
+            });
+          });
+          this.communityEvents = allEvents;
+          
+          // Stats'ları güncelle
+          this.stats[1].value = this.communityEvents.length;
+          
+          this.updateStatsAndLoading();
+        },
+        error: (err: any) => {
+          console.error('Events yüklenemedi:', err);
+          this.communityEvents = [];
+          this.stats[1].value = 0;
+          this.updateStatsAndLoading();
+        },
+      });
+    } else {
+      this.communityEvents = [];
+      this.stats[1].value = 0;
+      this.updateStatsAndLoading();
+    }
+  }
+
+  private updateStatsAndLoading(): void {
+    // Stats'lar getMyMemberships verisinden hesaplanıyor, burada sadece loading state'leri bitir
+    // Loading state'leri bitir
+    this.isLoadingOverview = false;
+    this.isLoadingCommunities = false;
+    this.isLoadingEvents = false;
   }
 
   private mapToEventCard(e: EventItem): EventCard {
@@ -404,7 +508,6 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
           return cId !== communityIdStr;
         });
         this.toastService.show('Topluluktan ayrıldınız', 'success');
-        this.stats[0].value = this.myCommunities.length;
 
         // Etkinlikleri de güncelle (ayrılan topluluğun etkinliklerini kaldır)
         const communityIdNum = typeof communityId === 'string' ? parseInt(communityId, 10) : communityId;
@@ -412,6 +515,9 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
           const eCommunityId = typeof e.communityId === 'string' ? parseInt(e.communityId, 10) : e.communityId;
           return eCommunityId !== communityIdNum;
         });
+
+        // Stats'ları manuel olarak güncelle
+        this.stats[0].value = this.myCommunities.length;
         this.stats[1].value = this.communityEvents.length;
       },
       error: (err) => {
@@ -467,16 +573,19 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
     const start = new Date(this.calendarMonth.getFullYear(), this.calendarMonth.getMonth(), 1);
     const end = new Date(this.calendarMonth.getFullYear(), this.calendarMonth.getMonth() + 1, 0);
     const days = [];
+    const currentMonth = this.calendarMonth.getMonth();
+    const currentYear = this.calendarMonth.getFullYear();
+    
     for (let d = 1; d <= end.getDate(); d++) {
       const dayDate = new Date(this.calendarMonth.getFullYear(), this.calendarMonth.getMonth(), d);
       const iso = this.toIso(dayDate);
 
-      // Etkinliklerin tarihlerini ISO formatına çevirerek karşılaştır
+      // Sadece o ay'a ait etkinlikleri kontrol et
       const hasEvent = this.communityEvents.some((ev) => {
+        let eventDateISO: string | null = null;
+        
         if (ev.startDateISO) {
-          // startDateISO varsa direkt kullan
-          const eventIso = this.toIso(new Date(ev.startDateISO));
-          return eventIso === iso;
+          eventDateISO = ev.startDateISO;
         } else if (ev.date) {
           // ev.date Türkçe formatında, parse et
           try {
@@ -489,14 +598,26 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
               const year = parseInt(dateParts[2], 10);
               if (month !== -1) {
                 const eventDate = new Date(year, month, day);
-                const eventIso = this.toIso(eventDate);
-                return eventIso === iso;
+                eventDateISO = this.toIso(eventDate);
               }
             }
           } catch (e) {
             console.warn('Error parsing event date:', ev.date, e);
+            return false;
           }
         }
+        
+        if (!eventDateISO) {
+          return false;
+        }
+        
+        // Sadece takvimde gösterilen ay'a ait etkinlikleri kontrol et
+        const [year, month, day] = eventDateISO.split('-').map(Number);
+        if (year === currentYear && month - 1 === currentMonth) {
+          const eventIso = this.toIso(new Date(year, month - 1, day));
+          return eventIso === iso;
+        }
+        
         return false;
       });
 
@@ -512,19 +633,114 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
       this.calendarMonth.getMonth() + offset,
       1
     );
+    // Ay değiştiğinde seçili tarihi sıfırla
+    this.calendarSelectedDate = null;
   }
 
   selectCalendarDate(iso: string) {
     this.calendarSelectedDate = iso;
   }
 
+  // Günlere göre gruplanmış etkinlikler (UTC+3 - Türkiye saati)
+  // Sadece takvimde gösterilen ay'a ait etkinlikleri döndürür
+  get eventsGroupedByDate() {
+    const grouped: { [key: string]: EventCard[] } = {};
+    const currentMonth = this.calendarMonth.getMonth();
+    const currentYear = this.calendarMonth.getFullYear();
+    
+    this.communityEvents.forEach((ev) => {
+      let eventDateISO: string | null = null;
+      
+      if (ev.startDateISO) {
+        eventDateISO = ev.startDateISO;
+      } else if (ev.date) {
+        // ev.date Türkçe formatında, parse et
+        try {
+          const dateParts = ev.date.split(' ');
+          if (dateParts.length === 3) {
+            const day = parseInt(dateParts[0], 10);
+            const monthNames = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+            const month = monthNames.indexOf(dateParts[1]);
+            const year = parseInt(dateParts[2], 10);
+            if (month !== -1) {
+              const eventDate = new Date(year, month, day);
+              eventDateISO = this.toIso(eventDate);
+            }
+          }
+        } catch (e) {
+          console.warn('Error parsing event date:', ev.date, e);
+          return; // Bu etkinliği atla
+        }
+      } else {
+        return; // Tarih bilgisi yok, bu etkinliği atla
+      }
+      
+      // eventDateISO null ise veya atanmamışsa bu etkinliği atla
+      if (!eventDateISO) {
+        return;
+      }
+      
+      // Sadece takvimde gösterilen ay'a ait etkinlikleri dahil et
+      const [year, month, day] = eventDateISO.split('-').map(Number);
+      if (year === currentYear && month - 1 === currentMonth) {
+        if (!grouped[eventDateISO]) {
+          grouped[eventDateISO] = [];
+        }
+        grouped[eventDateISO].push(ev);
+      }
+    });
+    
+    // Tarihe göre sırala (yakın tarihler önce)
+    const sortedDates = Object.keys(grouped).sort((a, b) => {
+      return a.localeCompare(b);
+    });
+    
+    return sortedDates.map(dateISO => ({
+      dateISO,
+      date: this.formatDateForDisplay(dateISO),
+      events: grouped[dateISO].sort((a, b) => {
+        // Aynı gündeki etkinlikleri saate göre sırala
+        const timeA = a.time || '00:00';
+        const timeB = b.time || '00:00';
+        return timeA.localeCompare(timeB);
+      })
+    }));
+  }
+
+  // Tarihi görüntüleme formatına çevir (UTC+3 - Türkiye saati)
+  formatDateForDisplay(dateISO: string): string {
+    const [year, month, day] = dateISO.split('-').map(Number);
+    // UTC+3 için tarih oluştur (Türkiye saati)
+    const date = new Date(year, month - 1, day);
+    
+    // Türkçe tarih formatı: "15 Ocak 2025, Pazartesi"
+    const dayNames = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+    const monthNames = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 
+                        'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+    
+    const dayName = dayNames[date.getDay()];
+    const monthName = monthNames[date.getMonth()];
+    
+    return `${day} ${monthName} ${year}, ${dayName}`;
+  }
+
   get eventsOnSelectedDate() {
     if (!this.calendarSelectedDate) return [];
+    
+    // Seçili tarihin o ay'a ait olduğunu kontrol et
+    const [selectedYear, selectedMonth, selectedDay] = this.calendarSelectedDate.split('-').map(Number);
+    const currentMonth = this.calendarMonth.getMonth();
+    const currentYear = this.calendarMonth.getFullYear();
+    
+    if (selectedYear !== currentYear || selectedMonth - 1 !== currentMonth) {
+      return []; // Seçili tarih o ay'a ait değilse boş döndür
+    }
+    
     return this.communityEvents.filter((ev) => {
+      let eventDateISO: string | null = null;
+      
       if (ev.startDateISO) {
-        // startDateISO varsa direkt kullan
-        const eventIso = this.toIso(new Date(ev.startDateISO));
-        return eventIso === this.calendarSelectedDate;
+        eventDateISO = ev.startDateISO;
       } else if (ev.date) {
         // ev.date Türkçe formatında, parse et
         try {
@@ -537,14 +753,25 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
             const year = parseInt(dateParts[2], 10);
             if (month !== -1) {
               const eventDate = new Date(year, month, day);
-              const eventIso = this.toIso(eventDate);
-              return eventIso === this.calendarSelectedDate;
+              eventDateISO = this.toIso(eventDate);
             }
           }
         } catch (e) {
           console.warn('Error parsing event date:', ev.date, e);
+          return false;
         }
       }
+      
+      if (!eventDateISO) {
+        return false;
+      }
+      
+      // Sadece o ay'a ait etkinlikleri kontrol et
+      const [year, month, day] = eventDateISO.split('-').map(Number);
+      if (year === currentYear && month - 1 === currentMonth) {
+        return eventDateISO === this.calendarSelectedDate;
+      }
+      
       return false;
     });
   }
@@ -642,34 +869,35 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
     // Backend'e istek gönder
     this.authService.updateProfile(this.userInfo.name.trim()).subscribe({
       next: (response) => {
+        // Backend'den gelen güncellenmiş ad soyadı kullan (eğer varsa)
+        const updatedName = response.fullName || response.FullName || this.userInfo.name.trim();
+
         // Backend'den başarılı yanıt geldi, localStorage'ı güncelle
         if (isPlatformBrowser(this.platformId)) {
           const userInfoToSave = {
-            name: this.userInfo.name.trim(),
+            name: updatedName,
             email: this.userInfo.email,
             id: this.userInfo.id,
             role: this.userInfo.role,
           };
           localStorage.setItem('user_info', JSON.stringify(userInfoToSave));
 
-          // AuthService'deki user bilgisini de güncelle
-          this.authService.saveUser(userInfoToSave);
-        }
-        this.toastService.show(response.message || 'Ad Soyad başarıyla güncellendi', 'success');
-      },
-      error: (err) => {
-        console.error('Profil güncelleme hatası:', err);
+          // Component'teki userInfo'yu da güncelle
+          this.userInfo.name = updatedName;
 
-        // 404 hatası için özel mesaj (backend endpoint henüz mevcut değil)
-        if (err.status === 404) {
-          this.toastService.show(
-            'Profil güncelleme özelliği şu anda kullanılamıyor. Backend\'de update-profile endpoint\'i oluşturulması gerekiyor.',
-            'error'
-          );
-        } else {
-          const errorMessage = err.error?.message || err.message || 'Profil güncellenirken bir hata oluştu.';
-          this.toastService.show(errorMessage, 'error');
+          // AuthService'deki user bilgisini de güncelle (AuthService zaten tap içinde yapıyor ama yine de)
+          this.authService.saveUser(userInfoToSave);
+
+          // Display name'i de güncelle
+          this.displayName = updatedName;
+          this.userInitial = updatedName.charAt(0).toUpperCase();
         }
+        this.toastService.show('Ad Soyad başarıyla güncellendi', 'success');
+      },
+      error: (err: any) => {
+        console.error('Profil güncelleme hatası:', err);
+        const errorMessage = err.error?.message || err.message || 'Profil güncellenirken bir hata oluştu.';
+        this.toastService.show(errorMessage, 'error');
       },
     });
   }
@@ -715,7 +943,7 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
           this.userInfo.newPassword = '';
           this.userInfo.confirmPassword = '';
         },
-        error: (err) => {
+        error: (err: any) => {
           console.error('Şifre değiştirme hatası:', err);
           const errorMessage =
             err.error?.message || err.message || 'Şifre değiştirme işlemi başarısız oldu.';

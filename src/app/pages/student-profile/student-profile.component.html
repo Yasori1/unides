@@ -502,21 +502,49 @@
       </div>
     </div>
 
-    <div class="calendar-events" *ngIf="eventsOnSelectedDate.length > 0; else noEventsOnDay">
-      <div class="calendar-item" *ngFor="let ev of eventsOnSelectedDate">
-        <div class="calendar-date">
-          <span class="day">{{ getEventDay(ev) }}</span>
-          <span class="month">{{ getEventMonth(ev) }}</span>
+    <!-- Seçili güne ait etkinlikler -->
+    <div class="calendar-events-list" *ngIf="calendarSelectedDate && eventsOnSelectedDate.length > 0">
+      <div class="events-day-group">
+        <div class="day-header">
+          <h4>{{ formatDateForDisplay(calendarSelectedDate) }}</h4>
         </div>
-        <div class="calendar-info">
-          <h4>{{ ev.title }}</h4>
-          <p>{{ ev.community }} • {{ ev.location }}</p>
-          <span class="time">{{ ev.time }}</span>
+        <div class="day-events">
+          <div class="calendar-item" *ngFor="let ev of eventsOnSelectedDate">
+            <div class="calendar-time">
+              <span class="time">{{ ev.time }}</span>
+            </div>
+            <div class="calendar-info">
+              <h4>{{ ev.title }}</h4>
+              <p>{{ ev.community }} • {{ ev.location }}</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-    <ng-template #noEventsOnDay>
-      <p class="no-events">Bu tarihte etkinlik yok.</p>
-    </ng-template>
+
+    <!-- Seçili gün yoksa, ayın tüm etkinliklerini göster -->
+    <div class="calendar-events-list" *ngIf="!calendarSelectedDate && eventsGroupedByDate.length > 0">
+      <div class="events-day-group" *ngFor="let dayGroup of eventsGroupedByDate">
+        <div class="day-header">
+          <h4>{{ dayGroup.date }}</h4>
+        </div>
+        <div class="day-events">
+          <div class="calendar-item" *ngFor="let ev of dayGroup.events">
+            <div class="calendar-time">
+              <span class="time">{{ ev.time }}</span>
+            </div>
+            <div class="calendar-info">
+              <h4>{{ ev.title }}</h4>
+              <p>{{ ev.community }} • {{ ev.location }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Etkinlik yoksa -->
+    <div class="calendar-events-list" *ngIf="(!calendarSelectedDate && eventsGroupedByDate.length === 0) || (calendarSelectedDate && eventsOnSelectedDate.length === 0)">
+      <p class="no-events">Henüz etkinlik bulunmamaktadır.</p>
+    </div>
   </div>
 </div>

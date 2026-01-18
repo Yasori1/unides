@@ -207,28 +207,33 @@ export class AuthService {
 
   /**
    * Update user profile (name)
-   * Uses backend endpoint: PUT /api/Auth/update-profile
-   * Backend endpoint must exist - no localStorage fallback
+   * Uses backend endpoint: PUT /api/Auth/update-fullname
+   * Backend expects: { FullName: string }
+   * Backend returns: { fullName: string } or { FullName: string }
    */
-  updateProfile(name: string): Observable<{ message: string }> {
+  updateProfile(name: string): Observable<{ fullName?: string; FullName?: string }> {
     const payload = {
-      fullName: name,
+      FullName: name, // Backend PascalCase bekliyor
     };
 
-    // Backend endpoint: PUT /api/Auth/update-profile
+    // Backend endpoint: PUT /api/Auth/update-fullname
     // Auth interceptor automatically adds Authorization header and Content-Type if token exists
-    return this.http.put<{ message: string }>(`${this.apiUrl}/Auth/update-profile`, payload).pipe(
-      tap((response) => {
-        // Backend'den başarılı yanıt geldiğinde localStorage'ı da güncelle (sync için)
-        const user = this.getUser();
-        if (user) {
-          user.name = name;
-          this.saveUser(user);
-        }
-      })
-      // No catchError - let error interceptor handle errors
-      // If backend endpoint doesn't exist, error interceptor will show error message
-    );
+    return this.http
+      .put<{ fullName?: string; FullName?: string }>(`${this.apiUrl}/Auth/update-fullname`, payload)
+      .pipe(
+        tap((response) => {
+          // Backend'den başarılı yanıt geldiğinde localStorage'ı da güncelle (sync için)
+          const user = this.getUser();
+          if (user) {
+            // Response'dan gelen fullName'i kullan (eğer varsa), yoksa gönderdiğimiz name'i kullan
+            const updatedName = response.fullName || response.FullName || name;
+            user.name = updatedName;
+            this.saveUser(user);
+          }
+        })
+        // No catchError - let error interceptor handle errors
+        // If backend endpoint doesn't exist, error interceptor will show error message
+      );
   }
 
   /**

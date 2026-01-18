@@ -84,7 +84,7 @@
         (click)="openEventDetail(event)">
         <div class="card-image">
           <img [src]="event.imageUrl" [alt]="event.title" loading="lazy"
-            onerror="this.src='assets/images/placeholder.jpg'" />
+            onerror="this.onImageError($event)" />
           <div class="date-badge">
             {{ event.date }}
           </div>

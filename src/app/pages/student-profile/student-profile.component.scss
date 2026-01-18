@@ -1966,6 +1966,86 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
       }
     }
 
+    .calendar-events-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-height: 400px;
+      overflow-y: auto;
+      margin-top: 16px;
+      padding-right: 4px;
+
+      .events-day-group {
+        .day-header {
+          margin-bottom: 12px;
+          padding-bottom: 8px;
+          border-bottom: 2px solid #e2e8f0;
+
+          h4 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #0f172a;
+          }
+        }
+
+        .day-events {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          margin-bottom: 8px;
+
+          .calendar-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 12px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
+
+            &:hover {
+              background: #f1f5f9;
+              border-color: #cbd5e1;
+            }
+
+            .calendar-time {
+              min-width: 60px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+
+              .time {
+                font-size: 0.9rem;
+                font-weight: 700;
+                color: #2563eb;
+                padding: 6px 10px;
+                background: #eff6ff;
+                border-radius: 8px;
+              }
+            }
+
+            .calendar-info {
+              flex: 1;
+
+              h4 {
+                margin: 0 0 6px 0;
+                font-size: 1rem;
+                font-weight: 700;
+                color: #0f172a;
+              }
+
+              p {
+                margin: 0;
+                color: #475569;
+                font-size: 0.9rem;
+              }
+            }
+          }
+        }
+      }
+    }
+
     .calendar-events {
       display: flex;
       flex-direction: column;
@@ -2062,7 +2142,9 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
     border-radius: 16px;
     padding: 20px 22px;
     width: 100%;
-    max-width: 480px;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
 
     .calendar-head {

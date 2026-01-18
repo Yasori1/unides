@@ -518,11 +518,10 @@ export class CommunityService {
     return of([]);
   }
 
-  // Email ile kullanıcı kontrolü
-  // Backend'de özel bir endpoint olmadığı için, addMember endpoint'ini kullanarak
-  // kullanıcının var olup olmadığını kontrol ediyoruz
-  // NOT: Bu metod sadece kontrol amaçlıdır, ama eğer kullanıcı varsa ve üye değilse ekler
-  // Bu yüzden sadece kontrol için kullanılmalı, gerçek ekleme işlemi için addMember kullanılmalı
+  // Email ile kullanıcı kontrolü (SADECE KONTROL - EKLEME YAPMAZ)
+  // Backend'de sadece kontrol yapan bir endpoint olmadığı için, mevcut üyeleri kontrol ediyoruz
+  // Email yazılırken sadece kontrol yapılır, ekleme yapılmaz
+  // Ekleme işlemi sadece "Kaydet" butonuna basıldığında yapılır
   checkUserExistsByEmail(email: string): Observable<{ exists: boolean; name?: string; message?: string; roleId?: number; isCorporate?: boolean }> {
     if (!email || !email.trim()) {
       return of({ exists: false, message: 'Email adresi boş olamaz' });
@@ -534,60 +533,57 @@ export class CommunityService {
       return of({ exists: false, message: 'Geçersiz email formatı' });
     }
 
-    // Backend'de addMember endpoint'ini kullanarak kullanıcı kontrolü yap
-    // Eğer NotFound (404) alırsak, kullanıcı yok demektir
-    // Eğer başka bir hata alırsak (Conflict, Forbidden, vs.), kullanıcı var demektir
-    // Eğer Success (200) alırsak, kullanıcı var ve eklendi demektir
-    const backendDto = {
-      Email: email.trim(),
-    };
+    // Email .edu.tr uzantılı olmalı
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail.endsWith('.edu.tr')) {
+      return of({ 
+        exists: false, 
+        message: 'Sadece .edu.tr uzantılı e-posta adresleri eklenebilir.',
+        roleId: undefined,
+        isCorporate: false
+      });
+    }
 
-    return this.http.post<{ message?: string }>(`${this.apiUrl}/me/members`, backendDto).pipe(
-      map(() => {
-        // Success: Kullanıcı var ve eklendi
-        // NOT: Bu durumda kullanıcı gerçekten eklenmiş olur, bu yüzden dikkatli kullanılmalı
-        return { exists: true, message: 'Kullanıcı bulundu ve eklendi', roleId: 1, isCorporate: false };
+    // Mevcut üyeleri getir ve email'in listede olup olmadığını kontrol et
+    // Bu şekilde kullanıcıyı eklemeden sadece kontrol yapıyoruz
+    return this.getCommunityMembers('').pipe(
+      map((members) => {
+        // Email'in listede olup olmadığını kontrol et
+        const memberExists = members.some((m: any) => 
+          m.email?.toLowerCase() === cleanEmail
+        );
+
+        if (memberExists) {
+          // Kullanıcı zaten üye
+          return { 
+            exists: true, 
+            message: 'Kullanıcı zaten üye', 
+            roleId: 1, 
+            isCorporate: false 
+          };
+        } else {
+          // Kullanıcı üye değil - eklenebilir
+          // Backend'de kullanıcı var mı kontrol edemiyoruz (sadece kontrol endpoint'i yok)
+          // Bu yüzden kullanıcının var olduğunu varsayıyoruz
+          // Gerçek kontrol "Kaydet" butonuna basıldığında yapılacak
+          return { 
+            exists: true, 
+            message: 'Kullanıcı eklenebilir', 
+            roleId: 1, 
+            isCorporate: false 
+          };
+        }
       }),
       catchError((error: any) => {
-        // 400: Bad Request - Email formatı hatası (örn: edu.tr uzantılı olmalı)
-        if (error.status === 400) {
-          // Backend'den gelen mesajı al
-          // error.error hem string hem de object olabilir
-          let errorMessage = 'Geçersiz e-posta formatı';
-          if (typeof error.error === 'string') {
-            errorMessage = error.error;
-          } else if (error.error?.error) {
-            errorMessage = error.error.error;
-          } else if (error.error?.message) {
-            errorMessage = error.error.message;
-          }
-          return of({ 
-            exists: false, 
-            message: errorMessage,
-            roleId: null,
-            isCorporate: false
-          });
-        }
-        // 404: Kullanıcı bulunamadı
-        if (error.status === 404) {
-          return of({ exists: false, message: error.error?.message || 'Kullanıcı bulunamadı' });
-        }
-        // 409: Kullanıcı zaten üye (kullanıcı var demektir)
-        if (error.status === 409) {
-          return of({ exists: true, message: 'Kullanıcı zaten üye', roleId: 1, isCorporate: false });
-        }
-        // 403: GSB yetkilisi (Role ID: 2) - Kurumsal yetkililer eklenemez
-        if (error.status === 403) {
-          return of({ 
-            exists: true, 
-            message: error.error?.message || 'GSB yetkilisi eklenemez',
-            roleId: 2,
-            isCorporate: true 
-          });
-        }
-        // Diğer hatalar: Kullanıcı var olabilir, ama başka bir sorun var
-        // Bu durumda kullanıcının var olduğunu varsayalım
-        return of({ exists: true, message: error.error?.message || 'Kullanıcı kontrol edilemedi' });
+        console.error('Email kontrol hatası:', error);
+        // Hata durumunda kullanıcının var olduğunu varsayalım
+        // Gerçek kontrol "Kaydet" butonuna basıldığında yapılacak
+        return of({ 
+          exists: true, 
+          message: 'Kullanıcı kontrol edilemedi', 
+          roleId: 1, 
+          isCorporate: false 
+        });
       })
     );
   }
@@ -725,14 +721,8 @@ export class CommunityService {
           events: dto.events || dto.Events || [], // Topluluk etkinlikleri
           joinedDate: dto.joinedDate || dto.JoinedDate, // Üyelik tarihi
         }));
-      }),
-      catchError((error) => {
-        console.error('Error fetching memberships:', error);
-        if (error.status === 401 || error.status === 403) {
-          // Unauthorized access - returning empty list
-        }
-        return of([]);
       })
+      // catchError kaldırıldı - hataları component'te handle edelim
     );
   }
 
@@ -761,6 +751,7 @@ export class CommunityService {
       return this.getAllCommunities().pipe(
         map((allCommunities) => {
           if (allCommunities.length === 0) {
+            console.log('getMyCommunities: Tüm topluluklar listesi boş');
             return [];
           }
 
@@ -771,16 +762,11 @@ export class CommunityService {
             (c) => c.comLeadMail?.toLowerCase() === userEmail.toLowerCase()
           );
 
+          console.log('getMyCommunities: Tüm topluluklar:', allCommunities.length, 'Başkan olduğu topluluklar:', myCommunities.length, 'Kullanıcı email:', userEmail);
+          
           return myCommunities;
-        }),
-        catchError((error) => {
-          // Hata durumunda boş array döndür
-          // Handle 401/403 gracefully
-          if (error.status === 401 || error.status === 403) {
-            // Unauthorized access - returning empty list
-          }
-          return of([]);
         })
+        // catchError kaldırıldı - hataları component'te handle edelim
       );
     } catch (e) {
       // Error parsing user info

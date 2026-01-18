@@ -749,6 +749,17 @@ export class EventsComponent implements OnInit, AfterViewInit {
     this.isCategoryDropdownOpen = false;
   }
 
+  // Image error handler - prevents infinite loop of 404 requests
+  onImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    // Only set fallback if not already set to prevent infinite loop
+    if (img.src && !img.src.includes('page-title1.jpg') && !img.src.includes('placeholder-cover.svg')) {
+      img.src = 'assets/images/page-title1.jpg';
+      // Remove onerror to prevent infinite loop
+      img.onerror = null;
+    }
+  }
+
   selectCategory(cat: string) {
     this.activeCategory = cat;
     this.applyFiltersAndGoFirstPage();

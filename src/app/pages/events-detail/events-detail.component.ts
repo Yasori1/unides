@@ -79,6 +79,17 @@ export class EventsDetailComponent implements OnInit {
     document.body.style.overflow = ''; // Restore background scrolling
   }
 
+  // Image error handler - prevents infinite loop of 404 requests
+  onImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    // Only set fallback if not already set to prevent infinite loop
+    if (img.src && !img.src.includes('page-title1.jpg') && !img.src.includes('placeholder-cover.svg')) {
+      img.src = 'assets/images/page-title1.jpg';
+      // Remove onerror to prevent infinite loop
+      img.onerror = null;
+    }
+  }
+
   getMonthName(date: Date): string {
       if (!date) return '';
       return date.toLocaleDateString('tr-TR', { month: 'short' });

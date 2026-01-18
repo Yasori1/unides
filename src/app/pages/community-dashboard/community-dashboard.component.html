@@ -186,7 +186,10 @@
               [class.rejected-card]="event.status === 'rejected'">
               <div class="card-image">
                 <img [src]="event.imageUrl" [alt]="event.title" loading="lazy" />
-                <span class="date-badge">{{ event.date }}</span>
+                <span class="date-badge">
+                  <span *ngIf="event.date">{{ event.date }}</span>
+                  <span *ngIf="event.time" class="time-badge">{{ event.time }}</span>
+                </span>
                 <div class="rejected-badge" *ngIf="event.status === 'rejected'">
                   <span class="material-symbols-outlined">priority_high</span>
                 </div>
@@ -257,7 +260,10 @@
           [class.rejected-card]="event.status === 'rejected'">
           <div class="card-image">
             <img [src]="event.imageUrl" [alt]="event.title" loading="lazy" />
-            <span class="date-badge">{{ event.date }}</span>
+            <span class="date-badge">
+              <span *ngIf="event.date">{{ event.date }}</span>
+              <span *ngIf="event.time" class="time-badge">{{ event.time }}</span>
+            </span>
             <div class="rejected-badge" *ngIf="event.status === 'rejected'">
               <span class="material-symbols-outlined">priority_high</span>
             </div>
@@ -633,7 +639,7 @@
         </div>
         <div class="image-preview" *ngIf="!isEditingEventDetail">
           <img [src]="selectedEvent.imageUrl" [alt]="selectedEvent.title"
-            onerror="this.src='assets/images/placeholder.jpg'" />
+            onerror="this.onImageError($event)" />
         </div>
         <app-image-upload *ngIf="isEditingEventDetail" label="Fotoğraf seç / sürükle"
           [previewUrl]="editedEventData.image || selectedEvent.imageUrl || null"
@@ -651,13 +657,13 @@
       <div class="row two-cols">
         <label class="stacked">
           <span>Tarih</span>
-          <input type="text" [value]="selectedEvent.date" [readonly]="!isEditingEventDetail"
+          <input type="text" [value]="selectedEvent.date || 'Tarih belirtilmemiş'" [readonly]="!isEditingEventDetail"
             *ngIf="!isEditingEventDetail" />
           <input type="date" [(ngModel)]="editedEventData.date" *ngIf="isEditingEventDetail" />
         </label>
         <label class="stacked">
           <span>Saat</span>
-          <input type="text" [value]="selectedEvent.time || '10:00'" [readonly]="!isEditingEventDetail"
+          <input type="text" [value]="selectedEvent.time || 'Saat belirtilmemiş'" [readonly]="!isEditingEventDetail"
             *ngIf="!isEditingEventDetail" />
           <input type="time" [(ngModel)]="editedEventData.time" *ngIf="isEditingEventDetail" />
         </label>

@@ -372,6 +372,10 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
               };
               // Update initialClubInfo for change detection
               this.initialClubInfo = JSON.parse(JSON.stringify(this.clubInfo));
+              
+              // Update displayName to show community name instead of user name
+              this.displayName = communityDetail.name || this.userName;
+              this.userInitial = this.displayName.charAt(0).toUpperCase();
 
               // Loading state'leri başlat
               this.isLoadingCommunity = false;
@@ -520,31 +524,43 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
               // Geçerlilik kontrolü
               if (isNaN(startDate.getTime())) {
                 // Geçersiz tarih, varsayılan değer kullan
+                console.warn('Geçersiz tarih formatı:', e.startDate, 'Event ID:', e.id);
                 startDate = new Date();
                 dateStr = 'Tarih belirtilmemiş';
-                timeStr = '';
+                timeStr = 'Saat belirtilmemiş';
                 startDateIso = new Date().toISOString();
               } else {
                 // Geçerli tarih, formatla
-                dateStr = startDate.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' });
+                // Türkçe tarih formatı: "15 Ocak 2026" (tam tarih)
+                dateStr = startDate.toLocaleDateString('tr-TR', { 
+                  day: 'numeric', 
+                  month: 'long',
+                  year: 'numeric'
+                });
+                // Türkçe saat formatı: "14:30" (24 saat formatı)
                 timeStr = startDate.toLocaleTimeString('tr-TR', {
                   hour: '2-digit',
                   minute: '2-digit',
+                  hour12: false, // 24 saat formatı
                 });
                 startDateIso = startDate.toISOString();
+                
+                // Debug: Tarih ve saat parse edildiğini kontrol et
+                console.log('Event parsed - ID:', e.id, 'Date:', dateStr, 'Time:', timeStr);
               }
             } catch (error) {
-              console.error('Tarih parse hatası:', error, e.startDate);
+              console.error('Tarih parse hatası:', error, 'Event ID:', e.id, 'startDate:', e.startDate);
               startDate = new Date();
               dateStr = 'Tarih belirtilmemiş';
-              timeStr = '';
+              timeStr = 'Saat belirtilmemiş';
               startDateIso = new Date().toISOString();
             }
           } else {
             // startDate yoksa varsayılan değer
+            console.warn('startDate yok - Event ID:', e.id);
             startDate = new Date();
             dateStr = 'Tarih belirtilmemiş';
-            timeStr = '';
+            timeStr = 'Saat belirtilmemiş';
             startDateIso = new Date().toISOString();
           }
 
@@ -951,11 +967,13 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     try {
       // HTML input type="date" YYYY-MM-DD formatında döndürür
       // HTML input type="time" HH:mm formatında döndürür
-      const dateStr = this.newEventData.date; // Format: "YYYY-MM-DD"
-      const timeStr = this.newEventData.time; // Format: "HH:mm"
+      const dateStr = this.newEventData.date?.trim(); // Format: "YYYY-MM-DD"
+      const timeStr = this.newEventData.time?.trim(); // Format: "HH:mm"
 
-      if (!dateStr || !timeStr) {
-        throw new Error('Tarih ve saat gereklidir');
+      // Boş string kontrolü de yapılmalı
+      if (!dateStr || dateStr.length === 0 || !timeStr || timeStr.length === 0) {
+        this.showToast('Lütfen tarih ve saat bilgilerini girin.', 'error');
+        return;
       }
 
       // Tarih ve saati birleştir: "YYYY-MM-DD HH:mm"
@@ -1019,7 +1037,12 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
           },
           error: (err: any) => {
             console.error('Etkinlik güncellenemedi:', err);
-            const errorMessage = err.error?.message || 'Etkinlik güncellenirken bir hata oluştu';
+            let errorMessage = 'Etkinlik güncellenirken bir hata oluştu.';
+            if (err.status === 401 || err.status === 403) {
+              errorMessage = 'Bu işlem için yetkiniz bulunmamaktadır.';
+            } else if (err.error?.message) {
+              errorMessage = err.error.message;
+            }
             this.showToast(errorMessage, 'error');
           },
         });
@@ -1072,8 +1095,16 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
 
   get isEventFormValid() {
     const { title, date, time, location, quota, description, image } = this.newEventData;
+    // Tarih ve saat boş string kontrolü de yapılmalı
+    const hasValidDate = date && date.trim().length > 0;
+    const hasValidTime = time && time.trim().length > 0;
     return (
-      !!title.trim() && !!date && !!time && !!location.trim() && !!quota && !!description.trim()
+      !!title?.trim() && 
+      hasValidDate && 
+      hasValidTime && 
+      !!location?.trim() && 
+      !!quota && 
+      !!description?.trim()
       // !!image // Fotoğraf zorunluluğu şimdilik kaldırıldı
     );
   }
@@ -1166,6 +1197,19 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // 3.5. Kullanıcı zaten üye kontrolü
+    if (this.emailExists && this.emailErrorMessage?.includes('zaten üye')) {
+      // Kullanıcı zaten üye - üyeleri yeniden yükle ve modal'ı kapat
+      const communityId = this.clubInfo?.id;
+      if (communityId) {
+        this.loadCommunityMembers(communityId);
+      }
+      this.showToast('Kullanıcı zaten üye.', 'error');
+      this.memberCurrentPage = 1;
+      this.closeModal();
+      return;
+    }
+
     // 4. Community ID kontrolü
     const communityId = this.clubInfo?.id;
     if (!communityId) {
@@ -1173,7 +1217,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // 5. Ekleme işlemi
+    // 5. Ekleme işlemi (kullanıcı checkEmailExists sırasında eklenmemişse)
     this.proceedWithAddMember();
   }
 
@@ -1219,13 +1263,14 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
         },
         error: (err: any) => {
           console.error('Üye eklenirken hata:', err);
-          // 409: Kullanıcı zaten üye (checkEmailExists sırasında eklenmiş olabilir)
+          // 409: Kullanıcı zaten üye
           if (err.status === 409) {
             // Üyeleri yeniden yükle ve kullanıcıya bilgi ver
             if (this.clubInfo.id) {
               this.loadCommunityMembers(this.clubInfo.id);
             }
-            this.showToast('Kullanıcı zaten üye olarak eklenmiş.', 'success');
+            const errorMessage = err.error?.message || 'Üye zaten ekli.';
+            this.showToast(errorMessage, 'error'); // 409 Conflict - kullanıcıya bilgi ver
             this.memberCurrentPage = 1;
             this.closeModal();
           } else {
@@ -1495,7 +1540,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
               message: result.message
             });
           }
-          // 4. Zaten üye (409) - exists: true döner
+          // 4. Zaten üye kontrolü
           else if (result.exists === true && result.message?.includes('zaten üye')) {
             // Kullanıcı zaten üye
             this.emailExists = true;
@@ -1507,14 +1552,14 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
               message: result.message
             });
           }
-          // 5. Başarılı ekleme (200) - exists: true döner
+          // 5. Kullanıcı eklenebilir (üye değil, kontrol sırasında eklenmedi)
           else if (result.exists === true) {
-            // Normal kullanıcı - eklenebilir (kontrol sırasında eklenmiş olabilir)
+            // Normal kullanıcı - eklenebilir (kontrol sırasında eklenmedi, sadece kontrol yapıldı)
             this.emailExists = true;
             this.emailIsCorporate = false;
             this.emailUserRoleId = result.roleId || 1;
-            this.emailErrorMessage = null; // Hata yok
-            console.log('Normal kullanıcı tespit edildi - eklenebilir', {
+            this.emailErrorMessage = null; // Hata yok - kullanıcı eklenebilir
+            console.log('Kullanıcı eklenebilir (kontrol sırasında eklenmedi)', {
               roleId: result.roleId,
               isCorporate: result.isCorporate,
               exists: result.exists
@@ -1744,13 +1789,23 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
           this.dashboardEvents = this.dashboardEvents.filter((e) => e.id !== this.confirmDeleteId);
         }
 
-        this.showToast('Etkinlik silindi.', 'success');
-        this.closeEventDetail();
+        this.showToast('Etkinlik başarıyla silindi.', 'success');
+        
+        // Eğer silinen etkinlik detail modal'da açıksa, modal'ı kapat
+        if (this.selectedEvent && this.selectedEvent.id === this.confirmDeleteId) {
+          this.closeEventDetail();
+        }
+        
         this.startCloseConfirm();
       },
       error: (err: any) => {
         console.error('Etkinlik silinirken hata:', err);
-        const errorMsg = err.error?.message || 'Etkinlik silinirken bir hata oluştu.';
+        let errorMsg = 'Etkinlik silinirken bir hata oluştu.';
+        if (err.status === 401 || err.status === 403) {
+          errorMsg = 'Bu işlem için yetkiniz bulunmamaktadır.';
+        } else if (err.error?.message) {
+          errorMsg = err.error.message;
+        }
         this.showToast(errorMsg, 'error');
         this.startCloseConfirm();
       },
@@ -1865,7 +1920,15 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
   }
 
   openEventDetail(event: DashboardEvent) {
-    this.selectedEvent = event;
+    // Event objesini kopyala ve tarih/saat bilgilerinin doğru yüklendiğinden emin ol
+    this.selectedEvent = { ...event };
+    console.log('Event detail opened:', {
+      id: this.selectedEvent.id,
+      title: this.selectedEvent.title,
+      date: this.selectedEvent.date,
+      time: this.selectedEvent.time,
+      startDateIso: this.selectedEvent.startDateIso
+    });
     if (isPlatformBrowser(this.platformId)) {
       document.body.style.overflow = 'hidden';
     }
@@ -1954,30 +2017,56 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     // Parse date and time from ISO string
     let dateStr = '';
     let timeStr = '';
+    
+    // Önce startDateIso'dan parse etmeyi dene
     if (this.selectedEvent.startDateIso) {
       try {
         const d = new Date(this.selectedEvent.startDateIso);
-        // YYYY-MM-DD
-        const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        dateStr = `${year}-${month}-${day}`;
+        
+        // Geçerlilik kontrolü
+        if (!isNaN(d.getTime())) {
+          // YYYY-MM-DD
+          const year = d.getFullYear();
+          const month = String(d.getMonth() + 1).padStart(2, '0');
+          const day = String(d.getDate()).padStart(2, '0');
+          dateStr = `${year}-${month}-${day}`;
 
-        // HH:mm
-        const hour = String(d.getHours()).padStart(2, '0');
-        const minute = String(d.getMinutes()).padStart(2, '0');
-        timeStr = `${hour}:${minute}`;
+          // HH:mm
+          const hour = String(d.getHours()).padStart(2, '0');
+          const minute = String(d.getMinutes()).padStart(2, '0');
+          timeStr = `${hour}:${minute}`;
+        }
       } catch (e) {
-        console.error('Date parsing error', e);
+        console.error('Date parsing error from startDateIso:', e);
       }
+    }
+    
+    // Eğer startDateIso'dan parse edilemediyse, selectedEvent.time'ı kullan
+    if (!timeStr && this.selectedEvent.time && this.selectedEvent.time.trim().length > 0) {
+      // selectedEvent.time zaten "HH:mm" formatında olmalı
+      timeStr = this.selectedEvent.time.trim();
+    }
+    
+    // Eğer hala tarih yoksa, bugünün tarihini kullan (fallback)
+    if (!dateStr) {
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      dateStr = `${year}-${month}-${day}`;
+    }
+    
+    // Eğer hala saat yoksa, varsayılan saat kullan (fallback)
+    if (!timeStr) {
+      timeStr = '10:00';
     }
 
     this.editedEventData = {
-      title: this.selectedEvent.title,
+      title: this.selectedEvent.title || '',
       shortDescription: this.selectedEvent.description?.substring(0, 70) || '',
       date: dateStr,
       time: timeStr,
-      location: this.selectedEvent.location,
+      location: this.selectedEvent.location || '',
       quota: this.selectedEvent.quota ? String(this.selectedEvent.quota) : '',
       description: this.selectedEvent.description || '',
       image: this.selectedEvent.imageUrl || '',
@@ -1988,16 +2077,25 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
   saveEventFromDetail() {
     if (!this.selectedEvent || !this.isEditingEventDetail) return;
 
-    // Validation
-    if (
-      !this.editedEventData.title?.trim() ||
-      !this.editedEventData.date ||
-      !this.editedEventData.time ||
-      !this.editedEventData.location?.trim() ||
-      !this.editedEventData.quota ||
-      !this.editedEventData.description?.trim()
-    ) {
-      this.showToast('Lütfen tüm alanları doldurun.', 'error');
+    // Validation - daha detaylı kontrol
+    const hasValidTitle = this.editedEventData.title?.trim() && this.editedEventData.title.trim().length > 0;
+    const hasValidDate = this.editedEventData.date && this.editedEventData.date.trim().length > 0;
+    const hasValidTime = this.editedEventData.time && this.editedEventData.time.trim().length > 0;
+    const hasValidLocation = this.editedEventData.location?.trim() && this.editedEventData.location.trim().length > 0;
+    const hasValidQuota = this.editedEventData.quota && String(this.editedEventData.quota).trim().length > 0;
+    const hasValidDescription = this.editedEventData.description?.trim() && this.editedEventData.description.trim().length > 0;
+
+    if (!hasValidTitle || !hasValidDate || !hasValidTime || !hasValidLocation || !hasValidQuota || !hasValidDescription) {
+      // Hangi alanların eksik olduğunu belirt
+      const missingFields: string[] = [];
+      if (!hasValidTitle) missingFields.push('Etkinlik İsmi');
+      if (!hasValidDate) missingFields.push('Tarih');
+      if (!hasValidTime) missingFields.push('Saat');
+      if (!hasValidLocation) missingFields.push('Konum');
+      if (!hasValidQuota) missingFields.push('Kontenjan');
+      if (!hasValidDescription) missingFields.push('Açıklama');
+      
+      this.showToast(`Lütfen şu alanları doldurun: ${missingFields.join(', ')}`, 'error');
       return;
     }
 
@@ -2006,11 +2104,13 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     let endDate: Date;
 
     try {
-      const dateStr = this.editedEventData.date;
-      const timeStr = this.editedEventData.time;
+      const dateStr = this.editedEventData.date?.trim();
+      const timeStr = this.editedEventData.time?.trim();
 
-      if (!dateStr || !timeStr) {
-        throw new Error('Tarih ve saat gereklidir');
+      // Boş string kontrolü
+      if (!dateStr || dateStr.length === 0 || !timeStr || timeStr.length === 0) {
+        this.showToast('Lütfen tarih ve saat bilgilerini girin.', 'error');
+        return;
       }
 
       const [year, month, day] = dateStr.split('-').map(Number);
@@ -2049,60 +2149,38 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
           this.isEditingEventDetail = false;
           this.editedEventData = {};
 
-          // Reload events
+          // Reload events from backend
           if (this.clubInfo.id) {
             this.loadCommunityEvents(this.clubInfo.id);
-          }
-
-          // Close modal and reopen with updated data
-          const eventId = this.selectedEvent?.id;
-          this.closeEventDetail();
-
-          // Reopen with updated event after a short delay
-          setTimeout(() => {
-            if (eventId && this.clubInfo.id) {
-              this.eventService.getCommunityEvents(this.clubInfo.id, [0, 1, 2]).subscribe({
-                next: (events) => {
-                  const updatedEvent = events.find((e) => e.id === eventId);
-                  if (updatedEvent) {
-                    const dashboardEvent: DashboardEvent = {
-                      id: updatedEvent.id,
-                      title: updatedEvent.title,
-                      status:
-                        updatedEvent.status === 'Onaylandı'
-                          ? 'approved'
-                          : updatedEvent.status === 'Reddedildi'
-                            ? 'rejected'
-                            : 'pending',
-                      imageUrl: updatedEvent.imageUrl || '',
-                      date: updatedEvent.startDate
-                        ? new Date(updatedEvent.startDate).toLocaleDateString('tr-TR', {
-                          day: 'numeric',
-                          month: 'long',
-                        })
-                        : '',
-                      startDateIso: updatedEvent.startDate || '',
-                      location: updatedEvent.location || '',
-                      category: updatedEvent.communityName || '',
-                      description: updatedEvent.description || '',
-                      time: updatedEvent.startDate
-                        ? new Date(updatedEvent.startDate).toLocaleTimeString('tr-TR', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })
-                        : '',
-                      quota: updatedEvent.quota || 0,
-                    };
-                    this.openEventDetail(dashboardEvent);
-                  }
-                },
-              });
+            
+            // After reload, update the selected event if it's still open
+            const eventId = this.selectedEvent?.id;
+            if (eventId) {
+              // Wait for events to reload, then update selected event
+              setTimeout(() => {
+                const updatedEvent = this.dashboardEvents.find((e) => e.id === eventId);
+                if (updatedEvent) {
+                  // Event'i güncelle ve tarih/saat bilgilerinin doğru yüklendiğinden emin ol
+                  this.selectedEvent = { ...updatedEvent };
+                  console.log('Selected event updated:', this.selectedEvent.date, this.selectedEvent.time);
+                  // Reinitialize edited data in case user wants to edit again
+                  this.initializeEditedEventData();
+                } else {
+                  // Event not found (might have been deleted or status changed), close modal
+                  this.closeEventDetail();
+                }
+              }, 500); // Timeout'u biraz artırdık, events yüklenene kadar beklemek için
             }
-          }, 500);
+          }
         },
         error: (err: any) => {
           console.error('Etkinlik güncellenemedi:', err);
-          const errorMessage = err.error?.message || 'Etkinlik güncellenirken bir hata oluştu';
+          let errorMessage = 'Etkinlik güncellenirken bir hata oluştu.';
+          if (err.status === 401 || err.status === 403) {
+            errorMessage = 'Bu işlem için yetkiniz bulunmamaktadır.';
+          } else if (err.error?.message) {
+            errorMessage = err.error.message;
+          }
           this.showToast(errorMessage, 'error');
         },
       });
@@ -2297,6 +2375,17 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
 
   getDashboardIcon(): string {
     return 'groups';
+  }
+
+  // Image error handler - prevents infinite loop of 404 requests
+  onImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    // Only set fallback if not already set to prevent infinite loop
+    if (img.src && !img.src.includes('page-title1.jpg') && !img.src.includes('placeholder-cover.svg')) {
+      img.src = 'assets/images/page-title1.jpg';
+      // Remove onerror to prevent infinite loop
+      img.onerror = null;
+    }
   }
 
 

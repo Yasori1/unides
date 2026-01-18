@@ -14,7 +14,7 @@
   <div class="hero-section" (mousemove)="onHeroMouseMove($event)">
     <div class="background-wrapper">
       <img src="assets/etkinlik-statik.png" [alt]="event.title" class="hero-image" loading="lazy"
-        onerror="this.src='assets/images/placeholder.jpg'" />
+        onerror="this.onImageError($event)" />
     </div>
     <div class="hero-overlay">
     </div>

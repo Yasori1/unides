@@ -7,6 +7,7 @@ import { ToastService } from '../../services/toast.services';
 // Bileşenler
 import { ToastComponent } from '../../components/ui/toast/toast.component';
 import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
+import { environment } from '../../../environments/environment';
 
 // Backend Response Interface
 interface AuthResponse {
@@ -109,7 +110,7 @@ export class LoginPageComponent implements OnInit {
     this.isLoading = true;
     this.loginError = '';
 
-    fetch('/api/Auth/login', {
+    fetch(`${environment.apiUrl}/Auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -204,7 +205,7 @@ export class LoginPageComponent implements OnInit {
 
     try {
       // NOT: Backend endpoint şu an yok ama kodlar hazır, endpoint eklendiğinde çalışacak
-      const response = await fetch('/api/Auth/forgot-password', {
+      const response = await fetch(`${environment.apiUrl}/Auth/forgot-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
