@@ -1047,7 +1047,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 999;
+  z-index: 4000; // Event detail modal'ından (z-index: 3000) yüksek olmalı
   padding: 16px;
   animation: fadeIn 0.2s ease forwards;
 }
@@ -1721,7 +1721,7 @@
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
 }
 
-.settings-hero .hero-banner .edit-btn {
+.settings-hero .hero-banner .edit-banner-btn {
   position: absolute;
   top: 12px;
   right: 12px;
@@ -1735,9 +1735,32 @@
   justify-content: center;
   cursor: pointer;
   transition: background 0.2s ease;
+  z-index: 10;
 }
 
-.settings-hero .hero-banner .edit-btn:hover {
+.settings-hero .hero-banner .edit-banner-btn:hover {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.settings-hero .avatar-wrapper .edit-avatar-btn {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  z-index: 10;
+}
+
+.settings-hero .avatar-wrapper .edit-avatar-btn:hover {
   background: rgba(0, 0, 0, 0.7);
 }
 

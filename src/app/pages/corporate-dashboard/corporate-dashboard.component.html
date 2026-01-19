@@ -219,15 +219,14 @@
             style="cursor: pointer">
             <div class="cover-area">
               <img [src]="item.coverImage || item.banner || 'assets/img/placeholder-cover.svg'" [alt]="item.name"
-                class="cover-img" onerror="this.src='assets/img/placeholder-cover.svg'" />
+                class="cover-img" (error)="onImageError($event, 'cover')" />
               <span class="category-badge" *ngIf="item.category">{{ item.category }}</span>
             </div>
 
             <div class="card-content">
               <div class="header-row">
                 <div class="logo-wrapper">
-                  <img [src]="item.logo" [alt]="item.name" class="logo-img"
-                    onerror="this.src='assets/img/placeholder-logo.svg'" />
+                  <img [src]="item.logo" [alt]="item.name" class="logo-img" (error)="onImageError($event, 'logo')" />
                 </div>
                 <div class="title-wrapper">
                   <h3 class="community-name">{{ item.name }}</h3>
@@ -312,7 +311,7 @@
             (click)="openEventDetail(e)">
             <div class="card-image">
               <img [src]="e.imageUrl || 'assets/images/page-title1.jpg'" [alt]="e.eventName" loading="lazy"
-                onerror="this.src='assets/images/page-title1.jpg'" />
+                (error)="onImageError($event, 'event')" />
               <div class="tap-hint">
                 <span class="material-symbols-outlined">visibility</span> İncele
               </div>
@@ -584,14 +583,16 @@
           <div class="banner-upload-wrapper no-url-input">
             <div class="upload-hint-wrapper">
               <app-image-upload label="Banner Görseli" [previewUrl]="newCommunity.banner || null"
-                (onImageSelected)="onNewBannerSelected($event)"></app-image-upload>
+                [uploadToServer]="true" [allowUrl]="false" (onImageSelected)="onNewBannerSelected($event)"
+                (onFileSelected)="onNewBannerFileSelected($event)"></app-image-upload>
               <span class="size-hint">Max 1 MB</span>
             </div>
           </div>
           <div class="logo-upload-wrapper no-url-input">
             <div class="upload-hint-wrapper">
-              <app-image-upload label="Logo" [previewUrl]="newCommunity.logo || null"
-                (onImageSelected)="onNewLogoSelected($event)"></app-image-upload>
+              <app-image-upload label="Logo" [previewUrl]="newCommunity.logo || null" [uploadToServer]="true"
+                [allowUrl]="false" (onImageSelected)="onNewLogoSelected($event)"
+                (onFileSelected)="onNewLogoFileSelected($event)"></app-image-upload>
               <span class="size-hint">Max 1 MB</span>
             </div>
           </div>
@@ -602,17 +603,18 @@
           <label class="section-title">Durum</label>
           <div class="status-toggle-buttons">
             <button type="button" class="status-btn" [class.active]="newCommunity.status === 'Aktif'"
-              (click)="newCommunity.status = 'Aktif'">
+              (click)="newCommunity.status = 'Aktif'; newCommunity.isActivity = true">
               <span class="material-symbols-outlined">check_circle</span>
               Aktif
             </button>
             <button type="button" class="status-btn passive" [class.active]="newCommunity.status === 'Pasif'"
-              (click)="newCommunity.status = 'Pasif'">
+              (click)="newCommunity.status = 'Pasif'; newCommunity.isActivity = false">
               <span class="material-symbols-outlined">cancel</span>
               Pasif
             </button>
           </div>
         </div>
+
 
         <!-- Temel Bilgiler -->
         <div class="form-section">
@@ -690,11 +692,13 @@
         <div class="image-uploads-section">
           <div class="banner-upload-wrapper no-url-input">
             <app-image-upload label="Banner Görseli" [previewUrl]="editingCommunity.banner || null"
-              (onImageSelected)="onBannerSelected($event)"></app-image-upload>
+              [uploadToServer]="true" [allowUrl]="false" (onImageSelected)="onBannerSelected($event)"
+              (onFileSelected)="onBannerFileSelected($event)"></app-image-upload>
           </div>
           <div class="logo-upload-wrapper no-url-input">
-            <app-image-upload label="Logo" [previewUrl]="editingCommunity.logo || null"
-              (onImageSelected)="onLogoSelected($event)"></app-image-upload>
+            <app-image-upload label="Logo" [previewUrl]="editingCommunity.logo || null" [uploadToServer]="true"
+              [allowUrl]="false" (onImageSelected)="onLogoSelected($event)"
+              (onFileSelected)="onLogoFileSelected($event)"></app-image-upload>
           </div>
         </div>
 
@@ -703,17 +707,18 @@
           <label>Topluluk Durumu</label>
           <div class="status-toggle-buttons">
             <button class="status-btn" [class.active]="editingCommunity.status === 'Aktif'"
-              (click)="editingCommunity.status = 'Aktif'">
+              (click)="editingCommunity.status = 'Aktif'; editingCommunity.isActivity = true">
               <span class="material-symbols-outlined">check_circle</span>
               Aktif
             </button>
             <button class="status-btn passive" [class.active]="editingCommunity.status === 'Pasif'"
-              (click)="editingCommunity.status = 'Pasif'">
+              (click)="editingCommunity.status = 'Pasif'; editingCommunity.isActivity = false">
               <span class="material-symbols-outlined">cancel</span>
               Pasif
             </button>
           </div>
         </div>
+
 
         <!-- Form Alanları -->
         <div class="form-section">
@@ -784,11 +789,11 @@
         </div>
 
         <div class="modal-actions">
-          <button class="btn-danger" (click)="deleteCommunity()">
+          <button type="button" class="btn-danger" (click)="deleteCommunity()">
             <span class="material-symbols-outlined">delete</span>
             Topluluğu Sil
           </button>
-          <button class="btn-primary" (click)="saveCommunity()">
+          <button type="button" class="btn-primary" (click)="saveCommunity()">
             <span class="material-symbols-outlined">save</span>
             Topluluk Kaydet
           </button>

@@ -9,6 +9,7 @@ import { TurkeySkylineComponent } from '../../components/ui/turkey-skyline/turke
 import { CommunityService } from '../../services/community.services';
 import { EventService } from '../../services/event.services';
 import { SearchService } from '../../services/search.services';
+import { ImageErrorHandlerService } from '../../services/image-error-handler.service';
 
 // --- Veri Tipleri (Interfaces) ---
 interface Community {
@@ -101,7 +102,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     private sanitizer: DomSanitizer,
     private communityService: CommunityService,
     private eventService: EventService,
-    private searchService: SearchService
+    private searchService: SearchService,
+    private imageErrorHandler: ImageErrorHandlerService
   ) {
     this.safeVideoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
       'https://www.youtube.com/embed/z-3j8kP0D48?autoplay=1'
@@ -366,5 +368,10 @@ export class HomeComponent implements OnInit, OnDestroy {
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     if (days === 0) return 'Bugün';
     return `${days} Gün`;
+  }
+
+  // Image error handler - Placeholder görsellerin sürekli istek atmasını engeller
+  onImageError(event: Event, type: 'announcement' | 'event' | 'logo' | 'cover' | 'avatar' = 'avatar'): void {
+    this.imageErrorHandler.handleImageError(event, type);
   }
 }

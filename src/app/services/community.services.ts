@@ -24,7 +24,45 @@ export class CommunityService {
   private readonly placeholderLogo = 'assets/img/placeholder-logo.svg';
   private readonly placeholderCover = 'assets/img/placeholder-cover.svg';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
+
+  // Image path'i tam URL'ye çevir ve `/ImagesUnides/` formatına dönüştür
+  private convertImagePathToFullUrl(imagePath: string): string {
+    if (!imagePath) {
+      return '';
+    }
+
+    const pathStr = String(imagePath).trim();
+
+    // Zaten tam URL ise (http://, https://, data:, blob:) olduğu gibi döndür
+    if (pathStr.startsWith('http://') || pathStr.startsWith('https://') || pathStr.startsWith('data:') || pathStr.startsWith('blob:')) {
+      return pathStr;
+    }
+
+    // Placeholder veya local asset ise olduğu gibi döndür
+    if (pathStr.startsWith('assets/')) {
+      return pathStr;
+    }
+
+    let finalPath = pathStr;
+    if (!finalPath.startsWith('/')) {
+      finalPath = '/' + finalPath;
+    }
+
+    // Path dönüşümü: `/assets/img/` -> `/ImagesUnides/`
+    if (finalPath.startsWith('/assets/img/')) {
+      finalPath = finalPath.replace('/assets/img/', '/ImagesUnides/');
+    }
+    // Eğer zaten `/ImagesUnides/` ile başlıyorsa olduğu gibi bırak
+    // Eğer `/images/` ile başlıyorsa (küçük harf) `/ImagesUnides/` yap
+    else if (finalPath.startsWith('/images/')) {
+      finalPath = finalPath.replace('/images/', '/ImagesUnides/');
+    }
+
+    // Her zaman production URL'ini kullan (unidesportal.com)
+    const baseUrl = environment.apiUrl.replace('/api', '');
+    return baseUrl + finalPath;
+  }
 
   private ensureCommunityAssets(c: Community): Community {
     const logo = c.logo && String(c.logo).trim() ? c.logo : this.placeholderLogo;
@@ -64,8 +102,8 @@ export class CommunityService {
       dto.isActivity !== undefined
         ? dto.isActivity
         : dto.IsActivity !== undefined
-        ? dto.IsActivity
-        : true;
+          ? dto.IsActivity
+          : true;
 
     // ID'yi string olarak sakla (Guid olabilir)
     const communityId = dto.communityId || dto.CommunityId;
@@ -80,18 +118,18 @@ export class CommunityService {
       description: dto.miniAbout || dto.MiniAbout || '',
       logo:
         (dto.logoUrl || dto.LogoUrl) && String(dto.logoUrl || dto.LogoUrl).trim()
-          ? dto.logoUrl || dto.LogoUrl
+          ? this.convertImagePathToFullUrl(dto.logoUrl || dto.LogoUrl)
           : this.placeholderLogo,
       memberCount: dto.memberCount || dto.MemberCount || 0,
       city: dto.city || dto.City || '',
       about: dto.miniAbout || dto.MiniAbout || '',
       banner:
         (dto.bannerUrl || dto.BannerUrl) && String(dto.bannerUrl || dto.BannerUrl).trim()
-          ? dto.bannerUrl || dto.BannerUrl
+          ? this.convertImagePathToFullUrl(dto.bannerUrl || dto.BannerUrl)
           : this.placeholderCover,
       coverImage:
         (dto.bannerUrl || dto.BannerUrl) && String(dto.bannerUrl || dto.BannerUrl).trim()
-          ? dto.bannerUrl || dto.BannerUrl
+          ? this.convertImagePathToFullUrl(dto.bannerUrl || dto.BannerUrl)
           : this.placeholderCover,
       status: isActivity ? 'Aktif' : 'Pasif',
       miniAbout: dto.miniAbout || dto.MiniAbout || '',
@@ -150,8 +188,8 @@ export class CommunityService {
       dto.isActivity !== undefined
         ? dto.isActivity
         : dto.IsActivity !== undefined
-        ? dto.IsActivity
-        : true;
+          ? dto.IsActivity
+          : true;
 
     return {
       id: dto.communityId || dto.CommunityId,
@@ -161,18 +199,18 @@ export class CommunityService {
       description: dto.miniAbout || dto.MiniAbout,
       logo:
         (dto.logoUrl || dto.LogoUrl) && String(dto.logoUrl || dto.LogoUrl).trim()
-          ? dto.logoUrl || dto.LogoUrl
+          ? this.convertImagePathToFullUrl(dto.logoUrl || dto.LogoUrl)
           : this.placeholderLogo,
       memberCount: 0, // List endpoint'inde memberCount yok
       city: dto.city || dto.City,
       about: dto.miniAbout || dto.MiniAbout,
       banner:
         (dto.bannerUrl || dto.BannerUrl) && String(dto.bannerUrl || dto.BannerUrl).trim()
-          ? dto.bannerUrl || dto.BannerUrl
+          ? this.convertImagePathToFullUrl(dto.bannerUrl || dto.BannerUrl)
           : this.placeholderCover,
       coverImage:
         (dto.bannerUrl || dto.BannerUrl) && String(dto.bannerUrl || dto.BannerUrl).trim()
-          ? dto.bannerUrl || dto.BannerUrl
+          ? this.convertImagePathToFullUrl(dto.bannerUrl || dto.BannerUrl)
           : this.placeholderCover,
       status: isActivity ? 'Aktif' : 'Pasif',
       miniAbout: dto.miniAbout || dto.MiniAbout,
@@ -196,18 +234,18 @@ export class CommunityService {
       description: dto.comAbout || dto.ComAbout || dto.miniAbout || dto.MiniAbout || '',
       logo:
         (dto.logoUrl || dto.LogoUrl) && String(dto.logoUrl || dto.LogoUrl).trim()
-          ? dto.logoUrl || dto.LogoUrl
+          ? this.convertImagePathToFullUrl(dto.logoUrl || dto.LogoUrl)
           : this.placeholderLogo,
       memberCount: 0, // Backend'de memberCount yok, gerekirse ayrı endpoint'ten çekilebilir
       city: dto.city || dto.City || '',
       about: dto.comAbout || dto.ComAbout || '',
       banner:
         (dto.bannerUrl || dto.BannerUrl) && String(dto.bannerUrl || dto.BannerUrl).trim()
-          ? dto.bannerUrl || dto.BannerUrl
+          ? this.convertImagePathToFullUrl(dto.bannerUrl || dto.BannerUrl)
           : this.placeholderCover,
       coverImage:
         (dto.bannerUrl || dto.BannerUrl) && String(dto.bannerUrl || dto.BannerUrl).trim()
-          ? dto.bannerUrl || dto.BannerUrl
+          ? this.convertImagePathToFullUrl(dto.bannerUrl || dto.BannerUrl)
           : this.placeholderCover,
       website: dto.webSiteUrl || dto.WebSiteUrl || '',
       email: dto.comMail || dto.ComMail || '',
@@ -223,8 +261,8 @@ export class CommunityService {
         dto.isActivity !== undefined
           ? dto.isActivity
           : dto.IsActivity !== undefined
-          ? dto.IsActivity
-          : true,
+            ? dto.IsActivity
+            : true,
       events: dto.events || dto.Events || [],
     };
   }
@@ -536,8 +574,8 @@ export class CommunityService {
     // Email .edu.tr uzantılı olmalı
     const cleanEmail = email.trim().toLowerCase();
     if (!cleanEmail.endsWith('.edu.tr')) {
-      return of({ 
-        exists: false, 
+      return of({
+        exists: false,
         message: 'Sadece .edu.tr uzantılı e-posta adresleri eklenebilir.',
         roleId: undefined,
         isCorporate: false
@@ -549,28 +587,28 @@ export class CommunityService {
     return this.getCommunityMembers('').pipe(
       map((members) => {
         // Email'in listede olup olmadığını kontrol et
-        const memberExists = members.some((m: any) => 
+        const memberExists = members.some((m: any) =>
           m.email?.toLowerCase() === cleanEmail
         );
 
         if (memberExists) {
           // Kullanıcı zaten üye
-          return { 
-            exists: true, 
-            message: 'Kullanıcı zaten üye', 
-            roleId: 1, 
-            isCorporate: false 
+          return {
+            exists: true,
+            message: 'Kullanıcı zaten üye',
+            roleId: 1,
+            isCorporate: false
           };
         } else {
           // Kullanıcı üye değil - eklenebilir
           // Backend'de kullanıcı var mı kontrol edemiyoruz (sadece kontrol endpoint'i yok)
           // Bu yüzden kullanıcının var olduğunu varsayıyoruz
           // Gerçek kontrol "Kaydet" butonuna basıldığında yapılacak
-          return { 
-            exists: true, 
-            message: 'Kullanıcı eklenebilir', 
-            roleId: 1, 
-            isCorporate: false 
+          return {
+            exists: true,
+            message: 'Kullanıcı eklenebilir',
+            roleId: 1,
+            isCorporate: false
           };
         }
       }),
@@ -578,11 +616,11 @@ export class CommunityService {
         console.error('Email kontrol hatası:', error);
         // Hata durumunda kullanıcının var olduğunu varsayalım
         // Gerçek kontrol "Kaydet" butonuna basıldığında yapılacak
-        return of({ 
-          exists: true, 
-          message: 'Kullanıcı kontrol edilemedi', 
-          roleId: 1, 
-          isCorporate: false 
+        return of({
+          exists: true,
+          message: 'Kullanıcı kontrol edilemedi',
+          roleId: 1,
+          isCorporate: false
         });
       })
     );
@@ -710,12 +748,12 @@ export class CommunityService {
           university: dto.university || dto.University || '',
           category: dto.comCategory || dto.ComCategory || 'Genel',
           description: dto.comAbout || dto.ComAbout || dto.miniAbout || dto.MiniAbout,
-          logo: dto.logoUrl || dto.LogoUrl || this.placeholderLogo,
+          logo: (dto.logoUrl || dto.LogoUrl) ? this.convertImagePathToFullUrl(dto.logoUrl || dto.LogoUrl) : this.placeholderLogo,
           memberCount: 0,
           city: dto.city || dto.City || '',
           about: dto.comAbout || dto.ComAbout,
-          banner: dto.bannerUrl || dto.BannerUrl || this.placeholderCover,
-          coverImage: dto.bannerUrl || dto.BannerUrl || this.placeholderCover,
+          banner: (dto.bannerUrl || dto.BannerUrl) ? this.convertImagePathToFullUrl(dto.bannerUrl || dto.BannerUrl) : this.placeholderCover,
+          coverImage: (dto.bannerUrl || dto.BannerUrl) ? this.convertImagePathToFullUrl(dto.bannerUrl || dto.BannerUrl) : this.placeholderCover,
           status: 'Aktif',
           isActivity: true,
           events: dto.events || dto.Events || [], // Topluluk etkinlikleri
@@ -763,7 +801,7 @@ export class CommunityService {
           );
 
           console.log('getMyCommunities: Tüm topluluklar:', allCommunities.length, 'Başkan olduğu topluluklar:', myCommunities.length, 'Kullanıcı email:', userEmail);
-          
+
           return myCommunities;
         })
         // catchError kaldırıldı - hataları component'te handle edelim
@@ -795,17 +833,30 @@ export class CommunityService {
       }
 
       // Güncelleme
+      // Base64 data URI'leri kaldır - backend bunları kabul etmiyor
+      // Sadece dosya yükleme endpoint'lerini kullanacağız
+      let logoUrl = community.logo || '';
+      let bannerUrl = community.banner || '';
+
+      // Eğer base64 data URI ise, undefined yap (backend'e gönderilmesin)
+      if (logoUrl && logoUrl.startsWith('data:')) {
+        logoUrl = undefined as any;
+      }
+      if (bannerUrl && bannerUrl.startsWith('data:')) {
+        bannerUrl = undefined as any;
+      }
+
       const updateDto: UpdateCommunityDto = {
         comName: community.name,
         comAbout: community.about || community.description,
         city: community.city,
         university: community.university,
         comCategory: community.category, // Kategori eklendi
-        logoUrl: community.logo || community.banner,
+        logoUrl: logoUrl || undefined,
         comMail: community.email || community.comMail,
         webSiteUrl: community.website || community.webSiteUrl,
         instagramUrl: community.instagram || community.instagramUrl,
-        bannerUrl: community.banner,
+        bannerUrl: bannerUrl || undefined,
         miniAbout: community.miniAbout,
         isActivity: isActivity,
         comLeadMail: community.presidentEmail || community.comLeadMail,
@@ -817,6 +868,19 @@ export class CommunityService {
       if (!community.presidentEmail && !community.comLeadMail) {
         throw new Error('Topluluk başkanı email adresi (comLeadMail) zorunludur.');
       }
+      // Base64 data URI'leri kaldır - backend bunları kabul etmiyor
+      // Sadece dosya yükleme endpoint'lerini kullanacağız
+      let logoUrl = community.logo || '';
+      let bannerUrl = community.banner || '';
+
+      // Eğer base64 data URI ise, undefined yap (backend'e gönderilmesin)
+      if (logoUrl && logoUrl.startsWith('data:')) {
+        logoUrl = undefined as any;
+      }
+      if (bannerUrl && bannerUrl.startsWith('data:')) {
+        bannerUrl = undefined as any;
+      }
+
       const createDto: CreateCommunityDto = {
         comName: community.name,
         comAbout: community.about || community.description,
@@ -826,8 +890,8 @@ export class CommunityService {
         comLeadMail: community.presidentEmail || community.comLeadMail || '',
         webSiteUrl: community.website || community.webSiteUrl,
         instagramUrl: community.instagram || community.instagramUrl,
-        logoUrl: community.logo,
-        bannerUrl: community.banner,
+        logoUrl: logoUrl || undefined,
+        bannerUrl: bannerUrl || undefined,
         miniAbout: community.miniAbout,
         comCategory: community.category,
       };
@@ -850,6 +914,76 @@ export class CommunityService {
         })
       );
     }
+  }
+
+  // Topluluk banner yükle (Backend: POST /api/Communities/{id}/banner)
+  // Auth interceptor automatically adds Authorization header if token exists
+  uploadBanner(communityId: string, file: File): Observable<{ BannerUrl: string }> {
+    const formData = new FormData();
+    formData.append('file', file, file.name);
+
+    return this.http.post<{ BannerUrl?: string; bannerUrl?: string }>(`${this.apiUrl}/${communityId}/banner`, formData).pipe(
+      map((response: any) => {
+        const path = response.BannerUrl || response.bannerUrl || '';
+        // Backend'den `/assets/img/Banner/...` formatında gelir, `/ImagesUnides/Banner/...` formatına çevir
+        if (path && !path.startsWith('http://') && !path.startsWith('https://') && !path.startsWith('data:')) {
+          let finalPath = path;
+          if (!finalPath.startsWith('/')) {
+            finalPath = '/' + finalPath;
+          }
+          // Path dönüşümü: `/assets/img/` -> `/ImagesUnides/`
+          if (finalPath.startsWith('/assets/img/')) {
+            finalPath = finalPath.replace('/assets/img/', '/ImagesUnides/');
+          } else if (finalPath.startsWith('/images/')) {
+            finalPath = finalPath.replace('/images/', '/ImagesUnides/');
+          }
+          // Full URL oluştur
+          const baseUrl = environment.apiUrl.replace('/api', '');
+          const fullUrl = baseUrl + finalPath;
+          return { BannerUrl: fullUrl };
+        }
+        return { BannerUrl: path };
+      }),
+      catchError((error) => {
+        console.error('Banner yüklenemedi:', error);
+        throw error;
+      })
+    );
+  }
+
+  // Topluluk logo yükle (Backend: POST /api/Communities/{id}/logo)
+  // Auth interceptor automatically adds Authorization header if token exists
+  uploadLogo(communityId: string, file: File): Observable<{ LogoUrl: string }> {
+    const formData = new FormData();
+    formData.append('file', file, file.name);
+
+    return this.http.post<{ LogoUrl?: string; logoUrl?: string }>(`${this.apiUrl}/${communityId}/logo`, formData).pipe(
+      map((response: any) => {
+        const path = response.LogoUrl || response.logoUrl || '';
+        // Backend'den `/assets/img/Logo/...` formatında gelir, `/ImagesUnides/Logo/...` formatına çevir
+        if (path && !path.startsWith('http://') && !path.startsWith('https://') && !path.startsWith('data:')) {
+          let finalPath = path;
+          if (!finalPath.startsWith('/')) {
+            finalPath = '/' + finalPath;
+          }
+          // Path dönüşümü: `/assets/img/` -> `/ImagesUnides/`
+          if (finalPath.startsWith('/assets/img/')) {
+            finalPath = finalPath.replace('/assets/img/', '/ImagesUnides/');
+          } else if (finalPath.startsWith('/images/')) {
+            finalPath = finalPath.replace('/images/', '/ImagesUnides/');
+          }
+          // Full URL oluştur
+          const baseUrl = environment.apiUrl.replace('/api', '');
+          const fullUrl = baseUrl + finalPath;
+          return { LogoUrl: fullUrl };
+        }
+        return { LogoUrl: path };
+      }),
+      catchError((error) => {
+        console.error('Logo yüklenemedi:', error);
+        throw error;
+      })
+    );
   }
 
   // Topluluk başkanı için istatistikleri getir (Backend: GET /api/Communities/leader-stats)

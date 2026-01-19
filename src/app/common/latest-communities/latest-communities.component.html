@@ -19,7 +19,7 @@
                 <img
                   [src]="item.logo"
                   [alt]="item.name"
-                  onerror="this.src='assets/img/placeholder.png'"
+                  (error)="onImageError($event, 'cover')"
                 />
                 <div class="meta">
                   <span class="category">{{ item.category }}</span>
@@ -45,7 +45,7 @@
                 <img
                   [src]="item.logo"
                   [alt]="item.name"
-                  onerror="this.src='assets/img/placeholder.png'"
+                  (error)="onImageError($event, 'cover')"
                 />
                 <div class="meta">
                   <span class="category">{{ item.category }}</span>
@@ -71,7 +71,7 @@
                 <img
                   [src]="item.logo"
                   [alt]="item.name"
-                  onerror="this.src='assets/img/placeholder.png'"
+                  (error)="onImageError($event, 'cover')"
                 />
                 <div class="meta">
                   <span class="category">{{ item.category }}</span>

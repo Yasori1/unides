@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
 import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
 import { CommunityService, Community } from '../../services/community.services';
+import { ImageErrorHandlerService } from '../../services/image-error-handler.service';
 
 @Component({
   selector: 'app-communities-page',
@@ -62,6 +63,7 @@ export class CommunitiesPageComponent implements OnInit {
 
   constructor(
     private communityService: CommunityService,
+    private imageErrorHandler: ImageErrorHandlerService,
     private route: ActivatedRoute,
     private router: Router,
     @Inject(PLATFORM_ID) private platformId: Object
@@ -292,5 +294,10 @@ export class CommunitiesPageComponent implements OnInit {
       this.heroMoveX = x / 40;
       this.heroMoveY = y / 40;
     }
+  }
+
+  // Image error handler - Placeholder görsellerin sürekli istek atmasını engeller
+  onImageError(event: Event, type: 'announcement' | 'event' | 'logo' | 'cover' | 'avatar' = 'cover'): void {
+    this.imageErrorHandler.handleImageError(event, type);
   }
 }

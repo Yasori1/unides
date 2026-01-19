@@ -5,6 +5,7 @@ import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.compon
 import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
 import { CommunityService, Community } from '../../services/community.services';
 import { EventService, EventItem } from '../../services/event.services';
+import { ImageErrorHandlerService } from '../../services/image-error-handler.service';
 
 // CommunityEvent interface for mock data
 export interface CommunityEvent {
@@ -42,6 +43,7 @@ export class CommunityDetailComponent implements OnInit {
     private router: Router,
     private communityService: CommunityService,
     private eventService: EventService,
+    private imageErrorHandler: ImageErrorHandlerService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -297,5 +299,10 @@ export class CommunityDetailComponent implements OnInit {
     setTimeout(() => {
       this.copyEmailSuccess = false;
     }, 2000);
+  }
+
+  // Image error handler - Placeholder görsellerin sürekli istek atmasını engeller
+  onImageError(event: Event, type: 'announcement' | 'event' | 'logo' | 'cover' | 'avatar' = 'cover'): void {
+    this.imageErrorHandler.handleImageError(event, type);
   }
 }

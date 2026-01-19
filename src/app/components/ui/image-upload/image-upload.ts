@@ -69,10 +69,12 @@ export class ImageUploadComponent {
     // Eğer uploadToServer true ise, dosyayı parent'a gönder (parent upload edecek)
     if (this.uploadToServer) {
       this.onFileSelected.emit(file);
-      // Önizleme için base64 oku
+      // Önizleme için base64 oku ve onImageSelected'i de emit et (preview için)
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.previewUrl = e.target.result;
+        // Base64 preview'ı da emit et (parent component preview için kullanabilir)
+        this.onImageSelected.emit(this.previewUrl || '');
       };
       reader.readAsDataURL(file);
     } else {

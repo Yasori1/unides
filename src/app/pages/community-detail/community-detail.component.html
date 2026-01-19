@@ -18,7 +18,7 @@
         [alt]="community.name"
         class="hero-image"
         loading="lazy"
-        onerror="this.src='assets/img/placeholder-cover.svg'"
+        (error)="onImageError($event, 'cover')"
       />
     </div>
     <div class="hero-overlay">
@@ -105,7 +105,7 @@
                 [src]="community.logo"
                 [alt]="community.name"
                 class="community-logo"
-                onerror="this.src='assets/img/placeholder-logo.png'"
+                (error)="onImageError($event, 'logo')"
               />
             </div>
 

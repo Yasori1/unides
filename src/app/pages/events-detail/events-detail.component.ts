@@ -4,6 +4,7 @@ import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
 import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
 import { EventService, EventItem } from '../../services/event.services';
+import { ImageErrorHandlerService } from '../../services/image-error-handler.service';
 
 @Component({
   selector: 'app-events-detail',
@@ -23,6 +24,7 @@ export class EventsDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private eventService: EventService,
+    private imageErrorHandler: ImageErrorHandlerService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -79,15 +81,9 @@ export class EventsDetailComponent implements OnInit {
     document.body.style.overflow = ''; // Restore background scrolling
   }
 
-  // Image error handler - prevents infinite loop of 404 requests
+  // Image error handler - Placeholder görsellerin sürekli istek atmasını engeller
   onImageError(event: Event): void {
-    const img = event.target as HTMLImageElement;
-    // Only set fallback if not already set to prevent infinite loop
-    if (img.src && !img.src.includes('page-title1.jpg') && !img.src.includes('placeholder-cover.svg')) {
-      img.src = 'assets/images/page-title1.jpg';
-      // Remove onerror to prevent infinite loop
-      img.onerror = null;
-    }
+    this.imageErrorHandler.handleImageError(event, 'event');
   }
 
   getMonthName(date: Date): string {

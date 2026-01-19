@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { AnnouncementService, Announcement } from '../../services/announcement.services';
 import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
 import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
+import { ImageErrorHandlerService } from '../../services/image-error-handler.service';
 
 // --- Interface Tanımı (DÜZELTİLDİ) ---
 // Omit kullanarak Announcement içindeki orijinal 'link' tanımını çıkardık
@@ -47,12 +48,15 @@ export class AnnouncementsPageComponent implements OnInit {
 
   constructor(
     private announcementService: AnnouncementService,
+    private imageErrorHandler: ImageErrorHandlerService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) { }
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
       this.loadAnnouncements();
+      // Placeholder'ın varlığını önceden kontrol et
+      this.imageErrorHandler.checkPlaceholderExists('assets/img/placeholder-announcement.jpg');
     }
   }
 
@@ -192,5 +196,15 @@ export class AnnouncementsPageComponent implements OnInit {
     } catch {
       return dateString;
     }
+  }
+
+  // Image error handler - Placeholder görsellerin sürekli istek atmasını engeller
+  onImageError(event: Event, type: 'announcement' | 'event' | 'logo' | 'cover' | 'avatar' = 'announcement'): void {
+    this.imageErrorHandler.handleImageError(event, type);
+  }
+
+  // Placeholder URL'i al - eğer placeholder yoksa data URI döndür
+  getPlaceholderUrl(type: 'announcement' | 'event' | 'logo' | 'cover' | 'avatar' = 'announcement'): string {
+    return this.imageErrorHandler.getPlaceholderUrl(type);
   }
 }

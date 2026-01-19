@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable, catchError, map, of, switchMap } from 'rxjs';
+import { Observable, catchError, map, of, switchMap, throwError } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface EventItem {
@@ -18,6 +18,7 @@ export interface EventItem {
   capacity?: string;
   quota?: number; // Kontenjan (number olarak)
   city?: string; // Şehir bilgisi
+  rejectionReason?: string; // Red nedeni / Revize nedeni (ConfirmAbout)
 }
 
 // Backend DTO interfaces
@@ -53,6 +54,10 @@ interface EventListItemDto {
   City?: string;
   eventConfirm?: number;
   EventConfirm?: number;
+  confirmAbout?: string;
+  ConfirmAbout?: string;
+  rejectionReason?: string;
+  RejectionReason?: string;
   // Eski field adları (fallback)
   kisaAciklama?: string;
   baslangicTarihi?: string;
@@ -110,19 +115,70 @@ export class EventService {
 
   // Backend'den gelen relative path'i tam URL'ye çevir
   private convertImagePathToFullUrl(imagePath: string): string {
-    if (!imagePath) return '';
+    if (!imagePath) {
+      return '';
+    }
     
-    // Zaten tam URL ise (http://, https://, data:) olduğu gibi döndür
-    if (imagePath.startsWith('http://') || imagePath.startsWith('https://') || imagePath.startsWith('data:')) {
-      return imagePath;
+    // String'e çevir ve trim yap
+    const pathStr = String(imagePath).trim();
+    
+    // Zaten tam URL ise (http://, https://, data:, blob:) olduğu gibi döndür
+    if (pathStr.startsWith('http://') || pathStr.startsWith('https://') || pathStr.startsWith('data:') || pathStr.startsWith('blob:')) {
+      return pathStr;
+    }
+    
+    // Geçersiz placeholder değerleri kontrol et (küçük harf normalize edilmiş)
+    const normalizedPath = pathStr.toLowerCase().trim();
+    const invalidValues = ['string', 'null', 'undefined', 'none', 'placeholder', ''];
+    if (invalidValues.includes(normalizedPath)) {
+      return '';
+    }
+    
+    // Çok kısa path'ler geçersiz olabilir (örn: "string" = 6 karakter)
+    // Ancak backend'den gelebilecek kısa GUID'ler veya hash'ler geçerli olabilir
+    // Bu yüzden sadece bilinen geçersiz değerleri kontrol ediyoruz
+    
+    // Relative path kontrolü - backend'den `/images/Etkinlikler/`, `/ImagesUnides/Etkinlikler/`, `/assets/img/Etkinlikler/` formatında gelebilir
+    // Eğer path `/images/`, `/ImagesUnides/`, `/assets/img/` ile başlamıyorsa ve çok kısaysa geçersiz olabilir
+    const isValidPath = pathStr.startsWith('/images/') || 
+                        pathStr.startsWith('/ImagesUnides/') || 
+                        pathStr.startsWith('/assets/img/') ||
+                        pathStr.startsWith('/assets/images/');
+    
+    // Eğer path geçerli bir format değilse ve çok kısaysa, geçersiz olabilir
+    if (!isValidPath && pathStr.length < 15) {
+      // Geçersiz placeholder değerleri tekrar kontrol et
+      if (invalidValues.includes(normalizedPath)) {
+        return '';
+      }
+      // Eğer path sadece harflerden oluşuyorsa ve çok kısaysa, muhtemelen geçersiz bir placeholder
+      if (/^[a-zA-Z]+$/.test(pathStr) && pathStr.length < 15) {
+        return '';
+      }
     }
     
     // Relative path ise tam URL'ye çevir
-    const baseUrl = environment.apiUrl.replace('/api', '');
-    if (!imagePath.startsWith('/')) {
-      imagePath = '/' + imagePath;
+    // Backend'den `/assets/img/Duyurular/`, `/assets/img/Banner/`, `/assets/img/Logo/` formatında gelebilir
+    // Bunları `/ImagesUnides/Duyurular/`, `/ImagesUnides/Banner/`, `/ImagesUnides/Logo/` formatına çevir
+    let finalPath = pathStr;
+    if (!finalPath.startsWith('/')) {
+      finalPath = '/' + finalPath;
     }
-    return baseUrl + imagePath;
+    
+    // Path dönüşümü: `/assets/img/` -> `/ImagesUnides/`
+    if (finalPath.startsWith('/assets/img/')) {
+      finalPath = finalPath.replace('/assets/img/', '/ImagesUnides/');
+    }
+    // Eğer zaten `/ImagesUnides/` ile başlıyorsa olduğu gibi bırak
+    // Eğer `/images/` ile başlıyorsa (küçük harf) `/ImagesUnides/` yap
+    else if (finalPath.startsWith('/images/')) {
+      finalPath = finalPath.replace('/images/', '/ImagesUnides/');
+    }
+    
+    // Her zaman production URL'ini kullan (unidesportal.com) - direkt bağlantı
+    const baseUrl = environment.apiUrl.replace('/api', '');
+    const fullUrl = baseUrl + finalPath;
+    return fullUrl;
   }
 
   private mapToEvent(dto: EventListItemDto | any): EventItem {
@@ -293,15 +349,49 @@ export class EventService {
       communityId:
         dto.comId || dto.ComId || dto.toplulukId || dto.ToplulukId || dto.communityId || 0,
       communityName: dto.communityName || dto.CommunityName || '',
-      imageUrl: this.convertImagePathToFullUrl(
-        dto.eventPictureLink || dto.EventPictureLink || dto.resimUrl || dto.ResimUrl || ''
-      ),
+      imageUrl: (() => {
+        // Backend'den gelen image path'i al - farklı field adlarını kontrol et
+        const rawImagePath = dto.eventPictureLink || dto.EventPictureLink || dto.resimUrl || dto.ResimUrl || dto.imageUrl || dto.ImageUrl || '';
+        const imagePathStr = rawImagePath ? String(rawImagePath).trim() : '';
+        
+        // Debug: Backend'den gelen raw image path'i logla
+        if (imagePathStr && imagePathStr.length > 0) {
+          console.log('[mapToEvent] Raw image path from backend:', imagePathStr, 'Event ID:', dto.eventId || dto.EventId);
+        }
+        
+        // convertImagePathToFullUrl ile işle
+        const convertedUrl = this.convertImagePathToFullUrl(imagePathStr);
+        
+        // Debug: Convert edilmiş URL'yi logla
+        if (convertedUrl && convertedUrl.length > 0) {
+          console.log('[mapToEvent] Converted image URL:', convertedUrl, 'Event ID:', dto.eventId || dto.EventId);
+        } else if (imagePathStr && imagePathStr.length > 0) {
+          console.warn('[mapToEvent] Image path convert edilemedi - Raw path:', imagePathStr, 'Event ID:', dto.eventId || dto.EventId);
+        }
+        
+        return convertedUrl;
+      })(),
       status: status,
       capacity:
         dto.eventKontenjan || dto.EventKontenjan
           ? String(dto.eventKontenjan || dto.EventKontenjan)
           : undefined,
       city: dto.city || dto.City || '',
+      rejectionReason: (() => {
+        // Backend'den gelen tüm olası field adlarını kontrol et
+        const confirmAbout = (dto as any).ConfirmAbout || (dto as any).confirmAbout || (dto as any).ConfirmAbout || (dto as any).confirmAbout;
+        const rejectionReason = (dto as any).RejectionReason || (dto as any).rejectionReason;
+        
+        // Debug
+        if (confirmAbout) {
+          console.log('mapToEvent: ConfirmAbout bulundu:', confirmAbout, 'Event ID:', dto.eventId || dto.EventId);
+        }
+        if (rejectionReason) {
+          console.log('mapToEvent: RejectionReason bulundu:', rejectionReason, 'Event ID:', dto.eventId || dto.EventId);
+        }
+        
+        return confirmAbout || rejectionReason || undefined;
+      })(),
     };
   }
 
@@ -416,16 +506,39 @@ export class EventService {
             return [];
           }
 
+          // Debug: Backend'den gelen raw response'u kontrol et
+          console.log('Backend raw response:', response);
+          
           // EventsByStatusDto: { Pending: EventListItemDto[], Accepted: EventListItemDto[], Rejected: EventListItemDto[] }
           const pending = response.Pending || response.pending || [];
           const accepted = response.Accepted || response.accepted || [];
           const rejected = response.Rejected || response.rejected || [];
 
+          // Debug: Rejected events'i kontrol et
+          console.log('Rejected events (raw):', rejected);
+          rejected.forEach((event: any, idx: number) => {
+            console.log(`Rejected event ${idx}:`, {
+              id: event.eventId || event.EventId,
+              name: event.eventName || event.EventName,
+              confirmAbout: event.ConfirmAbout || event.confirmAbout,
+              allKeys: Object.keys(event)
+            });
+          });
+
           // Tüm status'leri birleştir
           const allEvents: EventListItemDto[] = [...pending, ...accepted, ...rejected];
 
           // EventListItemDto'ları EventItem'a map et
-          const mappedEvents = allEvents.map((dto) => this.mapToEvent(dto));
+          const mappedEvents = allEvents.map((dto) => {
+            // Debug: Backend'den gelen raw DTO'yu kontrol et
+            console.log('Raw DTO:', dto);
+            if (dto && ((dto as any).ConfirmAbout || (dto as any).confirmAbout)) {
+              console.log('Backend\'den ConfirmAbout geldi:', (dto as any).ConfirmAbout || (dto as any).confirmAbout, 'Event ID:', dto.eventId || dto.EventId);
+            }
+            const mapped = this.mapToEvent(dto);
+            console.log('Mapped event rejectionReason:', mapped.rejectionReason, 'Event ID:', mapped.id);
+            return mapped;
+          });
 
           return mappedEvents;
         }),
@@ -439,12 +552,19 @@ export class EventService {
   // Etkinlik detayını getir (Backend: GET /api/Events/{id})
   // Auth interceptor automatically adds Authorization header if token exists
   getById(id: number): Observable<EventItem> {
-
-
     return this.http.get<any>(`${this.apiUrl}/${id}`).pipe(
       map((dto) => this.mapToEvent(dto)),
-      catchError((error) => {
-        console.error('Etkinlik detayı yüklenemedi:', error);
+      catchError((error: any) => {
+        // 404 hatalarını sessizce handle et - event bulunamadığında normal bir durum
+        if (error?.status === 404) {
+          // 404 hatası için boş bir EventItem döndür veya hata fırlatma
+          // Component'ler bu durumu handle edebilir
+          return throwError(() => error);
+        }
+        // Diğer hatalar için sadece development modunda log yaz
+        if (!environment.production) {
+          console.warn('Etkinlik detayı yüklenemedi:', error.status || error.message);
+        }
         throw error;
       })
     );
@@ -539,9 +659,16 @@ export class EventService {
     }
 
     // Backend UpdateEventDto formatına çevir (PascalCase)
+    // imageUrl boş string ise EventPictureLink'i boş string olarak gönder (fotoğraf silme durumu)
+    // imageUrl undefined/null ise EventPictureLink'i undefined olarak gönder (güncelleme yok)
+    let eventPictureLink: string | undefined = undefined;
+    if (event.imageUrl !== undefined && event.imageUrl !== null) {
+      eventPictureLink = event.imageUrl === '' ? '' : event.imageUrl;
+    }
+    
     const updateDto: UpdateEventDto = {
       EventName: event.title || undefined,
-      EventPictureLink: event.imageUrl || undefined,
+      EventPictureLink: eventPictureLink,
       EventDate: eventDate || undefined, // DateOnly format: "dd.MM.yyyy"
       EventClock: eventClock || undefined, // TimeOnly format: "HH:mm"
       EventLocation: event.location || undefined,
@@ -571,12 +698,34 @@ export class EventService {
 
   // Etkinlik görseli yükle (Backend: POST /api/Events/{id}/image)
   // Auth interceptor automatically adds Authorization header if token exists
-  uploadEventImage(eventId: number, file: File): Observable<{ ImagePath: string }> {
+  uploadEventImage(eventId: number, file: File): Observable<{ ImagePath: string; imagePath?: string }> {
     const formData = new FormData();
     // Backend'in beklediği parametre adı
     formData.append('file', file, file.name);
 
-    return this.http.post<{ ImagePath: string }>(`${this.apiUrl}/${eventId}/image`, formData).pipe(
+    return this.http.post<{ ImagePath?: string; imagePath?: string }>(`${this.apiUrl}/${eventId}/image`, formData).pipe(
+      map((response) => {
+        // Backend'den imagePath (küçük harf) veya ImagePath (büyük harf) gelebilir
+        const path = response.ImagePath || response.imagePath || '';
+        // Backend'den `/assets/img/Etkinlikler/...` formatında gelir, `/ImagesUnides/Etkinlikler/...` formatına çevir
+        if (path && !path.startsWith('http://') && !path.startsWith('https://') && !path.startsWith('data:')) {
+          let finalPath = path;
+          if (!finalPath.startsWith('/')) {
+            finalPath = '/' + finalPath;
+          }
+          // Path dönüşümü: `/assets/img/` -> `/ImagesUnides/`
+          if (finalPath.startsWith('/assets/img/')) {
+            finalPath = finalPath.replace('/assets/img/', '/ImagesUnides/');
+          } else if (finalPath.startsWith('/images/')) {
+            finalPath = finalPath.replace('/images/', '/ImagesUnides/');
+          }
+          // Full URL oluştur
+          const baseUrl = environment.apiUrl.replace('/api', '');
+          const fullUrl = baseUrl + finalPath;
+          return { ImagePath: fullUrl };
+        }
+        return { ImagePath: path };
+      }),
       catchError((error) => {
         console.error('Etkinlik görseli yüklenemedi:', error);
         console.error('Hata detayı:', error.error);

@@ -32,5 +32,11 @@
       "Accept": "application/json",
       "Content-Type": "application/json"
     }
+  },
+  "/ImagesUnides/**": {
+    "target": "https://unidesportal.com",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug"
   }
 }

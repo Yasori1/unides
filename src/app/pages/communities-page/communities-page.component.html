@@ -99,7 +99,7 @@
             [src]="item.coverImage"
             [alt]="item.name"
             class="cover-img"
-            onerror="this.src='assets/img/placeholder-cover.svg'"
+            (error)="onImageError($event, 'cover')"
           />
           <span class="category-badge">{{ item.category }}</span>
         </div>
@@ -111,7 +111,7 @@
                 [src]="item.logo"
                 [alt]="item.name"
                 class="logo-img"
-                onerror="this.src='assets/img/placeholder-logo.svg'"
+                (error)="onImageError($event, 'logo')"
               />
             </div>
             <div class="title-wrapper">

@@ -159,7 +159,7 @@
                 <div class="event-card modern-card" *ngFor="let event of communityEvents; let i = index"
                   (click)="openEventDetail(event)" [style.animation-delay]="i * 0.1 + 's'">
                   <div class="card-image">
-                    <img [src]="event.imageUrl || 'assets/images/page-title1.jpg'" [alt]="event.title" loading="lazy" />
+                    <img [src]="event.imageUrl || 'assets/images/page-title1.jpg'" [alt]="event.title" loading="lazy" (error)="onImageError($event, 'event')" />
                     <div class="date-badge">
                       {{ event.date }}
                     </div>
@@ -225,14 +225,14 @@
               <div class="cover-area">
                 <img [src]="
                     community.coverImage || community.banner || 'assets/img/placeholder-cover.svg'
-                  " [alt]="community.name" class="cover-img" onerror="this.src='assets/img/placeholder-cover.svg'" />
+                  " [alt]="community.name" class="cover-img" (error)="onImageError($event, 'cover')" />
                 <span class="category-badge">{{ community.category }}</span>
               </div>
               <div class="card-content">
                 <div class="header-row">
                   <div class="logo-wrapper">
                     <img [src]="community.logo || 'assets/img/placeholder-logo.svg'" [alt]="community.name"
-                      class="logo-img" onerror="this.src='assets/img/placeholder-logo.svg'" />
+                      class="logo-img" (error)="onImageError($event, 'logo')" />
                   </div>
                   <div class="title-wrapper">
                     <h3 class="community-name">{{ community.name }}</h3>
@@ -354,7 +354,7 @@
         <div class="events-grid cards" *ngIf="communityEvents.length > 0">
           <div class="event-card" *ngFor="let event of communityEvents" (click)="openEventDetail(event)">
             <div class="card-image">
-              <img [src]="event.imageUrl || 'assets/images/page-title1.jpg'" [alt]="event.title" loading="lazy" />
+              <img [src]="event.imageUrl || 'assets/images/page-title1.jpg'" [alt]="event.title" loading="lazy" (error)="onImageError($event, 'event')" />
               <div class="date-badge">
                 {{ event.date }}
               </div>

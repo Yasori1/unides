@@ -3,6 +3,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterModule } from '@angular/router';
 // Servisi ve Modeli import ediyoruz
 import { CommunityService, Community } from '../../services/community.services';
+import { ImageErrorHandlerService } from '../../services/image-error-handler.service';
 
 @Component({
   selector: 'app-latest-communities',
@@ -22,6 +23,7 @@ export class LatestCommunitiesComponent implements OnInit {
   // Servisi constructor'a ekliyoruz
   constructor(
     private communityService: CommunityService,
+    private imageErrorHandler: ImageErrorHandlerService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -66,5 +68,10 @@ export class LatestCommunitiesComponent implements OnInit {
     this.firstColumn = this.communities.slice(0, third);
     this.secondColumn = this.communities.slice(third, third * 2);
     this.thirdColumn = this.communities.slice(third * 2);
+  }
+
+  // Image error handler - Placeholder görsellerin sürekli istek atmasını engeller
+  onImageError(event: Event, type: 'announcement' | 'event' | 'logo' | 'cover' | 'avatar' = 'cover'): void {
+    this.imageErrorHandler.handleImageError(event, type);
   }
 }

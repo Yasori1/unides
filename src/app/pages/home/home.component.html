@@ -104,7 +104,7 @@
             [src]="event.communityLogo || 'assets/img/placeholder-avatar.svg'"
             alt="Logo"
             loading="lazy"
-            onerror="this.src='assets/img/placeholder-avatar.svg'"
+            (error)="onImageError($event, 'avatar')"
           />
         </div>
 
@@ -185,7 +185,7 @@
               [src]="nc.image || 'assets/img/placeholder-avatar.svg'"
               alt=""
               loading="lazy"
-              onerror="this.src='assets/img/placeholder-avatar.svg'"
+              (error)="onImageError($event, 'avatar')"
             />
             <span>{{ nc.name }}</span>
           </div>
@@ -196,7 +196,7 @@
               [src]="nc.image || 'assets/img/placeholder-avatar.svg'"
               alt=""
               loading="lazy"
-              onerror="this.src='assets/img/placeholder-avatar.svg'"
+              (error)="onImageError($event, 'avatar')"
             />
             <span>{{ nc.name }}</span>
           </div>
@@ -207,7 +207,7 @@
               [src]="nc.image || 'assets/img/placeholder-avatar.svg'"
               alt=""
               loading="lazy"
-              onerror="this.src='assets/img/placeholder-avatar.svg'"
+              (error)="onImageError($event, 'avatar')"
             />
             <span>{{ nc.name }}</span>
           </div>
@@ -218,7 +218,7 @@
               [src]="nc.image || 'assets/img/placeholder-avatar.svg'"
               alt=""
               loading="lazy"
-              onerror="this.src='assets/img/placeholder-avatar.svg'"
+              (error)="onImageError($event, 'avatar')"
             />
             <span>{{ nc.name }}</span>
           </div>
@@ -234,7 +234,7 @@
               [src]="nc.image || 'assets/img/placeholder-avatar.svg'"
               alt=""
               loading="lazy"
-              onerror="this.src='assets/img/placeholder-avatar.svg'"
+              (error)="onImageError($event, 'avatar')"
             />
             <span class="mobile-name">{{ nc.name }}</span>
           </div>
@@ -255,7 +255,7 @@
             class="cover-img"
             alt="Tanıtım Videosu"
             loading="lazy"
-            onerror="this.src='assets/unides_video_gorsel.jpg'"
+            (error)="onImageError($event, 'cover')"
           />
           <div class="play-overlay">
             <div class="play-btn-pulse"><div class="triangle"></div></div>

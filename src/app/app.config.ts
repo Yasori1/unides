@@ -3,7 +3,6 @@ import { provideRouter } from '@angular/router';
 import {
   provideHttpClient,
   withInterceptors,
-  withFetch,
   HttpInterceptorFn,
   HttpRequest,
   HttpHandlerFn,
@@ -57,9 +56,8 @@ export const appConfig: ApplicationConfig = {
     provideClientHydration(),
     provideAnimationsAsync(),
     // Interceptors are applied in order: authInterceptor first, then errorInterceptor
-    // NOTE: Ensure the remote server (72.62.37.160:8080) CORS policy allows 'http://localhost:4200' for development
+    // Direct connection to unidesportal.com/api - no proxy
     provideHttpClient(
-      withFetch(), 
       withInterceptors([authInterceptor, errorInterceptor])
     ),
     { provide: LOCALE_ID, useValue: 'tr' },

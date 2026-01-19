@@ -17,6 +17,8 @@ import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.compon
 import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
 import { CommunityService } from '../../services/community.services';
 import { EventService, EventItem } from '../../services/event.services';
+import { CorsImageDirective } from '../../directives/cors-image.directive';
+import { ImageErrorHandlerService } from '../../services/image-error-handler.service';
 
 interface EventCard {
   id: number;
@@ -40,7 +42,7 @@ interface EventCard {
 @Component({
   selector: 'app-events',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, SiteNavbarComponent, SiteFooterComponent],
+  imports: [CommonModule, RouterModule, FormsModule, SiteNavbarComponent, SiteFooterComponent, CorsImageDirective],
   templateUrl: './events.component.html',
   styleUrls: ['./events.component.scss'],
 })
@@ -472,7 +474,8 @@ export class EventsComponent implements OnInit, AfterViewInit {
     @Inject(PLATFORM_ID) private platformId: Object,
     private router: Router,
     private communityService: CommunityService,
-    private eventService: EventService
+    private eventService: EventService,
+    private imageErrorHandler: ImageErrorHandlerService
   ) { }
 
   ngOnInit() {
@@ -749,15 +752,9 @@ export class EventsComponent implements OnInit, AfterViewInit {
     this.isCategoryDropdownOpen = false;
   }
 
-  // Image error handler - prevents infinite loop of 404 requests
+  // Image error handler - Placeholder görsellerin sürekli istek atmasını engeller
   onImageError(event: Event): void {
-    const img = event.target as HTMLImageElement;
-    // Only set fallback if not already set to prevent infinite loop
-    if (img.src && !img.src.includes('page-title1.jpg') && !img.src.includes('placeholder-cover.svg')) {
-      img.src = 'assets/images/page-title1.jpg';
-      // Remove onerror to prevent infinite loop
-      img.onerror = null;
-    }
+    this.imageErrorHandler.handleImageError(event, 'event');
   }
 
   selectCategory(cat: string) {

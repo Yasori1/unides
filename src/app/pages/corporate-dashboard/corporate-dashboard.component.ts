@@ -12,8 +12,9 @@ import { ToastComponent } from '../../components/ui/toast/toast.component';
 import { AfkDetectionService } from '../../services/afk-detection.service';
 import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
 import { catchError } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { of, forkJoin } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { ImageErrorHandlerService } from '../../services/image-error-handler.service';
 
 // ==========================================
 // MAIN DASHBOARD COMPONENT
@@ -316,6 +317,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     private eventService: EventService,
     private http: HttpClient,
     private afkDetectionService: AfkDetectionService,
+    private imageErrorHandler: ImageErrorHandlerService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) { }
 
@@ -400,6 +402,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
             about: c.description || c.about || '',
             banner: c.coverImage || c.banner || '',
             coverImage: c.coverImage || c.banner || '', // Her iki alanı da tut
+            logo: c.logo || '', // Logo alanını koru (service'ten tam URL gelir)
             description: c.description || c.about || '', // Her iki alanı da tut
             city: c.city || '', // city undefined ise boş string
             category: c.category || 'Genel', // Category is included
@@ -463,6 +466,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
                   about: c.description || c.about || '',
                   banner: c.coverImage || c.banner || '',
                   coverImage: c.coverImage || c.banner || '',
+                  logo: c.logo || '', // Logo alanını koru
                   description: c.description || c.about || '',
                   city: c.city || '',
                   category: c.category || 'Genel',
@@ -787,24 +791,53 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   openCommunityDetail(community: Community) {
     this.selectedCommunity = community;
 
-    // Backend'den detaylı veriyi çek (about ve email alanlarının doğru gelmesi için)
-    // ID kontrolü - geçerli bir GUID olmalı ve mock-id içermemeli
+    // Önce mevcut veriyi editingCommunity'ye set et (silme işlemi için gerekli)
+    // Backend'den detay çekmeye çalışırken bile mevcut veriyi kullanabiliriz
+    this.editingCommunity = {
+      ...community,
+      about: community.description || community.about || '',
+      email: community.email || (community as any).comMail || '',
+      presidentEmail: (community as any).comLeadMail || (community as any).presidentEmail || '',
+      shortDescription: community.miniAbout || (community as any).shortDescription || '',
+      miniAbout: community.miniAbout || (community as any).shortDescription || '',
+      banner: community.coverImage || community.banner || '',
+      coverImage: community.coverImage || community.banner || '',
+      description: community.description || community.about || '',
+      city: community.city || '',
+      category: community.category || 'Genel',
+      status:
+        community.isActivity !== undefined
+          ? community.isActivity
+            ? 'Aktif'
+            : 'Pasif'
+          : community.status || 'Aktif',
+      isActivity:
+        community.isActivity !== undefined
+          ? community.isActivity
+          : community.status === 'Aktif',
+    } as Community & { presidentEmail?: string; shortDescription?: string };
+
+    // Modal'ı aç
+    this.modalType = 'edit-community';
+    this.isModalOpen = true;
+
+    // NOT: Backend'den detay çekmiyoruz çünkü:
+    // 1. Pasif topluluklar için 404 döner (backend IsActivity kontrolü yapıyor)
+    // 2. Liste verisi zaten yeterli (about, email, vb. alanlar liste verisinde mevcut)
+    // 3. Silme işlemi için liste ID'si yeterli
+    // 4. Gereksiz 404 hatalarını ve console error'larını önlüyor
+
+    /* Backend'den detay çekme - pasif topluluklar için 404 hatası veriyor
     if (community.id && community.id !== '' && !community.id.includes('mock')) {
       this.communityService.getCommunityById(community.id).subscribe({
         next: (detailedCommunity) => {
-          // Backend'den gelen detaylı veriyi editingCommunity'ye map et
           this.editingCommunity = {
             ...detailedCommunity,
-            // Backend'den gelen description'ı about'a map et
             about: detailedCommunity.description || detailedCommunity.about || '',
-            // Backend'den gelen comMail'i email'e map et
             email: detailedCommunity.email || detailedCommunity.comMail || '',
-            // Backend'den gelen comLeadMail'i presidentEmail'e map et
             presidentEmail: detailedCommunity.comLeadMail || (detailedCommunity as any).presidentEmail || '',
-            // Backend'den gelen miniAbout'u shortDescription'a map et
             shortDescription: detailedCommunity.miniAbout || (detailedCommunity as any).shortDescription || '',
             miniAbout: detailedCommunity.miniAbout || (detailedCommunity as any).shortDescription || '',
-            // Diğer alanları da map et
             banner: detailedCommunity.coverImage || detailedCommunity.banner || '',
             coverImage: detailedCommunity.coverImage || detailedCommunity.banner || '',
             description: detailedCommunity.description || detailedCommunity.about || '',
@@ -821,70 +854,17 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
                 ? detailedCommunity.isActivity
                 : detailedCommunity.status === 'Aktif',
           } as Community & { presidentEmail?: string; shortDescription?: string };
-
-          this.modalType = 'edit-community';
-          this.isModalOpen = true;
         },
         error: (err) => {
-          // Backend'de pasif topluluklar için 404 döner (IsActivity kontrolü)
           if (err.status === 404) {
-            this.showToast('Topluluk bulunamadı veya pasif durumda. Detay görüntülenemiyor.', 'error');
-            return;
+            console.warn('Topluluk detayı alınamadı (404), mevcut veri kullanılıyor:', community.id);
+          } else {
+            console.error('Topluluk detayı yüklenirken hata:', err);
           }
-
-          // Diğer hatalar için mevcut veriyi kullan
-          console.error('Topluluk detayı yüklenirken hata:', err);
-          this.editingCommunity = {
-            ...community,
-            about: community.description || community.about || '',
-            email: community.email || (community as any).comMail || '',
-            presidentEmail: (community as any).comLeadMail || (community as any).presidentEmail || '',
-            shortDescription: community.miniAbout || (community as any).shortDescription || '',
-            miniAbout: community.miniAbout || (community as any).shortDescription || '',
-            banner: community.coverImage || community.banner || '',
-            coverImage: community.coverImage || community.banner || '',
-            description: community.description || community.about || '',
-            status:
-              community.isActivity !== undefined
-                ? community.isActivity
-                  ? 'Aktif'
-                  : 'Pasif'
-                : community.status || 'Aktif',
-            isActivity:
-              community.isActivity !== undefined
-                ? community.isActivity
-                : community.status === 'Aktif',
-          } as Community & { presidentEmail?: string; shortDescription?: string };
-          this.modalType = 'edit-community';
-          this.isModalOpen = true;
         },
       });
-    } else {
-      // ID yoksa mevcut veriyi kullan
-      this.editingCommunity = {
-        ...community,
-        about: community.description || community.about || '',
-        email: community.email || (community as any).comMail || '',
-        presidentEmail: (community as any).comLeadMail || (community as any).presidentEmail || '',
-        shortDescription: community.miniAbout || (community as any).shortDescription || '',
-        miniAbout: community.miniAbout || (community as any).shortDescription || '',
-        banner: community.coverImage || community.banner || '',
-        coverImage: community.coverImage || community.banner || '',
-        description: community.description || community.about || '',
-        status:
-          community.isActivity !== undefined
-            ? community.isActivity
-              ? 'Aktif'
-              : 'Pasif'
-            : community.status || 'Aktif',
-        isActivity:
-          community.isActivity !== undefined
-            ? community.isActivity
-            : community.status === 'Aktif',
-      } as Community & { presidentEmail?: string; shortDescription?: string };
-      this.modalType = 'edit-community';
-      this.isModalOpen = true;
     }
+    */
   }
 
   // Yeni topluluk ekleme
@@ -902,11 +882,13 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       logo: '',
       banner: '',
       status: 'Aktif',
+      isActivity: true, // Varsayılan olarak aktif
       presidentEmail: '', // Topluluk başkanının email adresi (zorunlu)
     } as Community & { presidentEmail?: string; shortDescription?: string };
     this.modalType = 'new-community';
     this.isModalOpen = true;
   }
+
 
   saveCommunity() {
     if (this.editingCommunity) {
@@ -916,6 +898,23 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         return;
       }
 
+      // Logo ve Banner dosyalarını kontrol et
+      const logoFile = (this.editingCommunity as any)?.logoFile;
+      const bannerFile = (this.editingCommunity as any)?.bannerFile;
+
+      // Base64 data URI'leri kaldır - backend bunları kabul etmiyor
+      // Sadece dosya yükleme endpoint'lerini kullanacağız
+      let logoUrl = this.editingCommunity.logo;
+      let bannerUrl = this.editingCommunity.banner;
+
+      // Eğer base64 data URI ise, boş string yap (dosya yükleme endpoint'i kullanılacak)
+      if (logoUrl && logoUrl.startsWith('data:')) {
+        logoUrl = '';
+      }
+      if (bannerUrl && bannerUrl.startsWith('data:')) {
+        bannerUrl = '';
+      }
+
       // CommunityService'e kaydet (communities-page'e otomatik eklenir)
       const communityForService = {
         ...this.editingCommunity,
@@ -923,80 +922,77 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         about: this.editingCommunity.about || this.editingCommunity.description || '', // Detaylı açıklama (backend ComAbout)
         description: this.editingCommunity.about || this.editingCommunity.description || '', // description da about'a eşit
         miniAbout: this.editingCommunity.miniAbout || (this.editingCommunity as any).shortDescription || '', // Kısa açıklama (backend MiniAbout)
-        coverImage: this.editingCommunity.banner || this.editingCommunity.coverImage || '',
-        banner: this.editingCommunity.banner || this.editingCommunity.coverImage || '',
+        coverImage: bannerUrl || this.editingCommunity.coverImage || '',
+        banner: bannerUrl || this.editingCommunity.coverImage || '',
+        logo: logoUrl || '',
         // Status alanını açıkça ekle (butonlardan gelen değer)
         status: this.editingCommunity.status || 'Aktif',
-        // isActivity değerini status'a göre güncelle (status öncelikli)
-        isActivity:
-          this.editingCommunity.status === 'Pasif'
-            ? false
-            : this.editingCommunity.status === 'Aktif'
-              ? true
-              : undefined,
+        // isActivity değerini doğrudan kullan (butonlar artık hem status hem isActivity'yi set ediyor)
+        isActivity: this.editingCommunity.isActivity !== undefined
+          ? this.editingCommunity.isActivity
+          : (this.editingCommunity.status === 'Aktif'),
       };
+
 
       this.communityService.addOrUpdateCommunity(communityForService).subscribe({
         next: (updatedCommunity) => {
-          // Güncellenmiş topluluğu direkt listeye ekle/güncelle
-          const index = this.allCommunities.findIndex((c) => c.id === updatedCommunity.id);
-          if (index !== -1) {
-            // Mevcut topluluğu güncelle
-            const { website, webSiteUrl, instagram, instagramUrl, socialMedia, ...rest } =
-              updatedCommunity;
-            this.allCommunities[index] = {
-              ...rest,
-              about: updatedCommunity.description || updatedCommunity.about || '',
-              banner: updatedCommunity.coverImage || updatedCommunity.banner || '',
-              coverImage: updatedCommunity.coverImage || updatedCommunity.banner || '',
-              description: updatedCommunity.description || updatedCommunity.about || '',
-              city: updatedCommunity.city || '',
-              category: updatedCommunity.category || 'Genel',
-              email: updatedCommunity.email || updatedCommunity.comMail || '',
-              comMail: updatedCommunity.comMail || updatedCommunity.email || '',
-              miniAbout: updatedCommunity.miniAbout || '',
-              shortDescription: updatedCommunity.miniAbout || (updatedCommunity as any).shortDescription || '',
-              status:
-                updatedCommunity.isActivity !== undefined
-                  ? updatedCommunity.isActivity
-                    ? 'Aktif'
-                    : 'Pasif'
-                  : updatedCommunity.status || 'Aktif',
-              isActivity:
-                updatedCommunity.isActivity !== undefined
-                  ? updatedCommunity.isActivity
-                  : updatedCommunity.status === 'Aktif',
-              website: undefined,
-              webSiteUrl: undefined,
-              instagram: undefined,
-              instagramUrl: undefined,
-              socialMedia: undefined,
-            } as Community;
+          const communityId = updatedCommunity.id;
 
-            // Filtered communities'i de güncelle
-            const filteredIndex = this.filteredCommunities.findIndex(
-              (c) => c.id === updatedCommunity.id
-            );
-            if (filteredIndex !== -1) {
-              this.filteredCommunities[filteredIndex] = { ...this.allCommunities[index] };
-            }
+          // Logo ve Banner yükleme işlemleri - forkJoin ile bekle
+          const logoFile = (this.editingCommunity as any)?.logoFile;
+          const bannerFile = (this.editingCommunity as any)?.bannerFile;
 
-            // Communities listesini de güncelle
-            const communitiesIndex = this.communities.findIndex(
-              (c) => c.id === updatedCommunity.id
+          // Yüklenecek görseller varsa, tamamlanmasını bekle
+          const uploadTasks: any[] = [];
+
+          if (logoFile && communityId) {
+            uploadTasks.push(
+              this.communityService.uploadLogo(communityId, logoFile).pipe(
+                catchError((err) => {
+                  console.error('Logo yüklenirken hata:', err);
+                  return of(null); // Hata durumunda null döndür, devam et
+                })
+              )
             );
-            if (communitiesIndex !== -1) {
-              this.communities[communitiesIndex] = { ...this.allCommunities[index] };
-            }
-          } else {
-            // Yeni topluluk ise listeye ekle ve yeniden yükle
-            this.loadCommunitiesFromService();
           }
 
-          this.showToast('Topluluk başarıyla güncellendi', 'success');
-          this.closeModal();
+          if (bannerFile && communityId) {
+            uploadTasks.push(
+              this.communityService.uploadBanner(communityId, bannerFile).pipe(
+                catchError((err) => {
+                  console.error('Banner yüklenirken hata:', err);
+                  return of(null); // Hata durumunda null döndür, devam et
+                })
+              )
+            );
+          }
+
+          // Görsel yükleme varsa bekle, yoksa direkt listeyi güncelle
+          if (uploadTasks.length > 0) {
+            forkJoin(uploadTasks).subscribe({
+              next: (results) => {
+                console.log('Tüm görseller yüklendi:', results);
+                // Görseller yüklendikten sonra listeyi backend'den yeniden çek
+                this.loadCommunitiesFromService();
+                this.showToast('Topluluk ve görseller başarıyla güncellendi', 'success');
+                this.closeModal();
+              },
+              error: (err) => {
+                console.error('Görsel yükleme hatası:', err);
+                // Hata olsa bile listeyi güncelle
+                this.loadCommunitiesFromService();
+                this.showToast('Topluluk güncellendi ancak bazı görseller yüklenemedi', 'error');
+                this.closeModal();
+              }
+            });
+          } else {
+            // Görsel yüklemesi yoksa direkt listeyi güncelle
+            this.loadCommunitiesFromService();
+            this.showToast('Topluluk başarıyla güncellendi', 'success');
+            this.closeModal();
+          }
         },
-        error: (err) => {
+        error: (err: any) => {
           // Hata zaten toast ile gösteriliyor
           let errorMessage = 'Topluluk güncellenirken bir hata oluştu';
 
@@ -1048,6 +1044,23 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         return;
       }
 
+      // Logo ve Banner dosyalarını kontrol et
+      const logoFile = (this.newCommunity as any)?.logoFile;
+      const bannerFile = (this.newCommunity as any)?.bannerFile;
+
+      // Base64 data URI'leri kaldır - backend bunları kabul etmiyor
+      // Sadece dosya yükleme endpoint'lerini kullanacağız
+      let logoUrl = this.newCommunity.logo;
+      let bannerUrl = this.newCommunity.banner;
+
+      // Eğer base64 data URI ise, boş string yap (dosya yükleme endpoint'i kullanılacak)
+      if (logoUrl && logoUrl.startsWith('data:')) {
+        logoUrl = '';
+      }
+      if (bannerUrl && bannerUrl.startsWith('data:')) {
+        bannerUrl = '';
+      }
+
       // CommunityService'e kaydet (communities-page'e otomatik eklenir)
       const communityForService = {
         ...this.newCommunity,
@@ -1055,53 +1068,71 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         miniAbout: (this.newCommunity as any).shortDescription || '', // Kısa açıklama miniAbout'a (backend MiniAbout)
         about: this.newCommunity.about || '', // Detaylı açıklama about'a (backend ComAbout)
         description: this.newCommunity.about || '', // description da about'a eşit
-        coverImage: this.newCommunity.banner || '',
-        banner: this.newCommunity.banner || '',
+        coverImage: bannerUrl || '',
+        banner: bannerUrl || '',
+        logo: logoUrl || '',
         presidentEmail: presidentEmail.trim(),
         status: this.newCommunity.status || 'Aktif', // Status'u ekle
       } as Community & { presidentEmail?: string; shortDescription?: string };
 
       this.communityService.addOrUpdateCommunity(communityForService).subscribe({
         next: (createdCommunity) => {
-          // Backend'den dönen topluluğu listeye ekle
-          if (createdCommunity) {
-            const { website, webSiteUrl, instagram, instagramUrl, socialMedia, ...rest } = createdCommunity;
-            const mappedCommunity = {
-              ...rest,
-              about: createdCommunity.description || createdCommunity.about || '',
-              banner: createdCommunity.coverImage || createdCommunity.banner || '',
-              coverImage: createdCommunity.coverImage || createdCommunity.banner || '',
-              description: createdCommunity.description || createdCommunity.about || '',
-              city: createdCommunity.city || '',
-              category: createdCommunity.category || 'Genel',
-              email: createdCommunity.email || createdCommunity.comMail || '',
-              comMail: createdCommunity.comMail || createdCommunity.email || '',
-              miniAbout: createdCommunity.miniAbout || '',
-              shortDescription: createdCommunity.miniAbout || (createdCommunity as any).shortDescription || '',
-              status:
-                createdCommunity.isActivity !== undefined
-                  ? createdCommunity.isActivity
-                    ? 'Aktif'
-                    : 'Pasif'
-                  : createdCommunity.status || 'Aktif',
-              isActivity:
-                createdCommunity.isActivity !== undefined
-                  ? createdCommunity.isActivity
-                  : createdCommunity.status === 'Aktif',
-              website: undefined,
-              webSiteUrl: undefined,
-              instagram: undefined,
-              instagramUrl: undefined,
-              socialMedia: undefined,
-            } as Community;
-            this.allCommunities.push(mappedCommunity);
-            this.applyFilters();
+          const communityId = createdCommunity.id;
+
+          // Logo ve Banner yükleme işlemleri - forkJoin ile bekle
+          const logoFile = (this.newCommunity as any)?.logoFile;
+          const bannerFile = (this.newCommunity as any)?.bannerFile;
+
+          // Yüklenecek görseller varsa, tamamlanmasını bekle
+          const uploadTasks: any[] = [];
+
+          if (logoFile && communityId) {
+            uploadTasks.push(
+              this.communityService.uploadLogo(communityId, logoFile).pipe(
+                catchError((err) => {
+                  console.error('Logo yüklenirken hata:', err);
+                  return of(null);
+                })
+              )
+            );
           }
-          // Service'ten güncel veriyi tekrar yükle
-          this.loadCommunitiesFromService();
-          this.showToast('Topluluk başarıyla eklendi', 'success');
-          this.closeModal();
-          this.newCommunity = null;
+
+          if (bannerFile && communityId) {
+            uploadTasks.push(
+              this.communityService.uploadBanner(communityId, bannerFile).pipe(
+                catchError((err) => {
+                  console.error('Banner yüklenirken hata:', err);
+                  return of(null);
+                })
+              )
+            );
+          }
+
+          // Görsel yükleme varsa bekle, yoksa direkt tamamla
+          if (uploadTasks.length > 0) {
+            forkJoin(uploadTasks).subscribe({
+              next: (results) => {
+                console.log('Tüm görseller yüklendi:', results);
+                this.loadCommunitiesFromService();
+                this.showToast('Topluluk ve görseller başarıyla eklendi', 'success');
+                this.closeModal();
+                this.newCommunity = null;
+              },
+              error: (err) => {
+                console.error('Görsel yükleme hatası:', err);
+                this.loadCommunitiesFromService();
+                this.showToast('Topluluk eklendi ancak bazı görseller yüklenemedi', 'error');
+                this.closeModal();
+                this.newCommunity = null;
+              }
+            });
+          } else {
+            // Görsel yüklemesi yoksa direkt tamamla
+            this.loadCommunitiesFromService();
+            this.showToast('Topluluk başarıyla eklendi', 'success');
+            this.closeModal();
+            this.newCommunity = null;
+          }
         },
         error: (err) => {
           // Hata zaten toast ile gösteriliyor
@@ -1124,40 +1155,104 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   }
 
   deleteCommunity() {
-    if (this.editingCommunity) {
-      const communityId = this.editingCommunity.id;
+    console.log('deleteCommunity() çağrıldı');
+    console.log('editingCommunity:', this.editingCommunity);
 
-      // Kullanıcıdan onay al
-      if (!confirm('Bu topluluğu silmek istediğinizden emin misiniz?')) {
-        return;
-      }
-
-      // CommunityService'ten sil (backend'e istek atılır)
-      this.communityService.deleteCommunity(communityId).subscribe({
-        next: () => {
-          // Service'ten güncel veriyi tekrar yükle
-          this.loadCommunitiesFromService();
-          this.showToast('Topluluk başarıyla silindi', 'success');
-          this.closeModal();
-        },
-        error: (err) => {
-          // Hata zaten toast ile gösteriliyor
-          let errorMessage = 'Topluluk silinirken bir hata oluştu';
-
-          if (err.status === 401) {
-            errorMessage = 'Oturum açmanız gerekiyor. Lütfen tekrar giriş yapın.';
-          } else if (err.status === 403) {
-            errorMessage = err.error?.message || 'Bu işlem için yetkiniz bulunmamaktadır.';
-          } else if (err.error?.message) {
-            errorMessage = err.error.message;
-          } else if (err.message) {
-            errorMessage = err.message;
-          }
-
-          this.showToast(errorMessage, 'error');
-        },
-      });
+    if (!this.editingCommunity) {
+      console.error('editingCommunity null!');
+      this.showToast('Silinecek topluluk bulunamadı.', 'error');
+      return;
     }
+
+    const communityId = this.editingCommunity.id;
+    console.log('Community ID:', communityId);
+
+    // ID kontrolü - geçerli bir GUID olmalı
+    if (!communityId || communityId === '' || communityId.includes('mock')) {
+      console.error('Geçersiz Community ID:', communityId);
+      this.showToast('Topluluk ID\'si geçersiz. Lütfen sayfayı yenileyip tekrar deneyin.', 'error');
+      return;
+    }
+
+    // Kullanıcıdan onay al
+    const confirmed = confirm('Bu topluluğu silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.');
+    console.log('Kullanıcı onayı:', confirmed);
+
+    if (!confirmed) {
+      console.log('Kullanıcı silme işlemini iptal etti');
+      return;
+    }
+
+    console.log('DELETE isteği gönderiliyor - ID:', communityId);
+    console.log('DELETE isteği gönderiliyor - Endpoint: /api/Communities/' + communityId);
+
+    // CommunityService'ten sil (backend'e istek atılır)
+    // DELETE /api/Communities/{id} - 204 No Content döner (başarılı)
+    this.communityService.deleteCommunity(communityId).subscribe({
+      next: (response) => {
+        console.log('Topluluk başarıyla silindi - ID:', communityId);
+        console.log('Response (204 No Content):', response);
+
+        // Önce editingCommunity ve selectedCommunity'yi temizle (ID'li GET isteklerini önlemek için)
+        this.editingCommunity = null;
+        this.selectedCommunity = null;
+
+        // Modal'ı kapat (ID'li GET isteklerini önlemek için)
+        this.closeModal();
+
+        // Listelerden topluluğu kaldır
+        const index = this.allCommunities.findIndex((c) => c.id === communityId);
+        if (index !== -1) {
+          this.allCommunities.splice(index, 1);
+          console.log('allCommunities listesinden kaldırıldı');
+        }
+
+        const filteredIndex = this.filteredCommunities.findIndex((c) => c.id === communityId);
+        if (filteredIndex !== -1) {
+          this.filteredCommunities.splice(filteredIndex, 1);
+          console.log('filteredCommunities listesinden kaldırıldı');
+        }
+
+        const communitiesIndex = this.communities.findIndex((c) => c.id === communityId);
+        if (communitiesIndex !== -1) {
+          this.communities.splice(communitiesIndex, 1);
+          console.log('communities listesinden kaldırıldı');
+        }
+
+        // Filtreleri uygula (liste güncellenmiş olacak)
+        this.applyFilters();
+
+        // Service'ten güncel veriyi tekrar yükle (ID'siz GET /api/Communities endpoint'ini kullanır)
+        // Bu endpoint tüm toplulukları listeler, silinen topluluk artık listede olmayacak
+        this.loadCommunitiesFromService();
+
+        this.showToast('Topluluk başarıyla silindi', 'success');
+      },
+      error: (err) => {
+        console.error('Topluluk silme hatası:', err);
+        console.error('Error status:', err.status);
+        console.error('Error message:', err.message);
+        console.error('Error object:', err);
+
+        let errorMessage = 'Topluluk silinirken bir hata oluştu';
+
+        if (err.status === 401) {
+          errorMessage = 'Oturum açmanız gerekiyor. Lütfen tekrar giriş yapın.';
+        } else if (err.status === 403) {
+          errorMessage = err.error?.message || 'Bu işlem için yetkiniz bulunmamaktadır.';
+        } else if (err.status === 404) {
+          errorMessage = 'Topluluk bulunamadı. Zaten silinmiş olabilir.';
+        } else if (err.status === 500) {
+          errorMessage = err.error?.message || 'Sunucu hatası oluştu. Lütfen tekrar deneyin.';
+        } else if (err.error?.message) {
+          errorMessage = err.error.message;
+        } else if (err.message) {
+          errorMessage = err.message;
+        }
+
+        this.showToast(errorMessage, 'error');
+      },
+    });
   }
 
   // Image upload handlers
@@ -1173,6 +1268,37 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     }
   }
 
+  // Güncelleme için file upload handlers (backend'e yükleme için)
+  onLogoFileSelected(file: File) {
+    if (this.editingCommunity) {
+      // File'ı sakla, topluluk güncellendikten sonra yüklenecek
+      (this.editingCommunity as any).logoFile = file;
+      // Preview için base64 oku
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        if (this.editingCommunity) {
+          this.editingCommunity.logo = e.target.result;
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  onBannerFileSelected(file: File) {
+    if (this.editingCommunity) {
+      // File'ı sakla, topluluk güncellendikten sonra yüklenecek
+      (this.editingCommunity as any).bannerFile = file;
+      // Preview için base64 oku
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        if (this.editingCommunity) {
+          this.editingCommunity.banner = e.target.result;
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
   // Yeni topluluk için image upload handlers
   onNewLogoSelected(imageUrl: string) {
     if (this.newCommunity) {
@@ -1183,6 +1309,37 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   onNewBannerSelected(imageUrl: string) {
     if (this.newCommunity) {
       this.newCommunity.banner = imageUrl;
+    }
+  }
+
+  // Yeni topluluk için file upload handlers (backend'e yükleme için)
+  onNewLogoFileSelected(file: File) {
+    if (this.newCommunity) {
+      // File'ı sakla, topluluk oluşturulduktan sonra yüklenecek
+      (this.newCommunity as any).logoFile = file;
+      // Preview için base64 oku
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        if (this.newCommunity) {
+          this.newCommunity.logo = e.target.result;
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  onNewBannerFileSelected(file: File) {
+    if (this.newCommunity) {
+      // File'ı sakla, topluluk oluşturulduktan sonra yüklenecek
+      (this.newCommunity as any).bannerFile = file;
+      // Preview için base64 oku
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        if (this.newCommunity) {
+          this.newCommunity.banner = e.target.result;
+        }
+      };
+      reader.readAsDataURL(file);
     }
   }
 
@@ -1248,6 +1405,11 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   handleLogoutClick() {
     this.isProfileOpen = false;
     this.logout();
+  }
+
+  // Image error handler - Placeholder görsellerin sürekli istek atmasını engeller
+  onImageError(event: Event, type: 'announcement' | 'event' | 'logo' | 'cover' | 'avatar' = 'event'): void {
+    this.imageErrorHandler.handleImageError(event, type);
   }
 
   logout() {

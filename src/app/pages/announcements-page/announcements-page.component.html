@@ -60,8 +60,8 @@
     <div class="grid-container" *ngIf="!isLoading && displayedAnnouncements.length > 0">
       <a *ngFor="let ann of displayedAnnouncements" [routerLink]="['/announcements', ann.id]" class="announcement-card">
         <div class="cover-area">
-          <img [src]="ann.image || 'assets/img/placeholder-announcement.jpg'" [alt]="ann.title" class="cover-img"
-            loading="lazy" onerror="this.src='assets/img/placeholder-announcement.jpg'" />
+          <img [src]="ann.image || getPlaceholderUrl('announcement')" [alt]="ann.title" class="cover-img"
+            loading="lazy" (error)="onImageError($event, 'announcement')" />
           <div class="date-badge">
             {{ formatDate(ann.date) }}
           </div>

@@ -134,15 +134,28 @@ export class AnnouncementService {
     }
 
     // Görsel path'i tam URL'ye çevir
-    // Backend relative path dönerse (örn: /uploads/xxx.jpg), tam URL'ye çevir
+    // Backend relative path dönerse (örn: /assets/img/Duyurular/xxx.jpg), tam URL'ye çevir
     if (imagePath && !imagePath.startsWith('http://') && !imagePath.startsWith('https://') && !imagePath.startsWith('data:')) {
-      // Backend base URL'si (api kısmını çıkar)
+      // Backend base URL'si (api kısmını çıkar) - Her zaman production URL'ini kullan
       const baseUrl = environment.apiUrl.replace('/api', '');
+      
       // Path'in başında / yoksa ekle
-      if (!imagePath.startsWith('/')) {
-        imagePath = '/' + imagePath;
+      let finalPath = imagePath;
+      if (!finalPath.startsWith('/')) {
+        finalPath = '/' + finalPath;
       }
-      imagePath = baseUrl + imagePath;
+      
+      // Path dönüşümü: `/assets/img/Duyurular/` -> `/ImagesUnides/Duyurular/`
+      if (finalPath.startsWith('/assets/img/')) {
+        finalPath = finalPath.replace('/assets/img/', '/ImagesUnides/');
+      }
+      // Eğer zaten `/ImagesUnides/` ile başlıyorsa olduğu gibi bırak
+      // Eğer `/images/` ile başlıyorsa (küçük harf) `/ImagesUnides/` yap
+      else if (finalPath.startsWith('/images/')) {
+        finalPath = finalPath.replace('/images/', '/ImagesUnides/');
+      }
+      
+      imagePath = baseUrl + finalPath;
     }
 
     return {
@@ -275,16 +288,35 @@ export class AnnouncementService {
     // Backend'in beklediği parametre adı
     formData.append('file', file, file.name);
 
-    // Backend { imageUrl: string } formatında döndürüyor
+    // Backend { ImagePath: string } formatında döndürüyor
     interface UploadResponse {
-      imageUrl: string;
+      ImagePath?: string;
+      imagePath?: string;
+      imageUrl?: string;
     }
 
-    // TEST: Headers tamamen kaldırıldı - 415 hatasının kaynağını test ediyoruz
-    // Eğer bu çalışırsa, sorun headers'dan
-    // Eğer çalışmazsa, sorun backend'de
     return this.http.post<UploadResponse>(`${this.apiUrl}/${announcementId}/image`, formData).pipe(
-      map((response) => response.imageUrl || response as any),
+      map((response) => {
+        // Backend'den ImagePath, imagePath veya imageUrl gelebilir
+        const path = response.ImagePath || response.imagePath || response.imageUrl || '';
+        // Backend'den `/assets/img/Duyurular/...` formatında gelir, `/ImagesUnides/Duyurular/...` formatına çevir
+        if (path && !path.startsWith('http://') && !path.startsWith('https://') && !path.startsWith('data:')) {
+          let finalPath = path;
+          if (!finalPath.startsWith('/')) {
+            finalPath = '/' + finalPath;
+          }
+          // Path dönüşümü: `/assets/img/` -> `/ImagesUnides/`
+          if (finalPath.startsWith('/assets/img/')) {
+            finalPath = finalPath.replace('/assets/img/', '/ImagesUnides/');
+          } else if (finalPath.startsWith('/images/')) {
+            finalPath = finalPath.replace('/images/', '/ImagesUnides/');
+          }
+          // Full URL oluştur
+          const baseUrl = environment.apiUrl.replace('/api', '');
+          return baseUrl + finalPath;
+        }
+        return path;
+      }),
       catchError((error) => {
         console.error('Görsel yüklenemedi:', error);
         console.error('Hata detayı:', error.error);

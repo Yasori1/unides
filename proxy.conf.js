@@ -42,6 +42,13 @@ const PROXY_CONFIG = {
       'Content-Type': 'application/json',
     },
   },
+  // Images proxy - CORS sorununu çözmek için
+  '/ImagesUnides': {
+    target: 'https://unidesportal.com',
+    secure: true,
+    changeOrigin: true,
+    logLevel: 'debug',
+  },
 };
 
 module.exports = PROXY_CONFIG;

@@ -185,7 +185,7 @@
             <div class="event-card" *ngFor="let event of displayedDashboardEvents" (click)="onEventCardClick(event)"
               [class.rejected-card]="event.status === 'rejected'">
               <div class="card-image">
-                <img [src]="event.imageUrl" [alt]="event.title" loading="lazy" />
+                <img [src]="event.imageUrl" [alt]="event.title" loading="lazy" appCorsImage />
                 <span class="date-badge">
                   <span *ngIf="event.date">{{ event.date }}</span>
                   <span *ngIf="event.time" class="time-badge">{{ event.time }}</span>
@@ -259,7 +259,7 @@
         <div class="event-card" *ngFor="let event of filteredDashboardEvents" (click)="onEventCardClick(event)"
           [class.rejected-card]="event.status === 'rejected'">
           <div class="card-image">
-            <img [src]="event.imageUrl" [alt]="event.title" loading="lazy" />
+            <img [src]="event.imageUrl" [alt]="event.title" loading="lazy" appCorsImage (error)="onImageError($event)" />
             <span class="date-badge">
               <span *ngIf="event.date">{{ event.date }}</span>
               <span *ngIf="event.time" class="time-badge">{{ event.time }}</span>
@@ -362,10 +362,17 @@
     <div class="view-container" *ngIf="activeTab === 'settings'">
       <div class="card settings-card">
         <div class="settings-hero">
-          <div class="hero-banner" [style.background-image]="'url(' + clubInfo.banner + ')'"></div>
+          <div class="hero-banner" [style.background-image]="'url(' + clubInfo.banner + ')'">
+            <button class="edit-banner-btn" (click)="showBannerModal = true" title="Banner Güncelle">
+              <span class="material-symbols-outlined">edit</span>
+            </button>
+          </div>
           <div class="hero-profile">
             <div class="avatar-wrapper">
               <img [src]="clubInfo.logo" alt="Logo" />
+              <button class="edit-avatar-btn" (click)="showAvatarModal = true" title="Logo Güncelle">
+                <span class="material-symbols-outlined">edit</span>
+              </button>
             </div>
             <div class="hero-text">
               <p class="eyebrow">Profil</p>
@@ -639,11 +646,14 @@
         </div>
         <div class="image-preview" *ngIf="!isEditingEventDetail">
           <img [src]="selectedEvent.imageUrl" [alt]="selectedEvent.title"
+            loading="eager"
+            referrerpolicy="no-referrer"
             (error)="onImageError($event)" />
         </div>
         <app-image-upload *ngIf="isEditingEventDetail" label="Fotoğraf seç / sürükle"
           [previewUrl]="editedEventData.image || selectedEvent.imageUrl || null"
-          (onImageSelected)="editedEventData.image = $event"
+          [uploadToServer]="true"
+          (onImageSelected)="onEventImageSelectedForEdit($event)"
           (onFileSelected)="onEventFileSelected($event)"></app-image-upload>
       </div>
 
@@ -678,7 +688,7 @@
 
       <label class="stacked">
         <span>Kontenjan (Maks. 4 Hane)</span>
-        <input type="text" [value]="(selectedEvent.quota || 100) + ' Kişilik Yer Var'"
+        <input type="text" [value]="selectedEvent.quota !== undefined && selectedEvent.quota !== null ? (selectedEvent.quota + ' Kişilik Yer Var') : 'Kontenjan belirtilmemiş'"
           [readonly]="!isEditingEventDetail" *ngIf="!isEditingEventDetail" />
         <input type="number" [(ngModel)]="editedEventData.quota"
           oninput="if(this.value.length > 4) this.value = this.value.slice(0, 4); this.value = this.value.replace(/[^0-9]/g, '');"
@@ -702,16 +712,16 @@
           *ngIf="isEditingEventDetail"></textarea>
       </label>
 
-      <!-- Rejection Reason (only for rejected events) -->
-      <label class="stacked" *ngIf="
-          selectedEvent.status === 'rejected' &&
-          selectedEvent.rejectionReason &&
-          !isEditingEventDetail
-        ">
-        <span>Red Nedeni</span>
-        <textarea rows="2" readonly
-          style="background: #fef2f2; border-color: #fecaca; color: #991b1b">{{ selectedEvent.rejectionReason }}</textarea>
-      </label>
+      <!-- Rejection Reason Button (only for rejected events) -->
+      <div *ngIf="selectedEvent && selectedEvent.status === 'rejected' && !isEditingEventDetail" 
+        style="margin-top: 16px; margin-bottom: 8px; width: 100%; display: block;">
+        <button type="button"
+          (click)="openRejectionModal(selectedEvent.rejectionReason || 'Revize nedeni belirtilmemiş.')" 
+          style="background: #ef4444 !important; border: 2px solid #dc2626 !important; color: white !important; padding: 14px 20px !important; border-radius: 8px !important; font-weight: 600 !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 10px !important; cursor: pointer !important; width: 100% !important; font-size: 15px !important; transition: all 0.2s !important;">
+          <span class="material-symbols-outlined" style="font-size: 22px !important; line-height: 1;">info</span>
+          <span>Revize Nedeni Görüntüle</span>
+        </button>
+      </div>
 
       <!-- Buttons for different statuses - Edit Mode OFF -->
       <div style="display: flex; gap: 12px; margin-top: 8px; flex-direction: column" *ngIf="!isEditingEventDetail">
@@ -769,9 +779,9 @@
       </div>
 
       <div class="text-content">
-        <h3>Etkinlik Onaylanmadı</h3>
+        <h3>Revize Nedeni</h3>
         <div class="scrollable-reason">
-          <p>{{ selectedRejectionReason }}</p>
+          <p style="white-space: pre-wrap; line-height: 1.6;">{{ selectedRejectionReason }}</p>
         </div>
       </div>
 
@@ -782,6 +792,46 @@
           <span class="material-symbols-outlined">edit</span>
         </button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Banner Upload Modal -->
+<div class="modal-overlay" *ngIf="showBannerModal" (click)="showBannerModal = false">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-head">
+      <h3>Banner Güncelle</h3>
+      <button class="icon-btn ghost close-modern" (click)="showBannerModal = false">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <app-image-upload 
+        label="Banner Görseli Seç / Sürükle" 
+        [previewUrl]="clubInfo.banner || null"
+        [uploadToServer]="true"
+        (onImageSelected)="onBannerSelected($event)"
+        (onFileSelected)="onBannerFileSelected($event)"></app-image-upload>
+    </div>
+  </div>
+</div>
+
+<!-- Logo Upload Modal -->
+<div class="modal-overlay" *ngIf="showAvatarModal" (click)="showAvatarModal = false">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-head">
+      <h3>Logo Güncelle</h3>
+      <button class="icon-btn ghost close-modern" (click)="showAvatarModal = false">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <app-image-upload 
+        label="Logo Seç / Sürükle" 
+        [previewUrl]="clubInfo.logo || null"
+        [uploadToServer]="true"
+        (onImageSelected)="onLogoSelected($event)"
+        (onFileSelected)="onLogoFileSelected($event)"></app-image-upload>
     </div>
   </div>
 </div>

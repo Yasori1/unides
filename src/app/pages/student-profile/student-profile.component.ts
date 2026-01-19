@@ -10,6 +10,7 @@ import { CommunityService, Community } from '../../services/community.services';
 import { AfkDetectionService } from '../../services/afk-detection.service';
 import { AuthService } from '../../services/auth.services';
 import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
+import { ImageErrorHandlerService } from '../../services/image-error-handler.service';
 
 interface Stat {
   label: string;
@@ -129,6 +130,7 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
     private communityService: CommunityService,
     private afkDetectionService: AfkDetectionService,
     private authService: AuthService,
+    private imageErrorHandler: ImageErrorHandlerService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) { }
 
@@ -991,6 +993,11 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
   handleLogoutClick() {
     this.isProfileOpen = false;
     this.logout();
+  }
+
+  // Image error handler - Placeholder görsellerin sürekli istek atmasını engeller
+  onImageError(event: Event, type: 'announcement' | 'event' | 'logo' | 'cover' | 'avatar' = 'cover'): void {
+    this.imageErrorHandler.handleImageError(event, type);
   }
 
   logout() {
