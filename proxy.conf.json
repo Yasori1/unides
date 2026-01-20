@@ -10,14 +10,13 @@
     }
   },
   "/api/**": {
-    "target": "http://72.62.37.160:8080",
-    "secure": false,
+    "target": "https://unidesportal.com",
+    "secure": true,
     "changeOrigin": true,
     "logLevel": "debug",
     "ws": true,
     "headers": {
-      "Accept": "application/json",
-      "Content-Type": "application/json"
+      "Accept": "application/json"
     }
   },
   "/spam-check": {

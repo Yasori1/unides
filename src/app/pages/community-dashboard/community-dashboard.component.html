@@ -185,7 +185,8 @@
             <div class="event-card" *ngFor="let event of displayedDashboardEvents" (click)="onEventCardClick(event)"
               [class.rejected-card]="event.status === 'rejected'">
               <div class="card-image">
-                <img [src]="event.imageUrl" [alt]="event.title" loading="lazy" appCorsImage />
+                <img [src]="event.imageUrl" [alt]="event.title" loading="lazy"
+                  (error)="onImageError($event, 'event')" />
                 <span class="date-badge">
                   <span *ngIf="event.date">{{ event.date }}</span>
                   <span *ngIf="event.time" class="time-badge">{{ event.time }}</span>
@@ -406,7 +407,7 @@
             <label class="stacked">
               <span>Hakkımızda</span>
               <textarea rows="4" maxlength="500" [(ngModel)]="clubInfo.description"
-                placeholder="Topluluğunuzu anlatan kısa bir yazı yazın..." disabled readonly 
+                placeholder="Topluluğunuzu anlatan kısa bir yazı yazın..." disabled readonly
                 style="cursor: not-allowed; resize: none; background-color: #f1f5f9; color: #64748b;"></textarea>
             </label>
           </div>
@@ -442,7 +443,7 @@
             <span class="upload-hint">Önerilen: 1200×600px (2:1)</span>
           </div>
           <app-image-upload label="Fotoğraf seç / sürükle" [previewUrl]="newEventData.image || null"
-            (onImageSelected)="onEventImageSelected($event)"
+            [uploadToServer]="true" (onImageSelected)="onEventImageSelected($event)"
             (onFileSelected)="onEventFileSelected($event)"></app-image-upload>
         </div>
 
@@ -548,9 +549,7 @@
         <button class="btn-primary full" [disabled]="
             isBulkAddMode
               ? !bulkEmailsText.trim()
-              : !newMemberData.email ||
-                !emailValid ||
-                (emailValid && !emailExists && !emailChecking)
+              : !newMemberData.email || !newMemberData.email.trim()
           " (click)="saveMember()">
           {{ isBulkAddMode ? 'Toplu Ekle' : 'Kaydet' }}
         </button>
@@ -590,14 +589,11 @@
           <span class="upload-hint">Önerilen: 1200×600px (2:1)</span>
         </div>
         <div class="image-preview" *ngIf="!isEditingEventDetail">
-          <img [src]="selectedEvent.imageUrl" [alt]="selectedEvent.title"
-            loading="eager"
-            referrerpolicy="no-referrer"
-            (error)="onImageError($event)" />
+          <img [src]="selectedEvent.imageUrl" [alt]="selectedEvent.title" loading="eager" referrerpolicy="no-referrer"
+            (error)="onImageError($event, 'event')" />
         </div>
         <app-image-upload *ngIf="isEditingEventDetail" label="Fotoğraf seç / sürükle"
-          [previewUrl]="editedEventData.image || selectedEvent.imageUrl || null"
-          [uploadToServer]="true"
+          [previewUrl]="editedEventData.image || selectedEvent.imageUrl || null" [uploadToServer]="true"
           (onImageSelected)="onEventImageSelectedForEdit($event)"
           (onFileSelected)="onEventFileSelected($event)"></app-image-upload>
       </div>
@@ -633,7 +629,8 @@
 
       <label class="stacked">
         <span>Kontenjan (Maks. 4 Hane)</span>
-        <input type="text" [value]="selectedEvent.quota !== undefined && selectedEvent.quota !== null ? (selectedEvent.quota + ' Kişilik Yer Var') : 'Kontenjan belirtilmemiş'"
+        <input type="text"
+          [value]="selectedEvent.quota !== undefined && selectedEvent.quota !== null ? (selectedEvent.quota + ' Kişilik Yer Var') : 'Kontenjan belirtilmemiş'"
           [readonly]="!isEditingEventDetail" *ngIf="!isEditingEventDetail" />
         <input type="number" [(ngModel)]="editedEventData.quota"
           oninput="if(this.value.length > 4) this.value = this.value.slice(0, 4); this.value = this.value.replace(/[^0-9]/g, '');"
@@ -658,10 +655,10 @@
       </label>
 
       <!-- Rejection Reason Button (only for rejected events) -->
-      <div *ngIf="selectedEvent && selectedEvent.status === 'rejected' && !isEditingEventDetail" 
+      <div *ngIf="selectedEvent && selectedEvent.status === 'rejected' && !isEditingEventDetail"
         style="margin-top: 16px; margin-bottom: 8px; width: 100%; display: block;">
         <button type="button"
-          (click)="openRejectionModal(selectedEvent.rejectionReason || 'Revize nedeni belirtilmemiş.')" 
+          (click)="openRejectionModal(selectedEvent.rejectionReason || 'Revize nedeni belirtilmemiş.')"
           style="background: #ef4444 !important; border: 2px solid #dc2626 !important; color: white !important; padding: 14px 20px !important; border-radius: 8px !important; font-weight: 600 !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 10px !important; cursor: pointer !important; width: 100% !important; font-size: 15px !important; transition: all 0.2s !important;">
           <span class="material-symbols-outlined" style="font-size: 22px !important; line-height: 1;">info</span>
           <span>Revize Nedeni Görüntüle</span>
@@ -733,7 +730,7 @@
       <div class="action-area" style="display: flex; gap: 12px; justify-content: center; width: 100%">
         <button class="btn-secondary" (click)="closeRejectionModal()">Vazgeç</button>
         <button class="btn-theme-modern" (click)="proceedToEditRejectedEvent()">
-          <span>Düzenle</span>
+          <span>Etkinliği Düzenle</span>
           <span class="material-symbols-outlined">edit</span>
         </button>
       </div>
@@ -751,11 +748,8 @@
       </button>
     </div>
     <div class="modal-body">
-      <app-image-upload 
-        label="Banner Görseli Seç / Sürükle" 
-        [previewUrl]="clubInfo.banner || null"
-        [uploadToServer]="true"
-        (onImageSelected)="onBannerSelected($event)"
+      <app-image-upload label="Banner Görseli Seç / Sürükle" [previewUrl]="clubInfo.banner || null"
+        [uploadToServer]="true" (onImageSelected)="onBannerSelected($event)"
         (onFileSelected)="onBannerFileSelected($event)"></app-image-upload>
     </div>
   </div>
@@ -771,12 +765,8 @@
       </button>
     </div>
     <div class="modal-body">
-      <app-image-upload 
-        label="Logo Seç / Sürükle" 
-        [previewUrl]="clubInfo.logo || null"
-        [uploadToServer]="true"
-        (onImageSelected)="onLogoSelected($event)"
-        (onFileSelected)="onLogoFileSelected($event)"></app-image-upload>
+      <app-image-upload label="Logo Seç / Sürükle" [previewUrl]="clubInfo.logo || null" [uploadToServer]="true"
+        (onImageSelected)="onLogoSelected($event)" (onFileSelected)="onLogoFileSelected($event)"></app-image-upload>
     </div>
   </div>
 </div>

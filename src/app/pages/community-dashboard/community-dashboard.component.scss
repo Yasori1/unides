@@ -392,6 +392,9 @@
   .card-image {
     position: relative;
     height: 120px;
+    width: 100%; // Ensure full width
+    overflow: hidden; // Prevent overflow
+    flex-shrink: 0; // Prevent shrinking
 
     img {
       width: 100%;
@@ -508,6 +511,8 @@
       color: #0f172a;
       font-weight: 800;
       line-height: 1.25;
+      word-break: break-word; // Fix wrapping
+      overflow-wrap: break-word; // Fix wrapping
     }
 
     .desc {
@@ -522,6 +527,8 @@
       -webkit-box-orient: vertical;
       overflow: hidden;
       text-overflow: ellipsis;
+      word-break: break-word; // Fix wrapping
+      overflow-wrap: break-word; // Fix wrapping
     }
 
     .rejection-trigger {
@@ -549,20 +556,6 @@
         background: #fee2e2;
       }
     }
-  }
-}
-
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 18px;
-  color: #64748b;
-
-  span {
-    font-size: 32px;
-    color: #cbd5e1;
   }
 }
 
@@ -610,6 +603,7 @@
   position: relative;
   background-color: #f4f4f5;
   overflow: hidden;
+  flex-shrink: 0; // Prevent shrinking
 }
 
 .network-grid .cover-img {
@@ -676,6 +670,7 @@
 .network-grid .title-wrapper {
   padding-top: 35px;
   flex: 1;
+  overflow: hidden; // Contain overflow
 }
 
 .network-grid .community-name {
@@ -689,6 +684,8 @@
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  word-break: break-word; // Fix wrapping
+  overflow-wrap: break-word; // Fix wrapping
 }
 
 .network-grid .university-name {
@@ -696,6 +693,8 @@
   color: #6b7280;
   font-weight: 500;
   display: block;
+  word-break: break-word; // Fix wrapping
+  overflow-wrap: break-word; // Fix wrapping
 }
 
 .network-grid .description {
@@ -710,6 +709,8 @@
   line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  word-break: break-word; // Fix wrapping
+  overflow-wrap: break-word; // Fix wrapping
 }
 
 .network-grid .card-footer {

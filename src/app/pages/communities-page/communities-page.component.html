@@ -4,10 +4,7 @@
 
 <div class="page-spacer" (mousemove)="onHeroMouseMove($event)">
   <div class="background-wrapper">
-    <div
-      class="interactive-blob"
-      [style.transform]="'translate(' + -heroMoveX + 'px, ' + -heroMoveY + 'px)'"
-    ></div>
+    <div class="interactive-blob" [style.transform]="'translate(' + -heroMoveX + 'px, ' + -heroMoveY + 'px)'"></div>
     <div class="noise-overlay"></div>
   </div>
 
@@ -27,12 +24,7 @@
     <div class="filters-bar">
       <div class="search-group">
         <i class="bx bx-search"></i>
-        <input
-          type="text"
-          placeholder="Topluluk ara..."
-          [(ngModel)]="searchText"
-          (input)="applyFilters()"
-        />
+        <input type="text" placeholder="Topluluk ara..." [(ngModel)]="searchText" (input)="applyFilters()" />
       </div>
 
       <div class="filter-groups">
@@ -43,7 +35,8 @@
           </div>
           <div class="custom-options">
             <div class="option" (click)="selectCity('')" [class.selected]="selectedCity === ''">Tüm Şehirler</div>
-            <div *ngFor="let city of cities" class="option" (click)="selectCity(city)" [class.selected]="selectedCity === city">
+            <div *ngFor="let city of cities" class="option" (click)="selectCity(city)"
+              [class.selected]="selectedCity === city">
               {{ city }}
             </div>
           </div>
@@ -56,7 +49,8 @@
           </div>
           <div class="custom-options">
             <div class="option" (click)="selectTag('')" [class.selected]="selectedTag === ''">Etiketler</div>
-            <div *ngFor="let tag of tags" class="option" (click)="selectTag(tag)" [class.selected]="selectedTag === tag">
+            <div *ngFor="let tag of tags" class="option" (click)="selectTag(tag)"
+              [class.selected]="selectedTag === tag">
               {{ tag }}
             </div>
           </div>
@@ -68,9 +62,12 @@
             <i class="bx bx-sort-alt-2"></i>
           </div>
           <div class="custom-options">
-            <div class="option" (click)="selectSort('default')" [class.selected]="sortOrder === 'default'">Önerilen Sıralama</div>
-            <div class="option" (click)="selectSort('member_desc')" [class.selected]="sortOrder === 'member_desc'">Üye Sayısı (Çoktan Az)</div>
-            <div class="option" (click)="selectSort('member_asc')" [class.selected]="sortOrder === 'member_asc'">Üye Sayısı (Azdan Çok)</div>
+            <div class="option" (click)="selectSort('default')" [class.selected]="sortOrder === 'default'">Önerilen
+              Sıralama</div>
+            <div class="option" (click)="selectSort('member_desc')" [class.selected]="sortOrder === 'member_desc'">Üye
+              Sayısı (Çoktan Az)</div>
+            <div class="option" (click)="selectSort('member_asc')" [class.selected]="sortOrder === 'member_asc'">Üye
+              Sayısı (Azdan Çok)</div>
           </div>
         </div>
       </div>
@@ -88,31 +85,20 @@
     </div>
 
     <div class="grid-container" *ngIf="!isLoading && displayedCommunities.length > 0">
-      <div
-        *ngFor="let item of displayedCommunities"
-        (click)="navigateToDetail(item.id)"
-        class="community-card"
-        style="cursor: pointer"
-      >
+      <div *ngFor="let item of displayedCommunities" (click)="navigateToDetail(item.id)" class="community-card"
+        style="cursor: pointer">
         <div class="cover-area">
-          <img
-            [src]="item.coverImage"
-            [alt]="item.name"
-            class="cover-img"
-            (error)="onImageError($event, 'cover')"
-          />
+          <!-- Blurry Background Image -->
+          <div class="cover-bg-blur" [style.background-image]="'url(' + item.coverImage + ')'"></div>
+
+          <img [src]="item.coverImage" [alt]="item.name" class="cover-img" (error)="onImageError($event, 'cover')" />
           <span class="category-badge">{{ item.category }}</span>
         </div>
 
         <div class="card-content">
           <div class="header-row">
             <div class="logo-wrapper">
-              <img
-                [src]="item.logo"
-                [alt]="item.name"
-                class="logo-img"
-                (error)="onImageError($event, 'logo')"
-              />
+              <img [src]="item.logo" [alt]="item.name" class="logo-img" (error)="onImageError($event, 'logo')" />
             </div>
             <div class="title-wrapper">
               <h3 class="community-name">{{ item.name }}</h3>
@@ -121,66 +107,33 @@
 
           <p class="description">{{ item.description }}</p>
 
-          <div
-            class="social-media-icons"
-            *ngIf="
+          <div class="social-media-icons" *ngIf="
               item.instagram || item.youtube || item.twitter || item.tiktok || item.socialMedia
-            "
-          >
-            <a
-              *ngIf="item.instagram"
-              [href]="item.instagram"
-              target="_blank"
-              class="social-icon instagram"
-              (click)="$event.stopPropagation()"
-              title="Instagram"
-            >
+            ">
+            <a *ngIf="item.instagram" [href]="item.instagram" target="_blank" class="social-icon instagram"
+              (click)="$event.stopPropagation()" title="Instagram">
               <i class="bx bxl-instagram"></i>
             </a>
-            <a
-              *ngIf="item.youtube"
-              [href]="item.youtube"
-              target="_blank"
-              class="social-icon youtube"
-              (click)="$event.stopPropagation()"
-              title="Youtube"
-            >
+            <a *ngIf="item.youtube" [href]="item.youtube" target="_blank" class="social-icon youtube"
+              (click)="$event.stopPropagation()" title="Youtube">
               <i class="bx bxl-youtube"></i>
             </a>
-            <a
-              *ngIf="item.twitter"
-              [href]="item.twitter"
-              target="_blank"
-              class="social-icon twitter"
-              (click)="$event.stopPropagation()"
-              title="Twitter"
-            >
+            <a *ngIf="item.twitter" [href]="item.twitter" target="_blank" class="social-icon twitter"
+              (click)="$event.stopPropagation()" title="Twitter">
               <i class="bx bxl-twitter"></i>
             </a>
-            <a
-              *ngIf="item.tiktok"
-              [href]="item.tiktok"
-              target="_blank"
-              class="social-icon tiktok"
-              (click)="$event.stopPropagation()"
-              title="TikTok"
-            >
+            <a *ngIf="item.tiktok" [href]="item.tiktok" target="_blank" class="social-icon tiktok"
+              (click)="$event.stopPropagation()" title="TikTok">
               <i class="bx bxl-tiktok"></i>
             </a>
-            <a
-              *ngIf="
+            <a *ngIf="
                 item.socialMedia &&
                 !item.instagram &&
                 !item.youtube &&
                 !item.twitter &&
                 !item.tiktok
-              "
-              [href]="item.socialMedia"
-              target="_blank"
-              class="social-icon"
-              (click)="$event.stopPropagation()"
-              title="Sosyal Medya"
-            >
+              " [href]="item.socialMedia" target="_blank" class="social-icon" (click)="$event.stopPropagation()"
+              title="Sosyal Medya">
               <i class="bx bxl-facebook"></i>
             </a>
           </div>
@@ -208,29 +161,17 @@
     </div>
 
     <div class="pagination-area" *ngIf="!isLoading && totalPages > 1">
-      <button
-        class="page-btn prev"
-        [disabled]="currentPage === 1"
-        (click)="changePage(currentPage - 1)"
-      >
+      <button class="page-btn prev" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">
         <i class="bx bx-chevron-left"></i>
       </button>
 
       <ng-container *ngFor="let page of pages">
-        <button
-          class="page-btn number"
-          [class.active]="page === currentPage"
-          (click)="changePage(page)"
-        >
+        <button class="page-btn number" [class.active]="page === currentPage" (click)="changePage(page)">
           {{ page }}
         </button>
       </ng-container>
 
-      <button
-        class="page-btn next"
-        [disabled]="currentPage === totalPages"
-        (click)="changePage(currentPage + 1)"
-      >
+      <button class="page-btn next" [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)">
         <i class="bx bx-chevron-right"></i>
       </button>
     </div>

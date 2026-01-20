@@ -452,6 +452,7 @@
     position: relative;
     background-color: #f4f4f5;
     overflow: hidden;
+    flex-shrink: 0; // Prevent shrinking
 
     .cover-img {
       width: 100%;
@@ -478,9 +479,10 @@
 
   .card-content {
     padding: 24px;
-    display: flex;
+    display: flex; // Utilize flexbox for vertical spacing
     flex-direction: column;
     flex-grow: 1;
+    min-height: 0; // Allow shrinking if needed
 
     .announcement-title {
       font-size: 1.2rem;
@@ -493,6 +495,8 @@
       line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
+      word-break: break-word; // Fix wrapping
+      overflow-wrap: break-word; // Fix wrapping
     }
 
     .description {
@@ -506,6 +510,8 @@
       line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow: hidden;
+      word-break: break-word; // Fix wrapping
+      overflow-wrap: break-word; // Fix wrapping
     }
 
     .card-footer {
@@ -515,6 +521,7 @@
       border-top: 1px solid var(--border-color);
       padding-top: 15px;
       font-size: 0.85rem;
+      margin-top: auto; // Push to bottom
 
       .action-text {
         font-weight: 600;

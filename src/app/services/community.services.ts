@@ -996,9 +996,11 @@ export class CommunityService {
 
   // Topluluk banner yükle (Backend: POST /api/Communities/{id}/banner)
   // Auth interceptor automatically adds Authorization header if token exists
+  // FormData için Content-Type header'ı eklenmemeli (browser otomatik ekler)
   uploadBanner(communityId: string, file: File): Observable<{ BannerUrl: string }> {
     const formData = new FormData();
-    formData.append('file', file, file.name);
+    // Backend'in beklediği parametre adı (CommunityImageUploadRequest.File)
+    formData.append('File', file, file.name);
 
     return this.http.post<{ BannerUrl?: string; bannerUrl?: string }>(`${this.apiUrl}/${communityId}/banner`, formData).pipe(
       map((response: any) => {
@@ -1031,9 +1033,11 @@ export class CommunityService {
 
   // Topluluk logo yükle (Backend: POST /api/Communities/{id}/logo)
   // Auth interceptor automatically adds Authorization header if token exists
+  // FormData için Content-Type header'ı eklenmemeli (browser otomatik ekler)
   uploadLogo(communityId: string, file: File): Observable<{ LogoUrl: string }> {
     const formData = new FormData();
-    formData.append('file', file, file.name);
+    // Backend'in beklediği parametre adı (CommunityImageUploadRequest.File)
+    formData.append('File', file, file.name);
 
     return this.http.post<{ LogoUrl?: string; logoUrl?: string }>(`${this.apiUrl}/${communityId}/logo`, formData).pipe(
       map((response: any) => {

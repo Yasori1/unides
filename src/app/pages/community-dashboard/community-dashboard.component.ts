@@ -9,6 +9,7 @@ import { EventService } from '../../services/event.services';
 import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
 import { ToastComponent } from '../../components/ui/toast/toast.component';
 import { AfkDetectionService } from '../../services/afk-detection.service';
+import { ImageErrorHandlerService } from '../../services/image-error-handler.service';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { environment } from '../../../environments/environment';
@@ -250,6 +251,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     private http: HttpClient,
     private afkDetectionService: AfkDetectionService,
     private spamService: SpamService,
+    private imageErrorHandler: ImageErrorHandlerService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) { }
 
@@ -375,7 +377,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
               };
               // Update initialClubInfo for change detection
               this.initialClubInfo = JSON.parse(JSON.stringify(this.clubInfo));
-              
+
               // Update displayName to show community name instead of user name
               this.displayName = communityDetail.name || this.userName;
               this.userInitial = this.displayName.charAt(0).toUpperCase();
@@ -543,7 +545,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
 
               // Önce ISO formatını dene
               parsedDate = new Date(dateValue);
-              
+
               // Eğer ISO formatı geçersizse, "dd.MM.yyyy" formatını dene
               if (isNaN(parsedDate.getTime())) {
                 // "dd.MM.yyyy" formatını parse et (örn: "17.01.2026")
@@ -569,10 +571,10 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
               } else {
                 // Geçerli tarih, kullan
                 startDate = parsedDate;
-                
+
                 // Türkçe tarih formatı: "15 Ocak 2026" (tam tarih)
-                dateStr = startDate.toLocaleDateString('tr-TR', { 
-                  day: 'numeric', 
+                dateStr = startDate.toLocaleDateString('tr-TR', {
+                  day: 'numeric',
                   month: 'long',
                   year: 'numeric'
                 });
@@ -736,14 +738,14 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
 
   get filteredDashboardEvents() {
     let filtered: DashboardEvent[] = [];
-    
+
     // Status'e göre filtrele
     if (this.statusFilter === 'all') {
       filtered = [...this.dashboardEvents];
     } else {
       filtered = this.dashboardEvents.filter((e) => e.status === this.statusFilter);
     }
-    
+
     // Kronolojik sıraya göre sırala (en yeniden en eskiye - startDateIso'ya göre)
     filtered.sort((a, b) => {
       const dateA = a.startDateIso ? new Date(a.startDateIso).getTime() : 0;
@@ -751,7 +753,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       // En yeni tarih önce (büyükten küçüğe)
       return dateB - dateA;
     });
-    
+
     return filtered;
   }
 
@@ -1112,23 +1114,23 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
         .subscribe({
           next: (response) => {
             console.log('Event updated successfully:', response);
-            
+
             // Eğer fotoğraf seçildiyse, ayrı endpoint ile yükle
             if (this.newEventData.imageFile && this.editingEventId) {
               this.eventService.uploadEventImage(this.editingEventId, this.newEventData.imageFile).subscribe({
                 next: (uploadResponse) => {
                   console.log('Event image uploaded successfully:', uploadResponse);
                   console.log('Uploaded image path:', uploadResponse.ImagePath);
-                  
+
                   // Backend'den gelen ImagePath zaten full URL (convert edilmiş)
                   const imageUrl = uploadResponse.ImagePath || '';
-                  
+
                   // Backend'den gelen ImagePath'i event listesinde güncelle
                   const eventInList = this.dashboardEvents.find((e) => e.id === this.editingEventId);
                   if (eventInList && imageUrl) {
                     eventInList.imageUrl = imageUrl;
                   }
-                  
+
                   this.showToast(
                     "Etkinlik ve fotoğrafı güncellendi ve tekrar onaya gönderildi! Kurumsal Dashboard'daki etkinlik onaylama ekranına iletildi.",
                     'success'
@@ -1207,10 +1209,10 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
                 console.log('Event image uploaded successfully:', uploadResponse);
                 console.log('Uploaded image path:', uploadResponse.ImagePath);
                 console.log('Event ID:', eventId);
-                
+
                 // Backend'den gelen ImagePath zaten full URL (convert edilmiş)
                 const imageUrl = uploadResponse.ImagePath || '';
-                
+
                 // Yeni oluşturulan event'i listede bul ve imageUrl'ini güncelle
                 // NOT: Bu geçici bir güncelleme, asıl güncelleme loadCommunityEvents ile yapılacak
                 setTimeout(() => {
@@ -1224,14 +1226,14 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
                     console.warn('Event not found in list for ID:', eventId, 'Available IDs:', this.dashboardEvents.map(e => e.id));
                   }
                 }, 100);
-                
+
                 this.showToast(
                   "Etkinlik ve fotoğrafı başarıyla oluşturuldu! Kurumsal Dashboard'daki etkinlik onaylama ekranına iletildi.",
                   'success'
                 );
                 // Modal'ı kapat
                 this.closeModal();
-                
+
                 // Reload events from backend to get fresh data (fotoğraf path'i ile birlikte)
                 // Backend'in fotoğrafı işlemesi ve event objesine set etmesi için bekleme
                 if (this.clubInfo.id) {
@@ -1295,11 +1297,11 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     const hasValidDate = date && date.trim().length > 0;
     const hasValidTime = time && time.trim().length > 0;
     return (
-      !!title?.trim() && 
-      hasValidDate && 
-      hasValidTime && 
-      !!location?.trim() && 
-      !!quota && 
+      !!title?.trim() &&
+      hasValidDate &&
+      hasValidTime &&
+      !!location?.trim() &&
+      !!quota &&
       !!description?.trim()
       // !!image // Fotoğraf zorunluluğu şimdilik kaldırıldı
     );
@@ -1416,10 +1418,10 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       },
       error: (err: any) => {
         console.error('Üye eklenirken hata:', err);
-        
+
         // Backend'den gelen hata mesajını al
         let errorMessage = err.error?.message || 'Üye eklenirken bir hata oluştu.';
-        
+
         // HTTP status koduna göre özel mesajlar
         if (err.status === 400) {
           // 400: Email gereklidir veya geçersiz domain
@@ -1446,7 +1448,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
           this.showToast(errorMessage, 'error');
           return;
         }
-        
+
         this.showToast(errorMessage, 'error');
       },
     });
@@ -1684,7 +1686,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     return emails;
   }
 
-  // Toplu üye ekleme
+  // Toplu üye ekleme - her email için tek tek addMember çağrısı
   saveBulkMembers() {
     const emails = this.parseBulkEmails(this.bulkEmailsText);
 
@@ -1693,55 +1695,53 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Backend'den toplu üye ekleme endpoint'ini kullan
-    // Backend endpoint: POST /api/Communities/me/members/bulk
-    this.communityService.bulkAddMembers(emails).subscribe({
-      next: (result) => {
-        // Backend'den gelen sonuçları işle
-        const addedCount = result.added.length;
-        const alreadyMemberCount = result.alreadyMember.length;
-        const invalidDomainCount = result.invalidDomain.length;
-        const notFoundCount = result.notFound.length;
-        const rejectedRoleCount = result.rejectedRole.length;
+    const communityId = this.clubInfo?.id;
+    if (!communityId) {
+      this.showToast('Topluluk bilgisi bulunamadı.', 'error');
+      return;
+    }
 
-        // Başarılı eklenenler varsa üyeleri backend'den yeniden yükle
-        if (addedCount > 0 && this.clubInfo.id) {
-          this.loadCommunityMembers(this.clubInfo.id);
-        }
+    // Her email için backend'e istek at
+    let successCount = 0;
+    let failedEmails: string[] = [];
+    let completedCount = 0;
 
-        // Toast mesajı oluştur
-        let message = '';
-        if (addedCount > 0) {
-          message = `${addedCount} üye başarıyla eklendi.`;
+    emails.forEach(email => {
+      this.communityService.addMember(communityId, { email }).subscribe({
+        next: () => {
+          successCount++;
+          completedCount++;
+          this.checkBulkComplete(completedCount, emails.length, successCount, failedEmails);
+        },
+        error: (err: any) => {
+          failedEmails.push(email);
+          completedCount++;
+          console.error(`Üye eklenemedi (${email}):`, err);
+          this.checkBulkComplete(completedCount, emails.length, successCount, failedEmails);
         }
-        if (alreadyMemberCount > 0) {
-          message += ` ${alreadyMemberCount} üye zaten ekli.`;
-        }
-        if (invalidDomainCount > 0) {
-          message += ` ${invalidDomainCount} e-posta geçersiz domain (.edu.tr olmalı).`;
-        }
-        if (notFoundCount > 0) {
-          message += ` ${notFoundCount} e-posta ile kayıtlı kullanıcı bulunamadı.`;
-        }
-        if (rejectedRoleCount > 0) {
-          message += ` ${rejectedRoleCount} e-posta GSB yetkilisi (eklenemez).`;
-        }
-
-        if (addedCount > 0) {
-          this.showToast(message.trim(), 'success');
-        } else {
-          this.showToast(message.trim() || 'Hiçbir üye eklenemedi.', 'error');
-        }
-
-        this.memberCurrentPage = 1;
-        this.closeModal();
-      },
-      error: (err: any) => {
-        console.error('Toplu üye eklenirken hata:', err);
-        const errorMsg = err.error?.message || 'Toplu üye eklenirken bir hata oluştu.';
-        this.showToast(errorMsg, 'error');
-      },
+      });
     });
+  }
+
+  private checkBulkComplete(completed: number, total: number, success: number, failed: string[]) {
+    if (completed === total) {
+      // Tüm istekler tamamlandı
+      if (this.clubInfo.id) {
+        this.loadCommunityMembers(this.clubInfo.id);
+      }
+
+      if (success === total) {
+        this.showToast(`${success} üye başarıyla eklendi.`, 'success');
+      } else if (success > 0) {
+        this.showToast(`${success} üye eklendi, ${failed.length} e-posta eklenemedi (sistemde kayıtlı değil).`, 'success');
+      } else {
+        this.showToast(`Hiçbir üye eklenemedi. E-postalar sistemde kayıtlı değil.`, 'error');
+      }
+
+      this.bulkEmailsText = '';
+      this.memberCurrentPage = 1;
+      this.closeModal();
+    }
   }
 
   openDeleteConfirm(id: number) {
@@ -1792,12 +1792,12 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
         }
 
         this.showToast('Etkinlik başarıyla silindi.', 'success');
-        
+
         // Eğer silinen etkinlik detail modal'da açıksa, modal'ı kapat
         if (this.selectedEvent && this.selectedEvent.id === this.confirmDeleteId) {
           this.closeEventDetail();
         }
-        
+
         this.startCloseConfirm();
       },
       error: (err: any) => {
@@ -1935,7 +1935,31 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       hasRejectionReason: !!this.selectedEvent.rejectionReason,
       isRejected: this.selectedEvent.status === 'rejected'
     });
-    
+
+    // Eğer etkinlik rejected ise ve rejectionReason yoksa, backend'den detay çek
+    // EventDetailDto'da ConfirmAbout var, EventListItemDto'da yok
+    if (this.selectedEvent.status === 'rejected' && !this.selectedEvent.rejectionReason) {
+      this.eventService.getById(this.selectedEvent.id).subscribe({
+        next: (eventDetail) => {
+          if (eventDetail.rejectionReason) {
+            console.log('Fetched rejection reason from backend:', eventDetail.rejectionReason);
+            // selectedEvent'i güncelle
+            if (this.selectedEvent && this.selectedEvent.id === event.id) {
+              this.selectedEvent.rejectionReason = eventDetail.rejectionReason;
+            }
+            // Dashboard listesindeki event'i de güncelle
+            const eventInList = this.dashboardEvents.find(e => e.id === event.id);
+            if (eventInList) {
+              eventInList.rejectionReason = eventDetail.rejectionReason;
+            }
+          }
+        },
+        error: (err) => {
+          console.warn('Could not fetch event detail for rejection reason:', err);
+        }
+      });
+    }
+
     if (isPlatformBrowser(this.platformId)) {
       document.body.style.overflow = 'hidden';
     }
@@ -1946,13 +1970,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     this.openEventDetail(event);
   }
 
-  proceedToEditRejectedEvent() {
-    this.closeRejectionModal();
-    if (this.rejectedEventToEdit) {
-      this.editEvent(this.rejectedEventToEdit);
-      this.rejectedEventToEdit = null;
-    }
-  }
+
 
   editEvent(event: DashboardEvent) {
     this.editingEventId = event.id;
@@ -2027,12 +2045,12 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     // Parse date and time from ISO string
     let dateStr = '';
     let timeStr = '';
-    
+
     // Önce startDateIso'dan parse etmeyi dene
     if (this.selectedEvent.startDateIso) {
       try {
         const d = new Date(this.selectedEvent.startDateIso);
-        
+
         // Geçerlilik kontrolü
         if (!isNaN(d.getTime())) {
           // YYYY-MM-DD
@@ -2050,13 +2068,13 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
         console.error('Date parsing error from startDateIso:', e);
       }
     }
-    
+
     // Eğer startDateIso'dan parse edilemediyse, selectedEvent.time'ı kullan
     if (!timeStr && this.selectedEvent.time && this.selectedEvent.time.trim().length > 0) {
       // selectedEvent.time zaten "HH:mm" formatında olmalı
       timeStr = this.selectedEvent.time.trim();
     }
-    
+
     // Eğer hala tarih yoksa, bugünün tarihini kullan (fallback)
     if (!dateStr) {
       const today = new Date();
@@ -2065,7 +2083,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       const day = String(today.getDate()).padStart(2, '0');
       dateStr = `${year}-${month}-${day}`;
     }
-    
+
     // Eğer hala saat yoksa, varsayılan saat kullan (fallback)
     if (!timeStr) {
       timeStr = '10:00';
@@ -2113,7 +2131,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       if (!hasValidLocation) missingFields.push('Konum');
       if (!hasValidQuota) missingFields.push('Kontenjan');
       if (!hasValidDescription) missingFields.push('Açıklama');
-      
+
       this.showToast(`Lütfen şu alanları doldurun: ${missingFields.join(', ')}`, 'error');
       return;
     }
@@ -2149,18 +2167,18 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     // Update event
     const eventId = this.selectedEvent.id; // Store eventId to avoid null checks in callbacks
     const wasApproved = this.selectedEvent.status === 'approved'; // Approved event'ten mi düzenleniyor?
-    
+
     // Fotoğraf silme durumunu kontrol et
     const isImageDeleted = this.editedEventData.image === '' && !this.editedEventData.imageFile;
     const hasNewImage = this.editedEventData.imageFile !== null && this.editedEventData.imageFile !== undefined;
-    
+
     console.log('[saveEventFromDetail] Image state check:', {
       isImageDeleted,
       hasNewImage,
       imageFile: !!this.editedEventData.imageFile,
       image: this.editedEventData.image ? 'has value' : 'empty'
     });
-    
+
     this.eventService
       .updateEvent(eventId, {
         title: this.editedEventData.title,
@@ -2176,12 +2194,12 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           console.log('Event updated successfully:', response);
-          
+
           // Eğer approved event'ten düzenleniyorsa, yayından kaldırıldı ve onaya gönderildi
           if (wasApproved) {
             console.log('Approved event yayından kaldırıldı ve onaya gönderildi');
           }
-          
+
           // Eğer fotoğraf silinmişse, imageUrl'i temizle ve success mesajı göster
           if (isImageDeleted) {
             if (this.selectedEvent) {
@@ -2192,7 +2210,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
                 eventInList.imageUrl = '';
               }
             }
-            
+
             // Success mesajı göster
             if (wasApproved) {
               this.showToast(
@@ -2207,10 +2225,10 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
             }
             this.isEditingEventDetail = false;
             this.editedEventData = {};
-            
+
             // Pop-up'ı kapat (önce kapat, sonra reload yap)
             this.closeEventDetail();
-            
+
             // Reload events from backend (loading gösterme)
             if (this.clubInfo.id) {
               setTimeout(() => {
@@ -2219,7 +2237,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
             }
             return; // Fotoğraf silme durumunda işlem tamamlandı
           }
-          
+
           // Eğer yeni fotoğraf seçildiyse, ayrı endpoint ile yükle
           if (hasNewImage && eventId) {
             console.log('[saveEventFromDetail] Uploading image for event:', eventId, 'File:', this.editedEventData.imageFile?.name);
@@ -2227,31 +2245,31 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
               next: (uploadResponse) => {
                 console.log('[saveEventFromDetail] Event image uploaded successfully:', uploadResponse);
                 console.log('[saveEventFromDetail] Raw ImagePath from backend:', uploadResponse.ImagePath);
-                
-                  // Backend'den gelen ImagePath zaten full URL (convert edilmiş)
-                  const imageUrl = uploadResponse.ImagePath || '';
-                  console.log('[saveEventFromDetail] Uploaded imageUrl:', imageUrl);
-                  
-                  // Backend'den gelen ImagePath'i direkt olarak selectedEvent'e ata
-                  if (this.selectedEvent && imageUrl) {
-                    console.log('[saveEventFromDetail] Updating selectedEvent.imageUrl from', this.selectedEvent.imageUrl, 'to', imageUrl);
-                    // Cache-busting için timestamp ekle (yeni yüklenen image'ler için)
-                    const imageUrlWithCacheBust = imageUrl + (imageUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
-                    console.log('[saveEventFromDetail] Image URL with cache-bust:', imageUrlWithCacheBust);
-                    // Object reference'ı değiştir ki Angular change detection çalışsın
-                    this.selectedEvent = { ...this.selectedEvent, imageUrl: imageUrlWithCacheBust };
-                    // Dashboard events listesinde de güncelle (cache-bust olmadan, çünkü liste için gerekli değil)
-                    const eventInList = this.dashboardEvents.find((e) => e.id === eventId);
-                    if (eventInList) {
-                      console.log('[saveEventFromDetail] Updating eventInList.imageUrl from', eventInList.imageUrl, 'to', imageUrl);
-                      eventInList.imageUrl = imageUrl;
-                    } else {
-                      console.warn('[saveEventFromDetail] Event not found in dashboardEvents list, ID:', eventId);
-                    }
+
+                // Backend'den gelen ImagePath zaten full URL (convert edilmiş)
+                const imageUrl = uploadResponse.ImagePath || '';
+                console.log('[saveEventFromDetail] Uploaded imageUrl:', imageUrl);
+
+                // Backend'den gelen ImagePath'i direkt olarak selectedEvent'e ata
+                if (this.selectedEvent && imageUrl) {
+                  console.log('[saveEventFromDetail] Updating selectedEvent.imageUrl from', this.selectedEvent.imageUrl, 'to', imageUrl);
+                  // Cache-busting için timestamp ekle (yeni yüklenen image'ler için)
+                  const imageUrlWithCacheBust = imageUrl + (imageUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
+                  console.log('[saveEventFromDetail] Image URL with cache-bust:', imageUrlWithCacheBust);
+                  // Object reference'ı değiştir ki Angular change detection çalışsın
+                  this.selectedEvent = { ...this.selectedEvent, imageUrl: imageUrlWithCacheBust };
+                  // Dashboard events listesinde de güncelle (cache-bust olmadan, çünkü liste için gerekli değil)
+                  const eventInList = this.dashboardEvents.find((e) => e.id === eventId);
+                  if (eventInList) {
+                    console.log('[saveEventFromDetail] Updating eventInList.imageUrl from', eventInList.imageUrl, 'to', imageUrl);
+                    eventInList.imageUrl = imageUrl;
                   } else {
-                    console.warn('[saveEventFromDetail] Cannot update imageUrl - selectedEvent:', !!this.selectedEvent, 'imageUrl:', imageUrl);
+                    console.warn('[saveEventFromDetail] Event not found in dashboardEvents list, ID:', eventId);
                   }
-                
+                } else {
+                  console.warn('[saveEventFromDetail] Cannot update imageUrl - selectedEvent:', !!this.selectedEvent, 'imageUrl:', imageUrl);
+                }
+
                 // Approved event'ten düzenleniyorsa özel mesaj
                 if (wasApproved) {
                   this.showToast(
@@ -2291,12 +2309,12 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
                 // Pop-up'ı kapat (önce kapat, sonra reload yap)
                 this.closeEventDetail();
 
-            // Reload events from backend (fotoğraf path'i ile birlikte, loading gösterme)
-            if (this.clubInfo.id) {
-              setTimeout(() => {
-                this.loadCommunityEvents(this.clubInfo.id, true); // skipLoading = true
-              }, 500); // Backend'in fotoğrafı kaydetmesi için kısa bir bekleme
-            }
+                // Reload events from backend (fotoğraf path'i ile birlikte, loading gösterme)
+                if (this.clubInfo.id) {
+                  setTimeout(() => {
+                    this.loadCommunityEvents(this.clubInfo.id, true); // skipLoading = true
+                  }, 500); // Backend'in fotoğrafı kaydetmesi için kısa bir bekleme
+                }
               },
             });
           } else {
@@ -2369,6 +2387,21 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     if (isPlatformBrowser(this.platformId)) {
       document.body.style.overflow = 'auto';
     }
+  }
+
+  proceedToEditRejectedEvent() {
+    this.closeRejectionModal();
+    // Ensure the underlying event detail modal stays open and switches to edit mode
+    // active scroll lock again because closeRejectionModal removed it, 
+    // but we want it for the underlying modal if needed, though typically modal-overlay handles it?
+    // Actually closeRejectionModal removes overflow:hidden. 
+    // But since selectedEvent is still true, the underlying modal is visible.
+    // We should probably ensure overflow is hidden if valid.
+    if (isPlatformBrowser(this.platformId) && this.selectedEvent) {
+      document.body.style.overflow = 'hidden';
+    }
+
+    this.editRejectedEventFromDetail();
   }
 
   // Spam kontrolünü yapan private metod (Community Dashboard için)
@@ -2458,8 +2491,8 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
 
             // Status kontrolü
             const isClean = (moderationStatus === 'kabul' || moderationStatus === 'accept' || moderationStatus === 'approved') ||
-                            (forbiddenCount === 0 && spamCount === 0 && politicsCount === 0 && !moderationStatus.includes('admin_kontrolu') && !moderationStatus.includes('red'));
-            
+              (forbiddenCount === 0 && spamCount === 0 && politicsCount === 0 && !moderationStatus.includes('admin_kontrolu') && !moderationStatus.includes('red'));
+
             const status = moderationStatus || (isClean ? 'kabul' : 'red');
             const reasonArray = moderation.reason || [];
             const reason = Array.isArray(reasonArray) ? reasonArray.join(', ') : (reasonArray || '');
@@ -2481,8 +2514,8 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
               if (moderationStatus && moderationStatus.includes('admin_kontrolu')) {
                 issues.push('Admin kontrolü gerekli');
               }
-              const errorMessage = reason || (issues.length > 0 
-                ? `İçerikte sorun tespit edildi: ${issues.join(', ')}.` 
+              const errorMessage = reason || (issues.length > 0
+                ? `İçerikte sorun tespit edildi: ${issues.join(', ')}.`
                 : 'İçerik kontrol edilmeli.');
               reject({ clean: false, message: errorMessage });
             }
@@ -2550,10 +2583,10 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     if (!imagePath) {
       return '';
     }
-    
+
     // String'e çevir ve trim yap
     const pathStr = String(imagePath).trim();
-    
+
     // Çok kısa path'ler geçersiz (örn: "string" = 6 karakter)
     if (pathStr.length < 10) {
       // Geçersiz placeholder değerleri kontrol et
@@ -2563,12 +2596,12 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
         return '';
       }
     }
-    
+
     // Zaten tam URL ise (http://, https://, data:, blob:) olduğu gibi döndür
     if (pathStr.startsWith('http://') || pathStr.startsWith('https://') || pathStr.startsWith('data:') || pathStr.startsWith('blob:')) {
       return pathStr;
     }
-    
+
     // Relative path kontrolü - backend'den `/images/Etkinlikler/`, `/ImagesUnides/Etkinlikler/`, `/images/Duyurular/`, `/images/Banner/`, `/images/Logo/` formatında gelebilir
     // Eğer path `/images/` veya `/ImagesUnides/` ile başlamıyorsa ve çok kısaysa geçersiz olabilir
     const isValidPath = pathStr.startsWith('/images/') || pathStr.startsWith('/ImagesUnides/');
@@ -2580,7 +2613,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
         return '';
       }
     }
-    
+
     // Relative path ise tam URL'ye çevir
     // Backend'den `/assets/img/Duyurular/`, `/assets/img/Banner/`, `/assets/img/Logo/` formatında gelebilir
     // Bunları `/ImagesUnides/Duyurular/`, `/ImagesUnides/Banner/`, `/ImagesUnides/Logo/` formatına çevir
@@ -2588,7 +2621,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     if (!finalPath.startsWith('/')) {
       finalPath = '/' + finalPath;
     }
-    
+
     // Path dönüşümü: `/assets/img/` -> `/ImagesUnides/`
     if (finalPath.startsWith('/assets/img/')) {
       finalPath = finalPath.replace('/assets/img/', '/ImagesUnides/');
@@ -2598,7 +2631,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     else if (finalPath.startsWith('/images/')) {
       finalPath = finalPath.replace('/images/', '/ImagesUnides/');
     }
-    
+
     // Her zaman production URL'ini kullan (unidesportal.com) - direkt bağlantı
     const baseUrl = environment.apiUrl.replace('/api', '');
     const fullUrl = baseUrl + finalPath;
@@ -2606,21 +2639,9 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     return fullUrl;
   }
 
-  // Image error handler - Proxy kullanıldığı için CORS sorunu olmamalı
-  // Sadece fallback görsel göster
-  onImageError(event: Event): void {
-    const img = event.target as HTMLImageElement;
-    const originalSrc = img.src;
-    
-    // Placeholder görseli zaten yüklenmişse tekrar deneme
-    if (originalSrc && originalSrc.includes('placeholder-cover.svg')) {
-      return;
-    }
-    
-    // Fallback görsel göster
-    const fallbackPath = 'assets/img/placeholder-cover.svg';
-    img.src = fallbackPath;
-    img.onerror = null; // Sonsuz döngüyü önle
+  // Image error handler - ImageErrorHandlerService kullanarak tutarlı hata yönetimi
+  onImageError(event: Event, type: 'announcement' | 'event' | 'logo' | 'cover' | 'avatar' = 'event'): void {
+    this.imageErrorHandler.handleImageError(event, type);
   }
 
 

@@ -743,11 +743,14 @@ export class EventService {
 
   // Etkinlik görseli yükle (Backend: POST /api/Events/{id}/image)
   // Auth interceptor automatically adds Authorization header if token exists
+  // FormData için Content-Type header'ı eklenmemeli (browser otomatik ekler)
   uploadEventImage(eventId: number, file: File): Observable<{ ImagePath: string; imagePath?: string }> {
     const formData = new FormData();
-    // Backend'in beklediği parametre adı
-    formData.append('file', file, file.name);
+    // Backend'in beklediği parametre adı (EventImageUploadRequest.File)
+    formData.append('File', file, file.name);
 
+    // FormData için Content-Type header'ı EKLEME - browser otomatik multipart/form-data ekler
+    // Topluluk banner/logo yükleme ile aynı pattern (options objesi yok)
     return this.http.post<{ ImagePath?: string; imagePath?: string }>(`${this.apiUrl}/${eventId}/image`, formData).pipe(
       map((response) => {
         // Backend'den imagePath (küçük harf) veya ImagePath (büyük harf) gelebilir

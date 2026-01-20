@@ -97,15 +97,15 @@
         "serve": {
           "builder": "@angular/build:dev-server",
           "options": {
-            // Proxy devre dışı - direkt https://unidesportal.com adresine bağlanıyor
+            "proxyConfig": "proxy.conf.json"
           },
           "configurations": {
             "production": {
               "buildTarget": "unides:build:production"
             },
             "development": {
-              "buildTarget": "unides:build:development"
-              // Proxy devre dışı
+              "buildTarget": "unides:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

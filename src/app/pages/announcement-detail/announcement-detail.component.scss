@@ -290,6 +290,8 @@ $ministry-color: #1e3a8a;
       line-height: 1.2;
       margin: 0 0 16px 0;
       letter-spacing: -0.5px;
+      word-break: break-word; // Fix wrapping for long titles
+      overflow-wrap: break-word; // Ensure words break if too long
     }
 
     .announcement-meta {
@@ -321,7 +323,7 @@ $ministry-color: #1e3a8a;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 
       img {
-        width: 80%;
+        width: 100%; // Changed from 80% to 100% to fill container and avoid whitespace
         height: auto;
         max-height: 500px; // Limit max height
         object-fit: cover;

@@ -1,12 +1,10 @@
 export const environment = {
   production: false,
-  // Kendi bilgisayarında 'ng serve' yaparken burası çalışır
-  // Proxy kullanıyorsanız: http://localhost:4200/api (proxy.conf.json üzerinden backend'e yönlendirilir)
-  // Proxy kullanmıyorsanız ve backend localhost'ta çalışıyorsa: http://localhost:5000/api veya http://localhost:7001/api
-  // Remote sunucu kullanmak istiyorsanız: http://72.62.37.160:8080/api
-  apiUrl: 'https://unidesportal.com/api', // Proxy üzerinden çalışır (proxy.conf.json ile backend'e yönlendirilir)
-  // Flask Chatbot API URL - Development
+  // Development'ta proxy kullanılıyor: /api istekleri proxy.conf.json üzerinden https://unidesportal.com'a yönlendirilir
+  // Bu sayede CORS sorunu olmaz çünkü browser localhost:4200/api görür, proxy arka planda https://unidesportal.com/api'ye yönlendirir
+  apiUrl: '/api', // Proxy üzerinden çalışır (proxy.conf.json ile https://unidesportal.com'a yönlendirilir)
+  // Flask Chatbot API URL - Development (proxy kullanılmıyor, direkt istek)
   chatbotApiUrl: 'https://unidesportal.com/chatbot/chat', // Chatbot sunucu URL'si
-  // Spam Bot API URL - Development
+  // Spam Bot API URL - Development (proxy kullanılmıyor, direkt istek)
   spamBotApiUrl: 'https://unidesportal.com/spamfilter/api/moderate', // Spam kontrol sunucu URL'si
 };
