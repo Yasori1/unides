@@ -259,7 +259,7 @@
         <div class="event-card" *ngFor="let event of filteredDashboardEvents" (click)="onEventCardClick(event)"
           [class.rejected-card]="event.status === 'rejected'">
           <div class="card-image">
-            <img [src]="event.imageUrl" [alt]="event.title" loading="lazy" appCorsImage (error)="onImageError($event)" />
+            <img [src]="event.imageUrl" [alt]="event.title" loading="lazy" (error)="onImageError($event)" />
             <span class="date-badge">
               <span *ngIf="event.date">{{ event.date }}</span>
               <span *ngIf="event.time" class="time-badge">{{ event.time }}</span>
@@ -363,16 +363,10 @@
       <div class="card settings-card">
         <div class="settings-hero">
           <div class="hero-banner" [style.background-image]="'url(' + clubInfo.banner + ')'">
-            <button class="edit-banner-btn" (click)="showBannerModal = true" title="Banner Güncelle">
-              <span class="material-symbols-outlined">edit</span>
-            </button>
           </div>
           <div class="hero-profile">
             <div class="avatar-wrapper">
               <img [src]="clubInfo.logo" alt="Logo" />
-              <button class="edit-avatar-btn" (click)="showAvatarModal = true" title="Logo Güncelle">
-                <span class="material-symbols-outlined">edit</span>
-              </button>
             </div>
             <div class="hero-text">
               <p class="eyebrow">Profil</p>
@@ -410,14 +404,10 @@
               </label>
             </div>
             <label class="stacked">
-              <div class="label-header">
-                <span>Hakkımızda</span>
-                <span class="char-counter" [class.limit-near]="clubInfo.description.length > 450">
-                  {{ clubInfo.description.length }} / 500
-                </span>
-              </div>
+              <span>Hakkımızda</span>
               <textarea rows="4" maxlength="500" [(ngModel)]="clubInfo.description"
-                placeholder="Topluluğunuzu anlatan kısa bir yazı yazın..." disabled></textarea>
+                placeholder="Topluluğunuzu anlatan kısa bir yazı yazın..." disabled readonly 
+                style="cursor: not-allowed; resize: none; background-color: #f1f5f9; color: #64748b;"></textarea>
             </label>
           </div>
         </div>
@@ -519,57 +509,12 @@
 
         <!-- Normal Arama Modu -->
         <div *ngIf="!isBulkAddMode && modalType === 'new-member'">
-          <!-- Email Input with Validation -->
+          <!-- Email Input -->
           <div class="email-input-wrapper" style="margin-bottom: 15px">
             <label class="stacked">
               <span>E-posta Adresi</span>
-              <div class="email-input-container" style="position: relative">
-                <input type="email" placeholder="E-posta adresi girin" [(ngModel)]="newMemberData.email"
-                  (ngModelChange)="onEmailInputChange()" (input)="onEmailInputChange()"
-                  style="padding-right: 40px; width: 100%" />
-                <span class="email-validation-icon"
-                  *ngIf="newMemberData.email && emailValid && !emailChecking && emailInputComplete"
-                  [class.valid]="emailExists && !emailIsCorporate" [class.invalid]="!emailExists || emailIsCorporate">
-                  <span class="material-symbols-outlined" *ngIf="emailExists && !emailIsCorporate"
-                    style="color: #10b981">check_circle</span>
-                  <span class="material-symbols-outlined" *ngIf="!emailExists || emailIsCorporate"
-                    style="color: #ef4444">cancel</span>
-                </span>
-                <span class="email-validation-icon" *ngIf="emailChecking">
-                  <span class="spinner" style="width: 20px; height: 20px"></span>
-                </span>
-              </div>
-              <small *ngIf="
-                  newMemberData.email &&
-                  emailValid &&
-                  !emailChecking &&
-                  emailInputComplete &&
-                  !emailExists &&
-                  !emailIsCorporate
-                " style="color: #ef4444">
-                {{ emailErrorMessage || 'Bu e-posta adresi ile kayıtlı kullanıcı bulunamadı.' }}
-              </small>
-              <!-- GSB/Kurumsal yetkili uyarısı -->
-              <small *ngIf="
-                  newMemberData.email &&
-                  emailValid &&
-                  emailInputComplete &&
-                  (emailIsCorporate || emailUserRoleId === 2) &&
-                  !emailChecking
-                " style="color: #ef4444">
-                {{ emailErrorMessage || 'GSB Yetkilisi eklenemez.' }}
-              </small>
-              <!-- "Kullanıcı bulundu" mesajı sadece email tam girildiğinde ve kurumsal değilse gösterilsin -->
-              <small *ngIf="
-                  newMemberData.email &&
-                  emailValid &&
-                  emailInputComplete &&
-                  emailExists &&
-                  !emailIsCorporate &&
-                  !emailChecking
-                " style="color: #10b981">
-                Kullanıcı bulundu.
-              </small>
+              <input type="email" placeholder="E-posta adresi girin" [(ngModel)]="newMemberData.email"
+                (ngModelChange)="onEmailInputChange()" (input)="onEmailInputChange()" />
             </label>
           </div>
         </div>

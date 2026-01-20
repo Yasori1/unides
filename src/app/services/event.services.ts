@@ -13,6 +13,7 @@ export interface EventItem {
   location?: string;
   communityId: number | string; // Backend'den Guid (string) gelebilir
   communityName?: string;
+  communityLogo?: string; // Topluluk logosu
   imageUrl?: string;
   status?: 'Onaylandı' | 'Beklemede' | 'Reddedildi' | 'Revize';
   capacity?: string;
@@ -129,7 +130,13 @@ export class EventService {
     
     // Geçersiz placeholder değerleri kontrol et (küçük harf normalize edilmiş)
     const normalizedPath = pathStr.toLowerCase().trim();
-    const invalidValues = ['string', 'null', 'undefined', 'none', 'placeholder', ''];
+    const invalidValues = ['string', 'null', 'undefined', 'none', 'placeholder', '', 'null', 'undefined'];
+    
+    // "string" değeri özel kontrol - backend'den placeholder olarak gelebilir
+    if (normalizedPath === 'string' || normalizedPath === 'null' || normalizedPath === 'undefined') {
+      return '';
+    }
+    
     if (invalidValues.includes(normalizedPath)) {
       return '';
     }
@@ -152,14 +159,16 @@ export class EventService {
         return '';
       }
       // Eğer path sadece harflerden oluşuyorsa ve çok kısaysa, muhtemelen geçersiz bir placeholder
-      if (/^[a-zA-Z]+$/.test(pathStr) && pathStr.length < 15) {
+      // Ancak "string" gibi bilinen placeholder'ları zaten yukarıda kontrol ettik
+      if (/^[a-zA-Z]+$/.test(pathStr) && pathStr.length < 15 && normalizedPath !== 'string') {
+        // Sadece gerçekten geçersiz görünen değerleri filtrele
         return '';
       }
     }
     
     // Relative path ise tam URL'ye çevir
-    // Backend'den `/assets/img/Duyurular/`, `/assets/img/Banner/`, `/assets/img/Logo/` formatında gelebilir
-    // Bunları `/ImagesUnides/Duyurular/`, `/ImagesUnides/Banner/`, `/ImagesUnides/Logo/` formatına çevir
+    // Backend'den `/assets/img/Etkinlikler/`, `/assets/img/Duyurular/`, `/assets/img/Banner/`, `/assets/img/Logo/` formatında gelebilir
+    // Bunları `/ImagesUnides/Etkinlikler/`, `/ImagesUnides/Duyurular/`, `/ImagesUnides/Banner/`, `/ImagesUnides/Logo/` formatına çevir
     let finalPath = pathStr;
     if (!finalPath.startsWith('/')) {
       finalPath = '/' + finalPath;
@@ -173,6 +182,21 @@ export class EventService {
     // Eğer `/images/` ile başlıyorsa (küçük harf) `/ImagesUnides/` yap
     else if (finalPath.startsWith('/images/')) {
       finalPath = finalPath.replace('/images/', '/ImagesUnides/');
+    }
+    
+    // Etkinlikler klasörü için özel kontrol - eğer path Etkinlikler içermiyorsa ve backend'den geldiyse
+    // Backend'den `/ImagesUnides/Etkinlikler/` formatında gelmeli, eğer sadece dosya adı gelirse klasör ekle
+    if (finalPath.startsWith('/ImagesUnides/') && !finalPath.includes('/Etkinlikler/') && !finalPath.includes('/Duyurular/') && !finalPath.includes('/Banner/') && !finalPath.includes('/Logo/')) {
+      // Sadece dosya adı gelmişse Etkinlikler klasörüne ekle
+      const fileName = finalPath.replace('/ImagesUnides/', '');
+      if (fileName && !fileName.includes('/')) {
+        finalPath = `/ImagesUnides/Etkinlikler/${fileName}`;
+      }
+    }
+    // Eğer path `/ImagesUnides/` ile başlamıyorsa ama dosya adı gibi görünüyorsa, Etkinlikler klasörüne ekle
+    else if (!finalPath.startsWith('/ImagesUnides/') && !finalPath.startsWith('http') && !finalPath.startsWith('data:') && finalPath.length > 0 && !finalPath.includes('/')) {
+      // Sadece dosya adı gelmişse, Etkinlikler klasörüne ekle
+      finalPath = `/ImagesUnides/Etkinlikler/${finalPath}`;
     }
     
     // Her zaman production URL'ini kullan (unidesportal.com) - direkt bağlantı
@@ -349,13 +373,20 @@ export class EventService {
       communityId:
         dto.comId || dto.ComId || dto.toplulukId || dto.ToplulukId || dto.communityId || 0,
       communityName: dto.communityName || dto.CommunityName || '',
+      communityLogo: dto.communityLogo || dto.CommunityLogo || undefined, // Topluluk logosu (opsiyonel)
       imageUrl: (() => {
         // Backend'den gelen image path'i al - farklı field adlarını kontrol et
         const rawImagePath = dto.eventPictureLink || dto.EventPictureLink || dto.resimUrl || dto.ResimUrl || dto.imageUrl || dto.ImageUrl || '';
         const imagePathStr = rawImagePath ? String(rawImagePath).trim() : '';
         
-        // Debug: Backend'den gelen raw image path'i logla
-        if (imagePathStr && imagePathStr.length > 0) {
+        // "string", "null", "undefined" gibi placeholder değerleri kontrol et
+        const normalizedPath = imagePathStr.toLowerCase().trim();
+        if (normalizedPath === 'string' || normalizedPath === 'null' || normalizedPath === 'undefined' || !imagePathStr) {
+          return '';
+        }
+        
+        // Debug: Backend'den gelen raw image path'i logla (sadece geçerli path'ler için)
+        if (imagePathStr && imagePathStr.length > 0 && normalizedPath !== 'string') {
           console.log('[mapToEvent] Raw image path from backend:', imagePathStr, 'Event ID:', dto.eventId || dto.EventId);
         }
         
@@ -365,8 +396,6 @@ export class EventService {
         // Debug: Convert edilmiş URL'yi logla
         if (convertedUrl && convertedUrl.length > 0) {
           console.log('[mapToEvent] Converted image URL:', convertedUrl, 'Event ID:', dto.eventId || dto.EventId);
-        } else if (imagePathStr && imagePathStr.length > 0) {
-          console.warn('[mapToEvent] Image path convert edilemedi - Raw path:', imagePathStr, 'Event ID:', dto.eventId || dto.EventId);
         }
         
         return convertedUrl;
@@ -395,12 +424,28 @@ export class EventService {
     };
   }
 
-  // Anasayfa için yaklaşan etkinlikleri getir (Backend: GET /api/Events/upcoming/home)
+  // Anasayfa için yaklaşan etkinlikleri getir (Backend: GET /api/Events/all)
   getHomeUpcomingEvents(limit: number = 6): Observable<EventItem[]> {
-    return this.http.get<EventListItemDto[]>(`${this.apiUrl}/upcoming/home`).pipe(
+    // /api/Events/all endpoint'ini kullan
+    return this.http.get<EventListItemDto[]>(`${this.apiUrl}/all`).pipe(
       map((list) => {
-        const realEvents = list.slice(0, limit).map((dto) => this.mapToEvent(dto));
-        return realEvents;
+        // Tüm etkinlikleri map et
+        const mappedEvents = list.map((dto) => this.mapToEvent(dto));
+        // Gelecekteki etkinlikleri filtrele ve sırala
+        const now = new Date();
+        const futureEvents = mappedEvents
+          .filter((e) => {
+            if (!e.startDate) return false;
+            const eventDate = new Date(e.startDate);
+            return eventDate >= now;
+          })
+          .sort((a, b) => {
+            const dateA = a.startDate ? new Date(a.startDate).getTime() : 0;
+            const dateB = b.startDate ? new Date(b.startDate).getTime() : 0;
+            return dateA - dateB;
+          });
+        // İlk limit kadarını al
+        return futureEvents.slice(0, limit);
       }),
       catchError((error) => {
         console.error('Home upcoming events yüklenemedi:', error);
@@ -707,24 +752,31 @@ export class EventService {
       map((response) => {
         // Backend'den imagePath (küçük harf) veya ImagePath (büyük harf) gelebilir
         const path = response.ImagePath || response.imagePath || '';
-        // Backend'den `/assets/img/Etkinlikler/...` formatında gelir, `/ImagesUnides/Etkinlikler/...` formatına çevir
-        if (path && !path.startsWith('http://') && !path.startsWith('https://') && !path.startsWith('data:')) {
-          let finalPath = path;
-          if (!finalPath.startsWith('/')) {
-            finalPath = '/' + finalPath;
+          // Backend'den `/assets/img/Etkinlikler/...` formatında gelir, `/ImagesUnides/Etkinlikler/...` formatına çevir
+          if (path && !path.startsWith('http://') && !path.startsWith('https://') && !path.startsWith('data:')) {
+            let finalPath = path;
+            if (!finalPath.startsWith('/')) {
+              finalPath = '/' + finalPath;
+            }
+            // Path dönüşümü: `/assets/img/` -> `/ImagesUnides/`
+            if (finalPath.startsWith('/assets/img/')) {
+              finalPath = finalPath.replace('/assets/img/', '/ImagesUnides/');
+            } else if (finalPath.startsWith('/images/')) {
+              finalPath = finalPath.replace('/images/', '/ImagesUnides/');
+            }
+            // Etkinlikler klasörü kontrolü - eğer path Etkinlikler içermiyorsa ekle
+            if (finalPath.startsWith('/ImagesUnides/') && !finalPath.includes('/Etkinlikler/') && !finalPath.includes('/Duyurular/') && !finalPath.includes('/Banner/') && !finalPath.includes('/Logo/')) {
+              const fileName = finalPath.replace('/ImagesUnides/', '');
+              if (fileName && !fileName.includes('/')) {
+                finalPath = `/ImagesUnides/Etkinlikler/${fileName}`;
+              }
+            }
+            // Full URL oluştur
+            const baseUrl = environment.apiUrl.replace('/api', '');
+            const fullUrl = baseUrl + finalPath;
+            return { ImagePath: fullUrl };
           }
-          // Path dönüşümü: `/assets/img/` -> `/ImagesUnides/`
-          if (finalPath.startsWith('/assets/img/')) {
-            finalPath = finalPath.replace('/assets/img/', '/ImagesUnides/');
-          } else if (finalPath.startsWith('/images/')) {
-            finalPath = finalPath.replace('/images/', '/ImagesUnides/');
-          }
-          // Full URL oluştur
-          const baseUrl = environment.apiUrl.replace('/api', '');
-          const fullUrl = baseUrl + finalPath;
-          return { ImagePath: fullUrl };
-        }
-        return { ImagePath: path };
+          return { ImagePath: path };
       }),
       catchError((error) => {
         console.error('Etkinlik görseli yüklenemedi:', error);

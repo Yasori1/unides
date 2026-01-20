@@ -133,7 +133,7 @@
         <div class="card table-card">
           <div class="card-header">
             <h3>Bekleyen Etkinlik Onayları</h3>
-            <button class="btn-text" (click)="switchTab('events')">Tümünü Gör</button>
+            <button class="btn-text" (click)="goToPendingEvents()">Tümünü Gör</button>
           </div>
           <table class="data-table">
             <thead>
@@ -141,6 +141,7 @@
                 <th>Topluluk</th>
                 <th>Etkinlik</th>
                 <th>Tarih</th>
+                <th>Saat</th>
                 <th>Durum</th>
               </tr>
             </thead>
@@ -150,7 +151,8 @@
                   <span class="p-name">{{ req.communityName }}</span>
                 </td>
                 <td>{{ req.eventName }}</td>
-                <td>{{ req.date }}</td>
+                <td>{{ formatEventDateOnly(req.startDate || req.date) }}</td>
+                <td>{{ formatEventTime(req.startDate || req.date) }}</td>
                 <td>
                   <span class="status-badge warning">Onay Bekliyor</span>
                 </td>
@@ -167,9 +169,9 @@
               <span class="material-symbols-outlined">campaign</span>
               <span>Duyuru Yap</span>
             </button>
-            <button class="tile-btn" (click)="goToCommunitiesWithPendingFilter()">
+            <button class="tile-btn" (click)="openNewCommunityModal()">
               <span class="material-symbols-outlined">add_business</span>
-              <span>Topluluk Onayla</span>
+              <span>Topluluk Ekle</span>
             </button>
             <!-- Mesajlar (Destek) Butonu Silindi -->
           </div>
@@ -420,27 +422,23 @@
       <div class="settings-layout">
         <div class="settings-sidebar">
           <div class="club-avatar-edit">
-            <img [src]="corporateInfo.logo" alt="Logo" />
+            <div class="profile-initial-large">{{ userInitial || (userName ? userName.charAt(0).toUpperCase() : 'U') }}</div>
           </div>
-          <h3>{{ corporateInfo.name }}</h3>
+          <h3>{{ userName || displayName || corporateInfo.name }}</h3>
           <p>Kurumsal Yönetici</p>
         </div>
         <div class="settings-form-card">
           <h3>Kurum Bilgileri</h3>
           <div class="form-grid">
             <div class="form-group">
-              <label>İl Adı</label>
-              <input type="text" [(ngModel)]="corporateInfo.name" class="modern-input" />
+              <label>Kullanıcı Adı</label>
+              <input type="text" [value]="userName || corporateInfo.name" class="modern-input disabled-input" readonly disabled
+                title="Kullanıcı adı" />
             </div>
             <div class="form-group">
               <label>Yönetici Email</label>
-              <input type="email" [value]="corporateInfo.email" class="modern-input disabled-input" readonly disabled
-                title="Bu alan değiştirilemez" />
-            </div>
-            <div class="form-actions">
-              <button class="btn-primary" (click)="showToast('Bilgiler güncellendi', 'success')">
-                Güncelle
-              </button>
+              <input type="email" [value]="userEmail || corporateInfo.email" class="modern-input disabled-input" readonly disabled
+                title="Kullanıcı e-posta adresi" />
             </div>
           </div>
         </div>
@@ -633,7 +631,7 @@
             </div>
             <div class="form-group full-width">
               <label>Topluluk Kısa Açıklama (Max 70 Karakter)</label>
-              <input type="text" [(ngModel)]="newCommunity.shortDescription" class="modern-input"
+              <input type="text" [(ngModel)]="newCommunity.miniAbout" class="modern-input"
                 placeholder="Kısa açıklama..." maxlength="70" />
             </div>
             <div class="form-group full-width">
@@ -740,7 +738,7 @@
 
           <div class="form-group full-width">
             <label>Topluluk Kısa Açıklama (Max 70 Karakter)</label>
-            <input type="text" [(ngModel)]="editingCommunity.shortDescription" class="modern-input"
+            <input type="text" [(ngModel)]="editingCommunity.miniAbout" class="modern-input"
               placeholder="Kısa açıklama..." maxlength="70" />
           </div>
           <div class="form-group full-width">
@@ -777,11 +775,12 @@
                 placeholder="topluluk@mail.com" maxlength="60" />
             </div>
             <div class="form-group">
-              <label>Topluluk Başkanı E-posta</label>
-              <input type="email" [value]="editingCommunity.presidentEmail || editingCommunity.comLeadMail || ''"
-                class="modern-input" placeholder="baskan@mail.com" readonly disabled />
+              <label>Topluluk Başkanı E-posta <span style="color: red">*</span></label>
+              <input type="email" [(ngModel)]="editingCommunity.presidentEmail" class="modern-input"
+                placeholder="baskan@mail.com" maxlength="60" />
               <small style="color: #666; font-size: 12px; margin-top: 4px; display: block">
-                Bu alan değiştirilemez. Topluluk başkanının sistemde kayıtlı e-posta adresidir.
+                Topluluk başkanının sistemde kayıtlı e-posta adresi. Değiştirmek için kayıtlı bir kullanıcı e-postası
+                girin.
               </small>
             </div>
             <!-- Website and Social Media fields removed for Corporate Dashboard -->
@@ -932,6 +931,9 @@
 
           <!-- Onaylanmış etkinlikler için -->
           <div class="modal-actions spaced" *ngIf="selectedEvent.status === 'Onaylandı'">
+            <button class="btn-warning" (click)="rejectEvent(selectedEvent.id)">
+              <span class="material-symbols-outlined">edit_note</span> Revize
+            </button>
             <button class="btn-danger" (click)="deleteEvent(selectedEvent.id)">
               <span class="material-symbols-outlined">delete</span> Etkinliği Sil
             </button>
@@ -961,8 +963,9 @@
             <input type="text" [(ngModel)]="newEvent.location" />
           </div>
           <div class="form-group full">
-            <label>Görsel URL</label>
-            <input type="text" [(ngModel)]="newEvent.imageUrl" />
+            <app-image-upload label="Etkinlik Görseli" [previewUrl]="newEvent.imageUrl || null" [uploadToServer]="true"
+              (onFileSelected)="onNewEventFileSelected($event)"
+              (onImageSelected)="onNewEventImageSelected($event)"></app-image-upload>
           </div>
           <div class="form-group full">
             <label>Kontenjan</label>
@@ -1053,56 +1056,62 @@
             <!-- Detaylı Analiz (Yasak Kelimeler, Spam, Siyasi İçerik) -->
             <div *ngIf="!getSpamReport(selectedEvent.id)?.clean" class="spam-analysis-details">
               <!-- Yasak Kelimeler -->
-              <div *ngIf="
-                  getSpamReport(selectedEvent.id)?.forbidden &&
-                  getSpamReport(selectedEvent.id)!.forbidden!.count > 0
-                " class="analysis-item forbidden">
+              <div *ngIf="(getSpamReport(selectedEvent.id)?.forbidden?.count ?? 0) > 0" class="analysis-item forbidden">
                 <h5>
                   <span class="material-symbols-outlined">block</span>
-                  Yasak Kelimeler ({{ getSpamReport(selectedEvent.id)!.forbidden!.count }})
+                  Yasak Kelimeler ({{ getSpamReport(selectedEvent.id)?.forbidden?.count || 0 }})
                 </h5>
                 <div class="keywords-list" *ngIf="
-                    getSpamReport(selectedEvent.id)!.forbidden!.words &&
+                    getSpamReport(selectedEvent.id)?.forbidden?.words &&
                     getSpamReport(selectedEvent.id)!.forbidden!.words!.length > 0
                   ">
                   <span class="keyword-tag" *ngFor="let word of getSpamReport(selectedEvent.id)!.forbidden!.words">{{
                     word }}</span>
                 </div>
+                <div *ngIf="!getSpamReport(selectedEvent.id)?.forbidden?.words || (getSpamReport(selectedEvent.id)?.forbidden?.words?.length ?? 0) === 0" 
+                     class="no-keywords-message">
+                  <span class="material-symbols-outlined">info</span>
+                  <span>Yasak kelime listesi mevcut değil</span>
+                </div>
               </div>
 
               <!-- Spam Kelimeler -->
-              <div *ngIf="
-                  getSpamReport(selectedEvent.id)?.spam &&
-                  getSpamReport(selectedEvent.id)!.spam!.count > 0
-                " class="analysis-item spam">
+              <div *ngIf="(getSpamReport(selectedEvent.id)?.spam?.count ?? 0) > 0" class="analysis-item spam">
                 <h5>
                   <span class="material-symbols-outlined">warning</span>
-                  Spam Kelimeler ({{ getSpamReport(selectedEvent.id)!.spam!.count }})
+                  Spam Kelimeler ({{ getSpamReport(selectedEvent.id)?.spam?.count || 0 }})
                 </h5>
                 <div class="keywords-list" *ngIf="
-                    getSpamReport(selectedEvent.id)!.spam!.keywords &&
+                    getSpamReport(selectedEvent.id)?.spam?.keywords &&
                     getSpamReport(selectedEvent.id)!.spam!.keywords!.length > 0
                   ">
                   <span class="keyword-tag" *ngFor="let keyword of getSpamReport(selectedEvent.id)!.spam!.keywords">{{
                     keyword }}</span>
                 </div>
+                <div *ngIf="!getSpamReport(selectedEvent.id)?.spam?.keywords || (getSpamReport(selectedEvent.id)?.spam?.keywords?.length ?? 0) === 0" 
+                     class="no-keywords-message">
+                  <span class="material-symbols-outlined">info</span>
+                  <span>Spam kelime listesi mevcut değil</span>
+                </div>
               </div>
 
               <!-- Siyasi İçerik -->
-              <div *ngIf="
-                  getSpamReport(selectedEvent.id)?.politics &&
-                  getSpamReport(selectedEvent.id)!.politics!.count > 0
-                " class="analysis-item politics">
+              <div *ngIf="(getSpamReport(selectedEvent.id)?.politics?.count ?? 0) > 0" class="analysis-item politics">
                 <h5>
                   <span class="material-symbols-outlined">gavel</span>
-                  Siyasi İçerik ({{ getSpamReport(selectedEvent.id)!.politics!.count }})
+                  Siyasi İçerik ({{ getSpamReport(selectedEvent.id)?.politics?.count || 0 }})
                 </h5>
                 <div class="keywords-list" *ngIf="
-                    getSpamReport(selectedEvent.id)!.politics!.keywords &&
+                    getSpamReport(selectedEvent.id)?.politics?.keywords &&
                     getSpamReport(selectedEvent.id)!.politics!.keywords!.length > 0
                   ">
                   <span class="keyword-tag"
                     *ngFor="let keyword of getSpamReport(selectedEvent.id)!.politics!.keywords">{{ keyword }}</span>
+                </div>
+                <div *ngIf="!getSpamReport(selectedEvent.id)?.politics?.keywords || (getSpamReport(selectedEvent.id)?.politics?.keywords?.length ?? 0) === 0" 
+                     class="no-keywords-message">
+                  <span class="material-symbols-outlined">info</span>
+                  <span>Siyasi içerik listesi mevcut değil</span>
                 </div>
               </div>
             </div>

@@ -84,8 +84,7 @@
         (click)="openEventDetail(event)">
         <div class="card-image">
           <img [src]="event.imageUrl" [alt]="event.title" loading="lazy"
-            appCorsImage
-            onerror="this.onImageError($event)" />
+            (error)="onImageError($event)" />
           <div class="date-badge">
             {{ event.date }}
           </div>

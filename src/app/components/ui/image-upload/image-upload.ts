@@ -14,8 +14,10 @@ export class ImageUploadComponent {
   @Input() previewUrl: string | null = null; // Mevcut resim varsa göster
   @Input() uploadToServer: boolean = false; // Backend'e yükleme yapılacak mı?
   @Input() allowUrl: boolean = true; // URL ile ekleme izni
+  @Input() maxFileSizeMB: number = 1; // Maksimum dosya boyutu (MB)
   @Output() onImageSelected = new EventEmitter<string>(); // Parent'a image path/url gönder
   @Output() onFileSelected = new EventEmitter<File>(); // Parent'a File objesi gönder (upload için)
+  @Output() onFileSizeError = new EventEmitter<{ file: File; maxSize: number; actualSize: number }>(); // Dosya boyutu hatası
 
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
@@ -23,6 +25,10 @@ export class ImageUploadComponent {
   fileName: string | null = null;
   urlInput: string = ''; // URL ile giriş için
   isUploading: boolean = false;
+
+  // Dosya boyutu hatası için internal state
+  showFileSizeError: boolean = false;
+  fileSizeErrorMessage: string = '';
 
   // --- DOSYA SEÇME İŞLEMLERİ ---
   triggerFileInput() {
@@ -64,6 +70,34 @@ export class ImageUploadComponent {
 
   // --- DOSYAYI İŞLEME VE ÖNİZLEME ---
   processFile(file: File) {
+    // Dosya boyutu kontrolü (maxFileSizeMB MB üzeri dosyalar reddedilir)
+    const maxSizeBytes = this.maxFileSizeMB * 1024 * 1024; // MB -> Bytes
+    const actualSizeMB = file.size / (1024 * 1024);
+
+    if (file.size > maxSizeBytes) {
+      // Dosya çok büyük - hata göster
+      this.showFileSizeError = true;
+      this.fileSizeErrorMessage = `Dosya boyutu çok büyük! Maksimum ${this.maxFileSizeMB}MB yükleyebilirsiniz. Seçilen dosya: ${actualSizeMB.toFixed(2)}MB`;
+
+      // Input'u temizle
+      if (this.fileInput) {
+        this.fileInput.nativeElement.value = '';
+      }
+
+      // Parent component'e hata bildir
+      this.onFileSizeError.emit({
+        file: file,
+        maxSize: this.maxFileSizeMB,
+        actualSize: parseFloat(actualSizeMB.toFixed(2))
+      });
+
+      return; // İşlemi durdur
+    }
+
+    // Dosya boyutu uygun - hata mesajını temizle
+    this.showFileSizeError = false;
+    this.fileSizeErrorMessage = '';
+
     this.fileName = file.name;
 
     // Eğer uploadToServer true ise, dosyayı parent'a gönder (parent upload edecek)
@@ -86,6 +120,12 @@ export class ImageUploadComponent {
       };
       reader.readAsDataURL(file);
     }
+  }
+
+  // Dosya boyutu hata popup'ını kapat
+  closeFileSizeError() {
+    this.showFileSizeError = false;
+    this.fileSizeErrorMessage = '';
   }
 
   // --- URL GİRİŞİ ---

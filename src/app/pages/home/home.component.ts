@@ -23,6 +23,7 @@ interface Community {
 }
 
 interface UpcomingEvent {
+  imageUrl?: string;
   id: number;
   title: string;
   date: Date;
@@ -231,6 +232,13 @@ export class HomeComponent implements OnInit, OnDestroy {
           const eventDateOnly = new Date(eventDate);
           eventDateOnly.setHours(0, 0, 0, 0);
 
+          // Debug: imageUrl'yi logla
+          if (e.imageUrl) {
+            console.log('[Home] Event imageUrl:', e.imageUrl, 'Event ID:', e.id, 'Event Title:', e.title);
+          } else {
+            console.warn('[Home] Event imageUrl is empty or undefined:', 'Event ID:', e.id, 'Event Title:', e.title);
+          }
+
           return {
             id: e.id,
             title: e.title,
@@ -239,7 +247,8 @@ export class HomeComponent implements OnInit, OnDestroy {
             time: eventDate.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
             description: e.shortDescription || e.description || 'Açıklama belirtilmemiş',
             communityName: e.communityName || 'Topluluk',
-            communityLogo: e.imageUrl || 'assets/img/placeholder-avatar.svg',
+            communityLogo: e.communityLogo || 'assets/img/placeholder-avatar.svg',
+            imageUrl: e.imageUrl || '', // Etkinlik görseli
             dateOnly: eventDateOnly, // Sıralama için
           };
         });

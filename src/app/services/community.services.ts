@@ -215,6 +215,10 @@ export class CommunityService {
       status: isActivity ? 'Aktif' : 'Pasif',
       miniAbout: dto.miniAbout || dto.MiniAbout,
       isActivity: isActivity,
+      // Email alanları - backend'den gelebilir veya detay endpoint'inden çekilecek
+      email: dto.comMail || dto.ComMail || '',
+      comMail: dto.comMail || dto.ComMail || '',
+      comLeadMail: dto.comLeadMail || dto.ComLeadMail || '',
     };
   }
 
@@ -312,12 +316,62 @@ export class CommunityService {
   }
 
   // Topluluk Detayı Getir (Backend: GET /api/Communities/{id:guid})
-  getCommunityById(id: string): Observable<Community> {
+  // Pasif topluluklar için isActive=false query parametresi ile liste endpoint'inden çekilir
+  getCommunityById(id: string, isActive?: boolean): Observable<Community> {
     // ID validasyonu - GUID formatında olmalı
     if (!id || id === '' || id.includes('mock')) {
       throw new Error("Geçersiz topluluk ID'si");
     }
 
+    // Eğer isActive parametresi false ise (pasif topluluk)
+    // Backend'de Detail endpoint'i pasif topluluklar için 404 dönüyor (satır 178: if (!com.IsActivity) return NotFound)
+    // Swagger'a göre GET /api/Communities/{id} email bilgilerini döndürüyor ama backend'de pasif topluluklar için 404
+    // Çözüm: Önce Detail endpoint'ini dene (belki GSB rolü varsa çalışabilir), 404 dönerse list endpoint'inden çek
+    // Ama list endpoint'inden gelen CommunityMiniDto email bilgilerini içermiyor
+    if (isActive === false) {
+      // Önce Detail endpoint'ini dene (GSB rolü varsa pasif toplulukları da görebilir)
+      return this.http.get<CommunityDetailDto>(`${this.apiUrl}/${id}`).pipe(
+        map((response) => {
+          // Backend'den gelen response'u map et (email bilgileri dahil - CommunityDetailDto'da var)
+          return this.mapDetailDtoToCommunity(response);
+        }),
+        catchError((error) => {
+          // Eğer 404 dönerse (pasif topluluk), liste endpoint'inden çek (fallback)
+          // Ama CommunityMiniDto email bilgilerini içermiyor - backend'de sadece: CommunityId, ComName, ComCategory, City, University, BannerUrl, LogoUrl, MiniAbout, IsActivity
+          if (error.status === 404) {
+            console.warn('Pasif topluluk için Detail endpoint 404 döndü, liste endpoint\'inden çekiliyor (email bilgileri eksik olacak):', id);
+            // Liste endpoint'inden çek (fallback)
+            return this.http.get<CommunityMiniDto[]>(this.apiUrl, { 
+              params: new HttpParams().set('status', 'passive') 
+            }).pipe(
+              map((list) => {
+                // ID'ye göre topluluğu bul
+                const communityDto = list.find((c) => {
+                  const communityId = c.communityId;
+                  const idString = typeof communityId === 'string' ? communityId : String(communityId);
+                  return idString === id;
+                });
+
+                if (!communityDto) {
+                  throw new Error('Pasif topluluk bulunamadı.');
+                }
+
+                // MiniDto'yu Community'ye map et (email bilgileri eksik - backend'de MiniDto'da yok)
+                console.warn('Pasif topluluk için liste endpoint\'inden çekildi, email bilgileri (comMail, comLeadMail) eksik:', id);
+                return this.mapMiniDtoToCommunity(communityDto);
+              }),
+              catchError((fallbackError) => {
+                console.error('Pasif topluluk liste endpoint\'inden çekilemedi:', fallbackError);
+                throw fallbackError;
+              })
+            );
+          }
+          throw error;
+        })
+      );
+    }
+
+    // Aktif topluluklar için normal Detail endpoint'ini kullan
     // Backend endpoint: GET /api/Communities/{id:guid}
     // Backend'den CommunityDetailDto döner
     // Auth interceptor automatically adds Authorization header if token exists
@@ -359,7 +413,12 @@ export class CommunityService {
   // Topluluk Güncelle (Backend: PUT /api/Communities/{id:guid})
   // Auth interceptor automatically adds Authorization header and Content-Type if token exists
   updateCommunity(id: string, dto: UpdateCommunityDto): Observable<Community> {
-    return this.http.put<void>(`${this.apiUrl}/${id}`, dto).pipe(
+    // Debug log - DTO'nun içeriğini kontrol et
+    console.log('updateCommunity - Sending DTO to backend:', JSON.stringify(dto, null, 2));
+    console.log('updateCommunity - Community ID:', id);
+
+    // Backend endpoint: PUT /api/Communities/update/{id:guid}
+    return this.http.put<void>(`${this.apiUrl}/update/${id}`, dto).pipe(
       switchMap(() => {
         // Backend'de pasif topluluklar GET endpoint'inde döndürülmüyor (!com.IsActivity kontrolü var)
         // Bu yüzden güncellenmiş veriyi direkt oluştur
@@ -437,8 +496,12 @@ export class CommunityService {
   // Topluluk Sil (Backend: DELETE /api/Communities/{id:guid})
   deleteCommunity(id: string): Observable<void> {
     // Auth interceptor automatically adds Authorization header if token exists
-    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
+    const deleteUrl = `${this.apiUrl}/${id}`;
+    console.log('DELETE request to:', deleteUrl);
+    console.log('DELETE method: DELETE');
+    return this.http.delete<void>(deleteUrl).pipe(
       catchError((error) => {
+        console.error('DELETE request failed:', error);
         // Hata zaten throw ediliyor
         throw error;
       })
@@ -846,20 +909,35 @@ export class CommunityService {
         bannerUrl = undefined as any;
       }
 
+      // Backend'de !string.IsNullOrWhiteSpace() kontrolü var
+      // Boş string ('') gönderilirse güncelleme yapılmaz
+      // Bu yüzden boş string'leri undefined'a çeviriyoruz (ya da değer varsa gönderiyoruz)
+      const toValueOrUndefined = (val: string | undefined | null): string | undefined => {
+        return val && val.trim() !== '' ? val.trim() : undefined;
+      };
+      
+      // miniAbout için özel fonksiyon - boş string de gönderilmeli (backend'de güncelleme yapılabilmesi için)
+      const toMiniAboutValue = (val: string | undefined | null): string | undefined => {
+        if (val === undefined || val === null) return undefined;
+        // Boş string veya sadece whitespace ise boş string gönder (backend'de güncelleme yapılabilmesi için)
+        const trimmed = val.trim();
+        return trimmed === '' ? '' : trimmed;
+      };
+
       const updateDto: UpdateCommunityDto = {
-        comName: community.name,
-        comAbout: community.about || community.description,
-        city: community.city,
-        university: community.university,
-        comCategory: community.category, // Kategori eklendi
-        logoUrl: logoUrl || undefined,
-        comMail: community.email || community.comMail,
-        webSiteUrl: community.website || community.webSiteUrl,
-        instagramUrl: community.instagram || community.instagramUrl,
-        bannerUrl: bannerUrl || undefined,
-        miniAbout: community.miniAbout,
+        comName: toValueOrUndefined(community.name),
+        comAbout: toValueOrUndefined(community.about || community.description),
+        city: toValueOrUndefined(community.city),
+        university: toValueOrUndefined(community.university),
+        comCategory: toValueOrUndefined(community.category),
+        logoUrl: toValueOrUndefined(logoUrl),
+        comMail: toValueOrUndefined(community.email || community.comMail),
+        webSiteUrl: toValueOrUndefined(community.website || community.webSiteUrl),
+        instagramUrl: toValueOrUndefined(community.instagram || community.instagramUrl),
+        bannerUrl: toValueOrUndefined(bannerUrl),
+        miniAbout: toMiniAboutValue(community.miniAbout), // miniAbout için özel fonksiyon kullan
         isActivity: isActivity,
-        comLeadMail: community.presidentEmail || community.comLeadMail,
+        comLeadMail: toValueOrUndefined(community.presidentEmail || community.comLeadMail),
       };
 
       return this.updateCommunity(community.id, updateDto);
@@ -1024,4 +1102,5 @@ export class CommunityService {
         })
       );
   }
+
 }

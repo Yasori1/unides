@@ -2166,12 +2166,30 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
   width: 100px;
   height: 100px;
   margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   img {
     width: 100%;
     height: 100%;
     border-radius: 50%;
     object-fit: cover;
+  }
+
+  .profile-initial-large {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: #1e3a8a;
+    color: #fff;
+    font-weight: 700;
+    font-size: 2.5rem;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
   }
 }
 
@@ -2735,6 +2753,35 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
     }
   }
 
+  .btn-warning {
+    background: #fff7ed;
+    color: #c2410c;
+    border: 1px solid #fed7aa;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+    font-family: inherit;
+    white-space: nowrap;
+
+    &:hover {
+      background: #f97316;
+      color: white;
+      border-color: #f97316;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(249, 115, 22, 0.25);
+    }
+
+    .material-symbols-outlined {
+      font-size: 1.2rem;
+    }
+  }
+
   .btn-primary {
     flex: 1;
     justify-content: center;
@@ -2818,51 +2865,77 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
 // ================= SPAM FİLTRESİ RAPORU =================
 .spam-report-section {
   margin-top: 24px;
-  padding: 20px;
-  background: $bg-body;
-  border-radius: 8px;
-  border: 1px solid $border;
+  padding: 0;
+  background: transparent;
+  border-radius: 12px;
+  overflow: hidden;
 
   .spam-report-header {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 16px;
-    padding-bottom: 12px;
-    border-bottom: 2px solid $border;
+    gap: 16px;
+    margin-bottom: 0;
+    padding: 24px 28px;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-bottom: 2px solid rgba($border, 0.3);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 
     &.clean {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
       border-bottom-color: $success;
 
       .material-symbols-outlined {
         color: $success;
+        background: rgba(16, 185, 129, 0.15);
+        padding: 12px;
+        border-radius: 12px;
+      }
+
+      h4 {
+        color: #059669;
       }
     }
 
     &.not-clean {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%);
       border-bottom-color: $danger;
 
       .material-symbols-outlined {
         color: $danger;
+        background: rgba(239, 68, 68, 0.15);
+        padding: 12px;
+        border-radius: 12px;
+      }
+
+      h4 {
+        color: #dc2626;
       }
     }
 
     .material-symbols-outlined {
-      font-size: 28px;
+      font-size: 32px;
       font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease;
     }
 
     h4 {
       margin: 0;
-      font-size: 18px;
-      font-weight: 600;
+      font-size: 20px;
+      font-weight: 700;
       color: $text-main;
+      letter-spacing: -0.3px;
     }
   }
 
   .spam-report-content {
+    padding: 28px;
+    background: #ffffff;
+
     .spam-status-info {
-      margin-bottom: 16px;
+      margin-bottom: 20px;
 
       .status-badge {
         display: inline-block;
@@ -2896,57 +2969,77 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
     .spam-report-message {
       font-size: 15px;
       font-weight: 500;
-      margin-bottom: 16px;
-      padding: 12px;
-      border-radius: 6px;
+      margin-bottom: 24px;
+      padding: 16px 20px;
+      border-radius: 10px;
+      line-height: 1.6;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 
       &.success {
-        background: rgba(16, 185, 129, 0.1);
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
         color: #059669;
         border-left: 4px solid $success;
+        border: 1px solid rgba(16, 185, 129, 0.2);
       }
 
       &.error {
-        background: rgba(239, 68, 68, 0.1);
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%);
         color: #dc2626;
         border-left: 4px solid $danger;
+        border: 1px solid rgba(239, 68, 68, 0.2);
       }
     }
 
     .spam-reason-box {
-      margin-top: 16px;
-      padding: 12px;
-      background: rgba($text-muted, 0.05);
-      border-radius: 6px;
-      border-left: 3px solid $primary;
+      margin-top: 20px;
+      padding: 18px 20px;
+      background: linear-gradient(135deg, rgba($primary, 0.08) 0%, rgba($primary, 0.03) 100%);
+      border-radius: 10px;
+      border-left: 4px solid $primary;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
 
       h5 {
-        font-size: 13px;
-        font-weight: 600;
-        color: $text-main;
-        margin-bottom: 8px;
+        font-size: 14px;
+        font-weight: 700;
+        color: $primary;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
       }
 
       p {
         font-size: 14px;
         color: $text-main;
         margin: 0;
-        line-height: 1.6;
+        line-height: 1.7;
+        font-weight: 500;
       }
     }
 
     .spam-analysis-details {
-      margin-top: 20px;
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-height: 100px; // Minimum yükseklik garantisi
 
       .analysis-item {
-        margin-bottom: 16px;
-        padding: 16px;
-        border-radius: 8px;
+        margin-bottom: 0;
+        padding: 20px;
+        border-radius: 12px;
         border-left: 4px solid;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        transition: all 0.2s ease;
 
         &.forbidden {
-          background: rgba(239, 68, 68, 0.05);
+          background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%);
           border-left-color: #dc2626;
+          border: 1px solid rgba(239, 68, 68, 0.2);
+
+          &:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+          }
 
           h5 {
             color: #dc2626;
@@ -2954,8 +3047,14 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
         }
 
         &.spam {
-          background: rgba(251, 191, 36, 0.05);
+          background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(251, 191, 36, 0.05) 100%);
           border-left-color: #d97706;
+          border: 1px solid rgba(251, 191, 36, 0.2);
+
+          &:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(251, 191, 36, 0.15);
+          }
 
           h5 {
             color: #d97706;
@@ -2963,8 +3062,14 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
         }
 
         &.politics {
-          background: rgba(139, 92, 246, 0.05);
+          background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
           border-left-color: #7c3aed;
+          border: 1px solid rgba(139, 92, 246, 0.2);
+
+          &:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15);
+          }
 
           h5 {
             color: #7c3aed;
@@ -2974,30 +3079,62 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
         h5 {
           display: flex;
           align-items: center;
-          gap: 8px;
-          font-size: 14px;
-          font-weight: 600;
-          margin-bottom: 12px;
+          gap: 10px;
+          font-size: 15px;
+          font-weight: 700;
+          margin-bottom: 16px;
+          text-transform: uppercase;
+          letter-spacing: 0.3px;
 
           .material-symbols-outlined {
-            font-size: 18px;
+            font-size: 22px;
+            padding: 6px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
           }
         }
 
         .keywords-list {
           display: flex;
           flex-wrap: wrap;
-          gap: 8px;
+          gap: 10px;
+          margin-top: 8px;
 
           .keyword-tag {
-            display: inline-block;
-            padding: 4px 10px;
-            background: $surface;
-            border: 1px solid $border;
-            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 14px;
+            background: #ffffff;
+            border: 1.5px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
             font-size: 12px;
             color: $text-main;
-            font-weight: 500;
+            font-weight: 600;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+
+            &:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            }
+          }
+        }
+
+        .no-keywords-message {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-top: 12px;
+          padding: 12px;
+          background: rgba(0, 0, 0, 0.03);
+          border-radius: 8px;
+          font-size: 13px;
+          color: $text-muted;
+          font-style: italic;
+
+          .material-symbols-outlined {
+            font-size: 18px;
+            opacity: 0.6;
           }
         }
       }
@@ -3005,45 +3142,171 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
 
     .spam-reasons,
     .spam-details {
-      margin-top: 16px;
+      margin-top: 24px;
+      padding: 20px;
+      background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+      border-radius: 12px;
+      border: 1px solid rgba($border, 0.5);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
 
       h5 {
-        font-size: 14px;
-        font-weight: 600;
+        font-size: 15px;
+        font-weight: 700;
         color: $text-main;
-        margin-bottom: 12px;
+        margin-bottom: 16px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid rgba($border, 0.3);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
       }
 
       ul {
         list-style: none;
         padding: 0;
         margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
 
         li {
-          padding: 10px 12px;
-          margin-bottom: 8px;
-          background: $surface;
-          border-left: 3px solid $warning;
-          border-radius: 4px;
+          padding: 14px 16px;
+          background: #ffffff;
+          border-left: 4px solid $warning;
+          border-radius: 8px;
           font-size: 13px;
           color: $text-main;
-          line-height: 1.5;
+          line-height: 1.6;
+          font-weight: 500;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+          transition: all 0.2s ease;
 
-          &:last-child {
-            margin-bottom: 0;
+          &:hover {
+            transform: translateX(4px);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
           }
         }
       }
     }
 
     .spam-details {
+      background: linear-gradient(135deg, rgba($text-muted, 0.05) 0%, rgba($text-muted, 0.02) 100%);
+      border-color: rgba($text-muted, 0.3);
+
       ul li {
-        border-left-color: $text-muted;
-        background: rgba($text-muted, 0.05);
+        border-left-color: rgba($text-muted, 0.4);
+        background: rgba($text-muted, 0.03);
         color: $text-muted;
         font-size: 12px;
+        font-weight: 400;
       }
     }
+
+    // Moderation Scores Section
+    .moderation-scores {
+      margin-top: 24px;
+      padding: 20px;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border-radius: 12px;
+      border: 1px solid rgba($primary, 0.1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+
+      h5 {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 15px;
+        font-weight: 700;
+        color: $text-main;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid rgba($primary, 0.1);
+
+        .material-symbols-outlined {
+          font-size: 20px;
+          color: $primary;
+        }
+      }
+
+      .scores-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 16px;
+
+        .score-item {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          padding: 16px;
+          background: #ffffff;
+          border-radius: 10px;
+          border: 1px solid rgba($border, 0.5);
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+          transition: all 0.2s ease;
+
+          &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-color: rgba($primary, 0.3);
+          }
+
+          .score-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: $text-muted;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+
+          .score-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+
+            .score-fill {
+              height: 100%;
+              background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+              border-radius: 10px;
+              transition: width 0.5s ease;
+              position: relative;
+
+              &.high-risk {
+                background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+              }
+
+              &::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
+                animation: shimmer 2s infinite;
+              }
+            }
+          }
+
+          .score-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: $text-main;
+            text-align: right;
+          }
+        }
+      }
+    }
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
   }
 }
 

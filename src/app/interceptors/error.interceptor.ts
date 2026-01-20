@@ -1,7 +1,9 @@
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 import { ToastService } from '../services/toast.services';
+import { AuthService } from '../services/auth.services';
 
 /**
  * Global Error Interceptor
@@ -9,6 +11,8 @@ import { ToastService } from '../services/toast.services';
  */
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const toastService = inject(ToastService);
+  const authService = inject(AuthService);
+  const router = inject(Router);
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
@@ -16,15 +20,21 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       // Ayrıca email validation için kullanılan endpoint'ler için toast gösterilmemeli
       // çünkü component'te zaten mesaj gösteriliyor
       // Event detail re-fetch için kullanılan endpoint'ler için de 404'leri sessizce handle et
+      // Logout endpoint'i için 401 hatası normal olabilir (token zaten geçersiz), döngüyü önlemek için skip et
       const isEventDetailReFetch = req.url.match(/\/api\/Events\/\d+$/) && error.status === 404;
+      const isLogoutEndpoint = req.url.includes('/api/Auth/logout');
+      const isSpamFilterEndpoint = req.url.includes('/spamfilter/api/moderate') || req.url.includes('/api/moderate');
       const skipErrorHandling = req.url.includes('/api/Search') || 
                                 req.url.includes('/api/About') ||
                                 req.url.includes('/api/Forkod') ||
                                 (req.url.includes('/api/Communities/me/members') && req.method === 'POST') ||
-                                isEventDetailReFetch; // Event detail re-fetch için 404'leri sessizce handle et
+                                isEventDetailReFetch || // Event detail re-fetch için 404'leri sessizce handle et
+                                isLogoutEndpoint || // Logout endpoint'i için hata handling'i skip et (döngüyü önlemek için)
+                                isSpamFilterEndpoint; // Spam filter endpoint'i için hata handling'i skip et (component'te handle ediliyor)
 
       if (skipErrorHandling) {
         // Event detail re-fetch için 404'leri tamamen sessizce handle et (toast ve log yok)
+        // Logout endpoint'i için de hata handling'i skip et
         return throwError(() => error);
       }
 
@@ -49,11 +59,14 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         }
       } else if (error.status === 401) {
         // Unauthorized - token expired or invalid
+        // Logout endpoint'i için 401 hatası normal olabilir (token zaten geçersiz), bu durumda skip edildi
         errorMessage = 'Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.';
-        // Optionally clear token and redirect to login
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('auth_token');
-          localStorage.removeItem('user_info');
+        
+        // Token süresi dolduğunda otomatik logout yap
+        // Ancak logout endpoint'inden gelen 401 hatası için logout çağırma (döngüyü önlemek için)
+        if (typeof window !== 'undefined' && !error.url?.includes('/api/Auth/logout')) {
+          // AuthService'in logout metodunu çağırarak temizlik yap ve yönlendir
+          authService.logout();
         }
       } else if (error.status === 403) {
         // Forbidden

@@ -99,6 +99,16 @@
       >
         <div class="countdown-badge">⏳ {{ event.remainingTimeStr }}</div>
 
+        <!-- Etkinlik Görseli -->
+        <div class="event-image-box" *ngIf="event.imageUrl">
+          <img
+            [src]="event.imageUrl"
+            [alt]="event.title"
+            loading="lazy"
+            (error)="onImageError($event, 'event')"
+          />
+        </div>
+
         <div class="logo-box-modern">
           <img
             [src]="event.communityLogo || 'assets/img/placeholder-avatar.svg'"

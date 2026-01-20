@@ -55,24 +55,27 @@ export class CorsImageDirective implements OnInit, AfterViewInit, OnDestroy {
     }, 0);
 
     // Periyodik kontrol (Angular property binding değişikliklerini yakalamak için)
+    // Interval süresini artırarak gereksiz kontrolleri azalt
     this.checkTimer = setInterval(() => {
       const currentSrc = this.el.nativeElement.getAttribute('src') || this.el.nativeElement.src;
-      if (currentSrc && currentSrc !== this.originalSrc && currentSrc !== this.lastCheckedSrc && !currentSrc.startsWith('blob:')) {
-        this.lastCheckedSrc = currentSrc;
-        this.handleSrcChange(currentSrc);
+      // Blob URL'e zaten çevrilmişse tekrar işlem yapma
+      if (currentSrc && currentSrc.startsWith('blob:')) {
+        return;
       }
-    }, 200);
+      // Orijinal src ile aynıysa veya zaten işlenmişse tekrar işlem yapma
+      if (currentSrc && currentSrc !== this.originalSrc && currentSrc !== this.lastCheckedSrc && !currentSrc.startsWith('blob:')) {
+        // Boş veya geçersiz URL'leri atla
+        if (currentSrc && currentSrc.trim().length > 0 && !currentSrc.includes('undefined') && !currentSrc.includes('null')) {
+          this.lastCheckedSrc = currentSrc;
+          this.handleSrcChange(currentSrc);
+        }
+      }
+    }, 500); // Interval süresini 200ms'den 500ms'ye çıkar
   }
 
   private async handleSrcChange(src: string): Promise<void> {
-    // Eski blob URL'i temizle
-    if (this.blobUrl && this.originalSrc) {
-      this.imageCorsService.revokeBlobUrl(this.originalSrc);
-    }
-
-    this.originalSrc = src;
-
-    if (!src) {
+    // Geçersiz URL'leri atla
+    if (!src || src.trim().length === 0 || src.includes('undefined') || src.includes('null') || src.toLowerCase() === 'string') {
       return;
     }
 
@@ -80,6 +83,18 @@ export class CorsImageDirective implements OnInit, AfterViewInit, OnDestroy {
     if (src.startsWith('blob:') || src.startsWith('data:')) {
       return;
     }
+
+    // Eğer aynı src zaten işleniyorsa tekrar işlem yapma
+    if (this.originalSrc === src && this.blobUrl) {
+      return;
+    }
+
+    // Eski blob URL'i temizle
+    if (this.blobUrl && this.originalSrc) {
+      this.imageCorsService.revokeBlobUrl(this.originalSrc);
+    }
+
+    this.originalSrc = src;
 
     // Blob URL'e çevir
     await this.loadImageAsBlob(src);

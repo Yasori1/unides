@@ -54,7 +54,7 @@ interface CreateAnnouncementRequest {
 }
 
 interface UpdateAnnouncementRequest {
-  annId?: number; // Backend body'de de bekliyor
+  annId: number; // Swagger'a göre required
   title: string;
   shortDescription?: string;
   annDate?: string;
@@ -138,13 +138,13 @@ export class AnnouncementService {
     if (imagePath && !imagePath.startsWith('http://') && !imagePath.startsWith('https://') && !imagePath.startsWith('data:')) {
       // Backend base URL'si (api kısmını çıkar) - Her zaman production URL'ini kullan
       const baseUrl = environment.apiUrl.replace('/api', '');
-      
+
       // Path'in başında / yoksa ekle
       let finalPath = imagePath;
       if (!finalPath.startsWith('/')) {
         finalPath = '/' + finalPath;
       }
-      
+
       // Path dönüşümü: `/assets/img/Duyurular/` -> `/ImagesUnides/Duyurular/`
       if (finalPath.startsWith('/assets/img/')) {
         finalPath = finalPath.replace('/assets/img/', '/ImagesUnides/');
@@ -154,7 +154,7 @@ export class AnnouncementService {
       else if (finalPath.startsWith('/images/')) {
         finalPath = finalPath.replace('/images/', '/ImagesUnides/');
       }
-      
+
       imagePath = baseUrl + finalPath;
     }
 
@@ -241,25 +241,68 @@ export class AnnouncementService {
       link?: string;
     }
   ): Observable<void> {
-    // Backend camelCase formatında bekliyor: { annId, title, shortDescription, annDate, description, link, imagePath }
-    const request: UpdateAnnouncementRequest = {
-      annId: id, // Backend body'de de bekliyor
-      title: announcement.title.trim(),
-      shortDescription: announcement.shortDescription?.trim(),
-      description: announcement.content?.trim(),
-      link: announcement.link?.trim(),
-      imagePath: announcement.image?.trim(),
-      // annDate ISO 8601 formatında olmalı: 2025-12-06T17:42:28.785Z
-      annDate: announcement.date ? new Date(announcement.date).toISOString() : undefined,
+    // DEBUG: Gelen veriyi kontrol et
+    console.log('=== updateAnnouncement DEBUG - INPUT ===');
+    console.log('Announcement ID:', id);
+    console.log('announcement.title (raw):', announcement.title);
+    console.log('announcement.title type:', typeof announcement.title);
+    console.log('announcement.title length:', announcement.title?.length);
+    console.log('announcement.title trimmed:', announcement.title?.trim());
+    console.log('announcement.title trimmed length:', announcement.title?.trim()?.length);
+    console.log('Full announcement object:', JSON.stringify(announcement, null, 2));
+
+    // Title boş olabilir - validasyon kaldırıldı
+    const titleValue = announcement.title;
+    const trimmedTitle = titleValue ? String(titleValue).trim() : '';
+
+    // Backend camelCase formatında bekliyor (Swagger'a göre): { annId, title, shortDescription, annDate, description, link, imagePath }
+    // Backend'de JsonPropertyName("title") var ve PropertyNameCaseInsensitive = true
+    // Backend controller'da [FromBody] UpdateAnnouncementCommand? jsonCmd = null var
+    // Swagger formatına uygun olarak sadece camelCase gönderiyoruz
+    // ÖNEMLİ: undefined değerleri JSON'a dahil etme (backend'de sorun yaratabilir)
+    const request: any = {
+      annId: id, // Swagger'a göre required
+      title: trimmedTitle, // camelCase - JsonPropertyName("title") ile eşleşmeli
     };
+    
+    // Sadece tanımlı değerleri ekle (undefined değerleri JSON'a dahil etme)
+    if (announcement.shortDescription?.trim()) {
+      request.shortDescription = announcement.shortDescription.trim();
+    }
+    if (announcement.content?.trim()) {
+      request.description = announcement.content.trim();
+    }
+    if (announcement.link?.trim()) {
+      request.link = announcement.link.trim();
+    }
+    if (announcement.image?.trim()) {
+      request.imagePath = announcement.image.trim();
+    }
+    if (announcement.date) {
+      request.annDate = new Date(announcement.date).toISOString();
+    }
+    
+    // DEBUG: Request body'yi kontrol et
+    console.log('=== updateAnnouncement DEBUG - OUTPUT ===');
+    console.log('Request body (JSON string):', JSON.stringify(request, null, 2));
+    console.log('Request body (object):', request);
+    console.log('title value:', request.title, '(length:', request.title.length, ')');
+    console.log('Content-Type will be: application/json');
 
     // PUT /api/Announcements/update/{id} - NoContent döner
-    // Auth interceptor automatically adds Authorization header and Content-Type if token exists
-    return this.http.put<void>(`${this.apiUrl}/update/${id}`, request).pipe(
+    // Content-Type: application/json header'ını açıkça belirt (backend [FromBody] ile JSON bekliyor)
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json'
+    });
+    
+    // Auth interceptor automatically adds Authorization header if token exists
+    return this.http.put<void>(`${this.apiUrl}/update/${id}`, request, { headers }).pipe(
       catchError((error) => {
         console.error('Duyuru güncellenemedi:', error);
         console.error('Hata detayı:', error.error);
         console.error('Request body:', JSON.stringify(request, null, 2));
+        
+        
         throw error;
       })
     );

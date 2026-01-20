@@ -180,17 +180,24 @@ export class AuthService {
   }
 
   logout(): void {
-    // Önce backend'e logout isteği atıyoruz (Token'ı geçersiz kılmak için)
-    this.logoutBackend()
-      .pipe(
-        catchError((err) => {
-          console.warn('Backend logout hatası (önemsiz):', err);
-          return of(null); // Hata olsa bile local temizliğe devam et
-        })
-      )
-      .subscribe(() => {
-        // İstek tamamlanınca veya hata verince çalışır
-      });
+    // Token varsa backend'e logout isteği atıyoruz (Token'ı geçersiz kılmak için)
+    // Token yoksa veya geçersizse backend'e istek atmaya gerek yok (401 hatası döngüsünü önlemek için)
+    const token = this.getToken();
+    if (token) {
+      this.logoutBackend()
+        .pipe(
+          catchError((err) => {
+            // 401 hatası normal olabilir (token zaten geçersiz), sessizce handle et
+            if (err.status !== 401) {
+              console.warn('Backend logout hatası (önemsiz):', err);
+            }
+            return of(null); // Hata olsa bile local temizliğe devam et
+          })
+        )
+        .subscribe(() => {
+          // İstek tamamlanınca veya hata verince çalışır
+        });
+    }
 
     // Local temizlik her durumda yapılır
     localStorage.removeItem('auth_token');

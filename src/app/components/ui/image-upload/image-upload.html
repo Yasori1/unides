@@ -2,30 +2,17 @@
   <label class="upload-label">{{ label }}</label>
 
   <!-- GİZLİ INPUT -->
-  <input
-    type="file"
-    accept="image/*"
-    class="hidden-input"
-    #fileInput
-    (change)="handleFileChange($event)"
-  />
+  <input type="file" accept="image/*" class="hidden-input" #fileInput (change)="handleFileChange($event)" />
 
   <!-- DROP ZONE (Resim Yoksa) -->
-  <div
-    class="drop-zone"
-    [class.active]="isDragging"
-    *ngIf="!previewUrl"
-    (click)="triggerFileInput()"
-    (dragover)="onDragOver($event)"
-    (dragleave)="onDragLeave($event)"
-    (drop)="onDrop($event)"
-  >
+  <div class="drop-zone" [class.active]="isDragging" *ngIf="!previewUrl" (click)="triggerFileInput()"
+    (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
     <div class="icon-bg">
       <i class="bx bx-image-add"></i>
     </div>
     <div class="text-content">
       <p class="primary-text">Tıkla veya sürükle bırak</p>
-      <p class="secondary-text">JPG, PNG, GIF (Max 1MB)</p>
+      <p class="secondary-text">JPG, PNG, GIF (Max {{ maxFileSizeMB }}MB)</p>
     </div>
   </div>
 
@@ -52,15 +39,25 @@
   <div class="url-input-wrapper" *ngIf="allowUrl">
     <div class="divider"><span>veya URL gir</span></div>
     <div class="input-with-btn">
-      <input
-        type="text"
-        [(ngModel)]="urlInput"
-        placeholder="https://ornek-resim.com/logo.png"
-        (keyup.enter)="handleUrlInput()"
-      />
+      <input type="text" [(ngModel)]="urlInput" placeholder="https://ornek-resim.com/logo.png"
+        (keyup.enter)="handleUrlInput()" />
       <button type="button" (click)="handleUrlInput()">
         <i class="bx bx-check"></i>
       </button>
     </div>
+  </div>
+</div>
+
+<!-- DOSYA BOYUTU HATA POPUP'I -->
+<div class="file-size-error-overlay" *ngIf="showFileSizeError" (click)="closeFileSizeError()">
+  <div class="file-size-error-popup" (click)="$event.stopPropagation()">
+    <div class="popup-icon">
+      <i class="bx bx-error-circle"></i>
+    </div>
+    <h3 class="popup-title">Dosya Boyutu Çok Büyük!</h3>
+    <p class="popup-message">{{ fileSizeErrorMessage }}</p>
+    <button type="button" class="popup-close-btn" (click)="closeFileSizeError()">
+      Tamam
+    </button>
   </div>
 </div>

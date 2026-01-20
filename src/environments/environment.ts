@@ -6,7 +6,7 @@ export const environment = {
   // Remote sunucu kullanmak istiyorsanız: http://72.62.37.160:8080/api
   apiUrl: 'https://unidesportal.com/api', // Proxy üzerinden çalışır (proxy.conf.json ile backend'e yönlendirilir)
   // Flask Chatbot API URL - Development
-  chatbotApiUrl: 'https://unidesportal.com/chatbot', // Chatbot sunucu URL'si
+  chatbotApiUrl: 'https://unidesportal.com/chatbot/chat', // Chatbot sunucu URL'si
   // Spam Bot API URL - Development
-  spamBotApiUrl: 'https://unidesportal.com/spam-check', // Spam kontrol sunucu URL'si
+  spamBotApiUrl: 'https://unidesportal.com/spamfilter/api/moderate', // Spam kontrol sunucu URL'si
 };

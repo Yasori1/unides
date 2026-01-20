@@ -17,7 +17,6 @@ import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.compon
 import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
 import { CommunityService } from '../../services/community.services';
 import { EventService, EventItem } from '../../services/event.services';
-import { CorsImageDirective } from '../../directives/cors-image.directive';
 import { ImageErrorHandlerService } from '../../services/image-error-handler.service';
 
 interface EventCard {
@@ -42,7 +41,7 @@ interface EventCard {
 @Component({
   selector: 'app-events',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, SiteNavbarComponent, SiteFooterComponent, CorsImageDirective],
+  imports: [CommonModule, RouterModule, FormsModule, SiteNavbarComponent, SiteFooterComponent],
   templateUrl: './events.component.html',
   styleUrls: ['./events.component.scss'],
 })

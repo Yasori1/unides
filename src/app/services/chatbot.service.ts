@@ -19,7 +19,7 @@ export interface ChatResponse {
   providedIn: 'root',
 })
 export class ChatbotService {
-  private apiUrl = `${environment.chatbotApiUrl}/chat`;
+  private apiUrl = environment.chatbotApiUrl;
 
   constructor(private http: HttpClient) {}
 
