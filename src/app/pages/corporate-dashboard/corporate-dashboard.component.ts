@@ -2198,9 +2198,29 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   }
 
   deleteEvent(id: number) {
-    this.allEvents = this.allEvents.filter((e) => e.id !== id);
-    this.showToast('Etkinlik silindi', 'success');
-    this.closeModal();
+    // Backend'den etkinliği sil
+    this.eventService.deleteEvent(id).subscribe({
+      next: () => {
+        // Başarılı - etkinlikleri backend'den yeniden yükle
+        this.loadEventsFromService();
+        this.showToast('Etkinlik başarıyla silindi.', 'success');
+        
+        // Eğer silinen etkinlik detail modal'da açıksa, modal'ı kapat
+        if (this.selectedEvent && this.selectedEvent.id === id) {
+          this.closeModal();
+        }
+      },
+      error: (err: any) => {
+        console.error('Etkinlik silinirken hata:', err);
+        let errorMsg = 'Etkinlik silinirken bir hata oluştu.';
+        if (err.status === 401 || err.status === 403) {
+          errorMsg = 'Bu işlem için yetkiniz bulunmamaktadır.';
+        } else if (err.error?.message) {
+          errorMsg = err.error.message;
+        }
+        this.showToast(errorMsg, 'error');
+      },
+    });
   }
 
   openModal(type: string) {

@@ -145,7 +145,7 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
 .main-banner-wrapper {
   background-color: transparent;
   position: relative;
-  z-index: 1;
+  z-index: 3; // Section-communities'den (z-index: 2) daha yüksek - banner her zaman üstte kalır
   overflow: hidden;
 
   // Mobil varsayılan
@@ -442,7 +442,9 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
   position: relative;
   z-index: 2;
 
-  // Tüm ekran boyutları için tutarlı margin-top değerleri (clamp ile akışkan)\n  // Mobil varsayılan\n  margin-top: 20px;
+  // Tüm ekran boyutları için tutarlı margin-top değerleri (clamp ile akışkan)
+  // Mobil varsayılan
+  margin-top: 20px;
 
   // Tablet
   @media (min-width: 768px) {
@@ -531,13 +533,38 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
   }
 
   .card-image-wrapper {
-    height: 180px;
+    // 1920x500 aspect ratio (3.84:1) - Topluluk detay banner ile aynı ölçüler
+    aspect-ratio: 1920 / 500;
     position: relative;
+    overflow: hidden;
+    background: #f4f4f5; // Fallback renk
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px 16px 0 0; // Etkinlikler gibi yuvarlatılmış köşeler
+
+    // Blur background - görselin renk tonlarını yansıtır
+    .cover-bg-blur {
+      position: absolute;
+      inset: -20px; // Daha iyi blur kapsamı için
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      // Yüksek doygunluk, blur ve kontrast ile görselin renk tonlarını yansıtır
+      filter: blur(25px) saturate(200%) brightness(0.5) contrast(1.1);
+      opacity: 1;
+      z-index: 1;
+      transform: scale(1.2); // Blur kenarlarını gizlemek için ölçekle
+    }
 
     img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+      position: relative;
+      z-index: 2; // Blur'un üstünde
+      width: 100%; // Yatayda tam sığması için
+      height: 100%; // Dikeyde tam sığması için
+      object-fit: contain; // Görsellerin kırpılmadan tam sığması için
+      object-position: center;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3)); // Görseli belirginleştir
     }
   }
 
@@ -1162,5 +1189,151 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
         }
       }
     }
+  }
+}
+
+// --- Geçmişten Kareler Slider Section ---
+.slider-section {
+  padding: 60px 0 80px;
+  overflow: hidden;
+  background: linear-gradient(to right, #e0fbfc 0%, #ffffff 100%);
+
+  .container {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .slider-title {
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 40px;
+    color: $dark-text;
+    z-index: 10;
+    position: relative;
+  }
+
+  .slider-container {
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+
+    .slider-track {
+      display: flex;
+      gap: 20px;
+      width: max-content;
+      animation: scrollSlider 50s linear infinite;
+
+      .slide {
+        width: 308px;
+        height: 198px;
+        border-radius: 12px;
+        overflow: hidden;
+        flex-shrink: 0;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
+        cursor: pointer;
+        transition: transform 0.3s ease;
+
+        &:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+        }
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform 0.4s;
+
+          &:hover {
+            transform: scale(1.05);
+          }
+        }
+      }
+    }
+  }
+}
+
+@keyframes scrollSlider {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+// --- LIGHTBOX MODAL ---
+.lightbox-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(8px);
+  cursor: zoom-out;
+  animation: fadeInLightbox 0.3s ease-out;
+
+  img {
+    max-width: 90vw;
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+    cursor: default;
+    animation: scaleInLightbox 0.3s ease-out;
+  }
+
+  .close-lightbox {
+    position: absolute;
+    top: 30px;
+    right: 30px;
+    background: transparent;
+    border: none;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10001;
+    transition: all 0.2s;
+
+    .material-symbols-outlined {
+      font-size: 32px;
+    }
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: scale(1.1);
+    }
+  }
+}
+
+@keyframes fadeInLightbox {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleInLightbox {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
   }
 }

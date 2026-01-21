@@ -64,8 +64,8 @@
             <h2 class="section-title">Etkinlikler</h2>
             
             <!-- Etkinlik Varsa -->
-            <div class="upcoming-events-grid" *ngIf="upcomingEvents.length > 0">
-              <div class="upcoming-event-card" *ngFor="let event of upcomingEvents" (click)="navigateToEvent(event.id)" style="cursor: pointer;">
+            <div class="upcoming-events-grid" *ngIf="paginatedEvents.length > 0">
+              <div class="upcoming-event-card" *ngFor="let event of paginatedEvents" (click)="navigateToEvent(event.id)" style="cursor: pointer;">
                 <div class="event-card-image" *ngIf="event.imageUrl">
                   <img [src]="event.imageUrl" [alt]="event.title" />
                 </div>
@@ -84,6 +84,35 @@
                   </div>
                 </div>
               </div>
+            </div>
+            
+            <!-- Sayfalama (4'ten fazla etkinlik varsa) -->
+            <div class="pagination-container" *ngIf="totalPages > 1">
+              <button 
+                class="pagination-btn" 
+                (click)="previousPage()" 
+                [disabled]="currentPage === 1"
+                [class.disabled]="currentPage === 1">
+                <i class="bx bx-chevron-left"></i> Önceki
+              </button>
+              
+              <div class="pagination-numbers">
+                <button 
+                  *ngFor="let page of getPageNumbers()" 
+                  class="pagination-number"
+                  [class.active]="currentPage === page"
+                  (click)="changePage(page)">
+                  {{ page }}
+                </button>
+              </div>
+              
+              <button 
+                class="pagination-btn" 
+                (click)="nextPage()" 
+                [disabled]="currentPage === totalPages"
+                [class.disabled]="currentPage === totalPages">
+                Sonraki <i class="bx bx-chevron-right"></i>
+              </button>
             </div>
             
             <!-- Etkinlik Yoksa -->

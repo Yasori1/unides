@@ -34,6 +34,12 @@ export class CommunityDetailComponent implements OnInit {
   // Upcoming events from backend
   upcomingEvents: CommunityEvent[] = [];
 
+  // Sayfalama için
+  currentPage: number = 1;
+  itemsPerPage: number = 4; // Sayfa başına 4 etkinlik (2x2 grid)
+  paginatedEvents: CommunityEvent[] = [];
+  totalPages: number = 0;
+
   // Banner animation
   heroMoveX = 0;
   heroMoveY = 0;
@@ -45,7 +51,7 @@ export class CommunityDetailComponent implements OnInit {
     private eventService: EventService,
     private imageErrorHandler: ImageErrorHandlerService,
     @Inject(PLATFORM_ID) private platformId: Object
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.route.params.subscribe((params) => {
@@ -96,27 +102,23 @@ export class CommunityDetailComponent implements OnInit {
   }
 
   /**
-   * EventItem[] array'inden yaklaşan etkinlikleri filtrele ve işle
-   * Yaklaşan etkinlik: startDate bugünden sonra olan ve onaylanmış etkinlikler
+   * EventItem[] array'inden tüm onaylanmış etkinlikleri filtrele ve işle
+   * Tarih filtresi yok - tüm onaylanmış etkinlikler gösterilir
+   * Tarihe göre sıralanır (en yakın önce) ve sayfalama uygulanır
    */
   private processUpcomingEventsFromEventItems(events: EventItem[]): void {
     if (!events || events.length === 0) {
       this.upcomingEvents = [];
+      this.paginatedEvents = [];
+      this.totalPages = 0;
       return;
     }
 
-    const now = new Date();
-    now.setHours(0, 0, 0, 0); // Bugünün başlangıcı
-
-    // Yaklaşan etkinlikleri filtrele ve sırala (sadece onaylanmış etkinlikler)
+    // Tüm onaylanmış etkinlikleri filtrele ve sırala (tarih filtresi yok)
     const upcoming = events
       .filter((event) => {
         // Sadece onaylanmış etkinlikleri göster
-        if (event.status !== 'Onaylandı') return false;
-        if (!event.startDate) return false;
-        const eventDate = new Date(event.startDate);
-        eventDate.setHours(0, 0, 0, 0);
-        return eventDate >= now; // Bugün ve sonrası
+        return event.status === 'Onaylandı';
       })
       .sort((a, b) => {
         // Tarihe göre sırala (en yakın önce)
@@ -134,6 +136,63 @@ export class CommunityDetailComponent implements OnInit {
       }));
 
     this.upcomingEvents = upcoming;
+
+    // Sayfalama hesapla
+    this.totalPages = Math.ceil(upcoming.length / this.itemsPerPage);
+    this.currentPage = 1; // Her yüklemede ilk sayfaya dön
+    this.updatePaginatedEvents();
+  }
+
+  /**
+   * Sayfalama için etkinlikleri güncelle
+   */
+  private updatePaginatedEvents(): void {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.paginatedEvents = this.upcomingEvents.slice(startIndex, endIndex);
+  }
+
+  /**
+   * Sayfa değiştir
+   */
+  changePage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.updatePaginatedEvents();
+      // Sayfanın üstüne kaydır
+      if (isPlatformBrowser(this.platformId)) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+  }
+
+  /**
+   * Önceki sayfa
+   */
+  previousPage(): void {
+    if (this.currentPage > 1) {
+      this.changePage(this.currentPage - 1);
+    }
+  }
+
+  /**
+   * Sonraki sayfa
+   */
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.changePage(this.currentPage + 1);
+    }
+  }
+
+  /**
+   * Sayfa numaralarını döndür (pagination için)
+   */
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    for (let i = 1; i <= this.totalPages; i++) {
+      pages.push(i);
+    }
+    return pages;
   }
 
   loadCommunityEvents(communityId: string) {
@@ -142,14 +201,14 @@ export class CommunityDetailComponent implements OnInit {
     }
 
     this.isLoadingEvents = true;
-    
+
     // Backend'den tüm etkinlikleri çek ve bu topluluğa ait olanları filtrele
     this.eventService.getAll().subscribe({
       next: (events) => {
         // Backend'den gelen EventListItemDto'da ComId yok, sadece CommunityName var
         // Bu yüzden CommunityName ile filtreleme yapıyoruz
         const communityName = this.community?.name;
-        
+
         if (!communityName) {
           // Topluluk adı yoksa boş array döndür
           this.communityEvents = [];
@@ -172,10 +231,10 @@ export class CommunityDetailComponent implements OnInit {
 
         // Sadece onaylanmış etkinlikleri göster (public sayfa olduğu için)
         this.communityEvents = filteredEvents.filter((e) => e.status === 'Onaylandı');
-        
+
         // Yaklaşan etkinlikleri de güncelle
         this.processUpcomingEventsFromEventItems(filteredEvents);
-        
+
         this.isLoadingEvents = false;
       },
       error: (err) => {

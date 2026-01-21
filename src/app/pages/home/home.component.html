@@ -62,6 +62,8 @@
         (click)="goToCommunityDetail(comm.id)"
       >
         <div class="card-image-wrapper">
+          <!-- Blurry Background Image - görselin renk tonlarını yansıtır -->
+          <div class="cover-bg-blur" [style.background-image]="'url(' + comm.image + ')'"></div>
           <img [src]="comm.image" [alt]="comm.name" loading="lazy" />
           <div class="card-overlay"></div>
         </div>
@@ -296,4 +298,32 @@
   </div>
 </section>
 
+<!-- Geçmişten Kareler Section -->
+<section class="slider-section">
+  <div class="container">
+    <h3 class="slider-title">Geçmişten Kareler</h3>
+    <div class="slider-container">
+      <div class="slider-track">
+        <div class="slide" *ngFor="let img of sliderImages">
+          <img [src]="img" alt="Etkinlik Karesi" loading="lazy" (click)="openLightbox(img)" />
+        </div>
+        <div class="slide" *ngFor="let img of sliderImages">
+          <img [src]="img" alt="Etkinlik Karesi" loading="lazy" (click)="openLightbox(img)" />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Lightbox Modal -->
+<div class="lightbox-backdrop" *ngIf="lightboxOpen" (click)="closeLightbox()">
+  <button class="close-lightbox" (click)="closeLightbox()">
+    <span class="material-symbols-outlined">close</span>
+  </button>
+  <img [src]="selectedImage" (click)="$event.stopPropagation()" alt="Full Size" />
+</div>
+
 <app-site-footer />
+
+<link rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />

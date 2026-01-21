@@ -19,6 +19,11 @@ export interface SocialLinks {
   website?: string;
 }
 
+export interface Alumni {
+  name: string;
+  socialLinks?: SocialLinks;
+}
+
 @Component({
   selector: 'app-developers-page',
   standalone: true,
@@ -33,66 +38,73 @@ export interface SocialLinks {
 export class DevelopersPageComponent implements OnInit, OnDestroy {
   developers: Developer[] = [
     {
-      name: 'Safa Demirhan',
+      name: 'Emircan Sazlı',
       role: 'Baş Mimar',
-      image: 'assets/img/team/safa.jpg',
+      image: 'https://randomuser.me/api/portraits/men/32.jpg',
       codeBg: 'void main() { init_core(); }',
       socialLinks: { linkedin: '#', github: '#' }
     },
     {
-      name: 'Zeynep Kaya',
+      name: 'Alper Uğur Acar',
       role: 'Shader & Arayüz',
-      image: 'assets/img/team/zeynep.jpg',
+      image: 'https://randomuser.me/api/portraits/women/44.jpg',
       codeBg: 'import { crystal } from "unides"',
       socialLinks: { linkedin: '#', github: '#' }
     },
     {
-      name: 'Can Demir',
+      name: 'Safa Rahman Cenkci',
       role: 'Backend Motoru',
-      image: 'assets/img/team/can.jpg',
+      image: 'https://randomuser.me/api/portraits/men/15.jpg',
       codeBg: 'SELECT * FROM futures',
       socialLinks: { linkedin: '#', github: '#' }
     },
     {
-      name: 'Selin Aksoy',
+      name: 'Abdullah Gönç',
       role: 'Güvenlik Operasyonları',
-      image: 'assets/img/team/selin.jpg',
+      image: 'https://randomuser.me/api/portraits/women/28.jpg',
       codeBg: 'while(true) { innovate(); }',
       socialLinks: { linkedin: '#', github: '#' }
     },
     {
-      name: 'Oğuzhan Yılmaz',
+      name: 'Hüseyin Çeykel',
       role: 'Mobil Geliştirici',
-      image: 'assets/img/team/oguzhan.jpg',
+      image: 'https://randomuser.me/api/portraits/men/22.jpg',
       codeBg: 'Flutter.run()',
       socialLinks: { linkedin: '#', github: '#' }
     },
     {
-      name: 'Elif Öztürk',
+      name: 'Oğuzhan Akkoç',
       role: 'Veri Bilimci',
-      image: 'assets/img/team/elif.jpg',
+      image: 'https://randomuser.me/api/portraits/women/33.jpg',
       codeBg: 'import pandas as pd',
       socialLinks: { linkedin: '#', github: '#' }
     },
     {
-      name: 'Murat Çelik',
+      name: 'Yunus Emre Güler',
       role: 'DevOps Mühendisi',
-      image: 'assets/img/team/murat.jpg',
+      image: 'https://randomuser.me/api/portraits/men/47.jpg',
       codeBg: 'docker-compose up -d',
       socialLinks: { linkedin: '#', github: '#' }
     },
     {
-      name: 'Ayşe Yıldız',
+      name: 'Ali Kadir Güzel',
       role: 'QA Test Uzmanı',
-      image: 'assets/img/team/ayse.jpg',
+      image: 'https://randomuser.me/api/portraits/women/50.jpg',
       codeBg: 'expect(result).toBe(true)',
       socialLinks: { linkedin: '#', github: '#' }
     },
     {
-      name: 'Burak Şahin',
+      name: 'Hamza Ketenci',
       role: 'UI/UX Tasarımcı',
-      image: 'assets/img/team/burak.jpg',
+      image: 'https://randomuser.me/api/portraits/men/18.jpg',
       codeBg: '.design { beauty: true; }',
+      socialLinks: { linkedin: '#', github: '#' }
+    },
+    {
+      name: 'Burak Erken',
+      role: 'Full Stack Geliştirici',
+      image: 'https://randomuser.me/api/portraits/men/25.jpg',
+      codeBg: 'const future = await build();',
       socialLinks: { linkedin: '#', github: '#' }
     }
   ];
@@ -101,12 +113,22 @@ export class DevelopersPageComponent implements OnInit, OnDestroy {
   heroMoveY = 50;
   private mouseMoveListener: any;
 
-  alumni: string[] = [
-    'Eski Geliştirici 1',
-    'Eski Geliştirici 2',
-    'Eski Geliştirici 3',
-    'Eski Tasarımcı 1',
-    'Testçi Arkadaş'
+  isAlumniExpanded = false;
+
+  toggleAlumni() {
+    this.isAlumniExpanded = !this.isAlumniExpanded;
+  }
+
+  alumni: Alumni[] = [
+    { name: 'Eski Geliştirici 1', socialLinks: { linkedin: '#', github: '#' } },
+    { name: 'Eski Geliştirici 2', socialLinks: { linkedin: '#', github: '#' } },
+    { name: 'Eski Geliştirici 3', socialLinks: { linkedin: '#', github: '#' } },
+    { name: 'Eski Tasarımcı 1', socialLinks: { linkedin: '#', github: '#' } },
+    { name: 'Testçi Arkadaş', socialLinks: { linkedin: '#', github: '#' } },
+    { name: 'Eski Geliştirici 4', socialLinks: { linkedin: '#', github: '#' } },
+    { name: 'Eski Geliştirici 5', socialLinks: { linkedin: '#', github: '#' } },
+    { name: 'Eski Tasarımcı 2', socialLinks: { linkedin: '#', github: '#' } },
+    { name: 'Eski Geliştirici 6', socialLinks: { linkedin: '#', github: '#' } }
   ];
 
   constructor(@Inject(PLATFORM_ID) private platformId: Object) { }

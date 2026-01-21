@@ -91,6 +91,19 @@ export class HomeComponent implements OnInit, OnDestroy {
   // --- Responsive Placeholder ---
   isMobile: boolean = false;
 
+  // --- Geçmişten Kareler Slider ---
+  sliderImages: string[] = [
+    'https://images.unsplash.com/photo-1544531586-fde5298cdd40?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1523580494863-6f3031224c94?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=800&auto=format&fit=crop',
+    'https://media.istockphoto.com/id/1486287149/tr/foto%C4%9Fraf/group-of-multiracial-asian-business-participants-casual-chat-after-successful-conference.jpg?s=612x612&w=0&k=20&c=UIA06kHeAHdKyPRyREEGmmkfyvi0RMyjbldymvolJiY=',
+  ];
+
+  // --- Lightbox ---
+  lightboxOpen: boolean = false;
+  selectedImage: string | null = null;
+
   // mockAnnouncements kaldırıldı - artık backend'den veri çekiliyor
 
   get searchPlaceholder(): string {
@@ -137,6 +150,23 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
   closeVideo() {
     this.showVideo = false;
+  }
+
+  // --- Lightbox İşlemleri ---
+  openLightbox(imageUrl: string) {
+    this.selectedImage = imageUrl;
+    this.lightboxOpen = true;
+    if (isPlatformBrowser(this.platformId)) {
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  closeLightbox() {
+    this.lightboxOpen = false;
+    this.selectedImage = null;
+    if (isPlatformBrowser(this.platformId)) {
+      document.body.style.overflow = '';
+    }
   }
 
   // --- Typewriter (Yazı Yazma) Efekti ---

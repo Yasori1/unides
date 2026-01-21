@@ -371,7 +371,7 @@ export class EventService {
       endDate: endDate || dto.BitisTarihi || '',
       location: dto.eventLocation || dto.EventLocation || dto.konum || dto.Konum || '',
       communityId:
-        dto.comId || dto.ComId || dto.toplulukId || dto.ToplulukId || dto.communityId || 0,
+        dto.toplulukId || dto.ToplulukId || dto.comId || dto.ComId || dto.communityId || dto.CommunityId || 0,
       communityName: dto.communityName || dto.CommunityName || '',
       communityLogo: dto.communityLogo || dto.CommunityLogo || undefined, // Topluluk logosu (opsiyonel)
       imageUrl: (() => {

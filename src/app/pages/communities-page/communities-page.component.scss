@@ -378,11 +378,11 @@
   }
 
   @media (min-width: 1024px) {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr); // 3'ten 2'ye düşürüldü - kartlar daha büyük
   }
 
   @media (min-width: 1280px) {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr); // 4'ten 3'e düşürüldü - kartlar daha büyük
   }
 }
 
@@ -419,8 +419,8 @@
   }
 
   .cover-area {
-    height: 160px;
-    /* Reduced height from 200px */
+    // 1920x500 aspect ratio (3.84:1) - Topluluk detay banner ile aynı ölçüler
+    aspect-ratio: 1920 / 500;
     width: 100%;
     position: relative;
     background-color: #f4f4f5; // Fallback
@@ -445,7 +445,7 @@
       z-index: 2; // Above the blur
       width: 100%;
       height: 100%;
-      object-fit: contain; // Changed to contain to show full banner text
+      object-fit: contain; // Görsellerin kırpılmadan tam sığması için
       object-position: center;
       transition: transform 0.5s ease;
       filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3)); // Stronger shadow to pop against the colored bg

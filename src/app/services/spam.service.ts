@@ -7,9 +7,9 @@ export class SpamService {
   // Backend spam filter API adresi
   // URL: http://72.62.37.160/spam (HTTP protokolü, HTTPS değil)
   // Method: POST
-  private apiUrl = 'http://72.62.37.160/spam'; 
+  private apiUrl = 'https://unidesportal.com/spam-check';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   checkSpam(message: string): Observable<any> {
     // Backend'in beklediği format: { text: "..." }
