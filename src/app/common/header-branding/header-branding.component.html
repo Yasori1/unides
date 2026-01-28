@@ -25,7 +25,8 @@
       *ngIf="isInitialized && isLoggedIn === true && (userRole !== 'community' || isCommunityNameLoaded)">
       <div class="profile-info" (click)="toggleProfileDropdown($event)" title="Hesabım">
         <div class="profile-pic">
-          <div class="profile-initial">{{ userInitial }}</div>
+          <img *ngIf="communityLogo && userRole === 'community'" [src]="communityLogo" [alt]="displayName || 'Topluluk Logosu'" />
+          <div class="profile-initial" *ngIf="!communityLogo || userRole !== 'community'">{{ userInitial }}</div>
         </div>
         <!-- Kullanıcı adı burada artık gösterilmiyor, dropdown içinde gösterilecek -->
       </div>

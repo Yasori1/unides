@@ -72,7 +72,7 @@
   position: fixed;
   top: 20px;
   right: 20px;
-  z-index: 3000;
+  z-index: 10000; // Modal overlay'den (z-index: 3000) yüksek olmalı
 }
 
 .toast-container-inline .toast-notification {

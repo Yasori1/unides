@@ -65,7 +65,8 @@
         <div class="profile-wrapper" title="Hesabım">
           <div class="profile-info" (click)="toggleProfileDropdown($event)">
             <div class="profile-pic">
-              <div class="profile-initial">{{ userInitial }}</div>
+              <img *ngIf="clubInfo?.logo" [src]="clubInfo.logo" [alt]="clubInfo.name || 'Topluluk Logosu'" />
+              <div class="profile-initial" *ngIf="!clubInfo?.logo">{{ userInitial }}</div>
             </div>
           </div>
           <div class="dropdown-menu profile-dropdown" *ngIf="isProfileOpen" (click)="$event.stopPropagation()">

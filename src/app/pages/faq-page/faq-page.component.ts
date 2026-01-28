@@ -49,15 +49,16 @@ export class FaqPageComponent implements OnInit, AfterViewInit {
       items: [
         {
           question: 'Sisteme nasıl giriş yapabilirim?',
-          answer: `Giriş ekranında iki farklı seçenek bulunmaktadır:<br><br>
-          <strong>• Üye Girişi:</strong> Üniversite öğrencileri ve Topluluk Başkanları bu sekmeyi kullanarak, üniversite e-postaları ile giriş yapmalıdır.<br>
+          answer: `Giriş ekranında üç farklı seçenek bulunmaktadır:<br><br>
+          <strong>• Öğrenci Girişi:</strong> Üniversite öğrencileri bu sekmeyi kullanarak, üniversite e-postaları ile giriş yapmalıdır.<br>
+          <strong>• Topluluk Girişi:</strong> Topluluk Başkanları bu sekmeyi kullanarak, üniversite e-postaları ile giriş yapmalıdır.<br>
           <strong>• Kurumsal Giriş:</strong> Yalnızca Gençlik ve Spor Bakanlığı (GSB) yetkilileri bu alanı kullanmalıdır.`,
           isOpen: true,
         },
         {
           question: 'Topluluk Başkanıyım, "Kurumsal Giriş"ten mi girmeliyim?',
           answer:
-            'Hayır. Topluluk Başkanları da üniversite öğrencisi statüsünde olduğu için "Üye Girişi" sekmesini kullanmalıdır. Sisteme giriş yaptığınızda, başkanlık yetkiniz otomatik olarak tanımlanacak ve yönetim paneline erişiminiz açılacaktır.',
+            'Hayır. Topluluk Başkanları "Topluluk Girişi" sekmesini kullanmalıdır. Sisteme giriş yaptığınızda, başkanlık yetkiniz otomatik olarak tanımlanacak ve yönetim paneline erişiminiz açılacaktır.',
           isOpen: false,
         },
         {
@@ -88,51 +89,107 @@ export class FaqPageComponent implements OnInit, AfterViewInit {
         {
           question: 'Topluluk profil bilgilerini nasıl düzenlerim?',
           answer:
-            'Sisteme "Üye Girişi" üzerinden girdikten sonra menüdeki "Benim Topluluğum" butonuna tıklayarak yönetim paneline ulaşabilir; topluluk bilgilerinizi buradan güncelleyebilirsiniz.',
+            'Topluluk bilgileri üniversitelerde bulunan GSB Genç Ofislerde bulunan yetkili kişi tarafından düzenlenebilir. Topluluk Başkanı kendisi güncelleyemez. Güncelleme talepleriniz için üniversitenizdeki GSB Genç Ofis ile iletişime geçebilirsiniz.',
           isOpen: false,
         },
         {
-          question: 'Tamamlanan projelerimizi sisteme nasıl yükleyebiliriz?',
+          question: 'Topluluk nasıl kaydedebilirim?',
           answer:
-            'Gerçekleştirdiğiniz projelere ait görselleri ve sonuç metinlerini <strong>unidesbilgi@gsb.gov.tr</strong> adresine iletmeniz gerekmektedir.',
+            'Üniversitenizde bulunan GSB Genç Ofise başvuru yaparak topluluk kaydınızı sistemde oluşturtabilirsiniz. GSB Genç Ofis yetkilileri başvurunuzu değerlendirecek ve onaylandıktan sonra topluluğunuz platformda görünür hale gelecektir.',
+          isOpen: false,
+        },
+        {
+          question: 'Topluluğuma nasıl üye ekleyebilirim?',
+          answer:
+            'Topluluk Başkanı olarak "Benim Topluluğum" panelinden "Üyeler" sekmesine giderek e-posta adresi ile üye arayabilir veya toplu üye ekleme özelliğini kullanabilirsiniz.',
+          isOpen: false,
+        },
+        {
+          question: 'Topluluğum için etkinlik nasıl oluşturabilirim?',
+          answer:
+            'Topluluk Başkanı olarak giriş yaptıktan sonra "Benim Topluluğum" panelinden "Etkinlikler" sekmesine giderek yeni etkinlik oluşturabilirsiniz. Oluşturduğunuz etkinlikler kurumsal onay sürecinden geçtikten sonra yayınlanacaktır.',
           isOpen: false,
         },
       ],
     },
     {
       id: 'cat3',
-      title: 'Forum ve Etkileşim',
-      icon: 'forum',
+      title: 'Etkinlikler',
+      icon: 'event',
       items: [
         {
-          question: 'Forumda paylaştığım gönderi neden hemen görünmüyor?',
+          question: 'Etkinliklere nasıl katılabilirim?',
           answer:
-            'Tüm başlıklar ve mesajlar yönetici onayı sürecinden geçmektedir. Onaylandıktan sonra yayınlanacaktır.',
+            'Etkinlikler sayfasından ilgilendiğiniz etkinliği bulabilir ve detay sayfasından katılım bilgilerini görebilirsiniz. Etkinlikler genellikle topluluklar tarafından düzenlenir ve katılım koşulları etkinlik detayında belirtilir.',
           isOpen: false,
         },
         {
-          question: 'Partnerlik için nasıl iletişim kurabilirim?',
+          question: 'Etkinliğim neden onay bekliyor durumunda?',
           answer:
-            'Forum alanındaki "Partner Arayışı" kategorisini kullanabilir veya topluluk profillerindeki iletişim bilgilerinden ulaşabilirsiniz.',
+            'Tüm etkinlikler yayınlanmadan önce Gençlik ve Spor Bakanlığı yetkilileri tarafından onaylanmalıdır. Onay süreci genellikle birkaç iş günü sürmektedir. Etkinliğiniz onaylandıktan sonra platformda görünür hale gelecektir.',
+          isOpen: false,
+        },
+        {
+          question: 'Etkinliğim reddedildi, ne yapmalıyım?',
+          answer:
+            'Etkinlik detay sayfasında reddedilme nedeni görüntülenir. Gerekli düzenlemeleri yaptıktan sonra etkinliği tekrar düzenleyip onaya gönderebilirsiniz.',
           isOpen: false,
         },
       ],
     },
     {
       id: 'cat4',
-      title: 'Destek ve Mentörlük',
-      icon: 'support_agent',
+      title: 'Topluluklar',
+      icon: 'groups',
       items: [
         {
-          question: 'Mentörlük sistemine kimler başvurabilir?',
+          question: 'Topluluklara nasıl üye olabilirim?',
           answer:
-            'Üniversite e-posta adresi ile kayıtlı ve doğrulanmış tüm öğrenci üyeler başvurabilir.',
+            'Topluluklara sadece Topluluk Başkanları kendi panellerinden üyeleri kaydedebilir. Topluluğa üye olmak için topluluğun yetkilisiyle (Topluluk Başkanı) iletişime geçmeniz gerekmektedir.',
+          isOpen: false,
+        },
+      ],
+    },
+    {
+      id: 'cat5',
+      title: 'Duyurular',
+      icon: 'campaign',
+      items: [
+        {
+          question: 'Duyuruları nasıl görüntüleyebilirim?',
+          answer:
+            'Ana sayfada veya "Duyurular" sayfasından tüm duyuruları görüntüleyebilirsiniz. Duyurular Gençlik ve Spor Bakanlığı tarafından yayınlanmaktadır.',
           isOpen: false,
         },
         {
-          question: 'Teknik bir sorun yaşıyorum?',
+          question: 'Duyuru detaylarına nasıl ulaşabilirim?',
           answer:
-            'Hatanın ekran görüntüsünü <strong>unidesbilgi@gsb.gov.tr</strong> adresine iletebilirsiniz.',
+            'Duyurular sayfasından ilgilendiğiniz duyuruya tıklayarak detay sayfasına ulaşabilir ve tam içeriği okuyabilirsiniz.',
+          isOpen: false,
+        },
+      ],
+    },
+    {
+      id: 'cat6',
+      title: 'Destek ve İletişim',
+      icon: 'support_agent',
+      items: [
+        {
+          question: 'Teknik bir sorun yaşıyorum, ne yapmalıyım?',
+          answer:
+            'Teknik sorunlarınız için <strong>unidesbilgi@gsb.gov.tr</strong> adresine e-posta gönderebilirsiniz. Sorunun çözümü için ekran görüntüsü veya hata mesajı eklemeniz faydalı olacaktır.',
+          isOpen: false,
+        },
+        {
+          question: 'Genel sorularım için nereye başvurabilirim?',
+          answer:
+            'Genel sorularınız için "İletişim" sayfasından bize ulaşabilir veya <strong>unidesbilgi@gsb.gov.tr</strong> adresine e-posta gönderebilirsiniz.',
+          isOpen: false,
+        },
+        {
+          question: 'Yetki veya erişim sorunum var, ne yapmalıyım?',
+          answer:
+            'Yetki veya erişim sorunlarınız için <strong>unidesbilgi@gsb.gov.tr</strong> adresine e-posta göndererek durumunuzu açıklayabilirsiniz. Yetkililer en kısa sürede size yardımcı olacaktır.',
           isOpen: false,
         },
       ],

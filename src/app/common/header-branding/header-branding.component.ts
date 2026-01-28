@@ -24,6 +24,7 @@ export class HeaderBrandingComponent implements OnInit, OnDestroy {
   userName: string = '';
   userInitial: string = '';
   displayName: string = ''; // Gösterilecek isim (kullanıcı adı veya topluluk adı)
+  communityLogo: string | null = null; // Topluluk logosu
   isInitialized = false; // Auth durumu kontrol edilene kadar navbar'ı gizle
   isCommunityNameLoaded = false; // Topluluk adı yüklenene kadar profil bilgisini gizle
   private routerSubscription?: Subscription;
@@ -82,6 +83,7 @@ export class HeaderBrandingComponent implements OnInit, OnDestroy {
       this.userName = '';
       this.displayName = '';
       this.userInitial = '';
+      this.communityLogo = null;
       this.isCommunityNameLoaded = false; // Logout olduğunda sıfırla
     }
 
@@ -105,6 +107,7 @@ export class HeaderBrandingComponent implements OnInit, OnDestroy {
         if (communityInfo.name) {
           this.displayName = communityInfo.name;
           this.userInitial = communityInfo.name.charAt(0).toUpperCase();
+          this.communityLogo = communityInfo.logo || null;
           this.isCommunityNameLoaded = true; // Yükleme tamamlandı
           this.cdr.detectChanges();
           return;
@@ -165,15 +168,18 @@ export class HeaderBrandingComponent implements OnInit, OnDestroy {
           // Community interface'inde 'name' property'si var, 'comName' yok
           this.displayName = matchingCommunity.name || 'Topluluk';
           this.userInitial = this.displayName.charAt(0).toUpperCase();
+          this.communityLogo = matchingCommunity.logo || null;
           // localStorage'a kaydet (gelecek seferler için)
           localStorage.setItem('community_info', JSON.stringify({
             name: this.displayName,
-            id: matchingCommunity.id
+            id: matchingCommunity.id,
+            logo: this.communityLogo
           }));
         } else {
           // Topluluk bulunamazsa kullanıcı adını göster
           this.displayName = this.userName;
           this.userInitial = this.userName.charAt(0).toUpperCase();
+          this.communityLogo = null;
         }
         this.isCommunityNameLoaded = true; // Yükleme tamamlandı
         this.cdr.detectChanges();
@@ -182,6 +188,7 @@ export class HeaderBrandingComponent implements OnInit, OnDestroy {
         // Hata durumunda kullanıcı adını göster
         this.displayName = this.userName;
         this.userInitial = this.userName.charAt(0).toUpperCase();
+        this.communityLogo = null;
         this.isCommunityNameLoaded = true; // Yükleme tamamlandı (hata durumu)
         this.cdr.detectChanges();
       }
@@ -226,6 +233,7 @@ export class HeaderBrandingComponent implements OnInit, OnDestroy {
     localStorage.removeItem('user_info');
     localStorage.removeItem('user_type');
     localStorage.removeItem('community_info'); // Topluluk bilgisini de temizle
+    this.communityLogo = null;
     // Anasayfaya yönlendir
     this.router.navigate(['/']).then(() => {
       // Sayfa yüklendikten sonra login durumunu güncelle
