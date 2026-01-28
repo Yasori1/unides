@@ -113,10 +113,43 @@ export class EventsDetailComponent implements OnInit {
       university: '',
       club: e.communityName || '',
       location: e.location || '',
-      quota: 0,
+      quota: e.quota !== undefined && e.quota !== null ? e.quota : 0,
       imageUrl: e.imageUrl || '',
       color: '#2563eb',
       city: '',
     } as any;
+  }
+
+  // Metni HTML formatına çevir: \n\n paragraf, \n <br> olarak gösterilir
+  formatDescription(description: string): string {
+    if (!description) return '';
+    
+    // Eğer zaten HTML formatındaysa (tag'ler varsa), olduğu gibi döndür
+    if (description.includes('<') && description.includes('>')) {
+      return description;
+    }
+    
+    // HTML karakterlerini escape et
+    const escaped = description
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+    
+    // Çift satır sonlarını paragraf olarak ayır
+    const paragraphs = escaped.split(/\n\n+/);
+    
+    // Her paragrafı <p> etiketi içine al ve tek satır sonlarını <br> yap
+    const formatted = paragraphs
+      .map(para => {
+        // Paragraf içindeki tek satır sonlarını <br> yap
+        const withBreaks = para.replace(/\n/g, '<br>');
+        // Boş paragrafları atla
+        if (withBreaks.trim() === '') return '';
+        return `<p>${withBreaks.trim()}</p>`;
+      })
+      .filter(p => p !== '')
+      .join('');
+    
+    return formatted || escaped.replace(/\n/g, '<br>');
   }
 }

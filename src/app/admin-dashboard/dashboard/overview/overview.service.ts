@@ -1,5 +1,6 @@
 import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { Logger } from '../../../utils/logger.util';
 
 @Injectable({
     providedIn: 'root'
@@ -117,7 +118,7 @@ export class OverviewService {
                 const chart = new ApexCharts(document.querySelector('#overview_chart'), options);
                 chart.render();
             } catch (error) {
-                console.error('Error loading ApexCharts:', error);
+                Logger.error('Error loading ApexCharts:', error);
             }
         }
     }

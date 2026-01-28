@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 // Servisi ve Modeli import ediyoruz
 import { CommunityService, Community } from '../../services/community.services';
 import { ImageErrorHandlerService } from '../../services/image-error-handler.service';
+import { Logger } from '../../utils/logger.util';
 
 @Component({
   selector: 'app-latest-communities',
@@ -53,7 +54,7 @@ export class LatestCommunitiesComponent implements OnInit {
         this.isLoading = false;
       },
       error: (err) => {
-        console.error('Favori topluluklar yüklenemedi', err);
+        Logger.error('Favori topluluklar yüklenemedi', err);
         this.isLoading = false;
       },
     });

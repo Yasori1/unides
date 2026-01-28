@@ -24,49 +24,47 @@
       <button class="menu-item" [class.active]="activeTab === 'overview'" (click)="switchTab('overview')"
         title="Genel Bakış">
         <span class="material-symbols-outlined">dashboard</span>
-        <span *ngIf="!isSidebarCollapsed">Genel Bakış</span>
+        <span class="menu-text">Genel Bakış</span>
       </button>
 
-      <div class="menu-divider" *ngIf="!isSidebarCollapsed">YÖNETİM</div>
+      <div class="menu-divider">YÖNETİM</div>
 
       <button class="menu-item" [class.active]="activeTab === 'communities'" (click)="switchTab('communities')"
         title="Topluluklar">
         <span class="material-symbols-outlined">groups</span>
-        <span *ngIf="!isSidebarCollapsed">Topluluklar</span>
+        <span class="menu-text">Topluluklar</span>
       </button>
 
       <button class="menu-item" [class.active]="activeTab === 'events'" (click)="switchTab('events')"
         title="Etkinlikler">
         <span class="material-symbols-outlined">event_available</span>
-        <span *ngIf="!isSidebarCollapsed">Etkinlikler</span>
-        <span class="badge" *ngIf="pendingEventCount > 0 && !isSidebarCollapsed">{{
-          pendingEventCount
-          }}</span>
+        <span class="menu-text">Etkinlikler</span>
+        <span class="badge" *ngIf="pendingEventCount > 0">{{ pendingEventCount }}</span>
       </button>
 
-      <div class="menu-divider" *ngIf="!isSidebarCollapsed">İLETİŞİM</div>
+      <div class="menu-divider">İLETİŞİM</div>
 
       <button class="menu-item" [class.active]="activeTab === 'announcements'" (click)="switchTab('announcements')"
         title="Duyurular">
         <span class="material-symbols-outlined">campaign</span>
-        <span *ngIf="!isSidebarCollapsed">Duyurular</span>
+        <span class="menu-text">Duyurular</span>
       </button>
 
       <!-- Mesajlar Butonu Silindi -->
 
-      <div class="menu-divider" *ngIf="!isSidebarCollapsed">SİSTEM</div>
+      <div class="menu-divider">SİSTEM</div>
 
       <button class="menu-item" [class.active]="activeTab === 'settings'" (click)="switchTab('settings')"
         title="Ayarlar">
         <span class="material-symbols-outlined">person</span>
-        <span *ngIf="!isSidebarCollapsed">Profilim</span>
+        <span class="menu-text">Profilim</span>
       </button>
     </nav>
 
     <div class="sidebar-footer">
       <button class="logout-btn" (click)="logout()" title="Çıkış">
         <span class="material-symbols-outlined">logout</span>
-        <span *ngIf="!isSidebarCollapsed">Çıkış Yap</span>
+        <span class="menu-text">Çıkış Yap</span>
       </button>
     </div>
   </aside>
@@ -422,7 +420,8 @@
       <div class="settings-layout">
         <div class="settings-sidebar">
           <div class="club-avatar-edit">
-            <div class="profile-initial-large">{{ userInitial || (userName ? userName.charAt(0).toUpperCase() : 'U') }}</div>
+            <div class="profile-initial-large">{{ userInitial || (userName ? userName.charAt(0).toUpperCase() : 'U') }}
+            </div>
           </div>
           <h3>{{ userName || displayName || corporateInfo.name }}</h3>
           <p>Kurumsal Yönetici</p>
@@ -432,13 +431,13 @@
           <div class="form-grid">
             <div class="form-group">
               <label>Kullanıcı Adı</label>
-              <input type="text" [value]="userName || corporateInfo.name" class="modern-input disabled-input" readonly disabled
-                title="Kullanıcı adı" />
+              <input type="text" [value]="userName || corporateInfo.name" class="modern-input disabled-input" readonly
+                disabled title="Kullanıcı adı" />
             </div>
             <div class="form-group">
               <label>Yönetici Email</label>
-              <input type="email" [value]="userEmail || corporateInfo.email" class="modern-input disabled-input" readonly disabled
-                title="Kullanıcı e-posta adresi" />
+              <input type="email" [value]="userEmail || corporateInfo.email" class="modern-input disabled-input"
+                readonly disabled title="Kullanıcı e-posta adresi" />
             </div>
           </div>
         </div>
@@ -501,9 +500,9 @@
               placeholder="Duyurunun kısa özeti..." maxlength="100"></textarea>
           </div>
           <div class="form-group">
-            <label>Detaylı İçerik (Maks. 500)</label>
+            <label>Detaylı İçerik (Maks. 2000)</label>
             <textarea [(ngModel)]="newAnnouncement.content" class="modern-input" rows="6"
-              placeholder="Duyurunun tam metnini buraya yazın..." maxlength="500"></textarea>
+              placeholder="Duyurunun tam metnini buraya yazın..." maxlength="2000"></textarea>
           </div>
           <div class="form-group">
             <label>Duyuru Linki (Opsiyonel)</label>
@@ -542,9 +541,9 @@
               placeholder="Duyurunun kısa özeti..." maxlength="100"></textarea>
           </div>
           <div class="form-group">
-            <label>Detaylı İçerik (Maks. 500)</label>
+            <label>Detaylı İçerik (Maks. 2000)</label>
             <textarea [(ngModel)]="editingAnnouncement.content" class="modern-input" rows="8"
-              placeholder="Duyurunun tam metnini buraya yazın..." maxlength="500"></textarea>
+              placeholder="Duyurunun tam metnini buraya yazın..." maxlength="2000"></textarea>
           </div>
           <div class="form-group">
             <label>Duyuru Linki (Opsiyonel)</label>
@@ -1068,8 +1067,9 @@
                   <span class="keyword-tag" *ngFor="let word of getSpamReport(selectedEvent.id)!.forbidden!.words">{{
                     word }}</span>
                 </div>
-                <div *ngIf="!getSpamReport(selectedEvent.id)?.forbidden?.words || (getSpamReport(selectedEvent.id)?.forbidden?.words?.length ?? 0) === 0" 
-                     class="no-keywords-message">
+                <div
+                  *ngIf="!getSpamReport(selectedEvent.id)?.forbidden?.words || (getSpamReport(selectedEvent.id)?.forbidden?.words?.length ?? 0) === 0"
+                  class="no-keywords-message">
                   <span class="material-symbols-outlined">info</span>
                   <span>Yasak kelime listesi mevcut değil</span>
                 </div>
@@ -1088,8 +1088,9 @@
                   <span class="keyword-tag" *ngFor="let keyword of getSpamReport(selectedEvent.id)!.spam!.keywords">{{
                     keyword }}</span>
                 </div>
-                <div *ngIf="!getSpamReport(selectedEvent.id)?.spam?.keywords || (getSpamReport(selectedEvent.id)?.spam?.keywords?.length ?? 0) === 0" 
-                     class="no-keywords-message">
+                <div
+                  *ngIf="!getSpamReport(selectedEvent.id)?.spam?.keywords || (getSpamReport(selectedEvent.id)?.spam?.keywords?.length ?? 0) === 0"
+                  class="no-keywords-message">
                   <span class="material-symbols-outlined">info</span>
                   <span>Spam kelime listesi mevcut değil</span>
                 </div>
@@ -1108,8 +1109,9 @@
                   <span class="keyword-tag"
                     *ngFor="let keyword of getSpamReport(selectedEvent.id)!.politics!.keywords">{{ keyword }}</span>
                 </div>
-                <div *ngIf="!getSpamReport(selectedEvent.id)?.politics?.keywords || (getSpamReport(selectedEvent.id)?.politics?.keywords?.length ?? 0) === 0" 
-                     class="no-keywords-message">
+                <div
+                  *ngIf="!getSpamReport(selectedEvent.id)?.politics?.keywords || (getSpamReport(selectedEvent.id)?.politics?.keywords?.length ?? 0) === 0"
+                  class="no-keywords-message">
                   <span class="material-symbols-outlined">info</span>
                   <span>Siyasi içerik listesi mevcut değil</span>
                 </div>

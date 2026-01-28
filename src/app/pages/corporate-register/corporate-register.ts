@@ -6,6 +6,7 @@ import { ToastService } from '../../services/toast.services';
 import { AuthService } from '../../services/auth.services';
 import { ToastComponent } from '../../components/ui/toast/toast.component';
 import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
+import { Logger } from '../../utils/logger.util';
 
 @Component({
   selector: 'app-corporate-register',
@@ -143,7 +144,7 @@ export class CorporateRegisterComponent {
         this.toastService.show(errorMessage, 'error');
       }
     } catch (error: any) {
-      console.error('Kayıt Hatası:', error);
+      Logger.error('Kayıt Hatası:', error);
       this.isLoading = false;
       const message = error?.message || 'Kayıt sırasında bir hata oluştu.';
       this.toastService.show(message, 'error');

@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 import { ToastService } from '../services/toast.services';
 import { AuthService } from '../services/auth.services';
+import { environment } from '../../environments/environment';
 
 /**
  * Global Error Interceptor
@@ -103,7 +104,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       const shouldSkipLogging = error.url?.includes('/api/Search') || 
                                 (error.url?.match(/\/api\/Events\/\d+$/) && error.status === 404);
       
-      if (!shouldSkipLogging) {
+      if (!shouldSkipLogging && !environment.production) {
         console.error('HTTP Error:', {
           url: error.url,
           status: error.status,

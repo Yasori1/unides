@@ -3,13 +3,8 @@
 <div class="video-modal-overlay" *ngIf="showVideo" (click)="closeVideo()">
   <div class="video-modal-content" (click)="$event.stopPropagation()">
     <button class="close-btn" (click)="closeVideo()">✖</button>
-    <iframe
-      [src]="safeVideoUrl"
-      title="Tanıtım Videosu"
-      frameborder="0"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-      allowfullscreen
-    >
+    <iframe [src]="safeVideoUrl" title="Tanıtım Videosu" frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
     </iframe>
   </div>
 </div>
@@ -19,7 +14,7 @@
 <div class="main-banner-wrapper">
   <!-- Türkiye Skyline Line Art -->
   <app-turkey-skyline></app-turkey-skyline>
-  
+
   <div class="container">
     <div class="banner-wrapper-content">
       <h1>
@@ -33,13 +28,8 @@
       </p>
 
       <form (submit)="onSearch(); $event.preventDefault()">
-        <input
-          type="text"
-          class="input-search"
-          [placeholder]="searchPlaceholder"
-          [(ngModel)]="searchText"
-          name="searchText"
-        />
+        <input type="text" class="input-search" [placeholder]="searchPlaceholder" [(ngModel)]="searchText"
+          name="searchText" />
         <button type="button" (click)="onSearch()">ARA</button>
       </form>
     </div>
@@ -56,11 +46,8 @@
     </div>
 
     <div class="communities-grid" *ngIf="!isLoading">
-      <div
-        class="community-card compact fade-in-up"
-        *ngFor="let comm of featuredCommunities"
-        (click)="goToCommunityDetail(comm.id)"
-      >
+      <div class="community-card compact fade-in-up" *ngFor="let comm of featuredCommunities"
+        (click)="goToCommunityDetail(comm.id)">
         <div class="card-image-wrapper">
           <!-- Blurry Background Image - görselin renk tonlarını yansıtır -->
           <div class="cover-bg-blur" [style.background-image]="'url(' + comm.image + ')'"></div>
@@ -70,12 +57,12 @@
         <div class="card-content">
           <h3 class="comm-name">{{ comm.name }}</h3>
           <span class="comm-category">{{ comm.category }}</span>
-          
+
           <div class="comm-stats">
             <span class="comm-email-display" *ngIf="comm.email">{{ comm.email }}</span>
             <span class="stat">📅 {{ comm.eventCount }} Etkinlik</span>
           </div>
-          </div>
+        </div>
       </div>
     </div>
 
@@ -88,36 +75,25 @@
 <section class="section-upcoming-events">
   <div class="container">
     <div class="section-header-center">
+      <h6 class="sub-title">KEŞFET</h6>
       <h2 class="section-title">Yaklaşan Etkinlikler</h2>
-      <p class="section-subtitle">Kaçırmamanız gereken etkinlikler</p>
+      <p class="section-desc">Kaçırmamanız gereken etkinlikler</p>
       <div class="blue-divider"></div>
     </div>
 
     <div class="events-grid-modern">
-      <div
-        class="event-card-modern fade-in-up"
-        *ngFor="let event of upcomingEvents"
-        (click)="goToEventDetail(event.id)"
-      >
+      <div class="event-card-modern fade-in-up" *ngFor="let event of upcomingEvents"
+        (click)="goToEventDetail(event.id)">
         <div class="countdown-badge">⏳ {{ event.remainingTimeStr }}</div>
 
         <!-- Etkinlik Görseli -->
         <div class="event-image-box" *ngIf="event.imageUrl">
-          <img
-            [src]="event.imageUrl"
-            [alt]="event.title"
-            loading="lazy"
-            (error)="onImageError($event, 'event')"
-          />
+          <img [src]="event.imageUrl" [alt]="event.title" loading="lazy" (error)="onImageError($event, 'event')" />
         </div>
 
         <div class="logo-box-modern">
-          <img
-            [src]="event.communityLogo || 'assets/img/placeholder-avatar.svg'"
-            alt="Logo"
-            loading="lazy"
-            (error)="onImageError($event, 'avatar')"
-          />
+          <img [src]="event.communityLogo || 'assets/img/placeholder-avatar.svg'" alt="Logo" loading="lazy"
+            (error)="onImageError($event, 'avatar')" />
         </div>
 
         <div class="info-box-modern">
@@ -127,9 +103,9 @@
 
           <p class="event-desc-short">
             {{
-              event.description.length > 75
-                ? (event.description | slice : 0 : 75) + '...'
-                : event.description
+            event.description.length > 75
+            ? (event.description | slice : 0 : 75) + '...'
+            : event.description
             }}
           </p>
 
@@ -193,46 +169,26 @@
       <div class="cube">
         <div class="cube-face cube-front">
           <div class="nc-item" *ngFor="let nc of newestCommunities.slice(0, 4)">
-            <img
-              [src]="nc.image || 'assets/img/placeholder-avatar.svg'"
-              alt=""
-              loading="lazy"
-              (error)="onImageError($event, 'avatar')"
-            />
-            <span>{{ nc.name }}</span>
+            <img [src]="nc.image || 'assets/img/placeholder-avatar.svg'" alt="" loading="lazy"
+              (error)="onImageError($event, 'avatar')" />
           </div>
         </div>
         <div class="cube-face cube-back">
           <div class="nc-item" *ngFor="let nc of newestCommunities.slice(4, 8)">
-            <img
-              [src]="nc.image || 'assets/img/placeholder-avatar.svg'"
-              alt=""
-              loading="lazy"
-              (error)="onImageError($event, 'avatar')"
-            />
-            <span>{{ nc.name }}</span>
+            <img [src]="nc.image || 'assets/img/placeholder-avatar.svg'" alt="" loading="lazy"
+              (error)="onImageError($event, 'avatar')" />
           </div>
         </div>
         <div class="cube-face cube-bottom">
           <div class="nc-item" *ngFor="let nc of newestCommunities.slice(8, 12)">
-            <img
-              [src]="nc.image || 'assets/img/placeholder-avatar.svg'"
-              alt=""
-              loading="lazy"
-              (error)="onImageError($event, 'avatar')"
-            />
-            <span>{{ nc.name }}</span>
+            <img [src]="nc.image || 'assets/img/placeholder-avatar.svg'" alt="" loading="lazy"
+              (error)="onImageError($event, 'avatar')" />
           </div>
         </div>
         <div class="cube-face cube-top">
           <div class="nc-item" *ngFor="let nc of newestCommunities.slice(0, 4)">
-            <img
-              [src]="nc.image || 'assets/img/placeholder-avatar.svg'"
-              alt=""
-              loading="lazy"
-              (error)="onImageError($event, 'avatar')"
-            />
-            <span>{{ nc.name }}</span>
+            <img [src]="nc.image || 'assets/img/placeholder-avatar.svg'" alt="" loading="lazy"
+              (error)="onImageError($event, 'avatar')" />
           </div>
         </div>
       </div>
@@ -240,15 +196,18 @@
 
     <div class="mobile-slider-container mobile-only">
       <div class="mobile-slider-track">
+        <!-- 1. Grup Logolar -->
         <div class="mobile-slider-item" *ngFor="let nc of newestCommunities">
           <div class="mobile-card">
-            <img
-              [src]="nc.image || 'assets/img/placeholder-avatar.svg'"
-              alt=""
-              loading="lazy"
-              (error)="onImageError($event, 'avatar')"
-            />
-            <span class="mobile-name">{{ nc.name }}</span>
+            <img [src]="nc.image || 'assets/img/placeholder-avatar.svg'" alt="" loading="lazy"
+              (error)="onImageError($event, 'avatar')" />
+          </div>
+        </div>
+        <!-- 2. Grup Logolar (Sonsuz döngü için tekrar) -->
+        <div class="mobile-slider-item" *ngFor="let nc of newestCommunities">
+          <div class="mobile-card">
+            <img [src]="nc.image || 'assets/img/placeholder-avatar.svg'" alt="" loading="lazy"
+              (error)="onImageError($event, 'avatar')" />
           </div>
         </div>
       </div>
@@ -262,15 +221,12 @@
     <div class="about-grid-modern">
       <div class="visual-side fade-in-left">
         <div class="video-container-tall" (click)="openVideo()">
-          <img
-            [src]="videoThumbnail"
-            class="cover-img"
-            alt="Tanıtım Videosu"
-            loading="lazy"
-            (error)="onImageError($event, 'cover')"
-          />
+          <img [src]="videoThumbnail" class="cover-img" alt="Tanıtım Videosu" loading="lazy"
+            (error)="onImageError($event, 'cover')" />
           <div class="play-overlay">
-            <div class="play-btn-pulse"><div class="triangle"></div></div>
+            <div class="play-btn-pulse">
+              <div class="triangle"></div>
+            </div>
           </div>
           <div class="floating-badge">
             <span class="big-num">81</span>

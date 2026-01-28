@@ -6,6 +6,7 @@ import { AnnouncementService, Announcement } from '../../services/announcement.s
 import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
 import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
 import { ImageErrorHandlerService } from '../../services/image-error-handler.service';
+import { Logger } from '../../utils/logger.util';
 
 // --- Interface Tanımı (DÜZELTİLDİ) ---
 // Omit kullanarak Announcement içindeki orijinal 'link' tanımını çıkardık
@@ -78,7 +79,7 @@ export class AnnouncementsPageComponent implements OnInit {
         this.isLoading = false;
       },
       error: (err) => {
-        console.error('Duyurular yüklenirken hata oluştu:', err);
+        Logger.error('Duyurular yüklenirken hata oluştu:', err);
         this.isLoading = false;
         this.allAnnouncements = [];
         this.filteredAnnouncements = [];

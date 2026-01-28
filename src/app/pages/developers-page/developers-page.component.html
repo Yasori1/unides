@@ -1,3 +1,6 @@
+<!-- Poppins Font -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
 <div class="developers-page-wrapper">
   <!-- Background Elements -->
   <div class="prism-blur"></div>
@@ -25,11 +28,11 @@
       <div class="hero-meta">
         <p>Türkiye'nin geleceğini kodlayan üniversite öğrencileri için tasarlanmış, tam donanımlı dijital geliştirici
           ekosistemi.</p>
-        <div class="terminal-status" style="margin-bottom: 1rem">İnsan Zekası Derleniyor...</div>
+        <div class="terminal-status" style="margin-bottom: 1rem">Gençlik Portalı Başlatılıyor...</div>
         <div class="terminal-logs">
-          > git commit -m "ilk mimari sürüm"<br>
-          > yansıtıcı yüzeyler oluşturuluyor... TAMAMLANDI<br>
-          > nöral senkronizasyon başlatılıyor... AKTİF
+          > gençlik_portalı.init()<br>
+          > üniversiteli_gençler.buluşuyor()... TAMAMLANDI<br>
+          > topluluklar.hayat_buluyor()... AKTİF
         </div>
       </div>
     </section>
@@ -42,6 +45,12 @@
         <div class="biometric-frame" *ngIf="dev.image">
           <div class="frame-border"></div>
           <img [src]="dev.image" class="dev-avatar" alt="Geliştirici Avatarı">
+          <!-- Hover Description Overlay -->
+          <div class="dev-description-overlay" *ngIf="dev.description">
+            <div class="description-content" lang="tr">
+              <p>{{ dev.description }}</p>
+            </div>
+          </div>
         </div>
 
         <div class="dev-info">

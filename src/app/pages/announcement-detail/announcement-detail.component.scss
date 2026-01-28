@@ -83,7 +83,7 @@ $ministry-color: #1e3a8a;
       height: 100%;
       background-image: url('/assets/duyuru-statik.png');
       background-size: cover;
-      background-position: center 37%;
+      background-position: center 70%; // Görselin alt kısmını odak yap
       background-repeat: no-repeat;
       opacity: 1;
     }
@@ -277,6 +277,8 @@ $ministry-color: #1e3a8a;
   display: flex;
   flex-direction: column;
   gap: 32px;
+  max-width: 100%; // Container genişliğini aşmasın
+  overflow-x: hidden; // Yatay scroll'u önle
 
   .announcement-header {
     padding-bottom: 20px;
@@ -321,13 +323,16 @@ $ministry-color: #1e3a8a;
       border-radius: 12px;
       overflow: hidden;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      max-width: 100%; // Container genişliğini sınırla
 
       img {
-        width: 100%; // Changed from 80% to 100% to fill container and avoid whitespace
+        width: 100%;
         height: auto;
+        max-width: 100%; // Resmin container'dan taşmasını önle
         max-height: 500px; // Limit max height
-        object-fit: cover;
+        object-fit: contain; // cover yerine contain - resmin tamamı görünsün, kaymasın
         display: block;
+        margin: 0 auto; // Ortala
       }
     }
 
@@ -339,30 +344,78 @@ $ministry-color: #1e3a8a;
       line-height: 1.6;
       border-left: 4px solid $primary-blue;
       padding-left: 20px;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      word-break: break-word;
+      max-width: 100%;
+      text-align: justify; // İki yana yasla
+      text-justify: inter-word; // Kelimeler arası boşluk ayarla
     }
 
     .full-content {
       font-size: 1.05rem;
       color: #334155;
       line-height: 1.8;
+      word-wrap: break-word; // Uzun kelimeleri kır
+      overflow-wrap: break-word; // Taşan metinleri kır
+      word-break: break-word; // Kelimeleri gerekirse kır
+      max-width: 100%; // Container genişliğini aşmasın
+      overflow-x: hidden; // Yatay scroll'u önle
+      text-align: justify; // İki yana yasla
+      text-justify: inter-word; // Kelimeler arası boşluk ayarla
 
       ::ng-deep p {
         margin-bottom: 20px;
+        margin-top: 0;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        word-break: break-word;
+        max-width: 100%;
+        text-align: justify; // Paragrafları iki yana yasla
+        text-justify: inter-word;
+      }
+
+      ::ng-deep p:first-child {
+        margin-top: 0;
+      }
+
+      ::ng-deep p:last-child {
+        margin-bottom: 0;
       }
 
       ::ng-deep ul,
       ::ng-deep ol {
         margin-bottom: 20px;
+        margin-top: 0;
         padding-left: 20px;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        max-width: 100%;
+      }
+
+      ::ng-deep li {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        word-break: break-word;
+        max-width: 100%;
       }
 
       ::ng-deep img {
         max-width: 100%;
+        width: 100%;
         height: auto;
         border-radius: 12px;
         margin: 20px 0;
         display: block; // Ensure it takes its own line
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        object-fit: contain; // Resmin kaymasını önle
+      }
+
+      // Tüm inline elementler için
+      ::ng-deep * {
+        max-width: 100%;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
       }
     }
 
@@ -570,6 +623,12 @@ $ministry-color: #1e3a8a;
   .hero-section {
     height: 250px;
 
+    .background-wrapper {
+      .hero-background-image {
+        background-position: center 80%; // Mobilde görselin alt kısmı görünsün
+      }
+    }
+
     .hero-overlay {
       padding-bottom: 50px;
     }
@@ -598,9 +657,15 @@ $ministry-color: #1e3a8a;
   .hero-section {
     height: 200px;
 
-    .background-wrapper .hero-image {
-      transform: scale(1.3); // Resmi yaklaştır (Zoom in)
-      transform-origin: center center;
+    .background-wrapper {
+      .hero-background-image {
+        background-position: center 85%; // Küçük mobilde görselin alt kısmı görünsün
+      }
+
+      .hero-image {
+        transform: scale(1.3); // Resmi yaklaştır (Zoom in)
+        transform-origin: center center;
+      }
     }
   }
 

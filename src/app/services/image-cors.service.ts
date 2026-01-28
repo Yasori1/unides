@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Logger } from '../utils/logger.util';
 
 /**
  * Image CORS Service
@@ -38,7 +39,7 @@ export class ImageCorsService {
       return await this.loadImageViaCanvas(imageUrl);
     } catch (error) {
       // Hata durumunda orijinal URL'yi döndür
-      console.warn('Image blob URL oluşturulamadı, orijinal URL kullanılıyor:', imageUrl, error);
+      Logger.warn('Image blob URL oluşturulamadı, orijinal URL kullanılıyor:', imageUrl, error);
       return imageUrl;
     }
   }

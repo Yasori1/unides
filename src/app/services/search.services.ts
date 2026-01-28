@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Observable, map, catchError, of } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { Logger } from '../utils/logger.util';
 
 export interface SearchResult {
   communities: CommunitySearchItem[];
@@ -97,7 +98,7 @@ export class SearchService {
         };
       }),
       catchError((error) => {
-        console.error('Search error:', error);
+        Logger.error('Search error:', error);
         return of({
           communities: [],
           events: [],

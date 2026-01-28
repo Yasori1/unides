@@ -121,6 +121,24 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
     }
   }
 
+  // Desktop'ta collapsed durumunda yazıları gizle (yukarıdaki kod zaten bunu yapıyor)
+  // Mobilde sidebar açıldığında (collapsed class'ı ile) yazıları göster
+  @media (max-width: 768px) {
+    &.collapsed {
+      .menu-text {
+        display: inline-block !important;
+      }
+
+      .menu-divider {
+        display: block !important;
+      }
+
+      .sidebar-footer .logout-btn .menu-text {
+        display: inline-block !important;
+      }
+    }
+  }
+
   .brand {
     padding: 24px;
     display: flex;
@@ -3373,14 +3391,42 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
       .menu-item {
         justify-content: flex-start !important;
         padding: 12px 16px;
+        color: $text-muted !important; // Menu item rengini belirle
 
         .menu-text {
-          display: inline-block !important; // Force display
+          display: inline-block !important; // Mobilde yazıları göster
+          color: inherit !important; // Parent'tan renk al
+          opacity: 1 !important; // Opacity'yi 1 yap
+          visibility: visible !important; // Visibility'yi visible yap
+        }
+
+        &.active {
+          .menu-text {
+            color: color.adjust($primary, $lightness: -15%) !important; // Active durumunda renk
+          }
+        }
+
+        .badge {
+          display: inline-block !important; // Badge'leri de göster
         }
       }
 
-      .sidebar-footer .logout-btn .menu-text {
-        display: inline-block !important;
+      .menu-divider {
+        display: block !important; // Divider'ları göster
+        color: $text-muted !important; // Divider rengini belirle
+        opacity: 0.8 !important; // Opacity'yi belirle
+        visibility: visible !important; // Visibility'yi visible yap
+      }
+
+      .sidebar-footer .logout-btn {
+        color: $danger !important; // Logout butonu rengini belirle
+
+        .menu-text {
+          display: inline-block !important; // Mobilde yazıları göster
+          color: inherit !important; // Parent'tan renk al
+          opacity: 1 !important; // Opacity'yi 1 yap
+          visibility: visible !important; // Visibility'yi visible yap
+        }
       }
     }
   }

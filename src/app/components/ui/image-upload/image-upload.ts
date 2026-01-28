@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, Output, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Logger } from '../../../utils/logger.util';
 
 @Component({
   selector: 'app-image-upload',
@@ -38,7 +39,13 @@ export class ImageUploadComponent {
   handleFileChange(event: any) {
     const file = event.target.files[0];
     if (file) {
-      this.processFile(file);
+      // Dosya tipi ve uzantı kontrolü
+      if (this.isValidImageFile(file)) {
+        this.processFile(file);
+      } else {
+        // Geçersiz dosya tipi
+        this.showFileTypeError(file);
+      }
     }
   }
 
@@ -62,8 +69,12 @@ export class ImageUploadComponent {
 
     if (event.dataTransfer?.files && event.dataTransfer.files.length > 0) {
       const file = event.dataTransfer.files[0];
-      if (file.type.startsWith('image/')) {
+      // Dosya tipi ve uzantı kontrolü
+      if (this.isValidImageFile(file)) {
         this.processFile(file);
+      } else {
+        // Geçersiz dosya tipi
+        this.showFileTypeError(file);
       }
     }
   }
@@ -126,6 +137,75 @@ export class ImageUploadComponent {
   closeFileSizeError() {
     this.showFileSizeError = false;
     this.fileSizeErrorMessage = '';
+  }
+
+  // --- DOSYA TİPİ VALİDASYONU (GÜVENLİK) ---
+  /**
+   * Dosya tipini ve uzantısını kontrol eder
+   * MIME type spoofing saldırılarına karşı koruma sağlar
+   */
+  private isValidImageFile(file: File): boolean {
+    // İzin verilen MIME type'lar
+    const allowedMimeTypes = [
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+      'image/svg+xml'
+    ];
+
+    // İzin verilen dosya uzantıları
+    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
+
+    // MIME type kontrolü
+    if (!allowedMimeTypes.includes(file.type.toLowerCase())) {
+      return false;
+    }
+
+    // Dosya uzantısı kontrolü (MIME type spoofing koruması)
+    const fileName = file.name.toLowerCase();
+    const fileExtension = fileName.substring(fileName.lastIndexOf('.'));
+
+    if (!allowedExtensions.includes(fileExtension)) {
+      return false;
+    }
+
+    // MIME type ve uzantı uyumluluğu kontrolü
+    const mimeToExtension: { [key: string]: string[] } = {
+      'image/jpeg': ['.jpg', '.jpeg'],
+      'image/jpg': ['.jpg', '.jpeg'],
+      'image/png': ['.png'],
+      'image/gif': ['.gif'],
+      'image/webp': ['.webp'],
+      'image/svg+xml': ['.svg']
+    };
+
+    const expectedExtensions = mimeToExtension[file.type.toLowerCase()];
+    if (expectedExtensions && !expectedExtensions.includes(fileExtension)) {
+      // MIME type ve uzantı uyuşmuyor - şüpheli dosya
+      return false;
+    }
+
+    return true;
+  }
+
+  // Dosya tipi hatası göster
+  private showFileTypeError(file: File): void {
+    // Input'u temizle
+    if (this.fileInput) {
+      this.fileInput.nativeElement.value = '';
+    }
+
+    // Hata mesajı logla (Logger ile)
+    Logger.warn('Geçersiz dosya tipi reddedildi:', {
+      fileName: file.name,
+      fileType: file.type,
+      fileSize: file.size
+    });
+
+    // Kullanıcıya görsel geri bildirim için (opsiyonel - toast service kullanılabilir)
+    // Burada sadece input'u temizliyoruz, parent component toast gösterebilir
   }
 
   // --- URL GİRİŞİ ---

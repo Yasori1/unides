@@ -14,6 +14,7 @@ import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { SpamService } from '../../services/spam.service';
+import { Logger } from '../../utils/logger.util';
 
 // --- Interfaces ---
 interface Project {
@@ -278,7 +279,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
           this.displayName = this.userName;
           this.userInitial = this.userName.charAt(0).toUpperCase();
         } catch (e) {
-          console.error('Error parsing user info:', e);
+          Logger.error('Error parsing user info:', e);
         }
       }
     }
@@ -294,7 +295,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     // Get logged-in user's email from localStorage
     const userInfoStr = localStorage.getItem('user_info');
     if (!userInfoStr) {
-      console.warn('User info not found in localStorage');
+      Logger.warn('User info not found in localStorage');
       return;
     }
 
@@ -303,7 +304,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       const userEmail = userInfo.email?.trim().toLowerCase();
 
       if (!userEmail) {
-        console.warn('User email not found');
+        Logger.warn('User email not found');
         return;
       }
 
@@ -317,15 +318,15 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
           this.findUserCommunity(communities, userEmail);
         },
         error: (err: any) => {
-          console.error('Aktif topluluklar yüklenemedi:', err);
+          Logger.error('Aktif topluluklar yüklenemedi:', err);
           // Hata durumunda kullanıcıya bilgi ver
           if (err.status === 403) {
-            console.warn('Toplulukları görüntüleme yetkisi yok');
+            Logger.warn('Toplulukları görüntüleme yetkisi yok');
           }
         },
       });
     } catch (e) {
-      console.error('Error parsing user info:', e);
+      Logger.error('Error parsing user info:', e);
     }
   }
 
@@ -336,7 +337,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
    */
   private findUserCommunity(communities: any[], userEmail: string): void {
     if (!communities || communities.length === 0) {
-      console.warn('No communities found');
+      Logger.warn('No communities found');
       return;
     }
 
@@ -399,7 +400,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
             resolve();
           },
           error: (err: any) => {
-            console.error(`Community detail yüklenemedi (${community.id}):`, err);
+            Logger.error(`Community detail yüklenemedi (${community.id}):`, err);
             resolve();
           },
         });
@@ -411,7 +412,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     // Wait for all checks to complete
     Promise.all(checkPromises).then(() => {
       if (!found) {
-        console.warn('No community found for user email:', userEmail);
+        Logger.warn('No community found for user email:', userEmail);
         this.isLoadingCommunity = false;
 
         // Kullanıcı bir topluluğun başkanı değil, ana sayfaya yönlendir
@@ -471,7 +472,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
         this.isLoadingMembers = false;
       },
       error: (err: any) => {
-        console.error('Topluluk üyeleri yüklenemedi:', err);
+        Logger.error('Topluluk üyeleri yüklenemedi:', err);
         // Hata durumunda boş array kullan
         this.members = [];
         this.stats.totalMembers = 0;
@@ -513,10 +514,10 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     this.eventService.getCommunityEvents(communityId, [0, 1, 2]).subscribe({
       next: (communityEvents) => {
         // Debug: Backend'den gelen veriyi kontrol et
-        console.log('Backend\'den gelen etkinlikler (raw):', communityEvents);
+        Logger.log('Backend\'den gelen etkinlikler (raw):', communityEvents);
         communityEvents.forEach((e, idx) => {
           if (e.status === 'Reddedildi' || (e as any).status === 'Reddedildi') {
-            console.log(`Etkinlik ${idx} - Reddedildi:`, {
+            Logger.log(`Etkinlik ${idx} - Reddedildi:`, {
               id: e.id,
               title: e.title,
               status: e.status,
@@ -563,7 +564,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
               // Geçerlilik kontrolü
               if (!parsedDate || isNaN(parsedDate.getTime())) {
                 // Geçersiz tarih, varsayılan değer kullan
-                console.warn('Geçersiz tarih formatı:', e.startDate, 'Event ID:', e.id);
+                Logger.warn('Geçersiz tarih formatı:', e.startDate, 'Event ID:', e.id);
                 startDate = new Date();
                 dateStr = 'Tarih belirtilmemiş';
                 timeStr = 'Saat belirtilmemiş';
@@ -587,7 +588,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
                 startDateIso = startDate.toISOString();
               }
             } catch (error) {
-              console.error('Tarih parse hatası:', error, 'Event ID:', e.id, 'startDate:', e.startDate);
+              Logger.error('Tarih parse hatası:', error, 'Event ID:', e.id, 'startDate:', e.startDate);
               startDate = new Date();
               dateStr = 'Tarih belirtilmemiş';
               timeStr = 'Saat belirtilmemiş';
@@ -595,7 +596,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
             }
           } else {
             // startDate yoksa varsayılan değer
-            console.warn('startDate yok - Event ID:', e.id);
+            Logger.warn('startDate yok - Event ID:', e.id);
             startDate = new Date();
             dateStr = 'Tarih belirtilmemiş';
             timeStr = 'Saat belirtilmemiş';
@@ -632,9 +633,9 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
               // EventItem'dan gelen rejectionReason'ı kontrol et
               const reason = e.rejectionReason || (e as any).rejectionReason || (e as any).confirmAbout || (e as any).ConfirmAbout;
               if (reason) {
-                console.log('DashboardEvent mapping: rejectionReason bulundu:', reason, 'Event ID:', e.id);
+                Logger.log('DashboardEvent mapping: rejectionReason bulundu:', reason, 'Event ID:', e.id);
               } else {
-                console.log('DashboardEvent mapping: rejectionReason YOK, Event ID:', e.id, 'Status:', e.status, 'Raw event:', e);
+                Logger.log('DashboardEvent mapping: rejectionReason YOK, Event ID:', e.id, 'Status:', e.status, 'Raw event:', e);
               }
               return reason || undefined;
             })(), // Backend'den gelirse (ConfirmAbout olarak da gelebilir)
@@ -651,7 +652,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
         }
       },
       error: (err: any) => {
-        console.error('Etkinlikler yüklenemedi:', err);
+        Logger.error('Etkinlikler yüklenemedi:', err);
         // Hata durumunda boş array kullan
         this.dashboardEvents = [];
         if (!skipLoading) {
@@ -689,7 +690,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
         this.isLoading = false;
       },
       error: (err: any) => {
-        console.error('Topluluklar yüklenemedi:', err);
+        Logger.error('Topluluklar yüklenemedi:', err);
         this.collaborations = [];
         this.filteredCollaborations = [];
         this.isLoading = false;
@@ -915,7 +916,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
         this.showAvatarModal = false;
       },
       error: (error) => {
-        console.error('Logo yükleme hatası:', error);
+        Logger.error('Logo yükleme hatası:', error);
         this.showToast('Logo yüklenirken bir hata oluştu.', 'error');
       }
     });
@@ -942,7 +943,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
         this.showBannerModal = false;
       },
       error: (error) => {
-        console.error('Banner yükleme hatası:', error);
+        Logger.error('Banner yükleme hatası:', error);
         this.showToast('Banner yüklenirken bir hata oluştu.', 'error');
       }
     });
@@ -1040,9 +1041,9 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
   }
 
   saveEvent() {
-    console.log('saveEvent called');
-    console.log('isEventFormValid:', this.isEventFormValid);
-    console.log('newEventData:', this.newEventData);
+    Logger.log('saveEvent called');
+    Logger.log('isEventFormValid:', this.isEventFormValid);
+    Logger.log('newEventData:', this.newEventData);
 
     if (!this.isEventFormValid) {
       this.showToast('Lütfen tüm alanları doldurun.', 'error');
@@ -1113,14 +1114,14 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
         })
         .subscribe({
           next: (response) => {
-            console.log('Event updated successfully:', response);
+            Logger.log('Event updated successfully:', response);
 
             // Eğer fotoğraf seçildiyse, ayrı endpoint ile yükle
             if (this.newEventData.imageFile && this.editingEventId) {
               this.eventService.uploadEventImage(this.editingEventId, this.newEventData.imageFile).subscribe({
                 next: (uploadResponse) => {
-                  console.log('Event image uploaded successfully:', uploadResponse);
-                  console.log('Uploaded image path:', uploadResponse.ImagePath);
+                  Logger.log('Event image uploaded successfully:', uploadResponse);
+                  Logger.log('Uploaded image path:', uploadResponse.ImagePath);
 
                   // Backend'den gelen ImagePath zaten full URL (convert edilmiş)
                   const imageUrl = uploadResponse.ImagePath || '';
@@ -1144,7 +1145,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
                   }
                 },
                 error: (uploadErr: any) => {
-                  console.error('Etkinlik fotoğrafı yüklenemedi:', uploadErr);
+                  Logger.error('Etkinlik fotoğrafı yüklenemedi:', uploadErr);
                   // Etkinlik güncellendi ama fotoğraf yüklenemedi
                   this.showToast(
                     "Etkinlik güncellendi ancak fotoğraf yüklenirken bir hata oluştu. Etkinliği düzenleyerek fotoğrafı tekrar yükleyebilirsiniz.",
@@ -1171,7 +1172,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
             }
           },
           error: (err: any) => {
-            console.error('Etkinlik güncellenemedi:', err);
+            Logger.error('Etkinlik güncellenemedi:', err);
             let errorMessage = 'Etkinlik güncellenirken bir hata oluştu.';
             if (err.status === 401 || err.status === 403) {
               errorMessage = 'Bu işlem için yetkiniz bulunmamaktadır.';
@@ -1198,17 +1199,17 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       })
       .subscribe({
         next: (response) => {
-          console.log('Event created successfully:', response);
+          Logger.log('Event created successfully:', response);
           const eventId = response.eventId;
-          console.log('Created event ID:', eventId, 'Event title:', this.newEventData.title);
+          Logger.log('Created event ID:', eventId, 'Event title:', this.newEventData.title);
 
           // Eğer fotoğraf seçildiyse, ayrı endpoint ile yükle
           if (this.newEventData.imageFile && eventId) {
             this.eventService.uploadEventImage(eventId, this.newEventData.imageFile).subscribe({
               next: (uploadResponse) => {
-                console.log('Event image uploaded successfully:', uploadResponse);
-                console.log('Uploaded image path:', uploadResponse.ImagePath);
-                console.log('Event ID:', eventId);
+                Logger.log('Event image uploaded successfully:', uploadResponse);
+                Logger.log('Uploaded image path:', uploadResponse.ImagePath);
+                Logger.log('Event ID:', eventId);
 
                 // Backend'den gelen ImagePath zaten full URL (convert edilmiş)
                 const imageUrl = uploadResponse.ImagePath || '';
@@ -1218,12 +1219,12 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
                 setTimeout(() => {
                   const newEventInList = this.dashboardEvents.find((e) => e.id === eventId);
                   if (newEventInList && imageUrl) {
-                    console.log('Updating event in list - Event ID:', eventId, 'New imageUrl:', imageUrl);
+                    Logger.log('Updating event in list - Event ID:', eventId, 'New imageUrl:', imageUrl);
                     // Cache-busting için timestamp ekle
                     const imageUrlWithCacheBust = imageUrl + (imageUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
                     newEventInList.imageUrl = imageUrlWithCacheBust;
                   } else {
-                    console.warn('Event not found in list for ID:', eventId, 'Available IDs:', this.dashboardEvents.map(e => e.id));
+                    Logger.warn('Event not found in list for ID:', eventId, 'Available IDs:', this.dashboardEvents.map(e => e.id));
                   }
                 }, 100);
 
@@ -1250,7 +1251,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
                 }
               },
               error: (uploadErr: any) => {
-                console.error('Etkinlik fotoğrafı yüklenemedi:', uploadErr);
+                Logger.error('Etkinlik fotoğrafı yüklenemedi:', uploadErr);
                 // Etkinlik oluşturuldu ama fotoğraf yüklenemedi
                 this.showToast(
                   "Etkinlik oluşturuldu ancak fotoğraf yüklenirken bir hata oluştu. Etkinliği düzenleyerek fotoğrafı tekrar yükleyebilirsiniz.",
@@ -1279,7 +1280,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
           }
         },
         error: (err: any) => {
-          console.error('Etkinlik oluşturulamadı:', err);
+          Logger.error('Etkinlik oluşturulamadı:', err);
           let errorMessage = 'Etkinlik oluşturulurken bir hata oluştu';
           if (err.status === 401 || err.status === 403) {
             errorMessage = 'Bu işlem için yetkiniz bulunmamaktadır.';
@@ -1320,13 +1321,13 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
 
   onEventFileSelected(file: File) {
     if (file) {
-      console.log('[onEventFileSelected] File selected:', file.name, 'Size:', file.size, 'Type:', file.type, 'isEditingEventDetail:', this.isEditingEventDetail);
+      Logger.log('[onEventFileSelected] File selected:', file.name, 'Size:', file.size, 'Type:', file.type, 'isEditingEventDetail:', this.isEditingEventDetail);
       if (this.isEditingEventDetail) {
         // Event detail modal'da düzenleme modunda
         this.readFileToBase64ForEdit(file);
         // File objesini de sakla (backend'e yüklemek için)
         this.editedEventData.imageFile = file;
-        console.log('[onEventFileSelected] File saved to editedEventData.imageFile');
+        Logger.log('[onEventFileSelected] File saved to editedEventData.imageFile');
       } else {
         // Event creation modal'da
         this.readFileToBase64(file);
@@ -1334,7 +1335,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
         this.newEventData.imageFile = file;
       }
     } else {
-      console.warn('[onEventFileSelected] No file provided');
+      Logger.warn('[onEventFileSelected] No file provided');
     }
   }
 
@@ -1417,7 +1418,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
         this.closeModal();
       },
       error: (err: any) => {
-        console.error('Üye eklenirken hata:', err);
+        Logger.error('Üye eklenirken hata:', err);
 
         // Backend'den gelen hata mesajını al
         let errorMessage = err.error?.message || 'Üye eklenirken bir hata oluştu.';
@@ -1492,7 +1493,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     this.isSearchingMembers = true;
 
     // Debug: İlk harf yazıldığında arama yapıldığını kontrol et
-    console.log('Arama başlatıldı, terim:', term, 'Uzunluk:', term.length);
+    Logger.log('Arama başlatıldı, terim:', term, 'Uzunluk:', term.length);
 
     // Backend'den topluluğa üye olmayan öğrencileri ara
     this.communityService.searchNonMemberStudents(term).subscribe({
@@ -1526,7 +1527,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
         this.isSearchingMembers = false;
       },
       error: (err) => {
-        console.error('Öğrenci arama hatası:', err);
+        Logger.error('Öğrenci arama hatası:', err);
         this.memberSearchResults = [];
         this.isSearchingMembers = false;
       },
@@ -1716,7 +1717,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
         error: (err: any) => {
           failedEmails.push(email);
           completedCount++;
-          console.error(`Üye eklenemedi (${email}):`, err);
+          Logger.error(`Üye eklenemedi (${email}):`, err);
           this.checkBulkComplete(completedCount, emails.length, successCount, failedEmails);
         }
       });
@@ -1801,7 +1802,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
         this.startCloseConfirm();
       },
       error: (err: any) => {
-        console.error('Etkinlik silinirken hata:', err);
+        Logger.error('Etkinlik silinirken hata:', err);
         let errorMsg = 'Etkinlik silinirken bir hata oluştu.';
         if (err.status === 401 || err.status === 403) {
           errorMsg = 'Bu işlem için yetkiniz bulunmamaktadır.';
@@ -1848,7 +1849,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
         this.startCloseConfirm();
       },
       error: (err: any) => {
-        console.error('Üye silinirken hata:', err);
+        Logger.error('Üye silinirken hata:', err);
         const errorMsg = err.error?.message || 'Üye silinirken bir hata oluştu.';
         this.showToast(errorMsg, 'error');
         this.startCloseConfirm();
@@ -1924,7 +1925,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
   openEventDetail(event: DashboardEvent) {
     // Event objesini kopyala ve tarih/saat bilgilerinin doğru yüklendiğinden emin ol
     this.selectedEvent = { ...event };
-    console.log('Event detail opened:', {
+    Logger.log('Event detail opened:', {
       id: this.selectedEvent.id,
       title: this.selectedEvent.title,
       date: this.selectedEvent.date,
@@ -1942,7 +1943,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       this.eventService.getById(this.selectedEvent.id).subscribe({
         next: (eventDetail) => {
           if (eventDetail.rejectionReason) {
-            console.log('Fetched rejection reason from backend:', eventDetail.rejectionReason);
+            Logger.log('Fetched rejection reason from backend:', eventDetail.rejectionReason);
             // selectedEvent'i güncelle
             if (this.selectedEvent && this.selectedEvent.id === event.id) {
               this.selectedEvent.rejectionReason = eventDetail.rejectionReason;
@@ -1955,7 +1956,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
           }
         },
         error: (err) => {
-          console.warn('Could not fetch event detail for rejection reason:', err);
+          Logger.warn('Could not fetch event detail for rejection reason:', err);
         }
       });
     }
@@ -1994,7 +1995,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
         const minute = String(d.getMinutes()).padStart(2, '0');
         timeStr = `${hour}:${minute}`;
       } catch (e) {
-        console.error('Date parsing error', e);
+        Logger.error('Date parsing error', e);
       }
     }
 
@@ -2065,7 +2066,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
           timeStr = `${hour}:${minute}`;
         }
       } catch (e) {
-        console.error('Date parsing error from startDateIso:', e);
+        Logger.error('Date parsing error from startDateIso:', e);
       }
     }
 
@@ -2172,7 +2173,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     const isImageDeleted = this.editedEventData.image === '' && !this.editedEventData.imageFile;
     const hasNewImage = this.editedEventData.imageFile !== null && this.editedEventData.imageFile !== undefined;
 
-    console.log('[saveEventFromDetail] Image state check:', {
+    Logger.log('[saveEventFromDetail] Image state check:', {
       isImageDeleted,
       hasNewImage,
       imageFile: !!this.editedEventData.imageFile,
@@ -2193,11 +2194,11 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       })
       .subscribe({
         next: (response) => {
-          console.log('Event updated successfully:', response);
+          Logger.log('Event updated successfully:', response);
 
           // Eğer approved event'ten düzenleniyorsa, yayından kaldırıldı ve onaya gönderildi
           if (wasApproved) {
-            console.log('Approved event yayından kaldırıldı ve onaya gönderildi');
+            Logger.log('Approved event yayından kaldırıldı ve onaya gönderildi');
           }
 
           // Eğer fotoğraf silinmişse, imageUrl'i temizle ve success mesajı göster
@@ -2240,34 +2241,34 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
 
           // Eğer yeni fotoğraf seçildiyse, ayrı endpoint ile yükle
           if (hasNewImage && eventId) {
-            console.log('[saveEventFromDetail] Uploading image for event:', eventId, 'File:', this.editedEventData.imageFile?.name);
+            Logger.log('[saveEventFromDetail] Uploading image for event:', eventId, 'File:', this.editedEventData.imageFile?.name);
             this.eventService.uploadEventImage(eventId, this.editedEventData.imageFile).subscribe({
               next: (uploadResponse) => {
-                console.log('[saveEventFromDetail] Event image uploaded successfully:', uploadResponse);
-                console.log('[saveEventFromDetail] Raw ImagePath from backend:', uploadResponse.ImagePath);
+                Logger.log('[saveEventFromDetail] Event image uploaded successfully:', uploadResponse);
+                Logger.log('[saveEventFromDetail] Raw ImagePath from backend:', uploadResponse.ImagePath);
 
                 // Backend'den gelen ImagePath zaten full URL (convert edilmiş)
                 const imageUrl = uploadResponse.ImagePath || '';
-                console.log('[saveEventFromDetail] Uploaded imageUrl:', imageUrl);
+                Logger.log('[saveEventFromDetail] Uploaded imageUrl:', imageUrl);
 
                 // Backend'den gelen ImagePath'i direkt olarak selectedEvent'e ata
                 if (this.selectedEvent && imageUrl) {
-                  console.log('[saveEventFromDetail] Updating selectedEvent.imageUrl from', this.selectedEvent.imageUrl, 'to', imageUrl);
+                  Logger.log('[saveEventFromDetail] Updating selectedEvent.imageUrl from', this.selectedEvent.imageUrl, 'to', imageUrl);
                   // Cache-busting için timestamp ekle (yeni yüklenen image'ler için)
                   const imageUrlWithCacheBust = imageUrl + (imageUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
-                  console.log('[saveEventFromDetail] Image URL with cache-bust:', imageUrlWithCacheBust);
+                  Logger.log('[saveEventFromDetail] Image URL with cache-bust:', imageUrlWithCacheBust);
                   // Object reference'ı değiştir ki Angular change detection çalışsın
                   this.selectedEvent = { ...this.selectedEvent, imageUrl: imageUrlWithCacheBust };
                   // Dashboard events listesinde de güncelle (cache-bust olmadan, çünkü liste için gerekli değil)
                   const eventInList = this.dashboardEvents.find((e) => e.id === eventId);
                   if (eventInList) {
-                    console.log('[saveEventFromDetail] Updating eventInList.imageUrl from', eventInList.imageUrl, 'to', imageUrl);
+                    Logger.log('[saveEventFromDetail] Updating eventInList.imageUrl from', eventInList.imageUrl, 'to', imageUrl);
                     eventInList.imageUrl = imageUrl;
                   } else {
-                    console.warn('[saveEventFromDetail] Event not found in dashboardEvents list, ID:', eventId);
+                    Logger.warn('[saveEventFromDetail] Event not found in dashboardEvents list, ID:', eventId);
                   }
                 } else {
-                  console.warn('[saveEventFromDetail] Cannot update imageUrl - selectedEvent:', !!this.selectedEvent, 'imageUrl:', imageUrl);
+                  Logger.warn('[saveEventFromDetail] Cannot update imageUrl - selectedEvent:', !!this.selectedEvent, 'imageUrl:', imageUrl);
                 }
 
                 // Approved event'ten düzenleniyorsa özel mesaj
@@ -2297,7 +2298,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
                 }
               },
               error: (uploadErr: any) => {
-                console.error('Etkinlik fotoğrafı yüklenemedi:', uploadErr);
+                Logger.error('Etkinlik fotoğrafı yüklenemedi:', uploadErr);
                 // Etkinlik güncellendi ama fotoğraf yüklenemedi
                 this.showToast(
                   "Etkinlik güncellendi ancak fotoğraf yüklenirken bir hata oluştu. Etkinliği düzenleyerek fotoğrafı tekrar yükleyebilirsiniz.",
@@ -2344,7 +2345,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
           }
         },
         error: (err: any) => {
-          console.error('Etkinlik güncellenemedi:', err);
+          Logger.error('Etkinlik güncellenemedi:', err);
           let errorMessage = 'Etkinlik güncellenirken bir hata oluştu.';
           if (err.status === 401 || err.status === 403) {
             errorMessage = 'Bu işlem için yetkiniz bulunmamaktadır.';
@@ -2635,7 +2636,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     // Her zaman production URL'ini kullan (unidesportal.com) - direkt bağlantı
     const baseUrl = environment.apiUrl.replace('/api', '');
     const fullUrl = baseUrl + finalPath;
-    console.log('[convertImagePathToFullUrl] Converting path:', pathStr, 'to full URL:', fullUrl);
+    Logger.log('[convertImagePathToFullUrl] Converting path:', pathStr, 'to full URL:', fullUrl);
     return fullUrl;
   }
 

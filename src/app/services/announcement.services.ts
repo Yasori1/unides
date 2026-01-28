@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, map, catchError, of } from 'rxjs';
 import { AuthService } from './auth.services';
 import { environment } from '../../environments/environment';
+import { Logger } from '../utils/logger.util';
 
 export interface Announcement {
   id: number;
@@ -178,7 +179,7 @@ export class AnnouncementService {
         return realAnnouncements;
       }),
       catchError((error) => {
-        console.error('Duyurular yüklenemedi:', error);
+        Logger.error('Duyurular yüklenemedi:', error);
         return of([]);
       })
     );
@@ -190,7 +191,7 @@ export class AnnouncementService {
     return this.http.get<any>(`${this.apiUrl}/detail/${id}`).pipe(
       map((response) => this.mapToAnnouncement(response)),
       catchError((error) => {
-        console.error('Duyuru detayı yüklenemedi:', error);
+        Logger.error('Duyuru detayı yüklenemedi:', error);
         return of(undefined);
       })
     );
@@ -222,9 +223,9 @@ export class AnnouncementService {
     // Auth interceptor automatically adds Authorization header and Content-Type if token exists
     return this.http.post<number>(`${this.apiUrl}/create`, request).pipe(
       catchError((error) => {
-        console.error('Duyuru oluşturulamadı:', error);
-        console.error('Hata detayı:', error.error);
-        console.error('Request body:', JSON.stringify(request, null, 2));
+        Logger.error('Duyuru oluşturulamadı:', error);
+        Logger.error('Hata detayı:', error.error);
+        Logger.error('Request body:', JSON.stringify(request, null, 2));
         throw error;
       })
     );
@@ -242,14 +243,14 @@ export class AnnouncementService {
     }
   ): Observable<void> {
     // DEBUG: Gelen veriyi kontrol et
-    console.log('=== updateAnnouncement DEBUG - INPUT ===');
-    console.log('Announcement ID:', id);
-    console.log('announcement.title (raw):', announcement.title);
-    console.log('announcement.title type:', typeof announcement.title);
-    console.log('announcement.title length:', announcement.title?.length);
-    console.log('announcement.title trimmed:', announcement.title?.trim());
-    console.log('announcement.title trimmed length:', announcement.title?.trim()?.length);
-    console.log('Full announcement object:', JSON.stringify(announcement, null, 2));
+    Logger.log('=== updateAnnouncement DEBUG - INPUT ===');
+    Logger.log('Announcement ID:', id);
+    Logger.log('announcement.title (raw):', announcement.title);
+    Logger.log('announcement.title type:', typeof announcement.title);
+    Logger.log('announcement.title length:', announcement.title?.length);
+    Logger.log('announcement.title trimmed:', announcement.title?.trim());
+    Logger.log('announcement.title trimmed length:', announcement.title?.trim()?.length);
+    Logger.log('Full announcement object:', JSON.stringify(announcement, null, 2));
 
     // Title boş olabilir - validasyon kaldırıldı
     const titleValue = announcement.title;
@@ -283,11 +284,11 @@ export class AnnouncementService {
     }
     
     // DEBUG: Request body'yi kontrol et
-    console.log('=== updateAnnouncement DEBUG - OUTPUT ===');
-    console.log('Request body (JSON string):', JSON.stringify(request, null, 2));
-    console.log('Request body (object):', request);
-    console.log('title value:', request.title, '(length:', request.title.length, ')');
-    console.log('Content-Type will be: application/json');
+    Logger.log('=== updateAnnouncement DEBUG - OUTPUT ===');
+    Logger.log('Request body (JSON string):', JSON.stringify(request, null, 2));
+    Logger.log('Request body (object):', request);
+    Logger.log('title value:', request.title, '(length:', request.title.length, ')');
+    Logger.log('Content-Type will be: application/json');
 
     // PUT /api/Announcements/update/{id} - NoContent döner
     // Content-Type: application/json header'ını açıkça belirt (backend [FromBody] ile JSON bekliyor)
@@ -298,9 +299,9 @@ export class AnnouncementService {
     // Auth interceptor automatically adds Authorization header if token exists
     return this.http.put<void>(`${this.apiUrl}/update/${id}`, request, { headers }).pipe(
       catchError((error) => {
-        console.error('Duyuru güncellenemedi:', error);
-        console.error('Hata detayı:', error.error);
-        console.error('Request body:', JSON.stringify(request, null, 2));
+        Logger.error('Duyuru güncellenemedi:', error);
+        Logger.error('Hata detayı:', error.error);
+        Logger.error('Request body:', JSON.stringify(request, null, 2));
         
         
         throw error;
@@ -313,8 +314,8 @@ export class AnnouncementService {
     // Auth interceptor automatically adds Authorization header if token exists
     return this.http.delete<void>(`${this.apiUrl}/delete/${id}`).pipe(
       catchError((error) => {
-        console.error('Duyuru silinemedi:', error);
-        console.error('Hata detayı:', error.error);
+        Logger.error('Duyuru silinemedi:', error);
+        Logger.error('Hata detayı:', error.error);
         throw error;
       })
     );
@@ -361,8 +362,8 @@ export class AnnouncementService {
         return path;
       }),
       catchError((error) => {
-        console.error('Görsel yüklenemedi:', error);
-        console.error('Hata detayı:', error.error);
+        Logger.error('Görsel yüklenemedi:', error);
+        Logger.error('Hata detayı:', error.error);
         throw error;
       })
     );

@@ -8,6 +8,7 @@ import { ToastService } from '../../services/toast.services';
 import { ToastComponent } from '../../components/ui/toast/toast.component';
 import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
 import { AuthService } from '../../services/auth.services';
+import { Logger } from '../../utils/logger.util';
 
 @Component({
   selector: 'app-register-page',
@@ -92,7 +93,7 @@ export class RegisterPageComponent {
       })
       .subscribe({
         next: (response) => {
-          console.log('Kayıt Başarılı:', response);
+          Logger.log('Kayıt Başarılı:', response);
 
           // BAŞARILI DURUM:
           // 1. Kullanıcıya bilgi ver
@@ -107,7 +108,7 @@ export class RegisterPageComponent {
           }, 2000);
         },
         error: (error: any) => {
-          console.error('Kayıt Hatası:', error);
+          Logger.error('Kayıt Hatası:', error);
           this.isLoading = false;
 
           // Backend'den gelen hata mesajını göster

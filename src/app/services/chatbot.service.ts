@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { Logger } from '../utils/logger.util';
 
 export interface ChatMessage {
   message: string;
@@ -34,8 +35,8 @@ export class ChatbotService {
       context,
     };
 
-    console.log('Chatbot API URL:', this.apiUrl);
-    console.log('Sending payload:', payload);
+    Logger.log('Chatbot API URL:', this.apiUrl);
+    Logger.log('Sending payload:', payload);
 
     return this.http.post<ChatResponse>(this.apiUrl, payload, {
       headers: {

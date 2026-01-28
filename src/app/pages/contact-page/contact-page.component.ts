@@ -13,6 +13,7 @@ import { FormsModule } from '@angular/forms';
 
 import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
 import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
+import { Logger } from '../../utils/logger.util';
 
 @Component({
   selector: 'app-contact-page',
@@ -32,7 +33,7 @@ export class ContactPageComponent implements OnInit, AfterViewInit {
   constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
 
   ngOnInit(): void {
-    console.log('İletişim sayfası yüklendi.');
+    Logger.log('İletişim sayfası yüklendi.');
   }
 
   ngAfterViewInit() {

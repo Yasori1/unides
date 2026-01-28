@@ -6,6 +6,7 @@ import { ChatbotService, ChatResponse } from '../../services/chatbot.service';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
+import { Logger } from '../../utils/logger.util';
 
 interface Message {
   text: string;
@@ -153,8 +154,8 @@ export class ChatbotWidgetComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         this.isLoading = false;
-        console.error('Chatbot hatası:', error);
-        console.error('Hata detayları:', {
+        Logger.error('Chatbot hatası:', error);
+        Logger.error('Hata detayları:', {
           status: error.status,
           statusText: error.statusText,
           message: error.message,

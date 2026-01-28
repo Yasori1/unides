@@ -8,6 +8,7 @@ import { ToastService } from '../../services/toast.services';
 import { ToastComponent } from '../../components/ui/toast/toast.component';
 import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
 import { environment } from '../../../environments/environment';
+import { Logger } from '../../utils/logger.util';
 
 // Backend Response Interface
 interface AuthResponse {
@@ -154,7 +155,7 @@ export class LoginPageComponent implements OnInit {
       .catch((e: any) => {
         // --- HATALI GİRİŞ ---
         this.loginError = e?.message || 'Giriş başarısız';
-        console.error('Giriş Hatası:', e);
+        Logger.error('Giriş Hatası:', e);
         this.toastService.show(this.loginError, 'error');
       })
       .finally(() => {
@@ -251,7 +252,7 @@ export class LoginPageComponent implements OnInit {
         }
       }
     } catch (error: any) {
-      console.error('Şifre sıfırlama hatası:', error);
+      Logger.error('Şifre sıfırlama hatası:', error);
       this.isSendingEmail = false;
       this.toastService.show('Sunucuya bağlanılamadı. Lütfen tekrar deneyiniz.', 'error');
     }

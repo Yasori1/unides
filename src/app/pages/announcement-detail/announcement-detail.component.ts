@@ -4,6 +4,7 @@ import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { AnnouncementService, Announcement } from '../../services/announcement.services';
 import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
 import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
+import { Logger } from '../../utils/logger.util';
 
 // Extended Announcement Interface to include link? and category?
 interface ExtendedAnnouncement extends Omit<Announcement, 'link'> {
@@ -130,7 +131,7 @@ export class AnnouncementDetailComponent implements OnInit {
         }
       },
       error: (err) => {
-        console.error('Duyuru detayı yüklenemedi:', err);
+        Logger.error('Duyuru detayı yüklenemedi:', err);
         this.isLoading = false;
       }
     });
@@ -158,7 +159,7 @@ export class AnnouncementDetailComponent implements OnInit {
         }));
       },
       error: (err) => {
-        console.error('İlgili duyurular yüklenemedi:', err);
+        Logger.error('İlgili duyurular yüklenemedi:', err);
         this.recentAnnouncements = [];
       }
     });
@@ -196,5 +197,38 @@ export class AnnouncementDetailComponent implements OnInit {
     } catch {
       return dateString;
     }
+  }
+
+  // Metni HTML formatına çevir: \n\n paragraf, \n <br> olarak gösterilir
+  formatContent(content: string): string {
+    if (!content) return '';
+    
+    // Eğer zaten HTML formatındaysa (tag'ler varsa), olduğu gibi döndür
+    if (content.includes('<') && content.includes('>')) {
+      return content;
+    }
+    
+    // HTML karakterlerini escape et
+    const escaped = content
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+    
+    // Çift satır sonlarını paragraf olarak ayır
+    const paragraphs = escaped.split(/\n\n+/);
+    
+    // Her paragrafı <p> etiketi içine al ve tek satır sonlarını <br> yap
+    const formatted = paragraphs
+      .map(para => {
+        // Paragraf içindeki tek satır sonlarını <br> yap
+        const withBreaks = para.replace(/\n/g, '<br>');
+        // Boş paragrafları atla
+        if (withBreaks.trim() === '') return '';
+        return `<p>${withBreaks.trim()}</p>`;
+      })
+      .filter(p => p !== '')
+      .join('');
+    
+    return formatted || escaped.replace(/\n/g, '<br>');
   }
 }

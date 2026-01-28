@@ -13,23 +13,21 @@
 
 // --- ARKA PLAN (AURORA / AKIŞKAN) ---
 .global-background {
-  position: fixed; 
-  top: 0; 
-  left: 0; 
-  width: 100vw; 
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
   height: 100vh;
-  z-index: -1; 
+  z-index: -1;
   /* Opaque gradient: Left Turquoise (#e0fbfc) -> Right White (#ffffff) */
-  background: 
-    repeating-linear-gradient(
-      90deg,
+  background:
+    repeating-linear-gradient(90deg,
       transparent,
       transparent 1px,
       rgba(224, 251, 252, 0.15) 1px,
-      rgba(224, 251, 252, 0.15) 2px
-    ),
+      rgba(224, 251, 252, 0.15) 2px),
     linear-gradient(to right, #e0fbfc 0%, #ffffff 100%);
-  overflow: hidden; 
+  overflow: hidden;
   pointer-events: none;
 }
 
@@ -60,6 +58,7 @@
 .community-detail-page {
   min-height: 100vh;
   background: var(--bg-color);
+  padding-top: 75px; // Navbar yüksekliği kadar padding (navbar fixed olduğu için)
 }
 
 .hero-section {
@@ -68,6 +67,7 @@
   height: 500px;
   overflow: hidden;
   background: var(--bg-light);
+  margin-top: 0;
 
   .background-wrapper {
     position: absolute;
@@ -79,6 +79,7 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
+      object-position: center;
     }
 
     .interactive-blob {
@@ -229,7 +230,7 @@
         letter-spacing: -0.3px;
       }
 
-          .upcoming-events-grid {
+      .upcoming-events-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
         gap: 20px;
@@ -329,7 +330,7 @@
         justify-content: center;
         align-items: center;
         padding: 40px 0;
-        
+
         .no-events-message {
           display: flex;
           flex-direction: column;
@@ -337,13 +338,13 @@
           gap: 16px;
           text-align: center;
           color: var(--secondary-color);
-          
+
           i {
             font-size: 3rem;
             color: var(--secondary-color);
             opacity: 0.5;
           }
-          
+
           p {
             font-size: 1.1rem;
             font-weight: 500;
@@ -370,6 +371,15 @@
       }
     }
 
+    // Desktop'ta mobil logo ve başlığı gizle
+    .community-logo-mobile-sidebar {
+      display: none;
+    }
+
+    .community-title-mobile {
+      display: none;
+    }
+
     // Profile Photo - Moves up on Y axis, stays above banner on Z axis
     .profile-photo-container {
       text-align: center;
@@ -384,11 +394,12 @@
         max-width: 220px;
         height: 220px;
         border-radius: 16px;
-        object-fit: cover;
+        object-fit: contain; // PC'de logo tam sığsın, kırpılmasın
         border: 4px solid white;
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
         margin: 0 auto;
         display: block;
+        background: var(--bg-color); // Logo arka planı
       }
     }
 
@@ -445,6 +456,12 @@
         flex-direction: column;
         gap: 24px;
 
+        // Açıklama kısmı için iki yana yaslama
+        > .info-section:first-of-type .info-text {
+          text-align: justify !important;
+          text-justify: inter-word;
+        }
+
         .info-section {
           .info-label {
             font-size: 0.7rem;
@@ -462,6 +479,10 @@
             line-height: 1.7;
             word-break: break-word;
             font-weight: 400;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            max-width: 100%;
+            overflow-x: hidden;
           }
 
           .email-display {
@@ -598,7 +619,7 @@
         }
       }
 
-      > i:first-child {
+      >i:first-child {
         font-size: 2rem;
         color: var(--accent-color);
         flex-shrink: 0;
@@ -606,36 +627,40 @@
 
       // Sosyal medya özel renkleri
       &.social-instagram {
-        > i:first-child {
+        >i:first-child {
           color: #e4405f;
         }
+
         &:hover {
           border-color: #e4405f;
         }
       }
 
       &.social-youtube {
-        > i:first-child {
+        >i:first-child {
           color: #ff0000;
         }
+
         &:hover {
           border-color: #ff0000;
         }
       }
 
       &.social-twitter {
-        > i:first-child {
+        >i:first-child {
           color: #1da1f2;
         }
+
         &:hover {
           border-color: #1da1f2;
         }
       }
 
       &.social-tiktok {
-        > i:first-child {
+        >i:first-child {
           color: #000000;
         }
+
         &:hover {
           border-color: #000000;
         }
@@ -659,7 +684,7 @@
         }
       }
 
-      > i:last-child {
+      >i:last-child {
         font-size: 1.5rem;
         color: var(--accent-color);
         flex-shrink: 0;
@@ -1375,12 +1400,13 @@
 
     .sidebar {
       .profile-photo-container {
-        // Photo is 180px, move up on Y axis
+        // Photo is 250px, move up on Y axis
         margin-top: -130px;
 
         .community-logo {
           max-width: 180px;
           height: 180px;
+          object-fit: cover; // Tablet'te eski haline döndü
         }
       }
 
@@ -1393,54 +1419,136 @@
 }
 
 @media (max-width: 768px) {
+  .community-detail-page {
+    padding-top: 75px; // Navbar yüksekliği kadar padding (mobilde de aynı)
+  }
+
   .hero-section {
-    height: 350px;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    // Banner'ın aspect ratio'suna göre yükseklik hesapla (1920:500 = 3.84:1)
+    // Mobil genişliğe göre yükseklik: width / 3.84
+    padding-bottom: 26.04%; // 100 / 3.84 = 26.04% (500/1920)
+    height: 0;
+    margin-top: 0;
+    margin-bottom: 0; // Footer ile arasında boşluk olmasın
+
+    .background-wrapper {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      left: 0;
+      top: 0;
+      right: 0;
+      bottom: 0;
+
+      .hero-image {
+        width: 100%;
+        height: 100%;
+        object-fit: contain; // Tam sığması için contain kullan
+        object-position: center center;
+        display: block;
+      }
+    }
+
+    .hero-overlay {
+      display: none; // Mobilde breadcrumb'ı gizle
+    }
   }
 
   .content-section.layout-option-a {
-    padding: 40px 0 60px;
+    padding: 20px 0 0; // Alt padding'i kaldırdık, footer hemen altında başlasın
 
     .container-wide {
-      padding: 0 20px;
+      padding: 0 16px 40px; // İçerik için alt padding
+    }
+
+    .back-button-top {
+      margin-bottom: 20px;
+
+      .back-button {
+        font-size: 0.9rem;
+        padding: 6px 12px;
+      }
     }
 
     .layout-grid {
       grid-template-columns: 1fr;
-      gap: 32px;
+      gap: 24px;
     }
 
+    // Mobilde sıralama: Topluluk bilgileri üstte, etkinlikler altta
     .sidebar {
+      order: 1; // Topluluk bilgileri üstte
+
       .sidebar-content {
         &.sticky-sidebar {
           position: static;
         }
       }
 
+      // Desktop logo container'ı mobilde gizle
       .profile-photo-container {
-        // Photo is 150px, move up on Y axis
-        margin-top: -110px;
-        margin-bottom: 20px;
+        display: none;
+      }
 
-        .community-logo {
-          max-width: 150px;
+      // Mobil logo - Banner altında, başlığın üstünde, ortada
+      .community-logo-mobile-sidebar {
+        display: block;
+        text-align: center; // Ortaya hizala
+        margin: -10px auto 0 auto; // Banner'ın altında, ortada (daha aşağıya indirdik)
+        position: relative;
+        z-index: 10;
+        width: fit-content;
+        margin-bottom: 16px; // Başlık ile arasında boşluk
+
+        img {
+          width: 150px;
           height: 150px;
+          max-width: 150px;
+          border-radius: 12px;
+          object-fit: contain; // Mobilde tam sığsın, kırpılmasın (250x250 veya 500x500 boyutlarında)
+          border: 3px solid white;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+          display: block;
+          margin: 0 auto; // Ortaya hizala
+          background: var(--bg-color); // Logo arka planı
+        }
+      }
+
+      // Mobil başlık - Logo'nun altında, ortada
+      .community-title-mobile {
+        display: block;
+        margin-bottom: 20px;
+        text-align: center;
+        margin-top: 0; // Logo ile arasında boşluk yok
+
+        .community-title {
+          font-size: 1.75rem;
+          font-weight: 800;
+          color: var(--primary-color);
+          line-height: 1.3;
+          margin: 0;
+          letter-spacing: -0.5px;
         }
       }
 
       .community-info-card {
-        // FIXED - aligns with title underline, does not move
         margin-top: 0;
       }
     }
 
     .main-content {
-      .community-header {
-        padding-bottom: 20px;
-        margin-bottom: 0;
+      order: 2; // Etkinlikler altta
 
-        .community-title {
-          font-size: 1.75rem;
-        }
+      // Mobilde main content'teki logo'yu gizle (artık sidebar'da)
+      .community-logo-mobile {
+        display: none;
+      }
+
+      .community-header {
+        display: none; // Mobilde başlık sidebar'da gösteriliyor
       }
 
       .upcoming-events-main-section {
@@ -1450,20 +1558,8 @@
 
         .upcoming-events-grid {
           grid-template-columns: 1fr;
+          gap: 16px;
         }
-      }
-    }
-
-    .sidebar {
-      .profile-photo-container .community-logo {
-        max-width: 180px;
-        height: 180px;
-      }
-    }
-
-    .sidebar {
-      .sidebar-content.sticky-sidebar {
-        position: static;
       }
     }
   }

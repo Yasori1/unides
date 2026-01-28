@@ -3,6 +3,8 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { forkJoin, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
 import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
 import { TurkeySkylineComponent } from '../../components/ui/turkey-skyline/turkey-skyline.component';
@@ -10,6 +12,7 @@ import { CommunityService } from '../../services/community.services';
 import { EventService } from '../../services/event.services';
 import { SearchService } from '../../services/search.services';
 import { ImageErrorHandlerService } from '../../services/image-error-handler.service';
+import { environment } from '../../../environments/environment';
 
 // --- Veri Tipleri (Interfaces) ---
 interface Community {
@@ -32,6 +35,7 @@ interface UpcomingEvent {
   description: string;
   communityName: string;
   communityLogo: string;
+  communityId?: number | string; // Topluluk ID'si eklendi
   remainingTimeStr?: string; // Performans için eklendi
 }
 
@@ -196,6 +200,130 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   // --- Tarih Formatlama ---
+  // Topluluk logolarını yükle
+  loadCommunityLogos(events: UpcomingEvent[]): void {
+    if (!environment.production) {
+      console.log('[Home] loadCommunityLogos çağrıldı, event sayısı:', events.length);
+    }
+
+    // Her event için detay endpoint'inden communityId çek (daha güvenli)
+    const eventDetailRequests = events.map((event) => {
+      return this.eventService.getById(event.id).pipe(
+        map((eventDetail) => {
+          return {
+            eventId: event.id,
+            communityId: eventDetail.communityId,
+          };
+        }),
+        catchError((error) => {
+          if (!environment.production) {
+            console.warn('[Home] Event detayı yüklenemedi:', error, 'Event ID:', event.id);
+          }
+          // Hata durumunda mevcut communityId'yi kullan (varsa)
+          return of({
+            eventId: event.id,
+            communityId: (event as any).communityId || null,
+          });
+        })
+      );
+    });
+
+    // Tüm event detaylarını paralel çek
+    forkJoin(eventDetailRequests).subscribe({
+      next: (eventDetails) => {
+        if (!environment.production) {
+          console.log('[Home] Event detayları alındı:', eventDetails);
+        }
+
+        // Her event için topluluk logo isteklerini hazırla
+        const logoRequests = eventDetails.map((detail) => {
+          const event = events.find((e) => e.id === detail.eventId);
+          if (!event) {
+            return of({ eventId: detail.eventId, logo: 'assets/img/placeholder-avatar.svg' });
+          }
+
+          const communityId = detail.communityId;
+
+          if (!communityId || communityId === 0 || communityId === '0') {
+            if (!environment.production) {
+              console.warn('[Home] Event için communityId bulunamadı:', detail.eventId);
+            }
+            return of({ eventId: detail.eventId, logo: 'assets/img/placeholder-avatar.svg' });
+          }
+
+          // Topluluk detayını çek (logo için)
+          if (!environment.production) {
+            console.log('[Home] Topluluk detayı çekiliyor, Community ID:', communityId, 'Event ID:', detail.eventId);
+          }
+          return this.communityService.getCommunityById(String(communityId)).pipe(
+            map((community) => {
+              if (!environment.production) {
+                console.log('[Home] Topluluk detayı alındı:', community.id, 'Logo:', community.logo, 'Event ID:', detail.eventId);
+              }
+              return {
+                eventId: detail.eventId,
+                logo: community.logo || 'assets/img/placeholder-avatar.svg',
+              };
+            }),
+            catchError((error) => {
+              if (!environment.production) {
+                console.warn('[Home] Topluluk logosu yüklenemedi:', error, 'Community ID:', communityId, 'Event ID:', detail.eventId);
+              }
+              return of({ eventId: detail.eventId, logo: 'assets/img/placeholder-avatar.svg' });
+            })
+          );
+        });
+
+        // Tüm logo isteklerini paralel olarak çalıştır
+        forkJoin(logoRequests).subscribe({
+          next: (logoResults) => {
+            if (!environment.production) {
+              console.log('[Home] Logo sonuçları alındı:', logoResults);
+            }
+            // Logo sonuçlarını event'lere ekle
+            logoResults.forEach((result) => {
+              const event = events.find((e) => e.id === result.eventId);
+              if (event) {
+                if (!environment.production) {
+                  console.log('[Home] Event logo güncelleniyor:', event.id, 'Eski logo:', event.communityLogo, 'Yeni logo:', result.logo);
+                }
+                event.communityLogo = result.logo;
+              }
+            });
+
+            // Event'leri güncelle
+            if (!environment.production) {
+              console.log('[Home] Events guncelleniyor, yeni event listesi:', events);
+            }
+            this.upcomingEvents = [...events]; // Yeni array referansı ile güncelleme
+          },
+          error: (error) => {
+            if (!environment.production) {
+              console.error('[Home] Topluluk logoları yüklenirken hata:', error);
+            }
+            // Hata durumunda placeholder logoları kullan
+            events.forEach((event) => {
+              if (!event.communityLogo || event.communityLogo === 'assets/img/placeholder-avatar.svg') {
+                event.communityLogo = 'assets/img/placeholder-avatar.svg';
+              }
+            });
+            this.upcomingEvents = [...events]; // Yeni array referansı ile güncelleme
+          },
+        });
+      },
+      error: (error) => {
+        if (!environment.production) {
+          console.error('[Home] Event detayları yüklenirken hata:', error);
+        }
+        // Hata durumunda placeholder logoları kullan
+        events.forEach((event) => {
+          event.communityLogo = 'assets/img/placeholder-avatar.svg';
+        });
+        this.upcomingEvents = [...events];
+      },
+    });
+  }
+
   formatDateTr(date: Date): string {
     const months = [
       'Ocak',
@@ -262,11 +390,23 @@ export class HomeComponent implements OnInit, OnDestroy {
           const eventDateOnly = new Date(eventDate);
           eventDateOnly.setHours(0, 0, 0, 0);
 
-          // Debug: imageUrl'yi logla
-          if (e.imageUrl) {
-            console.log('[Home] Event imageUrl:', e.imageUrl, 'Event ID:', e.id, 'Event Title:', e.title);
-          } else {
-            console.warn('[Home] Event imageUrl is empty or undefined:', 'Event ID:', e.id, 'Event Title:', e.title);
+          // Debug: imageUrl ve communityLogo'yu logla (sadece development'ta)
+          if (!environment.production) {
+            if (e.imageUrl) {
+              console.log('[Home] Event imageUrl:', e.imageUrl, 'Event ID:', e.id, 'Event Title:', e.title);
+            } else {
+              console.warn('[Home] Event imageUrl is empty or undefined:', 'Event ID:', e.id, 'Event Title:', e.title);
+            }
+
+            // Debug: Event verisini logla
+            console.log('[Home] Event verisi:', {
+              id: e.id,
+              title: e.title,
+              communityName: e.communityName,
+              communityId: e.communityId,
+              communityLogo: e.communityLogo,
+              fullEvent: e
+            });
           }
 
           return {
@@ -277,7 +417,8 @@ export class HomeComponent implements OnInit, OnDestroy {
             time: eventDate.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
             description: e.shortDescription || e.description || 'Açıklama belirtilmemiş',
             communityName: e.communityName || 'Topluluk',
-            communityLogo: e.communityLogo || 'assets/img/placeholder-avatar.svg',
+            communityLogo: e.communityLogo || 'assets/img/placeholder-avatar.svg', // Geçici placeholder, sonra topluluk servisinden güncellenecek
+            communityId: e.communityId && e.communityId !== 0 ? e.communityId : undefined, // Topluluk ID'si eklendi (0 değilse)
             imageUrl: e.imageUrl || '', // Etkinlik görseli
             dateOnly: eventDateOnly, // Sıralama için
           };
@@ -292,18 +433,23 @@ export class HomeComponent implements OnInit, OnDestroy {
         futureEvents.sort((a, b) => a.dateOnly.getTime() - b.dateOnly.getTime());
 
         // İlk 6 tanesini al ve dateOnly'yi kaldır
-        this.upcomingEvents = futureEvents.slice(0, 6).map((e) => {
+        const selectedEvents = futureEvents.slice(0, 6).map((e) => {
           const { dateOnly, ...rest } = e;
           return rest as UpcomingEvent;
         });
 
         // Performans optimizasyonu: Template içinde fonksiyon çağırmak yerine hesaplayıp sakla
-        this.upcomingEvents.forEach((e) => {
+        selectedEvents.forEach((e) => {
           e.remainingTimeStr = this.getRemainingTime(e.date);
         });
+
+        // Her event için topluluk logolarını çek
+        this.loadCommunityLogos(selectedEvents);
       },
       error: (error) => {
-        console.error('Upcoming events yüklenemedi:', error);
+        if (!environment.production) {
+          console.error('Upcoming events yüklenemedi:', error);
+        }
         this.upcomingEvents = [];
       },
     });
@@ -326,7 +472,9 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Newest communities yüklenemedi:', error);
+        if (!environment.production) {
+          console.error('Newest communities yüklenemedi:', error);
+        }
         this.newestCommunities = [];
         this.isLoading = false;
       },
@@ -384,7 +532,9 @@ export class HomeComponent implements OnInit, OnDestroy {
         }
       },
       error: (error) => {
-        console.error('Search error:', error);
+        if (!environment.production) {
+          console.error('Search error:', error);
+        }
         // Hata durumunda varsayılan olarak topluluklar sayfasına yönlendir
         this.router.navigate(['/communities'], { queryParams: { search: query } });
       },

@@ -480,9 +480,9 @@
         </label>
 
         <label class="stacked">
-          <span>Etkinlik Açıklaması (Maks. 500)</span>
+          <span>Etkinlik Açıklaması (Maks. 2000)</span>
           <textarea rows="3" placeholder="Etkinlik Açıklaması" [(ngModel)]="newEventData.description"
-            maxlength="500"></textarea>
+            maxlength="2000"></textarea>
         </label>
 
         <button class="btn-primary full" [disabled]="!isEventFormValid" (click)="saveEvent()" type="button">
@@ -646,11 +646,11 @@
       </label>
 
       <label class="stacked">
-        <span>Etkinlik Açıklaması (Maks. 500)</span>
+        <span>Etkinlik Açıklaması (Maks. 2000)</span>
         <textarea rows="3" [readonly]="!isEditingEventDetail" *ngIf="!isEditingEventDetail">{{
           selectedEvent.description || 'Açıklama belirtilmemiş.'
         }}</textarea>
-        <textarea rows="3" [(ngModel)]="editedEventData.description" maxlength="500"
+        <textarea rows="3" [(ngModel)]="editedEventData.description" maxlength="2000"
           *ngIf="isEditingEventDetail"></textarea>
       </label>
 

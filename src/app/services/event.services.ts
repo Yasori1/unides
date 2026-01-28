@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, catchError, map, of, switchMap, throwError } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { Logger } from '../utils/logger.util';
 
 export interface EventItem {
   id: number;
@@ -119,39 +120,39 @@ export class EventService {
     if (!imagePath) {
       return '';
     }
-    
+
     // String'e çevir ve trim yap
     const pathStr = String(imagePath).trim();
-    
+
     // Zaten tam URL ise (http://, https://, data:, blob:) olduğu gibi döndür
     if (pathStr.startsWith('http://') || pathStr.startsWith('https://') || pathStr.startsWith('data:') || pathStr.startsWith('blob:')) {
       return pathStr;
     }
-    
+
     // Geçersiz placeholder değerleri kontrol et (küçük harf normalize edilmiş)
     const normalizedPath = pathStr.toLowerCase().trim();
     const invalidValues = ['string', 'null', 'undefined', 'none', 'placeholder', '', 'null', 'undefined'];
-    
+
     // "string" değeri özel kontrol - backend'den placeholder olarak gelebilir
     if (normalizedPath === 'string' || normalizedPath === 'null' || normalizedPath === 'undefined') {
       return '';
     }
-    
+
     if (invalidValues.includes(normalizedPath)) {
       return '';
     }
-    
+
     // Çok kısa path'ler geçersiz olabilir (örn: "string" = 6 karakter)
     // Ancak backend'den gelebilecek kısa GUID'ler veya hash'ler geçerli olabilir
     // Bu yüzden sadece bilinen geçersiz değerleri kontrol ediyoruz
-    
+
     // Relative path kontrolü - backend'den `/images/Etkinlikler/`, `/ImagesUnides/Etkinlikler/`, `/assets/img/Etkinlikler/` formatında gelebilir
     // Eğer path `/images/`, `/ImagesUnides/`, `/assets/img/` ile başlamıyorsa ve çok kısaysa geçersiz olabilir
-    const isValidPath = pathStr.startsWith('/images/') || 
-                        pathStr.startsWith('/ImagesUnides/') || 
-                        pathStr.startsWith('/assets/img/') ||
-                        pathStr.startsWith('/assets/images/');
-    
+    const isValidPath = pathStr.startsWith('/images/') ||
+      pathStr.startsWith('/ImagesUnides/') ||
+      pathStr.startsWith('/assets/img/') ||
+      pathStr.startsWith('/assets/images/');
+
     // Eğer path geçerli bir format değilse ve çok kısaysa, geçersiz olabilir
     if (!isValidPath && pathStr.length < 15) {
       // Geçersiz placeholder değerleri tekrar kontrol et
@@ -165,7 +166,7 @@ export class EventService {
         return '';
       }
     }
-    
+
     // Relative path ise tam URL'ye çevir
     // Backend'den `/assets/img/Etkinlikler/`, `/assets/img/Duyurular/`, `/assets/img/Banner/`, `/assets/img/Logo/` formatında gelebilir
     // Bunları `/ImagesUnides/Etkinlikler/`, `/ImagesUnides/Duyurular/`, `/ImagesUnides/Banner/`, `/ImagesUnides/Logo/` formatına çevir
@@ -173,7 +174,7 @@ export class EventService {
     if (!finalPath.startsWith('/')) {
       finalPath = '/' + finalPath;
     }
-    
+
     // Path dönüşümü: `/assets/img/` -> `/ImagesUnides/`
     if (finalPath.startsWith('/assets/img/')) {
       finalPath = finalPath.replace('/assets/img/', '/ImagesUnides/');
@@ -183,7 +184,7 @@ export class EventService {
     else if (finalPath.startsWith('/images/')) {
       finalPath = finalPath.replace('/images/', '/ImagesUnides/');
     }
-    
+
     // Etkinlikler klasörü için özel kontrol - eğer path Etkinlikler içermiyorsa ve backend'den geldiyse
     // Backend'den `/ImagesUnides/Etkinlikler/` formatında gelmeli, eğer sadece dosya adı gelirse klasör ekle
     if (finalPath.startsWith('/ImagesUnides/') && !finalPath.includes('/Etkinlikler/') && !finalPath.includes('/Duyurular/') && !finalPath.includes('/Banner/') && !finalPath.includes('/Logo/')) {
@@ -198,7 +199,7 @@ export class EventService {
       // Sadece dosya adı gelmişse, Etkinlikler klasörüne ekle
       finalPath = `/ImagesUnides/Etkinlikler/${finalPath}`;
     }
-    
+
     // Her zaman production URL'ini kullan (unidesportal.com) - direkt bağlantı
     const baseUrl = environment.apiUrl.replace('/api', '');
     const fullUrl = baseUrl + finalPath;
@@ -261,9 +262,9 @@ export class EventService {
             ? eventClock
             : eventClock.toString()
           : '00:00:00';
-        
+
         let dateObj: Date | null = null;
-        
+
         // Backend'den "dd.MM.yyyy" formatı gelebilir (örn: "17.01.2026")
         if (dateStr.includes('.')) {
           // "dd.MM.yyyy" formatını parse et
@@ -272,14 +273,14 @@ export class EventService {
             const day = parseInt(parts[0], 10);
             const month = parseInt(parts[1], 10) - 1; // JavaScript month is 0-indexed
             const year = parseInt(parts[2], 10);
-            
+
             // Saat bilgisini parse et
             const timeParts = timeStr.split(':');
             const hour = parseInt(timeParts[0] || '0', 10) || 0;
             const minute = parseInt(timeParts[1] || '0', 10) || 0;
-            
+
             dateObj = new Date(year, month, day, hour, minute);
-            
+
             // Geçerlilik kontrolü
             if (!isNaN(dateObj.getTime())) {
               startDate = dateObj.toISOString();
@@ -373,31 +374,91 @@ export class EventService {
       communityId:
         dto.toplulukId || dto.ToplulukId || dto.comId || dto.ComId || dto.communityId || dto.CommunityId || 0,
       communityName: dto.communityName || dto.CommunityName || '',
-      communityLogo: dto.communityLogo || dto.CommunityLogo || undefined, // Topluluk logosu (opsiyonel)
+      communityLogo: (() => {
+        // Backend'den gelen logo path'i al - farklı field adlarını kontrol et
+        const rawLogoPath = dto.communityLogo || dto.CommunityLogo || dto.logoUrl || dto.LogoUrl || dto.communityLogoUrl || dto.CommunityLogoUrl || '';
+        const logoPathStr = rawLogoPath ? String(rawLogoPath).trim() : '';
+
+        // Debug: Backend'den gelen logo path'i logla (sadece development modunda)
+        if (logoPathStr) {
+          Logger.log('[mapToEvent] Raw logo path from backend:', logoPathStr, 'Event ID:', dto.eventId || dto.EventId);
+        } else {
+          Logger.warn('[mapToEvent] Logo path is empty or undefined for Event ID:', dto.eventId || dto.EventId, 'DTO keys:', Object.keys(dto));
+        }
+
+        // "string", "null", "undefined" gibi placeholder değerleri kontrol et
+        const normalizedPath = logoPathStr.toLowerCase().trim();
+        if (normalizedPath === 'string' || normalizedPath === 'null' || normalizedPath === 'undefined' || !logoPathStr) {
+          return undefined;
+        }
+
+        // Zaten tam URL ise (http://, https://, data:, blob:) olduğu gibi döndür
+        if (logoPathStr.startsWith('http://') || logoPathStr.startsWith('https://') || logoPathStr.startsWith('data:') || logoPathStr.startsWith('blob:')) {
+          return logoPathStr;
+        }
+
+        // Logo için özel path dönüşümü - Logo klasörüne yönlendir
+        let finalLogoPath = logoPathStr;
+        if (!finalLogoPath.startsWith('/')) {
+          finalLogoPath = '/' + finalLogoPath;
+        }
+
+        // Path dönüşümü: `/assets/img/` -> `/ImagesUnides/`
+        if (finalLogoPath.startsWith('/assets/img/')) {
+          finalLogoPath = finalLogoPath.replace('/assets/img/', '/ImagesUnides/');
+        }
+        // Eğer zaten `/ImagesUnides/` ile başlıyorsa olduğu gibi bırak
+        else if (finalLogoPath.startsWith('/images/')) {
+          finalLogoPath = finalLogoPath.replace('/images/', '/ImagesUnides/');
+        }
+
+        // Logo klasörü için özel kontrol - eğer path Logo içermiyorsa ve backend'den geldiyse
+        if (finalLogoPath.startsWith('/ImagesUnides/') && !finalLogoPath.includes('/Logo/') && !finalLogoPath.includes('/Etkinlikler/') && !finalLogoPath.includes('/Duyurular/') && !finalLogoPath.includes('/Banner/')) {
+          // Sadece dosya adı gelmişse Logo klasörüne ekle
+          const fileName = finalLogoPath.replace('/ImagesUnides/', '');
+          if (fileName && !fileName.includes('/')) {
+            finalLogoPath = `/ImagesUnides/Logo/${fileName}`;
+          }
+        }
+        // Eğer path `/ImagesUnides/` ile başlamıyorsa ama dosya adı gibi görünüyorsa, Logo klasörüne ekle
+        else if (!finalLogoPath.startsWith('/ImagesUnides/') && !finalLogoPath.startsWith('http') && !finalLogoPath.startsWith('data:') && finalLogoPath.length > 0 && !finalLogoPath.includes('/')) {
+          // Sadece dosya adı gelmişse, Logo klasörüne ekle
+          finalLogoPath = `/ImagesUnides/Logo/${finalLogoPath}`;
+        }
+
+        // Her zaman production URL'ini kullan (unidesportal.com) - direkt bağlantı
+        const baseUrl = environment.apiUrl.replace('/api', '');
+        const fullUrl = baseUrl + finalLogoPath;
+
+        // Debug: Convert edilmiş logo URL'yi logla (sadece development modunda)
+        Logger.log('[mapToEvent] Converted logo URL:', fullUrl, 'Event ID:', dto.eventId || dto.EventId);
+
+        return fullUrl;
+      })(), // Topluluk logosu (opsiyonel)
       imageUrl: (() => {
         // Backend'den gelen image path'i al - farklı field adlarını kontrol et
         const rawImagePath = dto.eventPictureLink || dto.EventPictureLink || dto.resimUrl || dto.ResimUrl || dto.imageUrl || dto.ImageUrl || '';
         const imagePathStr = rawImagePath ? String(rawImagePath).trim() : '';
-        
+
         // "string", "null", "undefined" gibi placeholder değerleri kontrol et
         const normalizedPath = imagePathStr.toLowerCase().trim();
         if (normalizedPath === 'string' || normalizedPath === 'null' || normalizedPath === 'undefined' || !imagePathStr) {
           return '';
         }
-        
-        // Debug: Backend'den gelen raw image path'i logla (sadece geçerli path'ler için)
+
+        // Debug: Backend'den gelen raw image path'i logla (sadece development modunda ve geçerli path'ler için)
         if (imagePathStr && imagePathStr.length > 0 && normalizedPath !== 'string') {
-          console.log('[mapToEvent] Raw image path from backend:', imagePathStr, 'Event ID:', dto.eventId || dto.EventId);
+          Logger.log('[mapToEvent] Raw image path from backend:', imagePathStr, 'Event ID:', dto.eventId || dto.EventId);
         }
-        
+
         // convertImagePathToFullUrl ile işle
         const convertedUrl = this.convertImagePathToFullUrl(imagePathStr);
-        
-        // Debug: Convert edilmiş URL'yi logla
+
+        // Debug: Convert edilmiş URL'yi logla (sadece development modunda)
         if (convertedUrl && convertedUrl.length > 0) {
-          console.log('[mapToEvent] Converted image URL:', convertedUrl, 'Event ID:', dto.eventId || dto.EventId);
+          Logger.log('[mapToEvent] Converted image URL:', convertedUrl, 'Event ID:', dto.eventId || dto.EventId);
         }
-        
+
         return convertedUrl;
       })(),
       status: status,
@@ -405,20 +466,54 @@ export class EventService {
         dto.eventKontenjan || dto.EventKontenjan
           ? String(dto.eventKontenjan || dto.EventKontenjan)
           : undefined,
+      quota: (() => {
+        // Backend'den gelen kontenjan değerini number olarak map et
+        // Önce tüm olası field adlarını kontrol et
+        const kontenjan = dto.eventKontenjan ?? dto.EventKontenjan ?? (dto as any).kontenjan ?? (dto as any).Kontenjan;
+
+        // Debug: Backend'den gelen kontenjan değerini logla (sadece development modunda)
+        Logger.log('[mapToEvent] Kontenjan kontrolü - Raw value:', kontenjan, 'Tip:', typeof kontenjan, 'Event ID:', dto.eventId || dto.EventId);
+        Logger.log('[mapToEvent] DTO eventKontenjan:', dto.eventKontenjan, 'EventKontenjan:', dto.EventKontenjan);
+
+        // null, undefined veya boş string kontrolü
+        if (kontenjan === null || kontenjan === undefined || kontenjan === '') {
+          Logger.warn('[mapToEvent] Kontenjan bulunamadı veya boş, Event ID:', dto.eventId || dto.EventId, 'DTO keys:', Object.keys(dto));
+          return 0; // Sınırsız gösterilir
+        }
+
+        // String ise number'a çevir
+        const numValue = typeof kontenjan === 'number' ? kontenjan : Number(kontenjan);
+
+        // NaN kontrolü yap
+        if (isNaN(numValue)) {
+          Logger.warn('[mapToEvent] Kontenjan number\'a çevrilemedi:', kontenjan, 'Event ID:', dto.eventId || dto.EventId);
+          return 0; // Sınırsız gösterilir
+        }
+
+        // Negatif değerler için 0 döndür (sınırsız gösterilir)
+        // 0 ve pozitif değerler için direkt döndür (0 da geçerli bir değer olabilir, ama genelde sınırsız anlamına gelir)
+        const result = numValue >= 0 ? numValue : 0;
+        if (!environment.production) {
+          console.log('[mapToEvent] Kontenjan map edildi:', kontenjan, '->', numValue, '->', result, 'Event ID:', dto.eventId || dto.EventId);
+        }
+        return result;
+      })(),
       city: dto.city || dto.City || '',
       rejectionReason: (() => {
         // Backend'den gelen tüm olası field adlarını kontrol et
         const confirmAbout = (dto as any).ConfirmAbout || (dto as any).confirmAbout || (dto as any).ConfirmAbout || (dto as any).confirmAbout;
         const rejectionReason = (dto as any).RejectionReason || (dto as any).rejectionReason;
-        
-        // Debug
-        if (confirmAbout) {
-          console.log('mapToEvent: ConfirmAbout bulundu:', confirmAbout, 'Event ID:', dto.eventId || dto.EventId);
+
+        // Debug (sadece development modunda)
+        if (!environment.production) {
+          if (confirmAbout) {
+            console.log('mapToEvent: ConfirmAbout bulundu:', confirmAbout, 'Event ID:', dto.eventId || dto.EventId);
+          }
+          if (rejectionReason) {
+            console.log('mapToEvent: RejectionReason bulundu:', rejectionReason, 'Event ID:', dto.eventId || dto.EventId);
+          }
         }
-        if (rejectionReason) {
-          console.log('mapToEvent: RejectionReason bulundu:', rejectionReason, 'Event ID:', dto.eventId || dto.EventId);
-        }
-        
+
         return confirmAbout || rejectionReason || undefined;
       })(),
     };
@@ -553,7 +648,7 @@ export class EventService {
 
           // Debug: Backend'den gelen raw response'u kontrol et
           console.log('Backend raw response:', response);
-          
+
           // EventsByStatusDto: { Pending: EventListItemDto[], Accepted: EventListItemDto[], Rejected: EventListItemDto[] }
           const pending = response.Pending || response.pending || [];
           const accepted = response.Accepted || response.accepted || [];
@@ -710,7 +805,7 @@ export class EventService {
     if (event.imageUrl !== undefined && event.imageUrl !== null) {
       eventPictureLink = event.imageUrl === '' ? '' : event.imageUrl;
     }
-    
+
     const updateDto: UpdateEventDto = {
       EventName: event.title || undefined,
       EventPictureLink: eventPictureLink,
@@ -755,31 +850,31 @@ export class EventService {
       map((response) => {
         // Backend'den imagePath (küçük harf) veya ImagePath (büyük harf) gelebilir
         const path = response.ImagePath || response.imagePath || '';
-          // Backend'den `/assets/img/Etkinlikler/...` formatında gelir, `/ImagesUnides/Etkinlikler/...` formatına çevir
-          if (path && !path.startsWith('http://') && !path.startsWith('https://') && !path.startsWith('data:')) {
-            let finalPath = path;
-            if (!finalPath.startsWith('/')) {
-              finalPath = '/' + finalPath;
-            }
-            // Path dönüşümü: `/assets/img/` -> `/ImagesUnides/`
-            if (finalPath.startsWith('/assets/img/')) {
-              finalPath = finalPath.replace('/assets/img/', '/ImagesUnides/');
-            } else if (finalPath.startsWith('/images/')) {
-              finalPath = finalPath.replace('/images/', '/ImagesUnides/');
-            }
-            // Etkinlikler klasörü kontrolü - eğer path Etkinlikler içermiyorsa ekle
-            if (finalPath.startsWith('/ImagesUnides/') && !finalPath.includes('/Etkinlikler/') && !finalPath.includes('/Duyurular/') && !finalPath.includes('/Banner/') && !finalPath.includes('/Logo/')) {
-              const fileName = finalPath.replace('/ImagesUnides/', '');
-              if (fileName && !fileName.includes('/')) {
-                finalPath = `/ImagesUnides/Etkinlikler/${fileName}`;
-              }
-            }
-            // Full URL oluştur
-            const baseUrl = environment.apiUrl.replace('/api', '');
-            const fullUrl = baseUrl + finalPath;
-            return { ImagePath: fullUrl };
+        // Backend'den `/assets/img/Etkinlikler/...` formatında gelir, `/ImagesUnides/Etkinlikler/...` formatına çevir
+        if (path && !path.startsWith('http://') && !path.startsWith('https://') && !path.startsWith('data:')) {
+          let finalPath = path;
+          if (!finalPath.startsWith('/')) {
+            finalPath = '/' + finalPath;
           }
-          return { ImagePath: path };
+          // Path dönüşümü: `/assets/img/` -> `/ImagesUnides/`
+          if (finalPath.startsWith('/assets/img/')) {
+            finalPath = finalPath.replace('/assets/img/', '/ImagesUnides/');
+          } else if (finalPath.startsWith('/images/')) {
+            finalPath = finalPath.replace('/images/', '/ImagesUnides/');
+          }
+          // Etkinlikler klasörü kontrolü - eğer path Etkinlikler içermiyorsa ekle
+          if (finalPath.startsWith('/ImagesUnides/') && !finalPath.includes('/Etkinlikler/') && !finalPath.includes('/Duyurular/') && !finalPath.includes('/Banner/') && !finalPath.includes('/Logo/')) {
+            const fileName = finalPath.replace('/ImagesUnides/', '');
+            if (fileName && !fileName.includes('/')) {
+              finalPath = `/ImagesUnides/Etkinlikler/${fileName}`;
+            }
+          }
+          // Full URL oluştur
+          const baseUrl = environment.apiUrl.replace('/api', '');
+          const fullUrl = baseUrl + finalPath;
+          return { ImagePath: fullUrl };
+        }
+        return { ImagePath: path };
       }),
       catchError((error) => {
         console.error('Etkinlik görseli yüklenemedi:', error);

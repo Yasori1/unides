@@ -6,6 +6,7 @@ import { ToastService } from '../../services/toast.services';
 import { AuthService } from '../../services/auth.services';
 import { ToastComponent } from '../../components/ui/toast/toast.component';
 import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
+import { Logger } from '../../utils/logger.util';
 
 @Component({
   selector: 'app-community-register',
@@ -18,7 +19,7 @@ export class CommunityRegisterComponent {
   passwordMismatch: boolean = false;
   isLoading: boolean = false;
   emailError: boolean = false;
-  
+
   private communityName: string = '';
   private university: string = '';
   private fullName: string = '';
@@ -30,7 +31,7 @@ export class CommunityRegisterComponent {
     private router: Router,
     private toastService: ToastService,
     private authService: AuthService
-  ) {}
+  ) { }
 
   updateCommunityName(event: any) {
     this.communityName = event.target.value;
@@ -47,12 +48,12 @@ export class CommunityRegisterComponent {
   validateCommunityEmail(event: any) {
     const email = event.target.value;
     this.email = email;
-    
+
     if (!email) {
       this.emailError = false;
       return;
     }
-    
+
     // Topluluk e-posta kontrolü: .edu.tr ile bitmeli
     if (email.includes('@') && !email.endsWith('.edu.tr')) {
       this.emailError = true;
@@ -133,7 +134,7 @@ export class CommunityRegisterComponent {
         this.toastService.show(errorMessage, 'error');
       }
     } catch (error: any) {
-      console.error('Kayıt Hatası:', error);
+      Logger.error('Kayıt Hatası:', error);
       this.isLoading = false;
       const message = error?.message || 'Kayıt sırasında bir hata oluştu.';
       this.toastService.show(message, 'error');

@@ -13,13 +13,8 @@
   <!-- Hero Banner -->
   <div class="hero-section" (mousemove)="onHeroMouseMove($event)">
     <div class="background-wrapper">
-      <img
-        [src]="community.banner || community.coverImage || 'assets/img/placeholder-cover.svg'"
-        [alt]="community.name"
-        class="hero-image"
-        loading="lazy"
-        (error)="onImageError($event, 'cover')"
-      />
+      <img [src]="community.banner || community.coverImage || 'assets/img/placeholder-cover.svg'" [alt]="community.name"
+        class="hero-image" loading="lazy" (error)="onImageError($event, 'cover')" />
     </div>
     <div class="hero-overlay">
       <div class="container">
@@ -46,7 +41,7 @@
       <div class="layout-grid">
         <!-- Left Column (Main Content) - 2fr -->
         <main class="main-content">
-          <!-- Community Header - No Frame, Just Title with Underline -->
+          <!-- Community Header - No Frame, Just Title with Underline (Desktop) -->
           <div class="community-header">
             <h1 class="community-title">{{ community.name }}</h1>
           </div>
@@ -62,10 +57,11 @@
           <!-- Yaklaşan Etkinlikler Section -->
           <div class="upcoming-events-main-section">
             <h2 class="section-title">Etkinlikler</h2>
-            
+
             <!-- Etkinlik Varsa -->
             <div class="upcoming-events-grid" *ngIf="paginatedEvents.length > 0">
-              <div class="upcoming-event-card" *ngFor="let event of paginatedEvents" (click)="navigateToEvent(event.id)" style="cursor: pointer;">
+              <div class="upcoming-event-card" *ngFor="let event of paginatedEvents" (click)="navigateToEvent(event.id)"
+                style="cursor: pointer;">
                 <div class="event-card-image" *ngIf="event.imageUrl">
                   <img [src]="event.imageUrl" [alt]="event.title" />
                 </div>
@@ -85,36 +81,27 @@
                 </div>
               </div>
             </div>
-            
+
             <!-- Sayfalama (4'ten fazla etkinlik varsa) -->
             <div class="pagination-container" *ngIf="totalPages > 1">
-              <button 
-                class="pagination-btn" 
-                (click)="previousPage()" 
-                [disabled]="currentPage === 1"
+              <button class="pagination-btn" (click)="previousPage()" [disabled]="currentPage === 1"
                 [class.disabled]="currentPage === 1">
                 <i class="bx bx-chevron-left"></i> Önceki
               </button>
-              
+
               <div class="pagination-numbers">
-                <button 
-                  *ngFor="let page of getPageNumbers()" 
-                  class="pagination-number"
-                  [class.active]="currentPage === page"
-                  (click)="changePage(page)">
+                <button *ngFor="let page of getPageNumbers()" class="pagination-number"
+                  [class.active]="currentPage === page" (click)="changePage(page)">
                   {{ page }}
                 </button>
               </div>
-              
-              <button 
-                class="pagination-btn" 
-                (click)="nextPage()" 
-                [disabled]="currentPage === totalPages"
+
+              <button class="pagination-btn" (click)="nextPage()" [disabled]="currentPage === totalPages"
                 [class.disabled]="currentPage === totalPages">
                 Sonraki <i class="bx bx-chevron-right"></i>
               </button>
             </div>
-            
+
             <!-- Etkinlik Yoksa -->
             <div class="no-events-container" *ngIf="upcomingEvents.length === 0">
               <div class="no-events-message">
@@ -128,14 +115,20 @@
         <!-- Right Column (Sidebar/Info) - 1fr -->
         <aside class="sidebar">
           <div class="sidebar-content sticky-sidebar">
-            <!-- Profile Photo - Overlaps Banner -->
+            <!-- Profile Photo - Overlaps Banner (Desktop) -->
             <div class="profile-photo-container">
-              <img
-                [src]="community.logo"
-                [alt]="community.name"
-                class="community-logo"
-                (error)="onImageError($event, 'logo')"
-              />
+              <img [src]="community.logo" [alt]="community.name" class="community-logo"
+                (error)="onImageError($event, 'logo')" />
+            </div>
+
+            <!-- Logo Mobile - Banner altında, sağda -->
+            <div class="community-logo-mobile-sidebar">
+              <img [src]="community.logo" [alt]="community.name" (error)="onImageError($event, 'logo')" />
+            </div>
+
+            <!-- Community Title Mobile - Topluluk bilgilerinin üstünde -->
+            <div class="community-title-mobile">
+              <h1 class="community-title">{{ community.name }}</h1>
             </div>
 
             <!-- Topluluk Bilgileri Card -->
@@ -153,12 +146,9 @@
                   <div class="info-label">E-POSTA</div>
                   <div class="email-display">
                     <span class="email-text">{{ community.email }}</span>
-                    <button
-                      class="copy-email-btn"
-                      (click)="copyToClipboard(community.email!)"
+                    <button class="copy-email-btn" (click)="copyToClipboard(community.email!)"
                       [title]="copyEmailSuccess ? 'Kopyalandı!' : 'E-postayı kopyala'"
-                      [class.copied]="copyEmailSuccess"
-                    >
+                      [class.copied]="copyEmailSuccess">
                       <i class="bx" [class.bx-copy]="!copyEmailSuccess" [class.bx-check]="copyEmailSuccess"></i>
                     </button>
                   </div>
@@ -201,4 +191,3 @@
 </div>
 
 <app-site-footer />
-

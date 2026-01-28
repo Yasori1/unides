@@ -11,6 +11,7 @@ import { AfkDetectionService } from '../../services/afk-detection.service';
 import { AuthService } from '../../services/auth.services';
 import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
 import { ImageErrorHandlerService } from '../../services/image-error-handler.service';
+import { Logger } from '../../utils/logger.util';
 
 interface Stat {
   label: string;
@@ -149,7 +150,7 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
             role: savedUserInfo.role || this.userInfo.role,
           };
         } catch (e) {
-          console.error('Error parsing user info:', e);
+          Logger.error('Error parsing user info:', e);
         }
       }
 
@@ -256,11 +257,11 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
 
                     // Geçerlilik kontrolü
                     if (isNaN(startDate.getTime())) {
-                      console.warn('Invalid date after parsing:', { eventDate, eventClock, day, month, year, hour, minute });
+                      Logger.warn('Invalid date after parsing:', { eventDate, eventClock, day, month, year, hour, minute });
                       startDate = new Date();
                     }
                   } catch (error) {
-                    console.error('Error parsing date:', error, { eventDate, eventClock });
+                    Logger.error('Error parsing date:', error, { eventDate, eventClock });
                     startDate = new Date();
                   }
                 } else {
@@ -322,7 +323,7 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
         this.updateStatsAndLoading();
       },
       error: (err: any) => {
-        console.error('Memberships yüklenemedi:', err);
+        Logger.error('Memberships yüklenemedi:', err);
         // Handle 401/403 gracefully
         if (err.status === 401) {
           this.toastService.show(
@@ -337,7 +338,7 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
           // Backend sadece RoleId == 1 (Öğrenci) için izin veriyor
           // Topluluk başkanları (RoleId == 3) için alternatif endpoint kullan
           // Kullanıcı hem öğrenci hem de topluluk başkanı olabilir
-          console.log('403 hatası alındı, kullanıcı rolü kontrol ediliyor ve alternatif endpoint deneniyor...');
+          Logger.log('403 hatası alındı, kullanıcı rolü kontrol ediliyor ve alternatif endpoint deneniyor...');
           this.loadDataForLeaderOrMixedRole();
         } else {
           // Other errors - show empty state
@@ -354,11 +355,11 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
     // Backend'de GetUserCommunitiesAsync metodu var ama sadece RoleId == 1 için çalışıyor
     // Bu yüzden alternatif endpoint kullanıyoruz: getMyCommunities() - başkan olduğu toplulukları getirir
     
-    console.log('loadDataForLeaderOrMixedRole: Alternatif endpoint deneniyor, kullanıcı email:', this.userInfo.email);
+    Logger.log('loadDataForLeaderOrMixedRole: Alternatif endpoint deneniyor, kullanıcı email:', this.userInfo.email);
     
     this.communityService.getMyCommunities().subscribe({
       next: (communities) => {
-        console.log('loadDataForLeaderOrMixedRole: Topluluklar yüklendi:', communities.length);
+        Logger.log('loadDataForLeaderOrMixedRole: Topluluklar yüklendi:', communities.length);
         if (communities && communities.length > 0) {
           // Map to ProfileCommunity format
           this.myCommunities = communities.map((c: any) => ({
@@ -372,7 +373,7 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
           // Her topluluk için etkinlikleri çek
           this.loadEventsForCommunities(this.myCommunities);
         } else {
-          console.warn('loadDataForLeaderOrMixedRole: Başkan olduğu topluluk bulunamadı');
+          Logger.warn('loadDataForLeaderOrMixedRole: Başkan olduğu topluluk bulunamadı');
           this.myCommunities = [];
           this.communityEvents = [];
           this.stats[0].value = 0;
@@ -381,7 +382,7 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
         }
       },
       error: (err: any) => {
-        console.error('loadDataForLeaderOrMixedRole: Communities yüklenemedi:', err);
+        Logger.error('loadDataForLeaderOrMixedRole: Communities yüklenemedi:', err);
         this.myCommunities = [];
         this.communityEvents = [];
         this.stats[0].value = 0;
@@ -420,7 +421,7 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
           this.updateStatsAndLoading();
         },
         error: (err: any) => {
-          console.error('Events yüklenemedi:', err);
+          Logger.error('Events yüklenemedi:', err);
           this.communityEvents = [];
           this.stats[1].value = 0;
           this.updateStatsAndLoading();
@@ -523,7 +524,7 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
         this.stats[1].value = this.communityEvents.length;
       },
       error: (err) => {
-        console.error('Topluluktan ayrılma hatası:', err);
+        Logger.error('Topluluktan ayrılma hatası:', err);
         const errorMessage = err.error?.message || err.message || 'Topluluktan ayrılırken bir hata oluştu.';
         this.toastService.show(errorMessage, 'error');
       },
@@ -604,7 +605,7 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
               }
             }
           } catch (e) {
-            console.warn('Error parsing event date:', ev.date, e);
+            Logger.warn('Error parsing event date:', ev.date, e);
             return false;
           }
         }
@@ -670,7 +671,7 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
             }
           }
         } catch (e) {
-          console.warn('Error parsing event date:', ev.date, e);
+          Logger.warn('Error parsing event date:', ev.date, e);
           return; // Bu etkinliği atla
         }
       } else {
@@ -759,7 +760,7 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
             }
           }
         } catch (e) {
-          console.warn('Error parsing event date:', ev.date, e);
+          Logger.warn('Error parsing event date:', ev.date, e);
           return false;
         }
       }
@@ -815,7 +816,7 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
           return parts[0].padStart(2, '0');
         }
       } catch (e) {
-        console.warn('Error parsing day from date:', ev.date);
+        Logger.warn('Error parsing day from date:', ev.date);
       }
     }
     return '01';
@@ -855,7 +856,7 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
           return monthMap[monthShort] || monthShort;
         }
       } catch (e) {
-        console.warn('Error parsing month from date:', ev.date);
+        Logger.warn('Error parsing month from date:', ev.date);
       }
     }
     return 'Ocak';
@@ -897,7 +898,7 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
         this.toastService.show('Ad Soyad başarıyla güncellendi', 'success');
       },
       error: (err: any) => {
-        console.error('Profil güncelleme hatası:', err);
+        Logger.error('Profil güncelleme hatası:', err);
         const errorMessage = err.error?.message || err.message || 'Profil güncellenirken bir hata oluştu.';
         this.toastService.show(errorMessage, 'error');
       },
@@ -946,7 +947,7 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
           this.userInfo.confirmPassword = '';
         },
         error: (err: any) => {
-          console.error('Şifre değiştirme hatası:', err);
+          Logger.error('Şifre değiştirme hatası:', err);
           const errorMessage =
             err.error?.message || err.message || 'Şifre değiştirme işlemi başarısız oldu.';
           this.toastService.show(errorMessage, 'error');

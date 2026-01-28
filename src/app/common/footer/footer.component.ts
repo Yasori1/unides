@@ -19,7 +19,7 @@ export class FooterComponent {
     },
     description:
       'Bu Portal T.C. Gençlik ve Spor Bakanlığı Gençlik Hizmetleri Genel Müdürlüğünce desteklenmektedir.',
-    copyright: '© 2024 ÜNİDES. Tüm hakları saklıdır.',
+    copyright: '© 2026 ÜNİDES. Tüm hakları saklıdır.',
   };
 
   // Sosyal Medya Linkleri

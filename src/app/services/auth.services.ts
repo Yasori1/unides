@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, tap, catchError, of } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
+import { Logger } from '../utils/logger.util';
 
 export interface LoginResponse {
   // Eski/varsayılan alanlar
@@ -189,7 +190,7 @@ export class AuthService {
           catchError((err) => {
             // 401 hatası normal olabilir (token zaten geçersiz), sessizce handle et
             if (err.status !== 401) {
-              console.warn('Backend logout hatası (önemsiz):', err);
+              Logger.warn('Backend logout hatası (önemsiz):', err);
             }
             return of(null); // Hata olsa bile local temizliğe devam et
           })
@@ -209,7 +210,29 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    return !!this.getToken();
+    const token = this.getToken();
+    if (!token) return false;
+
+    try {
+      // JWT token'ı decode et ve expiry kontrolü yap
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const expiry = payload.exp * 1000; // JWT exp is in seconds, convert to milliseconds
+      const now = Date.now();
+
+      // Token expire olmuşsa false döndür
+      if (now >= expiry) {
+        // Token expire olmuş, localStorage'dan temizle
+        this.logout();
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      // Token decode edilemiyorsa geçersiz token
+      Logger.warn('Token decode edilemedi, geçersiz token:', error);
+      this.logout();
+      return false;
+    }
   }
 
   /**

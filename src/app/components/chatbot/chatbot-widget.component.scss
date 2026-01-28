@@ -57,7 +57,7 @@ $primary-color-lighter: #3b82f6;
   }
 }
 
-// Chat Widget - Viewport-based responsive sizing
+// Chat Widget - Viewport-based responsive sizing (Desktop/PC - default)
 .chatbot-widget {
   position: fixed;
   bottom: clamp(20px, 2vh, 28px);
@@ -75,6 +75,9 @@ $primary-color-lighter: #3b82f6;
   z-index: 1001;
   font-family: var(--fontFamily1, 'Open Sans', sans-serif);
   box-sizing: border-box;
+  // PC görünümü için açıkça belirtildi - top ve left kullanılmıyor
+  top: auto;
+  left: auto;
 }
 
 // Header
@@ -614,14 +617,49 @@ $primary-color-lighter: #3b82f6;
 // Responsive - Mobile
 @media (max-width: 480px) {
   .chatbot-widget {
-    width: calc(100vw - 24px);
-    height: calc(100vh - 24px);
-    max-height: calc(100vh - 24px);
-    max-width: calc(100vw - 24px);
-    bottom: 12px;
-    right: 12px;
-    border-radius: clamp(16px, 4vw, 20px);
+    // PC görünümünü override et - sadece mobilde geçerli
+    width: calc(100vw - 24px) !important;
+    height: calc(100vh - 80px) !important; // Alt boşluk için yeterli alan: 12px (top) + 68px (bottom - tarayıcı çubuğu için)
+    max-height: calc(100vh - 80px) !important;
+    max-width: calc(100vw - 24px) !important;
+    top: 12px !important; // Üstte boşluk eklendi (çarpı butonu için)
+    bottom: 68px !important; // Mobil tarayıcı navigasyon çubuğunun üstünde kalması için yeterli boşluk
+    left: 12px !important; // Sol ve sağdan eşit boşluk
+    right: 12px !important;
+    border-radius: clamp(16px, 4vw, 20px) !important; // Tüm köşeler yuvarlatıldı (alt boşluk olduğu için)
     box-shadow: 0 20px 60px rgba(30, 58, 138, 0.2), 0 0 0 1px rgba(30, 58, 138, 0.1);
+    padding-bottom: max(env(safe-area-inset-bottom, 0), 0); // iOS safe area desteği
+  }
+
+  .chatbot-header {
+    padding: clamp(12px, 2vh, 16px) clamp(14px, 3.5vw, 18px); // Padding azaltıldı - daha kompakt
+    position: sticky; // Header'ı sticky yap ki scroll'da üstte kalsın
+    top: 0;
+    z-index: 10; // Header'ın üstte kalması için z-index
+    border-radius: clamp(16px, 4vw, 20px) clamp(16px, 4vw, 20px) 0 0; // Üst köşeleri yuvarlat
+    min-height: 60px; // Minimum yükseklik - çarpı butonunun sığması için
+    display: flex; // Flexbox ile hizalama
+    align-items: center; // Dikey hizalama
+  }
+
+  .chatbot-close-btn {
+    width: 40px !important; // Mobilde optimize edilmiş boyut
+    height: 40px !important;
+    min-width: 40px; // Minimum genişlik garantisi
+    min-height: 40px; // Minimum yükseklik garantisi
+    z-index: 25 !important; // Çarpı butonunun kesinlikle görünür olması için çok yüksek z-index
+    position: relative !important; // Z-index'in çalışması için
+    background: rgba(255, 255, 255, 0.35) !important; // Daha görünür arka plan
+    border: 2px solid rgba(255, 255, 255, 0.6) !important; // Daha belirgin border
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3) !important; // Daha belirgin gölge
+    flex-shrink: 0; // Butonun küçülmesini engelle
+
+    svg {
+      width: 20px !important; // Optimize edilmiş ikon boyutu
+      height: 20px !important;
+      stroke-width: 3 !important; // Daha kalın çizgi
+      stroke: #ffffff !important; // Beyaz çizgi garantisi
+    }
   }
 
   .chatbot-toggle-btn {
@@ -631,9 +669,6 @@ $primary-color-lighter: #3b82f6;
     height: clamp(52px, 12vw, 60px);
   }
 
-  .chatbot-header {
-    padding: clamp(14px, 2.5vh, 18px) clamp(16px, 4vw, 20px);
-  }
 
   .chatbot-avatar {
     width: clamp(44px, 10vw, 52px);
@@ -667,8 +702,13 @@ $primary-color-lighter: #3b82f6;
   }
 
   .chatbot-input-container {
-    padding: clamp(14px, 2.5vh, 16px);
+    padding: clamp(12px, 2vh, 14px) clamp(14px, 3.5vw, 16px) clamp(20px, 5vh, 24px) clamp(14px, 3.5vw, 16px) !important; // Alt padding artırıldı - telefon sekmelerinden uzaklaştırmak için
     gap: clamp(8px, 2vw, 10px);
+    margin-bottom: max(env(safe-area-inset-bottom, 0), 8px); // iOS safe area desteği + ekstra boşluk
+    position: relative;
+    z-index: 5;
+    background: #ffffff; // Arka plan rengi garantisi
+    border-top: 1px solid rgba(30, 58, 138, 0.15); // Üst border garantisi
   }
 
   .chatbot-input {
@@ -711,12 +751,53 @@ $primary-color-lighter: #3b82f6;
 @media (max-width: 360px) {
   .chatbot-widget {
     width: calc(100vw - 16px);
-    height: calc(100vh - 16px);
+    height: calc(100vh - 72px); // Üstte boşluk için: 8px (top) + 64px (bottom - tarayıcı çubuğu için)
     max-width: calc(100vw - 16px);
-    max-height: calc(100vh - 16px);
-    bottom: 8px;
+    max-height: calc(100vh - 72px);
+    top: 8px; // Üstte boşluk eklendi (çarpı butonu için)
+    bottom: 64px; // Mobil tarayıcı navigasyon çubuğunun üstünde kalması için yeterli boşluk
+    left: 8px; // Sol ve sağdan eşit boşluk
     right: 8px;
-    border-radius: clamp(12px, 3vw, 16px);
+    border-radius: clamp(12px, 3vw, 16px); // Tüm köşeler yuvarlatıldı (alt boşluk olduğu için)
+    padding-bottom: max(env(safe-area-inset-bottom, 0), 0); // iOS safe area desteği
+  }
+
+  .chatbot-input-container {
+    padding: clamp(10px, 1.8vh, 12px) clamp(12px, 3vw, 14px) clamp(18px, 4.5vh, 22px) clamp(12px, 3vw, 14px) !important; // Küçük ekranlarda da alt padding artırıldı
+    margin-bottom: max(env(safe-area-inset-bottom, 0), 8px); // iOS safe area desteği + ekstra boşluk
+    background: #ffffff; // Arka plan rengi garantisi
+    border-top: 1px solid rgba(30, 58, 138, 0.15); // Üst border garantisi
+  }
+
+  .chatbot-header {
+    padding: clamp(10px, 1.8vh, 14px) clamp(12px, 3vw, 16px); // Küçük ekranlarda daha kompakt
+    position: sticky; // Header'ı sticky yap
+    top: 0;
+    z-index: 10;
+    border-radius: clamp(12px, 3vw, 16px) clamp(12px, 3vw, 16px) 0 0;
+    min-height: 56px; // Minimum yükseklik
+    display: flex;
+    align-items: center;
+  }
+
+  .chatbot-close-btn {
+    width: 38px !important; // Küçük ekranlarda optimize edilmiş boyut
+    height: 38px !important;
+    min-width: 38px;
+    min-height: 38px;
+    z-index: 25 !important;
+    position: relative !important;
+    background: rgba(255, 255, 255, 0.35) !important;
+    border: 2px solid rgba(255, 255, 255, 0.6) !important;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3) !important;
+    flex-shrink: 0;
+
+    svg {
+      width: 18px !important;
+      height: 18px !important;
+      stroke-width: 3 !important;
+      stroke: #ffffff !important;
+    }
   }
 
   .chatbot-toggle-btn {

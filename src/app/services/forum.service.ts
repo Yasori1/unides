@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, catchError, of } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { Logger } from '../utils/logger.util';
 import {
   CreateQuestionRequest,
   CreateAnswerRequest,
@@ -31,7 +32,7 @@ export class ForumService {
       .post<{ message: string; questionId: number }>(`${this.apiUrl}/formAsk`, request)
       .pipe(
         catchError((error) => {
-          console.error('Soru oluşturulamadı:', error);
+          Logger.error('Soru oluşturulamadı:', error);
           throw error;
         })
       );
@@ -47,7 +48,7 @@ export class ForumService {
       .post<{ message: string }>(`${this.apiUrl}/formAnswer`, request)
       .pipe(
         catchError((error) => {
-          console.error('Cevap oluşturulamadı:', error);
+          Logger.error('Cevap oluşturulamadı:', error);
           throw error;
         })
       );
@@ -61,7 +62,7 @@ export class ForumService {
   getAllQuestions(): Observable<QuestionDto[]> {
     return this.http.get<QuestionDto[]>(`${this.apiUrl}/getAllQuestionsAndAnswer`).pipe(
       catchError((error) => {
-        console.error('Sorular yüklenemedi:', error);
+        Logger.error('Sorular yüklenemedi:', error);
         return of([]);
       })
     );
@@ -77,7 +78,7 @@ export class ForumService {
       .put<{ message: string }>(`${this.apiUrl}/questionUpdate`, request)
       .pipe(
         catchError((error) => {
-          console.error('Soru güncellenemedi:', error);
+          Logger.error('Soru güncellenemedi:', error);
           throw error;
         })
       );
@@ -93,7 +94,7 @@ export class ForumService {
       .delete<{ message: string }>(`${this.apiUrl}/questionDelete/${id}`)
       .pipe(
         catchError((error) => {
-          console.error('Soru silinemedi:', error);
+          Logger.error('Soru silinemedi:', error);
           throw error;
         })
       );
@@ -109,7 +110,7 @@ export class ForumService {
       .put<{ message: string }>(`${this.apiUrl}/answerUpdate`, request)
       .pipe(
         catchError((error) => {
-          console.error('Cevap güncellenemedi:', error);
+          Logger.error('Cevap güncellenemedi:', error);
           throw error;
         })
       );
@@ -125,7 +126,7 @@ export class ForumService {
       .delete<{ message: string }>(`${this.apiUrl}/answerDelete/${id}`)
       .pipe(
         catchError((error) => {
-          console.error('Cevap silinemedi:', error);
+          Logger.error('Cevap silinemedi:', error);
           throw error;
         })
       );

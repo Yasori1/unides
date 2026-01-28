@@ -3,6 +3,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from './auth.services';
 import { Subject } from 'rxjs';
+import { Logger } from '../utils/logger.util';
 
 /**
  * AFK (Away From Keyboard) Detection Service
@@ -130,7 +131,7 @@ export class AfkDetectionService implements OnDestroy {
     }
 
     // AFK tespit edildi - logout yap
-    console.log('AFK tespit edildi - otomatik logout yapılıyor...');
+    Logger.log('AFK tespit edildi - otomatik logout yapılıyor...');
     this.onAfkDetected.next();
 
     // Logout yap

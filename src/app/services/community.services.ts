@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Observable, map, catchError, of, switchMap, forkJoin } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { Logger } from '../utils/logger.util';
 import {
   CommunityMiniDto,
   CommunityDetailDto,
@@ -90,7 +91,7 @@ export class CommunityService {
         });
       }),
       catchError((error) => {
-        console.error('Featured communities yüklenemedi:', error);
+        Logger.error('Featured communities yüklenemedi:', error);
         return of([]);
       })
     );
@@ -175,7 +176,7 @@ export class CommunityService {
         });
       }),
       catchError((error) => {
-        console.error('Newest communities yüklenemedi:', error);
+        Logger.error('Newest communities yüklenemedi:', error);
         return of([]);
       })
     );
@@ -295,7 +296,7 @@ export class CommunityService {
         return mapped;
       }),
       catchError((error) => {
-        console.error('Topluluklar yüklenemedi:', error);
+        Logger.error('Topluluklar yüklenemedi:', error);
         return of([]);
       })
     );
@@ -339,7 +340,7 @@ export class CommunityService {
           // Eğer 404 dönerse (pasif topluluk), liste endpoint'inden çek (fallback)
           // Ama CommunityMiniDto email bilgilerini içermiyor - backend'de sadece: CommunityId, ComName, ComCategory, City, University, BannerUrl, LogoUrl, MiniAbout, IsActivity
           if (error.status === 404) {
-            console.warn('Pasif topluluk için Detail endpoint 404 döndü, liste endpoint\'inden çekiliyor (email bilgileri eksik olacak):', id);
+            Logger.warn('Pasif topluluk için Detail endpoint 404 döndü, liste endpoint\'inden çekiliyor (email bilgileri eksik olacak):', id);
             // Liste endpoint'inden çek (fallback)
             return this.http.get<CommunityMiniDto[]>(this.apiUrl, { 
               params: new HttpParams().set('status', 'passive') 
@@ -357,7 +358,7 @@ export class CommunityService {
                 }
 
                 // MiniDto'yu Community'ye map et (email bilgileri eksik - backend'de MiniDto'da yok)
-                console.warn('Pasif topluluk için liste endpoint\'inden çekildi, email bilgileri (comMail, comLeadMail) eksik:', id);
+                Logger.warn('Pasif topluluk için liste endpoint\'inden çekildi, email bilgileri (comMail, comLeadMail) eksik:', id);
                 return this.mapMiniDtoToCommunity(communityDto);
               }),
               catchError((fallbackError) => {

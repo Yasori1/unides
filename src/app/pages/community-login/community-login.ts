@@ -13,6 +13,7 @@ import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.compo
 import { HttpClientModule, HttpErrorResponse } from '@angular/common/http';
 import { switchMap, catchError, take } from 'rxjs/operators';
 import { of, forkJoin } from 'rxjs';
+import { Logger } from '../../utils/logger.util';
 
 @Component({
   selector: 'app-community-login',
@@ -141,7 +142,7 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
             switchMap((communities) => {
               if (!communities || communities.length === 0) {
                 // Topluluk bulunamadı - girişe izin ver (backend zaten doğruladı)
-                console.warn('Topluluk bulunamadı, ancak backend girişi onayladı. Girişe izin veriliyor.');
+                Logger.warn('Topluluk bulunamadı, ancak backend girişi onayladı. Girişe izin veriliyor.');
                 return of(true); // Girişe izin ver
               }
 
@@ -172,7 +173,7 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
                     // Topluluk başkanı bulunamadı ama backend girişi onayladı
                     // Backend'de kullanıcı rolü topluluk başkanı (roleId=3) olarak ayarlanmış olabilir
                     // Bu durumda girişe izin ver
-                    console.warn('Topluluk başkanı eşleşmesi bulunamadı, ancak backend girişi onayladı. Girişe izin veriliyor.');
+                    Logger.warn('Topluluk başkanı eşleşmesi bulunamadı, ancak backend girişi onayladı. Girişe izin veriliyor.');
                     return of(true); // Girişe izin ver
                   }
                 })
@@ -180,8 +181,8 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
             }),
             catchError((error) => {
               // Topluluk kontrolü sırasında hata oluşursa, girişe izin ver (backend zaten doğruladı)
-              console.error('Topluluk kontrolü hatası:', error);
-              console.warn('Topluluk kontrolü başarısız oldu, ancak backend girişi onayladı. Girişe izin veriliyor.');
+              Logger.error('Topluluk kontrolü hatası:', error);
+              Logger.warn('Topluluk kontrolü başarısız oldu, ancak backend girişi onayladı. Girişe izin veriliyor.');
               return of(true); // Hata durumunda da girişe izin ver
             })
           )
@@ -201,8 +202,8 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
             error: (error) => {
               // Topluluk kontrolü sırasında hata oluşursa, yine de girişe izin ver (backend zaten doğruladı)
               this.isLoading = false;
-              console.error('Topluluk kontrolü hatası:', error);
-              console.warn('Topluluk kontrolü başarısız oldu, ancak backend girişi onayladı. Girişe izin veriliyor.');
+              Logger.error('Topluluk kontrolü hatası:', error);
+              Logger.warn('Topluluk kontrolü başarısız oldu, ancak backend girişi onayladı. Girişe izin veriliyor.');
 
               this.toastService.show(
                 'Giriş başarılı! Ana sayfaya yönlendiriliyorsunuz...',
@@ -218,7 +219,7 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
       error: (error: HttpErrorResponse) => {
         // --- HATALI GİRİŞ ---
         this.isLoading = false;
-        console.error('Giriş Hatası:', error);
+        Logger.error('Giriş Hatası:', error);
 
         const message = error.error?.message || error.message || 'E-posta veya şifre hatalı!';
         this.toastService.show(message, 'error');
@@ -335,7 +336,7 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
         }
       }
     } catch (error: any) {
-      console.error('Şifre sıfırlama hatası:', error);
+      Logger.error('Şifre sıfırlama hatası:', error);
       // Network hatası veya fetch hatası
       if (error.message && error.message.includes('fetch')) {
         this.toastService.show('Sunucuya Bağlanılamadı', 'error');

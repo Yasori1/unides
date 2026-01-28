@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
@@ -6,6 +6,7 @@ import { SiteFooterComponent } from '../../common/site-footer/site-footer.compon
 import { CommunityService, Community } from '../../services/community.services';
 import { EventService, EventItem } from '../../services/event.services';
 import { ImageErrorHandlerService } from '../../services/image-error-handler.service';
+import { Logger } from '../../utils/logger.util';
 
 // CommunityEvent interface for mock data
 export interface CommunityEvent {
@@ -24,7 +25,7 @@ export interface CommunityEvent {
   templateUrl: './community-detail.component.html',
   styleUrls: ['./community-detail.component.scss'],
 })
-export class CommunityDetailComponent implements OnInit {
+export class CommunityDetailComponent implements OnInit, OnDestroy {
   community: Community | null = null;
   isLoading: boolean = true;
   communityId: string | null = null;
@@ -36,13 +37,16 @@ export class CommunityDetailComponent implements OnInit {
 
   // Sayfalama için
   currentPage: number = 1;
-  itemsPerPage: number = 4; // Sayfa başına 4 etkinlik (2x2 grid)
+  itemsPerPage: number = 4; // Desktop için sayfa başına 4 etkinlik (mobilde 2 olacak)
   paginatedEvents: CommunityEvent[] = [];
   totalPages: number = 0;
 
   // Banner animation
   heroMoveX = 0;
   heroMoveY = 0;
+
+  // Resize handler için referans
+  private resizeHandler = () => this.updateItemsPerPage();
 
   constructor(
     private route: ActivatedRoute,
@@ -54,6 +58,12 @@ export class CommunityDetailComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    // Mobil/Desktop kontrolü ve itemsPerPage ayarla
+    if (isPlatformBrowser(this.platformId)) {
+      this.updateItemsPerPage();
+      window.addEventListener('resize', this.resizeHandler);
+    }
+
     this.route.params.subscribe((params) => {
       const id = params['id'];
       if (id) {
@@ -71,6 +81,32 @@ export class CommunityDetailComponent implements OnInit {
         }
       }
     });
+  }
+
+  /**
+   * Ekran boyutuna göre itemsPerPage'i güncelle
+   */
+  private updateItemsPerPage(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+    
+    const isMobile = window.innerWidth <= 768;
+    const newItemsPerPage = isMobile ? 2 : 4;
+    
+    // Eğer itemsPerPage değiştiyse, sayfalama'yı yeniden hesapla
+    if (this.itemsPerPage !== newItemsPerPage) {
+      this.itemsPerPage = newItemsPerPage;
+      // Mevcut etkinlikler varsa sayfalama'yı güncelle
+      if (this.upcomingEvents.length > 0) {
+        this.totalPages = Math.ceil(this.upcomingEvents.length / this.itemsPerPage);
+        // Mevcut sayfa geçerli değilse ilk sayfaya dön
+        if (this.currentPage > this.totalPages) {
+          this.currentPage = 1;
+        }
+        this.updatePaginatedEvents();
+      }
+    }
   }
 
   loadCommunity(id: string) {
@@ -94,7 +130,7 @@ export class CommunityDetailComponent implements OnInit {
         this.isLoading = false;
       },
       error: (err) => {
-        console.error('Topluluk yüklenemedi:', err);
+        Logger.error('Topluluk yüklenemedi:', err);
         this.router.navigate(['/communities']);
         this.isLoading = false;
       },
@@ -114,17 +150,15 @@ export class CommunityDetailComponent implements OnInit {
       return;
     }
 
-    // Tüm onaylanmış etkinlikleri filtrele ve sırala (tarih filtresi yok)
+    // Tüm onaylanmış etkinlikleri filtrele ve sırala (en son eklenen ilk)
     const upcoming = events
       .filter((event) => {
         // Sadece onaylanmış etkinlikleri göster
         return event.status === 'Onaylandı';
       })
       .sort((a, b) => {
-        // Tarihe göre sırala (en yakın önce)
-        const dateA = a.startDate ? new Date(a.startDate).getTime() : 0;
-        const dateB = b.startDate ? new Date(b.startDate).getTime() : 0;
-        return dateA - dateB;
+        // En son eklenen ilk gözüksün (id'ye göre ters sıralama - büyük id = daha yeni)
+        return (b.id || 0) - (a.id || 0);
       })
       .map((event) => ({
         id: event.id,
@@ -303,7 +337,7 @@ export class CommunityDetailComponent implements OnInit {
 
   joinCommunity() {
     // TODO: Implement join community functionality
-    console.log('Join community:', this.community?.id);
+    Logger.log('Join community:', this.community?.id);
     // This can be connected to a service method later
   }
 
@@ -322,7 +356,7 @@ export class CommunityDetailComponent implements OnInit {
           this.showCopySuccess();
         })
         .catch((err) => {
-          console.error('Failed to copy:', err);
+          Logger.error('Failed to copy:', err);
           this.fallbackCopyToClipboard(text);
         });
     } else {
@@ -347,7 +381,7 @@ export class CommunityDetailComponent implements OnInit {
         this.showCopySuccess();
       }
     } catch (err) {
-      console.error('Fallback copy failed:', err);
+      Logger.error('Fallback copy failed:', err);
     } finally {
       document.body.removeChild(textArea);
     }
@@ -363,5 +397,12 @@ export class CommunityDetailComponent implements OnInit {
   // Image error handler - Placeholder görsellerin sürekli istek atmasını engeller
   onImageError(event: Event, type: 'announcement' | 'event' | 'logo' | 'cover' | 'avatar' = 'cover'): void {
     this.imageErrorHandler.handleImageError(event, type);
+  }
+
+  ngOnDestroy(): void {
+    // Resize event listener'ı temizle
+    if (isPlatformBrowser(this.platformId)) {
+      window.removeEventListener('resize', this.resizeHandler);
+    }
   }
 }

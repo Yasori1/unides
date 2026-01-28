@@ -1,5 +1,6 @@
 import { Directive, ElementRef, OnInit, OnDestroy, Renderer2, inject, AfterViewInit } from '@angular/core';
 import { ImageCorsService } from '../services/image-cors.service';
+import { Logger } from '../utils/logger.util';
 
 /**
  * CORS Image Directive
@@ -129,7 +130,7 @@ export class CorsImageDirective implements OnInit, AfterViewInit, OnDestroy {
       // Hata durumunda orijinal URL'yi kullan ve crossorigin ekle
       this.renderer.setAttribute(this.el.nativeElement, 'crossorigin', 'anonymous');
       this.renderer.setAttribute(this.el.nativeElement, 'src', src);
-      console.warn('CORS image directive: Blob URL oluşturulamadı, orijinal URL kullanılıyor', error);
+      Logger.warn('CORS image directive: Blob URL oluşturulamadı, orijinal URL kullanılıyor', error);
     }
   }
 

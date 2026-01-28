@@ -6,6 +6,7 @@ import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.compon
 import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
 import { CommunityService, Community } from '../../services/community.services';
 import { ImageErrorHandlerService } from '../../services/image-error-handler.service';
+import { Logger } from '../../utils/logger.util';
 
 @Component({
   selector: 'app-communities-page',
@@ -132,7 +133,7 @@ export class CommunitiesPageComponent implements OnInit {
         this.isLoading = false;
       },
       error: (err) => {
-        console.error('Topluluklar yüklenirken hata oluştu:', err);
+        Logger.error('Topluluklar yüklenirken hata oluştu:', err);
         this.allCommunities = [];
         this.categories = [];
         this.applyFilters();

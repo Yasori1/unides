@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../services/toast.services';
 import { ToastComponent } from '../../components/ui/toast/toast.component';
 import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
+import { Logger } from '../../utils/logger.util';
 
 @Component({
   selector: 'app-reset-password',
@@ -132,7 +133,7 @@ export class ResetPasswordComponent implements OnInit {
         this.toastService.show(errorMessage, 'error');
       }
     } catch (error: any) {
-      console.error('Şifre sıfırlama hatası:', error);
+      Logger.error('Şifre sıfırlama hatası:', error);
       this.toastService.show(
         error.message || 'Bir hata oluştu. Lütfen tekrar deneyiniz.',
         'error'

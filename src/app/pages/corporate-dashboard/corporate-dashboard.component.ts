@@ -17,6 +17,7 @@ import { environment } from '../../../environments/environment';
 import { ImageErrorHandlerService } from '../../services/image-error-handler.service';
 import { AuthService } from '../../services/auth.services';
 import { SpamService } from '../../services/spam.service';
+import { Logger } from '../../utils/logger.util';
 
 // ==========================================
 // MAIN DASHBOARD COMPONENT
@@ -289,7 +290,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   // Bekleyen görsel dosyaları - duyuru ID alındıktan sonra yüklenecek
   pendingNewAnnouncementImage: File | null = null;
   pendingEditAnnouncementImage: File | null = null;
-  
+
   // Bekleyen görsel dosyaları - etkinlik ID alındıktan sonra yüklenecek
   pendingNewEventImage: File | null = null;
   pendingEditEventImage: File | null = null;
@@ -860,10 +861,10 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     // Pasif topluluklar için: GET /api/Communities?status=passive (liste endpoint'inden ID'ye göre filtrele)
     if (community.id && community.id !== '' && !community.id.includes('mock')) {
       // Topluluğun aktif/pasif durumunu kontrol et
-      const isActive = community.isActivity !== undefined 
-        ? community.isActivity 
+      const isActive = community.isActivity !== undefined
+        ? community.isActivity
         : (community.status === 'Aktif');
-      
+
       this.communityService.getCommunityById(community.id, isActive).subscribe({
         next: (detailedCommunity) => {
           // Backend'den gelen tüm detayları editingCommunity'ye map et
@@ -901,8 +902,8 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
                 ? detailedCommunity.isActivity
                 : detailedCommunity.status === 'Aktif',
           } as Community & { presidentEmail?: string; shortDescription?: string };
-          
-          console.log('Topluluk detayı başarıyla yüklendi:', {
+
+          Logger.log('Topluluk detayı başarıyla yüklendi:', {
             id: detailedCommunity.id,
             name: detailedCommunity.name,
             email: this.editingCommunity.email,
@@ -913,10 +914,10 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
           // Hata durumunda mevcut (liste) verisini kullanmaya devam et
           // editingCommunity zaten set edildi, bu yüzden kullanıcı formu görebilir
           if (err.status === 404) {
-            console.warn('Topluluk detayı alınamadı (404), mevcut liste verisi kullanılıyor:', community.id);
+            Logger.warn('Topluluk detayı alınamadı (404), mevcut liste verisi kullanılıyor:', community.id);
             // editingCommunity zaten set edildi, ek bir işlem gerekmez
           } else {
-            console.error('Topluluk detayı yüklenirken hata:', err);
+            Logger.error('Topluluk detayı yüklenirken hata:', err);
             // editingCommunity zaten set edildi, ek bir işlem gerekmez
           }
         },
@@ -974,24 +975,24 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
 
       // CommunityService'e kaydet (communities-page'e otomatik eklenir)
       // DEBUG: editingCommunity'nin değerlerini kontrol et
-      console.log('=== saveCommunity DEBUG ===');
-      console.log('editingCommunity.status:', this.editingCommunity.status);
-      console.log('editingCommunity.isActivity:', this.editingCommunity.isActivity);
-      console.log('editingCommunity.email:', this.editingCommunity.email);
-      console.log('editingCommunity.presidentEmail:', this.editingCommunity.presidentEmail);
-      console.log('editingCommunity.comMail:', (this.editingCommunity as any).comMail);
-      console.log('editingCommunity.comLeadMail:', (this.editingCommunity as any).comLeadMail);
-      console.log('editingCommunity.miniAbout:', this.editingCommunity.miniAbout);
-      console.log('editingCommunity.shortDescription:', (this.editingCommunity as any).shortDescription);
-      console.log('Full editingCommunity:', JSON.stringify(this.editingCommunity, null, 2));
+      Logger.log('=== saveCommunity DEBUG ===');
+      Logger.log('editingCommunity.status:', this.editingCommunity.status);
+      Logger.log('editingCommunity.isActivity:', this.editingCommunity.isActivity);
+      Logger.log('editingCommunity.email:', this.editingCommunity.email);
+      Logger.log('editingCommunity.presidentEmail:', this.editingCommunity.presidentEmail);
+      Logger.log('editingCommunity.comMail:', (this.editingCommunity as any).comMail);
+      Logger.log('editingCommunity.comLeadMail:', (this.editingCommunity as any).comLeadMail);
+      Logger.log('editingCommunity.miniAbout:', this.editingCommunity.miniAbout);
+      Logger.log('editingCommunity.shortDescription:', (this.editingCommunity as any).shortDescription);
+      Logger.log('Full editingCommunity:', JSON.stringify(this.editingCommunity, null, 2));
 
       const communityForService = {
         ...this.editingCommunity,
         id: this.editingCommunity.id, // ID'yi açıkça ekle
         about: this.editingCommunity.about || this.editingCommunity.description || '', // Detaylı açıklama (backend ComAbout)
         description: this.editingCommunity.about || this.editingCommunity.description || '', // description da about'a eşit
-        miniAbout: (this.editingCommunity.miniAbout !== undefined && this.editingCommunity.miniAbout !== null) 
-          ? String(this.editingCommunity.miniAbout).trim() 
+        miniAbout: (this.editingCommunity.miniAbout !== undefined && this.editingCommunity.miniAbout !== null)
+          ? String(this.editingCommunity.miniAbout).trim()
           : ((this.editingCommunity as any).shortDescription !== undefined && (this.editingCommunity as any).shortDescription !== null)
             ? String((this.editingCommunity as any).shortDescription).trim()
             : '', // Kısa açıklama (backend MiniAbout)
@@ -1027,7 +1028,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
             uploadTasks.push(
               this.communityService.uploadLogo(communityId, logoFile).pipe(
                 catchError((err) => {
-                  console.error('Logo yüklenirken hata:', err);
+                  Logger.error('Logo yüklenirken hata:', err);
                   return of(null); // Hata durumunda null döndür, devam et
                 })
               )
@@ -1038,7 +1039,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
             uploadTasks.push(
               this.communityService.uploadBanner(communityId, bannerFile).pipe(
                 catchError((err) => {
-                  console.error('Banner yüklenirken hata:', err);
+                  Logger.error('Banner yüklenirken hata:', err);
                   return of(null); // Hata durumunda null döndür, devam et
                 })
               )
@@ -1049,14 +1050,14 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
           if (uploadTasks.length > 0) {
             forkJoin(uploadTasks).subscribe({
               next: (results) => {
-                console.log('Tüm görseller yüklendi:', results);
+                Logger.log('Tüm görseller yüklendi:', results);
                 // Görseller yüklendikten sonra listeyi backend'den yeniden çek
                 this.loadCommunitiesFromService();
                 this.showToast('Topluluk ve görseller başarıyla güncellendi', 'success');
                 this.closeModal();
               },
               error: (err) => {
-                console.error('Görsel yükleme hatası:', err);
+                Logger.error('Görsel yükleme hatası:', err);
                 // Hata olsa bile listeyi güncelle
                 this.loadCommunitiesFromService();
                 this.showToast('Topluluk güncellendi ancak bazı görseller yüklenemedi', 'error');
@@ -1097,7 +1098,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
           } else if (error.status === 0) {
             errorMessage = 'Sunucuya bağlanılamadı. Lütfen internet bağlantınızı kontrol ediniz.';
           }
-          
+
           this.showToast(errorMessage, 'error');
         }
       });
@@ -1173,7 +1174,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
             uploadTasks.push(
               this.communityService.uploadLogo(communityId, logoFile).pipe(
                 catchError((err) => {
-                  console.error('Logo yüklenirken hata:', err);
+                  Logger.error('Logo yüklenirken hata:', err);
                   return of(null);
                 })
               )
@@ -1184,7 +1185,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
             uploadTasks.push(
               this.communityService.uploadBanner(communityId, bannerFile).pipe(
                 catchError((err) => {
-                  console.error('Banner yüklenirken hata:', err);
+                  Logger.error('Banner yüklenirken hata:', err);
                   return of(null);
                 })
               )
@@ -1195,14 +1196,14 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
           if (uploadTasks.length > 0) {
             forkJoin(uploadTasks).subscribe({
               next: (results) => {
-                console.log('Tüm görseller yüklendi:', results);
+                Logger.log('Tüm görseller yüklendi:', results);
                 this.loadCommunitiesFromService();
                 this.showToast('Topluluk ve görseller başarıyla eklendi', 'success');
                 this.closeModal();
                 this.newCommunity = null;
               },
               error: (err) => {
-                console.error('Görsel yükleme hatası:', err);
+                Logger.error('Görsel yükleme hatası:', err);
                 this.loadCommunitiesFromService();
                 this.showToast('Topluluk eklendi ancak bazı görseller yüklenemedi', 'error');
                 this.closeModal();
@@ -1244,7 +1245,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
           } else if (error.status === 0) {
             errorMessage = 'Sunucuya bağlanılamadı. Lütfen internet bağlantınızı kontrol ediniz.';
           }
-          
+
           this.showToast(errorMessage, 'error');
         },
       });
@@ -1252,21 +1253,21 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   }
 
   deleteCommunity() {
-    console.log('deleteCommunity() çağrıldı');
-    console.log('editingCommunity:', this.editingCommunity);
+    Logger.log('deleteCommunity() çağrıldı');
+    Logger.log('editingCommunity:', this.editingCommunity);
 
     if (!this.editingCommunity) {
-      console.error('editingCommunity null!');
+      Logger.error('editingCommunity null!');
       this.showToast('Silinecek topluluk bulunamadı.', 'error');
       return;
     }
 
     const communityId = this.editingCommunity.id;
-    console.log('Community ID:', communityId);
+    Logger.log('Community ID:', communityId);
 
     // ID kontrolü - geçerli bir GUID olmalı
     if (!communityId || communityId === '' || communityId.includes('mock')) {
-      console.error('Geçersiz Community ID:', communityId);
+      Logger.error('Geçersiz Community ID:', communityId);
       this.showToast('Topluluk ID\'si geçersiz. Lütfen sayfayı yenileyip tekrar deneyin.', 'error');
       return;
     }
@@ -1282,15 +1283,15 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   }
 
   private performDeleteCommunity(communityId: string) {
-    console.log('DELETE isteği gönderiliyor - ID:', communityId);
-    console.log('DELETE isteği gönderiliyor - Endpoint: /api/Communities/' + communityId);
+    Logger.log('DELETE isteği gönderiliyor - ID:', communityId);
+    Logger.log('DELETE isteği gönderiliyor - Endpoint: /api/Communities/' + communityId);
 
     // CommunityService'ten sil (backend'e istek atılır)
     // DELETE /api/Communities/{id} - 204 No Content döner (başarılı)
     this.communityService.deleteCommunity(communityId).subscribe({
       next: (response) => {
-        console.log('Topluluk başarıyla silindi - ID:', communityId);
-        console.log('Response (204 No Content):', response);
+        Logger.log('Topluluk başarıyla silindi - ID:', communityId);
+        Logger.log('Response (204 No Content):', response);
 
         // Önce editingCommunity ve selectedCommunity'yi temizle (ID'li GET isteklerini önlemek için)
         this.editingCommunity = null;
@@ -1303,19 +1304,19 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         const index = this.allCommunities.findIndex((c) => c.id === communityId);
         if (index !== -1) {
           this.allCommunities.splice(index, 1);
-          console.log('allCommunities listesinden kaldırıldı');
+          Logger.log('allCommunities listesinden kaldırıldı');
         }
 
         const filteredIndex = this.filteredCommunities.findIndex((c) => c.id === communityId);
         if (filteredIndex !== -1) {
           this.filteredCommunities.splice(filteredIndex, 1);
-          console.log('filteredCommunities listesinden kaldırıldı');
+          Logger.log('filteredCommunities listesinden kaldırıldı');
         }
 
         const communitiesIndex = this.communities.findIndex((c) => c.id === communityId);
         if (communitiesIndex !== -1) {
           this.communities.splice(communitiesIndex, 1);
-          console.log('communities listesinden kaldırıldı');
+          Logger.log('communities listesinden kaldırıldı');
         }
 
         // Filtreleri uygula (liste güncellenmiş olacak)
@@ -1328,10 +1329,10 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         this.showToast('Topluluk başarıyla silindi', 'success');
       },
       error: (err) => {
-        console.error('Topluluk silme hatası:', err);
-        console.error('Error status:', err.status);
-        console.error('Error message:', err.message);
-        console.error('Error object:', err);
+        Logger.error('Topluluk silme hatası:', err);
+        Logger.error('Error status:', err.status);
+        Logger.error('Error message:', err.message);
+        Logger.error('Error object:', err);
 
         let errorMessage = 'Topluluk silinirken bir hata oluştu';
 
@@ -1630,7 +1631,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     ].filter(Boolean).join('\n');
 
     // Debug: Gönderilen veriyi logla
-    console.log('[Spam Check] Sending full event data:', {
+    Logger.log('[Spam Check] Sending full event data:', {
       eventId: id,
       eventName: ev.eventName,
       fullText: fullText.substring(0, 200) + '...', // İlk 200 karakter
@@ -1691,7 +1692,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
           // }
           const analysis = response.analysis || {};
           const moderation = response.moderation || {};
-          
+
           // Analysis'den verileri al
           let forbiddenData = analysis.forbidden || { count: 0, words: [] };
           let spamData = analysis.spam || { count: 0, keywords: [] };
@@ -1741,7 +1742,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
           }
 
           // Debug: Backend'den gelen veriyi logla
-          console.log('[Spam Check] Backend Response:', {
+          Logger.log('[Spam Check] Backend Response:', {
             analysis,
             moderation,
             forbiddenData,
@@ -1760,23 +1761,47 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
 
           // Eğer status'ta "politics" veya "forbidden" veya "spam" geçiyorsa ama keywords yoksa,
           // count'u 1 yap (backend keywords döndürmüyor olabilir ama sorun var)
-          if (moderationStatus && moderationStatus.includes('politics') && politicsData.count === 0 && politicsData.keywords.length === 0) {
-            politicsData.count = 1;
+          // ÖNEMLİ: Backend bazen status'ta sorun belirtiyor ama keywords döndürmüyor
+          if (moderationStatus && moderationStatus.includes('politics')) {
+            // Status'ta "politics" geçiyorsa ama keywords yoksa, yine de sorunlu olarak işaretle
+            if (politicsData.count === 0 && politicsData.keywords.length === 0) {
+              politicsData.count = 1;
+            }
+            // Eğer count > 0 ama keywords boşsa, bu da bir sorun (backend keywords döndürmemiş)
+            // Bu durumda keywords'i status'tan çıkarabiliriz veya genel bir mesaj gösterebiliriz
           }
-          if (moderationStatus && moderationStatus.includes('forbidden') && forbiddenData.count === 0 && forbiddenData.words.length === 0) {
-            forbiddenData.count = 1;
+          if (moderationStatus && moderationStatus.includes('forbidden')) {
+            if (forbiddenData.count === 0 && forbiddenData.words.length === 0) {
+              forbiddenData.count = 1;
+            }
           }
-          if (moderationStatus && moderationStatus.includes('spam') && spamData.count === 0 && spamData.keywords.length === 0) {
-            spamData.count = 1;
+          if (moderationStatus && moderationStatus.includes('spam')) {
+            if (spamData.count === 0 && spamData.keywords.length === 0) {
+              spamData.count = 1;
+            }
+          }
+
+          // ÖZEL DURUM: Status'ta "admin_kontrolu" geçiyorsa (politics, forbidden, spam ile birlikte)
+          // ama ilgili kategori için count 0 ve keywords boşsa, yine de sorunlu olarak işaretle
+          if (moderationStatus.includes('admin_kontrolu')) {
+            if (moderationStatus.includes('politics') && politicsData.count === 0 && politicsData.keywords.length === 0) {
+              politicsData.count = 1;
+            }
+            if (moderationStatus.includes('forbidden') && forbiddenData.count === 0 && forbiddenData.words.length === 0) {
+              forbiddenData.count = 1;
+            }
+            if (moderationStatus.includes('spam') && spamData.count === 0 && spamData.keywords.length === 0) {
+              spamData.count = 1;
+            }
           }
 
           // Status kontrolü: "kabul" veya hiç sorun yoksa temiz
           // "yeniden_admin_kontrolu_politics", "red" gibi değerler sorunlu
           const isClean = (moderationStatus === 'kabul' || moderationStatus === 'accept' || moderationStatus === 'approved') ||
-                    (forbiddenCount === 0 && spamCount === 0 && politicsCount === 0 && !moderationStatus.includes('admin_kontrolu') && !moderationStatus.includes('red'));
-          
+            (forbiddenCount === 0 && spamCount === 0 && politicsCount === 0 && !moderationStatus.includes('admin_kontrolu') && !moderationStatus.includes('red'));
+
           const status = moderationStatus || (isClean ? 'kabul' : 'red');
-          
+
           // Reason array'ini string'e çevir
           const reasonArray = moderation.reason || [];
           const reason = Array.isArray(reasonArray) ? reasonArray.join(', ') : (reasonArray || '');
@@ -1807,11 +1832,12 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
               if (politicsKeywords.length > 0) {
                 issues.push(`${politicsCount} siyasi içerik: ${politicsKeywords.slice(0, 5).join(', ')}${politicsKeywords.length > 5 ? '...' : ''}`);
               } else {
-                issues.push(`${politicsCount} siyasi içerik`);
+                // Keywords boş ama status'ta "politics" geçiyorsa, backend algılamış ama keywords döndürmemiş
+                issues.push(`${politicsCount} siyasi içerik tespit edildi (detaylar backend'de mevcut değil)`);
               }
             }
-            message = issues.length > 0 
-              ? `İçerikte sorun tespit edildi: ${issues.join('; ')}.` 
+            message = issues.length > 0
+              ? `İçerikte sorun tespit edildi: ${issues.join('; ')}.`
               : 'İçerik kontrol edilmeli.';
           }
 
@@ -1938,7 +1964,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     };
 
     // Debug: Rapor verisini logla
-    console.log('[Spam Report] Generated report:', report);
+    Logger.log('[Spam Report] Generated report:', report);
 
     return report;
   }
@@ -1984,7 +2010,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
           this.loadEventsFromService();
         },
         error: (err: any) => {
-          console.error('Etkinlik onaylanamadı:', err);
+          Logger.error('Etkinlik onaylanamadı:', err);
           let errorMessage = 'Etkinlik onaylanırken bir hata oluştu.';
           if (err.error && err.error.message) {
             errorMessage = err.error.message;
@@ -2047,7 +2073,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         this.loadEventsFromService();
       },
       error: (err) => {
-        console.error('Etkinlik reddedilemedi:', err);
+        Logger.error('Etkinlik reddedilemedi:', err);
         let errorMessage = 'Etkinlik reddedilirken bir hata oluştu.';
         if (err.error && err.error.message) {
           errorMessage = err.error.message;
@@ -2135,7 +2161,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       this.showToast('Etkinlik adı zorunlu', 'error');
       return;
     }
-    
+
     // Backend'e event oluştur
     // Tarih formatını parse et - EventItem'da startDate string (ISO format) tipinde
     let startDate: string | undefined = undefined;
@@ -2146,10 +2172,10 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
           startDate = dateObj.toISOString();
         }
       } catch (e) {
-        console.warn('Tarih parse edilemedi:', e);
+        Logger.warn('Tarih parse edilemedi:', e);
       }
     }
-    
+
     const eventData: Partial<EventItem> = {
       title: this.newEvent.eventName,
       location: this.newEvent.location || '',
@@ -2158,11 +2184,11 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       imageUrl: this.newEvent.imageUrl || undefined,
       startDate: startDate,
     };
-    
+
     this.eventService.createEvent(eventData).subscribe({
       next: (response) => {
         const eventId = response.eventId;
-        
+
         // Eğer fotoğraf seçildiyse, event ID alındıktan sonra yükle
         if (this.pendingNewEventImage) {
           this.eventService.uploadEventImage(eventId, this.pendingNewEventImage).subscribe({
@@ -2176,7 +2202,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
             },
             error: (err) => {
               // Fotoğraf yüklenemedi ama etkinlik oluşturuldu
-              console.error('Görsel yüklenemedi:', err);
+              Logger.error('Görsel yüklenemedi:', err);
               this.loadEventsFromService();
               this.showToast('Etkinlik eklendi ancak görsel yüklenemedi', 'error');
               this.pendingNewEventImage = null;
@@ -2191,7 +2217,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         }
       },
       error: (error) => {
-        console.error('Etkinlik oluşturulamadı:', error);
+        Logger.error('Etkinlik oluşturulamadı:', error);
         this.showToast('Etkinlik oluşturulamadı', 'error');
       }
     });
@@ -2204,14 +2230,14 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         // Başarılı - etkinlikleri backend'den yeniden yükle
         this.loadEventsFromService();
         this.showToast('Etkinlik başarıyla silindi.', 'success');
-        
+
         // Eğer silinen etkinlik detail modal'da açıksa, modal'ı kapat
         if (this.selectedEvent && this.selectedEvent.id === id) {
           this.closeModal();
         }
       },
       error: (err: any) => {
-        console.error('Etkinlik silinirken hata:', err);
+        Logger.error('Etkinlik silinirken hata:', err);
         let errorMsg = 'Etkinlik silinirken bir hata oluştu.';
         if (err.status === 401 || err.status === 403) {
           errorMsg = 'Bu işlem için yetkiniz bulunmamaktadır.';
@@ -2281,7 +2307,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     this.editingAnnouncement = { ...announcement };
     this.modalType = 'edit-announcement';
     this.isModalOpen = true;
-    
+
     // Backend'den detay bilgisini çek (link bilgisi dahil tüm detaylar için)
     if (announcement.id) {
       this.announcementService.getAnnouncementById(announcement.id).subscribe({
@@ -2293,7 +2319,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           // Detay çekilemezse mevcut veriyi kullan (zaten set edildi)
-          console.warn('Duyuru detayı alınamadı, mevcut veri kullanılıyor:', err);
+          Logger.warn('Duyuru detayı alınamadı, mevcut veri kullanılıyor:', err);
         }
       });
     }
@@ -2331,7 +2357,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
               },
               error: (err) => {
                 // Görsel yüklenemedi ama duyuru oluşturuldu
-                console.error('Görsel yüklenemedi:', err);
+                Logger.error('Görsel yüklenemedi:', err);
                 this.loadAnnouncementsFromService();
                 this.showToast('Duyuru oluşturuldu ancak görsel yüklenemedi', 'error');
                 this.resetNewAnnouncementForm();
@@ -2455,11 +2481,11 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     }
 
     // DEBUG: Component'ten gönderilen veriyi kontrol et
-    console.log('=== updateAnnouncement Component DEBUG ===');
-    console.log('editingAnnouncement.title:', this.editingAnnouncement.title);
-    console.log('editingAnnouncement.title type:', typeof this.editingAnnouncement.title);
-    console.log('editingAnnouncement.title length:', this.editingAnnouncement.title?.length);
-    console.log('Full editingAnnouncement:', JSON.stringify(this.editingAnnouncement, null, 2));
+    Logger.log('=== updateAnnouncement Component DEBUG ===');
+    Logger.log('editingAnnouncement.title:', this.editingAnnouncement.title);
+    Logger.log('editingAnnouncement.title type:', typeof this.editingAnnouncement.title);
+    Logger.log('editingAnnouncement.title length:', this.editingAnnouncement.title?.length);
+    Logger.log('Full editingAnnouncement:', JSON.stringify(this.editingAnnouncement, null, 2));
 
     this.announcementService
       .updateAnnouncement(announcementId, {
@@ -2484,7 +2510,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
               },
               error: (err: any) => {
                 // Görsel yüklenemedi ama duyuru güncellendi
-                console.error('Görsel yüklenemedi:', err);
+                Logger.error('Görsel yüklenemedi:', err);
                 this.loadAnnouncementsFromService();
                 this.showToast('Duyuru güncellendi ancak görsel yüklenemedi', 'error');
                 this.pendingEditAnnouncementImage = null;

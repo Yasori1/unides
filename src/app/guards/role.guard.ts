@@ -6,9 +6,10 @@ export const roleGuard: CanActivateFn = (route, state) => {
     const authService = inject(AuthService);
     const router = inject(Router);
 
-    // 1. Kullanıcı giriş yapmış mı?
+    // 1. Kullanıcı giriş yapmış mı ve token geçerli mi?
+    // isAuthenticated() artık token expiry kontrolü de yapıyor
     if (!authService.isAuthenticated()) {
-        // Giriş yapmamışsa login sayfasına at
+        // Giriş yapmamışsa veya token expire olmuşsa login sayfasına at
         // İstenirse gidilmek istenen URL query param olarak eklenebilir
         router.navigate(['/login']);
         return false;
@@ -27,6 +28,6 @@ export const roleGuard: CanActivateFn = (route, state) => {
         return false;
     }
 
-    // Her şey yolunda
+    // Her şey yolunda - token geçerli ve rol uygun
     return true;
 };

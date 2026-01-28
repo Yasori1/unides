@@ -5,6 +5,7 @@ import { AuthService } from '../../services/auth.services';
 import { CommunityService } from '../../services/community.services';
 import { Subscription, filter, forkJoin, of } from 'rxjs';
 import { switchMap, catchError, take } from 'rxjs/operators';
+import { Logger } from '../../utils/logger.util';
 
 @Component({
   selector: 'app-header-branding',
@@ -109,7 +110,7 @@ export class HeaderBrandingComponent implements OnInit, OnDestroy {
           return;
         }
       } catch (e) {
-        console.error('Error parsing community info:', e);
+        Logger.error('Error parsing community info:', e);
       }
     }
 
