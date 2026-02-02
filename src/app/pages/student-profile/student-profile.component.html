@@ -219,44 +219,61 @@
             <h3>Katıldığım Topluluklar</h3>
             <button class="btn-text" (click)="switchTab('communities')">Tümünü Gör</button>
           </div>
-          <div class="community-cards-mini" *ngIf="myCommunities.length > 0">
-            <div class="community-card" *ngFor="let community of myCommunities.slice(0, 3)"
-              (click)="goCommunityDetail(community)">
-              <div class="cover-area">
-                <img [src]="
-                    community.coverImage || community.banner || 'assets/img/placeholder-cover.svg'
-                  " [alt]="community.name" class="cover-img" (error)="onImageError($event, 'cover')" />
-                <span class="category-badge">{{ community.category }}</span>
-              </div>
-              <div class="card-content">
-                <div class="header-row">
-                  <div class="logo-wrapper">
-                    <img [src]="community.logo || 'assets/img/placeholder-logo.svg'" [alt]="community.name"
-                      class="logo-img" (error)="onImageError($event, 'logo')" />
-                  </div>
-                  <div class="title-wrapper">
-                    <h3 class="community-name">{{ community.name }}</h3>
-                  </div>
-                </div>
-                <p class="description" *ngIf="community.description || community.about">
-                  {{ community.description || community.about }}
-                </p>
 
-                <div class="card-footer">
-                  <div class="footer-info">
-                    <span class="city-tag" *ngIf="community.city">
-                      <span class="material-symbols-outlined" style="font-size: 16px">location_on</span>
-                      {{ community.city }}
-                    </span>
+          <div class="communities-carousel-wrapper" *ngIf="myCommunities.length > 0">
+            <div class="carousel-fade left-fade" *ngIf="canScrollCommunitiesLeft()"></div>
+            <div class="carousel-fade right-fade" *ngIf="canScrollCommunitiesRight()"></div>
+
+            <button class="carousel-nav-btn left" (click)="scrollCommunities('left')" [disabled]="!canScrollCommunitiesLeft()"
+              title="Önceki">
+              <span class="material-symbols-outlined">chevron_left</span>
+            </button>
+            <div class="communities-carousel-container" (scroll)="onCommunitiesScroll($event)">
+              <div class="communities-carousel-track">
+                <div class="community-card carousel-card" *ngFor="let community of myCommunities"
+                  (click)="goCommunityDetail(community)">
+                  <div class="cover-area">
+                    <img [src]="
+                        community.coverImage || community.banner || 'assets/img/placeholder-cover.svg'
+                      " [alt]="community.name" class="cover-img" (error)="onImageError($event, 'cover')" />
+                    <span class="category-badge">{{ community.category }}</span>
                   </div>
-                  <span class="action-text">
-                    İncele
-                    <span class="material-symbols-outlined" style="font-size: 18px">arrow_forward</span>
-                  </span>
+                  <div class="card-content">
+                    <div class="header-row">
+                      <div class="logo-wrapper">
+                        <img [src]="community.logo || 'assets/img/placeholder-logo.svg'" [alt]="community.name"
+                          class="logo-img" (error)="onImageError($event, 'logo')" />
+                      </div>
+                      <div class="title-wrapper">
+                        <h3 class="community-name">{{ community.name }}</h3>
+                      </div>
+                    </div>
+                    <p class="description" *ngIf="community.description || community.about">
+                      {{ community.description || community.about }}
+                    </p>
+
+                    <div class="card-footer">
+                      <div class="footer-info">
+                        <span class="city-tag" *ngIf="community.city">
+                          <span class="material-symbols-outlined" style="font-size: 16px">location_on</span>
+                          {{ community.city }}
+                        </span>
+                      </div>
+                      <span class="action-text">
+                        İncele
+                        <span class="material-symbols-outlined" style="font-size: 18px">arrow_forward</span>
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
+            <button class="carousel-nav-btn right" (click)="scrollCommunities('right')" [disabled]="!canScrollCommunitiesRight()"
+              title="Sonraki">
+              <span class="material-symbols-outlined">chevron_right</span>
+            </button>
           </div>
+
           <div class="empty-state" *ngIf="myCommunities.length === 0">
             <span class="material-symbols-outlined">groups</span>
             <p>Henüz hiçbir topluluğa katılmadınız</p>
