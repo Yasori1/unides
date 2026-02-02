@@ -60,7 +60,7 @@ export class CommunityService {
       finalPath = finalPath.replace('/images/', '/ImagesUnides/');
     }
 
-    // Her zaman production URL'ini kullan (unidesportal.com)
+    // Base URL: environment.apiUrl (production'da unidesportal.org — sayfa ile aynı origin)
     const baseUrl = environment.apiUrl.replace('/api', '');
     return baseUrl + finalPath;
   }

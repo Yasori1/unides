@@ -56,7 +56,7 @@ export const appConfig: ApplicationConfig = {
     provideClientHydration(),
     provideAnimationsAsync(),
     // Interceptors are applied in order: authInterceptor first, then errorInterceptor
-    // Direct connection to unidesportal.com/api - no proxy
+    // API istekleri environment.apiUrl üzerinden (production: https://unidesportal.org/api — aynı origin, CORS yok)
     provideHttpClient(
       withInterceptors([authInterceptor, errorInterceptor])
     ),

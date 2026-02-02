@@ -10,7 +10,7 @@
     }
   },
   "/api/**": {
-    "target": "https://unidesportal.com",
+    "target": "https://unidesportal.org",
     "secure": true,
     "changeOrigin": true,
     "logLevel": "debug",
@@ -33,7 +33,7 @@
     }
   },
   "/ImagesUnides/**": {
-    "target": "https://unidesportal.com",
+    "target": "https://unidesportal.org",
     "secure": true,
     "changeOrigin": true,
     "logLevel": "debug"

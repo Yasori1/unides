@@ -2633,7 +2633,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       finalPath = finalPath.replace('/images/', '/ImagesUnides/');
     }
 
-    // Her zaman production URL'ini kullan (unidesportal.com) - direkt bağlantı
+    // Base URL: environment.apiUrl (production'da unidesportal.org)
     const baseUrl = environment.apiUrl.replace('/api', '');
     const fullUrl = baseUrl + finalPath;
     Logger.log('[convertImagePathToFullUrl] Converting path:', pathStr, 'to full URL:', fullUrl);

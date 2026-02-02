@@ -14,12 +14,10 @@ const PROXY_CONFIG = {
       'Content-Type': 'application/json',
     },
   },
-  // Ana API - tüm /api/... istekleri için (nested paths dahil)
-  // Vite'da nested path'ler için '**' wildcard pattern gerekli
-  // Bu pattern /api/Events/upcoming/home gibi tüm nested path'leri yakalar
+  // Ana API - tüm /api/... istekleri https://unidesportal.org'a yönlendirilir
   '/api': {
-    target: 'http://72.62.37.160:8080',
-    secure: false,
+    target: 'https://unidesportal.org',
+    secure: true,
     changeOrigin: true,
     logLevel: 'debug',
     ws: true,
@@ -44,7 +42,7 @@ const PROXY_CONFIG = {
   },
   // Images proxy - CORS sorununu çözmek için
   '/ImagesUnides': {
-    target: 'https://unidesportal.com',
+    target: 'https://unidesportal.org',
     secure: true,
     changeOrigin: true,
     logLevel: 'debug',

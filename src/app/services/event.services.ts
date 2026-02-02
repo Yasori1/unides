@@ -200,7 +200,7 @@ export class EventService {
       finalPath = `/ImagesUnides/Etkinlikler/${finalPath}`;
     }
 
-    // Her zaman production URL'ini kullan (unidesportal.com) - direkt bağlantı
+    // Base URL: environment.apiUrl (production'da https://unidesportal.org — aynı origin, CORS yok)
     const baseUrl = environment.apiUrl.replace('/api', '');
     const fullUrl = baseUrl + finalPath;
     return fullUrl;
@@ -426,7 +426,7 @@ export class EventService {
           finalLogoPath = `/ImagesUnides/Logo/${finalLogoPath}`;
         }
 
-        // Her zaman production URL'ini kullan (unidesportal.com) - direkt bağlantı
+        // Base URL: environment.apiUrl (production'da unidesportal.org)
         const baseUrl = environment.apiUrl.replace('/api', '');
         const fullUrl = baseUrl + finalLogoPath;
 
