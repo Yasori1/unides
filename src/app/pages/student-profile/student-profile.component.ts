@@ -104,6 +104,14 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
     confirmPassword: '',
   };
 
+  /** Şifre güç kuralları (Yeni Şifre alanı için — Öğrenci Kaydı ile aynı) */
+  passwordMinLength = false;
+  passwordHasUppercase = false;
+  passwordHasLowercase = false;
+  passwordHasNumber = false;
+  passwordHasSpecial = false;
+  hasPasswordInput = false;
+
   // Stats
   stats: Stat[] = [
     { label: 'Katıldığım Topluluklar', value: 0, icon: 'groups', color: '#2563eb' },
@@ -905,8 +913,40 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
     });
   }
 
+  /** Şifre güç kurallarını kontrol et (Öğrenci Kaydı ile aynı) */
+  private validatePasswordStrength(pwd: string): void {
+    this.passwordMinLength = pwd.length >= 8;
+    this.passwordHasUppercase = /[A-Z]/.test(pwd);
+    this.passwordHasLowercase = /[a-z]/.test(pwd);
+    this.passwordHasNumber = /[0-9]/.test(pwd);
+    this.passwordHasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?.]/.test(pwd);
+  }
+
+  get isPasswordStrong(): boolean {
+    return (
+      this.passwordMinLength &&
+      this.passwordHasUppercase &&
+      this.passwordHasLowercase &&
+      this.passwordHasNumber &&
+      this.passwordHasSpecial
+    );
+  }
+
+  get passwordMismatch(): boolean {
+    return !!(
+      this.userInfo.confirmPassword &&
+      this.userInfo.newPassword !== this.userInfo.confirmPassword
+    );
+  }
+
+  onNewPasswordInput(event: Event): void {
+    const value = (event.target as HTMLInputElement)?.value ?? '';
+    this.userInfo.newPassword = value;
+    this.hasPasswordInput = value.length > 0;
+    this.validatePasswordStrength(value);
+  }
+
   changePassword(): void {
-    // Validate password change
     if (
       !this.userInfo.currentPassword ||
       !this.userInfo.newPassword ||
@@ -921,8 +961,11 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (this.userInfo.newPassword.length < 6) {
-      this.toastService.show('Şifre en az 6 karakter olmalıdır', 'error');
+    if (!this.isPasswordStrong) {
+      this.toastService.show(
+        'Şifre en az 8 karakter olmalı; büyük harf, küçük harf, rakam ve özel karakter (! . , ? @ # vb.) içermelidir.',
+        'error'
+      );
       return;
     }
 

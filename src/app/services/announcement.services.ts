@@ -134,29 +134,28 @@ export class AnnouncementService {
       link = '';
     }
 
-    // Görsel path'i tam URL'ye çevir
-    // Backend relative path dönerse (örn: /assets/img/Duyurular/xxx.jpg), tam URL'ye çevir
+    // Görsel path'i /ImagesUnides/ formatına çevir — link bağlamada sadece path kullanılıyor
     if (imagePath && !imagePath.startsWith('http://') && !imagePath.startsWith('https://') && !imagePath.startsWith('data:')) {
-      // Backend base URL'si (api kısmını çıkar) - Her zaman production URL'ini kullan
-      const baseUrl = environment.apiUrl.replace('/api', '');
-
-      // Path'in başında / yoksa ekle
       let finalPath = imagePath;
       if (!finalPath.startsWith('/')) {
         finalPath = '/' + finalPath;
       }
-
-      // Path dönüşümü: `/assets/img/Duyurular/` -> `/ImagesUnides/Duyurular/`
       if (finalPath.startsWith('/assets/img/')) {
         finalPath = finalPath.replace('/assets/img/', '/ImagesUnides/');
-      }
-      // Eğer zaten `/ImagesUnides/` ile başlıyorsa olduğu gibi bırak
-      // Eğer `/images/` ile başlıyorsa (küçük harf) `/ImagesUnides/` yap
-      else if (finalPath.startsWith('/images/')) {
+      } else if (finalPath.startsWith('/images/')) {
         finalPath = finalPath.replace('/images/', '/ImagesUnides/');
       }
-
-      imagePath = baseUrl + finalPath;
+      imagePath = finalPath;
+    } else if (imagePath && (imagePath.startsWith('http://') || imagePath.startsWith('https://'))) {
+      try {
+        const pathname = new URL(imagePath).pathname;
+        if (pathname.startsWith('/ImagesUnides/')) imagePath = pathname;
+        else if (pathname.startsWith('/images/')) imagePath = pathname.replace('/images/', '/ImagesUnides/');
+        else if (pathname.startsWith('/assets/img/')) imagePath = pathname.replace('/assets/img/', '/ImagesUnides/');
+        else imagePath = pathname;
+      } catch {
+        // URL parse edilemezse olduğu gibi bırak
+      }
     }
 
     return {
@@ -349,15 +348,23 @@ export class AnnouncementService {
           if (!finalPath.startsWith('/')) {
             finalPath = '/' + finalPath;
           }
-          // Path dönüşümü: `/assets/img/` -> `/ImagesUnides/`
           if (finalPath.startsWith('/assets/img/')) {
             finalPath = finalPath.replace('/assets/img/', '/ImagesUnides/');
           } else if (finalPath.startsWith('/images/')) {
             finalPath = finalPath.replace('/images/', '/ImagesUnides/');
           }
-          // Full URL oluştur
-          const baseUrl = environment.apiUrl.replace('/api', '');
-          return baseUrl + finalPath;
+          return finalPath;
+        }
+        if (path && path.startsWith('http')) {
+          try {
+            const pathname = new URL(path).pathname;
+            if (pathname.startsWith('/ImagesUnides/')) return pathname;
+            if (pathname.startsWith('/images/')) return pathname.replace('/images/', '/ImagesUnides/');
+            if (pathname.startsWith('/assets/img/')) return pathname.replace('/assets/img/', '/ImagesUnides/');
+            return pathname;
+          } catch {
+            return path;
+          }
         }
         return path;
       }),

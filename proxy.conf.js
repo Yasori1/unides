@@ -2,11 +2,11 @@
 // Proxy sayesinde CORS sorunu olmayacak - istekler localhost:4200'den gelecek
 // IMPORTANT: Vite requires '**' wildcard for nested paths
 
+// Tüm proxy hedefleri https://unidesportal.org
 const PROXY_CONFIG = {
-  // Moderasyon API - daha spesifik pattern önce gelmeli (öncelikli)
   '/api/moderate': {
-    target: 'http://72.62.37.160:5002',
-    secure: false,
+    target: 'https://unidesportal.org',
+    secure: true,
     changeOrigin: true,
     logLevel: 'debug',
     headers: {
@@ -14,33 +14,38 @@ const PROXY_CONFIG = {
       'Content-Type': 'application/json',
     },
   },
-  // Ana API - tüm /api/... istekleri https://unidesportal.org'a yönlendirilir
+  '/chatbot': {
+    target: 'https://unidesportal.org',
+    secure: true,
+    changeOrigin: true,
+    logLevel: 'debug',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+  },
   '/api': {
     target: 'https://unidesportal.org',
     secure: true,
     changeOrigin: true,
     logLevel: 'debug',
     ws: true,
-    // Vite'da rewrite kullanmıyoruz, path'i olduğu gibi bırakıyoruz
-    // Çünkü backend zaten /api/Events/upcoming/home formatını bekliyor
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
     },
   },
-  // Spam check API
   '/spam-check': {
-    target: 'http://72.62.37.160:5002',
-    secure: false,
+    target: 'https://unidesportal.org',
+    secure: true,
     changeOrigin: true,
     logLevel: 'warn',
-    rewrite: (path) => path.replace(/^\/spam-check/, '/check'),
+    rewrite: (path) => path.replace(/^\/spam-check/, '/api/moderate'),
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
     },
   },
-  // Images proxy - CORS sorununu çözmek için
   '/ImagesUnides': {
     target: 'https://unidesportal.org',
     secure: true,

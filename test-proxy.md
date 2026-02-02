@@ -15,7 +15,7 @@ ng serve
 Dev server başladıktan sonra terminal'de şu logları ara:
 
 ```
-[proxy] /api/Events/upcoming/home -> http://72.62.37.160:8080/api/Events/upcoming/home
+[proxy] /api/Events/upcoming/home -> https://unidesportal.org/api/Events/upcoming/home
 ```
 
 Eğer bu logları görüyorsan → Proxy çalışıyor ✅
@@ -33,7 +33,7 @@ Browser'da F12 → Network tab → Sayfayı yenile
 
 Tarayıcıda şu URL'yi aç:
 ```
-http://72.62.37.160:8080/api/Events/upcoming/home
+https://unidesportal.org/api/Events/upcoming/home
 ```
 
 Eğer 404 alıyorsan → Backend sorunu
@@ -41,7 +41,7 @@ Eğer 200 alıyorsan → Proxy sorunu olabilir
 
 ## Adım 5: Backend Loglarını Kontrol Et
 
-Backend sunucusunun (72.62.37.160:8080) loglarında şunu ara:
+Backend sunucusunun (unidesportal.org) loglarında şunu ara:
 - `GET /api/Events/upcoming/home` isteği geliyor mu?
 - Hata mesajı var mı?
 

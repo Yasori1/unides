@@ -1,13 +1,12 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class SpamService {
-  // Backend spam filter API adresi
-  // URL: http://72.62.37.160/spam (HTTP protokolü, HTTPS değil)
-  // Method: POST
-  private apiUrl = 'https://unidesportal.org/spam-check';
+  // Tüm istekler unidesportal.org üzerinden (environment.spamBotApiUrl → /api/moderate)
+  private apiUrl = environment.spamBotApiUrl;
 
   constructor(private http: HttpClient) { }
 

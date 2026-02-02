@@ -35,8 +35,19 @@ export class CommunityService {
 
     const pathStr = String(imagePath).trim();
 
-    // Zaten tam URL ise (http://, https://, data:, blob:) olduğu gibi döndür
-    if (pathStr.startsWith('http://') || pathStr.startsWith('https://') || pathStr.startsWith('data:') || pathStr.startsWith('blob:')) {
+    // Tam URL ise (http/https) sadece path kısmını al — link bağlamada /ImagesUnides/ kullanılıyor
+    if (pathStr.startsWith('http://') || pathStr.startsWith('https://')) {
+      try {
+        const pathname = new URL(pathStr).pathname;
+        if (pathname.startsWith('/ImagesUnides/')) return pathname;
+        if (pathname.startsWith('/images/')) return pathname.replace('/images/', '/ImagesUnides/');
+        if (pathname.startsWith('/assets/img/')) return pathname.replace('/assets/img/', '/ImagesUnides/');
+        return pathname || pathStr;
+      } catch {
+        return pathStr;
+      }
+    }
+    if (pathStr.startsWith('data:') || pathStr.startsWith('blob:')) {
       return pathStr;
     }
 
@@ -54,15 +65,11 @@ export class CommunityService {
     if (finalPath.startsWith('/assets/img/')) {
       finalPath = finalPath.replace('/assets/img/', '/ImagesUnides/');
     }
-    // Eğer zaten `/ImagesUnides/` ile başlıyorsa olduğu gibi bırak
-    // Eğer `/images/` ile başlıyorsa (küçük harf) `/ImagesUnides/` yap
     else if (finalPath.startsWith('/images/')) {
       finalPath = finalPath.replace('/images/', '/ImagesUnides/');
     }
 
-    // Base URL: environment.apiUrl (production'da unidesportal.org — sayfa ile aynı origin)
-    const baseUrl = environment.apiUrl.replace('/api', '');
-    return baseUrl + finalPath;
+    return finalPath;
   }
 
   private ensureCommunityAssets(c: Community): Community {
@@ -1018,10 +1025,16 @@ export class CommunityService {
           } else if (finalPath.startsWith('/images/')) {
             finalPath = finalPath.replace('/images/', '/ImagesUnides/');
           }
-          // Full URL oluştur
-          const baseUrl = environment.apiUrl.replace('/api', '');
-          const fullUrl = baseUrl + finalPath;
-          return { BannerUrl: fullUrl };
+          return { BannerUrl: finalPath };
+        }
+        if (path.startsWith('http')) {
+          try {
+            const pathname = new URL(path).pathname;
+            const norm = pathname.startsWith('/images/') ? pathname.replace('/images/', '/ImagesUnides/') : pathname.startsWith('/assets/img/') ? pathname.replace('/assets/img/', '/ImagesUnides/') : pathname;
+            return { BannerUrl: norm.startsWith('/ImagesUnides/') ? norm : '/ImagesUnides/' + norm.replace(/^\//, '') };
+          } catch {
+            return { BannerUrl: path };
+          }
         }
         return { BannerUrl: path };
       }),
@@ -1055,10 +1068,16 @@ export class CommunityService {
           } else if (finalPath.startsWith('/images/')) {
             finalPath = finalPath.replace('/images/', '/ImagesUnides/');
           }
-          // Full URL oluştur
-          const baseUrl = environment.apiUrl.replace('/api', '');
-          const fullUrl = baseUrl + finalPath;
-          return { LogoUrl: fullUrl };
+          return { LogoUrl: finalPath };
+        }
+        if (path.startsWith('http')) {
+          try {
+            const pathname = new URL(path).pathname;
+            const norm = pathname.startsWith('/images/') ? pathname.replace('/images/', '/ImagesUnides/') : pathname.startsWith('/assets/img/') ? pathname.replace('/assets/img/', '/ImagesUnides/') : pathname;
+            return { LogoUrl: norm.startsWith('/ImagesUnides/') ? norm : '/ImagesUnides/' + norm.replace(/^\//, '') };
+          } catch {
+            return { LogoUrl: path };
+          }
         }
         return { LogoUrl: path };
       }),

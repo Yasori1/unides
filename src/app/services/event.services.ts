@@ -124,8 +124,19 @@ export class EventService {
     // String'e çevir ve trim yap
     const pathStr = String(imagePath).trim();
 
-    // Zaten tam URL ise (http://, https://, data:, blob:) olduğu gibi döndür
-    if (pathStr.startsWith('http://') || pathStr.startsWith('https://') || pathStr.startsWith('data:') || pathStr.startsWith('blob:')) {
+    // Tam URL ise (http/https) sadece path kısmını al — link bağlamada /ImagesUnides/ kullanılıyor
+    if (pathStr.startsWith('http://') || pathStr.startsWith('https://')) {
+      try {
+        const pathname = new URL(pathStr).pathname;
+        if (pathname.startsWith('/ImagesUnides/')) return pathname;
+        if (pathname.startsWith('/images/')) return pathname.replace('/images/', '/ImagesUnides/');
+        if (pathname.startsWith('/assets/img/')) return pathname.replace('/assets/img/', '/ImagesUnides/');
+        return pathname || pathStr;
+      } catch {
+        return pathStr;
+      }
+    }
+    if (pathStr.startsWith('data:') || pathStr.startsWith('blob:')) {
       return pathStr;
     }
 
@@ -200,10 +211,8 @@ export class EventService {
       finalPath = `/ImagesUnides/Etkinlikler/${finalPath}`;
     }
 
-    // Base URL: environment.apiUrl (production'da https://unidesportal.org — aynı origin, CORS yok)
-    const baseUrl = environment.apiUrl.replace('/api', '');
-    const fullUrl = baseUrl + finalPath;
-    return fullUrl;
+    // ImagePath olarak sadece /ImagesUnides/ path döndür (link bağlamada tam URL yok)
+    return finalPath;
   }
 
   private mapToEvent(dto: EventListItemDto | any): EventItem {
@@ -392,8 +401,19 @@ export class EventService {
           return undefined;
         }
 
-        // Zaten tam URL ise (http://, https://, data:, blob:) olduğu gibi döndür
-        if (logoPathStr.startsWith('http://') || logoPathStr.startsWith('https://') || logoPathStr.startsWith('data:') || logoPathStr.startsWith('blob:')) {
+        // Tam URL ise (http/https) sadece path kısmını al
+        if (logoPathStr.startsWith('http://') || logoPathStr.startsWith('https://')) {
+          try {
+            const pathname = new URL(logoPathStr).pathname;
+            if (pathname.startsWith('/ImagesUnides/')) return pathname;
+            if (pathname.startsWith('/images/')) return pathname.replace('/images/', '/ImagesUnides/');
+            if (pathname.startsWith('/assets/img/')) return pathname.replace('/assets/img/', '/ImagesUnides/');
+            return pathname || logoPathStr;
+          } catch {
+            return logoPathStr;
+          }
+        }
+        if (logoPathStr.startsWith('data:') || logoPathStr.startsWith('blob:')) {
           return logoPathStr;
         }
 
@@ -407,33 +427,22 @@ export class EventService {
         if (finalLogoPath.startsWith('/assets/img/')) {
           finalLogoPath = finalLogoPath.replace('/assets/img/', '/ImagesUnides/');
         }
-        // Eğer zaten `/ImagesUnides/` ile başlıyorsa olduğu gibi bırak
         else if (finalLogoPath.startsWith('/images/')) {
           finalLogoPath = finalLogoPath.replace('/images/', '/ImagesUnides/');
         }
 
-        // Logo klasörü için özel kontrol - eğer path Logo içermiyorsa ve backend'den geldiyse
+        // Logo klasörü için özel kontrol
         if (finalLogoPath.startsWith('/ImagesUnides/') && !finalLogoPath.includes('/Logo/') && !finalLogoPath.includes('/Etkinlikler/') && !finalLogoPath.includes('/Duyurular/') && !finalLogoPath.includes('/Banner/')) {
-          // Sadece dosya adı gelmişse Logo klasörüne ekle
           const fileName = finalLogoPath.replace('/ImagesUnides/', '');
           if (fileName && !fileName.includes('/')) {
             finalLogoPath = `/ImagesUnides/Logo/${fileName}`;
           }
         }
-        // Eğer path `/ImagesUnides/` ile başlamıyorsa ama dosya adı gibi görünüyorsa, Logo klasörüne ekle
         else if (!finalLogoPath.startsWith('/ImagesUnides/') && !finalLogoPath.startsWith('http') && !finalLogoPath.startsWith('data:') && finalLogoPath.length > 0 && !finalLogoPath.includes('/')) {
-          // Sadece dosya adı gelmişse, Logo klasörüne ekle
           finalLogoPath = `/ImagesUnides/Logo/${finalLogoPath}`;
         }
 
-        // Base URL: environment.apiUrl (production'da unidesportal.org)
-        const baseUrl = environment.apiUrl.replace('/api', '');
-        const fullUrl = baseUrl + finalLogoPath;
-
-        // Debug: Convert edilmiş logo URL'yi logla (sadece development modunda)
-        Logger.log('[mapToEvent] Converted logo URL:', fullUrl, 'Event ID:', dto.eventId || dto.EventId);
-
-        return fullUrl;
+        return finalLogoPath;
       })(), // Topluluk logosu (opsiyonel)
       imageUrl: (() => {
         // Backend'den gelen image path'i al - farklı field adlarını kontrol et
@@ -869,10 +878,17 @@ export class EventService {
               finalPath = `/ImagesUnides/Etkinlikler/${fileName}`;
             }
           }
-          // Full URL oluştur
-          const baseUrl = environment.apiUrl.replace('/api', '');
-          const fullUrl = baseUrl + finalPath;
-          return { ImagePath: fullUrl };
+          return { ImagePath: finalPath };
+        }
+        // Backend tam URL döndüyse path kısmını al
+        if (path.startsWith('http')) {
+          try {
+            const pathname = new URL(path).pathname;
+            const norm = pathname.startsWith('/images/') ? pathname.replace('/images/', '/ImagesUnides/') : pathname.startsWith('/assets/img/') ? pathname.replace('/assets/img/', '/ImagesUnides/') : pathname;
+            return { ImagePath: norm.startsWith('/ImagesUnides/') ? norm : '/ImagesUnides/' + norm.replace(/^\//, '') };
+          } catch {
+            return { ImagePath: path };
+          }
         }
         return { ImagePath: path };
       }),

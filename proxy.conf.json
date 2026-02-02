@@ -1,7 +1,17 @@
 {
   "/api/moderate": {
-    "target": "http://72.62.37.160:5002",
-    "secure": false,
+    "target": "https://unidesportal.org",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "headers": {
+      "Accept": "application/json",
+      "Content-Type": "application/json"
+    }
+  },
+  "/chatbot": {
+    "target": "https://unidesportal.org",
+    "secure": true,
     "changeOrigin": true,
     "logLevel": "debug",
     "headers": {
@@ -20,12 +30,12 @@
     }
   },
   "/spam-check": {
-    "target": "http://72.62.37.160:5002",
-    "secure": false,
+    "target": "https://unidesportal.org",
+    "secure": true,
     "changeOrigin": true,
     "logLevel": "warn",
     "pathRewrite": {
-      "^/spam-check": "/check"
+      "^/spam-check": "/api/moderate"
     },
     "headers": {
       "Accept": "application/json",

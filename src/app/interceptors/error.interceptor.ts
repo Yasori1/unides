@@ -51,7 +51,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
                           errorMessageStr.includes('certificate') ||
                           errorMessageStr.includes('SSL') ||
                           errorMessageStr.includes('TLS') ||
-                          (errorUrl && (errorUrl.includes('https://unidesportal.com') || errorUrl.includes('https://unidesportal.org')));
+                          (errorUrl && errorUrl.includes('https://unidesportal.org'));
         
         if (isSSLError) {
           errorMessage = 'SSL sertifika hatası. Sunucu sertifikası geçersiz veya güvenilir değil. Lütfen sunucu yöneticisiyle iletişime geçin.';

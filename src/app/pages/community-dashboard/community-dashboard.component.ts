@@ -12,7 +12,6 @@ import { AfkDetectionService } from '../../services/afk-detection.service';
 import { ImageErrorHandlerService } from '../../services/image-error-handler.service';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
-import { environment } from '../../../environments/environment';
 import { SpamService } from '../../services/spam.service';
 import { Logger } from '../../utils/logger.util';
 
@@ -2598,8 +2597,19 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       }
     }
 
-    // Zaten tam URL ise (http://, https://, data:, blob:) olduğu gibi döndür
-    if (pathStr.startsWith('http://') || pathStr.startsWith('https://') || pathStr.startsWith('data:') || pathStr.startsWith('blob:')) {
+    // Tam URL ise (http/https) sadece path kısmını al — link bağlamada /ImagesUnides/ kullanılıyor
+    if (pathStr.startsWith('http://') || pathStr.startsWith('https://')) {
+      try {
+        const pathname = new URL(pathStr).pathname;
+        if (pathname.startsWith('/ImagesUnides/')) return pathname;
+        if (pathname.startsWith('/images/')) return pathname.replace('/images/', '/ImagesUnides/');
+        if (pathname.startsWith('/assets/img/')) return pathname.replace('/assets/img/', '/ImagesUnides/');
+        return pathname || pathStr;
+      } catch {
+        return pathStr;
+      }
+    }
+    if (pathStr.startsWith('data:') || pathStr.startsWith('blob:')) {
       return pathStr;
     }
 
@@ -2633,11 +2643,8 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       finalPath = finalPath.replace('/images/', '/ImagesUnides/');
     }
 
-    // Base URL: environment.apiUrl (production'da unidesportal.org)
-    const baseUrl = environment.apiUrl.replace('/api', '');
-    const fullUrl = baseUrl + finalPath;
-    Logger.log('[convertImagePathToFullUrl] Converting path:', pathStr, 'to full URL:', fullUrl);
-    return fullUrl;
+    // ImagePath olarak sadece /ImagesUnides/ path döndür (link bağlamada tam URL yok)
+    return finalPath;
   }
 
   // Image error handler - ImageErrorHandlerService kullanarak tutarlı hata yönetimi

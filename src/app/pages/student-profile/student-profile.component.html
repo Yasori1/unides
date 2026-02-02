@@ -441,17 +441,31 @@
           </div>
           <div class="form-group">
             <label>Yeni Şifre</label>
-            <input type="password" [(ngModel)]="userInfo.newPassword" placeholder="Yeni şifrenizi giriniz"
-              class="editable-input" />
+            <input type="password" [(ngModel)]="userInfo.newPassword" (input)="onNewPasswordInput($event)"
+              placeholder="Yeni şifrenizi giriniz" class="editable-input"
+              [class.input-error]="hasPasswordInput && !isPasswordStrong" />
           </div>
           <div class="form-group">
             <label>Yeni Şifre (Tekrar)</label>
             <input type="password" [(ngModel)]="userInfo.confirmPassword" placeholder="Yeni şifrenizi tekrar giriniz"
-              class="editable-input" />
+              class="editable-input" [class.input-error]="passwordMismatch" />
             <small>Şifrenizi değiştirmek için mevcut şifrenizi ve yeni şifrenizi giriniz</small>
           </div>
+          <div *ngIf="passwordMismatch" class="error-message-inline">
+            <span class="material-symbols-outlined">error</span> Şifreler eşleşmiyor.
+          </div>
+          <ul class="password-rules">
+            <li [class.valid]="passwordMinLength"><span class="material-symbols-outlined rule-icon">{{ passwordMinLength ? 'check_circle' : 'radio_button_unchecked' }}</span> En az 8 karakter</li>
+            <li [class.valid]="passwordHasUppercase"><span class="material-symbols-outlined rule-icon">{{ passwordHasUppercase ? 'check_circle' : 'radio_button_unchecked' }}</span> En az bir büyük harf</li>
+            <li [class.valid]="passwordHasLowercase"><span class="material-symbols-outlined rule-icon">{{ passwordHasLowercase ? 'check_circle' : 'radio_button_unchecked' }}</span> En az bir küçük harf</li>
+            <li [class.valid]="passwordHasNumber"><span class="material-symbols-outlined rule-icon">{{ passwordHasNumber ? 'check_circle' : 'radio_button_unchecked' }}</span> En az bir rakam</li>
+            <li [class.valid]="passwordHasSpecial"><span class="material-symbols-outlined rule-icon">{{ passwordHasSpecial ? 'check_circle' : 'radio_button_unchecked' }}</span> En az bir özel karakter (! . , ? @ # $ vb.)</li>
+          </ul>
           <div class="form-actions">
-            <button class="btn-primary" (click)="changePassword()">Şifreyi Değiştir</button>
+            <button class="btn-primary" (click)="changePassword()"
+              [disabled]="!userInfo.currentPassword || !userInfo.newPassword || !userInfo.confirmPassword || !isPasswordStrong || passwordMismatch">
+              Şifreyi Değiştir
+            </button>
           </div>
         </div>
       </div>
