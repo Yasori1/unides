@@ -25,7 +25,7 @@ export class RegisterPageComponent {
   showKvkkModal: boolean = false;
 
   private name: string = '';
-  private email: string = '';
+  email: string = ''; // Public yapıldı - mail onay sayfasına gönderilecek
   private password: string = '';
   private confirmPassword: string = '';
 
@@ -98,14 +98,16 @@ export class RegisterPageComponent {
           // BAŞARILI DURUM:
           // 1. Kullanıcıya bilgi ver
           this.toastService.show(
-            'Kayıt işleminiz başarıyla tamamlandı! Giriş sayfasına yönlendiriliyorsunuz...',
+            'Kayıt işleminiz başarıyla tamamlandı! E-posta doğrulama sayfasına yönlendiriliyorsunuz...',
             'success'
           );
 
-          // 2. Yönlendirme yap (Kullanıcı mesajı okuyabilsin diye kısa bir gecikme ekledik)
+          // 2. Mail onay sayfasına yönlendir (email ile birlikte)
           setTimeout(() => {
-            this.router.navigate(['/login']);
-          }, 2000);
+            this.router.navigate(['/email-verification-waiting'], {
+              queryParams: { email: this.email }
+            });
+          }, 1500);
         },
         error: (error: any) => {
           Logger.error('Kayıt Hatası:', error);

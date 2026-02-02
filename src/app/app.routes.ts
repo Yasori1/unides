@@ -42,6 +42,8 @@ import { LoginPageComponent } from './pages/login-page/login-page.component';
 import { RegisterPageComponent } from './pages/register-page/register-page.component';
 import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
 import { KvkkPageComponent } from './pages/kvkk-page/kvkk-page.component';
+import { EmailVerificationWaitingComponent } from './pages/email-verification/email-verification-waiting.component';
+import { EmailVerificationConfirmComponent } from './pages/email-verification/email-verification-confirm.component';
 import { roleGuard } from './guards/role.guard';
 
 export const routes: Routes = [
@@ -90,6 +92,10 @@ export const routes: Routes = [
   // ŞİFRE SIFIRLAMA
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'reset-password', component: ResetPasswordComponent },
+
+  // E-POSTA DOĞRULAMA
+  { path: 'email-verification-waiting', component: EmailVerificationWaitingComponent },
+  { path: 'email-verification-confirm', component: EmailVerificationConfirmComponent },
 
   // KURUMSAL DASHBOARD
   {

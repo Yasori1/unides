@@ -1,4 +1,4 @@
-import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { Component, OnInit, OnDestroy, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -6,6 +6,7 @@ import { ToastService } from '../../services/toast.services';
 import { ToastComponent } from '../../components/ui/toast/toast.component';
 import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
 import { Logger } from '../../utils/logger.util';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-reset-password',
@@ -15,43 +16,55 @@ import { Logger } from '../../utils/logger.util';
   styleUrls: ['./reset-password.component.scss'],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class ResetPasswordComponent implements OnInit {
+export class ResetPasswordComponent implements OnInit, OnDestroy {
   token: string = '';
   newPassword: string = '';
   confirmPassword: string = '';
   passwordError: boolean = false;
   confirmPasswordError: boolean = false;
   isLoading: boolean = false;
+  private redirectTimeout?: any;
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     private toastService: ToastService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
-    // Spline Viewer scriptini dinamik olarak yükle
-    const scriptCheck = document.querySelector(
-      'script[src="https://unpkg.com/@splinetool/viewer@1.9.59/build/spline-viewer.js"]'
-    );
+    // URL'den token'ı al - hem query params hem route params'tan kontrol et
+    this.token = this.route.snapshot.queryParams['token'] ||
+      this.route.snapshot.params['token'] ||
+      '';
 
-    if (!scriptCheck) {
-      const script = document.createElement('script');
-      script.type = 'module';
-      script.src = 'https://unpkg.com/@splinetool/viewer@1.9.59/build/spline-viewer.js';
-      document.head.appendChild(script);
+    // Token yoksa bir kez kontrol et ve yönlendir (sürekli yönlendirme yapma)
+    if (!this.token) {
+      // Kısa bir gecikme ile kontrol et (bazı durumlarda params geç yüklenebilir)
+      setTimeout(() => {
+        // Tekrar kontrol et - hem query hem route params
+        const retryToken = this.route.snapshot.queryParams['token'] ||
+          this.route.snapshot.params['token'] ||
+          '';
+        if (retryToken) {
+          this.token = retryToken;
+        } else {
+          // Token hala yoksa yönlendir (sadece bir kez)
+          if (!this.redirectTimeout) {
+            this.toastService.show('Geçersiz veya eksik şifre sıfırlama linki.', 'error');
+            this.redirectTimeout = setTimeout(() => {
+              this.router.navigate(['/login']);
+            }, 2000);
+          }
+        }
+      }, 100);
     }
+  }
 
-    // URL'den token'ı al
-    this.route.queryParams.subscribe((params) => {
-      this.token = params['token'] || '';
-      if (!this.token) {
-        this.toastService.show('Geçersiz veya eksik şifre sıfırlama linki.', 'error');
-        setTimeout(() => {
-          this.router.navigate(['/login']);
-        }, 2000);
-      }
-    });
+  ngOnDestroy(): void {
+    // Timeout'u temizle
+    if (this.redirectTimeout) {
+      clearTimeout(this.redirectTimeout);
+    }
   }
 
   validatePassword(event: any) {
@@ -105,7 +118,7 @@ export class ResetPasswordComponent implements OnInit {
     this.isLoading = true;
 
     try {
-      const response = await fetch('/api/Auth/reset-password', {
+      const response = await fetch(`${environment.apiUrl}/Auth/reset-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

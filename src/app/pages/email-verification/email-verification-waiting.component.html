@@ -1,0 +1,83 @@
+<!-- Google Fonts & Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+
+<div class="main-container">
+  <div class="split-layout">
+    <!-- SOL TARAF: GÖRSEL ALAN -->
+    <div class="visual-side">
+      <div class="visual-overlay"></div>
+      <div class="visual-content">
+        <a class="brand-badge" style="cursor: pointer; text-decoration: none;" [routerLink]="['/']">
+          <div class="logo-box" style="width: auto; height: auto; padding: 12px 24px; gap: 8px;">
+            <i class='bx bx-home-alt' style="font-size: 1.2rem;"></i>
+            <span style="font-size: 1rem;">Ana Sayfa</span>
+          </div>
+        </a>
+        <div class="quote-container">
+          <h1>E-Posta<br />Doğrulama</h1>
+          <p>Hesabınızı aktifleştirmek için e-postanızı kontrol edin.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SAĞ TARAF: MODERN FORM -->
+    <div class="form-side">
+      <div class="form-wrapper">
+        <div class="mobile-logo">
+          <div class="back-to-home" routerLink="/">
+            <i class='bx bx-left-arrow-alt'></i>
+            <span>Ana Sayfaya Dön</span>
+          </div>
+        </div>
+
+        <div class="verification-content">
+          <div class="icon-container">
+            <div class="email-icon">
+              <i class="bx bx-mail-send"></i>
+            </div>
+          </div>
+
+          <div class="header-text">
+            <h3>E-Posta Adresinizi Doğrulayın</h3>
+            <p *ngIf="email" class="email-display">
+              <strong>{{ email }}</strong> adresine doğrulama maili gönderildi.
+            </p>
+            <p *ngIf="!email">
+              Kayıt olduğunuz e-posta adresine doğrulama maili gönderildi.
+            </p>
+          </div>
+
+          <div class="instructions">
+            <p>Lütfen e-posta kutunuzu kontrol edin ve doğrulama linkine tıklayın.</p>
+            <ul>
+              <li><i class="bx bx-check"></i> Gelen kutusunu kontrol edin</li>
+              <li><i class="bx bx-check"></i> Spam klasörünü de kontrol etmeyi unutmayın</li>
+              <li><i class="bx bx-check"></i> Doğrulama linkine tıklayarak hesabınızı aktifleştirin</li>
+            </ul>
+          </div>
+
+          <div class="action-buttons">
+            <button class="btn-primary" (click)="resendEmail()" [disabled]="isResending">
+              <ng-container *ngIf="!isResending">
+                <i class="bx bx-refresh"></i>
+                Maili Tekrar Gönder
+              </ng-container>
+              <ng-container *ngIf="isResending">
+                <app-luma-spin></app-luma-spin>
+              </ng-container>
+            </button>
+            <a routerLink="/login" class="back-link">
+              <i class="bx bx-arrow-back"></i> Giriş sayfasına dön
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <footer class="simple-footer">© T.C Gençlik ve Spor Bakanlığı</footer>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST BİLEŞENİ -->
+<app-toast></app-toast>

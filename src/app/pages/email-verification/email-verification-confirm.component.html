@@ -1,0 +1,73 @@
+<!-- Google Fonts & Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+
+<div class="main-container">
+  <div class="split-layout">
+    <!-- SOL TARAF: GÖRSEL ALAN -->
+    <div class="visual-side">
+      <div class="visual-overlay"></div>
+      <div class="visual-content">
+        <a class="brand-badge" style="cursor: pointer; text-decoration: none;" [routerLink]="['/']">
+          <div class="logo-box" style="width: auto; height: auto; padding: 12px 24px; gap: 8px;">
+            <i class='bx bx-home-alt' style="font-size: 1.2rem;"></i>
+            <span style="font-size: 1rem;">Ana Sayfa</span>
+          </div>
+        </a>
+        <div class="quote-container">
+          <h1>E-Posta<br />Doğrulanıyor ✨</h1>
+          <p>Hesabınız aktifleştiriliyor, lütfen bekleyin...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SAĞ TARAF: MODERN FORM -->
+    <div class="form-side">
+      <div class="form-wrapper">
+        <div class="mobile-logo">
+          <div class="back-to-home" routerLink="/">
+            <i class='bx bx-left-arrow-alt'></i>
+            <span>Ana Sayfaya Dön</span>
+          </div>
+        </div>
+
+        <div class="verification-content">
+          <!-- Loading State -->
+          <div *ngIf="isLoading" class="loading-state">
+            <div class="spinner-container">
+              <app-luma-spin></app-luma-spin>
+            </div>
+            <h3>Doğrulanıyor...</h3>
+            <p>E-posta adresiniz doğrulanıyor, lütfen bekleyin.</p>
+          </div>
+
+          <!-- Success State -->
+          <div *ngIf="isVerified && !isLoading" class="success-state">
+            <div class="success-icon">
+              <i class="bx bx-check-circle"></i>
+            </div>
+            <h3>E-Posta Doğrulandı! ✅</h3>
+            <p>E-posta adresiniz başarıyla doğrulandı. Giriş yapılıyor...</p>
+          </div>
+
+          <!-- Error State -->
+          <div *ngIf="isError && !isLoading" class="error-state">
+            <div class="error-icon">
+              <i class="bx bx-error-circle"></i>
+            </div>
+            <h3>Doğrulama Başarısız ❌</h3>
+            <p>{{ errorMessage }}</p>
+            <a routerLink="/login" class="btn-primary">
+              <i class="bx bx-arrow-back"></i> Giriş sayfasına dön
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <footer class="simple-footer">© T.C Gençlik ve Spor Bakanlığı</footer>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST BİLEŞENİ -->
+<app-toast></app-toast>
