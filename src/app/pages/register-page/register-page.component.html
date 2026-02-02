@@ -55,10 +55,19 @@
           </div>
 
           <div class="input-group">
-            <div class="icon-wrapper"><i class="bx bx-lock-alt"></i></div>
+            <div class="icon-wrapper" [class.error-icon]="hasPasswordInput && !isPasswordStrong">
+              <i class="bx bx-lock-alt"></i>
+            </div>
             <input type="password" (input)="checkPasswords($event, 'p1')" placeholder="Şifre" class="modern-input"
-              required />
+              [class.input-error]="hasPasswordInput && !isPasswordStrong" required minlength="8" />
           </div>
+          <ul class="password-rules">
+            <li [class.valid]="passwordMinLength"><i class="bx" [ngClass]="passwordMinLength ? 'bx-check-circle' : 'bx-circle'"></i> En az 8 karakter</li>
+            <li [class.valid]="passwordHasUppercase"><i class="bx" [ngClass]="passwordHasUppercase ? 'bx-check-circle' : 'bx-circle'"></i> En az bir büyük harf</li>
+            <li [class.valid]="passwordHasLowercase"><i class="bx" [ngClass]="passwordHasLowercase ? 'bx-check-circle' : 'bx-circle'"></i> En az bir küçük harf</li>
+            <li [class.valid]="passwordHasNumber"><i class="bx" [ngClass]="passwordHasNumber ? 'bx-check-circle' : 'bx-circle'"></i> En az bir rakam</li>
+            <li [class.valid]="passwordHasSpecial"><i class="bx" [ngClass]="passwordHasSpecial ? 'bx-check-circle' : 'bx-circle'"></i> En az bir özel karakter (! . , ? @ # $ vb.)</li>
+          </ul>
 
           <div class="input-group">
             <div class="icon-wrapper" [class.error-icon]="passwordMismatch">
@@ -73,7 +82,7 @@
 
           <div class="form-actions checkbox-area">
             <label class="terms-label">
-              <input type="checkbox" required />
+              <input type="checkbox" [(ngModel)]="termsAccepted" name="termsAccepted" />
               <span>
                 <a href="javascript:void(0)" (click)="openTermsModal()">Kullanıcı Sözleşmesi</a> ve
                 <a href="javascript:void(0)" (click)="openKvkkModal()">KVKK</a>'yı okudum.
@@ -81,8 +90,8 @@
             </label>
           </div>
 
-          <button type="submit" class="btn-primary" [disabled]="isLoading"
-            [style.opacity]="emailError || passwordMismatch ? '0.7' : '1'">
+          <button type="submit" class="btn-primary" [disabled]="isLoading || !termsAccepted || emailError || passwordMismatch || !isPasswordStrong"
+            [style.opacity]="(emailError || passwordMismatch || !termsAccepted || !isPasswordStrong) ? '0.7' : '1'">
             <span *ngIf="!isLoading">
               Öğrenci Olarak Kayıt Ol <i class="bx bx-right-arrow-alt"></i>
             </span>
