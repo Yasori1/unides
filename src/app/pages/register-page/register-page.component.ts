@@ -23,6 +23,17 @@ export class RegisterPageComponent {
   isLoading: boolean = false;
   showTermsModal: boolean = false;
   showKvkkModal: boolean = false;
+  /** Kullanıcı sözleşmesi ve KVKK onayı - işaretlenmeden kayıt yapılamaz */
+  termsAccepted: boolean = false;
+
+  /** Şifre güç kuralları (ekranda gösterim için) */
+  passwordMinLength = false;
+  passwordHasUppercase = false;
+  passwordHasLowercase = false;
+  passwordHasNumber = false;
+  passwordHasSpecial = false;
+  /** Şifre alanında en az bir karakter girildi mi (hata stilini göstermek için) */
+  hasPasswordInput = false;
 
   private name: string = '';
   private email: string = '';
@@ -54,16 +65,47 @@ export class RegisterPageComponent {
     }
   }
 
+  /** Şifre güç kurallarını kontrol et */
+  private validatePasswordStrength(pwd: string): void {
+    this.passwordMinLength = pwd.length >= 8;
+    this.passwordHasUppercase = /[A-Z]/.test(pwd);
+    this.passwordHasLowercase = /[a-z]/.test(pwd);
+    this.passwordHasNumber = /[0-9]/.test(pwd);
+    this.passwordHasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?.]/.test(pwd);
+  }
+
+  /** Tüm şifre kuralları sağlanıyor mu? */
+  get isPasswordStrong(): boolean {
+    return (
+      this.passwordMinLength &&
+      this.passwordHasUppercase &&
+      this.passwordHasLowercase &&
+      this.passwordHasNumber &&
+      this.passwordHasSpecial
+    );
+  }
+
   checkPasswords(event: any, type: string) {
     const val = event.target.value;
-    if (type === 'p1') this.password = val;
-    else this.confirmPassword = val;
+    if (type === 'p1') {
+      this.password = val;
+      this.hasPasswordInput = val.length > 0;
+      this.validatePasswordStrength(val);
+    } else {
+      this.confirmPassword = val;
+    }
 
     this.passwordMismatch = !!this.confirmPassword && this.password !== this.confirmPassword;
   }
 
   onSubmit(event: Event) {
     event.preventDefault();
+
+    // Kullanıcı sözleşmesi ve KVKK onayı zorunlu
+    if (!this.termsAccepted) {
+      this.toastService.show('Hesap oluşturmak için Kullanıcı Sözleşmesi ve KVKK\'yı okuduğunuzu onaylamanız gerekmektedir.', 'error');
+      return;
+    }
 
     // Validasyon Kontrolleri
     if (!this.name || !this.email || !this.password) {
@@ -78,6 +120,14 @@ export class RegisterPageComponent {
 
     if (this.passwordMismatch) {
       this.toastService.show('Şifreler eşleşmiyor!', 'error');
+      return;
+    }
+
+    if (!this.isPasswordStrong) {
+      this.toastService.show(
+        'Şifre en az 8 karakter olmalı; büyük harf, küçük harf, rakam ve özel karakter (! . , ? @ # vb.) içermelidir.',
+        'error'
+      );
       return;
     }
 
