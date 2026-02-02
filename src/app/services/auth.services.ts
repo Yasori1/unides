@@ -33,6 +33,13 @@ export interface RegisterRequest {
   password: string;
 }
 
+/** Kayıt sonrası e-posta doğrulama akışı: token dönmez, yönlendirme URL'i döner */
+export interface RegisterResponse {
+  redirectUrl: string;
+  message: string;
+  email: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -112,17 +119,16 @@ export class AuthService {
   }
 
   // --- 4. KAYIT OL (REGISTER) ---
-  // Swagger: POST /api/Auth/register
-  registerStudent(data: RegisterRequest): Observable<any> {
-    // Backend tek bir register noktası sunuyor.
-    // Backend formatı: { fullName, email, password, roleId }
+  // POST /api/Auth/register — E-posta doğrulamalı akış:
+  // Cevap: redirectUrl, message, email (token dönmez; kullanıcı PendingEmailVerification'a yazılır)
+  registerStudent(data: RegisterRequest): Observable<RegisterResponse> {
     const backendData = {
       fullName: data.name,
       email: data.email,
       password: data.password,
       roleId: 1, // 1 = Öğrenci
     };
-    return this.http.post(`${this.apiUrl}/Auth/register`, backendData);
+    return this.http.post<RegisterResponse>(`${this.apiUrl}/Auth/register`, backendData);
   }
 
   // --- 5. KURUMSAL KAYIT ---
@@ -147,7 +153,15 @@ export class AuthService {
     return this.http.post(`${this.apiUrl}/Auth/register`, backendData);
   }
 
-  // --- 5. REFRESH TOKEN (SWAGGER: POST /api/Auth/refresh) ---
+  // --- MAİLİ TEKRAR GÖNDER (Resend verification) ---
+  // POST /api/auth/resend-verification — Body: { "email": "..." }
+  resendVerificationEmail(email: string): Observable<{ message?: string }> {
+    return this.http.post<{ message?: string }>(`${this.apiUrl}/Auth/resend-verification`, {
+      email: email.trim(),
+    });
+  }
+
+  // --- REFRESH TOKEN (SWAGGER: POST /api/Auth/refresh) ---
   refreshToken(): Observable<any> {
     // Token yenileme ihtiyacı olursa bu metot kullanılabilir
     return this.http.post(`${this.apiUrl}/Auth/refresh`, {});

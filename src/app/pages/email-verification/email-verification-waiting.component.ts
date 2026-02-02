@@ -5,7 +5,7 @@ import { ToastService } from '../../services/toast.services';
 import { ToastComponent } from '../../components/ui/toast/toast.component';
 import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
 import { Logger } from '../../utils/logger.util';
-import { environment } from '../../../environments/environment';
+import { AuthService } from '../../services/auth.services';
 
 @Component({
   selector: 'app-email-verification-waiting',
@@ -21,54 +21,37 @@ export class EmailVerificationWaitingComponent implements OnInit {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
-    // URL'den email'i al (kayıt sayfasından gönderilecek)
+    // URL'den email'i al (kayıt sayfasından redirectUrl ile gelir)
     this.email = this.route.snapshot.queryParams['email'] || '';
   }
 
-  async resendEmail() {
+  resendEmail(): void {
     if (!this.email) {
       this.toastService.show('E-posta adresi bulunamadı.', 'error');
       return;
     }
 
     this.isResending = true;
-
-    try {
-      const response = await fetch(`${environment.apiUrl}/Auth/resend-verification-email`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: this.email.trim(),
-        }),
-      });
-
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        throw new Error('Backend sunucusuna bağlanılamıyor...');
-      }
-
-      const data = await response.json();
-
-      if (response.ok) {
-        this.toastService.show('Doğrulama maili tekrar gönderildi. Lütfen e-postanızı kontrol edin.', 'success');
-      } else {
-        const errorMessage = data.message || 'Mail gönderilemedi. Lütfen tekrar deneyiniz.';
-        this.toastService.show(errorMessage, 'error');
-      }
-    } catch (error: any) {
-      Logger.error('Mail tekrar gönderme hatası:', error);
-      this.toastService.show(
-        error.message || 'Bir hata oluştu. Lütfen tekrar deneyiniz.',
-        'error'
-      );
-    } finally {
-      this.isResending = false;
-    }
+    this.authService.resendVerificationEmail(this.email).subscribe({
+      next: (data) => {
+        const message =
+          data?.message || 'Doğrulama maili tekrar gönderildi. Lütfen gelen kutunuzu kontrol edin.';
+        this.toastService.show(message, 'success');
+      },
+      error: (err) => {
+        const message =
+          err?.error?.message || err?.message || 'Mail gönderilemedi. Lütfen tekrar deneyiniz.';
+        this.toastService.show(message, 'error');
+        Logger.error('Mail tekrar gönderme hatası:', err);
+      },
+      complete: () => {
+        this.isResending = false;
+      },
+    });
   }
 }

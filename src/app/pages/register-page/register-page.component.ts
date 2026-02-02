@@ -145,19 +145,33 @@ export class RegisterPageComponent {
         next: (response) => {
           Logger.log('Kayıt Başarılı:', response);
 
-          // BAŞARILI DURUM:
-          // 1. Kullanıcıya bilgi ver
-          this.toastService.show(
-            'Kayıt işleminiz başarıyla tamamlandı! E-posta doğrulama sayfasına yönlendiriliyorsunuz...',
-            'success'
-          );
+          // Backend: redirectUrl, message, email döner; token dönmez (e-posta doğrulama akışı)
+          const message = response?.message || 'Doğrulama maili gönderildi. E-posta doğrulama sayfasına yönlendiriliyorsunuz...';
+          this.toastService.show(message, 'success');
 
-          // 2. Mail onay sayfasına yönlendir (email ile birlikte)
-          setTimeout(() => {
-            this.router.navigate(['/email-verification-waiting'], {
-              queryParams: { email: this.email }
-            });
-          }, 1500);
+          const redirectUrl = response?.redirectUrl;
+          if (redirectUrl) {
+            try {
+              const url = new URL(redirectUrl);
+              if (url.origin === window.location.origin) {
+                setTimeout(() => this.router.navigateByUrl(url.pathname + url.search), 800);
+              } else {
+                setTimeout(() => (window.location.href = redirectUrl), 800);
+              }
+            } catch {
+              setTimeout(() => {
+                this.router.navigate(['/email-verification-waiting'], {
+                  queryParams: { email: response?.email ?? this.email }
+                });
+              }, 800);
+            }
+          } else {
+            setTimeout(() => {
+              this.router.navigate(['/email-verification-waiting'], {
+                queryParams: { email: response?.email ?? this.email }
+              });
+            }, 800);
+          }
         },
         error: (error: any) => {
           Logger.error('Kayıt Hatası:', error);

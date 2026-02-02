@@ -153,6 +153,7 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
         body: JSON.stringify({
           token: this.token,
           newPassword: this.newPassword,
+          confirmNewPassword: this.confirmPassword,
         }),
       });
 
@@ -164,10 +165,9 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
       const data = await response.json();
 
       if (response.ok) {
-        this.toastService.show('Şifreniz başarıyla değiştirildi. Giriş sayfasına yönlendiriliyorsunuz...', 'success');
-        setTimeout(() => {
-          this.router.navigate(['/login']);
-        }, 2000);
+        const message = data.message || 'Şifreniz başarıyla güncellendi. Yeni şifrenizle giriş yapabilirsiniz.';
+        this.toastService.show(message, 'success');
+        setTimeout(() => this.router.navigate(['/login']), 2000);
       } else {
         const errorMessage = data.message || 'Şifre sıfırlama işlemi başarısız oldu.';
         this.toastService.show(errorMessage, 'error');

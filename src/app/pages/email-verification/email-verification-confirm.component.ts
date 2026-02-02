@@ -62,6 +62,7 @@ export class EmailVerificationConfirmComponent implements OnInit, OnDestroy {
     this.isVerified = false;
 
     try {
+      // POST API_BASE_URL/api/auth/verify-email — Body: { "token": "URL'den_alinan_token" }
       const response = await fetch(`${environment.apiUrl}/Auth/verify-email`, {
         method: 'POST',
         headers: {
@@ -82,37 +83,32 @@ export class EmailVerificationConfirmComponent implements OnInit, OnDestroy {
       if (response.ok) {
         this.isVerified = true;
         this.isLoading = false;
-        
-        // Token varsa otomatik giriş yap
-        if (data.token) {
-          // Token'ı localStorage'a kaydet
-          localStorage.setItem('token', data.token);
-          
-          // User info varsa kaydet
+
+        // Backend: accessToken + refreshToken döner; token'ları sakla, öğrenci giriş sayfasına yönlendir
+        const accessToken = data.accessToken ?? data.AccessToken ?? data.token ?? data.Token;
+        const refreshToken = data.refreshToken ?? data.RefreshToken ?? data.refresh;
+
+        if (accessToken) {
+          this.authService.saveToken(accessToken);
+          if (refreshToken) {
+            localStorage.setItem('refresh_token', refreshToken);
+          }
           if (data.user) {
-            localStorage.setItem('user_info', JSON.stringify(data.user));
+            this.authService.saveUser(data.user);
+            const role = data.user.role ?? data.user.RoleName ?? data.roleName ?? 'student';
+            this.authService.saveUserType(role);
+          } else {
+            this.authService.saveUserType('student');
           }
 
-          this.toastService.show('E-posta adresiniz başarıyla doğrulandı! Giriş yapılıyor...', 'success');
-          
-          // Kullanıcıyı dashboard'a yönlendir
+          this.toastService.show('E-posta adresiniz doğrulandı. Giriş sayfasına yönlendiriliyorsunuz...', 'success');
           setTimeout(() => {
-            const role = data.user?.role || 'student';
-            if (role === 'student') {
-              this.router.navigate(['/student-dashboard']);
-            } else if (role === 'corporate') {
-              this.router.navigate(['/corporate-dashboard']);
-            } else if (role === 'community') {
-              this.router.navigate(['/community-dashboard']);
-            } else {
-              this.router.navigate(['/login']);
-            }
+            this.router.navigate(['/login'], { queryParams: { verified: '1' } });
           }, 2000);
         } else {
-          // Token yoksa login sayfasına yönlendir
-          this.toastService.show('E-posta adresiniz başarıyla doğrulandı! Giriş yapabilirsiniz.', 'success');
+          this.toastService.show('E-posta adresiniz doğrulandı. Giriş yapabilirsiniz.', 'success');
           setTimeout(() => {
-            this.router.navigate(['/login']);
+            this.router.navigate(['/login'], { queryParams: { verified: '1' } });
           }, 2000);
         }
       } else {

@@ -1,6 +1,6 @@
 import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 // Servisler
 import { ToastService } from '../../services/toast.services';
@@ -18,6 +18,9 @@ interface AuthResponse {
   roleName: string;
   accessToken: string;
   refreshToken: string;
+  /** E-posta doğrulandı mı? Backend false dönerse girişe izin verilmez */
+  emailVerified?: boolean;
+  isEmailVerified?: boolean;
 }
 
 @Component({
@@ -45,10 +48,20 @@ export class LoginPageComponent implements OnInit {
 
   constructor(
     private toastService: ToastService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) { }
 
   ngOnInit(): void {
+    // E-posta doğrulama sonrası yönlendirme: /login?verified=1 ise mesaj göster
+    const verified = this.route.snapshot.queryParams['verified'];
+    if (verified === '1') {
+      this.toastService.show('Hesabınız doğrulandı. Giriş yapabilirsiniz.', 'success');
+    } else if (verified === '0') {
+      const reason = this.route.snapshot.queryParams['reason'] || '';
+      this.toastService.show(reason || 'Doğrulama başarısız. Lütfen tekrar deneyiniz.', 'error');
+    }
+
     const scriptCheck = document.querySelector(
       'script[src="https://unpkg.com/@splinetool/viewer@1.9.59/build/spline-viewer.js"]'
     );
@@ -121,23 +134,42 @@ export class LoginPageComponent implements OnInit {
       })
     })
       .then(async (res) => {
+        const err = await res.json().catch(() => ({}));
+        const message = err?.message || `HTTP ${res.status}`;
+
         if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          const message = err?.message || `HTTP ${res.status}`;
+          const isEmailNotVerified =
+            /doğrulanmadı|doğrulanmamış|not verified|email not verified|EmailNotVerified/i.test(message) ||
+            err?.errorCode === 'EmailNotVerified' ||
+            err?.code === 'EMAIL_NOT_VERIFIED';
+          if (isEmailNotVerified && this.email) {
+            this.router.navigate(['/email-verification-waiting'], { queryParams: { email: this.email } });
+          }
+          this.loginError = message;
           throw new Error(message);
         }
-        return res.json();
+        return err as AuthResponse;
       })
       .then((data: AuthResponse) => {
-        // --- BAŞARILI GİRİŞ ---
-        // Token'ı localStorage'a kaydet
+        // E-posta doğrulanmamışsa token saklama, doğrulama sayfasına yönlendir
+        if (data.emailVerified === false || data.isEmailVerified === false) {
+          this.toastService.show(
+            'E-posta adresiniz henüz doğrulanmadı. Lütfen e-postanızdaki doğrulama linkine tıklayın.',
+            'error'
+          );
+          this.router.navigate(['/email-verification-waiting'], {
+            queryParams: { email: data.email || this.email }
+          });
+          return;
+        }
+
+        // --- BAŞARILI GİRİŞ (e-posta doğrulanmış) ---
         if (data.accessToken) {
           localStorage.setItem('auth_token', data.accessToken);
         }
         if (data.refreshToken) {
           localStorage.setItem('refresh_token', data.refreshToken);
         }
-        // Kullanıcı bilgilerini kaydet
         localStorage.setItem('user_info', JSON.stringify({
           id: data.id,
           name: data.fullName,
@@ -147,13 +179,9 @@ export class LoginPageComponent implements OnInit {
         localStorage.setItem('user_type', 'student');
 
         this.toastService.show('Giriş başarılı! Ana sayfaya yönlendiriliyorsunuz...', 'success');
-
-        setTimeout(() => {
-          this.router.navigateByUrl('/');
-        }, 1500);
+        setTimeout(() => this.router.navigateByUrl('/'), 1500);
       })
       .catch((e: any) => {
-        // --- HATALI GİRİŞ ---
         this.loginError = e?.message || 'Giriş başarısız';
         Logger.error('Giriş Hatası:', e);
         this.toastService.show(this.loginError, 'error');

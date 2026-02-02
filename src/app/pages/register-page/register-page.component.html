@@ -61,13 +61,6 @@
             <input type="password" (input)="checkPasswords($event, 'p1')" placeholder="Şifre" class="modern-input"
               [class.input-error]="hasPasswordInput && !isPasswordStrong" required minlength="8" />
           </div>
-          <ul class="password-rules">
-            <li [class.valid]="passwordMinLength"><i class="bx" [ngClass]="passwordMinLength ? 'bx-check-circle' : 'bx-circle'"></i> En az 8 karakter</li>
-            <li [class.valid]="passwordHasUppercase"><i class="bx" [ngClass]="passwordHasUppercase ? 'bx-check-circle' : 'bx-circle'"></i> En az bir büyük harf</li>
-            <li [class.valid]="passwordHasLowercase"><i class="bx" [ngClass]="passwordHasLowercase ? 'bx-check-circle' : 'bx-circle'"></i> En az bir küçük harf</li>
-            <li [class.valid]="passwordHasNumber"><i class="bx" [ngClass]="passwordHasNumber ? 'bx-check-circle' : 'bx-circle'"></i> En az bir rakam</li>
-            <li [class.valid]="passwordHasSpecial"><i class="bx" [ngClass]="passwordHasSpecial ? 'bx-check-circle' : 'bx-circle'"></i> En az bir özel karakter (! . , ? @ # $ vb.)</li>
-          </ul>
 
           <div class="input-group">
             <div class="icon-wrapper" [class.error-icon]="passwordMismatch">
@@ -79,6 +72,14 @@
           <div *ngIf="passwordMismatch" class="error-message">
             <i class="bx bx-error-circle"></i> Şifreler eşleşmiyor.
           </div>
+
+          <ul class="password-rules">
+            <li [class.valid]="passwordMinLength"><i class="bx" [ngClass]="passwordMinLength ? 'bx-check-circle' : 'bx-circle'"></i> En az 8 karakter</li>
+            <li [class.valid]="passwordHasUppercase"><i class="bx" [ngClass]="passwordHasUppercase ? 'bx-check-circle' : 'bx-circle'"></i> En az bir büyük harf</li>
+            <li [class.valid]="passwordHasLowercase"><i class="bx" [ngClass]="passwordHasLowercase ? 'bx-check-circle' : 'bx-circle'"></i> En az bir küçük harf</li>
+            <li [class.valid]="passwordHasNumber"><i class="bx" [ngClass]="passwordHasNumber ? 'bx-check-circle' : 'bx-circle'"></i> En az bir rakam</li>
+            <li [class.valid]="passwordHasSpecial"><i class="bx" [ngClass]="passwordHasSpecial ? 'bx-check-circle' : 'bx-circle'"></i> En az bir özel karakter (! . , ? @ # $ vb.)</li>
+          </ul>
 
           <div class="form-actions checkbox-area">
             <label class="terms-label">

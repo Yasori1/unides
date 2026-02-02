@@ -93,8 +93,9 @@ export const routes: Routes = [
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'reset-password', component: ResetPasswordComponent },
 
-  // E-POSTA DOĞRULAMA
+  // E-POSTA DOĞRULAMA (mail linki: /verify-email?token=...)
   { path: 'email-verification-waiting', component: EmailVerificationWaitingComponent },
+  { path: 'verify-email', component: EmailVerificationConfirmComponent },
   { path: 'email-verification-confirm', component: EmailVerificationConfirmComponent },
 
   // KURUMSAL DASHBOARD

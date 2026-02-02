@@ -6,6 +6,7 @@ import { ToastService } from '../../services/toast.services';
 import { ToastComponent } from '../../components/ui/toast/toast.component';
 import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
 import { Logger } from '../../utils/logger.util';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-forgot-password',
@@ -75,7 +76,8 @@ export class ForgotPasswordComponent implements OnInit {
     this.emailSent = false;
 
     try {
-      const response = await fetch('/api/Auth/forgot-password', {
+      // POST /api/auth/forgot-password — Body: { "email": "..." }
+      const response = await fetch(`${environment.apiUrl}/Auth/forgot-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -97,12 +99,10 @@ export class ForgotPasswordComponent implements OnInit {
 
       if (response.ok) {
         this.emailSent = true;
-        this.toastService.show('Şifre sıfırlama linki e-posta adresinize gönderildi.', 'success');
-        
-        // 3 saniye sonra login sayfasına yönlendir
-        setTimeout(() => {
-          this.router.navigate(['/login']);
-        }, 3000);
+        const message = data?.message || 'E-posta adresinize şifre sıfırlama bağlantısı gönderildi. Gelen kutusu ve gereksiz klasörünü kontrol edin.';
+        this.toastService.show(message, 'success');
+        // İsteğe bağlı: 3 saniye sonra login sayfasına yönlendir (dökümana göre zorunlu değil)
+        setTimeout(() => this.router.navigate(['/login']), 3000);
       } else {
         this.isLoading = false;
         const errorMessage = data?.message || '';
