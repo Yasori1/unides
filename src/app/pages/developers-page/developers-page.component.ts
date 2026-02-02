@@ -28,11 +28,7 @@ export interface Alumni {
 @Component({
   selector: 'app-developers-page',
   standalone: true,
-  imports: [
-    CommonModule,
-    SiteNavbarComponent,
-    SiteFooterComponent
-  ],
+  imports: [CommonModule, SiteNavbarComponent, SiteFooterComponent],
   templateUrl: './developers-page.component.html',
   styleUrls: ['./developers-page.component.scss'],
 })
@@ -43,80 +39,91 @@ export class DevelopersPageComponent implements OnInit, OnDestroy {
       role: 'Proje Yürütücüsü',
       image: 'assets/EmircanSazli.png',
       codeBg: 'void main() { init_core(); }',
-      description: 'Projenin genel mimarisini tasarlayan sistemin temel yapısını oluşturarak, ölçeklenebilir ve sürdürülebilir bir altyapı kurdu.', socialLinks: { linkedin: '#', github: '#' }
+      description:
+        'Projenin genel mimarisini tasarlayan sistemin temel yapısını oluşturarak, ölçeklenebilir ve sürdürülebilir bir altyapı kurdu.',
+      socialLinks: { linkedin: '#', github: '#' },
     },
     {
       name: 'Alper Uğur Acar',
       role: 'İş Analisti ',
       image: 'assets/alperuguracar.png',
       codeBg: 'import { crystal } from "unides"',
-      description: 'Veritabanı geliştiricisi olarak veri modelleri tasarladı, performanslı ve güvenli veritabanları geliştirdi; sistemlerin sürdürülebilirliğine katkı sağladı.',
-      socialLinks: { linkedin: '#', github: '#' }
+      description:
+        'Veritabanı geliştiricisi olarak veri modelleri tasarladı, performanslı ve güvenli veritabanları geliştirdi; sistemlerin sürdürülebilirliğine katkı sağladı.',
+      socialLinks: { linkedin: '#', github: '#' },
     },
     {
       name: 'Safa Rahman Cenkci',
       role: 'Frontend Takım Lideri',
       image: 'assets/safarahmancenkci.png',
       codeBg: 'SELECT * FROM futures',
-      description: 'Frontend ekibini yöneten ve kullanıcı arayüzü geliştirmelerini koordine eden takım lideri. Modern web teknolojileri ile kullanıcı deneyimini optimize ediyor.',
-      socialLinks: { linkedin: '#', github: '#' }
+      description:
+        'Frontend ekibini yöneten ve kullanıcı arayüzü geliştirmelerini koordine eden takım lideri. Modern web teknolojileri ile kullanıcı deneyimini optimize ediyor.',
+      socialLinks: { linkedin: '#', github: '#' },
     },
     {
       name: 'Abdullah Gönç',
       role: 'Frontend Geliştirici',
       image: 'assets/abdullahgonc.jpg',
       codeBg: 'while(true) { innovate(); }',
-      description: 'Kullanıcı arayüzü geliştirmelerinde aktif rol alan frontend geliştirici. Responsive ve kullanıcı dostu arayüzler oluşturuyor.',
-      socialLinks: { linkedin: '#', github: '#' }
+      description:
+        'Kullanıcı arayüzü geliştirmelerinde aktif rol alan frontend geliştirici. Responsive ve kullanıcı dostu arayüzler oluşturuyor.',
+      socialLinks: { linkedin: '#', github: '#' },
     },
     {
       name: 'Hüseyin Eren Çeykel',
       role: 'Database Sorumlusu',
       image: 'assets/huseyinceykel.png',
       codeBg: 'Flutter.run()',
-      description: ' İş ihtiyaçlarına uygun tablolar ve veri modelleri oluşturdu; veritabanı fonksiyonları, prosedürleri ve metotları geliştirerek sorgu performansını artırdı, güvenli ve ölçeklenebilir bir sistem yapısı sağladı.',
-      socialLinks: { linkedin: '#', github: '#' }
+      description:
+        ' İş ihtiyaçlarına uygun tablolar ve veri modelleri oluşturdu; veritabanı fonksiyonları, prosedürleri ve metotları geliştirerek sorgu performansını artırdı, güvenli ve ölçeklenebilir bir sistem yapısı sağladı.',
+      socialLinks: { linkedin: '#', github: '#' },
     },
     {
       name: 'Oğuzhan Akkoç',
       role: 'Backend Geliştirici',
       image: 'assets/oguzhanakkoc.png',
       codeBg: 'import pandas as pd',
-      description: 'Sunucu tarafı geliştirmelerini yapan backend geliştirici. API tasarımı ve veri işleme mantığını geliştiriyor.',
-      socialLinks: { linkedin: '#', github: '#' }
+      description:
+        'Sunucu tarafı geliştirmelerini yapan backend geliştirici. API tasarımı ve veri işleme mantığını geliştiriyor.',
+      socialLinks: { linkedin: '#', github: '#' },
     },
     {
       name: 'Yunus Emre Güler',
       role: 'Yapay Zeka Geliştiricisi',
       image: 'assets/yunusemreguler.webp',
       codeBg: 'docker-compose up -d',
-      description: 'Yapay zeka modelleri ve algoritmaları geliştiren AI uzmanı. Makine öğrenmesi çözümleri ile projeye değer katıyor.',
-      socialLinks: { linkedin: '#', github: '#' }
+      description:
+        'Yapay zeka modelleri ve algoritmaları geliştiren AI uzmanı. Makine öğrenmesi çözümleri ile projeye değer katıyor.',
+      socialLinks: { linkedin: '#', github: '#' },
     },
     {
       name: 'Ali Kadir Güzel',
       role: 'Yapay Zeka Geliştiricisi',
       image: 'assets/alikadirguzel.png',
       codeBg: 'expect(result).toBe(true)',
-      description: 'Yapay zeka teknolojileri ile akıllı sistemler geliştiren AI geliştirici. NLP ve makine öğrenmesi alanlarında çalışıyor.',
-      socialLinks: { linkedin: '#', github: '#' }
+      description:
+        'Yapay zeka teknolojileri ile akıllı sistemler geliştiren AI geliştirici. NLP ve makine öğrenmesi alanlarında çalışıyor.',
+      socialLinks: { linkedin: '#', github: '#' },
     },
     {
       name: 'Hamza Ketenci',
       role: 'Full Stack Geliştirici',
       image: 'assets/hamzaketenci.png',
       codeBg: '.design { beauty: true; }',
-      description: 'Hem frontend hem backend geliştirme yapan full stack geliştirici. Projenin tüm katmanlarında aktif rol alıyor.',
-      socialLinks: { linkedin: '#', github: '#' }
+      description:
+        'Hem frontend hem backend geliştirme yapan full stack geliştirici. Projenin tüm katmanlarında aktif rol alıyor.',
+      socialLinks: { linkedin: '#', github: '#' },
     },
     {
       name: 'Burak Erken',
       role: 'Full Stack Geliştirici',
       image: 'assets/burakerken.png',
       codeBg: 'const future = await build();',
-      description: 'Uçtan uca geliştirme yapan full stack geliştirici. Frontend ve backend entegrasyonlarını sağlayarak, bütünsel çözümler üretiyor.',
-      socialLinks: { linkedin: '#', github: '#' }
-    }
+      description:
+        'Uçtan uca geliştirme yapan full stack geliştirici. Frontend ve backend entegrasyonlarını sağlayarak, bütünsel çözümler üretiyor.',
+      socialLinks: { linkedin: '#', github: '#' },
+    },
   ];
 
   heroMoveX = 50;
@@ -130,18 +137,16 @@ export class DevelopersPageComponent implements OnInit, OnDestroy {
   }
 
   alumni: Alumni[] = [
-    { name: 'Eski Geliştirici 1', socialLinks: { linkedin: '#', github: '#' } },
-    { name: 'Eski Geliştirici 2', socialLinks: { linkedin: '#', github: '#' } },
-    { name: 'Eski Geliştirici 3', socialLinks: { linkedin: '#', github: '#' } },
-    { name: 'Eski Tasarımcı 1', socialLinks: { linkedin: '#', github: '#' } },
-    { name: 'Testçi Arkadaş', socialLinks: { linkedin: '#', github: '#' } },
-    { name: 'Eski Geliştirici 4', socialLinks: { linkedin: '#', github: '#' } },
-    { name: 'Eski Geliştirici 5', socialLinks: { linkedin: '#', github: '#' } },
-    { name: 'Eski Tasarımcı 2', socialLinks: { linkedin: '#', github: '#' } },
-    { name: 'Eski Geliştirici 6', socialLinks: { linkedin: '#', github: '#' } }
+    { name: 'Ahmet Berkan Çiçek', socialLinks: { linkedin: '#', github: '#' } },
+    { name: 'Yunus Yaman', socialLinks: { linkedin: '#', github: '#' } },
+    { name: 'Yaşar Eren Güre', socialLinks: { linkedin: '#', github: '#' } },
+    { name: 'Derya Gökçeli', socialLinks: { linkedin: '#', github: '#' } },
+    { name: 'Melikhan Atay', socialLinks: { linkedin: '#', github: '#' } },
+    { name: 'Melike Kuyucaklıoğlu', socialLinks: { linkedin: '#', github: '#' } },
+    { name: 'Mehmet Sezer Altun', socialLinks: { linkedin: '#', github: '#' } },
   ];
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) { }
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
@@ -152,16 +157,19 @@ export class DevelopersPageComponent implements OnInit, OnDestroy {
       window.addEventListener('mousemove', this.mouseMoveListener);
 
       // Simple Observer for scroll reveal
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-          }
-        });
-      }, { threshold: 0.1 });
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+            }
+          });
+        },
+        { threshold: 0.1 }
+      );
 
       setTimeout(() => {
-        document.querySelectorAll('.dev-cell, .stat-card').forEach(el => observer.observe(el));
+        document.querySelectorAll('.dev-cell, .stat-card').forEach((el) => observer.observe(el));
       }, 100);
     }
   }
