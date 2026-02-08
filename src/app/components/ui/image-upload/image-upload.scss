@@ -306,3 +306,120 @@
   }
 }
 
+/* KIRPMA MODAL'I */
+.crop-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+  padding: 16px;
+  animation: fadeIn 0.2s ease;
+}
+
+.crop-modal {
+  background: #fff;
+  border-radius: 16px;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: popIn 0.25s ease;
+
+  .crop-modal-header {
+    padding: 20px 24px 0;
+    flex-shrink: 0;
+
+    .crop-modal-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #1e293b;
+      margin: 0 0 6px 0;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .crop-modal-desc {
+      font-size: 0.875rem;
+      color: #64748b;
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .crop-modal-hint {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin: 8px 0 0 0;
+      font-family: 'Poppins', sans-serif;
+      line-height: 1.4;
+    }
+  }
+
+  .crop-modal-body {
+    padding: 20px 24px;
+    min-height: 280px;
+    max-height: 60vh;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    image-cropper {
+      max-height: 55vh;
+      width: 100%;
+    }
+
+    ::ng-deep .source-image {
+      max-height: 55vh !important;
+    }
+  }
+
+  .crop-modal-footer {
+    padding: 16px 24px 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    flex-shrink: 0;
+    border-top: 1px solid #e2e8f0;
+  }
+
+  .crop-btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.2s ease;
+
+    &.crop-btn-cancel {
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid #e2e8f0;
+
+      &:hover {
+        background: #e2e8f0;
+      }
+    }
+
+    &.crop-btn-confirm {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      color: #fff;
+      border: none;
+
+      &:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+    }
+  }
+}
+

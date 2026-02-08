@@ -101,8 +101,9 @@
       width: 50px;
       height: 50px;
       border-radius: 10px; // Karemsi, hafif yuvarlak
-      object-fit: cover;
-      background-color: #f0f0f0;
+      object-fit: contain; // Logo tam görünsün, kırpılmasın (detay sayfası ile uyumlu)
+      object-position: center;
+      background-color: #f8f9fa;
     }
 
     .meta {

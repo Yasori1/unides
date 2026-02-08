@@ -4,6 +4,24 @@
 /* Ekstra Register Özellikleri */
 .form-side {
   overflow-y: auto;
+
+  &.form-side-intro {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+}
+.form-side.form-side-intro .form-wrapper {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-bottom: 24px;
+  margin-top: 0;
+}
+.form-side.form-side-intro .form-wrapper .header-text {
+  margin-bottom: 8px;
 }
 .form-wrapper {
   padding-bottom: 40px;
@@ -26,4 +44,142 @@
   color: var(--text-gray);
   font-size: 13px;
   margin-bottom: 20px;
+}
+
+.step-block {
+  margin-top: 16px;
+}
+
+/* Intro ekranı: süreç açıklaması + Kayıt sürecine başla butonu — tek ekranda, dikey ortada */
+.intro-block {
+  max-width: 640px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-side.form-side-intro .intro-block {
+  flex: 0 0 auto;
+}
+
+.intro-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-dark, #1a1a1a);
+  margin: 0 0 8px;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+  flex-shrink: 0;
+}
+
+.intro-desc {
+  color: var(--text-gray, #5a5a5a);
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0 0 16px;
+  flex-shrink: 0;
+}
+
+.process-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0 0 16px;
+}
+
+.process-step {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  transition: background 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.08);
+  }
+}
+
+.process-step-num {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary-color, #2563eb);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border-radius: 50%;
+  line-height: 1;
+}
+
+.process-step-content {
+  flex: 1;
+  min-width: 0;
+
+  strong {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-dark, #1a1a1a);
+    margin-bottom: 4px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--text-gray, #555);
+  }
+}
+
+.intro-note {
+  font-size: 13px;
+  color: var(--text-gray, #5a5a5a);
+  margin: 0 0 14px;
+  line-height: 1.45;
+  flex-shrink: 0;
+}
+
+.btn-start-register {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 24px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.step-desc {
+  color: var(--text-gray, #666);
+  font-size: 14px;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+.step-three .form-section {
+  margin-bottom: 18px;
+}
+.step-three .form-section label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dark, #1a1a1a);
+  margin-bottom: 6px;
+}
+.step-three .form-section .required {
+  color: #c00;
+}
+.step-three .field-hint {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
 }

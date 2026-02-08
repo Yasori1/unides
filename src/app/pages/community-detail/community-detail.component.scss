@@ -827,7 +827,9 @@
         width: 120px;
         height: 120px;
         border-radius: 16px;
-        object-fit: cover;
+        object-fit: contain; // Logo tam sığsın, kart ve detay çerçevesiyle uyumlu (banner gibi)
+        object-position: center;
+        background: var(--bg-color);
         border: 3px solid var(--border-color);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         flex-shrink: 0;
@@ -1406,7 +1408,8 @@
         .community-logo {
           max-width: 180px;
           height: 180px;
-          object-fit: cover; // Tablet'te eski haline döndü
+          object-fit: contain; // Logo tam sığsın, kart ve detay çerçevesiyle uyumlu
+          object-position: center;
         }
       }
 

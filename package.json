@@ -42,6 +42,7 @@
     "magnific-popup": "^1.2.0",
     "ng-apexcharts": "^1.7.4",
     "ngx-editor": "^19.0.0-beta.1",
+    "ngx-image-cropper": "^9.1.6",
     "ngx-owl-carousel-o": "^20.0.1",
     "ngx-scrollbar": "^18.0.0",
     "ngx-typed-writer": "^1.5.1",

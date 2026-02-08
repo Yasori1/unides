@@ -1,12 +1,13 @@
 import { Component, EventEmitter, Input, Output, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ImageCropperComponent, ImageCroppedEvent } from 'ngx-image-cropper';
 import { Logger } from '../../../utils/logger.util';
 
 @Component({
   selector: 'app-image-upload',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ImageCropperComponent],
   templateUrl: './image-upload.html',
   styleUrls: ['./image-upload.scss'],
 })
@@ -16,11 +17,28 @@ export class ImageUploadComponent {
   @Input() uploadToServer: boolean = false; // Backend'e yükleme yapılacak mı?
   @Input() allowUrl: boolean = true; // URL ile ekleme izni
   @Input() maxFileSizeMB: number = 1; // Maksimum dosya boyutu (MB)
+  /** Kırpma açıksa, kullanıcı yüklemeden önce fotoğrafın hangi kısmının görüneceğini seçebilir */
+  @Input() enableCrop: boolean = false;
+  /** Kırpma en-boy oranını kilitle (false = kullanıcı serbest oran seçer) */
+  @Input() cropMaintainAspectRatio: boolean = true;
+  /** Kırpma en-boy oranı (örn: 1 = kare, 16/9 ≈ 1.78); cropMaintainAspectRatio true iken kullanılır */
+  @Input() cropAspectRatio: number = 1;
+  /** Kırpma alanı minimum genişlik (px, 0 = sınır yok) */
+  @Input() cropMinWidth: number = 0;
+  /** Kırpma alanı minimum yükseklik (px, 0 = sınır yok) */
+  @Input() cropMinHeight: number = 0;
+  /** Kırpma alanı maksimum genişlik (px, 0 = sınır yok) */
+  @Input() cropMaxWidth: number = 0;
+  /** Kırpma alanı maksimum yükseklik (px, 0 = sınır yok) */
+  @Input() cropMaxHeight: number = 0;
+  /** Kırpma modalında gösterilecek ek rehber metni (örn. "Logo kartlarda küçük karede gösterilir; önemli öğeleri ortada tutun.") */
+  @Input() cropHint: string = '';
   @Output() onImageSelected = new EventEmitter<string>(); // Parent'a image path/url gönder
   @Output() onFileSelected = new EventEmitter<File>(); // Parent'a File objesi gönder (upload için)
   @Output() onFileSizeError = new EventEmitter<{ file: File; maxSize: number; actualSize: number }>(); // Dosya boyutu hatası
 
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+  @ViewChild(ImageCropperComponent) imageCropper!: ImageCropperComponent;
 
   isDragging = false;
   fileName: string | null = null;
@@ -30,6 +48,12 @@ export class ImageUploadComponent {
   // Dosya boyutu hatası için internal state
   showFileSizeError: boolean = false;
   fileSizeErrorMessage: string = '';
+
+  // Kırpma modalı
+  showCropModal: boolean = false;
+  cropImageFile: File | null = null; // Cropper'da gösterilecek dosya
+  pendingCropFile: File | null = null; // Kırpma sonrası dosya adı vb. için
+  lastCroppedResult: ImageCroppedEvent | null = null;
 
   // --- DOSYA SEÇME İŞLEMLERİ ---
   triggerFileInput() {
@@ -111,6 +135,16 @@ export class ImageUploadComponent {
 
     this.fileName = file.name;
 
+    // Kırpma açıksa ve dosya SVG değilse (SVG canvas ile kırpılamaz) kırpma modalını aç
+    const isSvg = file.type === 'image/svg+xml';
+    if (this.enableCrop && !isSvg) {
+      this.pendingCropFile = file;
+      this.lastCroppedResult = null;
+      this.cropImageFile = file; // Cropper bu dosyayı gösterecek
+      this.showCropModal = true;
+      return;
+    }
+
     // Eğer uploadToServer true ise, dosyayı parent'a gönder (parent upload edecek)
     if (this.uploadToServer) {
       this.onFileSelected.emit(file);
@@ -131,6 +165,46 @@ export class ImageUploadComponent {
       };
       reader.readAsDataURL(file);
     }
+  }
+
+  /** Kırpma tamamlandığında cropper'dan gelen sonucu sakla */
+  onImageCropped(event: ImageCroppedEvent) {
+    this.lastCroppedResult = event;
+  }
+
+  /** Kırpma modalında "Kırp ve kullan" */
+  async confirmCrop() {
+    if (!this.lastCroppedResult || !this.pendingCropFile) return;
+    const event = this.lastCroppedResult;
+
+    // Önizleme: objectUrl (blob URL) veya base64
+    if (event.objectUrl) {
+      this.previewUrl = event.objectUrl;
+      this.onImageSelected.emit(event.objectUrl);
+    } else if (event.base64) {
+      this.previewUrl = event.base64;
+      this.onImageSelected.emit(event.base64);
+    }
+
+    // uploadToServer ise kırpılmış blob'u File olarak emit et
+    if (this.uploadToServer && event.blob) {
+      const croppedFile = new File([event.blob], this.pendingCropFile.name, {
+        type: this.pendingCropFile.type,
+        lastModified: Date.now()
+      });
+      this.onFileSelected.emit(croppedFile);
+    }
+
+    this.closeCropModal();
+  }
+
+  /** Kırpma modalını kapat (iptal veya tamamlandıktan sonra) */
+  closeCropModal() {
+    this.showCropModal = false;
+    this.cropImageFile = null;
+    this.pendingCropFile = null;
+    this.lastCroppedResult = null;
+    if (this.fileInput) this.fileInput.nativeElement.value = '';
   }
 
   // Dosya boyutu hata popup'ını kapat

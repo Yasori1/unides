@@ -794,6 +794,17 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       );
     }
 
+    // Tümü seçiliyken sıra: Bekleyen → Reddedilen → Onaylanan
+    if (!this.eventStatusFilter) {
+      const statusOrder = (status: string) => {
+        if (status === 'Beklemede') return 0;
+        if (status === 'Reddedildi' || status === 'Revize') return 1;
+        if (status === 'Onaylandı') return 2;
+        return 0;
+      };
+      temp.sort((a, b) => statusOrder(a.status) - statusOrder(b.status));
+    }
+
     this.filteredEvents = temp;
   }
 

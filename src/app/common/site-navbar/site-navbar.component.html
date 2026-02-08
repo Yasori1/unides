@@ -4,7 +4,11 @@
     </app-header-branding>
 
     <!-- Backdrop -->
-    <div class="mobile-backdrop" [class.active]="isMobileMenuOpen" (click)="closeMobileMenu()"></div>
+    <div
+      class="mobile-backdrop"
+      [class.active]="isMobileMenuOpen"
+      (click)="closeMobileMenu()"
+    ></div>
 
     <div class="nav-menu-wrapper" [class.active]="isMobileMenuOpen">
       <!-- Menu Header (Mobile Only) -->
@@ -56,20 +60,44 @@
       <!-- Mobile Menu Footer -->
       <div class="mobile-menu-footer">
         <div class="mobile-auth-footer" *ngIf="isInitialized && isLoggedIn === false">
-          <a routerLink="/login" class="btn-outline-custom small static-btn" (click)="closeMobileMenu()">Giriş Yap</a>
-          <a routerLink="/register" class="btn-solid-custom small" (click)="closeMobileMenu()">Kayıt Ol</a>
+          <a
+            routerLink="/community-login"
+            class="btn-outline-custom small static-btn"
+            (click)="closeMobileMenu()"
+            >Giriş Yap</a
+          >
+          <a routerLink="/register" class="btn-solid-custom small" (click)="closeMobileMenu()"
+            >Kayıt Ol</a
+          >
         </div>
 
         <div class="mobile-auth-footer" *ngIf="isInitialized && isLoggedIn === true">
+          <!-- Öğrenci Dashboard şu an çalışmayacak (yorum satırında)
           <a *ngIf="userRole === 'student'" routerLink="/profile" class="btn-solid-custom small"
             (click)="closeMobileMenu()">{{ getDashboardLabel() }}</a>
-          <a *ngIf="userRole === 'corporate'" routerLink="/corporate-dashboard" class="btn-solid-custom small"
-            (click)="closeMobileMenu()">{{ getDashboardLabel() }}</a>
-          <a *ngIf="userRole === 'community'" routerLink="/community-dashboard" class="btn-solid-custom small"
-            (click)="closeMobileMenu()">{{ getDashboardLabel() }}</a>
+          -->
+          <a
+            *ngIf="userRole === 'corporate'"
+            routerLink="/corporate-dashboard"
+            class="btn-solid-custom small"
+            (click)="closeMobileMenu()"
+            >{{ getDashboardLabel() }}</a
+          >
+          <a
+            *ngIf="userRole === 'community'"
+            routerLink="/community-dashboard"
+            class="btn-solid-custom small"
+            (click)="closeMobileMenu()"
+            >{{ getDashboardLabel() }}</a
+          >
 
-          <button class="btn-outline-custom small static-btn" style="width: 100%; margin-top: 10px;"
-            (click)="logout()">Çıkış Yap</button>
+          <button
+            class="btn-outline-custom small static-btn"
+            style="width: 100%; margin-top: 10px"
+            (click)="logout()"
+          >
+            Çıkış Yap
+          </button>
         </div>
 
         <p class="copyright">© 2026 ÜNİDES</p>

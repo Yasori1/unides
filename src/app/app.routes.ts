@@ -67,25 +67,25 @@ export const routes: Routes = [
   { path: 'kvkk', component: KvkkPageComponent },
 
   // --- LOGIN & REGISTER ROTALARI ---
-  // TÜM GİRİŞ SAYFALARI AKTİF
-  { path: 'login', component: LoginPageComponent },
+  // Sadece Topluluk Girişi ve Kurumsal Giriş aktif. Öğrenci Girişi/Kayıt/Dashboard şu an kapalı (ileride açılabilir).
+  // { path: 'login', component: LoginPageComponent },
+  { path: 'login', redirectTo: '/', pathMatch: 'full' },
   { path: 'corporate-login', component: CorporateLoginComponent },
   { path: 'community-login', component: CommunityLoginComponent },
 
-  // SADECE ÖĞRENCİ KAYDI AKTİF
-  { path: 'register', component: RegisterPageComponent },
+  // Topluluk Kaydı açık (3 adımlı: e-posta/şifre → doğrulama → topluluk bilgileri)
+  { path: 'community-register', component: CommunityRegisterComponent },
 
-  // YAPIM AŞAMASINDA - İlk etap için devre dışı
+  // Kayıt: Sadece Topluluk Kaydı açık (/register ve /community-register)
+  { path: 'register', component: CommunityRegisterComponent },
+
+  // Kurumsal kayıt: Bakanlık yetkilisi tarafından yönetilir
   { path: 'corporate-register', component: ComingSoonComponent, data: { title: 'Kurumsal Kayıt' } },
-  { path: 'community-register', component: ComingSoonComponent, data: { title: 'Topluluk Kayıt' } },
 
-  // YAPIM AŞAMASINDA - Gelecekte lazım olabilir (yorum satırında tutuldu)
-  // { path: 'corporate-register', component: CorporateRegisterComponent },
-  // { path: 'community-register', component: CommunityRegisterComponent },
-
-  // YAPIM AŞAMASINDA - Gelecekte lazım olabilir
-  // { path: 'login', component: ComingSoonComponent, data: { title: 'Giriş Yap' } },
-  // { path: 'register', component: ComingSoonComponent, data: { title: 'Kayıt Ol' } },
+  // Öğrenci giriş/kayıt şu an çalışmayacak (ileride açılabilir)
+  { path: 'student-register', redirectTo: '/', pathMatch: 'full' },
+  // { path: 'register', component: RegisterPageComponent },
+  // { path: 'community-register', component: ComingSoonComponent },
 
   { path: 'coming-soon', component: ComingSoonComponent, data: { title: 'Bu Sayfa' } },
 
@@ -103,29 +103,32 @@ export const routes: Routes = [
     path: 'corporate-dashboard',
     component: CorporateDashboardComponent,
     canActivate: [roleGuard],
-    data: { expectedRole: 'corporate' }
+    data: { expectedRole: 'corporate' },
   },
   // TOPLULUK DASHBOARD
   {
     path: 'community-dashboard',
     component: CommunityDashboardComponent,
     canActivate: [roleGuard],
-    data: { expectedRole: 'community' }
+    data: { expectedRole: 'community' },
   },
 
-  // ÖĞRENCİ DASHBOARD
-  {
-    path: 'student-dashboard',
-    component: StudentProfileComponent,
-    canActivate: [roleGuard],
-    data: { expectedRole: 'student' }
-  },
-  {
-    path: 'profile',
-    component: StudentProfileComponent, // Alias for student-dashboard
-    canActivate: [roleGuard],
-    data: { expectedRole: 'student' }
-  },
+  // ÖĞRENCİ DASHBOARD - Şu an çalışmayacak (ileride açılabilir)
+  { path: 'student-dashboard', redirectTo: '/', pathMatch: 'full' },
+  { path: 'profile', redirectTo: '/', pathMatch: 'full' },
+  // (Eski route'lar yorum satırında)
+  // {
+  //   path: 'student-dashboard',
+  //   component: StudentProfileComponent,
+  //   canActivate: [roleGuard],
+  //   data: { expectedRole: 'student' }
+  // },
+  // {
+  //   path: 'profile',
+  //   component: StudentProfileComponent,
+  //   canActivate: [roleGuard],
+  //   data: { expectedRole: 'student' }
+  // },
 
   // Admin Dashboard (Eski/Mevcut)
   /*

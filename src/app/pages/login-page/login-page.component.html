@@ -1,5 +1,8 @@
 <!-- Google Fonts & Icons -->
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<link
+  href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+  rel="stylesheet"
+/>
 <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
 
 <div class="main-container">
@@ -8,10 +11,10 @@
     <div class="visual-side">
       <div class="visual-overlay"></div>
       <div class="visual-content">
-        <div class="brand-badge" style="cursor: pointer;" routerLink="/">
-          <div class="logo-box" style="width: auto; height: auto; padding: 12px 24px; gap: 8px;">
-            <i class='bx bx-home-alt' style="font-size: 1.2rem;"></i>
-            <span style="font-size: 1rem;">Ana Sayfa</span>
+        <div class="brand-badge" style="cursor: pointer" routerLink="/">
+          <div class="logo-box" style="width: auto; height: auto; padding: 12px 24px; gap: 8px">
+            <i class="bx bx-home-alt" style="font-size: 1.2rem"></i>
+            <span style="font-size: 1rem">Ana Sayfa</span>
           </div>
         </div>
         <div class="quote-container">
@@ -26,18 +29,21 @@
       <div class="form-wrapper">
         <div class="mobile-logo">
           <div class="back-to-home" routerLink="/">
-            <i class='bx bx-left-arrow-alt'></i>
+            <i class="bx bx-left-arrow-alt"></i>
             <span>Ana Sayfaya Dön</span>
           </div>
         </div>
 
         <div class="header-text">
-          <h3>Tekrar Merhaba! 👋</h3>
-          <p>Hesabın yok mu? <a routerLink="/register" class="register-link">Hemen Kayıt Ol</a></p>
+          <h3>Giriş Yap</h3>
+          <p>
+            Topluluk hesabınız yok mu?
+            <a routerLink="/community-register" class="register-link">Topluluk Kaydı</a>
+          </p>
         </div>
 
+        <!-- Öğrenci girişi şu an çalışmayacak - yorum satırında
         <form (submit)="onSubmit($event)">
-          <!-- E-Posta Input -->
           <div class="input-group">
             <div class="icon-wrapper" [class.error-icon]="emailError">
               <i class="bx bx-envelope"></i>
@@ -45,68 +51,48 @@
             <input type="email" (input)="validateStudentEmail($event)" placeholder="Öğrenci E-Posta (xxx@univ.edu.tr)"
               class="modern-input" [class.input-error]="emailError" />
           </div>
-
           <div *ngIf="emailError" class="error-message">
-            <i class="bx bx-error-circle"></i> Sadece <b>.edu.tr</b> uzantılı öğrenci mailleri kabul
-            edilmektedir.
+            <i class="bx bx-error-circle"></i> Sadece <b>.edu.tr</b> uzantılı öğrenci mailleri kabul edilmektedir.
           </div>
-
-          <!-- Şifre Input -->
           <div class="input-group mt-3">
-            <div class="icon-wrapper">
-              <i class="bx bx-lock-alt"></i>
-            </div>
+            <div class="icon-wrapper"><i class="bx bx-lock-alt"></i></div>
             <input type="password" placeholder="Şifreniz" class="modern-input" />
           </div>
-
           <div class="form-actions">
-            <label class="remember-me">
-              <input type="checkbox" />
-              <span>Beni Hatırla</span>
-            </label>
+            <label class="remember-me"><input type="checkbox" /><span>Beni Hatırla</span></label>
             <a href="javascript:void(0)" class="forgot-link" (click)="openForgotPasswordModal()">Şifremi Unuttum?</a>
           </div>
-
-          <!-- Giriş Yap Butonu (Animasyonlu) -->
           <button type="submit" class="btn-primary" [style.opacity]="emailError ? '0.7' : '1'" [disabled]="isLoading">
-            <ng-container *ngIf="!isLoading">
-              Giriş Yap <i class="bx bx-right-arrow-alt"></i>
-            </ng-container>
+            <ng-container *ngIf="!isLoading">Giriş Yap <i class="bx bx-right-arrow-alt"></i></ng-container>
+            <ng-container *ngIf="isLoading"><app-luma-spin></app-luma-spin></ng-container>
+          </button>
+          <div class="divider"><span>veya</span></div>
+        </form>
+        -->
 
-            <ng-container *ngIf="isLoading">
-              <!-- Yükleniyor Animasyonu -->
-              <app-luma-spin></app-luma-spin>
-            </ng-container>
+        <div class="social-login-grid" style="margin-top: 0">
+          <!-- Topluluk Girişi -->
+          <button type="button" class="btn-social btn-community" routerLink="/community-login">
+            <div class="btn-content">
+              <span class="emoji-icon">👥</span>
+              <div class="text-col">
+                <span class="btn-label">Topluluk</span>
+                <span class="btn-title">Topluluk Girişi</span>
+              </div>
+            </div>
           </button>
 
-          <div class="divider">
-            <span>veya</span>
-          </div>
-
-          <div class="social-login-grid">
-            <!-- Yetkili Girişi -->
-            <button type="button" class="btn-social btn-official" routerLink="/corporate-login">
-              <div class="btn-content">
-                <i class="bx bxs-id-card icon-official"></i>
-                <div class="text-col">
-                  <span class="btn-label">Kurumsal</span>
-                  <span class="btn-title">Yetkili Girişi</span>
-                </div>
+          <!-- Kurumsal (Bakanlık) Girişi -->
+          <button type="button" class="btn-social btn-official" routerLink="/corporate-login">
+            <div class="btn-content">
+              <i class="bx bxs-id-card icon-official"></i>
+              <div class="text-col">
+                <span class="btn-label">Kurumsal</span>
+                <span class="btn-title">Yetkili Girişi</span>
               </div>
-            </button>
-
-            <!-- Topluluk Girişi -->
-            <button type="button" class="btn-social btn-community" routerLink="/community-login">
-              <div class="btn-content">
-                <span class="emoji-icon">👥</span>
-                <div class="text-col">
-                  <span class="btn-label">Sosyal</span>
-                  <span class="btn-title">Topluluk Girişi</span>
-                </div>
-              </div>
-            </button>
-          </div>
-        </form>
+            </div>
+          </button>
+        </div>
       </div>
 
       <footer class="simple-footer">© T.C Gençlik ve Spor Bakanlığı</footer>
@@ -117,23 +103,17 @@
 <!-- TOAST BİLEŞENİ -->
 <app-toast></app-toast>
 
-<!-- ŞİFREMİ UNUTTUM MODAL -->
+<!-- Öğrenci şifremi unuttum modal - şu an çalışmayacak (yorum satırında)
 <div class="modal-backdrop" *ngIf="showForgotPasswordModal" (click)="closeForgotPasswordModal()">
   <div class="modal-content-forgot" (click)="$event.stopPropagation()">
     <div class="modal-header">
       <h3>Şifremi Unuttum</h3>
-      <button class="close-btn" (click)="closeForgotPasswordModal()">
-        <i class="bx bx-x"></i>
-      </button>
+      <button class="close-btn" (click)="closeForgotPasswordModal()"><i class="bx bx-x"></i></button>
     </div>
     <div class="modal-body-forgot">
-      <p class="modal-description">
-        Kayıtlı öğrenci e-posta adresinizi girin. Size şifre sıfırlama linki göndereceğiz.
-      </p>
+      <p class="modal-description">Kayıtlı öğrenci e-posta adresinizi girin. Size şifre sıfırlama linki göndereceğiz.</p>
       <div class="input-group">
-        <div class="icon-wrapper" [class.error-icon]="forgotEmailError">
-          <i class="bx bx-envelope"></i>
-        </div>
+        <div class="icon-wrapper" [class.error-icon]="forgotEmailError"><i class="bx bx-envelope"></i></div>
         <input type="email" [(ngModel)]="forgotPasswordEmail" (input)="validateForgotEmail($event)"
           placeholder="Öğrenci E-Posta (xxx@univ.edu.tr)" class="modern-input" [class.input-error]="forgotEmailError" />
       </div>
@@ -143,19 +123,14 @@
       <button class="btn-primary" (click)="sendPasswordResetEmail()"
         [disabled]="isSendingEmail || forgotEmailError || !forgotPasswordEmail"
         [style.opacity]="isSendingEmail || forgotEmailError || !forgotPasswordEmail ? '0.7' : '1'">
-        <ng-container *ngIf="!isSendingEmail">
-          Şifre Sıfırlama Linki Gönder <i class="bx bx-right-arrow-alt"></i>
-        </ng-container>
-        <ng-container *ngIf="isSendingEmail">
-          <app-luma-spin></app-luma-spin>
-        </ng-container>
+        <ng-container *ngIf="!isSendingEmail">Şifre Sıfırlama Linki Gönder <i class="bx bx-right-arrow-alt"></i></ng-container>
+        <ng-container *ngIf="isSendingEmail"><app-luma-spin></app-luma-spin></ng-container>
       </button>
       <div *ngIf="emailSent" class="success-message">
         <i class="bx bx-check-circle"></i>
-        <p>
-          Şifre sıfırlama linki e-posta adresinize gönderildi. Lütfen e-postanızı kontrol edin.
-        </p>
+        <p>Şifre sıfırlama linki e-posta adresinize gönderildi. Lütfen e-postanızı kontrol edin.</p>
       </div>
     </div>
   </div>
 </div>
+-->

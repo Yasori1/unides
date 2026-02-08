@@ -250,7 +250,7 @@
     box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
   }
 
-  &:focus+.icon-wrapper,
+  &:focus + .icon-wrapper,
   .input-group:focus-within .icon-wrapper {
     color: var(--primary-color);
   }
@@ -371,32 +371,39 @@
 
 .social-login-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 15px;
 }
 
 .btn-social {
+  width: 100%;
+  min-width: 0;
   background-color: var(--white);
   border: 1px solid var(--border-color);
   border-radius: 12px;
-  padding: 12px;
+  padding: 14px 16px;
   cursor: pointer;
   transition: all 0.2s ease;
-  text-align: left;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
   .btn-content {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 12px;
   }
 
   .text-col {
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
   }
 
   .btn-label {
-    font-size: 10px;
+    font-size: 11px;
     text-transform: uppercase;
     color: #9ca3af;
     letter-spacing: 0.5px;
@@ -404,18 +411,18 @@
   }
 
   .btn-title {
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 600;
     color: var(--text-dark);
   }
 
   .icon-official {
-    font-size: 24px;
+    font-size: 26px;
     color: var(--official-color);
   }
 
   .emoji-icon {
-    font-size: 20px;
+    font-size: 22px;
     font-style: normal;
     line-height: 1;
   }
@@ -423,6 +430,11 @@
   &:hover {
     background-color: #f8fafc;
     border-color: #cbd5e1;
+  }
+
+  &.btn-official:hover {
+    border-color: var(--official-color);
+    background-color: #f8fafc;
   }
 
   &.btn-community:hover {
@@ -499,10 +511,6 @@
 
   .header-text h3 {
     font-size: 24px;
-  }
-
-  .social-login-grid {
-    grid-template-columns: 1fr;
   }
 }
 

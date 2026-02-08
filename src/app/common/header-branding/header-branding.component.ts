@@ -1,4 +1,13 @@
-import { Component, EventEmitter, Input, Output, OnInit, OnDestroy, ChangeDetectorRef, HostListener } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  OnInit,
+  OnDestroy,
+  ChangeDetectorRef,
+  HostListener,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, NavigationEnd, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.services';
@@ -12,7 +21,7 @@ import { Logger } from '../../utils/logger.util';
   standalone: true,
   imports: [CommonModule, RouterLink],
   templateUrl: './header-branding.component.html',
-  styleUrls: ['./header-branding.component.scss']
+  styleUrls: ['./header-branding.component.scss'],
 })
 export class HeaderBrandingComponent implements OnInit, OnDestroy {
   @Input() isMobileMenuOpen = false;
@@ -34,7 +43,7 @@ export class HeaderBrandingComponent implements OnInit, OnDestroy {
     private communityService: CommunityService,
     private router: Router,
     private cdr: ChangeDetectorRef
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     // İlk kontrolü yap
@@ -42,7 +51,7 @@ export class HeaderBrandingComponent implements OnInit, OnDestroy {
 
     // Router events'i dinle - sayfa değiştiğinde login durumunu kontrol et
     this.routerSubscription = this.router.events
-      .pipe(filter(event => event instanceof NavigationEnd))
+      .pipe(filter((event) => event instanceof NavigationEnd))
       .subscribe(() => {
         // Kısa bir gecikme ile kontrol et (localStorage güncellemelerinin tamamlanması için)
         setTimeout(() => {
@@ -131,68 +140,73 @@ export class HeaderBrandingComponent implements OnInit, OnDestroy {
     }
 
     // Aktif toplulukları getir ve kullanıcının topluluğunu bul
-    this.communityService.getAllCommunities({ status: 'active' }).pipe(
-      take(1),
-      switchMap((communities) => {
-        if (!communities || communities.length === 0) {
+    this.communityService
+      .getAllCommunities({ status: 'active' })
+      .pipe(
+        take(1),
+        switchMap((communities) => {
+          if (!communities || communities.length === 0) {
+            return of(null);
+          }
+
+          // Tüm toplulukların detaylarını paralel olarak çek
+          const detailRequests = communities.map((community) =>
+            this.communityService.getCommunityById(community.id).pipe(
+              catchError(() => of(null)),
+              take(1)
+            )
+          );
+
+          return forkJoin(detailRequests).pipe(
+            take(1),
+            switchMap((details) => {
+              // Kullanıcının e-postasının bir topluluğun ComLeadMail'i ile eşleşip eşleşmediğini kontrol et
+              const matchingCommunity = details.find(
+                (detail) => detail && detail.comLeadMail?.trim().toLowerCase() === userEmail
+              );
+
+              return of(matchingCommunity || null);
+            })
+          );
+        }),
+        catchError(() => {
           return of(null);
-        }
-
-        // Tüm toplulukların detaylarını paralel olarak çek
-        const detailRequests = communities.map((community) =>
-          this.communityService.getCommunityById(community.id).pipe(
-            catchError(() => of(null)),
-            take(1)
-          )
-        );
-
-        return forkJoin(detailRequests).pipe(
-          take(1),
-          switchMap((details) => {
-            // Kullanıcının e-postasının bir topluluğun ComLeadMail'i ile eşleşip eşleşmediğini kontrol et
-            const matchingCommunity = details.find(
-              (detail) =>
-                detail && detail.comLeadMail?.trim().toLowerCase() === userEmail
+        })
+      )
+      .subscribe({
+        next: (matchingCommunity) => {
+          if (matchingCommunity) {
+            // Community interface'inde 'name' property'si var, 'comName' yok
+            this.displayName = matchingCommunity.name || 'Topluluk';
+            this.userInitial = this.displayName.charAt(0).toUpperCase();
+            this.communityLogo = matchingCommunity.logo || null;
+            // localStorage'a kaydet (gelecek seferler için)
+            localStorage.setItem(
+              'community_info',
+              JSON.stringify({
+                name: this.displayName,
+                id: matchingCommunity.id,
+                logo: this.communityLogo,
+              })
             );
-
-            return of(matchingCommunity || null);
-          })
-        );
-      }),
-      catchError(() => {
-        return of(null);
-      })
-    ).subscribe({
-      next: (matchingCommunity) => {
-        if (matchingCommunity) {
-          // Community interface'inde 'name' property'si var, 'comName' yok
-          this.displayName = matchingCommunity.name || 'Topluluk';
-          this.userInitial = this.displayName.charAt(0).toUpperCase();
-          this.communityLogo = matchingCommunity.logo || null;
-          // localStorage'a kaydet (gelecek seferler için)
-          localStorage.setItem('community_info', JSON.stringify({
-            name: this.displayName,
-            id: matchingCommunity.id,
-            logo: this.communityLogo
-          }));
-        } else {
-          // Topluluk bulunamazsa kullanıcı adını göster
+          } else {
+            // Topluluk bulunamazsa kullanıcı adını göster
+            this.displayName = this.userName;
+            this.userInitial = this.userName.charAt(0).toUpperCase();
+            this.communityLogo = null;
+          }
+          this.isCommunityNameLoaded = true; // Yükleme tamamlandı
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          // Hata durumunda kullanıcı adını göster
           this.displayName = this.userName;
           this.userInitial = this.userName.charAt(0).toUpperCase();
           this.communityLogo = null;
-        }
-        this.isCommunityNameLoaded = true; // Yükleme tamamlandı
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        // Hata durumunda kullanıcı adını göster
-        this.displayName = this.userName;
-        this.userInitial = this.userName.charAt(0).toUpperCase();
-        this.communityLogo = null;
-        this.isCommunityNameLoaded = true; // Yükleme tamamlandı (hata durumu)
-        this.cdr.detectChanges();
-      }
-    });
+          this.isCommunityNameLoaded = true; // Yükleme tamamlandı (hata durumu)
+          this.cdr.detectChanges();
+        },
+      });
   }
 
   onToggleMenu() {
@@ -211,9 +225,9 @@ export class HeaderBrandingComponent implements OnInit, OnDestroy {
 
   handleSettingsClick() {
     this.isProfileOpen = false;
-    // Kullanıcı rolüne göre dashboard'a yönlendir
+    // Kullanıcı rolüne göre dashboard'a yönlendir (Öğrenci dashboard şu an kapalı)
     if (this.userRole === 'student') {
-      this.router.navigate(['/profile'], { queryParams: { tab: 'settings' } });
+      this.router.navigate(['/']);
     } else if (this.userRole === 'corporate') {
       this.router.navigate(['/corporate-dashboard'], { queryParams: { tab: 'settings' } });
     } else if (this.userRole === 'community') {
@@ -245,9 +259,9 @@ export class HeaderBrandingComponent implements OnInit, OnDestroy {
 
   navigateToDashboard() {
     this.isProfileOpen = false;
-    // Dashboard'ın "Genel Bakış" sekmesine yönlendir
+    // Dashboard'ın "Genel Bakış" sekmesine yönlendir (Öğrenci dashboard şu an kapalı)
     if (this.userRole === 'student') {
-      this.router.navigate(['/profile']);
+      this.router.navigate(['/']);
     } else if (this.userRole === 'corporate') {
       this.router.navigate(['/corporate-dashboard'], { queryParams: { tab: 'overview' } });
     } else if (this.userRole === 'community') {
@@ -290,7 +304,11 @@ export class HeaderBrandingComponent implements OnInit, OnDestroy {
     const target = event.target as HTMLElement;
 
     // Profil dropdown kontrolü - profile-info veya profile-wrapper içindeki tıklamaları kontrol et
-    if (!target.closest('.profile-wrapper') && !target.closest('.profile-dropdown') && !target.closest('.profile-info')) {
+    if (
+      !target.closest('.profile-wrapper') &&
+      !target.closest('.profile-dropdown') &&
+      !target.closest('.profile-info')
+    ) {
       this.isProfileOpen = false;
     }
   }

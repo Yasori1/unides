@@ -9,9 +9,8 @@ export const roleGuard: CanActivateFn = (route, state) => {
     // 1. Kullanıcı giriş yapmış mı ve token geçerli mi?
     // isAuthenticated() artık token expiry kontrolü de yapıyor
     if (!authService.isAuthenticated()) {
-        // Giriş yapmamışsa veya token expire olmuşsa login sayfasına at
-        // İstenirse gidilmek istenen URL query param olarak eklenebilir
-        router.navigate(['/login']);
+        // Giriş yapmamışsa veya token süresi dolmuşsa her zaman anasayfaya yönlendir
+        router.navigate(['/']);
         return false;
     }
 

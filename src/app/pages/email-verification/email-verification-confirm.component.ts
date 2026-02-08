@@ -32,10 +32,9 @@ export class EmailVerificationConfirmComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // URL'den token'ı al
-    this.token = this.route.snapshot.queryParams['token'] || 
-                 this.route.snapshot.params['token'] || 
-                 '';
-    
+    this.token =
+      this.route.snapshot.queryParams['token'] || this.route.snapshot.params['token'] || '';
+
     if (this.token) {
       this.verifyEmail();
     } else {
@@ -43,7 +42,7 @@ export class EmailVerificationConfirmComponent implements OnInit, OnDestroy {
       this.isError = true;
       this.errorMessage = 'Geçersiz veya eksik doğrulama linki.';
       this.toastService.show('Geçersiz veya eksik doğrulama linki.', 'error');
-      
+
       this.redirectTimeout = setTimeout(() => {
         this.router.navigate(['/login']);
       }, 3000);
@@ -101,14 +100,26 @@ export class EmailVerificationConfirmComponent implements OnInit, OnDestroy {
             this.authService.saveUserType('student');
           }
 
-          this.toastService.show('E-posta adresiniz doğrulandı. Giriş sayfasına yönlendiriliyorsunuz...', 'success');
+          this.toastService.show(
+            'E-posta adresiniz doğrulandı. Yönlendiriliyorsunuz...',
+            'success'
+          );
+          const returnUrl = sessionStorage.getItem('community_register_return');
+          const target = returnUrl || '/login';
+          if (returnUrl) sessionStorage.removeItem('community_register_return');
           setTimeout(() => {
-            this.router.navigate(['/login'], { queryParams: { verified: '1' } });
+            this.router.navigateByUrl(target);
           }, 2000);
         } else {
-          this.toastService.show('E-posta adresiniz doğrulandı. Giriş yapabilirsiniz.', 'success');
+          this.toastService.show(
+            'E-posta adresiniz doğrulandı. Yönlendiriliyorsunuz...',
+            'success'
+          );
+          const returnUrl = sessionStorage.getItem('community_register_return');
+          const target = returnUrl || '/login';
+          if (returnUrl) sessionStorage.removeItem('community_register_return');
           setTimeout(() => {
-            this.router.navigate(['/login'], { queryParams: { verified: '1' } });
+            this.router.navigateByUrl(target);
           }, 2000);
         }
       } else {
@@ -117,7 +128,7 @@ export class EmailVerificationConfirmComponent implements OnInit, OnDestroy {
         const errorMessage = data.message || 'E-posta doğrulama işlemi başarısız oldu.';
         this.errorMessage = errorMessage;
         this.toastService.show(errorMessage, 'error');
-        
+
         this.redirectTimeout = setTimeout(() => {
           this.router.navigate(['/login']);
         }, 3000);
@@ -128,7 +139,7 @@ export class EmailVerificationConfirmComponent implements OnInit, OnDestroy {
       this.isError = true;
       this.errorMessage = error.message || 'Bir hata oluştu. Lütfen tekrar deneyiniz.';
       this.toastService.show(this.errorMessage, 'error');
-      
+
       this.redirectTimeout = setTimeout(() => {
         this.router.navigate(['/login']);
       }, 3000);

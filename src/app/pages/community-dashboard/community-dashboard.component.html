@@ -750,7 +750,12 @@
     </div>
     <div class="modal-body">
       <app-image-upload label="Banner Görseli Seç / Sürükle" [previewUrl]="clubInfo.banner || null"
-        [uploadToServer]="true" (onImageSelected)="onBannerSelected($event)"
+        [uploadToServer]="true"
+        [enableCrop]="true"
+        [cropAspectRatio]="1920/500"
+        [cropMinWidth]="384"
+        [cropMinHeight]="100"
+        (onImageSelected)="onBannerSelected($event)"
         (onFileSelected)="onBannerFileSelected($event)"></app-image-upload>
     </div>
   </div>
@@ -767,6 +772,10 @@
     </div>
     <div class="modal-body">
       <app-image-upload label="Logo Seç / Sürükle" [previewUrl]="clubInfo.logo || null" [uploadToServer]="true"
+        [enableCrop]="true"
+        [cropAspectRatio]="1"
+        [cropMinWidth]="220"
+        [cropMinHeight]="220"
         (onImageSelected)="onLogoSelected($event)" (onFileSelected)="onLogoFileSelected($event)"></app-image-upload>
     </div>
   </div>

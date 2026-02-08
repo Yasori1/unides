@@ -6,7 +6,6 @@ import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../services/toast.services';
 // Bileşenler
 import { ToastComponent } from '../../components/ui/toast/toast.component';
-import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
 import { environment } from '../../../environments/environment';
 import { Logger } from '../../utils/logger.util';
 
@@ -26,7 +25,7 @@ interface AuthResponse {
 @Component({
   selector: 'app-login-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, ToastComponent, LumaSpinComponent],
+  imports: [CommonModule, RouterLink, FormsModule, ToastComponent],
   templateUrl: './login-page.component.html',
   styleUrls: ['./login-page.component.scss'],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -50,7 +49,7 @@ export class LoginPageComponent implements OnInit {
     private toastService: ToastService,
     private router: Router,
     private route: ActivatedRoute
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     // E-posta doğrulama sonrası yönlendirme: /login?verified=1 ise mesaj göster
@@ -130,8 +129,8 @@ export class LoginPageComponent implements OnInit {
       body: JSON.stringify({
         email: this.email,
         password: this.password,
-        roleId: this.roleId // 1 = Öğrenci
-      })
+        roleId: this.roleId, // 1 = Öğrenci
+      }),
     })
       .then(async (res) => {
         const err = await res.json().catch(() => ({}));
@@ -139,11 +138,15 @@ export class LoginPageComponent implements OnInit {
 
         if (!res.ok) {
           const isEmailNotVerified =
-            /doğrulanmadı|doğrulanmamış|not verified|email not verified|EmailNotVerified/i.test(message) ||
+            /doğrulanmadı|doğrulanmamış|not verified|email not verified|EmailNotVerified/i.test(
+              message
+            ) ||
             err?.errorCode === 'EmailNotVerified' ||
             err?.code === 'EMAIL_NOT_VERIFIED';
           if (isEmailNotVerified && this.email) {
-            this.router.navigate(['/email-verification-waiting'], { queryParams: { email: this.email } });
+            this.router.navigate(['/email-verification-waiting'], {
+              queryParams: { email: this.email },
+            });
           }
           this.loginError = message;
           throw new Error(message);
@@ -158,7 +161,7 @@ export class LoginPageComponent implements OnInit {
             'error'
           );
           this.router.navigate(['/email-verification-waiting'], {
-            queryParams: { email: data.email || this.email }
+            queryParams: { email: data.email || this.email },
           });
           return;
         }
@@ -170,12 +173,15 @@ export class LoginPageComponent implements OnInit {
         if (data.refreshToken) {
           localStorage.setItem('refresh_token', data.refreshToken);
         }
-        localStorage.setItem('user_info', JSON.stringify({
-          id: data.id,
-          name: data.fullName,
-          email: data.email,
-          role: data.roleName
-        }));
+        localStorage.setItem(
+          'user_info',
+          JSON.stringify({
+            id: data.id,
+            name: data.fullName,
+            email: data.email,
+            role: data.roleName,
+          })
+        );
         localStorage.setItem('user_type', 'student');
 
         this.toastService.show('Giriş başarılı! Ana sayfaya yönlendiriliyorsunuz...', 'success');

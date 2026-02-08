@@ -1,6 +1,6 @@
 import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit, HostListener, OnDestroy } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 // Servisler
 import { ToastService } from '../../services/toast.services';
@@ -46,8 +46,9 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private communityService: CommunityService,
     private router: Router,
+    private route: ActivatedRoute,
     private location: Location
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     // Spline Viewer scriptini dinamik olarak yükle
@@ -142,7 +143,9 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
             switchMap((communities) => {
               if (!communities || communities.length === 0) {
                 // Topluluk bulunamadı - girişe izin ver (backend zaten doğruladı)
-                Logger.warn('Topluluk bulunamadı, ancak backend girişi onayladı. Girişe izin veriliyor.');
+                Logger.warn(
+                  'Topluluk bulunamadı, ancak backend girişi onayladı. Girişe izin veriliyor.'
+                );
                 return of(true); // Girişe izin ver
               }
 
@@ -162,8 +165,8 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
                   // Hem aktif hem pasif toplulukları kontrol et
                   const matchingCommunity = communityDetails.find(
                     (detail) =>
-                      detail && 
-                      detail.comLeadMail && 
+                      detail &&
+                      detail.comLeadMail &&
                       detail.comLeadMail.trim().toLowerCase() === normalizedEmail
                   );
 
@@ -173,7 +176,9 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
                     // Topluluk başkanı bulunamadı ama backend girişi onayladı
                     // Backend'de kullanıcı rolü topluluk başkanı (roleId=3) olarak ayarlanmış olabilir
                     // Bu durumda girişe izin ver
-                    Logger.warn('Topluluk başkanı eşleşmesi bulunamadı, ancak backend girişi onayladı. Girişe izin veriliyor.');
+                    Logger.warn(
+                      'Topluluk başkanı eşleşmesi bulunamadı, ancak backend girişi onayladı. Girişe izin veriliyor.'
+                    );
                     return of(true); // Girişe izin ver
                   }
                 })
@@ -182,37 +187,32 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
             catchError((error) => {
               // Topluluk kontrolü sırasında hata oluşursa, girişe izin ver (backend zaten doğruladı)
               Logger.error('Topluluk kontrolü hatası:', error);
-              Logger.warn('Topluluk kontrolü başarısız oldu, ancak backend girişi onayladı. Girişe izin veriliyor.');
+              Logger.warn(
+                'Topluluk kontrolü başarısız oldu, ancak backend girişi onayladı. Girişe izin veriliyor.'
+              );
               return of(true); // Hata durumunda da girişe izin ver
             })
           )
           .subscribe({
             next: (hasCommunity) => {
-              // Backend girişi onayladıysa, topluluk kontrolü başarısız olsa bile girişe izin ver
               this.isLoading = false;
+              const nextUrl = this.route.snapshot.queryParams['next'];
+              const target = nextUrl || '/community-dashboard';
               this.toastService.show(
-                'Giriş başarılı! Ana sayfaya yönlendiriliyorsunuz...',
+                nextUrl
+                  ? 'Giriş başarılı! Yönlendiriliyorsunuz...'
+                  : 'Giriş başarılı! Topluluk paneline yönlendiriliyorsunuz...',
                 'success'
               );
-
-              setTimeout(() => {
-                this.router.navigate(['/']);
-              }, 1500);
+              setTimeout(() => this.router.navigateByUrl(target), 1500);
             },
             error: (error) => {
-              // Topluluk kontrolü sırasında hata oluşursa, yine de girişe izin ver (backend zaten doğruladı)
               this.isLoading = false;
               Logger.error('Topluluk kontrolü hatası:', error);
-              Logger.warn('Topluluk kontrolü başarısız oldu, ancak backend girişi onayladı. Girişe izin veriliyor.');
-
-              this.toastService.show(
-                'Giriş başarılı! Ana sayfaya yönlendiriliyorsunuz...',
-                'success'
-              );
-
-              setTimeout(() => {
-                this.router.navigate(['/']);
-              }, 1500);
+              const nextUrl = this.route.snapshot.queryParams['next'];
+              const target = nextUrl || '/community-dashboard';
+              this.toastService.show('Giriş başarılı! Yönlendiriliyorsunuz...', 'success');
+              setTimeout(() => this.router.navigateByUrl(target), 1500);
             },
           });
       },

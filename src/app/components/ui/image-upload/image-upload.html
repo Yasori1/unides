@@ -61,3 +61,37 @@
     </button>
   </div>
 </div>
+
+<!-- KIRPMA MODAL'I -->
+<div class="crop-modal-overlay" *ngIf="showCropModal" (click)="closeCropModal()">
+  <div class="crop-modal" (click)="$event.stopPropagation()">
+    <div class="crop-modal-header">
+      <h3 class="crop-modal-title">Fotoğrafı kırp</h3>
+      <p class="crop-modal-desc">{{ cropMaintainAspectRatio ? 'Görünmesini istediğin alanı seç. Min/maks ölçülere uygun kırpabilirsin.' : 'Görünmesini istediğin alanı serbestçe seç.' }}</p>
+      <p class="crop-modal-hint" *ngIf="cropHint">{{ cropHint }}</p>
+    </div>
+    <div class="crop-modal-body">
+      <image-cropper
+        *ngIf="cropImageFile"
+        [imageFile]="cropImageFile"
+        [maintainAspectRatio]="cropMaintainAspectRatio"
+        [aspectRatio]="cropAspectRatio"
+        [cropperMinWidth]="cropMinWidth"
+        [cropperMinHeight]="cropMinHeight"
+        [cropperMaxWidth]="cropMaxWidth"
+        [cropperMaxHeight]="cropMaxHeight"
+        format="png"
+        output="blob"
+        (imageCropped)="onImageCropped($event)"
+      ></image-cropper>
+    </div>
+    <div class="crop-modal-footer">
+      <button type="button" class="crop-btn crop-btn-cancel" (click)="closeCropModal()">
+        İptal
+      </button>
+      <button type="button" class="crop-btn crop-btn-confirm" (click)="confirmCrop()" [disabled]="!lastCroppedResult">
+        Kırp ve kullan
+      </button>
+    </div>
+  </div>
+</div>

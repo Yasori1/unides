@@ -15,22 +15,38 @@
 
     <!-- Desktop Auth Buttons -->
     <div class="auth-buttons desktop-auth" *ngIf="isInitialized && isLoggedIn === false">
-      <a routerLink="/login" class="btn-outline-custom small static-btn"><span>Giriş Yap</span></a>
+      <a routerLink="/community-login" class="btn-outline-custom small static-btn"
+        ><span>Giriş Yap</span></a
+      >
       <a routerLink="/register" class="btn-solid-custom small"><span>Kayıt Ol</span></a>
     </div>
 
     <!-- Profile Dropdown (Logged In Users) -->
     <!-- Sadece ikon görünür, tıklandığında kullanıcı adı dropdown içinde gösterilir -->
-    <div class="profile-wrapper desktop-auth"
-      *ngIf="isInitialized && isLoggedIn === true && (userRole !== 'community' || isCommunityNameLoaded)">
+    <div
+      class="profile-wrapper desktop-auth"
+      *ngIf="
+        isInitialized && isLoggedIn === true && (userRole !== 'community' || isCommunityNameLoaded)
+      "
+    >
       <div class="profile-info" (click)="toggleProfileDropdown($event)" title="Hesabım">
         <div class="profile-pic">
-          <img *ngIf="communityLogo && userRole === 'community'" [src]="communityLogo" [alt]="displayName || 'Topluluk Logosu'" />
-          <div class="profile-initial" *ngIf="!communityLogo || userRole !== 'community'">{{ userInitial }}</div>
+          <img
+            *ngIf="communityLogo && userRole === 'community'"
+            [src]="communityLogo"
+            [alt]="displayName || 'Topluluk Logosu'"
+          />
+          <div class="profile-initial" *ngIf="!communityLogo || userRole !== 'community'">
+            {{ userInitial }}
+          </div>
         </div>
         <!-- Kullanıcı adı burada artık gösterilmiyor, dropdown içinde gösterilecek -->
       </div>
-      <div class="dropdown-menu profile-dropdown" *ngIf="isProfileOpen" (click)="$event.stopPropagation()">
+      <div
+        class="dropdown-menu profile-dropdown"
+        *ngIf="isProfileOpen"
+        (click)="$event.stopPropagation()"
+      >
         <!-- Kullanıcı adı ve rolü dropdown header'ında gösteriliyor -->
         <div class="dd-header">
           <div class="dd-user-name">{{ displayName || userName }}</div>
