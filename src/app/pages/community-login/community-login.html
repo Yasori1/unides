@@ -35,6 +35,18 @@
           </div>
         </div>
 
+        <!-- Onay bekleyen: giriş yapıldı ama topluluk henüz onaylanmadı -->
+        <div class="pending-approval-message" *ngIf="showPendingApprovalMessage">
+          <i class="bx bx-time-five pending-icon"></i>
+          <h3>Hesabınız onay sürecinde</h3>
+          <p>Topluluğunuz kurumsal onay bekliyor. Onaylandığında bu ekrandan giriş yaparak anasayfaya yönlendirileceksiniz.</p>
+          <div class="pending-actions">
+            <a routerLink="/" class="btn-primary">Ana Sayfaya Git</a>
+            <button type="button" class="btn-outline" (click)="logoutAndShowForm()">Çıkış Yap</button>
+          </div>
+        </div>
+
+        <ng-container *ngIf="!showPendingApprovalMessage">
         <div class="header-text">
           <h3>Topluluk Girişi 👥</h3>
           <p>
@@ -127,6 +139,7 @@
             </button>
           </div>
         </form>
+        </ng-container>
       </div>
 
       <!-- DÜZELTME: Footer buraya taşındı. Artık form-side'ın bir parçası ve sabit duracak. -->

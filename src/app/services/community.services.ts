@@ -323,6 +323,23 @@ export class CommunityService {
     );
   }
 
+  /**
+   * Topluluk başkanının kendi topluluğunu getirir (onay bekleyen dahil).
+   * Backend: GET /api/Communities/lead-by-me — sadece RolId 3 için.
+   * 404/403 dönerse null.
+   */
+  getMyLeadCommunity(): Observable<Community | null> {
+    return this.http.get<CommunityDetailDto>(`${this.apiUrl}/lead-by-me`).pipe(
+      map((dto) => this.mapDetailDtoToCommunity(dto)),
+      catchError((err) => {
+        if (err?.status === 404 || err?.status === 403) {
+          return of(null);
+        }
+        throw err;
+      })
+    );
+  }
+
   // Topluluk Detayı Getir (Backend: GET /api/Communities/{id:guid})
   // Pasif topluluklar için isActive=false query parametresi ile liste endpoint'inden çekilir
   getCommunityById(id: string, isActive?: boolean): Observable<Community> {

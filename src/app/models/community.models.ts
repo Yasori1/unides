@@ -60,6 +60,8 @@ export interface CreateCommunityDto {
   bannerUrl?: string;
   logoUrl?: string;
   miniAbout?: string;
+  /** Topluluk Kaydı ile oluşturulduğunda false (onay bekleyen); GSB onayından sonra true yapılır. */
+  isActivity?: boolean;
 }
 
 // Backend: UpdateCommunityDto

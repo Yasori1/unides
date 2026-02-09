@@ -17,6 +17,8 @@ import { AuthService } from '../../services/auth.services';
 export class EmailVerificationWaitingComponent implements OnInit {
   email: string = '';
   isResending: boolean = false;
+  /** Topluluk kaydı akışından mı gelindi (Adım 2 / Topluluk Kaydı göstermek için) */
+  isCommunityFlow: boolean = false;
 
   constructor(
     private router: Router,
@@ -26,8 +28,9 @@ export class EmailVerificationWaitingComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // URL'den email'i al (kayıt sayfasından redirectUrl ile gelir)
-    this.email = this.route.snapshot.queryParams['email'] || '';
+    const params = this.route.snapshot.queryParams;
+    this.email = params['email'] || '';
+    this.isCommunityFlow = params['flow'] === 'community' || params['step'] === '2';
   }
 
   resendEmail(): void {

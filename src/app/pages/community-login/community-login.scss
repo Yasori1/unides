@@ -154,6 +154,53 @@
   animation: fadeIn 0.6s ease-in;
 }
 
+/* Onay bekleyen mesajı (giriş yapıldı, topluluk henüz onaylanmadı) */
+.pending-approval-message {
+  text-align: center;
+  padding: 2rem 0;
+  .pending-icon {
+    font-size: 56px;
+    color: #f59e0b;
+    margin-bottom: 1rem;
+    display: block;
+  }
+  h3 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin: 0 0 0.75rem;
+  }
+  p {
+    color: var(--text-gray);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin: 0 0 1.5rem;
+  }
+  .pending-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+  }
+  .btn-outline {
+    padding: 12px 24px;
+    background: transparent;
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    font-family: var(--font-main);
+  }
+  .btn-outline:hover {
+    background: var(--primary-color);
+    color: var(--white);
+  }
+}
+
 .mobile-logo {
   display: none;
   margin-bottom: 30px;
@@ -446,6 +493,9 @@
 .simple-footer {
   position: absolute;
   bottom: 20px;
+  left: 0;
+  right: 0;
+  text-align: center;
   color: #9ca3af;
   font-size: 12px;
 }

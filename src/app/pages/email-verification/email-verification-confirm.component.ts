@@ -21,6 +21,8 @@ export class EmailVerificationConfirmComponent implements OnInit, OnDestroy {
   isVerified: boolean = false;
   isError: boolean = false;
   errorMessage: string = '';
+  /** Topluluk kaydı akışı (doğrulama sonrası Adım 3'e yönlendirilecek) */
+  isCommunityFlow: boolean = false;
   private redirectTimeout?: any;
 
   constructor(
@@ -31,6 +33,9 @@ export class EmailVerificationConfirmComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.isCommunityFlow = !!(
+      typeof sessionStorage !== 'undefined' && sessionStorage.getItem('community_register_return')
+    );
     // URL'den token'ı al
     this.token =
       this.route.snapshot.queryParams['token'] || this.route.snapshot.params['token'] || '';
@@ -101,22 +106,26 @@ export class EmailVerificationConfirmComponent implements OnInit, OnDestroy {
           }
 
           this.toastService.show(
-            'E-posta adresiniz doğrulandı. Yönlendiriliyorsunuz...',
+            this.isCommunityFlow
+              ? 'E-posta doğrulandı. Topluluk bilgilerini gireceğiniz adıma yönlendiriliyorsunuz...'
+              : 'E-posta adresiniz doğrulandı. Yönlendiriliyorsunuz...',
             'success'
           );
           const returnUrl = sessionStorage.getItem('community_register_return');
-          const target = returnUrl || '/login';
+          const target = returnUrl || (this.isCommunityFlow ? '/community-register?step=3' : '/community-login');
           if (returnUrl) sessionStorage.removeItem('community_register_return');
           setTimeout(() => {
             this.router.navigateByUrl(target);
           }, 2000);
         } else {
           this.toastService.show(
-            'E-posta adresiniz doğrulandı. Yönlendiriliyorsunuz...',
+            this.isCommunityFlow
+              ? 'E-posta doğrulandı. Topluluk bilgilerini gireceğiniz adıma yönlendiriliyorsunuz...'
+              : 'E-posta adresiniz doğrulandı. Yönlendiriliyorsunuz...',
             'success'
           );
           const returnUrl = sessionStorage.getItem('community_register_return');
-          const target = returnUrl || '/login';
+          const target = returnUrl || (this.isCommunityFlow ? '/community-register?step=3' : '/community-login');
           if (returnUrl) sessionStorage.removeItem('community_register_return');
           setTimeout(() => {
             this.router.navigateByUrl(target);

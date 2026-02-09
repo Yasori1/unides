@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, HostListener, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ImageUploadComponent } from '../../components/ui/image-upload/image-upload';
 import { CommunityService, Community } from '../../services/community.services';
@@ -80,7 +80,7 @@ interface DashboardEvent {
 @Component({
   selector: 'app-community-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, ImageUploadComponent, LumaSpinComponent, ToastComponent],
+  imports: [CommonModule, FormsModule, RouterModule, ImageUploadComponent, LumaSpinComponent, ToastComponent],
   templateUrl: './community-dashboard.component.html',
   styleUrls: ['./community-dashboard.component.scss'],
 })
@@ -234,6 +234,9 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
   categories: string[] = [];
   isLoading = true;
 
+  /** Topluluk onaylı mı? null = yükleniyor, true = onaylı (dashboard açık), false = henüz onay aşamasında */
+  communityApproved: boolean | null = null;
+
   // Loading states for different data
   isLoadingCommunity = true;
   isLoadingEvents = true;
@@ -291,41 +294,91 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
    * NOTE: CommunityMiniDto doesn't include ComLeadMail, so we need to check each community's detail
    */
   private loadCommunityProfile(): void {
-    // Get logged-in user's email from localStorage
     const userInfoStr = localStorage.getItem('user_info');
     if (!userInfoStr) {
       Logger.warn('User info not found in localStorage');
+      this.communityApproved = false;
       return;
     }
 
     try {
+      // Önce "lead-by-me" ile kendi topluluğunu getir (onay bekleyen dahil)
+      this.communityService.getMyLeadCommunity().subscribe({
+        next: (community) => {
+          if (community) {
+            this.clubInfo = {
+              id: community.id,
+              name: community.name,
+              university: community.university || '',
+              city: community.city || '',
+              category: community.category || 'Genel',
+              logo: community.logo || this.clubInfo.logo,
+              banner: community.banner || community.coverImage || this.clubInfo.banner,
+              email: community.email || community.comMail || '',
+              phone: this.clubInfo.phone,
+              instagram: community.instagram || community.instagramUrl || '',
+              description: community.about || community.description || '',
+              comMail: community.comMail,
+              comLeadMail: community.comLeadMail,
+              webSiteUrl: community.webSiteUrl,
+              instagramUrl: community.instagramUrl,
+              miniAbout: community.miniAbout,
+            };
+            this.initialClubInfo = JSON.parse(JSON.stringify(this.clubInfo));
+            this.displayName = community.name || this.userName;
+            this.userInitial = this.displayName.charAt(0).toUpperCase();
+            this.communityApproved = community.isActivity === true;
+            this.isLoadingCommunity = false;
+            if (this.communityApproved) {
+              this.isLoadingEvents = true;
+              this.isLoadingMembers = true;
+              this.loadCommunityEvents(community.id);
+              this.loadCommunityMembers(community.id);
+              this.loadLeaderStats();
+            }
+            return;
+          }
+          // lead-by-me 404/403 döndüyse eski akışa düş (aktif listeden bul)
+          this.loadCommunityProfileFallback();
+        },
+        error: () => {
+          this.loadCommunityProfileFallback();
+        },
+      });
+    } catch (e) {
+      Logger.error('Error in loadCommunityProfile:', e);
+      this.communityApproved = false;
+    }
+  }
+
+  private loadCommunityProfileFallback(): void {
+    const userInfoStr = localStorage.getItem('user_info');
+    if (!userInfoStr) {
+      this.isLoadingCommunity = false;
+      this.communityApproved = false;
+      return;
+    }
+    try {
       const userInfo = JSON.parse(userInfoStr);
       const userEmail = userInfo.email?.trim().toLowerCase();
-
       if (!userEmail) {
-        Logger.warn('User email not found');
+        this.isLoadingCommunity = false;
+        this.communityApproved = false;
         return;
       }
-
-      // Topluluk lideri (RolId 3) sadece aktif toplulukları görebilir
-      // status: 'all' sadece GSB (RolId 2) için çalışır
-      // Bu yüzden önce aktif toplulukları kontrol ediyoruz
       this.communityService.getAllCommunities({ status: 'active' }).subscribe({
         next: (communities) => {
-          // CommunityMiniDto doesn't include ComLeadMail, so we need to check details
-          // Check communities one by one to find the one where user is president
           this.findUserCommunity(communities, userEmail);
         },
         error: (err: any) => {
           Logger.error('Aktif topluluklar yüklenemedi:', err);
-          // Hata durumunda kullanıcıya bilgi ver
-          if (err.status === 403) {
-            Logger.warn('Toplulukları görüntüleme yetkisi yok');
-          }
+          this.isLoadingCommunity = false;
+          this.communityApproved = false;
         },
       });
     } catch (e) {
       Logger.error('Error parsing user info:', e);
+      this.communityApproved = false;
     }
   }
 
@@ -382,6 +435,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
               this.displayName = communityDetail.name || this.userName;
               this.userInitial = this.displayName.charAt(0).toUpperCase();
 
+              this.communityApproved = communityDetail.isActivity === true;
               // Loading state'leri başlat
               this.isLoadingCommunity = false;
               this.isLoadingEvents = true;
@@ -413,6 +467,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       if (!found) {
         Logger.warn('No community found for user email:', userEmail);
         this.isLoadingCommunity = false;
+        this.communityApproved = false;
 
         // Kullanıcı bir topluluğun başkanı değil, ana sayfaya yönlendir
         this.showToast(

@@ -401,13 +401,13 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
 
     if (statusFilter === 'Aktif') {
       backendStatus = 'active';
-    } else if (statusFilter === 'Pasif') {
+    } else if (statusFilter === 'Pasif' || statusFilter === 'Onay Bekleyen') {
+      // Pasif ve Onay Bekleyen: backend'de aynı (passive) — onay bekleyen topluluklar pasif oluşturulur
       backendStatus = 'passive';
     } else if (!statusFilter || statusFilter === '') {
       // Tüm Durumlar seçildiğinde veya filtre yoksa tüm toplulukları getir
       backendStatus = 'all';
     }
-    // "Onay Bekleyen" durumu için backend'de status yok, bu durumda frontend'de filtreleme yapılacak
 
     // Corporate Dashboard'da seçilen filtreye göre toplulukları göster
     // Backend'de status parametresi ile istek atıyoruz

@@ -36,6 +36,33 @@
 .input-group {
   margin-bottom: 15px;
 }
+
+/* Şifre kabul şartları listesi (öğrenci kayıt sayfası ile aynı) */
+.password-rules {
+  list-style: none;
+  margin: 8px 0 14px 0;
+  padding: 0;
+  font-size: 12px;
+  color: var(--text-gray, #6b7280);
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+
+    i.bx {
+      font-size: 16px;
+      color: #d1d5db;
+      flex-shrink: 0;
+    }
+
+    &.valid i.bx {
+      color: #22c55e;
+    }
+  }
+}
+
 .terms-label {
   display: flex;
   align-items: flex-start;
@@ -182,4 +209,141 @@
   font-size: 12px;
   color: #666;
   margin-top: 4px;
+}
+
+/* Scroll sayfanın sağ tarafında; footer en altta */
+.form-side:not(.form-side-intro) {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  min-height: 0;
+}
+.form-side:not(.form-side-intro) .form-scroll-zone {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+.form-side:not(.form-side-intro) .form-scroll-zone .form-wrapper {
+  margin-top: 20px;
+  padding-bottom: 24px;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+/* Footer: Topluluk/Kurumsal Giriş ile aynı — en alt ortada sabit */
+.form-side .simple-footer {
+  position: absolute;
+  bottom: 20px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 12px;
+}
+/* Intro: scroll zone içeriği ortada */
+.form-side.form-side-intro .form-scroll-zone {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.form-side.form-side-intro .form-wrapper {
+  padding-bottom: 24px;
+  margin-top: 0;
+}
+
+/* Adım 1: yazı ve form ilgili alanın tam ortasında (dikey ortalama) */
+.form-side.form-side-step1 .form-scroll-zone {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.form-side.form-side-step1 .form-scroll-zone .form-wrapper {
+  margin-top: 0;
+  padding-bottom: 24px;
+}
+
+/* Adım 3: Banner ve Logo üstte (Kurumsal Dashboard topluluk ekle ile aynı stil) */
+.step-three .image-uploads-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 24px;
+  width: 100%;
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+}
+
+.step-three .banner-upload-wrapper,
+.step-three .logo-upload-wrapper {
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+
+  &.no-url-input ::ng-deep .url-input-wrapper {
+    display: none !important;
+  }
+
+  ::ng-deep .image-upload-container {
+    width: 100%;
+    box-sizing: border-box;
+
+    .drop-zone {
+      min-height: 180px;
+      padding: 20px;
+      width: 100%;
+      box-sizing: border-box;
+
+      @media (max-width: 768px) {
+        min-height: 150px;
+        padding: 15px;
+      }
+    }
+
+    .preview-zone .image-wrapper {
+      height: 180px;
+      width: 100%;
+      box-sizing: border-box;
+
+      @media (max-width: 768px) {
+        height: 150px;
+      }
+    }
+  }
+}
+
+.step-three .logo-upload-wrapper ::ng-deep .image-upload-container {
+  .drop-zone {
+    min-height: 140px;
+  }
+
+  .preview-zone .image-wrapper {
+    height: 140px;
+
+    img {
+      object-fit: contain;
+      background: #f8fafc;
+    }
+  }
+}
+
+.step-three .upload-hint-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.step-three .size-hint {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-left: 4px;
+  font-style: italic;
 }

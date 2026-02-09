@@ -16,7 +16,8 @@
         </a>
         <div class="quote-container">
           <h1>E-Posta<br />Doğrulama</h1>
-          <p>Hesabınızı aktifleştirmek için e-postanızı kontrol edin.</p>
+          <p *ngIf="isCommunityFlow">Topluluk Kaydı — Adım 2 / 3</p>
+          <p *ngIf="!isCommunityFlow">Hesabınızı aktifleştirmek için e-postanızı kontrol edin.</p>
         </div>
       </div>
     </div>
@@ -39,7 +40,8 @@
           </div>
 
           <div class="header-text">
-            <h3>E-Posta Adresinizi Doğrulayın</h3>
+            <h3 *ngIf="isCommunityFlow">Topluluk Kaydı — Adım 2: E-Posta Doğrulama</h3>
+            <h3 *ngIf="!isCommunityFlow">E-Posta Adresinizi Doğrulayın</h3>
             <p *ngIf="email" class="email-display">
               <strong>{{ email }}</strong> adresine doğrulama maili gönderildi.
             </p>
@@ -67,7 +69,10 @@
                 <app-luma-spin></app-luma-spin>
               </ng-container>
             </button>
-            <a routerLink="/login" class="back-link">
+            <a *ngIf="isCommunityFlow" routerLink="/community-register" class="back-link">
+              <i class="bx bx-arrow-back"></i> Topluluk kaydına dön
+            </a>
+            <a *ngIf="!isCommunityFlow" routerLink="/community-login" class="back-link">
               <i class="bx bx-arrow-back"></i> Giriş sayfasına dön
             </a>
           </div>

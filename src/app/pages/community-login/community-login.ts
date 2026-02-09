@@ -11,8 +11,8 @@ import { ToastComponent } from '../../components/ui/toast/toast.component';
 import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
 // Http Client
 import { HttpClientModule, HttpErrorResponse } from '@angular/common/http';
-import { switchMap, catchError, take } from 'rxjs/operators';
-import { of, forkJoin } from 'rxjs';
+import { catchError, take } from 'rxjs/operators';
+import { of } from 'rxjs';
 import { Logger } from '../../utils/logger.util';
 
 @Component({
@@ -39,6 +39,8 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
   forgotEmailError: boolean = false;
   isSendingEmail: boolean = false;
   emailSent: boolean = false;
+  /** Giriş başarılı ama topluluk henüz onaylanmadığında form yerine bu mesaj gösterilir */
+  showPendingApprovalMessage: boolean = false;
   private popStateListener?: (event: PopStateEvent) => void;
 
   constructor(
@@ -128,91 +130,36 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
     this.isLoading = true;
 
     this.authService.loginCommunity(email, password).subscribe({
-      next: (response: LoginResponse) => {
-        // --- BAŞARILI GİRİŞ ---
-        // Giriş başarılı olduktan sonra, kullanıcının e-postasının bir topluluğun başkan e-postası olup olmadığını kontrol et
-        const normalizedEmail = email.trim().toLowerCase();
-
-        // Aktif ve pasif toplulukları getir ve kullanıcının e-postasının ComLeadMail ile eşleşip eşleşmediğini kontrol et
-        // CommunityMiniDto'da ComLeadMail yok, bu yüzden her topluluğun detayını kontrol etmemiz gerekiyor
-        // Hem aktif hem pasif toplulukları kontrol et (status parametresi olmadan tüm toplulukları getir)
+      next: () => {
+        // Giriş başarılı; token kaydedildi. Kendi topluluğumuzu (onay bekleyen dahil) lead-by-me ile al
         this.communityService
-          .getAllCommunities()
-          .pipe(
-            take(1), // İlk sonucu al ve tamamla
-            switchMap((communities) => {
-              if (!communities || communities.length === 0) {
-                // Topluluk bulunamadı - girişe izin ver (backend zaten doğruladı)
-                Logger.warn(
-                  'Topluluk bulunamadı, ancak backend girişi onayladı. Girişe izin veriliyor.'
-                );
-                return of(true); // Girişe izin ver
+          .getMyLeadCommunity()
+          .pipe(take(1), catchError(() => of(null)))
+          .subscribe({
+            next: (community) => {
+              this.isLoading = false;
+              const nextUrl = this.route.snapshot.queryParams['next'];
+
+              if (community && community.isActivity === false) {
+                // Topluluk henüz onaylanmamış: sayfada kal, mesaj göster
+                this.showPendingApprovalMessage = true;
+                this.toastService.show('Giriş başarılı.', 'success');
+                return;
               }
 
-              // Tüm toplulukların detaylarını paralel olarak çek (ComLeadMail kontrolü için)
-              const checkPromises = communities.map((community) =>
-                this.communityService.getCommunityById(community.id).pipe(
-                  catchError(() => of(null)),
-                  take(1)
-                )
-              );
-
-              // Tüm topluluk detaylarını paralel olarak kontrol et
-              return forkJoin(checkPromises).pipe(
-                take(1),
-                switchMap((communityDetails) => {
-                  // Kullanıcının e-postasının bir topluluğun ComLeadMail'i ile eşleşip eşleşmediğini kontrol et
-                  // Hem aktif hem pasif toplulukları kontrol et
-                  const matchingCommunity = communityDetails.find(
-                    (detail) =>
-                      detail &&
-                      detail.comLeadMail &&
-                      detail.comLeadMail.trim().toLowerCase() === normalizedEmail
-                  );
-
-                  if (matchingCommunity) {
-                    return of(true); // Topluluk başkanı bulundu
-                  } else {
-                    // Topluluk başkanı bulunamadı ama backend girişi onayladı
-                    // Backend'de kullanıcı rolü topluluk başkanı (roleId=3) olarak ayarlanmış olabilir
-                    // Bu durumda girişe izin ver
-                    Logger.warn(
-                      'Topluluk başkanı eşleşmesi bulunamadı, ancak backend girişi onayladı. Girişe izin veriliyor.'
-                    );
-                    return of(true); // Girişe izin ver
-                  }
-                })
-              );
-            }),
-            catchError((error) => {
-              // Topluluk kontrolü sırasında hata oluşursa, girişe izin ver (backend zaten doğruladı)
-              Logger.error('Topluluk kontrolü hatası:', error);
-              Logger.warn(
-                'Topluluk kontrolü başarısız oldu, ancak backend girişi onayladı. Girişe izin veriliyor.'
-              );
-              return of(true); // Hata durumunda da girişe izin ver
-            })
-          )
-          .subscribe({
-            next: (hasCommunity) => {
-              this.isLoading = false;
-              const nextUrl = this.route.snapshot.queryParams['next'];
-              const target = nextUrl || '/community-dashboard';
+              // Onaylı topluluk veya lead-by-me yok: anasayfaya yönlendir
+              const target = nextUrl || '/';
               this.toastService.show(
-                nextUrl
-                  ? 'Giriş başarılı! Yönlendiriliyorsunuz...'
-                  : 'Giriş başarılı! Topluluk paneline yönlendiriliyorsunuz...',
+                nextUrl ? 'Giriş başarılı! Yönlendiriliyorsunuz...' : 'Giriş başarılı! Yönlendiriliyorsunuz...',
                 'success'
               );
-              setTimeout(() => this.router.navigateByUrl(target), 1500);
+              setTimeout(() => this.router.navigateByUrl(target), 800);
             },
-            error: (error) => {
+            error: () => {
               this.isLoading = false;
-              Logger.error('Topluluk kontrolü hatası:', error);
-              const nextUrl = this.route.snapshot.queryParams['next'];
-              const target = nextUrl || '/community-dashboard';
+              const target = this.route.snapshot.queryParams['next'] || '/';
               this.toastService.show('Giriş başarılı! Yönlendiriliyorsunuz...', 'success');
-              setTimeout(() => this.router.navigateByUrl(target), 1500);
+              setTimeout(() => this.router.navigateByUrl(target), 800);
             },
           });
       },
@@ -239,6 +186,13 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
     this.forgotPasswordEmail = '';
     this.forgotEmailError = false;
     this.emailSent = false;
+  }
+
+  /** Onay bekleyen ekranındayken çıkış yapıp tekrar giriş formunu göstermek için */
+  logoutAndShowForm(): void {
+    this.authService.logout();
+    this.showPendingApprovalMessage = false;
+    this.toastService.show('Çıkış yapıldı.', 'success');
   }
 
   validateForgotEmail(event: any) {

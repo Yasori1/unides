@@ -16,7 +16,8 @@
         </a>
         <div class="quote-container">
           <h1>E-Posta<br />Doğrulanıyor ✨</h1>
-          <p>Hesabınız aktifleştiriliyor, lütfen bekleyin...</p>
+          <p *ngIf="isCommunityFlow">Topluluk Kaydı — Adım 2 / 3</p>
+          <p *ngIf="!isCommunityFlow">Hesabınız aktifleştiriliyor, lütfen bekleyin...</p>
         </div>
       </div>
     </div>
@@ -47,7 +48,8 @@
               <i class="bx bx-check-circle"></i>
             </div>
             <h3>E-Posta Doğrulandı! ✅</h3>
-            <p>E-posta adresiniz başarıyla doğrulandı. Giriş yapılıyor...</p>
+            <p *ngIf="isCommunityFlow">Topluluk bilgilerini ve fotoğrafını gireceğiniz Adım 3'e yönlendiriliyorsunuz...</p>
+            <p *ngIf="!isCommunityFlow">E-posta adresiniz başarıyla doğrulandı. Giriş yapılıyor...</p>
           </div>
 
           <!-- Error State -->
@@ -57,7 +59,10 @@
             </div>
             <h3>Doğrulama Başarısız ❌</h3>
             <p>{{ errorMessage }}</p>
-            <a routerLink="/login" class="btn-primary">
+            <a *ngIf="isCommunityFlow" routerLink="/community-register" class="btn-primary">
+              <i class="bx bx-arrow-back"></i> Topluluk kaydına dön
+            </a>
+            <a *ngIf="!isCommunityFlow" routerLink="/community-login" class="btn-primary">
               <i class="bx bx-arrow-back"></i> Giriş sayfasına dön
             </a>
           </div>

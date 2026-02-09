@@ -2,18 +2,28 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { Observable, forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { ToastService } from '../../services/toast.services';
 import { AuthService } from '../../services/auth.services';
 import { CommunityService } from '../../services/community.services';
 import { ToastComponent } from '../../components/ui/toast/toast.component';
 import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
+import { ImageUploadComponent } from '../../components/ui/image-upload/image-upload';
 import { Logger } from '../../utils/logger.util';
 import { CreateCommunityDto } from '../../models/community.models';
 
 @Component({
   selector: 'app-community-register',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, ToastComponent, LumaSpinComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    FormsModule,
+    ToastComponent,
+    LumaSpinComponent,
+    ImageUploadComponent,
+  ],
   templateUrl: './community-register.html',
   styleUrls: ['./community-register.scss'],
 })
@@ -23,6 +33,14 @@ export class CommunityRegisterComponent implements OnInit {
   isLoading = false;
   emailError = false;
   passwordMismatch = false;
+
+  // Adım 1 — Şifre kabul şartları (öğrenci kayıt sayfası ile aynı)
+  passwordMinLength = false;
+  passwordHasUppercase = false;
+  passwordHasLowercase = false;
+  passwordHasNumber = false;
+  passwordHasSpecial = false;
+  hasPasswordInput = false;
 
   // Adım 1
   email = '';
@@ -40,6 +58,12 @@ export class CommunityRegisterComponent implements OnInit {
   comLeadMail = '';
   webSiteUrl = '';
   instagramUrl = '';
+
+  // Adım 3 - Banner ve Logo (önizleme + yüklenecek dosya)
+  bannerPreviewUrl = '';
+  logoPreviewUrl = '';
+  bannerFile: File | null = null;
+  logoFile: File | null = null;
 
   categories: string[] = [
     'Teknoloji',
@@ -184,11 +208,61 @@ export class CommunityRegisterComponent implements OnInit {
     this.emailError = val.includes('@') && !val.endsWith('.edu.tr');
   }
 
+  /** Şifre kabul şartlarını kontrol et (öğrenci kayıt ile aynı kurallar) */
+  private validatePasswordStrength(pwd: string): void {
+    this.passwordMinLength = pwd.length >= 8;
+    this.passwordHasUppercase = /[A-Z]/.test(pwd);
+    this.passwordHasLowercase = /[a-z]/.test(pwd);
+    this.passwordHasNumber = /[0-9]/.test(pwd);
+    this.passwordHasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?.]/.test(pwd);
+  }
+
+  get isPasswordStrong(): boolean {
+    return (
+      this.passwordMinLength &&
+      this.passwordHasUppercase &&
+      this.passwordHasLowercase &&
+      this.passwordHasNumber &&
+      this.passwordHasSpecial
+    );
+  }
+
   checkPasswords(event: any, type: 'p1' | 'p2'): void {
     const val = (event.target as HTMLInputElement).value;
-    if (type === 'p1') this.password = val;
-    else this.confirmPassword = val;
+    if (type === 'p1') {
+      this.password = val;
+      this.hasPasswordInput = val.length > 0;
+      this.validatePasswordStrength(val);
+    } else {
+      this.confirmPassword = val;
+    }
     this.passwordMismatch = !!this.confirmPassword && this.password !== this.confirmPassword;
+  }
+
+  onBannerSelected(imageUrl: string): void {
+    this.bannerPreviewUrl = imageUrl;
+  }
+
+  onLogoSelected(imageUrl: string): void {
+    this.logoPreviewUrl = imageUrl;
+  }
+
+  onBannerFileSelected(file: File): void {
+    this.bannerFile = file;
+    const reader = new FileReader();
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      this.bannerPreviewUrl = (e.target?.result as string) || '';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  onLogoFileSelected(file: File): void {
+    this.logoFile = file;
+    const reader = new FileReader();
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      this.logoPreviewUrl = (e.target?.result as string) || '';
+    };
+    reader.readAsDataURL(file);
   }
 
   submitStep1(event: Event): void {
@@ -205,6 +279,13 @@ export class CommunityRegisterComponent implements OnInit {
     }
     if (!this.password) {
       this.toastService.show('Şifre giriniz.', 'error');
+      return;
+    }
+    if (!this.isPasswordStrong) {
+      this.toastService.show(
+        'Şifre, tüm kabul şartlarını sağlamalıdır (en az 8 karakter, büyük/küçük harf, rakam ve özel karakter).',
+        'error'
+      );
       return;
     }
     if (this.passwordMismatch || this.password !== this.confirmPassword) {
@@ -229,7 +310,7 @@ export class CommunityRegisterComponent implements OnInit {
             'success'
           );
           this.router.navigate(['/email-verification-waiting'], {
-            queryParams: { email: this.email.trim() },
+            queryParams: { email: this.email.trim(), flow: 'community', step: 2 },
           });
         },
         error: (err) => {
@@ -277,17 +358,61 @@ export class CommunityRegisterComponent implements OnInit {
       webSiteUrl: this.webSiteUrl?.trim() || undefined,
       instagramUrl: this.instagramUrl?.trim() || undefined,
       miniAbout: this.miniAbout?.trim() || undefined,
+      isActivity: false, // Onay bekleyen; ilgili şehir kurumsal dashboard'da onaylanacak
     };
 
     this.communityService.createCommunity(dto).subscribe({
-      next: () => {
+      next: (createdCommunity) => {
         sessionStorage.removeItem('community_register_email');
         sessionStorage.removeItem('community_register_return');
-        this.toastService.show(
-          'Topluluğunuz oluşturuldu. Giriş sayfasına yönlendiriliyorsunuz...',
-          'success'
-        );
-        setTimeout(() => this.router.navigate(['/community-login']), 2000);
+        const communityId = createdCommunity.id;
+        const uploadTasks: Observable<unknown>[] = [];
+
+        if (this.logoFile && communityId) {
+          uploadTasks.push(
+            this.communityService.uploadLogo(communityId, this.logoFile).pipe(
+              catchError((err) => {
+                Logger.error('Logo yüklenirken hata:', err);
+                return of(null);
+              })
+            )
+          );
+        }
+        if (this.bannerFile && communityId) {
+          uploadTasks.push(
+            this.communityService.uploadBanner(communityId, this.bannerFile!).pipe(
+              catchError((err) => {
+                Logger.error('Banner yüklenirken hata:', err);
+                return of(null);
+              })
+            )
+          );
+        }
+
+        const showSuccessAndNavigate = (imagesOk: boolean) => {
+          this.isLoading = false;
+          this.toastService.show(
+            imagesOk
+              ? 'Topluluğunuz oluşturuldu. Anasayfaya yönlendiriliyorsunuz...'
+              : 'Topluluk oluşturuldu; bazı görseller yüklenemedi. Anasayfaya yönlendiriliyorsunuz...',
+            imagesOk ? 'success' : 'error'
+          );
+          setTimeout(() => this.router.navigate(['/']), 2000);
+        };
+
+        if (uploadTasks.length > 0) {
+          forkJoin(uploadTasks).subscribe({
+            next: (results) => {
+              const hasError = results.some((r) => r === null);
+              showSuccessAndNavigate(!hasError);
+            },
+            error: () => {
+              showSuccessAndNavigate(false);
+            },
+          });
+        } else {
+          showSuccessAndNavigate(true);
+        }
       },
       error: (err) => {
         this.isLoading = false;
@@ -305,9 +430,6 @@ export class CommunityRegisterComponent implements OnInit {
           err?.error?.message || err?.message || 'Topluluk oluşturulurken bir hata oluştu.';
         this.toastService.show(msg, 'error');
         Logger.error('Topluluk oluşturma hatası:', err);
-      },
-      complete: () => {
-        this.isLoading = false;
       },
     });
   }

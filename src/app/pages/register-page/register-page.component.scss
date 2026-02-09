@@ -365,13 +365,13 @@
 }
 
 .simple-footer {
-  position: relative;
-  bottom: auto;
-  margin-top: 40px;
+  position: absolute;
+  bottom: 20px;
+  left: 0;
+  right: 0;
   text-align: center;
   color: #9ca3af;
   font-size: 12px;
-  padding-bottom: 20px;
 }
 
 /* RESPONSIVE */
@@ -397,8 +397,10 @@
 
   .simple-footer {
     position: absolute;
-    bottom: 10px;
-    width: 100%;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    text-align: center;
   }
 }
 

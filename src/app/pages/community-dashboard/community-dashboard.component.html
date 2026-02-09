@@ -102,7 +102,17 @@
       </div>
     </div>
 
-    <div class="view-container" *ngIf="activeTab === 'overview'">
+    <!-- Topluluk henüz onaylanmadıysa -->
+    <div class="pending-approval-container" *ngIf="communityApproved === false && !isLoadingCommunity">
+      <div class="pending-approval-card">
+        <span class="material-symbols-outlined pending-icon">schedule</span>
+        <h2>Henüz onay aşamasında</h2>
+        <p>Topluluğunuz kurumsal onay bekliyor. Onaylandığında Topluluk Panelini kullanabileceksiniz.</p>
+        <a routerLink="/" class="btn-primary">Anasayfaya Dön</a>
+      </div>
+    </div>
+
+    <div class="view-container" *ngIf="communityApproved !== false && activeTab === 'overview'">
       <!-- Loading State for Overview -->
       <div class="loading-container" *ngIf="isLoadingCommunity || isLoadingEvents || isLoadingMembers">
         <app-luma-spin></app-luma-spin>
@@ -222,7 +232,7 @@
       </div>
     </div>
 
-    <div class="view-container" *ngIf="activeTab === 'projects'">
+    <div class="view-container" *ngIf="communityApproved !== false && activeTab === 'projects'">
       <div class="page-header projects-header">
         <h2>Etkinliklerim</h2>
         <div class="header-controls">
@@ -294,7 +304,7 @@
       </ng-template>
     </div>
 
-    <div class="view-container" *ngIf="activeTab === 'members'">
+    <div class="view-container" *ngIf="communityApproved !== false && activeTab === 'members'">
       <div class="page-header">
         <h2>Üyeler</h2>
         <div class="header-controls">
@@ -361,7 +371,7 @@
       </div>
     </div>
 
-    <div class="view-container" *ngIf="activeTab === 'settings'">
+    <div class="view-container" *ngIf="communityApproved !== false && activeTab === 'settings'">
       <div class="card settings-card">
         <div class="settings-hero">
           <div class="hero-banner" [style.background-image]="'url(' + clubInfo.banner + ')'">

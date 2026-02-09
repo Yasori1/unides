@@ -26,7 +26,8 @@
       </div>
     </div>
 
-    <div class="form-side" [class.form-side-intro]="step === 0">
+    <div class="form-side" [class.form-side-intro]="step === 0" [class.form-side-step1]="step === 1">
+      <div class="form-scroll-zone">
       <div class="form-wrapper">
         <div class="mobile-logo">
           <div class="back-to-home" routerLink="/">
@@ -122,13 +123,17 @@
               edilir.
             </div>
             <div class="input-group">
-              <div class="icon-wrapper"><i class="bx bx-lock-alt"></i></div>
+              <div class="icon-wrapper" [class.error-icon]="hasPasswordInput && !isPasswordStrong">
+                <i class="bx bx-lock-alt"></i>
+              </div>
               <input
                 type="password"
                 placeholder="Şifre"
                 class="modern-input"
+                [class.input-error]="hasPasswordInput && !isPasswordStrong"
                 (input)="checkPasswords($event, 'p1')"
                 required
+                minlength="8"
               />
             </div>
             <div class="input-group">
@@ -147,10 +152,33 @@
             <div *ngIf="passwordMismatch" class="error-message">
               <i class="bx bx-error-circle"></i> Şifreler eşleşmiyor.
             </div>
+            <ul class="password-rules">
+              <li [class.valid]="passwordMinLength">
+                <i class="bx" [ngClass]="passwordMinLength ? 'bx-check-circle' : 'bx-circle'"></i>
+                En az 8 karakter
+              </li>
+              <li [class.valid]="passwordHasUppercase">
+                <i class="bx" [ngClass]="passwordHasUppercase ? 'bx-check-circle' : 'bx-circle'"></i>
+                En az bir büyük harf
+              </li>
+              <li [class.valid]="passwordHasLowercase">
+                <i class="bx" [ngClass]="passwordHasLowercase ? 'bx-check-circle' : 'bx-circle'"></i>
+                En az bir küçük harf
+              </li>
+              <li [class.valid]="passwordHasNumber">
+                <i class="bx" [ngClass]="passwordHasNumber ? 'bx-check-circle' : 'bx-circle'"></i>
+                En az bir rakam
+              </li>
+              <li [class.valid]="passwordHasSpecial">
+                <i class="bx" [ngClass]="passwordHasSpecial ? 'bx-check-circle' : 'bx-circle'"></i>
+                En az bir özel karakter (! . , ? @ # $ vb.)
+              </li>
+            </ul>
             <button
               type="submit"
               class="btn-primary"
-              [disabled]="isLoading || emailError || passwordMismatch"
+              [disabled]="isLoading || emailError || passwordMismatch || !isPasswordStrong"
+              [style.opacity]="(emailError || passwordMismatch || !isPasswordStrong) ? '0.7' : '1'"
             >
               <app-luma-spin *ngIf="isLoading"></app-luma-spin>
               <span *ngIf="!isLoading"
@@ -160,10 +188,45 @@
           </form>
         </div>
 
-        <!-- Adım 3: Topluluk bilgileri (Topluluk ekle popup alanları) -->
+        <!-- Adım 3: Topluluk bilgileri (Banner/Logo + form) -->
         <div *ngIf="step === 3" class="step-block step-three">
-          <p class="step-desc">Topluluğunuzun bilgilerini tek tek girin.</p>
           <form (submit)="submitStep3($event)">
+            <div class="image-uploads-section">
+              <div class="banner-upload-wrapper no-url-input">
+                <div class="upload-hint-wrapper">
+                  <app-image-upload
+                    label="Banner Görseli (1920×500 px)"
+                    [previewUrl]="bannerPreviewUrl || null"
+                    [uploadToServer]="true"
+                    [allowUrl]="false"
+                    [enableCrop]="true"
+                    [cropMaintainAspectRatio]="true"
+                    [cropAspectRatio]="1920 / 500"
+                    cropHint="Banner detay sayfası ve anasayfa kartlarında bu oranda gösterilir; önemli alanı ortada seçin."
+                    (onImageSelected)="onBannerSelected($event)"
+                    (onFileSelected)="onBannerFileSelected($event)"
+                  ></app-image-upload>
+                  <span class="size-hint">Max 1 MB</span>
+                </div>
+              </div>
+              <div class="logo-upload-wrapper no-url-input">
+                <div class="upload-hint-wrapper">
+                  <app-image-upload
+                    label="Logo (220×220 px — 1:1 kare)"
+                    [previewUrl]="logoPreviewUrl || null"
+                    [uploadToServer]="true"
+                    [allowUrl]="false"
+                    [enableCrop]="true"
+                    [cropMaintainAspectRatio]="true"
+                    [cropAspectRatio]="1"
+                    cropHint="Logo detay sayfasında ve topluluk kartlarında kare çerçevede gösterilir; yazı ve simgeyi ortada tutun."
+                    (onImageSelected)="onLogoSelected($event)"
+                    (onFileSelected)="onLogoFileSelected($event)"
+                  ></app-image-upload>
+                  <span class="size-hint">Max 1 MB</span>
+                </div>
+              </div>
+            </div>
             <div class="form-section">
               <label>Topluluk adı <span class="required">*</span></label>
               <div class="input-group">
@@ -270,38 +333,13 @@
               </div>
               <small class="field-hint">Kayıt olurken kullandığınız .edu.tr e-posta adresi.</small>
             </div>
-            <div class="form-section">
-              <label>Web sitesi (isteğe bağlı)</label>
-              <div class="input-group">
-                <div class="icon-wrapper"><i class="bx bx-link"></i></div>
-                <input
-                  type="url"
-                  [(ngModel)]="webSiteUrl"
-                  name="webSiteUrl"
-                  class="modern-input"
-                  placeholder="https://..."
-                />
-              </div>
-            </div>
-            <div class="form-section">
-              <label>Instagram (isteğe bağlı)</label>
-              <div class="input-group">
-                <div class="icon-wrapper"><i class="bx bxl-instagram"></i></div>
-                <input
-                  type="text"
-                  [(ngModel)]="instagramUrl"
-                  name="instagramUrl"
-                  class="modern-input"
-                  placeholder="https://instagram.com/..."
-                />
-              </div>
-            </div>
             <button type="submit" class="btn-primary" [disabled]="isLoading">
               <app-luma-spin *ngIf="isLoading"></app-luma-spin>
               <span *ngIf="!isLoading">Topluluğu oluştur <i class="bx bx-rocket"></i></span>
             </button>
           </form>
         </div>
+      </div>
       </div>
       <footer class="simple-footer">© T.C Gençlik ve Spor Bakanlığı</footer>
     </div>
