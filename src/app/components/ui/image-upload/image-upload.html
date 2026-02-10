@@ -2,11 +2,24 @@
   <label class="upload-label">{{ label }}</label>
 
   <!-- GİZLİ INPUT -->
-  <input type="file" accept="image/*" class="hidden-input" #fileInput (change)="handleFileChange($event)" />
+  <input
+    type="file"
+    accept="image/*"
+    class="hidden-input"
+    #fileInput
+    (change)="handleFileChange($event)"
+  />
 
   <!-- DROP ZONE (Resim Yoksa) -->
-  <div class="drop-zone" [class.active]="isDragging" *ngIf="!previewUrl" (click)="triggerFileInput()"
-    (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
+  <div
+    class="drop-zone"
+    [class.active]="isDragging"
+    *ngIf="!previewUrl"
+    (click)="triggerFileInput()"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    (drop)="onDrop($event)"
+  >
     <div class="icon-bg">
       <i class="bx bx-image-add"></i>
     </div>
@@ -19,7 +32,7 @@
   <!-- PREVIEW ZONE (Resim Varsa) -->
   <div class="preview-zone" *ngIf="previewUrl">
     <div class="image-wrapper">
-      <img [src]="previewUrl" alt="Preview" />
+      <img [src]="previewUrl" alt="Preview" (error)="onPreviewImageError($event)" />
       <div class="overlay">
         <button type="button" class="action-btn edit" (click)="triggerFileInput()">
           <i class="bx bx-upload"></i>
@@ -39,8 +52,12 @@
   <div class="url-input-wrapper" *ngIf="allowUrl">
     <div class="divider"><span>veya URL gir</span></div>
     <div class="input-with-btn">
-      <input type="text" [(ngModel)]="urlInput" placeholder="https://ornek-resim.com/logo.png"
-        (keyup.enter)="handleUrlInput()" />
+      <input
+        type="text"
+        [(ngModel)]="urlInput"
+        placeholder="https://ornek-resim.com/logo.png"
+        (keyup.enter)="handleUrlInput()"
+      />
       <button type="button" (click)="handleUrlInput()">
         <i class="bx bx-check"></i>
       </button>
@@ -56,9 +73,7 @@
     </div>
     <h3 class="popup-title">Dosya Boyutu Çok Büyük!</h3>
     <p class="popup-message">{{ fileSizeErrorMessage }}</p>
-    <button type="button" class="popup-close-btn" (click)="closeFileSizeError()">
-      Tamam
-    </button>
+    <button type="button" class="popup-close-btn" (click)="closeFileSizeError()">Tamam</button>
   </div>
 </div>
 
@@ -67,7 +82,13 @@
   <div class="crop-modal" (click)="$event.stopPropagation()">
     <div class="crop-modal-header">
       <h3 class="crop-modal-title">Fotoğrafı kırp</h3>
-      <p class="crop-modal-desc">{{ cropMaintainAspectRatio ? 'Görünmesini istediğin alanı seç. Min/maks ölçülere uygun kırpabilirsin.' : 'Görünmesini istediğin alanı serbestçe seç.' }}</p>
+      <p class="crop-modal-desc">
+        {{
+          cropMaintainAspectRatio
+            ? 'Görünmesini istediğin alanı seç. Min/maks ölçülere uygun kırpabilirsin.'
+            : 'Görünmesini istediğin alanı serbestçe seç.'
+        }}
+      </p>
       <p class="crop-modal-hint" *ngIf="cropHint">{{ cropHint }}</p>
     </div>
     <div class="crop-modal-body">
@@ -89,7 +110,12 @@
       <button type="button" class="crop-btn crop-btn-cancel" (click)="closeCropModal()">
         İptal
       </button>
-      <button type="button" class="crop-btn crop-btn-confirm" (click)="confirmCrop()" [disabled]="!lastCroppedResult">
+      <button
+        type="button"
+        class="crop-btn crop-btn-confirm"
+        (click)="confirmCrop()"
+        [disabled]="!lastCroppedResult"
+      >
         Kırp ve kullan
       </button>
     </div>

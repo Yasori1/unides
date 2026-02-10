@@ -3,6 +3,7 @@ import { provideRouter } from '@angular/router';
 import {
   provideHttpClient,
   withInterceptors,
+  withXsrfConfiguration,
   HttpInterceptorFn,
   HttpRequest,
   HttpHandlerFn,
@@ -55,9 +56,10 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideClientHydration(),
     provideAnimationsAsync(),
-    // Interceptors are applied in order: authInterceptor first, then errorInterceptor
-    // API istekleri environment.apiUrl üzerinden (production: https://unidesportal.org/api — aynı origin, CORS yok)
+    // XSRF: Backend expects cookie XSRF-TOKEN and header X-CSRF-Token (double-submit). Without Bearer, middleware enforces CSRF.
+    // Interceptors are applied in order: XSRF (adds header from cookie), then authInterceptor, then errorInterceptor
     provideHttpClient(
+      withXsrfConfiguration({ cookieName: 'XSRF-TOKEN', headerName: 'X-CSRF-Token' }),
       withInterceptors([authInterceptor, errorInterceptor])
     ),
     { provide: LOCALE_ID, useValue: 'tr' },

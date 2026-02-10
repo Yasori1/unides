@@ -35,7 +35,11 @@ export class ImageUploadComponent {
   @Input() cropHint: string = '';
   @Output() onImageSelected = new EventEmitter<string>(); // Parent'a image path/url gönder
   @Output() onFileSelected = new EventEmitter<File>(); // Parent'a File objesi gönder (upload için)
-  @Output() onFileSizeError = new EventEmitter<{ file: File; maxSize: number; actualSize: number }>(); // Dosya boyutu hatası
+  @Output() onFileSizeError = new EventEmitter<{
+    file: File;
+    maxSize: number;
+    actualSize: number;
+  }>(); // Dosya boyutu hatası
 
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
   @ViewChild(ImageCropperComponent) imageCropper!: ImageCropperComponent;
@@ -112,7 +116,9 @@ export class ImageUploadComponent {
     if (file.size > maxSizeBytes) {
       // Dosya çok büyük - hata göster
       this.showFileSizeError = true;
-      this.fileSizeErrorMessage = `Dosya boyutu çok büyük! Maksimum ${this.maxFileSizeMB}MB yükleyebilirsiniz. Seçilen dosya: ${actualSizeMB.toFixed(2)}MB`;
+      this.fileSizeErrorMessage = `Dosya boyutu çok büyük! Maksimum ${
+        this.maxFileSizeMB
+      }MB yükleyebilirsiniz. Seçilen dosya: ${actualSizeMB.toFixed(2)}MB`;
 
       // Input'u temizle
       if (this.fileInput) {
@@ -123,7 +129,7 @@ export class ImageUploadComponent {
       this.onFileSizeError.emit({
         file: file,
         maxSize: this.maxFileSizeMB,
-        actualSize: parseFloat(actualSizeMB.toFixed(2))
+        actualSize: parseFloat(actualSizeMB.toFixed(2)),
       });
 
       return; // İşlemi durdur
@@ -190,7 +196,7 @@ export class ImageUploadComponent {
     if (this.uploadToServer && event.blob) {
       const croppedFile = new File([event.blob], this.pendingCropFile.name, {
         type: this.pendingCropFile.type,
-        lastModified: Date.now()
+        lastModified: Date.now(),
       });
       this.onFileSelected.emit(croppedFile);
     }
@@ -226,7 +232,7 @@ export class ImageUploadComponent {
       'image/png',
       'image/gif',
       'image/webp',
-      'image/svg+xml'
+      'image/svg+xml',
     ];
 
     // İzin verilen dosya uzantıları
@@ -252,7 +258,7 @@ export class ImageUploadComponent {
       'image/png': ['.png'],
       'image/gif': ['.gif'],
       'image/webp': ['.webp'],
-      'image/svg+xml': ['.svg']
+      'image/svg+xml': ['.svg'],
     };
 
     const expectedExtensions = mimeToExtension[file.type.toLowerCase()];
@@ -275,7 +281,7 @@ export class ImageUploadComponent {
     Logger.warn('Geçersiz dosya tipi reddedildi:', {
       fileName: file.name,
       fileType: file.type,
-      fileSize: file.size
+      fileSize: file.size,
     });
 
     // Kullanıcıya görsel geri bildirim için (opsiyonel - toast service kullanılabilir)
@@ -289,6 +295,15 @@ export class ImageUploadComponent {
       this.fileName = 'URL Bağlantısı';
       this.onImageSelected.emit(this.previewUrl);
     }
+  }
+
+  /** Önizleme resmi yüklenemezse (404 vb.) placeholder göster; siyah ekran olmasın */
+  onPreviewImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    if (!img) return;
+    img.onerror = null;
+    img.src =
+      'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM5Y2EzYWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5Hw7xyc2VsIFnDvGtsZW5lbWVkaTwvdGV4dD48L3N2Zz4=';
   }
 
   // --- SİLME ---

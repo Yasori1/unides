@@ -16,6 +16,9 @@ export interface CommunityMiniDto {
   isActivity: boolean;
   comCreatedAt?: string; // ISO date string
   ComCreatedAt?: string; // PascalCase variant
+  comMail?: string;
+  comLeadMail?: string;
+  comConfirm?: number; // 0=beklemede, 1=onaylandı, 2=reddedildi
 }
 
 // Backend: CommunityEventDto
@@ -91,6 +94,12 @@ export interface RemoveCommunityMemberDto {
   email: string;
 }
 
+// Backend: CommunityReviewDto (GSB onay/red)
+export interface CommunityReviewDto {
+  confirm: 1 | 2; // 1=onay, 2=red
+  confirmAbout?: string; // Red gerekçesi
+}
+
 // Frontend için uyumlu Community interface (eski kodlarla uyumluluk için)
 export interface Community {
   id: string; // Guid (eski number yerine)
@@ -111,7 +120,7 @@ export interface Community {
   tiktok?: string;
   website?: string;
   email?: string;
-  status?: 'Aktif' | 'Pasif' | 'Onay Bekleyen';
+  status?: 'Aktif' | 'Pasif' | 'Onay Bekleyen' | 'Reddedilen';
   presidentEmail?: string;
   // Backend'den gelen ek alanlar
   comMail?: string;
@@ -120,6 +129,7 @@ export interface Community {
   instagramUrl?: string;
   miniAbout?: string;
   isActivity?: boolean;
+  comConfirm?: number; // 0=beklemede, 1=onaylandı, 2=reddedildi
   events?: CommunityEventDto[];
   upcomingEventCount?: number; // Featured communities için
 }

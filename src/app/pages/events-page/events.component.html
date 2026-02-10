@@ -23,47 +23,56 @@
 
 <section class="events-content-section">
   <div class="container">
-    <div class="filters-bar" #animItem>
-      <div class="search-group">
-        <i class="bx bx-search"></i>
-        <input type="text" placeholder="Etkinlik, üniversite veya kulüp ara..." (input)="onSearch($event)"
-          [value]="searchQuery" />
-      </div>
-
-      <div class="filter-groups">
-        <!-- Category Filter -->
-        <div class="select-wrapper custom-dropdown" [class.open]="isCategoryDropdownOpen">
-          <div class="custom-select-trigger" (click)="toggleCategoryDropdown($event)">
-            <span>{{ activeCategory }}</span>
-            <i class="bx bx-chevron-down"></i>
-          </div>
-          <div class="custom-options">
-            <div *ngFor="let cat of categories" class="option" (click)="selectCategory(cat)"
-              [class.selected]="activeCategory === cat">
-              {{ cat }}
-            </div>
-          </div>
+    <div class="filters-row" #animItem>
+      <div class="filters-bar">
+        <div class="search-group">
+          <i class="bx bx-search"></i>
+          <input type="text" placeholder="Etkinlik, üniversite veya kulüp ara..." (input)="onSearch($event)"
+            [value]="searchQuery" />
         </div>
 
-        <!-- Sort Filter -->
-        <div class="select-wrapper custom-dropdown" [class.open]="isSortDropdownOpen">
-          <div class="custom-select-trigger" (click)="toggleSortDropdown($event)">
-            <span>{{ getSortLabel(sortOrder) }}</span>
-            <i class="bx bx-sort-alt-2"></i>
-          </div>
-          <div class="custom-options">
-            <div class="option" (click)="selectSort('date_asc')" [class.selected]="sortOrder === 'date_asc'">Tarih
-              (Yakın-Uzak)</div>
-            <div class="option" (click)="selectSort('date_desc')" [class.selected]="sortOrder === 'date_desc'">Tarih
-              (Uzak-Yakın)</div>
-            <div class="option" (click)="selectSort('name_asc')" [class.selected]="sortOrder === 'name_asc'">İsim (A-Z)
+        <div class="filter-groups">
+          <!-- Category Filter -->
+          <div class="select-wrapper custom-dropdown" [class.open]="isCategoryDropdownOpen">
+            <div class="custom-select-trigger" (click)="toggleCategoryDropdown($event)">
+              <span>{{ activeCategory }}</span>
+              <i class="bx bx-chevron-down"></i>
             </div>
-            <div class="option" (click)="selectSort('name_desc')" [class.selected]="sortOrder === 'name_desc'">İsim
-              (Z-A)</div>
+            <div class="custom-options">
+              <div *ngFor="let cat of categories" class="option" (click)="selectCategory(cat)"
+                [class.selected]="activeCategory === cat">
+                {{ cat }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Sort Filter -->
+          <div class="select-wrapper custom-dropdown" [class.open]="isSortDropdownOpen">
+            <div class="custom-select-trigger" (click)="toggleSortDropdown($event)">
+              <span>{{ getSortLabel(sortOrder) }}</span>
+              <i class="bx bx-sort-alt-2"></i>
+            </div>
+            <div class="custom-options">
+              <div class="option" (click)="selectSort('date_asc')" [class.selected]="sortOrder === 'date_asc'">Tarih
+                (Yakın-Uzak)</div>
+              <div class="option" (click)="selectSort('date_desc')" [class.selected]="sortOrder === 'date_desc'">Tarih
+                (Uzak-Yakın)</div>
+              <div class="option" (click)="selectSort('name_asc')" [class.selected]="sortOrder === 'name_asc'">İsim (A-Z)
+              </div>
+              <div class="option" (click)="selectSort('name_desc')" [class.selected]="sortOrder === 'name_desc'">İsim
+                (Z-A)</div>
+            </div>
           </div>
         </div>
       </div>
     </div>
+
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="spinner"></div>
+      <p>Etkinlikler yükleniyor...</p>
+    </div>
+
+    <ng-container *ngIf="!isLoading">
 
     <div class="results-count" *ngIf="filteredEventsCount > 0">
       <p>
@@ -144,6 +153,7 @@
         </div>
       </div>
     </div>
+    </ng-container>
   </div>
 </section>
 

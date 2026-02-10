@@ -76,6 +76,9 @@ export const routes: Routes = [
   // Topluluk Kaydı açık (3 adımlı: e-posta/şifre → doğrulama → topluluk bilgileri)
   { path: 'community-register', component: CommunityRegisterComponent },
 
+  // Backend GET verify-email topluluk başkanını buraya yönlendirir (/create-community?setupToken=...)
+  { path: 'create-community', component: CommunityRegisterComponent },
+
   // Kayıt: Sadece Topluluk Kaydı açık (/register ve /community-register)
   { path: 'register', component: CommunityRegisterComponent },
 

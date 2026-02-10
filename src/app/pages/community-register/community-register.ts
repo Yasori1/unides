@@ -2,8 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { Observable, forkJoin, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
 import { ToastService } from '../../services/toast.services';
 import { AuthService } from '../../services/auth.services';
 import { CommunityService } from '../../services/community.services';
@@ -12,6 +10,8 @@ import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.compo
 import { ImageUploadComponent } from '../../components/ui/image-upload/image-upload';
 import { Logger } from '../../utils/logger.util';
 import { CreateCommunityDto } from '../../models/community.models';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 @Component({
   selector: 'app-community-register',
@@ -33,6 +33,9 @@ export class CommunityRegisterComponent implements OnInit {
   isLoading = false;
   emailError = false;
   passwordMismatch = false;
+
+  /** Kayıt başarılı olduğunda formu gizleyip başarı ekranını gösterir */
+  showRegistrationSuccess = false;
 
   // Adım 1 — Şifre kabul şartları (öğrenci kayıt sayfası ile aynı)
   passwordMinLength = false;
@@ -58,6 +61,9 @@ export class CommunityRegisterComponent implements OnInit {
   comLeadMail = '';
   webSiteUrl = '';
   instagramUrl = '';
+
+  // Setup Token (verify-email sonrası gelen token — complete-community-setup için)
+  setupToken = '';
 
   // Adım 3 - Banner ve Logo (önizleme + yüklenecek dosya)
   bannerPreviewUrl = '';
@@ -167,15 +173,28 @@ export class CommunityRegisterComponent implements OnInit {
     private toastService: ToastService,
     private authService: AuthService,
     private communityService: CommunityService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     const stepParam = this.route.snapshot.queryParams['step'];
-    if (stepParam === '3') {
+    // /create-community?setupToken=... — GET verify-email backend redirect'i
+    const querySetupToken = this.route.snapshot.queryParams['setupToken'];
+    if (querySetupToken) {
+      sessionStorage.setItem('community_setup_token', querySetupToken);
+      this.setupToken = querySetupToken;
+    }
+
+    if (stepParam === '3' || querySetupToken) {
+      // SetupToken var mı kontrol et (sessionStorage veya query param)
+      this.setupToken = this.setupToken || sessionStorage.getItem('community_setup_token') || '';
       const storedEmail = sessionStorage.getItem('community_register_email');
-      if (storedEmail) {
+      if (this.setupToken) {
+        if (storedEmail) {
+          this.comLeadMail = storedEmail; // Sadece başkan e-postası 1. adımdaki mail ile dolar
+        }
+        this.step = 3;
+      } else if (storedEmail) {
         this.comLeadMail = storedEmail;
-        this.comMail = storedEmail;
         this.step = 3;
       } else {
         this.toastService.show(
@@ -247,7 +266,16 @@ export class CommunityRegisterComponent implements OnInit {
     this.logoPreviewUrl = imageUrl;
   }
 
+  private readonly maxImageSizeBytes = 1 * 1024 * 1024; // 1 MB
+
   onBannerFileSelected(file: File): void {
+    if (file.size > this.maxImageSizeBytes) {
+      this.toastService.show(
+        'Banner görseli 1 MB\'dan büyük olamaz. Lütfen daha küçük bir dosya seçin.',
+        'error'
+      );
+      return;
+    }
     this.bannerFile = file;
     const reader = new FileReader();
     reader.onload = (e: ProgressEvent<FileReader>) => {
@@ -257,6 +285,13 @@ export class CommunityRegisterComponent implements OnInit {
   }
 
   onLogoFileSelected(file: File): void {
+    if (file.size > this.maxImageSizeBytes) {
+      this.toastService.show(
+        'Logo 1 MB\'dan büyük olamaz. Lütfen daha küçük bir dosya seçin.',
+        'error'
+      );
+      return;
+    }
     this.logoFile = file;
     const reader = new FileReader();
     reader.onload = (e: ProgressEvent<FileReader>) => {
@@ -345,92 +380,167 @@ export class CommunityRegisterComponent implements OnInit {
       this.toastService.show('Üniversite adı giriniz.', 'error');
       return;
     }
+    if (!this.comMail?.trim()) {
+      this.toastService.show('Topluluk iletişim e-postası zorunludur.', 'error');
+      return;
+    }
 
     this.isLoading = true;
+
+    // Banner ve Logo URL'leri: /ImagesUnides/Banner/ ve /ImagesUnides/Logo/ formatında bağlanır (MaxLength 255).
+    const bannerUrl = this.bannerFile
+      ? `/ImagesUnides/Banner/${this.getUniqueImageId()}.${this.getFileExtension(this.bannerFile.name)}`
+      : undefined;
+    const logoUrl = this.logoFile
+      ? `/ImagesUnides/Logo/${this.getUniqueImageId()}.${this.getFileExtension(this.logoFile.name)}`
+      : undefined;
+
     const dto: CreateCommunityDto = {
       comName: this.comName.trim(),
       comCategory: this.comCategory || undefined,
       comAbout: this.about?.trim() || undefined,
       city: this.city.trim(),
       university: this.university.trim(),
-      comMail: this.comMail?.trim() || this.comLeadMail?.trim(),
+      comMail: this.comMail?.trim(),
       comLeadMail: this.comLeadMail.trim(),
       webSiteUrl: this.webSiteUrl?.trim() || undefined,
       instagramUrl: this.instagramUrl?.trim() || undefined,
+      bannerUrl,
+      logoUrl,
       miniAbout: this.miniAbout?.trim() || undefined,
       isActivity: false, // Onay bekleyen; ilgili şehir kurumsal dashboard'da onaylanacak
     };
 
-    this.communityService.createCommunity(dto).subscribe({
-      next: (createdCommunity) => {
-        sessionStorage.removeItem('community_register_email');
-        sessionStorage.removeItem('community_register_return');
-        const communityId = createdCommunity.id;
-        const uploadTasks: Observable<unknown>[] = [];
+    // SetupToken varsa complete-community-setup kullan (hesap+topluluk birlikte oluşturulur)
+    const token = this.setupToken || sessionStorage.getItem('community_setup_token') || '';
 
-        if (this.logoFile && communityId) {
-          uploadTasks.push(
-            this.communityService.uploadLogo(communityId, this.logoFile).pipe(
-              catchError((err) => {
-                Logger.error('Logo yüklenirken hata:', err);
-                return of(null);
-              })
-            )
-          );
-        }
-        if (this.bannerFile && communityId) {
-          uploadTasks.push(
-            this.communityService.uploadBanner(communityId, this.bannerFile!).pipe(
-              catchError((err) => {
-                Logger.error('Banner yüklenirken hata:', err);
-                return of(null);
-              })
-            )
-          );
-        }
+    if (token) {
+      // --- YENI AKIŞ: complete-community-setup ---
+      // Backend topluluk oluşturduktan sonra "Topluluğunuz hala onay aşamasındadır" hatası fırlatır.
+      // Bu hata beklenen bir durumdur: topluluk VE kullanıcı veritabanında oluşturulmuştur.
+      // Hata mesajını kontrol edip başarılı kayıt olarak ele alıyoruz.
+      this.authService.completeCommunitySetup(token, dto).subscribe({
+        next: (response: any) => {
+          const communityId = response?.community?.communityId ?? response?.community?.CommunityId ?? response?.communityId;
+          sessionStorage.removeItem('community_setup_token');
+          sessionStorage.removeItem('community_register_email');
+          sessionStorage.removeItem('community_register_return');
+          this.uploadBannerAndLogoThenSuccess(communityId);
+        },
+        error: (err) => {
+          const msg = err?.error?.message || err?.message || '';
+          const msgLower = msg.toLowerCase();
 
-        const showSuccessAndNavigate = (imagesOk: boolean) => {
+          // Backend topluluk oluşturduktan sonra "onay aşamasındadır" hatası fırlatır.
+          // Bu BEKLENEN bir durumdur — topluluk başarıyla oluşturuldu ama onay bekliyor.
+          if (
+            msgLower.includes('onay') ||
+            msgLower.includes('aşamasındadır') ||
+            msgLower.includes('approval')
+          ) {
+            sessionStorage.removeItem('community_setup_token');
+            sessionStorage.removeItem('community_register_email');
+            sessionStorage.removeItem('community_register_return');
+            // Hata branch'te communityId yok; görsel yüklemesi atlanır
+            this.onCommunitySetupSuccess();
+          } else {
+            // Gerçek hata (validation, token geçersiz, vb.)
+            this.isLoading = false;
+            this.toastService.show(msg || 'Topluluk oluşturulurken bir hata oluştu.', 'error');
+            Logger.error('Topluluk kurulum hatası:', err);
+          }
+        },
+      });
+    } else {
+      // --- FALLBACK: Eski akış (zaten giriş yapmış kullanıcı için) ---
+      this.communityService.createCommunity(dto).subscribe({
+        next: (createdCommunity) => {
+          sessionStorage.removeItem('community_register_email');
+          sessionStorage.removeItem('community_register_return');
+          this.uploadBannerAndLogoThenSuccess(createdCommunity?.id ?? '');
+        },
+        error: (err) => {
           this.isLoading = false;
-          this.toastService.show(
-            imagesOk
-              ? 'Topluluğunuz oluşturuldu. Anasayfaya yönlendiriliyorsunuz...'
-              : 'Topluluk oluşturuldu; bazı görseller yüklenemedi. Anasayfaya yönlendiriliyorsunuz...',
-            imagesOk ? 'success' : 'error'
-          );
-          setTimeout(() => this.router.navigate(['/']), 2000);
-        };
+          if (err?.status === 401) {
+            this.toastService.show(
+              'Oturum açmanız gerekiyor. Lütfen giriş yapıp tekrar deneyin.',
+              'error'
+            );
+            this.router.navigate(['/community-login'], {
+              queryParams: { next: '/community-register?step=3' },
+            });
+            return;
+          }
+          const msg =
+            err?.error?.message || err?.message || 'Topluluk oluşturulurken bir hata oluştu.';
+          this.toastService.show(msg, 'error');
+          Logger.error('Topluluk oluşturma hatası:', err);
+        },
+      });
+    }
+  }
 
-        if (uploadTasks.length > 0) {
-          forkJoin(uploadTasks).subscribe({
-            next: (results) => {
-              const hasError = results.some((r) => r === null);
-              showSuccessAndNavigate(!hasError);
-            },
-            error: () => {
-              showSuccessAndNavigate(false);
-            },
-          });
-        } else {
-          showSuccessAndNavigate(true);
-        }
-      },
-      error: (err) => {
-        this.isLoading = false;
-        if (err?.status === 401) {
-          this.toastService.show(
-            'Oturum açmanız gerekiyor. Lütfen giriş yapıp tekrar deneyin.',
-            'error'
-          );
-          this.router.navigate(['/community-login'], {
-            queryParams: { next: '/community-register?step=3' },
-          });
-          return;
-        }
-        const msg =
-          err?.error?.message || err?.message || 'Topluluk oluşturulurken bir hata oluştu.';
-        this.toastService.show(msg, 'error');
-        Logger.error('Topluluk oluşturma hatası:', err);
-      },
-    });
+  /** Dosya adından uzantı al (örn. "foto.jpg" -> "jpg"). Varsayılan: "jpg" */
+  private getFileExtension(fileName: string): string {
+    if (!fileName?.includes('.')) return 'jpg';
+    return fileName.split('.').pop()!.toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+  }
+
+  /** Banner/Logo URL için kısa benzersiz id (MaxLength 255 uyumlu). */
+  private getUniqueImageId(): string {
+    return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+  }
+
+  /**
+   * Topluluk oluşturulduktan sonra banner/logo dosyalarını sunucuya yükler, ardından başarı ekranını gösterir.
+   */
+  private uploadBannerAndLogoThenSuccess(communityId: string): void {
+    if (!communityId) {
+      this.onCommunitySetupSuccess();
+      return;
+    }
+    const uploadTasks: any[] = [];
+    if (this.logoFile) {
+      uploadTasks.push(
+        this.communityService.uploadLogo(communityId, this.logoFile).pipe(
+          catchError((err) => {
+            Logger.error('Logo yüklenirken hata:', err);
+            return of(null);
+          })
+        )
+      );
+    }
+    if (this.bannerFile) {
+      uploadTasks.push(
+        this.communityService.uploadBanner(communityId, this.bannerFile).pipe(
+          catchError((err) => {
+            Logger.error('Banner yüklenirken hata:', err);
+            return of(null);
+          })
+        )
+      );
+    }
+    if (uploadTasks.length > 0) {
+      forkJoin(uploadTasks).subscribe({
+        next: () => this.onCommunitySetupSuccess(),
+        error: () => this.onCommunitySetupSuccess(),
+      });
+    } else {
+      this.onCommunitySetupSuccess();
+    }
+  }
+
+  /**
+   * Topluluk başarıyla oluşturulduktan sonra (onay bekliyor).
+   * Kullanıcıyı bilgilendir ve community-login'deki pending ekranına yönlendir.
+   */
+  private onCommunitySetupSuccess(): void {
+    this.isLoading = false;
+
+    // Topluluk yeni oluşturuldu → ComConfirm=0, IsActivity=false
+    localStorage.setItem('community_approved', JSON.stringify(false));
+
+    // Toast veya yönlendirme yok — başarı ekranını göster
+    this.showRegistrationSuccess = true;
   }
 }

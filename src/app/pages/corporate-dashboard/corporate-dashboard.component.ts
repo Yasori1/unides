@@ -331,7 +331,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private spamService: SpamService,
     @Inject(PLATFORM_ID) private platformId: Object
-  ) { }
+  ) {}
 
   ngOnInit() {
     // SSR sırasında HTTP istekleri yapma, sadece browser'da yap
@@ -396,52 +396,54 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     this.isLoadingCommunities = true;
 
     // Dropdown'dan gelen filtreye göre backend'den toplulukları çağır
-    // statusFilter: '' (Tüm Durumlar) -> 'all', 'Aktif' -> 'active', 'Pasif' -> 'passive'
-    let backendStatus: 'all' | 'active' | 'aktif' | 'passive' | 'pasif' | undefined = 'all';
+    // statusFilter: '' -> 'all', 'Aktif' -> 'active', 'Pasif' -> 'passive', 'Onay Bekleyen' -> 'pending', 'Reddedilen' -> 'passive' + client filter
+    let backendStatus: 'all' | 'active' | 'aktif' | 'passive' | 'pasif' | 'pending' | undefined =
+      'all';
 
     if (statusFilter === 'Aktif') {
       backendStatus = 'active';
-    } else if (statusFilter === 'Pasif' || statusFilter === 'Onay Bekleyen') {
-      // Pasif ve Onay Bekleyen: backend'de aynı (passive) — onay bekleyen topluluklar pasif oluşturulur
+    } else if (statusFilter === 'Onay Bekleyen') {
+      backendStatus = 'pending';
+    } else if (statusFilter === 'Pasif') {
+      backendStatus = 'passive';
+    } else if (statusFilter === 'Reddedilen') {
+      // Reddedilen = sadece ComConfirm=2; backend'de ayrı status yok, passive çekip client'ta filtreliyoruz
       backendStatus = 'passive';
     } else if (!statusFilter || statusFilter === '') {
-      // Tüm Durumlar seçildiğinde veya filtre yoksa tüm toplulukları getir
       backendStatus = 'all';
     }
 
     // Corporate Dashboard'da seçilen filtreye göre toplulukları göster
     // Backend'de status parametresi ile istek atıyoruz
-    // Not: 'all' ve 'passive' sadece GSB (RolId 2) yetkisi olan kullanıcılar için çalışır
+    // Not: 'all', 'passive', 'pending' sadece GSB (RolId 2) yetkisi olan kullanıcılar için çalışır
     this.communityService.getAllCommunities({ status: backendStatus }).subscribe({
       next: (data) => {
         // CommunityService'ten gelen veriyi Corporate Dashboard formatına dönüştür
         // EXCLUSION: Website URL and Social Media Links are NOT displayed in Corporate Dashboard
         // Category is INCLUDED and will be shown with dropdown
-        this.allCommunities = data.map((c) => {
+        let mapped = data.map((c) => {
           const { website, webSiteUrl, instagram, instagramUrl, socialMedia, ...rest } = c;
-          // Backend'den gelen isActivity değerini direkt kullan (zaten doğru map edilmiş)
-          // CommunityService.mapMiniDtoToCommunity içinde dto.isActivity doğru map ediliyor
           const isActivity = c.isActivity !== undefined ? c.isActivity : true;
+          const coverUrl =
+            (c.coverImage && String(c.coverImage).trim()) || (c.banner && String(c.banner).trim())
+              ? c.coverImage || c.banner
+              : '';
+          const logoUrl = c.logo && String(c.logo).trim() ? c.logo : '';
           return {
             ...rest,
             about: c.description || c.about || '',
-            banner: c.coverImage || c.banner || '',
-            coverImage: c.coverImage || c.banner || '', // Her iki alanı da tut
-            logo: c.logo || '', // Logo alanını koru (service'ten tam URL gelir)
-            description: c.description || c.about || '', // Her iki alanı da tut
-            city: c.city || '', // city undefined ise boş string
-            category: c.category || 'Genel', // Category is included
-            // Backend'den gelen email/comMail'i email'e map et
+            banner: coverUrl || 'assets/img/placeholder-cover.svg',
+            coverImage: coverUrl || 'assets/img/placeholder-cover.svg',
+            logo: logoUrl || 'assets/img/placeholder-logo.svg',
+            description: c.description || c.about || '',
+            city: c.city || '',
+            category: c.category || 'Genel',
             email: c.email || c.comMail || '',
-            comMail: c.comMail || c.email || '', // comMail'i de koru
-            // Backend'den gelen miniAbout'u shortDescription'a map et
+            comMail: c.comMail || c.email || '',
             miniAbout: c.miniAbout || '',
             shortDescription: c.miniAbout || (c as any).shortDescription || '',
-            // Backend'den gelen isActivity değerini status'a çevir
-            // CommunityService içinde zaten dto.isActivity doğru map ediliyor
-            status: c.status || (isActivity ? 'Aktif' : 'Pasif'),
-            isActivity: isActivity, // isActivity alanını da koru
-            // Explicitly exclude these fields for Corporate Dashboard
+            status: c.status ?? (isActivity ? 'Aktif' : 'Pasif'), // Reddedilen service'ten korunur
+            isActivity: isActivity,
             website: undefined,
             webSiteUrl: undefined,
             instagram: undefined,
@@ -449,6 +451,11 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
             socialMedia: undefined,
           } as Community;
         });
+        // Reddedilen filtresi: backend passive hem reddedilen hem pasif döner; sadece ComConfirm=2 (Reddedilen) göster
+        if (statusFilter === 'Reddedilen') {
+          mapped = mapped.filter((c) => c.status === 'Reddedilen');
+        }
+        this.allCommunities = mapped;
 
         // Extract unique categories from communities for dropdown
         const uniqueCategories = [
@@ -484,14 +491,20 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
                   rest.isActivity !== undefined
                     ? rest.isActivity
                     : c.isActivity !== undefined
-                      ? c.isActivity
-                      : true;
+                    ? c.isActivity
+                    : true;
+                const coverUrl =
+                  (c.coverImage && String(c.coverImage).trim()) ||
+                  (c.banner && String(c.banner).trim())
+                    ? c.coverImage || c.banner
+                    : '';
+                const logoUrl = c.logo && String(c.logo).trim() ? c.logo : '';
                 return {
                   ...rest,
                   about: c.description || c.about || '',
-                  banner: c.coverImage || c.banner || '',
-                  coverImage: c.coverImage || c.banner || '',
-                  logo: c.logo || '', // Logo alanını koru
+                  banner: coverUrl || 'assets/img/placeholder-cover.svg',
+                  coverImage: coverUrl || 'assets/img/placeholder-cover.svg',
+                  logo: logoUrl || 'assets/img/placeholder-logo.svg',
                   description: c.description || c.about || '',
                   city: c.city || '',
                   category: c.category || 'Genel',
@@ -532,6 +545,23 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         this.isLoadingCommunities = false;
       },
     });
+  }
+
+  /** ngFor trackBy: her topluluk kartının doğru görselle eşleşmesi için (yanlış görsel göstermeyi önler) */
+  trackByCommunityId(_index: number, item: Community): string {
+    return item?.id ?? '';
+  }
+
+  /** Topluluk logosu URL'si; null/boş ise placeholder kullanılır (veritabanında LogoUrl null olabilir) */
+  getCommunityLogo(item: Community): string | null {
+    const url = item?.logo;
+    return url && String(url).trim() ? url : null;
+  }
+
+  /** Topluluk kapak görseli URL'si; null/boş ise placeholder kullanılır (veritabanında BannerUrl null olabilir) */
+  getCommunityCover(item: Community): string | null {
+    const url = item?.coverImage || item?.banner;
+    return url && String(url).trim() ? url : null;
   }
 
   // Üniversite kısaltması için yardımcı metod
@@ -673,7 +703,6 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-
   attachCommunityNamesToEvents() {
     if (!this.allCommunities?.length || !this.allEvents?.length) return;
     this.allEvents = this.allEvents.map((ev) => {
@@ -747,6 +776,16 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     // }
     // "Aktif" ve "Pasif" filtreleri backend'den zaten filtrelenmiş olarak geliyor
 
+    // Kurumsal Dashboard: Onay Bekleyen → Reddedilen → Pasif → Aktif sırası
+    const statusOrder = (status: string | undefined): number => {
+      if (!status || status === 'Onay Bekleyen') return 0;
+      if (status === 'Reddedilen') return 1;
+      if (status === 'Pasif') return 2;
+      if (status === 'Aktif') return 3;
+      return 4;
+    };
+    temp.sort((a, b) => statusOrder(a.status) - statusOrder(b.status));
+
     this.filteredCommunities = temp;
     this.currentPage = 1;
     this.initPagination();
@@ -818,17 +857,76 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   // Topluluklar sayfasına onay bekleyen filtresiyle yönlendir
   goToCommunitiesWithPendingFilter() {
     this.router.navigate(['/corporate-dashboard'], {
-      queryParams: { tab: 'communities', status: 'Onay Bekliyor' },
+      queryParams: { tab: 'communities', status: 'Onay Bekleyen' },
     });
     this.switchTab('communities');
-    this.statusFilter = 'Onay Bekliyor';
-    this.applyFilters();
+    this.statusFilter = 'Onay Bekleyen';
+    this.loadCommunitiesFromService(this.statusFilter);
   }
 
   // Etkinlikler sekmesine beklemede filtresiyle yönlendir
   goToPendingEvents() {
     this.switchTab('events');
     this.setEventStatusFilter('Beklemede');
+  }
+
+  // --- TOPLULUK ONAY/RED (GSB) ---
+  rejectionReasonCommunity = '';
+  communityToReject: Community | null = null;
+  communityToApprove: Community | null = null;
+
+  openApproveCommunityModal(community: Community): void {
+    this.communityToApprove = community;
+    this.modalType = 'approveCommunity';
+    this.isModalOpen = true;
+  }
+
+  confirmApproveCommunity(): void {
+    if (!this.communityToApprove) return;
+    const community = this.communityToApprove;
+    this.communityService.reviewCommunity(community.id, 1).subscribe({
+      next: () => {
+        this.toastService.show(`${community.name} topluluğu onaylandı.`, 'success');
+        this.isModalOpen = false;
+        this.communityToApprove = null;
+        this.loadCommunitiesFromService(this.statusFilter);
+      },
+      error: (err) => {
+        const msg = err?.error?.message || err?.error || 'Onaylama sırasında bir hata oluştu.';
+        this.toastService.show(typeof msg === 'string' ? msg : 'Onaylama hatası.', 'error');
+      },
+    });
+  }
+
+  openRejectCommunityModal(community: Community): void {
+    this.communityToReject = community;
+    this.rejectionReasonCommunity = '';
+    this.modalType = 'rejectCommunity';
+    this.isModalOpen = true;
+  }
+
+  confirmRejectCommunity(): void {
+    if (!this.communityToReject) return;
+    const reason = this.rejectionReasonCommunity?.trim() || '';
+    if (!reason) {
+      this.toastService.show('Lütfen reddetme nedenini giriniz.', 'error');
+      return;
+    }
+    const community = this.communityToReject;
+
+    this.communityService.reviewCommunity(community.id, 2, reason).subscribe({
+      next: () => {
+        this.toastService.show(`${community.name} topluluğu reddedildi.`, 'success');
+        this.isModalOpen = false;
+        this.communityToReject = null;
+        this.rejectionReasonCommunity = '';
+        this.loadCommunitiesFromService(this.statusFilter);
+      },
+      error: (err) => {
+        const msg = err?.error?.message || err?.error || 'Red işlemi sırasında bir hata oluştu.';
+        this.toastService.show(typeof msg === 'string' ? msg : 'Red hatası.', 'error');
+      },
+    });
   }
 
   // Topluluk detay ve güncelleme
@@ -838,7 +936,8 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     // Önce mevcut veriyi editingCommunity'ye set et (silme işlemi için gerekli)
     // Backend'den detay çekmeye çalışırken bile mevcut veriyi kullanabiliriz
     // CommunityMiniDto'dan gelen miniAbout'u kullan
-    const miniAboutValue = community.miniAbout || (community as any).MiniAbout || (community as any).miniAbout || '';
+    const miniAboutValue =
+      community.miniAbout || (community as any).MiniAbout || (community as any).miniAbout || '';
     this.editingCommunity = {
       ...community,
       about: community.description || community.about || '',
@@ -858,9 +957,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
             : 'Pasif'
           : community.status || 'Aktif',
       isActivity:
-        community.isActivity !== undefined
-          ? community.isActivity
-          : community.status === 'Aktif',
+        community.isActivity !== undefined ? community.isActivity : community.status === 'Aktif',
     } as Community & { presidentEmail?: string; shortDescription?: string };
 
     // Modal'ı aç
@@ -872,9 +969,8 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     // Pasif topluluklar için: GET /api/Communities?status=passive (liste endpoint'inden ID'ye göre filtrele)
     if (community.id && community.id !== '' && !community.id.includes('mock')) {
       // Topluluğun aktif/pasif durumunu kontrol et
-      const isActive = community.isActivity !== undefined
-        ? community.isActivity
-        : (community.status === 'Aktif');
+      const isActive =
+        community.isActivity !== undefined ? community.isActivity : community.status === 'Aktif';
 
       this.communityService.getCommunityById(community.id, isActive).subscribe({
         next: (detailedCommunity) => {
@@ -882,17 +978,51 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
           this.editingCommunity = {
             ...detailedCommunity,
             // Açıklama alanları
-            about: detailedCommunity.description || detailedCommunity.about || (detailedCommunity as any).comAbout || '',
-            description: detailedCommunity.description || detailedCommunity.about || (detailedCommunity as any).comAbout || '',
+            about:
+              detailedCommunity.description ||
+              detailedCommunity.about ||
+              (detailedCommunity as any).comAbout ||
+              '',
+            description:
+              detailedCommunity.description ||
+              detailedCommunity.about ||
+              (detailedCommunity as any).comAbout ||
+              '',
             // Email alanları - backend'den gelen tüm email alanlarını kontrol et
-            email: detailedCommunity.email || detailedCommunity.comMail || (detailedCommunity as any).comMail || '',
-            comMail: detailedCommunity.comMail || detailedCommunity.email || (detailedCommunity as any).comMail || '',
+            email:
+              detailedCommunity.email ||
+              detailedCommunity.comMail ||
+              (detailedCommunity as any).comMail ||
+              '',
+            comMail:
+              detailedCommunity.comMail ||
+              detailedCommunity.email ||
+              (detailedCommunity as any).comMail ||
+              '',
             // Topluluk başkanı email - backend'den gelen tüm alanları kontrol et
-            presidentEmail: detailedCommunity.comLeadMail || detailedCommunity.presidentEmail || (detailedCommunity as any).comLeadMail || (detailedCommunity as any).presidentEmail || '',
-            comLeadMail: detailedCommunity.comLeadMail || detailedCommunity.presidentEmail || (detailedCommunity as any).comLeadMail || (detailedCommunity as any).presidentEmail || '',
+            presidentEmail:
+              detailedCommunity.comLeadMail ||
+              detailedCommunity.presidentEmail ||
+              (detailedCommunity as any).comLeadMail ||
+              (detailedCommunity as any).presidentEmail ||
+              '',
+            comLeadMail:
+              detailedCommunity.comLeadMail ||
+              detailedCommunity.presidentEmail ||
+              (detailedCommunity as any).comLeadMail ||
+              (detailedCommunity as any).presidentEmail ||
+              '',
             // Kısa açıklama
-            shortDescription: detailedCommunity.miniAbout || (detailedCommunity as any).shortDescription || (detailedCommunity as any).miniAbout || '',
-            miniAbout: detailedCommunity.miniAbout || (detailedCommunity as any).shortDescription || (detailedCommunity as any).miniAbout || '',
+            shortDescription:
+              detailedCommunity.miniAbout ||
+              (detailedCommunity as any).shortDescription ||
+              (detailedCommunity as any).miniAbout ||
+              '',
+            miniAbout:
+              detailedCommunity.miniAbout ||
+              (detailedCommunity as any).shortDescription ||
+              (detailedCommunity as any).miniAbout ||
+              '',
             // Görsel alanları
             banner: detailedCommunity.coverImage || detailedCommunity.banner || '',
             coverImage: detailedCommunity.coverImage || detailedCommunity.banner || '',
@@ -925,7 +1055,10 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
           // Hata durumunda mevcut (liste) verisini kullanmaya devam et
           // editingCommunity zaten set edildi, bu yüzden kullanıcı formu görebilir
           if (err.status === 404) {
-            Logger.warn('Topluluk detayı alınamadı (404), mevcut liste verisi kullanılıyor:', community.id);
+            Logger.warn(
+              'Topluluk detayı alınamadı (404), mevcut liste verisi kullanılıyor:',
+              community.id
+            );
             // editingCommunity zaten set edildi, ek bir işlem gerekmez
           } else {
             Logger.error('Topluluk detayı yüklenirken hata:', err);
@@ -958,12 +1091,18 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     this.isModalOpen = true;
   }
 
-
   saveCommunity() {
     if (this.editingCommunity) {
       // ID kontrolü - geçerli bir GUID olmalı
-      if (!this.editingCommunity.id || this.editingCommunity.id === '' || this.editingCommunity.id.includes('mock')) {
-        this.showToast('Topluluk ID\'si geçersiz. Lütfen sayfayı yenileyip tekrar deneyin.', 'error');
+      if (
+        !this.editingCommunity.id ||
+        this.editingCommunity.id === '' ||
+        this.editingCommunity.id.includes('mock')
+      ) {
+        this.showToast(
+          "Topluluk ID'si geçersiz. Lütfen sayfayı yenileyip tekrar deneyin.",
+          'error'
+        );
         return;
       }
 
@@ -994,7 +1133,10 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       Logger.log('editingCommunity.comMail:', (this.editingCommunity as any).comMail);
       Logger.log('editingCommunity.comLeadMail:', (this.editingCommunity as any).comLeadMail);
       Logger.log('editingCommunity.miniAbout:', this.editingCommunity.miniAbout);
-      Logger.log('editingCommunity.shortDescription:', (this.editingCommunity as any).shortDescription);
+      Logger.log(
+        'editingCommunity.shortDescription:',
+        (this.editingCommunity as any).shortDescription
+      );
       Logger.log('Full editingCommunity:', JSON.stringify(this.editingCommunity, null, 2));
 
       const communityForService = {
@@ -1002,9 +1144,11 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         id: this.editingCommunity.id, // ID'yi açıkça ekle
         about: this.editingCommunity.about || this.editingCommunity.description || '', // Detaylı açıklama (backend ComAbout)
         description: this.editingCommunity.about || this.editingCommunity.description || '', // description da about'a eşit
-        miniAbout: (this.editingCommunity.miniAbout !== undefined && this.editingCommunity.miniAbout !== null)
-          ? String(this.editingCommunity.miniAbout).trim()
-          : ((this.editingCommunity as any).shortDescription !== undefined && (this.editingCommunity as any).shortDescription !== null)
+        miniAbout:
+          this.editingCommunity.miniAbout !== undefined && this.editingCommunity.miniAbout !== null
+            ? String(this.editingCommunity.miniAbout).trim()
+            : (this.editingCommunity as any).shortDescription !== undefined &&
+              (this.editingCommunity as any).shortDescription !== null
             ? String((this.editingCommunity as any).shortDescription).trim()
             : '', // Kısa açıklama (backend MiniAbout)
         coverImage: bannerUrl || this.editingCommunity.coverImage || '',
@@ -1013,16 +1157,18 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         // Email alanları - form'dan gelen değerleri kullan
         email: this.editingCommunity.email || '',
         comMail: this.editingCommunity.email || '',
-        presidentEmail: this.editingCommunity.presidentEmail || this.editingCommunity.comLeadMail || '',
-        comLeadMail: this.editingCommunity.presidentEmail || this.editingCommunity.comLeadMail || '',
+        presidentEmail:
+          this.editingCommunity.presidentEmail || this.editingCommunity.comLeadMail || '',
+        comLeadMail:
+          this.editingCommunity.presidentEmail || this.editingCommunity.comLeadMail || '',
         // Status alanını açıkça ekle (butonlardan gelen değer)
         status: this.editingCommunity.status || 'Aktif',
         // isActivity değerini doğrudan kullan (butonlar artık hem status hem isActivity'yi set ediyor)
-        isActivity: this.editingCommunity.isActivity !== undefined
-          ? this.editingCommunity.isActivity
-          : (this.editingCommunity.status === 'Aktif'),
+        isActivity:
+          this.editingCommunity.isActivity !== undefined
+            ? this.editingCommunity.isActivity
+            : this.editingCommunity.status === 'Aktif',
       };
-
 
       this.communityService.addOrUpdateCommunity(communityForService).subscribe({
         next: (updatedCommunity) => {
@@ -1073,7 +1219,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
                 this.loadCommunitiesFromService();
                 this.showToast('Topluluk güncellendi ancak bazı görseller yüklenemedi', 'error');
                 this.closeModal();
-              }
+              },
             });
           } else {
             // Görsel yok, sadece topluluk güncellendi
@@ -1092,15 +1238,19 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
           } else if (error.status === 400) {
             // Backend validasyon hataları
             if (error.error?.message?.includes('öğrenci')) {
-              errorMessage = 'Topluluk başkanı sadece öğrenci olabilir. Lütfen öğrenci e-postası girin.';
+              errorMessage =
+                'Topluluk başkanı sadece öğrenci olabilir. Lütfen öğrenci e-postası girin.';
             } else if (error.error?.message?.includes('başka bir topluluğa başkan')) {
               errorMessage = 'Bu e-posta adresi zaten başka bir topluluğa başkan olarak atanmış.';
             } else {
-              errorMessage = error.error?.message || 'Geçersiz veri gönderildi. Lütfen tüm alanları kontrol ediniz.';
+              errorMessage =
+                error.error?.message ||
+                'Geçersiz veri gönderildi. Lütfen tüm alanları kontrol ediniz.';
             }
           } else if (error.status === 404) {
             if (error.error?.message?.includes('kullanıcı bulunamadı')) {
-              errorMessage = 'Bu e-posta adresi ile kayıtlı kullanıcı bulunamadı. Lütfen geçerli bir öğrenci e-postası girin.';
+              errorMessage =
+                'Bu e-posta adresi ile kayıtlı kullanıcı bulunamadı. Lütfen geçerli bir öğrenci e-postası girin.';
             } else {
               errorMessage = 'Topluluk bulunamadı.';
             }
@@ -1111,7 +1261,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
           }
 
           this.showToast(errorMessage, 'error');
-        }
+        },
       });
     }
   }
@@ -1219,7 +1369,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
                 this.showToast('Topluluk eklendi ancak bazı görseller yüklenemedi', 'error');
                 this.closeModal();
                 this.newCommunity = null;
-              }
+              },
             });
           } else {
             // Görsel yok, sadece topluluk eklendi
@@ -1239,15 +1389,19 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
           } else if (error.status === 400) {
             // Backend validasyon hataları
             if (error.error?.message?.includes('öğrenci')) {
-              errorMessage = 'Topluluk başkanı sadece öğrenci olabilir. Lütfen öğrenci e-postası girin.';
+              errorMessage =
+                'Topluluk başkanı sadece öğrenci olabilir. Lütfen öğrenci e-postası girin.';
             } else if (error.error?.message?.includes('başka bir topluluğa başkan')) {
               errorMessage = 'Bu e-posta adresi zaten başka bir topluluğa başkan olarak atanmış.';
             } else {
-              errorMessage = error.error?.message || 'Geçersiz veri gönderildi. Lütfen tüm alanları kontrol ediniz.';
+              errorMessage =
+                error.error?.message ||
+                'Geçersiz veri gönderildi. Lütfen tüm alanları kontrol ediniz.';
             }
           } else if (error.status === 404) {
             if (error.error?.message?.includes('kullanıcı bulunamadı')) {
-              errorMessage = 'Bu e-posta adresi ile kayıtlı kullanıcı bulunamadı. Lütfen geçerli bir öğrenci e-postası girin.';
+              errorMessage =
+                'Bu e-posta adresi ile kayıtlı kullanıcı bulunamadı. Lütfen geçerli bir öğrenci e-postası girin.';
             } else {
               errorMessage = 'Topluluk bulunamadı.';
             }
@@ -1279,7 +1433,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     // ID kontrolü - geçerli bir GUID olmalı
     if (!communityId || communityId === '' || communityId.includes('mock')) {
       Logger.error('Geçersiz Community ID:', communityId);
-      this.showToast('Topluluk ID\'si geçersiz. Lütfen sayfayı yenileyip tekrar deneyin.', 'error');
+      this.showToast("Topluluk ID'si geçersiz. Lütfen sayfayı yenileyip tekrar deneyin.", 'error');
       return;
     }
 
@@ -1519,8 +1673,19 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   }
 
   // Image error handler - Placeholder görsellerin sürekli istek atmasını engeller
-  onImageError(event: Event, type: 'announcement' | 'event' | 'logo' | 'cover' | 'avatar' = 'event'): void {
+  onImageError(
+    event: Event,
+    type: 'announcement' | 'event' | 'logo' | 'cover' | 'avatar' = 'event'
+  ): void {
     this.imageErrorHandler.handleImageError(event, type);
+  }
+
+  /** Kartlarda banner/logo yoksa veya 404'te kullanılacak güvenli placeholder URL */
+  getPlaceholderCoverUrl(): string {
+    return this.imageErrorHandler.getPlaceholderUrl('cover');
+  }
+  getPlaceholderLogoUrl(): string {
+    return this.imageErrorHandler.getPlaceholderUrl('logo');
   }
 
   logout() {
@@ -1639,18 +1804,21 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       // Diğer alanlar
       (ev as any).title ? `Başlık: ${(ev as any).title}` : '',
       (ev as any).eventType ? `Etkinlik Tipi: ${(ev as any).eventType}` : '',
-    ].filter(Boolean).join('\n');
+    ]
+      .filter(Boolean)
+      .join('\n');
 
     // Debug: Gönderilen veriyi logla
     Logger.log('[Spam Check] Sending full event data:', {
       eventId: id,
       eventName: ev.eventName,
       fullText: fullText.substring(0, 200) + '...', // İlk 200 karakter
-      fullTextLength: fullText.length
+      fullTextLength: fullText.length,
     });
 
     // SpamService kullanarak spam kontrolü yap
-    this.spamService.checkSpam(fullText)
+    this.spamService
+      .checkSpam(fullText)
       .pipe(
         catchError((error) => {
           // Hata durumunda
@@ -1660,13 +1828,24 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
           if (error.name === 'HttpErrorResponse' && error.status === 0) {
             const errorMsg = error.message || '';
             if (errorMsg.includes('CORS') || errorMsg.includes('Access-Control')) {
-              errorMessage = 'Spam filter servisi CORS hatası veriyor. Sunucu yöneticisiyle iletişime geçin.';
-            } else if (errorMsg.includes('SSL') || errorMsg.includes('certificate') || errorMsg.includes('ERR_CERT')) {
-              errorMessage = 'Spam filter servisinde SSL sertifika hatası var. Sunucu yöneticisiyle iletişime geçin.';
+              errorMessage =
+                'Spam filter servisi CORS hatası veriyor. Sunucu yöneticisiyle iletişime geçin.';
+            } else if (
+              errorMsg.includes('SSL') ||
+              errorMsg.includes('certificate') ||
+              errorMsg.includes('ERR_CERT')
+            ) {
+              errorMessage =
+                'Spam filter servisinde SSL sertifika hatası var. Sunucu yöneticisiyle iletişime geçin.';
             } else {
-              errorMessage = 'Spam filter servisine bağlanılamıyor. Lütfen daha sonra tekrar deneyin.';
+              errorMessage =
+                'Spam filter servisine bağlanılamıyor. Lütfen daha sonra tekrar deneyin.';
             }
-          } else if (error.error && typeof error.error === 'string' && error.error.includes('<!DOCTYPE')) {
+          } else if (
+            error.error &&
+            typeof error.error === 'string' &&
+            error.error.includes('<!DOCTYPE')
+          ) {
             errorMessage = 'Backend bağlantı hatası. Lütfen daha sonra tekrar deneyin.';
           } else if (error.error && typeof error.error === 'object' && error.error.message) {
             errorMessage = error.error.message;
@@ -1695,7 +1874,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
             return;
           }
 
-          // Backend formatı: 
+          // Backend formatı:
           // {
           //   "analysis": { "forbidden": {...}, "spam": {...}, "politics": {...} },
           //   "moderation": { "status": "yeniden_admin_kontrolu_politics" | "kabul" | ..., "reason": [], "scores": {...}, "politics_keywords": [...] },
@@ -1712,43 +1891,55 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
           // Veri yapısını normalize et (array garantisi)
           forbiddenData = {
             count: forbiddenData.count || 0,
-            words: Array.isArray(forbiddenData.words) ? forbiddenData.words : []
+            words: Array.isArray(forbiddenData.words) ? forbiddenData.words : [],
           };
           spamData = {
             count: spamData.count || 0,
-            keywords: Array.isArray(spamData.keywords) ? spamData.keywords : []
+            keywords: Array.isArray(spamData.keywords) ? spamData.keywords : [],
           };
           politicsData = {
             count: politicsData.count || 0,
-            keywords: Array.isArray(politicsData.keywords) ? politicsData.keywords : []
+            keywords: Array.isArray(politicsData.keywords) ? politicsData.keywords : [],
           };
 
           // Eğer analysis'de keywords yoksa, moderation'dan al
           // Backend bazen keywords'leri moderation içinde gönderiyor
-          if (moderation.politics_keywords && Array.isArray(moderation.politics_keywords) && moderation.politics_keywords.length > 0) {
+          if (
+            moderation.politics_keywords &&
+            Array.isArray(moderation.politics_keywords) &&
+            moderation.politics_keywords.length > 0
+          ) {
             // Moderation'dan gelen keywords'leri politics'e ekle
             politicsData = {
               ...politicsData,
               keywords: moderation.politics_keywords,
-              count: moderation.politics_keywords.length
+              count: moderation.politics_keywords.length,
             };
           }
 
           // Forbidden words için de kontrol et (eğer moderation'da varsa)
-          if (moderation.forbidden_keywords && Array.isArray(moderation.forbidden_keywords) && moderation.forbidden_keywords.length > 0) {
+          if (
+            moderation.forbidden_keywords &&
+            Array.isArray(moderation.forbidden_keywords) &&
+            moderation.forbidden_keywords.length > 0
+          ) {
             forbiddenData = {
               ...forbiddenData,
               words: moderation.forbidden_keywords,
-              count: moderation.forbidden_keywords.length
+              count: moderation.forbidden_keywords.length,
             };
           }
 
           // Spam keywords için de kontrol et
-          if (moderation.spam_keywords && Array.isArray(moderation.spam_keywords) && moderation.spam_keywords.length > 0) {
+          if (
+            moderation.spam_keywords &&
+            Array.isArray(moderation.spam_keywords) &&
+            moderation.spam_keywords.length > 0
+          ) {
             spamData = {
               ...spamData,
               keywords: moderation.spam_keywords,
-              count: moderation.spam_keywords.length
+              count: moderation.spam_keywords.length,
             };
           }
 
@@ -1762,7 +1953,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
             forbiddenWords: forbiddenData?.words,
             spamKeywords: spamData?.keywords,
             politicsKeywords: politicsData?.keywords,
-            moderationPoliticsKeywords: moderation.politics_keywords
+            moderationPoliticsKeywords: moderation.politics_keywords,
           });
 
           const forbiddenCount = forbiddenData?.count || 0;
@@ -1795,37 +1986,61 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
           // ÖZEL DURUM: Status'ta "admin_kontrolu" geçiyorsa (politics, forbidden, spam ile birlikte)
           // ama ilgili kategori için count 0 ve keywords boşsa, yine de sorunlu olarak işaretle
           if (moderationStatus.includes('admin_kontrolu')) {
-            if (moderationStatus.includes('politics') && politicsData.count === 0 && politicsData.keywords.length === 0) {
+            if (
+              moderationStatus.includes('politics') &&
+              politicsData.count === 0 &&
+              politicsData.keywords.length === 0
+            ) {
               politicsData.count = 1;
             }
-            if (moderationStatus.includes('forbidden') && forbiddenData.count === 0 && forbiddenData.words.length === 0) {
+            if (
+              moderationStatus.includes('forbidden') &&
+              forbiddenData.count === 0 &&
+              forbiddenData.words.length === 0
+            ) {
               forbiddenData.count = 1;
             }
-            if (moderationStatus.includes('spam') && spamData.count === 0 && spamData.keywords.length === 0) {
+            if (
+              moderationStatus.includes('spam') &&
+              spamData.count === 0 &&
+              spamData.keywords.length === 0
+            ) {
               spamData.count = 1;
             }
           }
 
           // Status kontrolü: "kabul" veya hiç sorun yoksa temiz
           // "yeniden_admin_kontrolu_politics", "red" gibi değerler sorunlu
-          const isClean = (moderationStatus === 'kabul' || moderationStatus === 'accept' || moderationStatus === 'approved') ||
-            (forbiddenCount === 0 && spamCount === 0 && politicsCount === 0 && !moderationStatus.includes('admin_kontrolu') && !moderationStatus.includes('red'));
+          const isClean =
+            moderationStatus === 'kabul' ||
+            moderationStatus === 'accept' ||
+            moderationStatus === 'approved' ||
+            (forbiddenCount === 0 &&
+              spamCount === 0 &&
+              politicsCount === 0 &&
+              !moderationStatus.includes('admin_kontrolu') &&
+              !moderationStatus.includes('red'));
 
           const status = moderationStatus || (isClean ? 'kabul' : 'red');
 
           // Reason array'ini string'e çevir
           const reasonArray = moderation.reason || [];
-          const reason = Array.isArray(reasonArray) ? reasonArray.join(', ') : (reasonArray || '');
+          const reason = Array.isArray(reasonArray) ? reasonArray.join(', ') : reasonArray || '';
 
           let message = '';
           if (isClean) {
-            message = reason || 'İçerik temizdir. Spam, yasak kelime veya siyasi içerik tespit edilmedi.';
+            message =
+              reason || 'İçerik temizdir. Spam, yasak kelime veya siyasi içerik tespit edilmedi.';
           } else {
             const issues: string[] = [];
             if (forbiddenCount > 0) {
               const forbiddenWords = forbiddenData?.words || [];
               if (forbiddenWords.length > 0) {
-                issues.push(`${forbiddenCount} yasak kelime: ${forbiddenWords.slice(0, 5).join(', ')}${forbiddenWords.length > 5 ? '...' : ''}`);
+                issues.push(
+                  `${forbiddenCount} yasak kelime: ${forbiddenWords.slice(0, 5).join(', ')}${
+                    forbiddenWords.length > 5 ? '...' : ''
+                  }`
+                );
               } else {
                 issues.push(`${forbiddenCount} yasak kelime`);
               }
@@ -1833,7 +2048,11 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
             if (spamCount > 0) {
               const spamKeywords = spamData?.keywords || [];
               if (spamKeywords.length > 0) {
-                issues.push(`${spamCount} spam kelimesi: ${spamKeywords.slice(0, 5).join(', ')}${spamKeywords.length > 5 ? '...' : ''}`);
+                issues.push(
+                  `${spamCount} spam kelimesi: ${spamKeywords.slice(0, 5).join(', ')}${
+                    spamKeywords.length > 5 ? '...' : ''
+                  }`
+                );
               } else {
                 issues.push(`${spamCount} spam kelimesi`);
               }
@@ -1841,15 +2060,22 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
             if (politicsCount > 0) {
               const politicsKeywords = politicsData?.keywords || [];
               if (politicsKeywords.length > 0) {
-                issues.push(`${politicsCount} siyasi içerik: ${politicsKeywords.slice(0, 5).join(', ')}${politicsKeywords.length > 5 ? '...' : ''}`);
+                issues.push(
+                  `${politicsCount} siyasi içerik: ${politicsKeywords.slice(0, 5).join(', ')}${
+                    politicsKeywords.length > 5 ? '...' : ''
+                  }`
+                );
               } else {
                 // Keywords boş ama status'ta "politics" geçiyorsa, backend algılamış ama keywords döndürmemiş
-                issues.push(`${politicsCount} siyasi içerik tespit edildi (detaylar backend'de mevcut değil)`);
+                issues.push(
+                  `${politicsCount} siyasi içerik tespit edildi (detaylar backend'de mevcut değil)`
+                );
               }
             }
-            message = issues.length > 0
-              ? `İçerikte sorun tespit edildi: ${issues.join('; ')}.`
-              : 'İçerik kontrol edilmeli.';
+            message =
+              issues.length > 0
+                ? `İçerikte sorun tespit edildi: ${issues.join('; ')}.`
+                : 'İçerik kontrol edilmeli.';
           }
 
           // Spam sonuçlarını kaydet (tüm detayları sakla)
@@ -1959,18 +2185,24 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       reason: result.reason,
       reasons: reasons.length > 0 ? reasons : undefined,
       details: details.length > 0 ? details : undefined,
-      forbidden: result.forbidden ? {
-        count: result.forbidden.count || 0,
-        words: Array.isArray(result.forbidden.words) ? result.forbidden.words : []
-      } : undefined,
-      spam: result.spam ? {
-        count: result.spam.count || 0,
-        keywords: Array.isArray(result.spam.keywords) ? result.spam.keywords : []
-      } : undefined,
-      politics: result.politics ? {
-        count: result.politics.count || 0,
-        keywords: Array.isArray(result.politics.keywords) ? result.politics.keywords : []
-      } : undefined,
+      forbidden: result.forbidden
+        ? {
+            count: result.forbidden.count || 0,
+            words: Array.isArray(result.forbidden.words) ? result.forbidden.words : [],
+          }
+        : undefined,
+      spam: result.spam
+        ? {
+            count: result.spam.count || 0,
+            keywords: Array.isArray(result.spam.keywords) ? result.spam.keywords : [],
+          }
+        : undefined,
+      politics: result.politics
+        ? {
+            count: result.politics.count || 0,
+            keywords: Array.isArray(result.politics.keywords) ? result.politics.keywords : [],
+          }
+        : undefined,
       moderation: result.moderation, // Moderation scores ve diğer detaylar
     };
 
@@ -2218,7 +2450,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
               this.showToast('Etkinlik eklendi ancak görsel yüklenemedi', 'error');
               this.pendingNewEventImage = null;
               this.closeModal();
-            }
+            },
           });
         } else {
           // Fotoğraf yok, sadece etkinlik oluşturuldu
@@ -2230,7 +2462,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       error: (error) => {
         Logger.error('Etkinlik oluşturulamadı:', error);
         this.showToast('Etkinlik oluşturulamadı', 'error');
-      }
+      },
     });
   }
 
@@ -2273,7 +2505,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       'new-event',
       'event-detail',
       'new-announcement',
-      'edit-announcement'
+      'edit-announcement',
     ];
     return preventCloseTypes.includes(this.modalType);
   }
@@ -2307,8 +2539,11 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
 
   closeModal() {
     this.isModalOpen = false;
+    this.modalType = '';
     this.editingAnnouncement = null;
     this.selectedAnnouncement = null;
+    this.communityToApprove = null;
+    this.communityToReject = null;
   }
 
   // Duyuru detay ve güncelleme
@@ -2331,7 +2566,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         error: (err) => {
           // Detay çekilemezse mevcut veriyi kullan (zaten set edildi)
           Logger.warn('Duyuru detayı alınamadı, mevcut veri kullanılıyor:', err);
-        }
+        },
       });
     }
   }
@@ -2358,23 +2593,25 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         next: (announcementId) => {
           // Duyuru oluşturuldu, şimdi bekleyen görsel varsa yükle
           if (this.pendingNewAnnouncementImage) {
-            this.announcementService.uploadImage(announcementId, this.pendingNewAnnouncementImage).subscribe({
-              next: (imagePath) => {
-                // Görsel yüklendi, duyuruları yeniden yükle
-                this.loadAnnouncementsFromService();
-                this.showToast('Duyuru ve görsel başarıyla yayınlandı', 'success');
-                this.resetNewAnnouncementForm();
-                this.closeModal();
-              },
-              error: (err) => {
-                // Görsel yüklenemedi ama duyuru oluşturuldu
-                Logger.error('Görsel yüklenemedi:', err);
-                this.loadAnnouncementsFromService();
-                this.showToast('Duyuru oluşturuldu ancak görsel yüklenemedi', 'error');
-                this.resetNewAnnouncementForm();
-                this.closeModal();
-              }
-            });
+            this.announcementService
+              .uploadImage(announcementId, this.pendingNewAnnouncementImage)
+              .subscribe({
+                next: (imagePath) => {
+                  // Görsel yüklendi, duyuruları yeniden yükle
+                  this.loadAnnouncementsFromService();
+                  this.showToast('Duyuru ve görsel başarıyla yayınlandı', 'success');
+                  this.resetNewAnnouncementForm();
+                  this.closeModal();
+                },
+                error: (err) => {
+                  // Görsel yüklenemedi ama duyuru oluşturuldu
+                  Logger.error('Görsel yüklenemedi:', err);
+                  this.loadAnnouncementsFromService();
+                  this.showToast('Duyuru oluşturuldu ancak görsel yüklenemedi', 'error');
+                  this.resetNewAnnouncementForm();
+                  this.closeModal();
+                },
+              });
           } else {
             // Görsel yok, sadece duyuru oluşturuldu
             this.loadAnnouncementsFromService();
@@ -2511,23 +2748,25 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         next: () => {
           // Duyuru güncellendi, bekleyen görsel varsa yükle
           if (this.pendingEditAnnouncementImage) {
-            this.announcementService.uploadImage(announcementId, this.pendingEditAnnouncementImage).subscribe({
-              next: (imagePath: any) => {
-                // Görsel yüklendi
-                this.loadAnnouncementsFromService();
-                this.showToast('Duyuru ve görsel başarıyla güncellendi', 'success');
-                this.pendingEditAnnouncementImage = null;
-                this.closeModal();
-              },
-              error: (err: any) => {
-                // Görsel yüklenemedi ama duyuru güncellendi
-                Logger.error('Görsel yüklenemedi:', err);
-                this.loadAnnouncementsFromService();
-                this.showToast('Duyuru güncellendi ancak görsel yüklenemedi', 'error');
-                this.pendingEditAnnouncementImage = null;
-                this.closeModal();
-              }
-            });
+            this.announcementService
+              .uploadImage(announcementId, this.pendingEditAnnouncementImage)
+              .subscribe({
+                next: (imagePath: any) => {
+                  // Görsel yüklendi
+                  this.loadAnnouncementsFromService();
+                  this.showToast('Duyuru ve görsel başarıyla güncellendi', 'success');
+                  this.pendingEditAnnouncementImage = null;
+                  this.closeModal();
+                },
+                error: (err: any) => {
+                  // Görsel yüklenemedi ama duyuru güncellendi
+                  Logger.error('Görsel yüklenemedi:', err);
+                  this.loadAnnouncementsFromService();
+                  this.showToast('Duyuru güncellendi ancak görsel yüklenemedi', 'error');
+                  this.pendingEditAnnouncementImage = null;
+                  this.closeModal();
+                },
+              });
           } else {
             // Görsel yok, sadece duyuru güncellendi
             this.loadAnnouncementsFromService();

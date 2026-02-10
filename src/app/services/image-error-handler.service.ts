@@ -61,6 +61,14 @@ export class ImageErrorHandlerService {
       return;
     }
 
+    // Sunucu görseli (örn. /ImagesUnides/Banner/, /ImagesUnides/Logo/) 404 döndüyse hemen data URI placeholder kullan
+    // (Dosya sunucuda yoksa tekrar denemeye gerek yok)
+    if (currentSrc.includes('/ImagesUnides/')) {
+      img.onerror = null;
+      img.src = this.getPlaceholder(placeholderType, true);
+      return;
+    }
+
     // Placeholder path'i kontrol et - eğer daha önce başarısız olduysa direkt data URI kullan
     if (this.placeholderExists.has(placeholderPath)) {
       const exists = this.placeholderExists.get(placeholderPath);

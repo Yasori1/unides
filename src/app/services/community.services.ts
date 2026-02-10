@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map, catchError, of, switchMap, forkJoin } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Logger } from '../utils/logger.util';
@@ -25,7 +25,7 @@ export class CommunityService {
   private readonly placeholderLogo = 'assets/img/placeholder-logo.svg';
   private readonly placeholderCover = 'assets/img/placeholder-cover.svg';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   // Image path'i tam URL'ye çevir ve `/ImagesUnides/` formatına dönüştür
   private convertImagePathToFullUrl(imagePath: string): string {
@@ -41,7 +41,8 @@ export class CommunityService {
         const pathname = new URL(pathStr).pathname;
         if (pathname.startsWith('/ImagesUnides/')) return pathname;
         if (pathname.startsWith('/images/')) return pathname.replace('/images/', '/ImagesUnides/');
-        if (pathname.startsWith('/assets/img/')) return pathname.replace('/assets/img/', '/ImagesUnides/');
+        if (pathname.startsWith('/assets/img/'))
+          return pathname.replace('/assets/img/', '/ImagesUnides/');
         return pathname || pathStr;
       } catch {
         return pathStr;
@@ -64,11 +65,19 @@ export class CommunityService {
     // Path dönüşümü: `/assets/img/` -> `/ImagesUnides/`
     if (finalPath.startsWith('/assets/img/')) {
       finalPath = finalPath.replace('/assets/img/', '/ImagesUnides/');
-    }
-    else if (finalPath.startsWith('/images/')) {
+    } else if (finalPath.startsWith('/images/')) {
       finalPath = finalPath.replace('/images/', '/ImagesUnides/');
     }
 
+    // Logo ve banner listelemede tam URL (https://unidesportal.org/ImagesUnides/Banner/... vb.) kullan
+    const base = environment.imageBaseUrl;
+    if (
+      base &&
+      finalPath &&
+      (finalPath.startsWith('/ImagesUnides/') || finalPath.startsWith('/images/'))
+    ) {
+      return base.replace(/\/$/, '') + (finalPath.startsWith('/') ? finalPath : '/' + finalPath);
+    }
     return finalPath;
   }
 
@@ -110,8 +119,8 @@ export class CommunityService {
       dto.isActivity !== undefined
         ? dto.isActivity
         : dto.IsActivity !== undefined
-          ? dto.IsActivity
-          : true;
+        ? dto.IsActivity
+        : true;
 
     // ID'yi string olarak sakla (Guid olabilir)
     const communityId = dto.communityId || dto.CommunityId;
@@ -196,8 +205,21 @@ export class CommunityService {
       dto.isActivity !== undefined
         ? dto.isActivity
         : dto.IsActivity !== undefined
-          ? dto.IsActivity
-          : true;
+        ? dto.IsActivity
+        : true;
+
+    // comConfirm: 0=beklemede, 1=onaylandı, 2=reddedildi
+    const comConfirm = dto.comConfirm ?? dto.ComConfirm;
+    let status: 'Aktif' | 'Pasif' | 'Onay Bekleyen' | 'Reddedilen';
+    if (comConfirm === 0 || (comConfirm === undefined && !isActivity)) {
+      status = 'Onay Bekleyen';
+    } else if (comConfirm === 2) {
+      status = 'Reddedilen';
+    } else if (isActivity) {
+      status = 'Aktif';
+    } else {
+      status = 'Pasif';
+    }
 
     return {
       id: dto.communityId || dto.CommunityId,
@@ -220,9 +242,10 @@ export class CommunityService {
         (dto.bannerUrl || dto.BannerUrl) && String(dto.bannerUrl || dto.BannerUrl).trim()
           ? this.convertImagePathToFullUrl(dto.bannerUrl || dto.BannerUrl)
           : this.placeholderCover,
-      status: isActivity ? 'Aktif' : 'Pasif',
+      status: status,
       miniAbout: dto.miniAbout || dto.MiniAbout,
       isActivity: isActivity,
+      comConfirm: comConfirm,
       // Email alanları - backend'den gelebilir veya detay endpoint'inden çekilecek
       email: dto.comMail || dto.ComMail || '',
       comMail: dto.comMail || dto.ComMail || '',
@@ -273,8 +296,8 @@ export class CommunityService {
         dto.isActivity !== undefined
           ? dto.isActivity
           : dto.IsActivity !== undefined
-            ? dto.IsActivity
-            : true,
+          ? dto.IsActivity
+          : true,
       events: dto.events || dto.Events || [],
     };
   }
@@ -287,7 +310,7 @@ export class CommunityService {
     university?: string;
     category?: string;
     name?: string;
-    status?: 'active' | 'aktif' | 'passive' | 'pasif' | 'all' | 'tumu' | 'tümü';
+    status?: 'active' | 'aktif' | 'passive' | 'pasif' | 'pending' | 'all' | 'tumu' | 'tümü';
   }): Observable<Community[]> {
     let httpParams = new HttpParams();
     if (params?.city) httpParams = httpParams.set('city', params.city);
@@ -307,6 +330,16 @@ export class CommunityService {
         return of([]);
       })
     );
+  }
+
+  // Topluluk Onay/Red (GSB: PUT /api/Communities/{id}/review)
+  // confirm: 1 = onay, 2 = red
+  // confirmAbout: red gerekçesi (opsiyonel)
+  reviewCommunity(id: string, confirm: 1 | 2, confirmAbout?: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}/review`, {
+      confirm,
+      confirmAbout: confirmAbout || '',
+    });
   }
 
   // En Popüler Toplulukları Getir
@@ -364,32 +397,41 @@ export class CommunityService {
           // Eğer 404 dönerse (pasif topluluk), liste endpoint'inden çek (fallback)
           // Ama CommunityMiniDto email bilgilerini içermiyor - backend'de sadece: CommunityId, ComName, ComCategory, City, University, BannerUrl, LogoUrl, MiniAbout, IsActivity
           if (error.status === 404) {
-            Logger.warn('Pasif topluluk için Detail endpoint 404 döndü, liste endpoint\'inden çekiliyor (email bilgileri eksik olacak):', id);
-            // Liste endpoint'inden çek (fallback)
-            return this.http.get<CommunityMiniDto[]>(this.apiUrl, { 
-              params: new HttpParams().set('status', 'passive') 
-            }).pipe(
-              map((list) => {
-                // ID'ye göre topluluğu bul
-                const communityDto = list.find((c) => {
-                  const communityId = c.communityId;
-                  const idString = typeof communityId === 'string' ? communityId : String(communityId);
-                  return idString === id;
-                });
-
-                if (!communityDto) {
-                  throw new Error('Pasif topluluk bulunamadı.');
-                }
-
-                // MiniDto'yu Community'ye map et (email bilgileri eksik - backend'de MiniDto'da yok)
-                Logger.warn('Pasif topluluk için liste endpoint\'inden çekildi, email bilgileri (comMail, comLeadMail) eksik:', id);
-                return this.mapMiniDtoToCommunity(communityDto);
-              }),
-              catchError((fallbackError) => {
-                console.error('Pasif topluluk liste endpoint\'inden çekilemedi:', fallbackError);
-                throw fallbackError;
-              })
+            Logger.warn(
+              "Pasif topluluk için Detail endpoint 404 döndü, liste endpoint'inden çekiliyor (email bilgileri eksik olacak):",
+              id
             );
+            // Liste endpoint'inden çek (fallback)
+            return this.http
+              .get<CommunityMiniDto[]>(this.apiUrl, {
+                params: new HttpParams().set('status', 'passive'),
+              })
+              .pipe(
+                map((list) => {
+                  // ID'ye göre topluluğu bul
+                  const communityDto = list.find((c) => {
+                    const communityId = c.communityId;
+                    const idString =
+                      typeof communityId === 'string' ? communityId : String(communityId);
+                    return idString === id;
+                  });
+
+                  if (!communityDto) {
+                    throw new Error('Pasif topluluk bulunamadı.');
+                  }
+
+                  // MiniDto'yu Community'ye map et (email bilgileri eksik - backend'de MiniDto'da yok)
+                  Logger.warn(
+                    "Pasif topluluk için liste endpoint'inden çekildi, email bilgileri (comMail, comLeadMail) eksik:",
+                    id
+                  );
+                  return this.mapMiniDtoToCommunity(communityDto);
+                }),
+                catchError((fallbackError) => {
+                  console.error("Pasif topluluk liste endpoint'inden çekilemedi:", fallbackError);
+                  throw fallbackError;
+                })
+              );
           }
           throw error;
         })
@@ -421,18 +463,16 @@ export class CommunityService {
   // Backend Community entity döndürüyor (communityId: Guid)
   // Auth interceptor automatically adds Authorization header and Content-Type if token exists
   createCommunity(dto: CreateCommunityDto): Observable<Community> {
-    return this.http
-      .post<{ communityId: string; comName: string }>(this.apiUrl, dto)
-      .pipe(
-        switchMap((response) => {
-          // Backend Community entity döndürüyor, detayı çek
-          return this.getCommunityById(response.communityId);
-        }),
-        catchError((error) => {
-          // Hata zaten throw ediliyor
-          throw error;
-        })
-      );
+    return this.http.post<{ communityId: string; comName: string }>(this.apiUrl, dto).pipe(
+      switchMap((response) => {
+        // Backend Community entity döndürüyor, detayı çek
+        return this.getCommunityById(response.communityId);
+      }),
+      catchError((error) => {
+        // Hata zaten throw ediliyor
+        throw error;
+      })
+    );
   }
 
   // Topluluk Güncelle (Backend: PUT /api/Communities/{id:guid})
@@ -464,9 +504,18 @@ export class CommunityService {
                 email: dto.comMail !== undefined ? dto.comMail : existing.email,
                 comMail: dto.comMail !== undefined ? dto.comMail : existing.comMail,
                 comLeadMail: dto.comLeadMail !== undefined ? dto.comLeadMail : existing.comLeadMail,
-                logo: dto.logoUrl !== undefined ? dto.logoUrl : existing.logo,
-                banner: dto.bannerUrl !== undefined ? dto.bannerUrl : existing.banner,
-                coverImage: dto.bannerUrl !== undefined ? dto.bannerUrl : existing.coverImage,
+                logo:
+                  dto.logoUrl !== undefined
+                    ? this.convertImagePathToFullUrl(dto.logoUrl) || existing.logo
+                    : existing.logo,
+                banner:
+                  dto.bannerUrl !== undefined
+                    ? this.convertImagePathToFullUrl(dto.bannerUrl) || existing.banner
+                    : existing.banner,
+                coverImage:
+                  dto.bannerUrl !== undefined
+                    ? this.convertImagePathToFullUrl(dto.bannerUrl) || existing.coverImage
+                    : existing.coverImage,
                 miniAbout: dto.miniAbout !== undefined ? dto.miniAbout : existing.miniAbout,
                 webSiteUrl: dto.webSiteUrl !== undefined ? dto.webSiteUrl : existing.webSiteUrl,
                 instagramUrl:
@@ -491,9 +540,15 @@ export class CommunityService {
               about: dto.comAbout || '',
               city: dto.city || '',
               email: dto.comMail,
-              logo: dto.logoUrl || this.placeholderLogo,
-              banner: dto.bannerUrl || this.placeholderCover,
-              coverImage: dto.bannerUrl || this.placeholderCover,
+              logo:
+                (dto.logoUrl && this.convertImagePathToFullUrl(dto.logoUrl)) ||
+                this.placeholderLogo,
+              banner:
+                (dto.bannerUrl && this.convertImagePathToFullUrl(dto.bannerUrl)) ||
+                this.placeholderCover,
+              coverImage:
+                (dto.bannerUrl && this.convertImagePathToFullUrl(dto.bannerUrl)) ||
+                this.placeholderCover,
               memberCount: 0,
               status: dto.isActivity === false ? 'Pasif' : 'Aktif',
               isActivity: dto.isActivity !== undefined ? dto.isActivity : true,
@@ -538,7 +593,6 @@ export class CommunityService {
   // Token'daki topluluk lideri için üye ekleme (id gerekmez, token'dan alınır)
   // Auth interceptor automatically adds Authorization header and Content-Type if token exists
   addMember(id: string, dto: AddCommunityMemberDto): Observable<void> {
-
     // Backend PascalCase bekliyor (Email), frontend camelCase gönderiyor (email)
     // Email'i temizle: parantez içindeki email'i çıkar veya sadece email kısmını al
     let cleanEmail = dto.email.trim();
@@ -590,19 +644,17 @@ export class CommunityService {
       Email: cleanEmail,
     };
 
-    return this.http
-      .post<{ message?: string }>(`${this.apiUrl}/me/members`, backendDto)
-      .pipe(
-        map(() => {
-          // Membership is stored in backend CommunitiesUsers table
-          // No need for localStorage tracking
-          return undefined;
-        }),
-        catchError((error) => {
-          // Hata zaten throw ediliyor
-          throw error;
-        })
-      );
+    return this.http.post<{ message?: string }>(`${this.apiUrl}/me/members`, backendDto).pipe(
+      map(() => {
+        // Membership is stored in backend CommunitiesUsers table
+        // No need for localStorage tracking
+        return undefined;
+      }),
+      catchError((error) => {
+        // Hata zaten throw ediliyor
+        throw error;
+      })
+    );
   }
 
   // Topluluk Üyelerini Getir (Backend: GET /api/Communities/me/members)
@@ -648,7 +700,13 @@ export class CommunityService {
   // Backend'de sadece kontrol yapan bir endpoint olmadığı için, mevcut üyeleri kontrol ediyoruz
   // Email yazılırken sadece kontrol yapılır, ekleme yapılmaz
   // Ekleme işlemi sadece "Kaydet" butonuna basıldığında yapılır
-  checkUserExistsByEmail(email: string): Observable<{ exists: boolean; name?: string; message?: string; roleId?: number; isCorporate?: boolean }> {
+  checkUserExistsByEmail(email: string): Observable<{
+    exists: boolean;
+    name?: string;
+    message?: string;
+    roleId?: number;
+    isCorporate?: boolean;
+  }> {
     if (!email || !email.trim()) {
       return of({ exists: false, message: 'Email adresi boş olamaz' });
     }
@@ -666,7 +724,7 @@ export class CommunityService {
         exists: false,
         message: 'Sadece .edu.tr uzantılı e-posta adresleri eklenebilir.',
         roleId: undefined,
-        isCorporate: false
+        isCorporate: false,
       });
     }
 
@@ -675,9 +733,7 @@ export class CommunityService {
     return this.getCommunityMembers('').pipe(
       map((members) => {
         // Email'in listede olup olmadığını kontrol et
-        const memberExists = members.some((m: any) =>
-          m.email?.toLowerCase() === cleanEmail
-        );
+        const memberExists = members.some((m: any) => m.email?.toLowerCase() === cleanEmail);
 
         if (memberExists) {
           // Kullanıcı zaten üye
@@ -685,7 +741,7 @@ export class CommunityService {
             exists: true,
             message: 'Kullanıcı zaten üye',
             roleId: 1,
-            isCorporate: false
+            isCorporate: false,
           };
         } else {
           // Kullanıcı üye değil - eklenebilir
@@ -696,7 +752,7 @@ export class CommunityService {
             exists: true,
             message: 'Kullanıcı eklenebilir',
             roleId: 1,
-            isCorporate: false
+            isCorporate: false,
           };
         }
       }),
@@ -708,7 +764,7 @@ export class CommunityService {
           exists: true,
           message: 'Kullanıcı kontrol edilemedi',
           roleId: 1,
-          isCorporate: false
+          isCorporate: false,
         });
       })
     );
@@ -725,7 +781,6 @@ export class CommunityService {
     notFound: string[];
     rejectedRole: string[];
   }> {
-
     // Backend virgülle ayrılmış string bekliyor
     const emailsString = emails.join(',');
 
@@ -760,7 +815,6 @@ export class CommunityService {
   // Token'daki topluluk lideri için üye çıkarma (id parametresi yok, token'dan alınır)
   // Auth interceptor automatically adds Authorization header and Content-Type if token exists
   removeMember(id: string, dto: RemoveCommunityMemberDto): Observable<void> {
-
     // Backend PascalCase bekliyor (Email), frontend camelCase gönderiyor (email)
     // DTO'yu backend'in beklediği formata çevir
     const backendDto = {
@@ -836,12 +890,21 @@ export class CommunityService {
           university: dto.university || dto.University || '',
           category: dto.comCategory || dto.ComCategory || 'Genel',
           description: dto.comAbout || dto.ComAbout || dto.miniAbout || dto.MiniAbout,
-          logo: (dto.logoUrl || dto.LogoUrl) ? this.convertImagePathToFullUrl(dto.logoUrl || dto.LogoUrl) : this.placeholderLogo,
+          logo:
+            dto.logoUrl || dto.LogoUrl
+              ? this.convertImagePathToFullUrl(dto.logoUrl || dto.LogoUrl)
+              : this.placeholderLogo,
           memberCount: 0,
           city: dto.city || dto.City || '',
           about: dto.comAbout || dto.ComAbout,
-          banner: (dto.bannerUrl || dto.BannerUrl) ? this.convertImagePathToFullUrl(dto.bannerUrl || dto.BannerUrl) : this.placeholderCover,
-          coverImage: (dto.bannerUrl || dto.BannerUrl) ? this.convertImagePathToFullUrl(dto.bannerUrl || dto.BannerUrl) : this.placeholderCover,
+          banner:
+            dto.bannerUrl || dto.BannerUrl
+              ? this.convertImagePathToFullUrl(dto.bannerUrl || dto.BannerUrl)
+              : this.placeholderCover,
+          coverImage:
+            dto.bannerUrl || dto.BannerUrl
+              ? this.convertImagePathToFullUrl(dto.bannerUrl || dto.BannerUrl)
+              : this.placeholderCover,
           status: 'Aktif',
           isActivity: true,
           events: dto.events || dto.Events || [], // Topluluk etkinlikleri
@@ -888,7 +951,14 @@ export class CommunityService {
             (c) => c.comLeadMail?.toLowerCase() === userEmail.toLowerCase()
           );
 
-          console.log('getMyCommunities: Tüm topluluklar:', allCommunities.length, 'Başkan olduğu topluluklar:', myCommunities.length, 'Kullanıcı email:', userEmail);
+          console.log(
+            'getMyCommunities: Tüm topluluklar:',
+            allCommunities.length,
+            'Başkan olduğu topluluklar:',
+            myCommunities.length,
+            'Kullanıcı email:',
+            userEmail
+          );
 
           return myCommunities;
         })
@@ -940,7 +1010,7 @@ export class CommunityService {
       const toValueOrUndefined = (val: string | undefined | null): string | undefined => {
         return val && val.trim() !== '' ? val.trim() : undefined;
       };
-      
+
       // miniAbout için özel fonksiyon - boş string de gönderilmeli (backend'de güncelleme yapılabilmesi için)
       const toMiniAboutValue = (val: string | undefined | null): string | undefined => {
         if (val === undefined || val === null) return undefined;
@@ -1027,39 +1097,57 @@ export class CommunityService {
     // Backend'in beklediği parametre adı (CommunityImageUploadRequest.File)
     formData.append('File', file, file.name);
 
-    return this.http.post<{ BannerUrl?: string; bannerUrl?: string }>(`${this.apiUrl}/${communityId}/banner`, formData).pipe(
-      map((response: any) => {
-        const path = response.BannerUrl || response.bannerUrl || '';
-        // Backend'den `/assets/img/Banner/...` formatında gelir, `/ImagesUnides/Banner/...` formatına çevir
-        if (path && !path.startsWith('http://') && !path.startsWith('https://') && !path.startsWith('data:')) {
-          let finalPath = path;
-          if (!finalPath.startsWith('/')) {
-            finalPath = '/' + finalPath;
+    return this.http
+      .post<{ BannerUrl?: string; bannerUrl?: string }>(
+        `${this.apiUrl}/${communityId}/banner`,
+        formData
+      )
+      .pipe(
+        map((response: any) => {
+          const path = response.BannerUrl || response.bannerUrl || '';
+          // Backend'den `/assets/img/Banner/...` formatında gelir, `/ImagesUnides/Banner/...` formatına çevir
+          if (
+            path &&
+            !path.startsWith('http://') &&
+            !path.startsWith('https://') &&
+            !path.startsWith('data:')
+          ) {
+            let finalPath = path;
+            if (!finalPath.startsWith('/')) {
+              finalPath = '/' + finalPath;
+            }
+            // Path dönüşümü: `/assets/img/` -> `/ImagesUnides/`
+            if (finalPath.startsWith('/assets/img/')) {
+              finalPath = finalPath.replace('/assets/img/', '/ImagesUnides/');
+            } else if (finalPath.startsWith('/images/')) {
+              finalPath = finalPath.replace('/images/', '/ImagesUnides/');
+            }
+            return { BannerUrl: finalPath };
           }
-          // Path dönüşümü: `/assets/img/` -> `/ImagesUnides/`
-          if (finalPath.startsWith('/assets/img/')) {
-            finalPath = finalPath.replace('/assets/img/', '/ImagesUnides/');
-          } else if (finalPath.startsWith('/images/')) {
-            finalPath = finalPath.replace('/images/', '/ImagesUnides/');
+          if (path.startsWith('http')) {
+            try {
+              const pathname = new URL(path).pathname;
+              const norm = pathname.startsWith('/images/')
+                ? pathname.replace('/images/', '/ImagesUnides/')
+                : pathname.startsWith('/assets/img/')
+                ? pathname.replace('/assets/img/', '/ImagesUnides/')
+                : pathname;
+              return {
+                BannerUrl: norm.startsWith('/ImagesUnides/')
+                  ? norm
+                  : '/ImagesUnides/' + norm.replace(/^\//, ''),
+              };
+            } catch {
+              return { BannerUrl: path };
+            }
           }
-          return { BannerUrl: finalPath };
-        }
-        if (path.startsWith('http')) {
-          try {
-            const pathname = new URL(path).pathname;
-            const norm = pathname.startsWith('/images/') ? pathname.replace('/images/', '/ImagesUnides/') : pathname.startsWith('/assets/img/') ? pathname.replace('/assets/img/', '/ImagesUnides/') : pathname;
-            return { BannerUrl: norm.startsWith('/ImagesUnides/') ? norm : '/ImagesUnides/' + norm.replace(/^\//, '') };
-          } catch {
-            return { BannerUrl: path };
-          }
-        }
-        return { BannerUrl: path };
-      }),
-      catchError((error) => {
-        console.error('Banner yüklenemedi:', error);
-        throw error;
-      })
-    );
+          return { BannerUrl: path };
+        }),
+        catchError((error) => {
+          console.error('Banner yüklenemedi:', error);
+          throw error;
+        })
+      );
   }
 
   // Topluluk logo yükle (Backend: POST /api/Communities/{id}/logo)
@@ -1070,39 +1158,54 @@ export class CommunityService {
     // Backend'in beklediği parametre adı (CommunityImageUploadRequest.File)
     formData.append('File', file, file.name);
 
-    return this.http.post<{ LogoUrl?: string; logoUrl?: string }>(`${this.apiUrl}/${communityId}/logo`, formData).pipe(
-      map((response: any) => {
-        const path = response.LogoUrl || response.logoUrl || '';
-        // Backend'den `/assets/img/Logo/...` formatında gelir, `/ImagesUnides/Logo/...` formatına çevir
-        if (path && !path.startsWith('http://') && !path.startsWith('https://') && !path.startsWith('data:')) {
-          let finalPath = path;
-          if (!finalPath.startsWith('/')) {
-            finalPath = '/' + finalPath;
+    return this.http
+      .post<{ LogoUrl?: string; logoUrl?: string }>(`${this.apiUrl}/${communityId}/logo`, formData)
+      .pipe(
+        map((response: any) => {
+          const path = response.LogoUrl || response.logoUrl || '';
+          // Backend'den `/assets/img/Logo/...` formatında gelir, `/ImagesUnides/Logo/...` formatına çevir
+          if (
+            path &&
+            !path.startsWith('http://') &&
+            !path.startsWith('https://') &&
+            !path.startsWith('data:')
+          ) {
+            let finalPath = path;
+            if (!finalPath.startsWith('/')) {
+              finalPath = '/' + finalPath;
+            }
+            // Path dönüşümü: `/assets/img/` -> `/ImagesUnides/`
+            if (finalPath.startsWith('/assets/img/')) {
+              finalPath = finalPath.replace('/assets/img/', '/ImagesUnides/');
+            } else if (finalPath.startsWith('/images/')) {
+              finalPath = finalPath.replace('/images/', '/ImagesUnides/');
+            }
+            return { LogoUrl: finalPath };
           }
-          // Path dönüşümü: `/assets/img/` -> `/ImagesUnides/`
-          if (finalPath.startsWith('/assets/img/')) {
-            finalPath = finalPath.replace('/assets/img/', '/ImagesUnides/');
-          } else if (finalPath.startsWith('/images/')) {
-            finalPath = finalPath.replace('/images/', '/ImagesUnides/');
+          if (path.startsWith('http')) {
+            try {
+              const pathname = new URL(path).pathname;
+              const norm = pathname.startsWith('/images/')
+                ? pathname.replace('/images/', '/ImagesUnides/')
+                : pathname.startsWith('/assets/img/')
+                ? pathname.replace('/assets/img/', '/ImagesUnides/')
+                : pathname;
+              return {
+                LogoUrl: norm.startsWith('/ImagesUnides/')
+                  ? norm
+                  : '/ImagesUnides/' + norm.replace(/^\//, ''),
+              };
+            } catch {
+              return { LogoUrl: path };
+            }
           }
-          return { LogoUrl: finalPath };
-        }
-        if (path.startsWith('http')) {
-          try {
-            const pathname = new URL(path).pathname;
-            const norm = pathname.startsWith('/images/') ? pathname.replace('/images/', '/ImagesUnides/') : pathname.startsWith('/assets/img/') ? pathname.replace('/assets/img/', '/ImagesUnides/') : pathname;
-            return { LogoUrl: norm.startsWith('/ImagesUnides/') ? norm : '/ImagesUnides/' + norm.replace(/^\//, '') };
-          } catch {
-            return { LogoUrl: path };
-          }
-        }
-        return { LogoUrl: path };
-      }),
-      catchError((error) => {
-        console.error('Logo yüklenemedi:', error);
-        throw error;
-      })
-    );
+          return { LogoUrl: path };
+        }),
+        catchError((error) => {
+          console.error('Logo yüklenemedi:', error);
+          throw error;
+        })
+      );
   }
 
   // Topluluk başkanı için istatistikleri getir (Backend: GET /api/Communities/leader-stats)
@@ -1143,5 +1246,4 @@ export class CommunityService {
         })
       );
   }
-
 }

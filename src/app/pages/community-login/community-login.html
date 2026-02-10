@@ -35,18 +35,65 @@
           </div>
         </div>
 
+        <!-- Onay kontrol ediliyor (ngOnInit'te zaten giriş yapmış kullanıcı için) -->
+        <div class="pending-approval-message" *ngIf="isCheckingApproval && !showPendingApprovalMessage">
+          <div class="checking-spinner">
+            <app-luma-spin></app-luma-spin>
+          </div>
+          <p style="margin-top: 1rem; color: #6b7280;">Topluluk durumu kontrol ediliyor...</p>
+        </div>
+
         <!-- Onay bekleyen: giriş yapıldı ama topluluk henüz onaylanmadı -->
         <div class="pending-approval-message" *ngIf="showPendingApprovalMessage">
-          <i class="bx bx-time-five pending-icon"></i>
-          <h3>Hesabınız onay sürecinde</h3>
-          <p>Topluluğunuz kurumsal onay bekliyor. Onaylandığında bu ekrandan giriş yaparak anasayfaya yönlendirileceksiniz.</p>
+          <div class="pending-status-badge">
+            <i class="bx bx-time-five"></i>
+            <span>Onay Bekliyor</span>
+          </div>
+
+          <h3>Topluluğunuz Onay Sürecindedir</h3>
+
+          <p *ngIf="pendingCommunityName" class="community-name-label">
+            <i class="bx bx-buildings"></i> {{ pendingCommunityName }}
+          </p>
+
+          <p class="pending-description">
+            Topluluğunuz, T.C. Gençlik ve Spor Bakanlığı İl Müdürlüğü tarafından
+            incelenmektedir. Onay sürecinin tamamlanmasının ardından topluluk paneline
+            erişebileceksiniz.
+          </p>
+
+          <div class="pending-info-card">
+            <div class="info-row">
+              <i class="bx bx-info-circle"></i>
+              <span>Onay süreci genellikle <strong>1-3 iş günü</strong> içerisinde tamamlanır.</span>
+            </div>
+            <div class="info-row">
+              <i class="bx bx-envelope"></i>
+              <span>Onay durumu hakkında e-posta ile bilgilendirileceksiniz.</span>
+            </div>
+          </div>
+
           <div class="pending-actions">
-            <a routerLink="/" class="btn-primary">Ana Sayfaya Git</a>
-            <button type="button" class="btn-outline" (click)="logoutAndShowForm()">Çıkış Yap</button>
+            <button
+              type="button"
+              class="btn-primary btn-check-status"
+              (click)="recheckApprovalStatus()"
+              [disabled]="isCheckingApproval"
+            >
+              <ng-container *ngIf="!isCheckingApproval">
+                <i class="bx bx-refresh"></i> Durumu Kontrol Et
+              </ng-container>
+              <ng-container *ngIf="isCheckingApproval">
+                <app-luma-spin></app-luma-spin>
+              </ng-container>
+            </button>
+            <button type="button" class="btn-outline" (click)="logoutAndShowForm()">
+              <i class="bx bx-log-out"></i> Çıkış Yap
+            </button>
           </div>
         </div>
 
-        <ng-container *ngIf="!showPendingApprovalMessage">
+        <ng-container *ngIf="!showPendingApprovalMessage && !isCheckingApproval">
         <div class="header-text">
           <h3>Topluluk Girişi 👥</h3>
           <p>

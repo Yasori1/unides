@@ -30,7 +30,7 @@ export class EmailVerificationConfirmComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private toastService: ToastService,
     private authService: AuthService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.isCommunityFlow = !!(
@@ -88,7 +88,28 @@ export class EmailVerificationConfirmComponent implements OnInit, OnDestroy {
         this.isVerified = true;
         this.isLoading = false;
 
-        // Backend: accessToken + refreshToken döner; token'ları sakla, öğrenci giriş sayfasına yönlendir
+        // Backend AuthResponse alanları: requiresCommunitySetup, setupToken, accessToken, refreshToken
+        const requiresSetup = data.requiresCommunitySetup ?? data.RequiresCommunitySetup;
+        const setupToken = data.setupToken ?? data.SetupToken;
+
+        // --- Topluluk başkanı akışı: hesap henüz oluşmadı, SetupToken ile community oluşturulacak ---
+        if (requiresSetup && setupToken) {
+          sessionStorage.setItem('community_setup_token', setupToken);
+          // E-posta adresini de koru (Adım 3'te comLeadMail için kullanılacak)
+          if (data.email || data.Email) {
+            sessionStorage.setItem('community_register_email', data.email || data.Email);
+          }
+          this.toastService.show(
+            'E-posta doğrulandı. Topluluk bilgilerini gireceğiniz adıma yönlendiriliyorsunuz...',
+            'success'
+          );
+          this.redirectTimeout = setTimeout(() => {
+            this.router.navigateByUrl('/community-register?step=3');
+          }, 2000);
+          return;
+        }
+
+        // --- Normal akış: token'ları sakla ve yönlendir ---
         const accessToken = data.accessToken ?? data.AccessToken ?? data.token ?? data.Token;
         const refreshToken = data.refreshToken ?? data.RefreshToken ?? data.refresh;
 
@@ -102,35 +123,31 @@ export class EmailVerificationConfirmComponent implements OnInit, OnDestroy {
             const role = data.user.role ?? data.user.RoleName ?? data.roleName ?? 'student';
             this.authService.saveUserType(role);
           } else {
-            this.authService.saveUserType('student');
+            // roleName doğrudan response'da olabilir
+            const roleName = data.roleName ?? data.RoleName ?? 'student';
+            const userObj = {
+              id: data.id ?? data.Id,
+              name: data.fullName ?? data.FullName,
+              email: data.email ?? data.Email,
+              role: roleName,
+            };
+            this.authService.saveUser(userObj);
+            this.authService.saveUserType(roleName);
           }
-
-          this.toastService.show(
-            this.isCommunityFlow
-              ? 'E-posta doğrulandı. Topluluk bilgilerini gireceğiniz adıma yönlendiriliyorsunuz...'
-              : 'E-posta adresiniz doğrulandı. Yönlendiriliyorsunuz...',
-            'success'
-          );
-          const returnUrl = sessionStorage.getItem('community_register_return');
-          const target = returnUrl || (this.isCommunityFlow ? '/community-register?step=3' : '/community-login');
-          if (returnUrl) sessionStorage.removeItem('community_register_return');
-          setTimeout(() => {
-            this.router.navigateByUrl(target);
-          }, 2000);
-        } else {
-          this.toastService.show(
-            this.isCommunityFlow
-              ? 'E-posta doğrulandı. Topluluk bilgilerini gireceğiniz adıma yönlendiriliyorsunuz...'
-              : 'E-posta adresiniz doğrulandı. Yönlendiriliyorsunuz...',
-            'success'
-          );
-          const returnUrl = sessionStorage.getItem('community_register_return');
-          const target = returnUrl || (this.isCommunityFlow ? '/community-register?step=3' : '/community-login');
-          if (returnUrl) sessionStorage.removeItem('community_register_return');
-          setTimeout(() => {
-            this.router.navigateByUrl(target);
-          }, 2000);
         }
+
+        this.toastService.show(
+          this.isCommunityFlow
+            ? 'E-posta doğrulandı. Topluluk bilgilerini gireceğiniz adıma yönlendiriliyorsunuz...'
+            : 'E-posta adresiniz doğrulandı. Yönlendiriliyorsunuz...',
+          'success'
+        );
+        const returnUrl = sessionStorage.getItem('community_register_return');
+        const target = returnUrl || (this.isCommunityFlow ? '/community-register?step=3' : '/community-login');
+        if (returnUrl) sessionStorage.removeItem('community_register_return');
+        this.redirectTimeout = setTimeout(() => {
+          this.router.navigateByUrl(target);
+        }, 2000);
       } else {
         this.isLoading = false;
         this.isError = true;

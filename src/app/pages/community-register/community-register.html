@@ -18,15 +18,16 @@
         </div>
         <div class="quote-container">
           <h1>Topluluk<br />Kaydı</h1>
-          <p *ngIf="step === 0">Kayıt süreci hakkında</p>
-          <p *ngIf="step === 1">Adım 1 / 3 — E-posta ve şifre</p>
-          <p *ngIf="step === 2">Adım 2 / 3 — E-posta doğrulama</p>
-          <p *ngIf="step === 3">Adım 3 / 3 — Topluluk bilgileri</p>
+          <p *ngIf="showRegistrationSuccess">Kayıt tamamlandı</p>
+          <p *ngIf="step === 0 && !showRegistrationSuccess">Kayıt süreci hakkında</p>
+          <p *ngIf="step === 1 && !showRegistrationSuccess">Adım 1 / 3 — E-posta ve şifre</p>
+          <p *ngIf="step === 2 && !showRegistrationSuccess">Adım 2 / 3 — E-posta doğrulama</p>
+          <p *ngIf="step === 3 && !showRegistrationSuccess">Adım 3 / 3 — Topluluk bilgileri</p>
         </div>
       </div>
     </div>
 
-    <div class="form-side" [class.form-side-intro]="step === 0" [class.form-side-step1]="step === 1">
+    <div class="form-side" [class.form-side-intro]="step === 0" [class.form-side-step1]="step === 1" [class.form-side-success]="showRegistrationSuccess">
       <div class="form-scroll-zone">
       <div class="form-wrapper">
         <div class="mobile-logo">
@@ -35,7 +36,7 @@
             <span>Ana Sayfaya Dön</span>
           </div>
         </div>
-        <div class="header-text">
+        <div class="header-text" *ngIf="!showRegistrationSuccess">
           <h3>Topluluk Kaydı 👥</h3>
           <p>
             Zaten hesabınız var mı?
@@ -45,8 +46,38 @@
 
         <app-toast></app-toast>
 
+        <!-- Başarı ekranı: Topluluk kaydı başarıyla alındı -->
+        <div *ngIf="showRegistrationSuccess" class="step-block registration-success-block">
+          <div class="success-icon-wrapper">
+            <i class="bx bx-check-circle"></i>
+          </div>
+          <h2 class="success-title">Topluluk Kaydınız Başarıyla Alınmıştır</h2>
+          <p class="success-description">
+            Topluluğunuz, T.C. Gençlik ve Spor Bakanlığı İl Müdürlüğü tarafından
+            incelenecektir. Onay süreci tamamlandığında kayıtlı e-posta adresinize
+            bilgilendirme yapılacaktır.
+          </p>
+          <div class="success-info-card">
+            <div class="info-row">
+              <i class="bx bx-time-five"></i>
+              <span>Onay süreci genellikle <strong>1-3 iş günü</strong> içerisinde tamamlanır.</span>
+            </div>
+            <div class="info-row">
+              <i class="bx bx-envelope"></i>
+              <span>Sonuç hakkında e-posta ile bilgilendirileceksiniz.</span>
+            </div>
+          </div>
+          <button
+            type="button"
+            class="btn-primary btn-back-to-login"
+            routerLink="/community-login"
+          >
+            <i class="bx bx-log-in"></i> Giriş Sayfasına Dön
+          </button>
+        </div>
+
         <!-- Intro: Süreç açıklaması + Kayıt sürecine başla butonu -->
-        <div *ngIf="step === 0" class="step-block intro-block">
+        <div *ngIf="step === 0 && !showRegistrationSuccess" class="step-block intro-block">
           <h2 class="intro-title">Topluluk kayıt süreci</h2>
           <p class="intro-desc">
             Kayıt olmak için aşağıdaki adımları sırayla tamamlamanız gerekmektedir.
@@ -99,7 +130,7 @@
         </div>
 
         <!-- Adım 1: .edu.tr e-posta ve şifre -->
-        <div *ngIf="step === 1" class="step-block">
+        <div *ngIf="step === 1 && !showRegistrationSuccess" class="step-block">
           <p class="step-desc">
             Topluluk yetkilisi olarak kullanacağınız .edu.tr e-posta adresinizi ve şifrenizi
             oluşturun. E-postanıza doğrulama linki gönderilecektir.
@@ -189,7 +220,7 @@
         </div>
 
         <!-- Adım 3: Topluluk bilgileri (Banner/Logo + form) -->
-        <div *ngIf="step === 3" class="step-block step-three">
+        <div *ngIf="step === 3 && !showRegistrationSuccess" class="step-block step-three">
           <form (submit)="submitStep3($event)">
             <div class="image-uploads-section">
               <div class="banner-upload-wrapper no-url-input">
@@ -304,20 +335,6 @@
               </div>
             </div>
             <div class="form-section">
-              <label>Topluluk iletişim e-postası</label>
-              <div class="input-group">
-                <div class="icon-wrapper"><i class="bx bx-envelope"></i></div>
-                <input
-                  type="email"
-                  [(ngModel)]="comMail"
-                  name="comMail"
-                  class="modern-input"
-                  placeholder="topluluk@univ.edu.tr"
-                  maxlength="60"
-                />
-              </div>
-            </div>
-            <div class="form-section">
               <label>Topluluk başkanı e-posta <span class="required">*</span></label>
               <div class="input-group">
                 <div class="icon-wrapper"><i class="bx bx-user"></i></div>
@@ -329,9 +346,26 @@
                   placeholder="baskan@univ.edu.tr"
                   maxlength="60"
                   required
+                  readonly
                 />
               </div>
-              <small class="field-hint">Kayıt olurken kullandığınız .edu.tr e-posta adresi.</small>
+              <small class="field-hint">Başvurunun 1. adımında kullandığınız .edu.tr e-posta adresi.</small>
+            </div>
+            <div class="form-section">
+              <label>Topluluk iletişim e-postası <span class="required">*</span></label>
+              <div class="input-group">
+                <div class="icon-wrapper"><i class="bx bx-envelope"></i></div>
+                <input
+                  type="email"
+                  [(ngModel)]="comMail"
+                  name="comMail"
+                  class="modern-input"
+                  placeholder="topluluk@univ.edu.tr"
+                  maxlength="60"
+                  required
+                />
+              </div>
+              <small class="field-hint">Topluluk iletişimi için kullanılacak e-posta adresini girin.</small>
             </div>
             <button type="submit" class="btn-primary" [disabled]="isLoading">
               <app-luma-spin *ngIf="isLoading"></app-luma-spin>

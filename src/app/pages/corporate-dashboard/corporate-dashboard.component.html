@@ -242,9 +242,10 @@
               (change)="onStatusFilterChange()"
             >
               <option value="">Tüm Durumlar</option>
-              <option value="Aktif">Aktif</option>
+              <option value="Onay Bekleyen">Onay Bekleyen Topluluklar</option>
+              <option value="Reddedilen">Reddedilen</option>
               <option value="Pasif">Pasif</option>
-              <option value="Onay Bekleyen">Onay Bekleyen</option>
+              <option value="Aktif">Onaylanan Topluluklar</option>
             </select>
             <button class="btn-primary" (click)="openNewCommunityModal()">
               <span class="material-symbols-outlined">add</span>
@@ -263,14 +264,14 @@
         <!-- Communities-page ile aynı kart tasarımı -->
         <div class="grid-container" *ngIf="displayedCommunities.length > 0">
           <div
-            *ngFor="let item of displayedCommunities"
+            *ngFor="let item of displayedCommunities; trackBy: trackByCommunityId"
             (click)="openCommunityDetail(item)"
             class="community-card"
             style="cursor: pointer"
           >
             <div class="cover-area">
               <img
-                [src]="item.coverImage || item.banner || 'assets/img/placeholder-cover.svg'"
+                [src]="getCommunityCover(item) || getPlaceholderCoverUrl()"
                 [alt]="item.name"
                 class="cover-img"
                 (error)="onImageError($event, 'cover')"
@@ -282,7 +283,7 @@
               <div class="header-row">
                 <div class="logo-wrapper">
                   <img
-                    [src]="item.logo"
+                    [src]="getCommunityLogo(item) || getPlaceholderLogoUrl()"
                     [alt]="item.name"
                     class="logo-img"
                     (error)="onImageError($event, 'logo')"
@@ -304,7 +305,26 @@
                     <i class="bx bxs-graduation"></i> {{ getUniversityAbbr(item.university) }}
                   </span>
                 </div>
-                <span class="action-text">İncele <i class="bx bx-right-arrow-alt"></i></span>
+                <!-- Onay Bekleyen topluluklar için onay/red butonları -->
+                <div
+                  class="review-actions"
+                  *ngIf="item.status === 'Onay Bekleyen'"
+                  (click)="$event.stopPropagation()"
+                >
+                  <button class="btn-approve" title="Onayla" (click)="openApproveCommunityModal(item)">
+                    <span class="material-symbols-outlined">check_circle</span> Onayla
+                  </button>
+                  <button
+                    class="btn-reject"
+                    title="Reddet"
+                    (click)="openRejectCommunityModal(item)"
+                  >
+                    <span class="material-symbols-outlined">cancel</span> Reddet
+                  </button>
+                </div>
+                <span class="action-text" *ngIf="item.status !== 'Onay Bekleyen'"
+                  >İncele <i class="bx bx-right-arrow-alt"></i
+                ></span>
               </div>
             </div>
           </div>
@@ -603,6 +623,10 @@
               ? 'Topluluk Güncelle'
               : modalType === 'reject-event'
               ? 'Revize İste'
+              : modalType === 'rejectCommunity'
+              ? 'Topluluk Reddet'
+              : modalType === 'approveCommunity'
+              ? 'Topluluk Onayla'
               : modalType === 'spam-report'
               ? 'Spam Analiz Raporu'
               : 'İşlem'
@@ -1602,8 +1626,58 @@
           </button>
         </div>
       </div>
+
+      <!-- Topluluk Onayla Modal (onay pop-up) -->
+      <div class="modal-body" *ngIf="modalType === 'approveCommunity' && communityToApprove">
+        <div class="form-section">
+          <p class="reject-community-intro">
+            "<strong>{{ communityToApprove.name }}</strong>" topluluğunu onaylamak istediğinize emin
+            misiniz? Onaylandıktan sonra topluluk listede görünecek ve topluluk başkanı panele
+            erişebilecektir.
+          </p>
+          <div class="modal-actions">
+            <button class="btn-secondary" (click)="closeModal()">Vazgeç</button>
+            <button class="btn-primary" (click)="confirmApproveCommunity()">
+              <span class="material-symbols-outlined">check_circle</span>
+              Topluluğu Onayla
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Topluluk Reddet Modal (reddetme nedeni pop-up) -->
+      <div class="modal-body" *ngIf="modalType === 'rejectCommunity' && communityToReject">
+        <div class="form-section">
+          <p class="reject-community-intro">
+            "<strong>{{ communityToReject.name }}</strong
+            >" topluluğunu reddetmek istediğinize emin misiniz? Reddetme nedeni topluluk başkanına
+            e-posta ile iletilecektir.
+          </p>
+          <div class="form-group full">
+            <label>Reddetme Nedeni <span class="required">*</span></label>
+            <textarea
+              [(ngModel)]="rejectionReasonCommunity"
+              class="modern-input"
+              rows="4"
+              placeholder="Reddetme nedeninizi yazınız (zorunlu)..."
+            ></textarea>
+          </div>
+          <div class="modal-actions">
+            <button class="btn-secondary" (click)="closeModal()">Vazgeç</button>
+            <button
+              class="btn-danger"
+              [disabled]="!rejectionReasonCommunity || !rejectionReasonCommunity.trim()"
+              (click)="confirmRejectCommunity()"
+            >
+              <span class="material-symbols-outlined">cancel</span>
+              Topluluğu Reddet
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
+
   <!-- CONFIRMATION MODAL -->
   <div
     class="modal-backdrop confirm-modal"

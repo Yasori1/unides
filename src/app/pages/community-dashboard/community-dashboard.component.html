@@ -25,11 +25,6 @@
       </button>
 
       <div class="menu-divider">YÖNETİM</div>
-      <button class="menu-item" [class.active]="activeTab === 'members'" (click)="switchTab('members')">
-        <span class="material-symbols-outlined">diversity_3</span>
-        <span class="menu-text">Üyeler</span>
-      </button>
-
       <button class="menu-item" [class.active]="activeTab === 'settings'" (click)="switchTab('settings')">
         <span class="material-symbols-outlined">person</span>
         <span class="menu-text">Profilim</span>
@@ -65,7 +60,8 @@
         <div class="profile-wrapper" title="Hesabım">
           <div class="profile-info" (click)="toggleProfileDropdown($event)">
             <div class="profile-pic">
-              <img *ngIf="clubInfo?.logo" [src]="clubInfo.logo" [alt]="clubInfo.name || 'Topluluk Logosu'" />
+              <img *ngIf="clubInfo?.logo" [src]="clubInfo.logo" [alt]="clubInfo.name || 'Topluluk Logosu'"
+                (error)="onImageError($event, 'logo')" />
               <div class="profile-initial" *ngIf="!clubInfo?.logo">{{ userInitial }}</div>
             </div>
           </div>
@@ -114,13 +110,13 @@
 
     <div class="view-container" *ngIf="communityApproved !== false && activeTab === 'overview'">
       <!-- Loading State for Overview -->
-      <div class="loading-container" *ngIf="isLoadingCommunity || isLoadingEvents || isLoadingMembers">
+      <div class="loading-container" *ngIf="isLoadingCommunity || isLoadingEvents">
         <app-luma-spin></app-luma-spin>
         <p>Veriler yükleniyor...</p>
       </div>
 
       <!-- Content when loaded -->
-      <div *ngIf="!isLoadingCommunity && !isLoadingEvents && !isLoadingMembers">
+      <div *ngIf="!isLoadingCommunity && !isLoadingEvents">
         <div class="stats-grid-compact">
           <div class="stat-card-mini" *ngFor="
               let stat of [
@@ -304,81 +300,24 @@
       </ng-template>
     </div>
 
-    <div class="view-container" *ngIf="communityApproved !== false && activeTab === 'members'">
-      <div class="page-header">
-        <h2>Üyeler</h2>
-        <div class="header-controls">
-          <div class="search-input">
-            <span class="material-symbols-outlined">search</span>
-            <input type="text" placeholder="Üye ara..." [(ngModel)]="memberSearchText"
-              (ngModelChange)="onMemberSearchChange()" />
-          </div>
-          <button class="btn-primary" (click)="openModal('new-member')">Üye Ekle</button>
-        </div>
-      </div>
-      <!-- Loading State -->
-      <div class="loading-container" *ngIf="isLoadingMembers">
-        <app-luma-spin></app-luma-spin>
-        <p>Üyeler yükleniyor...</p>
-      </div>
-
-      <!-- Members Table -->
-      <div *ngIf="!isLoadingMembers && pagedMembers.length; else noMembers" class="members-table-container">
-        <table class="members-table">
-          <thead>
-            <tr>
-              <th>İsim Soyad</th>
-              <th>E-Posta</th>
-              <th class="action-column">İşlem</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let m of pagedMembers" class="member-row">
-              <td class="member-name-cell">
-                <div class="member-name-wrapper">
-                  <span>{{ m.name }}</span>
-                  <span *ngIf="m.role === 'Başkan' || m.role === 'Başkan Yrd.'" class="admin-star" title="Yönetici">
-                    <span class="material-symbols-outlined">star</span>
-                  </span>
-                </div>
-              </td>
-              <td class="member-email-cell">{{ m.email }}</td>
-              <td class="member-action-cell">
-                <button class="member-delete-btn-table" (click)="openDeleteConfirm(m.id)" title="Üyeyi Sil">
-                  <span class="material-symbols-outlined">delete</span>
-                  <span>Sil</span>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <ng-template #noMembers>
-        <div class="empty-state" *ngIf="!isLoadingMembers">
-          <span class="material-symbols-outlined">group_off</span>
-          <p>Listelenecek üye bulunamadı.</p>
-        </div>
-      </ng-template>
-      <div class="member-pagination" *ngIf="memberTotalPages > 1">
-        <button class="page-btn" [disabled]="memberCurrentPage === 1" (click)="setMemberPage(memberCurrentPage - 1)">
-          ‹
-        </button>
-        <span class="page-info">Sayfa {{ memberCurrentPage }} / {{ memberTotalPages }}</span>
-        <button class="page-btn" [disabled]="memberCurrentPage === memberTotalPages"
-          (click)="setMemberPage(memberCurrentPage + 1)">
-          ›
-        </button>
-      </div>
-    </div>
-
     <div class="view-container" *ngIf="communityApproved !== false && activeTab === 'settings'">
       <div class="card settings-card">
         <div class="settings-hero">
-          <div class="hero-banner" [style.background-image]="'url(' + clubInfo.banner + ')'">
+          <div class="hero-banner">
+            <img [src]="clubInfo.banner || 'assets/img/placeholder-cover.svg'" alt="Banner"
+              (error)="onImageError($event, 'cover')" />
+            <button type="button" class="edit-banner-btn" (click)="showBannerModal = true" title="Banner Güncelle">
+              <span class="material-symbols-outlined">photo_camera</span>
+              <span>Banner Güncelle</span>
+            </button>
           </div>
           <div class="hero-profile">
             <div class="avatar-wrapper">
-              <img [src]="clubInfo.logo" alt="Logo" />
+              <img [src]="clubInfo.logo || 'assets/img/placeholder-logo.svg'" alt="Logo"
+                (error)="onImageError($event, 'logo')" />
+              <button type="button" class="edit-avatar-btn" (click)="showAvatarModal = true" title="Logo Güncelle">
+                <span class="material-symbols-outlined">photo_camera</span>
+              </button>
             </div>
             <div class="hero-text">
               <p class="eyebrow">Profil</p>
@@ -393,34 +332,50 @@
         <div class="form-grid">
           <div class="form-section">
             <h3>Kulüp Bilgileri</h3>
+            <p class="profile-hint">Bilgileri güncelledikten sonra "Güncelle ve Onaya Gönder" ile GSB onayına iletebilirsiniz. Onaylandığında değişiklikler yayına alınır.</p>
             <div class="input-grid">
               <label>
                 <span>Kulüp Adı</span>
-                <input type="text" [(ngModel)]="clubInfo.name" disabled />
+                <input type="text" [(ngModel)]="clubInfo.name" placeholder="Topluluk adı" />
               </label>
               <label>
                 <span>Üniversite</span>
-                <input type="text" [(ngModel)]="clubInfo.university" disabled />
+                <input type="text" [(ngModel)]="clubInfo.university" placeholder="Üniversite" />
               </label>
               <label>
                 <span>Şehir</span>
-                <input type="text" [(ngModel)]="clubInfo.city" disabled />
+                <select [(ngModel)]="clubInfo.city" class="profile-select">
+                  <option value="" disabled>Şehir seçin</option>
+                  <option *ngFor="let c of profileCities" [value]="c">{{ c }}</option>
+                </select>
               </label>
               <label>
                 <span>Kategori</span>
-                <input type="text" [(ngModel)]="clubInfo.category" disabled />
+                <select [(ngModel)]="clubInfo.category" class="profile-select">
+                  <option value="" disabled>Kategori seçin</option>
+                  <option *ngFor="let c of profileCategories" [value]="c">{{ c }}</option>
+                </select>
               </label>
               <label>
-                <span>E-Posta</span>
-                <input type="email" [(ngModel)]="clubInfo.email" disabled />
+                <span>Topluluk İletişim E-Postası</span>
+                <input type="email" [(ngModel)]="clubInfo.email" placeholder="topluluk@edu.tr" />
+              </label>
+              <label>
+                <span>Topluluk Başkanı E-Postası</span>
+                <input type="email" [(ngModel)]="clubInfo.comLeadMail" placeholder="baskan@edu.tr" />
+                <small class="field-hint">Topluluk başkanı e-postası değişimi GSB onayından sonra geçerli olacak; onaylandığında yeni girilen e-posta adresine doğrulama maili gönderilecektir. Topluluk paneline giriş bu e-posta ile yapılacağından lütfen dikkatli ve doğru doldurunuz.</small>
               </label>
             </div>
             <label class="stacked">
-              <span>Hakkımızda</span>
+              <span>Hakkımızda (Maks. 500 karakter)</span>
               <textarea rows="4" maxlength="500" [(ngModel)]="clubInfo.description"
-                placeholder="Topluluğunuzu anlatan kısa bir yazı yazın..." disabled readonly
-                style="cursor: not-allowed; resize: none; background-color: #f1f5f9; color: #64748b;"></textarea>
+                placeholder="Topluluğunuzu anlatan kısa bir yazı yazın..."></textarea>
             </label>
+            <div class="profile-actions">
+              <button type="button" class="btn-primary" [disabled]="!isProfileFormValid || isSavingProfile" (click)="saveCommunityProfile()">
+                {{ isSavingProfile ? 'Gönderiliyor...' : 'Güncelle ve Onaya Gönder' }}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -428,7 +383,7 @@
   </main>
 
   <div class="modal-overlay" *ngIf="isModalOpen" (click)="closeModal()">
-    <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-card" [class.event-modal]="modalType === 'new-event'" (click)="$event.stopPropagation()">
       <div class="modal-head">
         <h3>
           {{
@@ -438,69 +393,69 @@
           : 'Etkinlik Oluştur'
           : modalType === 'new-project'
           ? 'Yeni Proje Başlat'
-          : modalType === 'edit-member'
-          ? 'Üye Düzenle'
-          : 'Topluluğa Üye Ekle'
+          : 'İşlem'
           }}
         </h3>
         <button class="icon-btn ghost close-modern" (click)="closeModal()">
           <span class="material-symbols-outlined">close</span>
         </button>
       </div>
-      <div class="modal-body" *ngIf="modalType === 'new-event'">
-        <div class="single-image-upload no-url-input">
-          <div class="upload-header">
-            <span class="upload-title">Etkinlik Fotoğrafı</span>
-            <span class="upload-hint">Önerilen: 1200×600px (2:1)</span>
+      <div class="modal-body modal-body-event" *ngIf="modalType === 'new-event'">
+        <div class="event-detail-layout">
+          <div class="event-detail-left">
+            <div class="single-image-upload no-url-input">
+              <div class="upload-header">
+                <span class="upload-title">Etkinlik Fotoğrafı</span>
+                <span class="upload-hint">Önerilen: 1200×600px (2:1)</span>
+              </div>
+              <app-image-upload label="Fotoğraf seç / sürükle" [previewUrl]="newEventData.image || null"
+                [uploadToServer]="true" [allowUrl]="false"
+                (onImageSelected)="onEventImageSelected($event)"
+                (onFileSelected)="onEventFileSelected($event)"></app-image-upload>
+            </div>
           </div>
-          <app-image-upload label="Fotoğraf seç / sürükle" [previewUrl]="newEventData.image || null"
-            [uploadToServer]="true" (onImageSelected)="onEventImageSelected($event)"
-            (onFileSelected)="onEventFileSelected($event)"></app-image-upload>
+          <div class="event-detail-right">
+            <label class="stacked">
+              <span>Etkinlik İsmi (Maks. 90)</span>
+              <input type="text" placeholder="Etkinlik İsmi" [(ngModel)]="newEventData.title" maxlength="90" />
+            </label>
+            <div class="row two-cols">
+              <label class="stacked">
+                <span>Tarih</span>
+                <input type="date" [(ngModel)]="newEventData.date" />
+              </label>
+              <label class="stacked">
+                <span>Saat</span>
+                <input type="time" [(ngModel)]="newEventData.time" />
+              </label>
+            </div>
+            <label class="stacked">
+              <span>Konum (Maks. 100)</span>
+              <input type="text" placeholder="Konum" [(ngModel)]="newEventData.location" maxlength="100" />
+            </label>
+            <label class="stacked">
+              <span>Kontenjan (Maks. 4 Hane)</span>
+              <input type="number" placeholder="Kontenjan" [(ngModel)]="newEventData.quota"
+                oninput="if(this.value.length > 4) this.value = this.value.slice(0, 4); this.value = this.value.replace(/[^0-9]/g, '');"
+                min="0" />
+            </label>
+            <label class="stacked">
+              <span>Etkinlik Kısa Açıklama (Max 70)</span>
+              <input type="text" placeholder="Kısa açıklama..." [(ngModel)]="newEventData.shortDescription"
+                maxlength="70" />
+            </label>
+            <label class="stacked">
+              <span>Etkinlik Açıklaması (Maks. 2000)</span>
+              <textarea rows="3" placeholder="Etkinlik Açıklaması" [(ngModel)]="newEventData.description"
+                maxlength="2000"></textarea>
+            </label>
+            <button class="btn-primary full" [disabled]="!isEventFormValid" (click)="saveEvent()" type="button">
+              <span *ngIf="!isEventFormValid">Lütfen Tüm Alanları Doldurun</span>
+              <span *ngIf="isEventFormValid && !editingEventId">Etkinlik Oluştur ve Kurumsal Tarafa Yönlendir</span>
+              <span *ngIf="isEventFormValid && editingEventId">Etkinliği Güncelle ve Onaya Gönder</span>
+            </button>
+          </div>
         </div>
-
-        <label class="stacked">
-          <span>Etkinlik İsmi (Maks. 90)</span>
-          <input type="text" placeholder="Etkinlik İsmi" [(ngModel)]="newEventData.title" maxlength="90" />
-        </label>
-
-        <div class="row two-cols">
-          <label class="stacked">
-            <span>Tarih</span>
-            <input type="date" [(ngModel)]="newEventData.date" />
-          </label>
-          <label class="stacked">
-            <span>Saat</span>
-            <input type="time" [(ngModel)]="newEventData.time" />
-          </label>
-        </div>
-        <label class="stacked">
-          <span>Konum (Maks. 100)</span>
-          <input type="text" placeholder="Konum" [(ngModel)]="newEventData.location" maxlength="100" />
-        </label>
-        <label class="stacked">
-          <span>Kontenjan (Maks. 4 Hane)</span>
-          <input type="number" placeholder="Kontenjan" [(ngModel)]="newEventData.quota"
-            oninput="if(this.value.length > 4) this.value = this.value.slice(0, 4); this.value = this.value.replace(/[^0-9]/g, '');"
-            min="0" />
-        </label>
-
-        <label class="stacked">
-          <span>Etkinlik Kısa Açıklama (Max 70)</span>
-          <input type="text" placeholder="Kısa açıklama..." [(ngModel)]="newEventData.shortDescription"
-            maxlength="70" />
-        </label>
-
-        <label class="stacked">
-          <span>Etkinlik Açıklaması (Maks. 2000)</span>
-          <textarea rows="3" placeholder="Etkinlik Açıklaması" [(ngModel)]="newEventData.description"
-            maxlength="2000"></textarea>
-        </label>
-
-        <button class="btn-primary full" [disabled]="!isEventFormValid" (click)="saveEvent()" type="button">
-          <span *ngIf="!isEventFormValid">Lütfen Tüm Alanları Doldurun</span>
-          <span *ngIf="isEventFormValid && !editingEventId">Etkinlik Oluştur ve Kurumsal Tarafa Yönlendir</span>
-          <span *ngIf="isEventFormValid && editingEventId">Etkinliği Güncelle ve Onaya Gönder</span>
-        </button>
       </div>
       <div class="modal-body" *ngIf="modalType === 'new-project'">
         <input type="text" placeholder="Proje Adı" [(ngModel)]="newProjectData.name" />
@@ -509,61 +464,6 @@
           <input type="date" [(ngModel)]="newProjectData.deadline" />
         </div>
         <button class="btn-primary full" (click)="saveProject()">Oluştur 🚀</button>
-      </div>
-      <div class="modal-body" *ngIf="modalType === 'new-member' || modalType === 'edit-member'">
-        <!-- Topluca Üye Ekle Toggle -->
-        <div class="bulk-add-toggle" *ngIf="modalType === 'new-member'">
-          <label class="toggle-label">
-            <input type="checkbox" [(ngModel)]="isBulkAddMode" />
-            <span class="toggle-text">Topluca Üye Ekle</span>
-          </label>
-        </div>
-
-        <!-- Normal Arama Modu -->
-        <div *ngIf="!isBulkAddMode && modalType === 'new-member'">
-          <!-- Email Input -->
-          <div class="email-input-wrapper" style="margin-bottom: 15px">
-            <label class="stacked">
-              <span>E-posta Adresi</span>
-              <input type="email" placeholder="E-posta adresi girin" [(ngModel)]="newMemberData.email"
-                (ngModelChange)="onEmailInputChange()" (input)="onEmailInputChange()" />
-            </label>
-          </div>
-        </div>
-
-        <!-- Toplu Ekleme Modu -->
-        <div *ngIf="isBulkAddMode && modalType === 'new-member'" class="bulk-add-section">
-          <label class="stacked">
-            <span>E-posta Adresleri</span>
-            <textarea rows="8"
-              placeholder="E-posta adreslerini virgül ile ayırarak yapıştırın:&#10;abc@itu.edu.tr, bbb@bogazici.edu.tr, xxx@odtu.edu.tr"
-              [(ngModel)]="bulkEmailsText" class="bulk-emails-textarea"></textarea>
-            <span class="bulk-hint">
-              Örnek: abc@itu.edu.tr, bbb@bogazici.edu.tr, xxx@odtu.edu.tr
-            </span>
-          </label>
-        </div>
-
-        <!-- Düzenleme Modu -->
-        <div *ngIf="modalType === 'edit-member'" class="edit-member-form"
-          style="display: flex; flex-direction: column; gap: 10px">
-          <label class="stacked">
-            <span>Adı Soyadı Düzenle</span>
-            <input type="text" [(ngModel)]="newMemberData.name" placeholder="Ad Soyad" />
-          </label>
-          <label class="stacked">
-            <span>Mail Adresi Düzenle</span>
-            <input type="email" [(ngModel)]="newMemberData.email" placeholder="E-Posta Adresi" />
-          </label>
-        </div>
-
-        <button class="btn-primary full" [disabled]="
-            isBulkAddMode
-              ? !bulkEmailsText.trim()
-              : !newMemberData.email || !newMemberData.email.trim()
-          " (click)="saveMember()">
-          {{ isBulkAddMode ? 'Toplu Ekle' : 'Kaydet' }}
-        </button>
       </div>
     </div>
   </div>
@@ -574,7 +474,6 @@
         <span class="material-symbols-outlined">warning</span>
       </div>
       <h3>Silmek istediğinize emin misiniz?</h3>
-      <p *ngIf="confirmDeleteType === 'member'">Bu üye topluluktan kaldırılacak.</p>
       <p *ngIf="confirmDeleteType === 'event'">Bu etkinlik kalıcı olarak silinecek.</p>
       <div class="confirm-actions">
         <button class="btn ghost" (click)="cancelDelete()">Vazgeç</button>
@@ -584,139 +483,138 @@
   </div>
 </div>
 
-<!-- Event Detail Modal -->
+<!-- Event Detail Modal (geniş düzen: etkinlik oluştur ile aynı) -->
 <div class="modal-overlay" *ngIf="selectedEvent" (click)="!isEditingEventDetail && closeEventDetail()">
-  <div class="modal-card" (click)="$event.stopPropagation()">
+  <div class="modal-card event-modal" (click)="$event.stopPropagation()">
     <div class="modal-head">
       <h3>{{ isEditingEventDetail ? 'Etkinliği Düzenle' : 'Etkinlik Detayları' }}</h3>
       <button class="icon-btn ghost close-modern" (click)="closeEventDetail()">
         <span class="material-symbols-outlined">close</span>
       </button>
     </div>
-    <div class="modal-body">
-      <div class="single-image-upload no-url-input">
-        <div class="upload-header">
-          <span class="upload-title">Etkinlik Fotoğrafı</span>
-          <span class="upload-hint">Önerilen: 1200×600px (2:1)</span>
+    <div class="modal-body modal-body-event">
+      <div class="event-detail-layout">
+        <div class="event-detail-left">
+          <div class="single-image-upload no-url-input">
+            <div class="upload-header">
+              <span class="upload-title">Etkinlik Fotoğrafı</span>
+              <span class="upload-hint">Önerilen: 1200×600px (2:1)</span>
+            </div>
+            <div class="image-preview" *ngIf="!isEditingEventDetail">
+              <img [src]="selectedEvent.imageUrl" [alt]="selectedEvent.title" loading="eager" referrerpolicy="no-referrer"
+                (error)="onImageError($event, 'event')" />
+            </div>
+            <app-image-upload *ngIf="isEditingEventDetail" label="Fotoğraf seç / sürükle"
+              [previewUrl]="editedEventData.image || selectedEvent.imageUrl || null" [uploadToServer]="true"
+              [allowUrl]="false"
+              (onImageSelected)="onEventImageSelectedForEdit($event)"
+              (onFileSelected)="onEventFileSelected($event)"></app-image-upload>
+          </div>
         </div>
-        <div class="image-preview" *ngIf="!isEditingEventDetail">
-          <img [src]="selectedEvent.imageUrl" [alt]="selectedEvent.title" loading="eager" referrerpolicy="no-referrer"
-            (error)="onImageError($event, 'event')" />
+        <div class="event-detail-right">
+          <label class="stacked">
+            <span>Etkinlik İsmi (Maks. 90)</span>
+            <input type="text" [value]="isEditingEventDetail ? editedEventData.title : selectedEvent.title"
+              [readonly]="!isEditingEventDetail" *ngIf="!isEditingEventDetail" />
+            <input type="text" [(ngModel)]="editedEventData.title" maxlength="90" *ngIf="isEditingEventDetail" />
+          </label>
+
+          <div class="row two-cols">
+            <label class="stacked">
+              <span>Tarih</span>
+              <input type="text" [value]="selectedEvent.date || 'Tarih belirtilmemiş'" [readonly]="!isEditingEventDetail"
+                *ngIf="!isEditingEventDetail" />
+              <input type="date" [(ngModel)]="editedEventData.date" *ngIf="isEditingEventDetail" />
+            </label>
+            <label class="stacked">
+              <span>Saat</span>
+              <input type="text" [value]="selectedEvent.time || 'Saat belirtilmemiş'" [readonly]="!isEditingEventDetail"
+                *ngIf="!isEditingEventDetail" />
+              <input type="time" [(ngModel)]="editedEventData.time" *ngIf="isEditingEventDetail" />
+            </label>
+          </div>
+
+          <label class="stacked">
+            <span>Konum (Maks. 100)</span>
+            <input type="text" [value]="selectedEvent.location" [readonly]="!isEditingEventDetail" maxlength="100"
+              *ngIf="!isEditingEventDetail" />
+            <input type="text" [(ngModel)]="editedEventData.location" maxlength="100" *ngIf="isEditingEventDetail" />
+          </label>
+
+          <label class="stacked">
+            <span>Kontenjan (Maks. 4 Hane)</span>
+            <input type="text"
+              [value]="selectedEvent.quota !== undefined && selectedEvent.quota !== null ? (selectedEvent.quota + ' Kişilik Yer Var') : 'Kontenjan belirtilmemiş'"
+              [readonly]="!isEditingEventDetail" *ngIf="!isEditingEventDetail" />
+            <input type="number" [(ngModel)]="editedEventData.quota"
+              oninput="if(this.value.length > 4) this.value = this.value.slice(0, 4); this.value = this.value.replace(/[^0-9]/g, '');"
+              min="0" *ngIf="isEditingEventDetail" />
+          </label>
+
+          <label class="stacked">
+            <span>Etkinlik Kısa Açıklama (Max 70)</span>
+            <input type="text" [value]="
+                (selectedEvent.description || '').substring(0, 70) || 'Kısa açıklama belirtilmemiş.'
+              " [readonly]="!isEditingEventDetail" *ngIf="!isEditingEventDetail" />
+            <input type="text" [(ngModel)]="editedEventData.shortDescription" maxlength="70" *ngIf="isEditingEventDetail" />
+          </label>
+
+          <label class="stacked">
+            <span>Etkinlik Açıklaması (Maks. 2000)</span>
+            <textarea rows="3" [readonly]="!isEditingEventDetail" *ngIf="!isEditingEventDetail">{{
+              selectedEvent.description || 'Açıklama belirtilmemiş.'
+            }}</textarea>
+            <textarea rows="3" [(ngModel)]="editedEventData.description" maxlength="2000"
+              *ngIf="isEditingEventDetail"></textarea>
+          </label>
+
+          <!-- Rejection Reason Button (only for rejected events) -->
+          <div *ngIf="selectedEvent && selectedEvent.status === 'rejected' && !isEditingEventDetail"
+            style="margin-top: 16px; margin-bottom: 8px; width: 100%; display: block;">
+            <button type="button"
+              (click)="openRejectionModal(selectedEvent.rejectionReason || 'Revize nedeni belirtilmemiş.')"
+              style="background: #ef4444 !important; border: 2px solid #dc2626 !important; color: white !important; padding: 14px 20px !important; border-radius: 8px !important; font-weight: 600 !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 10px !important; cursor: pointer !important; width: 100% !important; font-size: 15px !important; transition: all 0.2s !important;">
+              <span class="material-symbols-outlined" style="font-size: 22px !important; line-height: 1;">info</span>
+              <span>Revize Nedeni Görüntüle</span>
+            </button>
+          </div>
+
+          <!-- Buttons for different statuses - Edit Mode OFF -->
+          <div style="display: flex; gap: 12px; margin-top: 8px; flex-direction: column" *ngIf="!isEditingEventDetail">
+            <button class="btn-primary full" *ngIf="selectedEvent.status === 'pending'" (click)="editEventFromDetail()"
+              type="button">
+              <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px">edit</span>
+              <span>Etkinliği Düzenle</span>
+            </button>
+            <button class="btn-primary full" *ngIf="selectedEvent.status === 'approved'"
+              (click)="editApprovedEventFromDetail()" type="button" style="background: #f59e0b">
+              <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px">edit_off</span>
+              <span>Etkinliği Yayından Çek ve Düzenle</span>
+            </button>
+            <button class="btn-primary full" *ngIf="selectedEvent.status === 'rejected'"
+              (click)="editRejectedEventFromDetail()" type="button">
+              <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px">edit</span>
+              <span>Düzenle</span>
+            </button>
+            <button class="btn-primary full" style="background: #ef4444" (click)="openDeleteEventConfirm(selectedEvent.id)"
+              type="button">
+              <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px">delete</span>
+              <span>Etkinliği Sil</span>
+            </button>
+          </div>
+
+          <!-- Buttons for Edit Mode ON -->
+          <div style="display: flex; gap: 12px; margin-top: 8px; flex-direction: column" *ngIf="isEditingEventDetail">
+            <button class="btn-primary full" (click)="saveEventFromDetail()" type="button">
+              <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px">save</span>
+              <span>Kaydet ve Onaya Gönder</span>
+            </button>
+            <button class="btn-primary full" style="background: #6b7280" (click)="cancelEditEventDetail()" type="button">
+              <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px">close</span>
+              <span>İptal</span>
+            </button>
+          </div>
         </div>
-        <app-image-upload *ngIf="isEditingEventDetail" label="Fotoğraf seç / sürükle"
-          [previewUrl]="editedEventData.image || selectedEvent.imageUrl || null" [uploadToServer]="true"
-          (onImageSelected)="onEventImageSelectedForEdit($event)"
-          (onFileSelected)="onEventFileSelected($event)"></app-image-upload>
-      </div>
-
-      <label class="stacked">
-        <span>Etkinlik İsmi (Maks. 90)</span>
-        <input type="text" [value]="isEditingEventDetail ? editedEventData.title : selectedEvent.title"
-          [readonly]="!isEditingEventDetail" *ngIf="!isEditingEventDetail" />
-        <input type="text" [(ngModel)]="editedEventData.title" maxlength="90" *ngIf="isEditingEventDetail" />
-      </label>
-
-      <div class="row two-cols">
-        <label class="stacked">
-          <span>Tarih</span>
-          <input type="text" [value]="selectedEvent.date || 'Tarih belirtilmemiş'" [readonly]="!isEditingEventDetail"
-            *ngIf="!isEditingEventDetail" />
-          <input type="date" [(ngModel)]="editedEventData.date" *ngIf="isEditingEventDetail" />
-        </label>
-        <label class="stacked">
-          <span>Saat</span>
-          <input type="text" [value]="selectedEvent.time || 'Saat belirtilmemiş'" [readonly]="!isEditingEventDetail"
-            *ngIf="!isEditingEventDetail" />
-          <input type="time" [(ngModel)]="editedEventData.time" *ngIf="isEditingEventDetail" />
-        </label>
-      </div>
-
-      <label class="stacked">
-        <span>Konum (Maks. 100)</span>
-        <input type="text" [value]="selectedEvent.location" [readonly]="!isEditingEventDetail" maxlength="100"
-          *ngIf="!isEditingEventDetail" />
-        <input type="text" [(ngModel)]="editedEventData.location" maxlength="100" *ngIf="isEditingEventDetail" />
-      </label>
-
-      <label class="stacked">
-        <span>Kontenjan (Maks. 4 Hane)</span>
-        <input type="text"
-          [value]="selectedEvent.quota !== undefined && selectedEvent.quota !== null ? (selectedEvent.quota + ' Kişilik Yer Var') : 'Kontenjan belirtilmemiş'"
-          [readonly]="!isEditingEventDetail" *ngIf="!isEditingEventDetail" />
-        <input type="number" [(ngModel)]="editedEventData.quota"
-          oninput="if(this.value.length > 4) this.value = this.value.slice(0, 4); this.value = this.value.replace(/[^0-9]/g, '');"
-          min="0" *ngIf="isEditingEventDetail" />
-      </label>
-
-      <label class="stacked">
-        <span>Etkinlik Kısa Açıklama (Max 70)</span>
-        <input type="text" [value]="
-            (selectedEvent.description || '').substring(0, 70) || 'Kısa açıklama belirtilmemiş.'
-          " [readonly]="!isEditingEventDetail" *ngIf="!isEditingEventDetail" />
-        <input type="text" [(ngModel)]="editedEventData.shortDescription" maxlength="70" *ngIf="isEditingEventDetail" />
-      </label>
-
-      <label class="stacked">
-        <span>Etkinlik Açıklaması (Maks. 2000)</span>
-        <textarea rows="3" [readonly]="!isEditingEventDetail" *ngIf="!isEditingEventDetail">{{
-          selectedEvent.description || 'Açıklama belirtilmemiş.'
-        }}</textarea>
-        <textarea rows="3" [(ngModel)]="editedEventData.description" maxlength="2000"
-          *ngIf="isEditingEventDetail"></textarea>
-      </label>
-
-      <!-- Rejection Reason Button (only for rejected events) -->
-      <div *ngIf="selectedEvent && selectedEvent.status === 'rejected' && !isEditingEventDetail"
-        style="margin-top: 16px; margin-bottom: 8px; width: 100%; display: block;">
-        <button type="button"
-          (click)="openRejectionModal(selectedEvent.rejectionReason || 'Revize nedeni belirtilmemiş.')"
-          style="background: #ef4444 !important; border: 2px solid #dc2626 !important; color: white !important; padding: 14px 20px !important; border-radius: 8px !important; font-weight: 600 !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 10px !important; cursor: pointer !important; width: 100% !important; font-size: 15px !important; transition: all 0.2s !important;">
-          <span class="material-symbols-outlined" style="font-size: 22px !important; line-height: 1;">info</span>
-          <span>Revize Nedeni Görüntüle</span>
-        </button>
-      </div>
-
-      <!-- Buttons for different statuses - Edit Mode OFF -->
-      <div style="display: flex; gap: 12px; margin-top: 8px; flex-direction: column" *ngIf="!isEditingEventDetail">
-        <!-- Onaya Gönderilen (pending) etkinlikler için -->
-        <button class="btn-primary full" *ngIf="selectedEvent.status === 'pending'" (click)="editEventFromDetail()"
-          type="button">
-          <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px">edit</span>
-          <span>Etkinliği Düzenle</span>
-        </button>
-
-        <!-- Onaylanmış (approved) etkinlikler için -->
-        <button class="btn-primary full" *ngIf="selectedEvent.status === 'approved'"
-          (click)="editApprovedEventFromDetail()" type="button" style="background: #f59e0b">
-          <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px">edit_off</span>
-          <span>Etkinliği Yayından Çek ve Düzenle</span>
-        </button>
-
-        <!-- Reddedilmiş (rejected) etkinlikler için -->
-        <button class="btn-primary full" *ngIf="selectedEvent.status === 'rejected'"
-          (click)="editRejectedEventFromDetail()" type="button">
-          <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px">edit</span>
-          <span>Düzenle</span>
-        </button>
-
-        <!-- Sil butonu (tüm status'ler için) -->
-        <button class="btn-primary full" style="background: #ef4444" (click)="openDeleteEventConfirm(selectedEvent.id)"
-          type="button">
-          <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px">delete</span>
-          <span>Etkinliği Sil</span>
-        </button>
-      </div>
-
-      <!-- Buttons for Edit Mode ON -->
-      <div style="display: flex; gap: 12px; margin-top: 8px; flex-direction: column" *ngIf="isEditingEventDetail">
-        <button class="btn-primary full" (click)="saveEventFromDetail()" type="button">
-          <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px">save</span>
-          <span>Kaydet ve Onaya Gönder</span>
-        </button>
-        <button class="btn-primary full" style="background: #6b7280" (click)="cancelEditEventDetail()" type="button">
-          <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px">close</span>
-          <span>İptal</span>
-        </button>
       </div>
     </div>
   </div>
@@ -761,6 +659,7 @@
     <div class="modal-body">
       <app-image-upload label="Banner Görseli Seç / Sürükle" [previewUrl]="clubInfo.banner || null"
         [uploadToServer]="true"
+        [allowUrl]="false"
         [enableCrop]="true"
         [cropAspectRatio]="1920/500"
         [cropMinWidth]="384"
@@ -782,6 +681,7 @@
     </div>
     <div class="modal-body">
       <app-image-upload label="Logo Seç / Sürükle" [previewUrl]="clubInfo.logo || null" [uploadToServer]="true"
+        [allowUrl]="false"
         [enableCrop]="true"
         [cropAspectRatio]="1"
         [cropMinWidth]="220"

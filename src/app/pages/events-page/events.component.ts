@@ -84,6 +84,9 @@ export class EventsComponent implements OnInit, AfterViewInit {
   // Detay Modal
   // selectedEvent removed
 
+  // Yükleme (ilk açılışta spinner - Duyurular sayfası gibi)
+  isLoading: boolean = true;
+
   // Sayfalama
   allEventsPool: EventCard[] = [];
   displayedEvents: EventCard[] = [];
@@ -517,12 +520,14 @@ export class EventsComponent implements OnInit, AfterViewInit {
         }
         this.allEventsPool = [...this.baseEvents];
         this.applyFiltersAndGoFirstPage();
+        this.isLoading = false;
       },
       error: (err) => {
         // Hata durumunda boş array
         this.baseEvents = [];
         this.allEventsPool = [];
         this.applyFiltersAndGoFirstPage();
+        this.isLoading = false;
       },
     });
   }

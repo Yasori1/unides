@@ -1453,6 +1453,58 @@
   animation: popIn 160ms ease;
   max-height: 90vh;
   overflow-y: auto;
+
+  // Etkinlik oluştur/düzenle modalı — Kurumsal Dashboard Etkinlik Detay genişliğinde
+  &.event-modal {
+    width: 98vw;
+    max-width: 1200px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    @media (max-width: 768px) {
+      width: 100%;
+      max-width: 100vw;
+      max-height: 100vh;
+      border-radius: 0;
+    }
+  }
+}
+
+// Etkinlik modalı iki sütunlu düzen (foto solda, form sağda)
+.modal-body-event {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+
+  .event-detail-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    align-items: start;
+    flex: 1;
+    min-height: 0;
+
+    @media (max-width: 900px) {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+  }
+
+  .event-detail-left {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .event-detail-right {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+  }
 }
 
 .modal-head {
@@ -1666,6 +1718,58 @@
   overflow: hidden;
 }
 
+.profile-hint {
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  color: #0369a1;
+  font-weight: 500;
+}
+
+.profile-actions {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+
+  .btn-primary {
+    min-width: 200px;
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}
+
+.field-hint {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.profile-select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  background: #f8fafc;
+  color: #0f172a;
+  cursor: pointer;
+  appearance: auto;
+
+  &:focus {
+    outline: 2px solid #0ea5e9;
+    border-color: #0ea5e9;
+    background: #fff;
+  }
+}
+
 .settings-banner {
   position: relative;
   padding: 24px;
@@ -1763,11 +1867,16 @@
   width: 100%;
   height: 180px;
   border-radius: 14px;
-  background-size: cover;
-  background-position: center;
   position: relative;
   overflow: hidden;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+.settings-hero .hero-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .settings-hero .hero-banner .edit-banner-btn {
@@ -1778,13 +1887,20 @@
   color: #fff;
   border: none;
   border-radius: 10px;
-  padding: 8px;
+  padding: 8px 14px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   cursor: pointer;
   transition: background 0.2s ease;
   z-index: 10;
+  font-size: 0.85rem;
+  font-weight: 600;
+
+  .material-symbols-outlined {
+    font-size: 20px;
+  }
 }
 
 .settings-hero .hero-banner .edit-banner-btn:hover {

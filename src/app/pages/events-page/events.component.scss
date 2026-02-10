@@ -159,16 +159,44 @@ $border-color: #e2e8f0;
   }
 }
 
+.filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 30px;
+}
+
+.loading-state {
+  text-align: center;
+  padding: 80px 0;
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #e4e4e7;
+    border-top-color: $primary-blue;
+    border-radius: 50%;
+    margin: 0 auto 15px;
+    animation: spin 1s linear infinite;
+  }
+
+  p {
+    color: $text-gray;
+  }
+}
+
 .filters-bar {
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
+  flex: 1;
+  min-width: 0;
   background: transparent !important;
   padding: 20px 0;
   border-radius: 0;
   border: none;
   box-shadow: none;
-  margin-bottom: 30px;
   align-items: center;
 
   .search-group {

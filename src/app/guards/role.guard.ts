@@ -27,6 +27,18 @@ export const roleGuard: CanActivateFn = (route, state) => {
         return false;
     }
 
+    // 3. Topluluk başkanı için onay durumu kontrolü
+    // Onaylanmamış topluluklar community-dashboard'a erişemez
+    if (userType === 'community' && expectedRole === 'community') {
+        const approved = authService.isCommunityApproved();
+        if (approved === false) {
+            // Topluluk onaylanmamış — community-login'deki pending ekranına yönlendir
+            router.navigate(['/community-login']);
+            return false;
+        }
+        // approved === null (bilinmiyor) → geçişe izin ver, component kendi kontrolünü yapacak
+    }
+
     // Her şey yolunda - token geçerli ve rol uygun
     return true;
 };

@@ -34,6 +34,7 @@ import { Logger } from '../../utils/logger.util';
 export class CommunityLoginComponent implements OnInit, OnDestroy {
   emailError: boolean = false;
   isLoading: boolean = false;
+  isCheckingApproval: boolean = false;
   showForgotPasswordModal: boolean = false;
   forgotPasswordEmail: string = '';
   forgotEmailError: boolean = false;
@@ -41,6 +42,8 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
   emailSent: boolean = false;
   /** Giriş başarılı ama topluluk henüz onaylanmadığında form yerine bu mesaj gösterilir */
   showPendingApprovalMessage: boolean = false;
+  /** Topluluk adı (pending ekranında göstermek için) */
+  pendingCommunityName: string = '';
   private popStateListener?: (event: PopStateEvent) => void;
 
   constructor(
@@ -50,7 +53,7 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
     private router: Router,
     private route: ActivatedRoute,
     private location: Location
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     // Spline Viewer scriptini dinamik olarak yükle
@@ -80,6 +83,47 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
 
     // History'ye bir entry ekle ki geri butonuna basıldığında popstate tetiklensin
     history.pushState({ fromCommunityLogin: true }, '', location.href);
+
+    // --- Zaten giriş yapmış topluluk başkanı mı? Onay durumunu kontrol et ---
+    this.checkIfAlreadyLoggedInAndPending();
+  }
+
+  /**
+   * Sayfa yüklendiğinde: Kullanıcı zaten giriş yapmışsa ve topluluk onay bekliyor ise
+   * pending ekranını göster. Onaylıysa anasayfaya/dashboard'a yönlendir.
+   */
+  private checkIfAlreadyLoggedInAndPending(): void {
+    // Kullanıcı giriş yapmış mı ve topluluk rolünde mi?
+    if (!this.authService.isAuthenticated() || this.authService.getUserType() !== 'community') {
+      return;
+    }
+
+    this.isCheckingApproval = true;
+
+    // Backend'den güncel topluluk bilgisini al
+    this.communityService
+      .getMyLeadCommunity()
+      .pipe(take(1), catchError(() => of(null)))
+      .subscribe({
+        next: (community) => {
+          this.isCheckingApproval = false;
+
+          if (community && community.isActivity === false) {
+            // Topluluk hâlâ onay bekliyor — pending ekranını göster
+            this.authService.saveCommunityApproved(false);
+            this.showPendingApprovalMessage = true;
+            this.pendingCommunityName = community.name || '';
+          } else if (community && community.isActivity === true) {
+            // Topluluk onaylı — localStorage'ı güncelle ve yönlendir
+            this.authService.saveCommunityApproved(true);
+            this.router.navigate(['/']);
+          }
+          // community === null → lead-by-me yok, formu göstermeye devam et
+        },
+        error: () => {
+          this.isCheckingApproval = false;
+        },
+      });
   }
 
   ngOnDestroy(): void {
@@ -141,22 +185,24 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
               const nextUrl = this.route.snapshot.queryParams['next'];
 
               if (community && community.isActivity === false) {
-                // Topluluk henüz onaylanmamış: sayfada kal, mesaj göster
+                // Topluluk henüz onaylanmamış: sayfada kal, pending ekranı göster
+                this.authService.saveCommunityApproved(false);
                 this.showPendingApprovalMessage = true;
+                this.pendingCommunityName = community.name || '';
                 this.toastService.show('Giriş başarılı.', 'success');
                 return;
               }
 
-              // Onaylı topluluk veya lead-by-me yok: anasayfaya yönlendir
+              // Onaylı topluluk: localStorage'ı güncelle ve yönlendir
+              this.authService.saveCommunityApproved(true);
               const target = nextUrl || '/';
-              this.toastService.show(
-                nextUrl ? 'Giriş başarılı! Yönlendiriliyorsunuz...' : 'Giriş başarılı! Yönlendiriliyorsunuz...',
-                'success'
-              );
+              this.toastService.show('Giriş başarılı! Yönlendiriliyorsunuz...', 'success');
               setTimeout(() => this.router.navigateByUrl(target), 800);
             },
             error: () => {
               this.isLoading = false;
+              // lead-by-me hatası — güvenli varsayılan: anasayfaya yönlendir
+              this.authService.saveCommunityApproved(true);
               const target = this.route.snapshot.queryParams['next'] || '/';
               this.toastService.show('Giriş başarılı! Yönlendiriliyorsunuz...', 'success');
               setTimeout(() => this.router.navigateByUrl(target), 800);
@@ -190,9 +236,49 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
 
   /** Onay bekleyen ekranındayken çıkış yapıp tekrar giriş formunu göstermek için */
   logoutAndShowForm(): void {
-    this.authService.logout();
+    // Logout normalde anasayfaya yönlendirir; onu bypass edip burada kalıyoruz
+    // Manuel temizlik yapıyoruz
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user_info');
+    localStorage.removeItem('user_type');
+    localStorage.removeItem('community_approved');
     this.showPendingApprovalMessage = false;
+    this.pendingCommunityName = '';
     this.toastService.show('Çıkış yapıldı.', 'success');
+  }
+
+  /** Onay durumunu tekrar kontrol et (kullanıcı "Durumu Kontrol Et" butonuna bastığında) */
+  recheckApprovalStatus(): void {
+    if (!this.authService.isAuthenticated()) {
+      this.toastService.show('Oturum süresi dolmuş. Lütfen tekrar giriş yapınız.', 'error');
+      this.logoutAndShowForm();
+      return;
+    }
+
+    this.isCheckingApproval = true;
+
+    this.communityService
+      .getMyLeadCommunity()
+      .pipe(take(1), catchError(() => of(null)))
+      .subscribe({
+        next: (community) => {
+          this.isCheckingApproval = false;
+
+          if (community && community.isActivity === true) {
+            // Topluluk onaylandı!
+            this.authService.saveCommunityApproved(true);
+            this.toastService.show('Topluluğunuz onaylandı! Anasayfaya yönlendiriliyorsunuz...', 'success');
+            setTimeout(() => this.router.navigate(['/']), 1200);
+          } else {
+            this.toastService.show('Topluluğunuz henüz onay sürecinde.', 'error');
+          }
+        },
+        error: () => {
+          this.isCheckingApproval = false;
+          this.toastService.show('Durum kontrol edilemedi. Lütfen tekrar deneyiniz.', 'error');
+        },
+      });
   }
 
   validateForgotEmail(event: any) {

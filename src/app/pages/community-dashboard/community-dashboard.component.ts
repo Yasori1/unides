@@ -10,8 +10,8 @@ import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.compo
 import { ToastComponent } from '../../components/ui/toast/toast.component';
 import { AfkDetectionService } from '../../services/afk-detection.service';
 import { ImageErrorHandlerService } from '../../services/image-error-handler.service';
-import { catchError } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { catchError, switchMap, map } from 'rxjs/operators';
+import { of, forkJoin } from 'rxjs';
 import { SpamService } from '../../services/spam.service';
 import { Logger } from '../../utils/logger.util';
 
@@ -25,22 +25,6 @@ interface Project {
   deadline: string;
   category: string;
   isPromoted?: boolean;
-}
-interface Member {
-  id: number;
-  name: string;
-  role: string;
-  department: string;
-  email: string;
-  phone: string;
-  grade: string;
-  avatar: string;
-  status: 'Aktif' | 'Pasif';
-  university?: string;
-}
-interface UserSearchResult {
-  name: string;
-  email: string;
 }
 interface Notification {
   id: number;
@@ -99,31 +83,18 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
   displayName: string = '';
   userInitial: string = '';
   activeRowMenuId: number | null = null;
-  modalType: 'new-event' | 'new-project' | 'new-member' | 'edit-member' | null = null;
-  isSearchingMembers = false;
-  memberSearchQuery = '';
-  memberSearchResults: UserSearchResult[] = [];
-  isBulkAddMode = false;
-  bulkEmailsText = '';
-  // Email validation states
-  emailChecking = false;
-  emailExists = false;
-  emailValid = false;
-  emailInputComplete = false; // Email tam girildi mi kontrolü
-  emailUserRoleId: number | null = null; // Kullanıcının role ID'si (2 = GSB/Kurumsal)
-  emailIsCorporate: boolean = false; // Kullanıcı kurumsal yetkili mi?
-  emailErrorMessage: string | null = null; // Backend'den gelen hata mesajı
-  private emailCheckTimeout: any;
+  modalType: 'new-event' | 'new-project' | null = null;
   confirmDeleteId: number | null = null;
-  confirmDeleteType: 'member' | 'event' = 'member';
+  confirmDeleteType: 'event' = 'event';
   confirmVisible = false;
   confirmHiding = false;
   private confirmTimer: any;
-  memberCurrentPage = 1;
-  membersPerPage = 20;
   private toastTimer: any;
   showBannerModal = false;
   showAvatarModal = false;
+  /** Güncelle ve Onaya Gönder ile birlikte yüklenecek; hemen sunucuya gitmez */
+  pendingBannerFile: File | null = null;
+  pendingLogoFile: File | null = null;
   initialClubInfo: any = {};
 
   // Eksik olan değişken eklendi
@@ -152,6 +123,32 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     imageFile: null as File | null, // Backend'e yüklenecek dosya
   };
 
+  /** Profilim sekmesi: Kategori dropdown seçenekleri (community-register ile aynı) */
+  profileCategories: string[] = [
+    'Teknoloji',
+    'Sanat',
+    'Spor',
+    'Kariyer',
+    'Kültür',
+    'Bilim',
+    'Sosyal',
+    'Müzik',
+    'Genel',
+  ];
+
+  /** Profilim sekmesi: Şehir dropdown seçenekleri (community-register ile aynı) */
+  profileCities: string[] = [
+    'Adana', 'Adıyaman', 'Afyonkarahisar', 'Ağrı', 'Amasya', 'Ankara', 'Antalya', 'Artvin', 'Aydın',
+    'Balıkesir', 'Bilecik', 'Bingöl', 'Bitlis', 'Bolu', 'Burdur', 'Bursa', 'Çanakkale', 'Çankırı', 'Çorum',
+    'Denizli', 'Diyarbakır', 'Edirne', 'Elazığ', 'Erzincan', 'Erzurum', 'Eskişehir', 'Gaziantep', 'Giresun',
+    'Gümüşhane', 'Hakkari', 'Hatay', 'Isparta', 'Mersin', 'İstanbul', 'İzmir', 'Kars', 'Kastamonu', 'Kayseri',
+    'Kırklareli', 'Kırşehir', 'Kocaeli', 'Konya', 'Kütahya', 'Malatya', 'Manisa', 'Kahramanmaraş', 'Mardin',
+    'Muğla', 'Muş', 'Nevşehir', 'Niğde', 'Ordu', 'Rize', 'Sakarya', 'Samsun', 'Siirt', 'Sinop', 'Sivas',
+    'Tekirdağ', 'Tokat', 'Trabzon', 'Tunceli', 'Şanlıurfa', 'Uşak', 'Van', 'Yozgat', 'Zonguldak', 'Aksaray',
+    'Bayburt', 'Karaman', 'Kırıkkale', 'Batman', 'Şırnak', 'Bartın', 'Ardahan', 'Iğdır', 'Yalova', 'Karabük',
+    'Kilis', 'Osmaniye', 'Düzce',
+  ].sort();
+
   eventCategories: string[] = [
     'Afet Yönetimi ve Dayanıklılık',
     'Aile ve Değerler',
@@ -168,15 +165,6 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
 
   // Form Data
   newProjectData = { name: '', category: 'Teknoloji', budget: 0, deadline: '' };
-  newMemberData = {
-    name: '',
-    department: '',
-    role: 'Üye',
-    email: '',
-    phone: '',
-    grade: '1. Sınıf',
-  };
-  memberSearchText: string = '';
 
   // Toast
   toastMessage: string | null = null;
@@ -212,12 +200,8 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
   // Projects - Frontend-only feature (no backend endpoint)
   projects: Project[] = [];
 
-  // Members loaded from backend via loadCommunityMembers()
-  members: Member[] = [];
-
   notifications: Notification[] = [
-    { id: 1, text: 'Yeni üye başvurusu', time: '10 dk önce', read: false, targetTab: 'members' },
-    { id: 2, text: 'TÜBİTAK onayı', time: '2 saat önce', read: false, targetTab: 'projects' },
+    { id: 1, text: 'TÜBİTAK onayı', time: '2 saat önce', read: false, targetTab: 'projects' },
   ];
 
   collaborations: Collaboration[] = [];
@@ -237,10 +221,12 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
   /** Topluluk onaylı mı? null = yükleniyor, true = onaylı (dashboard açık), false = henüz onay aşamasında */
   communityApproved: boolean | null = null;
 
+  /** Profilim sekmesinden topluluk güncelleme gönderiliyor mu */
+  isSavingProfile = false;
+
   // Loading states for different data
   isLoadingCommunity = true;
   isLoadingEvents = true;
-  isLoadingMembers = true;
 
   // Spam kontrolü için değişkenler
   inspectedEvents: Set<number> = new Set();
@@ -330,11 +316,15 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
             this.communityApproved = community.isActivity === true;
             this.isLoadingCommunity = false;
             if (this.communityApproved) {
+              // Topluluk onaylı — localStorage'ı güncelle ve dashboard'ı yükle
+              localStorage.setItem('community_approved', JSON.stringify(true));
               this.isLoadingEvents = true;
-              this.isLoadingMembers = true;
               this.loadCommunityEvents(community.id);
-              this.loadCommunityMembers(community.id);
               this.loadLeaderStats();
+            } else {
+              // Topluluk onaylanmamış — community-login'deki pending ekranına yönlendir
+              localStorage.setItem('community_approved', JSON.stringify(false));
+              this.router.navigate(['/community-login']);
             }
             return;
           }
@@ -436,19 +426,23 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
               this.userInitial = this.displayName.charAt(0).toUpperCase();
 
               this.communityApproved = communityDetail.isActivity === true;
-              // Loading state'leri başlat
               this.isLoadingCommunity = false;
-              this.isLoadingEvents = true;
-              this.isLoadingMembers = true;
 
-              // Load events for this community
-              this.loadCommunityEvents(communityDetail.id);
+              if (this.communityApproved) {
+                // Topluluk onaylı — localStorage'ı güncelle ve dashboard verilerini yükle
+                localStorage.setItem('community_approved', JSON.stringify(true));
+                this.isLoadingEvents = true;
 
-              // Load members for this community
-              this.loadCommunityMembers(communityDetail.id);
+                // Load events for this community
+                this.loadCommunityEvents(communityDetail.id);
 
-              // Load statistics for overview
-              this.loadLeaderStats();
+                // Load statistics for overview
+                this.loadLeaderStats();
+              } else {
+                // Topluluk onaylanmamış — community-login'deki pending ekranına yönlendir
+                localStorage.setItem('community_approved', JSON.stringify(false));
+                this.router.navigate(['/community-login']);
+              }
             }
             resolve();
           },
@@ -486,52 +480,6 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
           this.router.navigate(['/']);
         }, 3000);
       }
-    });
-  }
-
-  // Load members for the community (Backend: GET /api/Communities/{id:guid}/members)
-  private loadCommunityMembers(communityId: string): void {
-    this.isLoadingMembers = true;
-    this.communityService.getCommunityMembers(communityId).subscribe({
-      next: (backendMembers) => {
-        if (backendMembers && backendMembers.length > 0) {
-          // Backend'den gelen üyeleri map et
-          this.members = backendMembers.map(
-            (m) =>
-            ({
-              id: m.id || 0,
-              name: m.name || this.getNameFromEmail(m.email),
-              role: m.role || 'Üye',
-              department: m.department || '',
-              email: m.email || '',
-              phone: m.phone || '',
-              grade: m.grade || '',
-              avatar:
-                m.avatar ||
-                `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                  (m.name || this.getNameFromEmail(m.email) || 'U').substring(0, 2)
-                )}&background=e2e8f0&color=1e293b`,
-              status: m.status || 'Aktif',
-              university: m.university || this.getUniversityFromEmail(m.email),
-            } as Member)
-          );
-
-          // Stats'ı güncelle
-          this.stats.totalMembers = this.members.length;
-        } else {
-          // Backend'den üye gelmezse boş array kullan
-          this.members = [];
-          this.stats.totalMembers = 0;
-        }
-        this.isLoadingMembers = false;
-      },
-      error: (err: any) => {
-        Logger.error('Topluluk üyeleri yüklenemedi:', err);
-        // Hata durumunda boş array kullan
-        this.members = [];
-        this.stats.totalMembers = 0;
-        this.isLoadingMembers = false;
-      },
     });
   }
 
@@ -771,26 +719,6 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  get filteredMembers() {
-    if (!this.memberSearchText) return this.members;
-    const term = this.memberSearchText.toLowerCase();
-    return this.members.filter(
-      (m) =>
-        m.name.toLowerCase().includes(term) ||
-        m.department.toLowerCase().includes(term) ||
-        m.email.toLowerCase().includes(term)
-    );
-  }
-
-  get pagedMembers() {
-    const start = (this.memberCurrentPage - 1) * this.membersPerPage;
-    return this.filteredMembers.slice(start, start + this.membersPerPage);
-  }
-
-  get memberTotalPages() {
-    return Math.max(1, Math.ceil(this.filteredMembers.length / this.membersPerPage));
-  }
-
   get filteredDashboardEvents() {
     let filtered: DashboardEvent[] = [];
 
@@ -832,7 +760,6 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       overview: 'Genel Bakış',
       projects: 'Etkinliklerim',
       network: 'Diğer Topluluklar',
-      members: 'Üyeler',
       settings: 'Profilim',
     };
     return titles[this.activeTab] || 'Panel';
@@ -852,11 +779,6 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     this.activeTab = tab;
     this.showNotifications = false;
     this.isProfileOpen = false;
-
-    // Üyeler sekmesine geçildiğinde üyeleri yükle
-    if (tab === 'members' && this.clubInfo?.id) {
-      this.loadCommunityMembers(this.clubInfo.id);
-    }
   }
 
   toggleNotifications(event?: MouseEvent) {
@@ -955,52 +877,37 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
   }
 
   onLogoFileSelected(file: File) {
-    // Backend'e logo yükle
-    if (!this.clubInfo.id) {
+    if (!this.clubInfo?.id) {
       this.showToast('Topluluk ID bulunamadı.', 'error');
       return;
     }
-
-    this.communityService.uploadLogo(this.clubInfo.id, file).subscribe({
-      next: (response) => {
-        // Backend'den gelen full URL'yi direkt kullan (zaten convert edilmiş)
-        const logoUrl = response.LogoUrl || (response as any).logoUrl || '';
-        this.clubInfo.logo = logoUrl;
-        this.showToast('Logo başarıyla yüklendi.', 'success');
-        this.showAvatarModal = false;
-      },
-      error: (error) => {
-        Logger.error('Logo yükleme hatası:', error);
-        this.showToast('Logo yüklenirken bir hata oluştu.', 'error');
-      }
-    });
+    // Direkt yükleme yok: dosyayı sakla, önizleme göster; "Güncelle ve Onaya Gönder" ile yüklenecek
+    if (this.clubInfo.logo?.startsWith('blob:')) {
+      URL.revokeObjectURL(this.clubInfo.logo);
+    }
+    this.pendingLogoFile = file;
+    this.clubInfo.logo = URL.createObjectURL(file);
+    this.showToast('Logo seçildi. Değişiklikler "Güncelle ve Onaya Gönder" ile GSB onayına gönderilecektir.', 'success');
+    this.showAvatarModal = false;
   }
 
   onBannerSelected(imageUrl: string) {
-    // ImageUploadComponent'ten gelen preview URL (base64 veya URL)
     this.clubInfo.banner = imageUrl;
   }
 
   onBannerFileSelected(file: File) {
-    // Backend'e banner yükle
-    if (!this.clubInfo.id) {
+    if (!this.clubInfo?.id) {
       this.showToast('Topluluk ID bulunamadı.', 'error');
       return;
     }
-
-    this.communityService.uploadBanner(this.clubInfo.id, file).subscribe({
-      next: (response) => {
-        // Backend'den gelen full URL'yi direkt kullan (zaten convert edilmiş)
-        const bannerUrl = response.BannerUrl || (response as any).bannerUrl || '';
-        this.clubInfo.banner = bannerUrl;
-        this.showToast('Banner başarıyla yüklendi.', 'success');
-        this.showBannerModal = false;
-      },
-      error: (error) => {
-        Logger.error('Banner yükleme hatası:', error);
-        this.showToast('Banner yüklenirken bir hata oluştu.', 'error');
-      }
-    });
+    // Direkt yükleme yok: dosyayı sakla, önizleme göster; "Güncelle ve Onaya Gönder" ile yüklenecek
+    if (this.clubInfo.banner?.startsWith('blob:')) {
+      URL.revokeObjectURL(this.clubInfo.banner);
+    }
+    this.pendingBannerFile = file;
+    this.clubInfo.banner = URL.createObjectURL(file);
+    this.showToast('Banner seçildi. Değişiklikler "Güncelle ve Onaya Gönder" ile GSB onayına gönderilecektir.', 'success');
+    this.showBannerModal = false;
   }
 
 
@@ -1019,11 +926,144 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     return emailOk && aboutOk;
   }
 
+  /** Profilim formu: zorunlu alanlar dolu mu (isim, topluluk e-posta, başkan e-posta, hakkımızda) */
+  get isProfileFormValid(): boolean {
+    const nameOk = !!this.clubInfo.name?.trim();
+    const emailOk = !!this.clubInfo.email?.trim();
+    const leadMailOk = !!this.clubInfo.comLeadMail?.trim();
+    const aboutOk = !!this.clubInfo.description?.trim();
+    return !!(nameOk && emailOk && leadMailOk && aboutOk);
+  }
+
   // GÜNCELLEME: Kontrol listesi sadeleştirildi (Website, Youtube vs. çıkarıldı)
-  // E-posta ve description artık değiştirilemez, bu yüzden kontrol dışı bırakıldı
   get isSettingsChanged() {
     const fields = ['instagram', 'banner', 'logo'];
     return fields.some((f) => (this.clubInfo as any)[f] !== this.initialClubInfo[f]);
+  }
+
+  /**
+   * Profilim sekmesinden topluluk bilgilerini güncelle ve GSB onayına gönder.
+   * Önce bekleyen banner/logo dosyaları yüklenir, sonra form + URL'ler ile update gönderilir.
+   * Topluluk GSB onay bekleyen kategorisine düşer; GSB Kurumsal Panel'den onaylayabilir.
+   */
+  saveCommunityProfile(): void {
+    if (!this.isProfileFormValid || this.isSavingProfile || !this.clubInfo?.id) {
+      if (!this.clubInfo?.id) this.showToast('Topluluk bilgisi yüklenemedi.', 'error');
+      return;
+    }
+
+    this.isSavingProfile = true;
+    const id =
+      typeof this.clubInfo.id === 'string' ? this.clubInfo.id : String(this.clubInfo.id);
+
+    const bannerUpload$ = this.pendingBannerFile
+      ? this.communityService.uploadBanner(id, this.pendingBannerFile).pipe(
+          map((r) => r.BannerUrl || (r as any).bannerUrl),
+          catchError((err) => {
+            this.isSavingProfile = false;
+            this.showToast('Banner yüklenirken bir hata oluştu.', 'error');
+            throw err;
+          })
+        )
+      : of(undefined);
+    const logoUpload$ = this.pendingLogoFile
+      ? this.communityService.uploadLogo(id, this.pendingLogoFile).pipe(
+          map((r) => r.LogoUrl || (r as any).logoUrl),
+          catchError((err) => {
+            this.isSavingProfile = false;
+            this.showToast('Logo yüklenirken bir hata oluştu.', 'error');
+            throw err;
+          })
+        )
+      : of(undefined);
+
+    forkJoin({ bannerUrl: bannerUpload$, logoUrl: logoUpload$ }).pipe(
+      switchMap(({ bannerUrl, logoUrl }) => {
+        const dto: any = {
+          comName: this.clubInfo.name?.trim() || undefined,
+          comCategory: this.clubInfo.category?.trim() || undefined,
+          comAbout: this.clubInfo.description?.trim() || undefined,
+          city: this.clubInfo.city?.trim() || undefined,
+          university: this.clubInfo.university?.trim() || undefined,
+          comMail: this.clubInfo.email?.trim() || undefined,
+          comLeadMail: this.clubInfo.comLeadMail?.trim() || undefined,
+          webSiteUrl: this.clubInfo.webSiteUrl?.trim() || undefined,
+          instagramUrl: this.clubInfo.instagramUrl?.trim() || this.clubInfo.instagram?.trim() || undefined,
+          miniAbout: this.clubInfo.miniAbout?.trim() || undefined,
+          isActivity: false, // GSB onay bekleyen kategorisine düşsün; GSB onaylayınca tekrar aktif olur
+        };
+        if (bannerUrl !== undefined) dto.bannerUrl = bannerUrl;
+        else if (this.clubInfo.banner && !this.clubInfo.banner.startsWith('data:') && !this.clubInfo.banner.startsWith('blob:'))
+          dto.bannerUrl = this.clubInfo.banner;
+        if (logoUrl !== undefined) dto.logoUrl = logoUrl;
+        else if (this.clubInfo.logo && !this.clubInfo.logo.startsWith('data:') && !this.clubInfo.logo.startsWith('blob:'))
+          dto.logoUrl = this.clubInfo.logo;
+
+        return this.communityService.updateCommunity(id, dto);
+      })
+    ).subscribe({
+      next: () => {
+        this.pendingBannerFile = null;
+        this.pendingLogoFile = null;
+        if (this.clubInfo.banner?.startsWith('blob:')) URL.revokeObjectURL(this.clubInfo.banner);
+        if (this.clubInfo.logo?.startsWith('blob:')) URL.revokeObjectURL(this.clubInfo.logo);
+        this.showToast(
+          'Topluluk bilgileri GSB onayına gönderildi. Onay bekleyen topluluklar kategorisinde görünecek; GSB onayından sonra değişiklikler yayına alınacaktır.',
+          'success'
+        );
+        this.initialClubInfo = JSON.parse(JSON.stringify(this.clubInfo));
+        this.refreshCommunityProfileAfterUpdate();
+      },
+      error: (err: any) => {
+        this.isSavingProfile = false;
+        const msg =
+          err?.error?.message || err?.error || 'Topluluk güncellenirken bir hata oluştu.';
+        this.showToast(typeof msg === 'string' ? msg : 'Güncelleme hatası.', 'error');
+      },
+    });
+  }
+
+  /**
+   * Güncelleme sonrası topluluk bilgisini yeniden yükle (GSB onayına gittiği için navigate etme).
+   */
+  private refreshCommunityProfileAfterUpdate(): void {
+    this.communityService.getMyLeadCommunity().subscribe({
+      next: (community) => {
+        this.isSavingProfile = false;
+        if (community) {
+          this.clubInfo = {
+            id: community.id,
+            name: community.name,
+            university: community.university || '',
+            city: community.city || '',
+            category: community.category || 'Genel',
+            logo: community.logo || this.clubInfo.logo,
+            banner: community.banner || community.coverImage || this.clubInfo.banner,
+            email: community.email || community.comMail || '',
+            phone: this.clubInfo.phone,
+            instagram: community.instagram || community.instagramUrl || '',
+            description: community.about || community.description || '',
+            comMail: community.comMail,
+            comLeadMail: community.comLeadMail,
+            webSiteUrl: community.webSiteUrl,
+            instagramUrl: community.instagramUrl,
+            miniAbout: community.miniAbout,
+          };
+          this.initialClubInfo = JSON.parse(JSON.stringify(this.clubInfo));
+          this.displayName = community.name || this.userName;
+          this.userInitial = this.displayName.charAt(0).toUpperCase();
+          this.communityApproved = community.isActivity === true;
+          localStorage.setItem('community_approved', JSON.stringify(this.communityApproved));
+          if (this.communityApproved) {
+            this.loadCommunityEvents(community.id);
+            this.loadLeaderStats();
+          }
+        }
+      },
+      error: () => {
+        this.isSavingProfile = false;
+      },
+    });
   }
 
   openModal(type: any) {
@@ -1043,31 +1083,6 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       imageFile: null,
     };
     this.newProjectData = { name: '', category: 'Teknoloji', budget: 0, deadline: '' };
-    this.newMemberData = {
-      name: '',
-      department: '',
-      role: 'Üye',
-      email: '',
-      phone: '',
-      grade: '1. Sınıf',
-    };
-    this.memberSearchQuery = '';
-    this.memberSearchResults = [];
-    this.isSearchingMembers = false;
-    this.isBulkAddMode = false;
-    this.bulkEmailsText = '';
-    // Email validation state'lerini sıfırla
-    this.emailChecking = false;
-    this.emailExists = false;
-    this.emailValid = false;
-    this.emailInputComplete = false;
-    this.emailUserRoleId = null;
-    this.emailIsCorporate = false;
-    this.emailErrorMessage = null;
-    if (this.emailCheckTimeout) {
-      clearTimeout(this.emailCheckTimeout);
-      this.emailCheckTimeout = null;
-    }
   }
 
   closeModal() {
@@ -1434,380 +1449,6 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     reader.readAsDataURL(file);
   }
 
-  saveMember() {
-    // Toplu ekleme modu aktifse, toplu ekleme fonksiyonunu çağır
-    if (this.isBulkAddMode) {
-      this.saveBulkMembers();
-      return;
-    }
-
-    // Email zorunluluğu kontrolü
-    if (!this.newMemberData.email || !this.newMemberData.email.trim()) {
-      this.showToast('E-posta adresi zorunludur.', 'error');
-      return;
-    }
-
-    // Email formatını kontrol et
-    if (!this.isValidEmail(this.newMemberData.email)) {
-      this.showToast('Geçerli bir e-posta adresi giriniz.', 'error');
-      return;
-    }
-
-    // Community ID kontrolü
-    const communityId = this.clubInfo?.id;
-    if (!communityId) {
-      this.showToast('Topluluk bilgisi bulunamadı.', 'error');
-      return;
-    }
-
-    // Backend'e direkt istek at - tüm kontroller backend'de yapılacak
-    this.communityService.addMember(communityId, { email: this.newMemberData.email }).subscribe({
-      next: () => {
-        // Başarılı - üyeleri backend'den yeniden yükle
-        if (this.clubInfo.id) {
-          this.loadCommunityMembers(this.clubInfo.id);
-        }
-        this.showToast('Üye eklendi.', 'success');
-        this.memberCurrentPage = 1;
-        this.closeModal();
-      },
-      error: (err: any) => {
-        Logger.error('Üye eklenirken hata:', err);
-
-        // Backend'den gelen hata mesajını al
-        let errorMessage = err.error?.message || 'Üye eklenirken bir hata oluştu.';
-
-        // HTTP status koduna göre özel mesajlar
-        if (err.status === 400) {
-          // 400: Email gereklidir veya geçersiz domain
-          if (errorMessage.includes('edu.tr')) {
-            errorMessage = 'Sadece .edu.tr uzantılı e-posta adresleri eklenebilir.';
-          } else if (errorMessage.includes('Email gereklidir')) {
-            errorMessage = 'E-posta adresi zorunludur.';
-          }
-        } else if (err.status === 403) {
-          // 403: GSB yetkilisi eklenemez
-          errorMessage = 'GSB yetkilisi topluluğa üye olarak eklenemez.';
-        } else if (err.status === 404) {
-          // 404: Kullanıcı bulunamadı
-          errorMessage = 'Bu e-posta ile kayıtlı kullanıcı bulunamadı.';
-        } else if (err.status === 409) {
-          // 409: Üye zaten ekli
-          errorMessage = 'Üye zaten ekli.';
-          // Üyeleri yeniden yükle
-          if (this.clubInfo.id) {
-            this.loadCommunityMembers(this.clubInfo.id);
-          }
-          this.memberCurrentPage = 1;
-          this.closeModal();
-          this.showToast(errorMessage, 'error');
-          return;
-        }
-
-        this.showToast(errorMessage, 'error');
-      },
-    });
-  }
-
-  // Edit member functionality (frontend only, no backend update endpoint)
-  private proceedWithAddMember() {
-    if (this.modalType === 'edit-member') {
-      // Backend'de üye güncelleme yok, sadece silip yeniden ekleme yapılabilir
-      // Şimdilik sadece frontend'de güncelleme yapıyoruz
-      const id = (this.newMemberData as any).id;
-      const index = this.members.findIndex((m) => m.id === id);
-      if (index !== -1) {
-        this.members[index] = {
-          ...this.members[index],
-          name: this.newMemberData.name,
-          role: this.newMemberData.role,
-          department: this.newMemberData.department,
-          email: this.newMemberData.email,
-          phone: this.newMemberData.phone,
-          grade: this.newMemberData.grade,
-        };
-        this.showToast('Üye güncellendi.', 'success');
-      }
-      this.closeModal();
-    }
-    // Normal member addition is now handled directly in saveMember()
-  }
-
-  onMemberSearch() {
-    const term = this.memberSearchQuery?.trim() || '';
-
-    // İlk harf yazıldığında aramayı başlat (minimum 1 karakter)
-    if (!term || term.length < 1) {
-      this.memberSearchResults = [];
-      this.isSearchingMembers = false;
-      return;
-    }
-
-    // İlk harf yazıldığında aramayı başlat
-    this.isSearchingMembers = true;
-
-    // Debug: İlk harf yazıldığında arama yapıldığını kontrol et
-    Logger.log('Arama başlatıldı, terim:', term, 'Uzunluk:', term.length);
-
-    // Backend'den topluluğa üye olmayan öğrencileri ara
-    this.communityService.searchNonMemberStudents(term).subscribe({
-      next: (students) => {
-        // Backend'den gelen öğrencileri filtrele (mevcut üyeler hariç)
-        const memberEmails = new Set(this.members.map((m) => m.email.toLowerCase()));
-        const filteredStudents = students
-          .filter((s: any) => {
-            const email = (s.email || s.Email || '').toLowerCase();
-            return !memberEmails.has(email);
-          })
-          .map((s: any) => {
-            const name = s.name || s.Name || this.getNameFromEmail(s.email || s.Email || '');
-            const email = s.email || s.Email || '';
-            return {
-              name,
-              email,
-              relevanceScore: this.calculateRelevanceScore(name, email, term),
-            };
-          })
-          .sort((a, b) => b.relevanceScore - a.relevanceScore); // En ilgili sonuçtan ilgisiz sonuca doğru sırala
-
-        // Minimum 5 sonuç göster, eğer 5'ten az varsa tüm sonuçları göster
-        if (filteredStudents.length >= 5) {
-          this.memberSearchResults = filteredStudents.slice(0, 5);
-        } else {
-          // 5'ten az sonuç varsa, tüm sonuçları göster (en ilgili sonuçtan ilgisiz sonuca doğru)
-          this.memberSearchResults = filteredStudents;
-        }
-
-        this.isSearchingMembers = false;
-      },
-      error: (err) => {
-        Logger.error('Öğrenci arama hatası:', err);
-        this.memberSearchResults = [];
-        this.isSearchingMembers = false;
-      },
-    });
-  }
-
-  // Relevance scoring: Daha ilgili sonuçları önce getir
-  private calculateRelevanceScore(name: string, email: string, query: string): number {
-    let score = 0;
-    const queryLower = query.toLowerCase();
-    const nameLower = name.toLowerCase();
-    const emailLower = email.toLowerCase();
-
-    // İsim tam eşleşmesi (en yüksek öncelik)
-    if (nameLower === queryLower) {
-      score += 1000;
-    }
-    // İsim başlangıcı eşleşmesi
-    else if (nameLower.startsWith(queryLower)) {
-      score += 500;
-    }
-    // İsim içinde eşleşme
-    else if (nameLower.includes(queryLower)) {
-      score += 200;
-    }
-
-    // Email tam eşleşmesi
-    if (emailLower === queryLower) {
-      score += 1000;
-    }
-    // Email başlangıcı eşleşmesi
-    else if (emailLower.startsWith(queryLower)) {
-      score += 500;
-    }
-    // Email içinde eşleşme
-    else if (emailLower.includes(queryLower)) {
-      score += 200;
-    }
-
-    // Email'de @ öncesi kısım eşleşmesi (local part)
-    const emailLocalPart = emailLower.split('@')[0];
-    if (emailLocalPart === queryLower) {
-      score += 400;
-    } else if (emailLocalPart.startsWith(queryLower)) {
-      score += 300;
-    } else if (emailLocalPart.includes(queryLower)) {
-      score += 150;
-    }
-
-    return score;
-  }
-
-  selectMemberSuggestion(user: UserSearchResult) {
-    this.newMemberData.name = user.name;
-    this.newMemberData.email = user.email;
-    this.memberSearchQuery = `${user.name} (${user.email})`;
-    this.memberSearchResults = [];
-    this.memberCurrentPage = 1;
-    // Email formatını kontrol et
-    this.emailValid = this.isValidEmail(user.email);
-  }
-
-  // Email format kontrolü (backend sorgusu yapılmaz, sadece format kontrolü)
-  onEmailInputChange() {
-    const email = this.newMemberData.email?.trim() || '';
-
-    // Sadece email formatını kontrol et
-    this.emailValid = this.isValidEmail(email);
-
-    // Backend sorgusu yapılmaz - sadece "Kaydet" butonuna basıldığında kontrol edilecek
-    // State'leri sıfırla (backend kontrolü yapılmayacak)
-    if (!email) {
-      this.emailValid = false;
-      return;
-    }
-  }
-
-  // Email formatını kontrol et
-  private isValidEmail(email: string): boolean {
-    if (!email) return false;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  }
-
-  // checkEmailExists metodu kaldırıldı - artık sadece "Kaydet" butonuna basıldığında backend'e istek atılıyor
-
-  // Mail adresinden isim çıkarma
-  getNameFromEmail(email: string): string {
-    if (!email) return '';
-    const parts = email.split('@');
-    if (parts.length > 0) {
-      // "ahmet.yilmaz" -> "Ahmet Yilmaz"
-      return parts[0]
-        .split(/[._]/)
-        .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
-        .join(' ');
-    }
-    return email;
-  }
-
-  // Mail adresinden üniversite çıkarma (domain'den)
-  getUniversityFromEmail(email: string): string {
-    const emailRegex = /^[^\s@]+@([^\s@]+)$/;
-    const match = email.match(emailRegex);
-    if (!match) return '';
-
-    const domain = match[1].toLowerCase();
-
-    // Üniversite domain mapping
-    const universityMap: { [key: string]: string } = {
-      'itu.edu.tr': 'İTÜ',
-      'bogazici.edu.tr': 'Boğaziçi',
-      'odtu.edu.tr': 'ODTÜ',
-      'metu.edu.tr': 'ODTÜ',
-      'hacettepe.edu.tr': 'Hacettepe',
-      'ege.edu.tr': 'Ege',
-      'marmara.edu.tr': 'Marmara',
-      'ankara.edu.tr': 'Ankara',
-      'gsu.edu.tr': 'Galatasaray',
-      'gsb.edu.tr': 'GSB',
-      'yildiz.edu.tr': 'YTÜ',
-      'koc.edu.tr': 'Koç',
-    };
-
-    // Eğer mapping'de varsa kullan, yoksa domain'i formatla
-    if (universityMap[domain]) {
-      return universityMap[domain];
-    }
-
-    // Domain'i formatla (örnek: itu.edu.tr -> İTÜ)
-    const parts = domain.split('.');
-    if (parts.length >= 2 && parts[1] === 'edu' && parts[2] === 'tr') {
-      const uniCode = parts[0].toUpperCase();
-      return uniCode;
-    }
-
-    // Fallback: domain'i direkt göster
-    return domain;
-  }
-
-  // Toplu mail parse etme
-  parseBulkEmails(text: string): string[] {
-    if (!text || !text.trim()) return [];
-
-    // Sadece virgül ile ayrılmış mailleri parse et
-    const emails = text
-      .split(',')
-      .map((email) => email.trim())
-      .filter((email) => {
-        // Boş string'leri filtrele
-        if (!email) return false;
-        // Basit email validasyonu
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-      });
-
-    return emails;
-  }
-
-  // Toplu üye ekleme - her email için tek tek addMember çağrısı
-  saveBulkMembers() {
-    const emails = this.parseBulkEmails(this.bulkEmailsText);
-
-    if (emails.length === 0) {
-      this.showToast('Geçerli e-posta adresi bulunamadı.', 'error');
-      return;
-    }
-
-    const communityId = this.clubInfo?.id;
-    if (!communityId) {
-      this.showToast('Topluluk bilgisi bulunamadı.', 'error');
-      return;
-    }
-
-    // Her email için backend'e istek at
-    let successCount = 0;
-    let failedEmails: string[] = [];
-    let completedCount = 0;
-
-    emails.forEach(email => {
-      this.communityService.addMember(communityId, { email }).subscribe({
-        next: () => {
-          successCount++;
-          completedCount++;
-          this.checkBulkComplete(completedCount, emails.length, successCount, failedEmails);
-        },
-        error: (err: any) => {
-          failedEmails.push(email);
-          completedCount++;
-          Logger.error(`Üye eklenemedi (${email}):`, err);
-          this.checkBulkComplete(completedCount, emails.length, successCount, failedEmails);
-        }
-      });
-    });
-  }
-
-  private checkBulkComplete(completed: number, total: number, success: number, failed: string[]) {
-    if (completed === total) {
-      // Tüm istekler tamamlandı
-      if (this.clubInfo.id) {
-        this.loadCommunityMembers(this.clubInfo.id);
-      }
-
-      if (success === total) {
-        this.showToast(`${success} üye başarıyla eklendi.`, 'success');
-      } else if (success > 0) {
-        this.showToast(`${success} üye eklendi, ${failed.length} e-posta eklenemedi (sistemde kayıtlı değil).`, 'success');
-      } else {
-        this.showToast(`Hiçbir üye eklenemedi. E-postalar sistemde kayıtlı değil.`, 'error');
-      }
-
-      this.bulkEmailsText = '';
-      this.memberCurrentPage = 1;
-      this.closeModal();
-    }
-  }
-
-  openDeleteConfirm(id: number) {
-    this.clearToast();
-    this.clearConfirmTimer();
-    this.confirmDeleteId = id;
-    this.confirmDeleteType = 'member';
-    this.confirmVisible = true;
-    this.confirmHiding = false;
-  }
-
   openDeleteEventConfirm(id: number) {
     this.clearToast();
     this.clearConfirmTimer();
@@ -1825,11 +1466,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
   }
 
   confirmDeleteAction() {
-    if (this.confirmDeleteType === 'member') {
-      this.deleteMemberConfirmed();
-    } else {
-      this.deleteEventConfirmed();
-    }
+    this.deleteEventConfirmed();
   }
 
   deleteEventConfirmed() {
@@ -1867,71 +1504,6 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
         this.startCloseConfirm();
       },
     });
-  }
-
-  deleteMemberConfirmed() {
-    if (this.confirmDeleteId === null) return;
-
-    // Silinecek üyeyi bul
-    const memberToDelete = this.members.find((m) => m.id === this.confirmDeleteId);
-    if (!memberToDelete) {
-      this.startCloseConfirm();
-      return;
-    }
-
-    // Community ID kontrolü
-    const communityId = this.clubInfo?.id;
-    if (!communityId) {
-      this.showToast('Topluluk bilgisi bulunamadı.', 'error');
-      this.startCloseConfirm();
-      return;
-    }
-
-    // Backend'den üye çıkar
-    // Backend endpoint: DELETE /api/Communities/me/members
-    // id parametresi kullanılmıyor, token'dan topluluk bilgisi alınıyor
-    this.communityService.removeMember(communityId, { email: memberToDelete.email }).subscribe({
-      next: () => {
-        // Başarılı - üyeleri backend'den yeniden yükle
-        if (this.clubInfo.id) {
-          this.loadCommunityMembers(this.clubInfo.id);
-        }
-        this.showToast('Üye silindi.', 'success');
-        if (this.memberCurrentPage > this.memberTotalPages) {
-          this.memberCurrentPage = this.memberTotalPages;
-        }
-        this.startCloseConfirm();
-      },
-      error: (err: any) => {
-        Logger.error('Üye silinirken hata:', err);
-        const errorMsg = err.error?.message || 'Üye silinirken bir hata oluştu.';
-        this.showToast(errorMsg, 'error');
-        this.startCloseConfirm();
-      },
-    });
-  }
-
-  setMemberPage(page: number) {
-    if (page < 1 || page > this.memberTotalPages) return;
-    this.memberCurrentPage = page;
-  }
-
-  onMemberSearchChange() {
-    this.memberCurrentPage = 1;
-  }
-
-  editMember(member: Member) {
-    this.openModal('edit-member');
-    this.newMemberData = {
-      name: member.name,
-      department: member.department,
-      role: member.role,
-      email: member.email,
-      phone: member.phone,
-      grade: member.grade,
-    };
-    // Store ID to know which member to update
-    (this.newMemberData as any).id = member.id;
   }
 
   private startCloseConfirm() {

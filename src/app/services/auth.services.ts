@@ -153,6 +153,49 @@ export class AuthService {
     return this.http.post(`${this.apiUrl}/Auth/register`, backendData);
   }
 
+  // --- 7. TOPLULUK KURULUM TAMAMLA ---
+  // POST /api/Auth/complete-community-setup
+  // E-posta doğrulandıktan sonra topluluk başkanı topluluk bilgilerini girerek hesap+topluluk oluşturur.
+  // setupToken: verify-email cevabından gelen token
+  // community: CreateCommunityDto — topluluk bilgileri
+  // Cevap: AuthResponse (accessToken, refreshToken, user info)
+  completeCommunitySetup(setupToken: string, community: any): Observable<any> {
+    return this.http
+      .post<any>(`${this.apiUrl}/Auth/complete-community-setup`, {
+        setupToken,
+        community,
+      })
+      .pipe(
+        tap((response: any) => {
+          const token =
+            response?.accessToken ||
+            response?.AccessToken ||
+            response?.token ||
+            null;
+          const refresh =
+            response?.refreshToken || response?.RefreshToken || null;
+          const roleName =
+            response?.roleName || response?.RoleName || 'community';
+
+          if (token) {
+            this.saveToken(token);
+          }
+          if (refresh) {
+            localStorage.setItem('refresh_token', refresh);
+          }
+
+          const userObj = {
+            id: response?.id || response?.Id,
+            name: response?.fullName || response?.FullName,
+            email: response?.email || response?.Email,
+            role: roleName,
+          };
+          this.saveUser(userObj);
+          this.saveUserType('community');
+        })
+      );
+  }
+
   // --- MAİLİ TEKRAR GÖNDER (Resend verification) ---
   // POST /api/auth/resend-verification — Body: { "email": "..." }
   resendVerificationEmail(email: string): Observable<{ message?: string }> {
@@ -194,6 +237,23 @@ export class AuthService {
     return localStorage.getItem('user_type');
   }
 
+  // --- TOPLULUK ONAY DURUMU ---
+  /** Topluluk onay durumunu localStorage'a kaydet */
+  saveCommunityApproved(approved: boolean): void {
+    localStorage.setItem('community_approved', JSON.stringify(approved));
+  }
+
+  /** Topluluk onay durumunu oku. null = bilinmiyor */
+  isCommunityApproved(): boolean | null {
+    const val = localStorage.getItem('community_approved');
+    if (val === null) return null;
+    try {
+      return JSON.parse(val) === true;
+    } catch {
+      return null;
+    }
+  }
+
   logout(): void {
     // Token varsa backend'e logout isteği atıyoruz (Token'ı geçersiz kılmak için)
     // Token yoksa veya geçersizse backend'e istek atmaya gerek yok (401 hatası döngüsünü önlemek için)
@@ -219,6 +279,7 @@ export class AuthService {
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('user_info');
     localStorage.removeItem('user_type');
+    localStorage.removeItem('community_approved');
     // Anasayfaya yönlendir
     this.router.navigate(['/']);
   }
