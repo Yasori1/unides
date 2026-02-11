@@ -208,10 +208,13 @@ export class CommunityService {
         ? dto.IsActivity
         : true;
 
-    // comConfirm: 0=beklemede, 1=onaylandı, 2=reddedildi
+    // comConfirm: 0=beklemede, 1=onaylandı, 2=reddedildi. deletedAt varsa Silinmiş.
+    const deletedAt = dto.deletedAt ?? dto.DeletedAt ?? null;
     const comConfirm = dto.comConfirm ?? dto.ComConfirm;
-    let status: 'Aktif' | 'Pasif' | 'Onay Bekleyen' | 'Reddedilen';
-    if (comConfirm === 0 || (comConfirm === undefined && !isActivity)) {
+    let status: 'Aktif' | 'Pasif' | 'Onay Bekleyen' | 'Reddedilen' | 'Silinmiş';
+    if (deletedAt != null && deletedAt !== '') {
+      status = 'Silinmiş';
+    } else if (comConfirm === 0 || (comConfirm === undefined && !isActivity)) {
       status = 'Onay Bekleyen';
     } else if (comConfirm === 2) {
       status = 'Reddedilen';
@@ -243,14 +246,25 @@ export class CommunityService {
           ? this.convertImagePathToFullUrl(dto.bannerUrl || dto.BannerUrl)
           : this.placeholderCover,
       status: status,
+      deletedAt: deletedAt ?? undefined,
       miniAbout: dto.miniAbout || dto.MiniAbout,
       isActivity: isActivity,
       comConfirm: comConfirm,
+      // Reddedilme nedeni (liste/passive endpoint'inde ConfirmAbout dönebilir)
+      confirmAbout: dto.confirmAbout || dto.ConfirmAbout || '',
       // Email alanları - backend'den gelebilir veya detay endpoint'inden çekilecek
       email: dto.comMail || dto.ComMail || '',
       comMail: dto.comMail || dto.ComMail || '',
       comLeadMail: dto.comLeadMail || dto.ComLeadMail || '',
     };
+  }
+
+  private statusFromDetailDto(dto: any): 'Aktif' | 'Pasif' | 'Onay Bekleyen' | 'Reddedilen' {
+    const comConfirm = dto.comConfirm ?? dto.ComConfirm;
+    if (comConfirm === 2) return 'Reddedilen';
+    if (comConfirm === 0) return 'Onay Bekleyen';
+    const isActivity = dto.isActivity !== undefined ? dto.isActivity : dto.IsActivity;
+    return isActivity ? 'Aktif' : 'Pasif';
   }
 
   // CommunityDetailDto'yu Community'ye dönüştür (Detail için)
@@ -285,7 +299,8 @@ export class CommunityService {
       website: dto.webSiteUrl || dto.WebSiteUrl || '',
       email: dto.comMail || dto.ComMail || '',
       instagram: dto.instagramUrl || dto.InstagramUrl || '',
-      status: (dto.isActivity !== undefined ? dto.isActivity : dto.IsActivity) ? 'Aktif' : 'Pasif',
+      status: this.statusFromDetailDto(dto),
+      confirmAbout: dto.confirmAbout || dto.ConfirmAbout || '',
       presidentEmail: dto.comLeadMail || dto.ComLeadMail || '',
       comMail: dto.comMail || dto.ComMail || '',
       comLeadMail: dto.comLeadMail || dto.ComLeadMail || '',
@@ -304,13 +319,26 @@ export class CommunityService {
 
   // Tüm Toplulukları Getir (Backend: GET /api/Communities)
   // Query parametreleri: city, university, category, name, status
-  // status: "active"/"aktif" (sadece aktif), "passive"/"pasif" (sadece pasif), "all"/"tumu"/"tümü" (tümü)
+  // status: active | passive | pending | rejected | deleted | all (backend ParseStatus ile uyumlu)
   getAllCommunities(params?: {
     city?: string;
     university?: string;
     category?: string;
     name?: string;
-    status?: 'active' | 'aktif' | 'passive' | 'pasif' | 'pending' | 'all' | 'tumu' | 'tümü';
+    status?:
+      | 'active'
+      | 'aktif'
+      | 'passive'
+      | 'pasif'
+      | 'pending'
+      | 'rejected'
+      | 'reddedilen'
+      | 'deleted'
+      | 'silinmis'
+      | 'silinmiş'
+      | 'all'
+      | 'tumu'
+      | 'tümü';
   }): Observable<Community[]> {
     let httpParams = new HttpParams();
     if (params?.city) httpParams = httpParams.set('city', params.city);
@@ -573,19 +601,20 @@ export class CommunityService {
     );
   }
 
-  // Topluluk Sil (Backend: DELETE /api/Communities/{id:guid})
-  deleteCommunity(id: string): Observable<void> {
-    // Auth interceptor automatically adds Authorization header if token exists
+  // Topluluk Sil (Backend: DELETE /api/Communities/{id:guid}, body: { Reason } zorunlu; backend silme nedenini topluluk başkanına e-posta ile gönderir ve topluluğu siler)
+  deleteCommunity(id: string, reason: string): Observable<void> {
     const deleteUrl = `${this.apiUrl}/${id}`;
-    console.log('DELETE request to:', deleteUrl);
-    console.log('DELETE method: DELETE');
-    return this.http.delete<void>(deleteUrl).pipe(
-      catchError((error) => {
-        console.error('DELETE request failed:', error);
-        // Hata zaten throw ediliyor
-        throw error;
+    const body = { Reason: (reason || '').trim() };
+    return this.http
+      .request<void>('DELETE', deleteUrl, {
+        body,
       })
-    );
+      .pipe(
+        catchError((error) => {
+          Logger.error('DELETE request failed:', error);
+          throw error;
+        })
+      );
   }
 
   // Üye Ekle (Backend: POST /api/Communities/me/members)
@@ -1122,7 +1151,10 @@ export class CommunityService {
             } else if (finalPath.startsWith('/images/')) {
               finalPath = finalPath.replace('/images/', '/ImagesUnides/');
             }
-            return { BannerUrl: finalPath };
+            // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'community.services.ts:uploadBanner',message:'Banner upload response',data:{rawPath:path,returnedBannerUrl:finalPath,len:finalPath?.length},timestamp:Date.now(),hypothesisId:'A'})}).catch(()=>{});
+          // #endregion
+          return { BannerUrl: finalPath };
           }
           if (path.startsWith('http')) {
             try {

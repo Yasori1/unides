@@ -19,6 +19,8 @@ export interface CommunityMiniDto {
   comMail?: string;
   comLeadMail?: string;
   comConfirm?: number; // 0=beklemede, 1=onaylandı, 2=reddedildi
+  confirmAbout?: string; // Reddedilme gerekçesi (ComConfirm=2)
+  ConfirmAbout?: string;
 }
 
 // Backend: CommunityEventDto
@@ -46,6 +48,8 @@ export interface CommunityDetailDto {
   logoUrl?: string;
   miniAbout?: string;
   isActivity: boolean;
+  comConfirm?: number;
+  confirmAbout?: string; // Reddetme gerekçesi (ComConfirm=2)
   events: CommunityEventDto[];
 }
 
@@ -120,7 +124,11 @@ export interface Community {
   tiktok?: string;
   website?: string;
   email?: string;
-  status?: 'Aktif' | 'Pasif' | 'Onay Bekleyen' | 'Reddedilen';
+  status?: 'Aktif' | 'Pasif' | 'Onay Bekleyen' | 'Reddedilen' | 'Silinmiş';
+  /** Reddetme gerekçesi (ComConfirm=2 iken backend ConfirmAbout) */
+  confirmAbout?: string;
+  /** Soft delete: Backend DeletedAt döndürürse dolu (Silinmiş filtresi için) */
+  deletedAt?: string | null;
   presidentEmail?: string;
   // Backend'den gelen ek alanlar
   comMail?: string;

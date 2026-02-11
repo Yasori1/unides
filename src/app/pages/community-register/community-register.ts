@@ -10,8 +10,8 @@ import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.compo
 import { ImageUploadComponent } from '../../components/ui/image-upload/image-upload';
 import { Logger } from '../../utils/logger.util';
 import { CreateCommunityDto } from '../../models/community.models';
-import { forkJoin, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
+import { catchError, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-community-register',
@@ -368,8 +368,16 @@ export class CommunityRegisterComponent implements OnInit {
       this.toastService.show('Topluluk adı zorunludur.', 'error');
       return;
     }
-    if (!this.comLeadMail?.trim()) {
-      this.toastService.show('Topluluk başkanı e-postası zorunludur.', 'error');
+    if (!this.comCategory?.trim()) {
+      this.toastService.show('Kategori seçiniz.', 'error');
+      return;
+    }
+    if (!this.miniAbout?.trim()) {
+      this.toastService.show('Kısa açıklama zorunludur.', 'error');
+      return;
+    }
+    if (!this.about?.trim()) {
+      this.toastService.show('Topluluk hakkında açıklaması zorunludur.', 'error');
       return;
     }
     if (!this.city?.trim()) {
@@ -380,20 +388,28 @@ export class CommunityRegisterComponent implements OnInit {
       this.toastService.show('Üniversite adı giriniz.', 'error');
       return;
     }
+    if (!this.comLeadMail?.trim()) {
+      this.toastService.show('Topluluk başkanı e-postası zorunludur.', 'error');
+      return;
+    }
     if (!this.comMail?.trim()) {
       this.toastService.show('Topluluk iletişim e-postası zorunludur.', 'error');
+      return;
+    }
+    if (!this.bannerFile) {
+      this.toastService.show('Lütfen topluluk kapak görseli (banner) yükleyin.', 'error');
+      return;
+    }
+    if (!this.logoFile) {
+      this.toastService.show('Lütfen topluluk logosu yükleyin.', 'error');
       return;
     }
 
     this.isLoading = true;
 
-    // Banner ve Logo URL'leri: /ImagesUnides/Banner/ ve /ImagesUnides/Logo/ formatında bağlanır (MaxLength 255).
-    const bannerUrl = this.bannerFile
-      ? `/ImagesUnides/Banner/${this.getUniqueImageId()}.${this.getFileExtension(this.bannerFile.name)}`
-      : undefined;
-    const logoUrl = this.logoFile
-      ? `/ImagesUnides/Logo/${this.getUniqueImageId()}.${this.getFileExtension(this.logoFile.name)}`
-      : undefined;
+    // Banner ve Logo: Placeholder (kısa ID) göndermiyoruz; yükleme sonrası backend Guid path atayacak. Kısa path kaydedilirse banner görüntülenmez.
+    const bannerUrl = undefined;
+    const logoUrl = undefined;
 
     const dto: CreateCommunityDto = {
       comName: this.comName.trim(),
@@ -492,42 +508,34 @@ export class CommunityRegisterComponent implements OnInit {
   }
 
   /**
-   * Topluluk oluşturulduktan sonra banner/logo dosyalarını sunucuya yükler, ardından başarı ekranını gösterir.
+   * Topluluk oluşturulduktan sonra banner/logo dosyalarını sunucuya sırayla yükler (paralel yükleme ikinci update'in birincisini ezmesin diye).
    */
   private uploadBannerAndLogoThenSuccess(communityId: string): void {
     if (!communityId) {
       this.onCommunitySetupSuccess();
       return;
     }
-    const uploadTasks: any[] = [];
-    if (this.logoFile) {
-      uploadTasks.push(
-        this.communityService.uploadLogo(communityId, this.logoFile).pipe(
-          catchError((err) => {
-            Logger.error('Logo yüklenirken hata:', err);
-            return of(null);
-          })
-        )
-      );
-    }
-    if (this.bannerFile) {
-      uploadTasks.push(
-        this.communityService.uploadBanner(communityId, this.bannerFile).pipe(
+    const banner$ = this.bannerFile
+      ? this.communityService.uploadBanner(communityId, this.bannerFile).pipe(
           catchError((err) => {
             Logger.error('Banner yüklenirken hata:', err);
             return of(null);
           })
         )
-      );
-    }
-    if (uploadTasks.length > 0) {
-      forkJoin(uploadTasks).subscribe({
-        next: () => this.onCommunitySetupSuccess(),
-        error: () => this.onCommunitySetupSuccess(),
-      });
-    } else {
-      this.onCommunitySetupSuccess();
-    }
+      : of(null);
+    const logo$ = this.logoFile
+      ? this.communityService.uploadLogo(communityId, this.logoFile).pipe(
+          catchError((err) => {
+            Logger.error('Logo yüklenirken hata:', err);
+            return of(null);
+          })
+        )
+      : of(null);
+    // Önce banner, sonra logo — sıralı çalıştır ki backend'de ikinci UpdateAsync birincinin alanını ezmesin
+    banner$.pipe(switchMap(() => logo$)).subscribe({
+      next: () => this.onCommunitySetupSuccess(),
+      error: () => this.onCommunitySetupSuccess(),
+    });
   }
 
   /**

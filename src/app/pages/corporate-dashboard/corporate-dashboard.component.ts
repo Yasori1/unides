@@ -93,7 +93,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   isModalOpen = false;
   modalType = '';
   searchText = '';
-  statusFilter: string = ''; // Aktif/Pasif filtre
+  statusFilter: string = ''; // Aktif/Pasif filtre ('' = Tüm Durumlar sadece Bartın için)
   cityFilter: string = ''; // Şehir filtresi
   announcementSearchText = ''; // Duyuru arama metni
   eventSearchText = ''; // Etkinlik arama metni
@@ -353,10 +353,10 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
 
     if (statusParam) {
       this.statusFilter = statusParam;
-      // Query parametresinden gelen status filtresine göre toplulukları yükle
       this.loadCommunitiesFromService(this.statusFilter);
     } else {
-      // İlk yüklemede filtresiz (Tüm Durumlar) tüm toplulukları getir
+      // Topluluklar sekmesine her girişte varsayılan "Tüm Durumlar"
+      this.statusFilter = '';
       this.loadCommunitiesFromService('');
     }
     // Overview için loading state'i başlat
@@ -386,19 +386,152 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     }
   }
 
+  /** API'den gelen topluluk listesini işleyip ekrana yansıtır. Backend: active | passive | pending | all. Reddedilen/Silinmiş = all + client filter. */
+  private handleCommunitiesLoaded(communities: Community[], statusFilter?: string): void {
+    let mapped = communities;
+    if (statusFilter === 'Reddedilen') {
+      mapped = mapped.filter((c) => c.status === 'Reddedilen');
+    } else if (statusFilter === 'Silinmiş') {
+      mapped = mapped.filter((c) => c.deletedAt != null && c.deletedAt !== '');
+    }
+    this.allCommunities = mapped;
+    const uniqueCategories = [
+      ...new Set(
+        this.allCommunities
+          .map((c) => c.category)
+          .filter((cat): cat is string => !!cat && cat !== 'Genel')
+      ),
+    ].sort();
+    this.categories = [...new Set([...this.categories, ...uniqueCategories, 'Genel'])].sort();
+    this.communities = [...this.allCommunities];
+    this.applyFilters();
+    this.attachCommunityNamesToEvents();
+    this.isLoadingCommunities = false;
+  }
+
+  /** Topluluklar yükleme hatası: 403 ise aktif topluluklara düş, değilse mevcut listeyi koru */
+  private handleCommunitiesError(err: any): void {
+    if (err?.status === 403) {
+      this.showToast(
+        'Pasif toplulukları görüntülemek için GSB yetkisi gereklidir. Şu anda sadece aktif topluluklar gösteriliyor.',
+        'error'
+      );
+      this.communityService.getAllCommunities({ status: 'active' }).subscribe({
+        next: (data) => {
+          const mapped = (data || []).map((c) => {
+            const { website, webSiteUrl, instagram, instagramUrl, socialMedia, ...rest } = c;
+            const isActivity = c.isActivity !== undefined ? c.isActivity : true;
+            const coverUrl =
+              (c.coverImage && String(c.coverImage).trim()) || (c.banner && String(c.banner).trim())
+                ? c.coverImage || c.banner
+                : '';
+            const logoUrl = c.logo && String(c.logo).trim() ? c.logo : '';
+            return {
+              ...rest,
+              about: c.description || c.about || '',
+              banner: coverUrl || 'assets/img/placeholder-cover.svg',
+              coverImage: coverUrl || 'assets/img/placeholder-cover.svg',
+              logo: logoUrl || 'assets/img/placeholder-logo.svg',
+              description: c.description || c.about || '',
+              city: c.city || '',
+              category: c.category || 'Genel',
+              email: c.email || c.comMail || '',
+              comMail: c.comMail || c.email || '',
+              miniAbout: c.miniAbout || '',
+              shortDescription: c.miniAbout || (c as any).shortDescription || '',
+              status: c.status ?? (isActivity ? 'Aktif' : 'Pasif'),
+              isActivity,
+              website: undefined,
+              webSiteUrl: undefined,
+              instagram: undefined,
+              instagramUrl: undefined,
+              socialMedia: undefined,
+            } as Community;
+          });
+          this.handleCommunitiesLoaded(mapped);
+        },
+        error: () => {
+          this.communities = [...this.allCommunities];
+          this.applyFilters();
+          this.attachCommunityNamesToEvents();
+          this.isLoadingCommunities = false;
+        },
+      });
+    } else {
+      this.communities = [...this.allCommunities];
+      this.applyFilters();
+      this.attachCommunityNamesToEvents();
+      this.isLoadingCommunities = false;
+    }
+  }
+
+  /** Bartın hesabı ile giriş yapılmış mı (şehir/üniversite adı Bartın içeriyorsa) */
+  isBartinUser(): boolean {
+    const user = this.authService.getUser();
+    if (!user) return false;
+    const city = (user.city ?? user.City ?? '').toString().toLowerCase();
+    const university = (user.university ?? user.University ?? '').toString().toLowerCase();
+    const normalizedCity = city.normalize('NFD').replace(/\u0131/g, 'i').replace(/[\u0300-\u036f]/g, '');
+    const normalizedUni = university.normalize('NFD').replace(/\u0131/g, 'i').replace(/[\u0300-\u036f]/g, '');
+    return /bartin/.test(normalizedCity) || /bartin/.test(normalizedUni);
+  }
+
+  /** Giriş yapan kurumsal kullanıcının şehrini döndürür (Aktif/Pasif/Onay Bekleyen filtresinde sadece o şehir listelenir) */
+  getUserCity(): string | undefined {
+    const user = this.authService.getUser();
+    if (!user) return undefined;
+    const rawCity = (
+      (user as any).city ??
+      (user as any).City ??
+      (user as any).userCity ??
+      (user as any).officeCity ??
+      (user as any).selectedCity ??
+      (user as any).il ??
+      ''
+    )
+      .toString()
+      .trim();
+    if (rawCity) return rawCity;
+    if (this.isBartinUser()) return 'Bartın';
+    return undefined;
+  }
+
+  /** İki şehir adının eşleşip eşleşmediğini Türkçe karakterlere duyarlı şekilde karşılaştırır */
+  private cityMatches(communityCity: string | undefined, userCity: string): boolean {
+    if (!communityCity || !userCity) return false;
+    const n = (s: string) =>
+      s
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/\u0131/g, 'i')
+        .replace(/[\u0300-\u036f]/g, '');
+    return n(communityCity.trim()) === n(userCity.trim());
+  }
+
   loadCommunitiesFromService(statusFilter?: string) {
     // Sadece browser'da çalıştığından emin ol
     if (!isPlatformBrowser(this.platformId)) {
       return;
     }
 
-    // Loading state'i başlat
+    // Loading state'i başlat; önceki filtre verisini kaldır ki yanlış liste görünmesin
     this.isLoadingCommunities = true;
+    this.allCommunities = [];
+    this.communities = [];
+    this.filteredCommunities = [];
+    this.displayedCommunities = [];
+    this.currentPage = 1;
+    this.totalPages = 0;
 
-    // Dropdown'dan gelen filtreye göre backend'den toplulukları çağır
-    // statusFilter: '' -> 'all', 'Aktif' -> 'active', 'Pasif' -> 'passive', 'Onay Bekleyen' -> 'pending', 'Reddedilen' -> 'passive' + client filter
-    let backendStatus: 'all' | 'active' | 'aktif' | 'passive' | 'pasif' | 'pending' | undefined =
-      'all';
+    // Backend GET /api/Communities: status = active | passive | pending | rejected | deleted | all
+    let backendStatus:
+      | 'all'
+      | 'active'
+      | 'passive'
+      | 'pending'
+      | 'rejected'
+      | 'deleted' = 'all';
+    let backendCity: string | undefined = this.getUserCity();
 
     if (statusFilter === 'Aktif') {
       backendStatus = 'active';
@@ -407,143 +540,75 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     } else if (statusFilter === 'Pasif') {
       backendStatus = 'passive';
     } else if (statusFilter === 'Reddedilen') {
-      // Reddedilen = sadece ComConfirm=2; backend'de ayrı status yok, passive çekip client'ta filtreliyoruz
-      backendStatus = 'passive';
+      backendStatus = 'rejected';
+    } else if (statusFilter === 'Silinmiş') {
+      backendStatus = 'deleted';
     } else if (!statusFilter || statusFilter === '') {
       backendStatus = 'all';
+      if (this.isBartinUser()) backendCity = 'Bartın';
     }
 
-    // Corporate Dashboard'da seçilen filtreye göre toplulukları göster
-    // Backend'de status parametresi ile istek atıyoruz
-    // Not: 'all', 'passive', 'pending' sadece GSB (RolId 2) yetkisi olan kullanıcılar için çalışır
-    this.communityService.getAllCommunities({ status: backendStatus }).subscribe({
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        location: 'corporate-dashboard:loadCommunitiesFromService',
+        message: 'Request',
+        data: { statusFilter, backendStatus },
+        timestamp: Date.now(),
+        hypothesisId: 'H1',
+      }),
+    }).catch(() => {});
+    // #endregion
+
+    const mapApiDataToCommunities = (data: any[]) => {
+      return (data || []).map((c) => {
+        const { website, webSiteUrl, instagram, instagramUrl, socialMedia, ...rest } = c;
+        const isActivity = c.isActivity !== undefined ? c.isActivity : true;
+        const deletedAt = c.deletedAt ?? (c as any).DeletedAt ?? rest.deletedAt ?? null;
+        const isDeleted = deletedAt != null && String(deletedAt).trim() !== '';
+        const coverUrl =
+          (c.coverImage && String(c.coverImage).trim()) || (c.banner && String(c.banner).trim())
+            ? c.coverImage || c.banner
+            : '';
+        const logoUrl = c.logo && String(c.logo).trim() ? c.logo : '';
+        const status: Community['status'] = isDeleted
+          ? 'Silinmiş'
+          : (c.status ?? (isActivity ? 'Aktif' : 'Pasif'));
+        return {
+          ...rest,
+          about: c.description || c.about || '',
+          banner: coverUrl || 'assets/img/placeholder-cover.svg',
+          coverImage: coverUrl || 'assets/img/placeholder-cover.svg',
+          logo: logoUrl || 'assets/img/placeholder-logo.svg',
+          description: c.description || c.about || '',
+          city: c.city || '',
+          category: c.category || 'Genel',
+          email: c.email || c.comMail || '',
+          comMail: c.comMail || c.email || '',
+          miniAbout: c.miniAbout || '',
+          shortDescription: c.miniAbout || (c as any).shortDescription || '',
+          status,
+          deletedAt: isDeleted ? deletedAt : undefined,
+          isActivity: isActivity,
+          website: undefined,
+          webSiteUrl: undefined,
+          instagram: undefined,
+          instagramUrl: undefined,
+          socialMedia: undefined,
+        } as Community;
+      });
+    };
+
+    const apiParams: { status: typeof backendStatus; city?: string } = { status: backendStatus };
+    if (backendCity) apiParams.city = backendCity;
+    this.communityService.getAllCommunities(apiParams).subscribe({
       next: (data) => {
-        // CommunityService'ten gelen veriyi Corporate Dashboard formatına dönüştür
-        // EXCLUSION: Website URL and Social Media Links are NOT displayed in Corporate Dashboard
-        // Category is INCLUDED and will be shown with dropdown
-        let mapped = data.map((c) => {
-          const { website, webSiteUrl, instagram, instagramUrl, socialMedia, ...rest } = c;
-          const isActivity = c.isActivity !== undefined ? c.isActivity : true;
-          const coverUrl =
-            (c.coverImage && String(c.coverImage).trim()) || (c.banner && String(c.banner).trim())
-              ? c.coverImage || c.banner
-              : '';
-          const logoUrl = c.logo && String(c.logo).trim() ? c.logo : '';
-          return {
-            ...rest,
-            about: c.description || c.about || '',
-            banner: coverUrl || 'assets/img/placeholder-cover.svg',
-            coverImage: coverUrl || 'assets/img/placeholder-cover.svg',
-            logo: logoUrl || 'assets/img/placeholder-logo.svg',
-            description: c.description || c.about || '',
-            city: c.city || '',
-            category: c.category || 'Genel',
-            email: c.email || c.comMail || '',
-            comMail: c.comMail || c.email || '',
-            miniAbout: c.miniAbout || '',
-            shortDescription: c.miniAbout || (c as any).shortDescription || '',
-            status: c.status ?? (isActivity ? 'Aktif' : 'Pasif'), // Reddedilen service'ten korunur
-            isActivity: isActivity,
-            website: undefined,
-            webSiteUrl: undefined,
-            instagram: undefined,
-            instagramUrl: undefined,
-            socialMedia: undefined,
-          } as Community;
-        });
-        // Reddedilen filtresi: backend passive hem reddedilen hem pasif döner; sadece ComConfirm=2 (Reddedilen) göster
-        if (statusFilter === 'Reddedilen') {
-          mapped = mapped.filter((c) => c.status === 'Reddedilen');
-        }
-        this.allCommunities = mapped;
-
-        // Extract unique categories from communities for dropdown
-        const uniqueCategories = [
-          ...new Set(
-            this.allCommunities
-              .map((c) => c.category)
-              .filter((cat): cat is string => !!cat && cat !== 'Genel')
-          ),
-        ].sort();
-        // Merge with existing categories, avoiding duplicates
-        this.categories = [...new Set([...this.categories, ...uniqueCategories, 'Genel'])].sort();
-
-        this.communities = [...this.allCommunities];
-        // Filtreleri uygula (arama metni varsa ona göre filtreleme yapılacak)
-        this.applyFilters();
-        // Topluluk isimleri yüklendikten sonra etkinlikleri eşle
-        this.attachCommunityNamesToEvents();
-        // Loading state'i bitir
-        this.isLoadingCommunities = false;
+        const mapped = mapApiDataToCommunities(data || []);
+        this.handleCommunitiesLoaded(mapped, statusFilter);
       },
-      error: (err) => {
-        // Eğer 403 hatası alırsak (GSB yetkisi yoksa), kullanıcıya uyarı göster ve aktif toplulukları göster
-        if (err.status === 403) {
-          this.showToast(
-            'Pasif toplulukları görüntülemek için GSB yetkisi gereklidir. Şu anda sadece aktif topluluklar gösteriliyor.',
-            'error'
-          );
-          this.communityService.getAllCommunities({ status: 'active' }).subscribe({
-            next: (data) => {
-              this.allCommunities = data.map((c) => {
-                const { website, webSiteUrl, instagram, instagramUrl, socialMedia, ...rest } = c;
-                const isActivity =
-                  rest.isActivity !== undefined
-                    ? rest.isActivity
-                    : c.isActivity !== undefined
-                    ? c.isActivity
-                    : true;
-                const coverUrl =
-                  (c.coverImage && String(c.coverImage).trim()) ||
-                  (c.banner && String(c.banner).trim())
-                    ? c.coverImage || c.banner
-                    : '';
-                const logoUrl = c.logo && String(c.logo).trim() ? c.logo : '';
-                return {
-                  ...rest,
-                  about: c.description || c.about || '',
-                  banner: coverUrl || 'assets/img/placeholder-cover.svg',
-                  coverImage: coverUrl || 'assets/img/placeholder-cover.svg',
-                  logo: logoUrl || 'assets/img/placeholder-logo.svg',
-                  description: c.description || c.about || '',
-                  city: c.city || '',
-                  category: c.category || 'Genel',
-                  email: c.email || c.comMail || '',
-                  comMail: c.comMail || c.email || '',
-                  miniAbout: c.miniAbout || '',
-                  shortDescription: c.miniAbout || (c as any).shortDescription || '',
-                  status: isActivity ? 'Aktif' : 'Pasif',
-                  isActivity: isActivity,
-                  website: undefined,
-                  webSiteUrl: undefined,
-                  instagram: undefined,
-                  instagramUrl: undefined,
-                  socialMedia: undefined,
-                } as Community;
-              });
-              this.communities = [...this.allCommunities];
-              // Filtreleri uygula
-              this.applyFilters();
-              this.attachCommunityNamesToEvents();
-              this.isLoadingCommunities = false;
-            },
-            error: () => {
-              this.communities = [...this.allCommunities];
-              // Filtreleri uygula
-              this.applyFilters();
-              this.attachCommunityNamesToEvents();
-              this.isLoadingCommunities = false;
-            },
-          });
-        } else {
-          // Diğer hatalar için mevcut veriyi kullan
-          this.communities = [...this.allCommunities];
-          // Filtreleri uygula
-          this.applyFilters();
-          this.attachCommunityNamesToEvents();
-        }
-        this.isLoadingCommunities = false;
-      },
+      error: (err) => this.handleCommunitiesError(err),
     });
   }
 
@@ -743,8 +808,24 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
 
   // Dropdown değiştiğinde backend'den toplulukları çağır
   onStatusFilterChange() {
-    // "Tüm Durumlar", "Aktif", "Pasif" için backend'den yeni veri çek
     this.loadCommunitiesFromService(this.statusFilter);
+  }
+
+  /** Chip tıklanınca durum filtresini ayarla ve backend'den ilgili endpoint ile veri çek */
+  setCommunityStatusFilter(status: string) {
+    this.statusFilter = status;
+    this.loadCommunitiesFromService(this.statusFilter);
+  }
+
+  /** Kart üzerindeki durum rozeti için CSS sınıfı (Aktif, Pasif, Onay Bekleyen, Reddedilen, Silinmiş) */
+  getCommunityStatusClass(item: Community): string {
+    const s = (item?.status || '').toLowerCase();
+    if (s === 'aktif') return 'aktif';
+    if (s === 'pasif') return 'pasif';
+    if (s === 'onay bekleyen') return 'onay-bekleyen';
+    if (s === 'reddedilen') return 'reddedilen';
+    if (s === 'silinmiş') return 'silinmis';
+    return 'aktif';
   }
 
   // Arama ve filtreleme
@@ -768,6 +849,17 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       temp = temp.filter((c) => c.city && c.city === this.cityFilter);
     }
 
+    // Aktif / Pasif / Onay Bekleyen seçiliyse sadece giriş yapan kullanıcının şehrindeki topluluklar (backend city desteklemiyorsa client-side yedek)
+    const userCity = this.getUserCity();
+    if (userCity && (this.statusFilter === 'Aktif' || this.statusFilter === 'Pasif' || this.statusFilter === 'Onay Bekleyen' || this.statusFilter === 'Reddedilen' || this.statusFilter === 'Silinmiş')) {
+      temp = temp.filter((c) => this.cityMatches(c.city, userCity));
+    }
+
+    // Pasif filtresinde reddedilen toplulukları gösterme (reddedilenler artık direkt siliniyor, yine de listede çıkarsa elenecek)
+    if (this.statusFilter === 'Pasif') {
+      temp = temp.filter((c) => c.status !== 'Reddedilen');
+    }
+
     // Durum filtresi - sadece "Onay Bekleyen" için frontend'de filtreleme yap
     // "Aktif" ve "Pasif" filtreleri backend'den geliyor, burada sadece "Onay Bekleyen" kontrolü yapılıyor
     // if (this.statusFilter === 'Onay Bekleyen') {
@@ -776,17 +868,43 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     // }
     // "Aktif" ve "Pasif" filtreleri backend'den zaten filtrelenmiş olarak geliyor
 
-    // Kurumsal Dashboard: Onay Bekleyen → Reddedilen → Pasif → Aktif sırası
+    // Kurumsal Dashboard: Onay Bekleyen → Reddedilen → Pasif → Aktif → Silinmiş sırası
     const statusOrder = (status: string | undefined): number => {
       if (!status || status === 'Onay Bekleyen') return 0;
       if (status === 'Reddedilen') return 1;
       if (status === 'Pasif') return 2;
       if (status === 'Aktif') return 3;
-      return 4;
+      if (status === 'Silinmiş') return 4;
+      return 5;
     };
     temp.sort((a, b) => statusOrder(a.status) - statusOrder(b.status));
 
     this.filteredCommunities = temp;
+    // #region agent log
+    const citiesFiltered = [
+      ...new Set(this.filteredCommunities.map((c) => c.city).filter(Boolean)),
+    ];
+    fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        location: 'corporate-dashboard:applyFilters',
+        message: 'After filters',
+        data: {
+          cityFilter: this.cityFilter,
+          searchText: this.searchText,
+          filteredCount: this.filteredCommunities.length,
+          cities: citiesFiltered,
+          hasBartin: citiesFiltered.some(
+            (x) =>
+              typeof x === 'string' && /bartin/i.test(x.normalize('NFD').replace(/\u0131/g, 'i'))
+          ),
+        },
+        timestamp: Date.now(),
+        hypothesisId: 'H2',
+      }),
+    }).catch(() => {});
+    // #endregion
     this.currentPage = 1;
     this.initPagination();
   }
@@ -874,6 +992,8 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   rejectionReasonCommunity = '';
   communityToReject: Community | null = null;
   communityToApprove: Community | null = null;
+  /** Backend liste ConfirmAbout dönmediği için: reddederken girilen neden burada tutulur, detay popup'ta gösterilir. */
+  rejectedCommunityReasons: Map<string, string> = new Map();
 
   openApproveCommunityModal(community: Community): void {
     this.communityToApprove = community;
@@ -913,9 +1033,9 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       return;
     }
     const community = this.communityToReject;
-
     this.communityService.reviewCommunity(community.id, 2, reason).subscribe({
       next: () => {
+        this.rejectedCommunityReasons.set(community.id, reason);
         this.toastService.show(`${community.name} topluluğu reddedildi.`, 'success');
         this.isModalOpen = false;
         this.communityToReject = null;
@@ -938,6 +1058,8 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     // CommunityMiniDto'dan gelen miniAbout'u kullan
     const miniAboutValue =
       community.miniAbout || (community as any).MiniAbout || (community as any).miniAbout || '';
+    const isRejected = community.status === 'Reddedilen' || (community as any).comConfirm === 2;
+    const cachedRejectionReason = isRejected ? this.rejectedCommunityReasons.get(community.id) : undefined;
     this.editingCommunity = {
       ...community,
       about: community.description || community.about || '',
@@ -958,6 +1080,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
           : community.status || 'Aktif',
       isActivity:
         community.isActivity !== undefined ? community.isActivity : community.status === 'Aktif',
+      confirmAbout: (community.confirmAbout && community.confirmAbout.trim()) || cachedRejectionReason || community.confirmAbout || '',
     } as Community & { presidentEmail?: string; shortDescription?: string };
 
     // Modal'ı aç
@@ -1031,13 +1154,15 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
             city: detailedCommunity.city || '',
             university: detailedCommunity.university || '',
             category: detailedCommunity.category || 'Genel',
-            // Durum alanları
-            status:
-              detailedCommunity.isActivity !== undefined
-                ? detailedCommunity.isActivity
-                  ? 'Aktif'
-                  : 'Pasif'
-                : detailedCommunity.status || 'Aktif',
+            // Durum ve reddetme nedeni (backend detay/liste ConfirmAbout dönmeyebilir; frontend cache kullanılır)
+            status: detailedCommunity.status || (detailedCommunity.isActivity ? 'Aktif' : 'Pasif'),
+            confirmAbout:
+              (detailedCommunity.confirmAbout && detailedCommunity.confirmAbout.trim()) ||
+              (detailedCommunity as any).confirmAbout ||
+              (detailedCommunity as any).ConfirmAbout ||
+              this.rejectedCommunityReasons.get(community.id) ||
+              this.editingCommunity?.confirmAbout ||
+              '',
             isActivity:
               detailedCommunity.isActivity !== undefined
                 ? detailedCommunity.isActivity
@@ -1208,22 +1333,22 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
             forkJoin(uploadTasks).subscribe({
               next: (results) => {
                 Logger.log('Tüm görseller yüklendi:', results);
-                // Görseller yüklendikten sonra listeyi backend'den yeniden çek
-                this.loadCommunitiesFromService();
+                // Görseller yüklendikten sonra listeyi mevcut durum filtresiyle yeniden çek
+                this.loadCommunitiesFromService(this.statusFilter);
                 this.showToast('Topluluk ve görseller başarıyla güncellendi', 'success');
                 this.closeModal();
               },
               error: (err) => {
                 Logger.error('Görsel yükleme hatası:', err);
                 // Hata olsa bile listeyi güncelle
-                this.loadCommunitiesFromService();
+                this.loadCommunitiesFromService(this.statusFilter);
                 this.showToast('Topluluk güncellendi ancak bazı görseller yüklenemedi', 'error');
                 this.closeModal();
               },
             });
           } else {
             // Görsel yok, sadece topluluk güncellendi
-            this.loadCommunitiesFromService();
+            this.loadCommunitiesFromService(this.statusFilter);
             this.showToast('Topluluk başarıyla güncellendi', 'success');
             this.closeModal();
           }
@@ -1289,9 +1414,17 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         return;
       }
 
-      // Logo ve Banner dosyalarını kontrol et
+      // Logo ve Banner yüklemesi zorunlu
       const logoFile = (this.newCommunity as any)?.logoFile;
       const bannerFile = (this.newCommunity as any)?.bannerFile;
+      if (!logoFile) {
+        this.showToast('Lütfen topluluk logosu yükleyin.', 'error');
+        return;
+      }
+      if (!bannerFile) {
+        this.showToast('Lütfen topluluk kapak görseli (banner) yükleyin.', 'error');
+        return;
+      }
 
       // Base64 data URI'leri kaldır - backend bunları kabul etmiyor
       // Sadece dosya yükleme endpoint'lerini kullanacağız
@@ -1358,14 +1491,14 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
             forkJoin(uploadTasks).subscribe({
               next: (results) => {
                 Logger.log('Tüm görseller yüklendi:', results);
-                this.loadCommunitiesFromService();
+                this.loadCommunitiesFromService(this.statusFilter);
                 this.showToast('Topluluk ve görseller başarıyla eklendi', 'success');
                 this.closeModal();
                 this.newCommunity = null;
               },
               error: (err) => {
                 Logger.error('Görsel yükleme hatası:', err);
-                this.loadCommunitiesFromService();
+                this.loadCommunitiesFromService(this.statusFilter);
                 this.showToast('Topluluk eklendi ancak bazı görseller yüklenemedi', 'error');
                 this.closeModal();
                 this.newCommunity = null;
@@ -1373,7 +1506,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
             });
           } else {
             // Görsel yok, sadece topluluk eklendi
-            this.loadCommunitiesFromService();
+            this.loadCommunitiesFromService(this.statusFilter);
             this.showToast('Topluluk başarıyla eklendi', 'success');
             this.closeModal();
             this.newCommunity = null;
@@ -1417,52 +1550,62 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  deleteCommunity() {
-    Logger.log('deleteCommunity() çağrıldı');
-    Logger.log('editingCommunity:', this.editingCommunity);
+  // Topluluk silme modalı (silme nedeni zorunlu)
+  isDeleteCommunityModalOpen = false;
+  communityToDelete: { id: string; name: string } | null = null;
+  deleteReasonCommunity = '';
 
+  deleteCommunity() {
     if (!this.editingCommunity) {
-      Logger.error('editingCommunity null!');
       this.showToast('Silinecek topluluk bulunamadı.', 'error');
       return;
     }
-
     const communityId = this.editingCommunity.id;
-    Logger.log('Community ID:', communityId);
-
-    // ID kontrolü - geçerli bir GUID olmalı
     if (!communityId || communityId === '' || communityId.includes('mock')) {
-      Logger.error('Geçersiz Community ID:', communityId);
       this.showToast("Topluluk ID'si geçersiz. Lütfen sayfayı yenileyip tekrar deneyin.", 'error');
       return;
     }
-
-    // Onay modal'ını aç
-    const communityName = this.editingCommunity.name || 'bu topluluk';
-    this.openConfirmModal(
-      `"${communityName}" topluluğunu silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`,
-      () => {
-        this.performDeleteCommunity(communityId);
-      }
-    );
+    this.communityToDelete = { id: communityId, name: this.editingCommunity.name || 'bu topluluk' };
+    this.deleteReasonCommunity = '';
+    this.isDeleteCommunityModalOpen = true;
   }
 
-  private performDeleteCommunity(communityId: string) {
-    Logger.log('DELETE isteği gönderiliyor - ID:', communityId);
-    Logger.log('DELETE isteği gönderiliyor - Endpoint: /api/Communities/' + communityId);
+  closeDeleteCommunityModal() {
+    this.isDeleteCommunityModalOpen = false;
+    this.communityToDelete = null;
+    this.deleteReasonCommunity = '';
+  }
 
-    // CommunityService'ten sil (backend'e istek atılır)
-    // DELETE /api/Communities/{id} - 204 No Content döner (başarılı)
-    this.communityService.deleteCommunity(communityId).subscribe({
+  /** Silinmiş topluluk detayında sadece Kapat gösterilir; Kaydet/Sil gösterilmez. */
+  isEditingCommunityDeleted(): boolean {
+    return (this.editingCommunity?.status as string) === 'Silinmiş';
+  }
+
+  confirmDeleteCommunity() {
+    if (!this.communityToDelete) return;
+    const reason = this.deleteReasonCommunity?.trim() || '';
+    if (!reason) {
+      this.showToast('Lütfen topluluğu silme nedenini yazınız.', 'error');
+      return;
+    }
+    const communityId = this.communityToDelete.id;
+    this.closeDeleteCommunityModal();
+    this.performDeleteCommunity(communityId, reason);
+  }
+
+  private performDeleteCommunity(communityId: string, reason: string) {
+    this.communityService.deleteCommunity(communityId, reason).subscribe({
       next: (response) => {
         Logger.log('Topluluk başarıyla silindi - ID:', communityId);
         Logger.log('Response (204 No Content):', response);
 
-        // Önce editingCommunity ve selectedCommunity'yi temizle (ID'li GET isteklerini önlemek için)
+        // Önce editingCommunity, selectedCommunity ve reddetme state'ini temizle
         this.editingCommunity = null;
         this.selectedCommunity = null;
+        this.communityToReject = null;
+        this.rejectionReasonCommunity = '';
 
-        // Modal'ı kapat (ID'li GET isteklerini önlemek için)
+        // Modal'ı kapat
         this.closeModal();
 
         // Listelerden topluluğu kaldır
@@ -1487,9 +1630,9 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         // Filtreleri uygula (liste güncellenmiş olacak)
         this.applyFilters();
 
-        // Service'ten güncel veriyi tekrar yükle (ID'siz GET /api/Communities endpoint'ini kullanır)
-        // Bu endpoint tüm toplulukları listeler, silinen topluluk artık listede olmayacak
-        this.loadCommunitiesFromService();
+        // Listeyi mevcut durum filtresiyle yeniden yükle. status != "all" iken backend DeletedAt==null
+        // döndürür; böylece silinen topluluk listede görünmez. status=all (Tüm Durumlar) ise silinenler de gelir.
+        this.loadCommunitiesFromService(this.statusFilter);
 
         this.showToast('Topluluk başarıyla silindi', 'success');
       },

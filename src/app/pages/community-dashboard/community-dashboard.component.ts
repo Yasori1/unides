@@ -979,6 +979,9 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
 
     forkJoin({ bannerUrl: bannerUpload$, logoUrl: logoUpload$ }).pipe(
       switchMap(({ bannerUrl, logoUrl }) => {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'community-dashboard:saveCommunityProfile',message:'DTO before update',data:{bannerUrl,bannerUrlLen:bannerUrl?.length,logoUrl,logoUrlLen:logoUrl?.length},timestamp:Date.now(),hypothesisId:'B'})}).catch(()=>{});
+        // #endregion
         const dto: any = {
           comName: this.clubInfo.name?.trim() || undefined,
           comCategory: this.clubInfo.category?.trim() || undefined,

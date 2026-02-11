@@ -226,7 +226,7 @@
               <div class="banner-upload-wrapper no-url-input">
                 <div class="upload-hint-wrapper">
                   <app-image-upload
-                    label="Banner Görseli (1920×500 px)"
+                    label="Banner Görseli (1920×500 px) *"
                     [previewUrl]="bannerPreviewUrl || null"
                     [uploadToServer]="true"
                     [allowUrl]="false"
@@ -243,7 +243,7 @@
               <div class="logo-upload-wrapper no-url-input">
                 <div class="upload-hint-wrapper">
                   <app-image-upload
-                    label="Logo (220×220 px — 1:1 kare)"
+                    label="Logo (220×220 px — 1:1 kare) *"
                     [previewUrl]="logoPreviewUrl || null"
                     [uploadToServer]="true"
                     [allowUrl]="false"
@@ -273,16 +273,17 @@
               </div>
             </div>
             <div class="form-section">
-              <label>Kategori</label>
+              <label>Kategori <span class="required">*</span></label>
               <div class="input-group">
                 <div class="icon-wrapper"><i class="bx bx-category"></i></div>
-                <select [(ngModel)]="comCategory" name="comCategory" class="modern-input">
+                <select [(ngModel)]="comCategory" name="comCategory" class="modern-input" required>
+                  <option value="">Kategori seçin</option>
                   <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
                 </select>
               </div>
             </div>
             <div class="form-section">
-              <label>Kısa açıklama (max 70 karakter)</label>
+              <label>Kısa açıklama (max 70 karakter) <span class="required">*</span></label>
               <div class="input-group">
                 <div class="icon-wrapper"><i class="bx bx-text"></i></div>
                 <input
@@ -292,11 +293,12 @@
                   class="modern-input"
                   placeholder="Kısa açıklama..."
                   maxlength="70"
+                  required
                 />
               </div>
             </div>
             <div class="form-section">
-              <label>Topluluk hakkında (max 500 karakter)</label>
+              <label>Topluluk hakkında (max 500 karakter) <span class="required">*</span></label>
               <div class="input-group">
                 <div class="icon-wrapper"><i class="bx bx-detail"></i></div>
                 <textarea
@@ -306,6 +308,7 @@
                   rows="4"
                   placeholder="Topluluk hakkında..."
                   maxlength="500"
+                  required
                 ></textarea>
               </div>
             </div>
