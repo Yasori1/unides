@@ -670,6 +670,25 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     return resolved;
   }
 
+  /** Onay Bekleyen (Güncelleme) kartında gösterilecek veri: pendingUpdateData varsa onaya gönderilen alanlar. */
+  getPendingDisplay(item: Community): {
+    name?: string;
+    description?: string;
+    category?: string;
+    city?: string;
+    university?: string;
+    logo?: string;
+    banner?: string;
+  } | null {
+    if (
+      item?.status !== 'Onay Bekleyen' ||
+      !item.hasEverBeenApproved ||
+      !item.pendingUpdateData
+    )
+      return null;
+    return this.communityService.getPendingDisplayData(item.pendingUpdateData);
+  }
+
   // Üniversite kısaltması için yardımcı metod
   getUniversityAbbr(uniName: string): string {
     if (!uniName) return '';
@@ -1047,9 +1066,13 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   confirmApproveCommunity(): void {
     if (!this.communityToApprove) return;
     const community = this.communityToApprove;
+    const isUpdate = community.hasEverBeenApproved === true;
     this.communityService.reviewCommunity(community.id, 1).subscribe({
       next: () => {
-        this.toastService.show(`${community.name} topluluğu onaylandı.`, 'success');
+        this.toastService.show(
+          isUpdate ? `${community.name} topluluğunun güncellemesi onaylandı.` : `${community.name} topluluğu onaylandı.`,
+          'success'
+        );
         this.isModalOpen = false;
         this.communityToApprove = null;
         this.loadCommunitiesFromService(this.statusFilter);
@@ -1087,10 +1110,16 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       return;
     }
     const community = this.communityToReject;
+    const isUpdate = community.hasEverBeenApproved === true;
     this.communityService.reviewCommunity(community.id, 2, reason).subscribe({
       next: () => {
         this.rejectedCommunityReasons.set(community.id, reason);
-        this.toastService.show(`${community.name} topluluğu reddedildi.`, 'success');
+        this.toastService.show(
+          isUpdate
+            ? `${community.name} topluluğunun güncelleme talebi reddedildi. Topluluk aktif kaldı.`
+            : `${community.name} topluluğu reddedildi.`,
+          'success'
+        );
         this.isRejectCommunitySubModalOpen = false;
         this.isModalOpen = false;
         this.communityToReject = null;
@@ -1221,6 +1250,20 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
                 ? detailedCommunity.isActivity
                 : detailedCommunity.status === 'Aktif',
           } as Community & { presidentEmail?: string; shortDescription?: string };
+
+          // Onay Bekleyen (Güncelleme) ise PendingUpdateData varsa onaya gelen verileri göster
+          if (
+            this.editingCommunity &&
+            detailedCommunity.status === 'Onay Bekleyen' &&
+            detailedCommunity.hasEverBeenApproved === true &&
+            (detailedCommunity.pendingUpdateData ?? (detailedCommunity as any).pendingUpdateData)
+          ) {
+            const pendingJson = detailedCommunity.pendingUpdateData ?? (detailedCommunity as any).pendingUpdateData;
+            this.editingCommunity = this.communityService.applyPendingUpdateToCommunity(
+              this.editingCommunity,
+              pendingJson
+            ) as Community & { presidentEmail?: string; shortDescription?: string };
+          }
 
           Logger.log('Topluluk detayı başarıyla yüklendi:', {
             id: detailedCommunity.id,

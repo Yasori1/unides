@@ -82,6 +82,91 @@ export class CommunityService {
     return finalPath;
   }
 
+  /**
+   * Onaya gönderilen güncelleme verisini (PendingUpdateData JSON string) topluluk nesnesine uygular.
+   * Backend: comConfirm=4 iken pendingUpdateData, ana alanlar mevcut (yayındaki) veri; JSON içi PascalCase (ComName, BannerUrl, LogoUrl vb.).
+   */
+  applyPendingUpdateToCommunity(
+    community: Community & { presidentEmail?: string },
+    pendingUpdateDataJson: string | null | undefined
+  ): Community & { presidentEmail?: string } {
+    if (!pendingUpdateDataJson || typeof pendingUpdateDataJson !== 'string') return community;
+    let raw: Record<string, unknown>;
+    try {
+      raw = JSON.parse(pendingUpdateDataJson) as Record<string, unknown>;
+    } catch {
+      return community;
+    }
+    const pascal = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+    const getStr = (camelKey: string, alt?: string): string | undefined => {
+      const v = raw[camelKey] ?? raw[pascal(camelKey)];
+      if (v == null || v === undefined) return alt;
+      const str = String(v).trim();
+      return str || alt;
+    };
+    const logoUrl = getStr('logoUrl') ?? getStr('LogoUrl');
+    const bannerUrl = getStr('bannerUrl') ?? getStr('BannerUrl');
+    return {
+      ...community,
+      name: getStr('comName', community.name) ?? community.name,
+      about: getStr('comAbout', community.about) ?? community.about ?? '',
+      description: getStr('comAbout', community.description) ?? community.description ?? '',
+      city: getStr('city', community.city) ?? community.city ?? '',
+      university: getStr('university', community.university) ?? community.university ?? '',
+      category: getStr('comCategory', community.category) ?? community.category ?? 'Genel',
+      email: getStr('comMail', community.email) ?? community.email ?? '',
+      comMail: getStr('comMail', community.comMail) ?? community.comMail ?? '',
+      presidentEmail: getStr('comLeadMail', community.presidentEmail ?? community.comLeadMail) ?? community.presidentEmail ?? community.comLeadMail ?? '',
+      comLeadMail: getStr('comLeadMail', community.comLeadMail ?? community.presidentEmail) ?? community.comLeadMail ?? community.presidentEmail ?? '',
+      webSiteUrl: getStr('webSiteUrl', community.webSiteUrl) ?? community.webSiteUrl ?? '',
+      instagramUrl: getStr('instagramUrl', community.instagramUrl) ?? community.instagramUrl ?? '',
+      miniAbout: getStr('miniAbout', community.miniAbout) ?? community.miniAbout ?? '',
+      logo: logoUrl ? this.convertImagePathToFullUrl(logoUrl) || community.logo : community.logo,
+      banner: bannerUrl ? this.convertImagePathToFullUrl(bannerUrl) || community.banner : community.banner ?? '',
+      coverImage: bannerUrl ? this.convertImagePathToFullUrl(bannerUrl) || community.coverImage : community.coverImage ?? '',
+    };
+  }
+
+  /**
+   * Kart/liste için onaya gönderilen veriyi döndürür (name, description, logo, banner vb.).
+   * pendingUpdateData yoksa veya parse hatası olursa null.
+   */
+  getPendingDisplayData(pendingUpdateDataJson: string | null | undefined): {
+    name?: string;
+    description?: string;
+    category?: string;
+    city?: string;
+    university?: string;
+    logo?: string;
+    banner?: string;
+  } | null {
+    if (!pendingUpdateDataJson || typeof pendingUpdateDataJson !== 'string') return null;
+    let raw: Record<string, unknown>;
+    try {
+      raw = JSON.parse(pendingUpdateDataJson) as Record<string, unknown>;
+    } catch {
+      return null;
+    }
+    const pascal = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+    const getStr = (camelKey: string): string | undefined => {
+      const v = raw[camelKey] ?? raw[pascal(camelKey)];
+      if (v == null || v === undefined) return undefined;
+      const str = String(v).trim();
+      return str || undefined;
+    };
+    const logoUrl = getStr('logoUrl') ?? getStr('LogoUrl');
+    const bannerUrl = getStr('bannerUrl') ?? getStr('BannerUrl');
+    return {
+      name: getStr('comName'),
+      description: getStr('comAbout') ?? getStr('miniAbout'),
+      category: getStr('comCategory'),
+      city: getStr('city'),
+      university: getStr('university'),
+      logo: logoUrl ? this.convertImagePathToFullUrl(logoUrl) : undefined,
+      banner: bannerUrl ? this.convertImagePathToFullUrl(bannerUrl) : undefined,
+    };
+  }
+
   private ensureCommunityAssets(c: Community): Community {
     const logo = c.logo && String(c.logo).trim() ? c.logo : this.placeholderLogo;
     const coverCandidate = c.coverImage && String(c.coverImage).trim() ? c.coverImage : '';
@@ -280,6 +365,7 @@ export class CommunityService {
       comMail: dto.comMail || dto.ComMail || '',
       comLeadMail: dto.comLeadMail || dto.ComLeadMail || '',
       hasEverBeenApproved: isUpdatePending ? true : (dto.hasEverBeenApproved ?? dto.HasEverBeenApproved ?? undefined),
+      pendingUpdateData: dto.pendingUpdateData ?? dto.PendingUpdateData ?? undefined,
     };
   }
 
@@ -348,6 +434,7 @@ export class CommunityService {
           ? dto.IsActivity
           : true,
       hasEverBeenApproved: dto.hasEverBeenApproved ?? dto.HasEverBeenApproved ?? undefined,
+      pendingUpdateData: dto.pendingUpdateData ?? dto.PendingUpdateData ?? undefined,
       events: dto.events || dto.Events || [],
     };
   }

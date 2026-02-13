@@ -413,25 +413,36 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
             this.initialClubInfo = JSON.parse(JSON.stringify(this.clubInfo));
             this.displayName = community.name || this.userName;
             this.userInitial = this.displayName.charAt(0).toUpperCase();
-            this.communityApproved = community.isActivity === true;
             this.isLoadingCommunity = false;
 
-            // İlk kayıt onayı vs güncelleme onayı ayrımı: backend hasEverBeenApproved veya localStorage flag
+            // Güncelleme bekliyor = "Onay Bekleyen" + daha önce onaylanmış (comConfirm=4). Bu durum öncelikli;
+            // F5 sonrası da buton görünmesin ve alanlar kilitli kalsın.
             const profileUpdatePendingFlag =
               isPlatformBrowser(this.platformId) &&
               localStorage.getItem('community_profile_update_pending') === 'true';
-            this.isUpdatePending =
-              !this.communityApproved &&
-              (community.hasEverBeenApproved === true || profileUpdatePendingFlag);
+            const isUpdatePendingFromBackend =
+              community.status === 'Onay Bekleyen' && community.hasEverBeenApproved === true;
 
-            if (this.communityApproved) {
+            if (isUpdatePendingFromBackend || profileUpdatePendingFlag) {
+              this.communityApproved = true;
+              this.isUpdatePending = true;
+              if (isPlatformBrowser(this.platformId)) {
+                localStorage.setItem('community_approved', JSON.stringify(true));
+                localStorage.setItem('community_profile_update_pending', 'true');
+              }
+            } else if (community.isActivity === true) {
+              this.communityApproved = true;
+              this.isUpdatePending = false;
               if (isPlatformBrowser(this.platformId)) {
                 localStorage.setItem('community_approved', JSON.stringify(true));
                 localStorage.removeItem('community_profile_update_pending');
               }
             } else {
+              this.communityApproved = false;
+              this.isUpdatePending = false;
               if (isPlatformBrowser(this.platformId)) {
                 localStorage.setItem('community_approved', JSON.stringify(false));
+                localStorage.removeItem('community_profile_update_pending');
               }
             }
 
@@ -537,13 +548,28 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
               this.displayName = communityDetail.name || this.userName;
               this.userInitial = this.displayName.charAt(0).toUpperCase();
 
-              this.communityApproved = communityDetail.isActivity === true;
-              this.isUpdatePending = false;
-              this.isLoadingCommunity = false;
-              if (isPlatformBrowser(this.platformId)) {
-                localStorage.setItem('community_approved', JSON.stringify(this.communityApproved));
-                localStorage.removeItem('community_profile_update_pending');
+              const isUpdatePendingFromBackend =
+                communityDetail.status === 'Onay Bekleyen' && communityDetail.hasEverBeenApproved === true;
+              const profileUpdatePendingFlag =
+                isPlatformBrowser(this.platformId) &&
+                localStorage.getItem('community_profile_update_pending') === 'true';
+
+              if (isUpdatePendingFromBackend || profileUpdatePendingFlag) {
+                this.communityApproved = true;
+                this.isUpdatePending = true;
+                if (isPlatformBrowser(this.platformId)) {
+                  localStorage.setItem('community_approved', JSON.stringify(true));
+                  localStorage.setItem('community_profile_update_pending', 'true');
+                }
+              } else {
+                this.communityApproved = communityDetail.isActivity === true;
+                this.isUpdatePending = false;
+                if (isPlatformBrowser(this.platformId)) {
+                  localStorage.setItem('community_approved', JSON.stringify(this.communityApproved));
+                  localStorage.removeItem('community_profile_update_pending');
+                }
               }
+              this.isLoadingCommunity = false;
               this.isLoadingEvents = true;
               this.loadCommunityEvents(communityDetail.id);
               this.loadLeaderStats();
@@ -1160,18 +1186,33 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
           }
           this.communityApproved = false;
           this.isUpdatePending = true;
-          this.showToast(
-            'Topluluk bilgileri GSB onayına gönderildi. Onay bekleyen topluluklar kategorisinde görünecek; GSB onayından sonra değişiklikler yayına alınacaktır.',
-            'success'
-          );
           this.initialClubInfo = JSON.parse(JSON.stringify(this.clubInfo));
           this.refreshCommunityProfileAfterUpdate();
         },
         error: (err: any) => {
           this.isSavingProfile = false;
           const msg =
-            err?.error?.message || err?.error || 'Topluluk güncellenirken bir hata oluştu.';
-          this.showToast(typeof msg === 'string' ? msg : 'Güncelleme hatası.', 'error');
+            (typeof err?.error?.message === 'string' ? err.error.message : null) ||
+            (typeof err?.error === 'string' ? err.error : null) ||
+            '';
+          const isAlreadyPending =
+            msg && msg.includes('güncelleme isteği onay bekliyor');
+          if (isAlreadyPending) {
+            if (isPlatformBrowser(this.platformId)) {
+              localStorage.setItem('community_profile_update_pending', 'true');
+            }
+            this.communityApproved = false;
+            this.isUpdatePending = true;
+            this.showToast(
+              'Zaten bir güncelleme onay bekliyor. GSB sonucunu bekleyin; bu sürede buton kapatıldı.',
+              'success'
+            );
+            return;
+          }
+          this.showToast(
+            msg && msg.trim() ? msg : 'Topluluk güncellenirken bir hata oluştu.',
+            'error'
+          );
         },
       });
   }
@@ -1205,14 +1246,19 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
           this.initialClubInfo = JSON.parse(JSON.stringify(this.clubInfo));
           this.displayName = community.name || this.userName;
           this.userInitial = this.displayName.charAt(0).toUpperCase();
-          this.communityApproved = community.isActivity === true;
-          // Güncelleme onayı beklerken panel açık kalsın: isUpdatePending sadece onaylıyken false
           const profileUpdateFlag =
             isPlatformBrowser(this.platformId) &&
             localStorage.getItem('community_profile_update_pending') === 'true';
-          this.isUpdatePending =
-            !this.communityApproved &&
-            (community.hasEverBeenApproved === true || profileUpdateFlag);
+          // Onaya gönderdikten sonra buton geri gelmesin: localStorage flag varsa hep pending kabul et
+          if (profileUpdateFlag) {
+            this.communityApproved = false;
+            this.isUpdatePending = true;
+          } else {
+            this.communityApproved = community.isActivity === true;
+            this.isUpdatePending =
+              !this.communityApproved &&
+              (community.hasEverBeenApproved === true || profileUpdateFlag);
+          }
           if (isPlatformBrowser(this.platformId)) {
             localStorage.setItem('community_approved', JSON.stringify(this.communityApproved));
             if (this.communityApproved) localStorage.removeItem('community_profile_update_pending');

@@ -311,8 +311,8 @@
           >
             <div class="cover-area">
               <img
-                [src]="getCommunityCover(item) || getPlaceholderCoverUrl()"
-                [alt]="item.name"
+                [src]="(getPendingDisplay(item)?.banner || getCommunityCover(item)) || getPlaceholderCoverUrl()"
+                [alt]="getPendingDisplay(item)?.name ?? item.name"
                 class="cover-img"
                 (error)="onImageError($event, 'cover')"
               />
@@ -327,42 +327,67 @@
                   <span class="pending-type-hint" *ngIf="!item.hasEverBeenApproved">(Yeni kayıt)</span>
                 </ng-container>
               </span>
-              <span class="category-badge" *ngIf="item.category">{{ item.category }}</span>
+              <span class="category-badge" *ngIf="(getPendingDisplay(item)?.category ?? item.category)">{{ getPendingDisplay(item)?.category ?? item.category }}</span>
             </div>
 
             <div class="card-content">
               <div class="header-row">
                 <div class="logo-wrapper">
                   <img
-                    [src]="getCommunityLogo(item) || getPlaceholderLogoUrl()"
-                    [alt]="item.name"
+                    [src]="(getPendingDisplay(item)?.logo || getCommunityLogo(item)) || getPlaceholderLogoUrl()"
+                    [alt]="getPendingDisplay(item)?.name ?? item.name"
                     class="logo-img"
                     (error)="onImageError($event, 'logo')"
                   />
                 </div>
                 <div class="title-wrapper">
-                  <h3 class="community-name">{{ item.name }}</h3>
+                  <h3 class="community-name">{{ getPendingDisplay(item)?.name ?? item.name }}</h3>
                 </div>
               </div>
 
-              <p class="description">{{ item.description || item.about }}</p>
+              <p class="description">{{ getPendingDisplay(item)?.description ?? item.description ?? item.about }}</p>
 
               <div
                 class="card-footer"
                 [class.card-footer--with-actions]="item.status === 'Onay Bekleyen'"
               >
                 <div class="footer-info">
-                  <span class="city-tag" *ngIf="item.city">
-                    <i class="bx bxs-map"></i> {{ item.city }}
+                  <span class="city-tag" *ngIf="getPendingDisplay(item)?.city ?? item.city">
+                    <i class="bx bxs-map"></i> {{ getPendingDisplay(item)?.city ?? item.city }}
                   </span>
-                  <span class="email-tag" *ngIf="item.university">
-                    <i class="bx bxs-graduation"></i> {{ item.university }}
+                  <span class="email-tag" *ngIf="getPendingDisplay(item)?.university ?? item.university">
+                    <i class="bx bxs-graduation"></i> {{ getPendingDisplay(item)?.university ?? item.university }}
                   </span>
                 </div>
-                <!-- Onay Bekleyen topluluklar için Onayla / Reddet / Topluluğu Sil -->
+                <!-- Onay Bekleyen (Güncelleme): sadece Güncellemeyi Onayla / Güncellemeyi Reddet -->
                 <div
                   class="review-actions"
-                  *ngIf="item.status === 'Onay Bekleyen'"
+                  *ngIf="item.status === 'Onay Bekleyen' && item.hasEverBeenApproved === true"
+                  (click)="$event.stopPropagation()"
+                >
+                  <div class="review-actions-primary">
+                    <button
+                      class="btn-reject"
+                      title="Güncellemeyi Reddet"
+                      (click)="openRejectCommunityModal(item)"
+                    >
+                      <span class="material-symbols-outlined">cancel</span>
+                      <span>Güncellemeyi Reddet</span>
+                    </button>
+                    <button
+                      class="btn-approve"
+                      title="Güncellemeyi Onayla"
+                      (click)="openApproveCommunityModal(item)"
+                    >
+                      <span class="material-symbols-outlined">check_circle</span>
+                      <span>Güncellemeyi Onayla</span>
+                    </button>
+                  </div>
+                </div>
+                <!-- Onay Bekleyen (Yeni Kayıt): Onayla / Reddet / Topluluğu Sil -->
+                <div
+                  class="review-actions"
+                  *ngIf="item.status === 'Onay Bekleyen' && item.hasEverBeenApproved !== true"
                   (click)="$event.stopPropagation()"
                 >
                   <div class="review-actions-primary">
@@ -695,6 +720,8 @@
               ? 'Topluluk Detayı'
               : modalType === 'edit-community' && editingCommunity?.status === 'Silinmiş'
               ? 'Silinmiş Topluluk Detayı'
+              : modalType === 'edit-community' && editingCommunity?.status === 'Onay Bekleyen' && editingCommunity?.hasEverBeenApproved === true
+              ? 'Güncelleme Onayı'
               : modalType === 'edit-community' && editingCommunity?.status === 'Onay Bekleyen'
               ? 'Topluluğu Onayla'
               : modalType === 'edit-community' && editingCommunity?.status === 'Reddedilen'
@@ -1344,10 +1371,32 @@
               </div>
             </div>
           </div>
-          <!-- Onay Bekleyen: Reddet / Onayla / Topluluğu Sil (Kapat yok; butonlar alt kısımda düzenli) -->
+          <!-- Onay Bekleyen (Güncelleme): sadece Güncellemeyi Onayla / Güncellemeyi Reddet; Topluluğu Sil YOK -->
           <div
             class="modal-actions modal-actions--community-pending"
-            *ngIf="editingCommunity.status === 'Onay Bekleyen'"
+            *ngIf="editingCommunity.status === 'Onay Bekleyen' && editingCommunity.hasEverBeenApproved === true"
+          >
+            <button
+              type="button"
+              class="btn-danger"
+              (click)="openRejectCommunityModal(editingCommunity)"
+            >
+              <span class="material-symbols-outlined">cancel</span>
+              Güncellemeyi Reddet
+            </button>
+            <button
+              type="button"
+              class="btn-primary"
+              (click)="openApproveCommunityModal(editingCommunity)"
+            >
+              <span class="material-symbols-outlined">check_circle</span>
+              Güncellemeyi Onayla
+            </button>
+          </div>
+          <!-- Onay Bekleyen (Yeni Kayıt): Reddet / Onayla / Topluluğu Sil -->
+          <div
+            class="modal-actions modal-actions--community-pending"
+            *ngIf="editingCommunity.status === 'Onay Bekleyen' && editingCommunity.hasEverBeenApproved !== true"
           >
             <button
               type="button"
@@ -1911,7 +1960,10 @@
         *ngIf="modalType === 'approveCommunity' && communityToApprove"
       >
         <div class="form-section">
-          <p class="reject-community-intro">
+          <p class="reject-community-intro" *ngIf="communityToApprove.hasEverBeenApproved === true">
+            "<strong>{{ communityToApprove.name }}</strong>" topluluğunun profil güncellemesini onaylamak istediğinize emin misiniz? Onaylandıktan sonra talep edilen değişiklikler yayına alınacaktır.
+          </p>
+          <p class="reject-community-intro" *ngIf="communityToApprove.hasEverBeenApproved !== true">
             "<strong>{{ communityToApprove.name }}</strong
             >" topluluğunu onaylamak istediğinize emin misiniz? Onaylandıktan sonra topluluk listede
             görünecek ve topluluk başkanı panele erişebilecektir.
@@ -1920,7 +1972,7 @@
             <button class="btn-secondary" (click)="closeModal()">Vazgeç</button>
             <button class="btn-primary" (click)="confirmApproveCommunity()">
               <span class="material-symbols-outlined">check_circle</span>
-              Topluluğu Onayla
+              {{ communityToApprove.hasEverBeenApproved === true ? 'Güncellemeyi Onayla' : 'Topluluğu Onayla' }}
             </button>
           </div>
         </div>
@@ -1932,7 +1984,10 @@
         *ngIf="modalType === 'rejectCommunity' && communityToReject"
       >
         <div class="form-section">
-          <p class="reject-community-intro">
+          <p class="reject-community-intro" *ngIf="communityToReject.hasEverBeenApproved === true">
+            "<strong>{{ communityToReject.name }}</strong>" topluluğunun profil güncellemesini reddetmek istediğinize emin misiniz? Red nedeni topluluk başkanına iletilecektir; topluluk aktif kalacak, sadece bu güncelleme talebi iptal edilecektir.
+          </p>
+          <p class="reject-community-intro" *ngIf="communityToReject.hasEverBeenApproved !== true">
             "<strong>{{ communityToReject.name }}</strong
             >" topluluğunu reddetmek istediğinize emin misiniz? Reddetme nedeni topluluk başkanına
             e-posta ile iletilecektir.
@@ -1943,7 +1998,7 @@
               [(ngModel)]="rejectionReasonCommunity"
               class="modern-input"
               rows="4"
-              placeholder="Reddetme nedeninizi yazınız (zorunlu)..."
+              [placeholder]="communityToReject.hasEverBeenApproved === true ? 'Red nedeninizi yazınız (zorunlu)…' : 'Reddetme nedeninizi yazınız (zorunlu)...'"
             ></textarea>
           </div>
           <div class="modal-actions">
@@ -1954,7 +2009,7 @@
               (click)="confirmRejectCommunity()"
             >
               <span class="material-symbols-outlined">cancel</span>
-              Topluluğu Reddet
+              {{ communityToReject.hasEverBeenApproved === true ? 'Güncellemeyi Reddet' : 'Topluluğu Reddet' }}
             </button>
           </div>
         </div>
@@ -1973,12 +2028,15 @@
       (click)="$event.stopPropagation()"
     >
       <div class="modal-header">
-        <h3>Topluluk Reddet</h3>
+        <h3>{{ communityToReject.hasEverBeenApproved === true ? 'Güncellemeyi Reddet' : 'Topluluk Reddet' }}</h3>
         <button class="close-btn" (click)="closeRejectCommunitySubModal()">✕</button>
       </div>
       <div class="modal-body modal-body-reject-community">
         <div class="form-section">
-          <p class="reject-community-intro">
+          <p class="reject-community-intro" *ngIf="communityToReject.hasEverBeenApproved === true">
+            "<strong>{{ communityToReject.name }}</strong>" topluluğunun profil güncellemesini reddetmek istediğinize emin misiniz? Red nedeni topluluk başkanına iletilecektir; topluluk aktif kalacak, sadece bu güncelleme talebi iptal edilecektir.
+          </p>
+          <p class="reject-community-intro" *ngIf="communityToReject.hasEverBeenApproved !== true">
             "<strong>{{ communityToReject.name }}</strong
             >" topluluğunu reddetmek istediğinize emin misiniz? Reddetme nedeni topluluk başkanına
             e-posta ile iletilecektir.
@@ -1989,7 +2047,7 @@
               [(ngModel)]="rejectionReasonCommunity"
               class="modern-input"
               rows="4"
-              placeholder="Reddetme nedeninizi yazınız (zorunlu)..."
+              [placeholder]="communityToReject.hasEverBeenApproved === true ? 'Red nedeninizi yazınız (zorunlu)…' : 'Reddetme nedeninizi yazınız (zorunlu)...'"
             ></textarea>
           </div>
           <div class="modal-actions">
@@ -2000,7 +2058,7 @@
               (click)="confirmRejectCommunity()"
             >
               <span class="material-symbols-outlined">cancel</span>
-              Topluluğu Reddet
+              {{ communityToReject.hasEverBeenApproved === true ? 'Güncellemeyi Reddet' : 'Topluluğu Reddet' }}
             </button>
           </div>
         </div>

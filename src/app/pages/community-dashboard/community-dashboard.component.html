@@ -308,7 +308,7 @@
           <div class="hero-banner">
             <img [src]="clubInfo.banner || 'assets/img/placeholder-cover.svg'" alt="Banner"
               (error)="onImageError($event, 'cover')" />
-            <button *ngIf="communityApproved" type="button" class="edit-banner-btn" (click)="showBannerModal = true" title="Banner Güncelle">
+            <button *ngIf="communityApproved && !isUpdatePending" type="button" class="edit-banner-btn" (click)="showBannerModal = true" title="Banner Güncelle">
               <span class="material-symbols-outlined">photo_camera</span>
               <span>Banner Güncelle</span>
             </button>
@@ -317,7 +317,7 @@
             <div class="avatar-wrapper">
               <img [src]="clubInfo.logo || 'assets/img/placeholder-logo.svg'" alt="Logo"
                 (error)="onImageError($event, 'logo')" />
-              <button *ngIf="communityApproved" type="button" class="edit-avatar-btn" (click)="showAvatarModal = true" title="Logo Güncelle">
+              <button *ngIf="communityApproved && !isUpdatePending" type="button" class="edit-avatar-btn" (click)="showAvatarModal = true" title="Logo Güncelle">
                 <span class="material-symbols-outlined">photo_camera</span>
               </button>
             </div>
@@ -332,46 +332,50 @@
         </div>
         <div class="form-grid">
           <div class="form-section">
-            <p class="profile-pending-text" *ngIf="!communityApproved">Henüz Onay aşamasında.</p>
+            <p class="profile-pending-text" *ngIf="!communityApproved && !isUpdatePending">Henüz Onay aşamasında.</p>
+            <div class="profile-pending-banner" *ngIf="isUpdatePending">
+              <span class="material-symbols-outlined">schedule</span>
+              <p>Topluluk bilgileri güncellemesi için GSB tarafına onaya gönderilmiştir. Red veya Kabul alana kadar topluluk bilgilerini tekrar güncelleyemezsiniz.</p>
+            </div>
             <p class="profile-hint" *ngIf="communityApproved && !isUpdatePending">Bilgileri güncelledikten sonra "Güncellemeleri Onaya Gönder" ile GSB onayına iletebilirsiniz. Onaylandığında değişiklikler yayına alınır.</p>
             <h3>Kulüp Bilgileri</h3>
             <div class="input-grid">
               <label>
                 <span>Kulüp Adı</span>
-                <input type="text" [(ngModel)]="clubInfo.name" placeholder="Topluluk adı" [readonly]="!communityApproved" />
+                <input type="text" [(ngModel)]="clubInfo.name" placeholder="Topluluk adı" [readonly]="!communityApproved || isUpdatePending" />
               </label>
               <label>
                 <span>Üniversite</span>
-                <input type="text" [(ngModel)]="clubInfo.university" placeholder="Üniversite" [readonly]="!communityApproved" />
+                <input type="text" [(ngModel)]="clubInfo.university" placeholder="Üniversite" [readonly]="!communityApproved || isUpdatePending" />
               </label>
               <label>
                 <span>Şehir</span>
-                <select [(ngModel)]="clubInfo.city" class="profile-select" [disabled]="!communityApproved">
+                <select [(ngModel)]="clubInfo.city" class="profile-select" [disabled]="!communityApproved || isUpdatePending">
                   <option value="" disabled>Şehir seçin</option>
                   <option *ngFor="let c of profileCities" [value]="c">{{ c }}</option>
                 </select>
               </label>
               <label>
                 <span>Kategori</span>
-                <select [(ngModel)]="clubInfo.category" class="profile-select" [disabled]="!communityApproved">
+                <select [(ngModel)]="clubInfo.category" class="profile-select" [disabled]="!communityApproved || isUpdatePending">
                   <option value="" disabled>Kategori seçin</option>
                   <option *ngFor="let c of profileCategories" [value]="c">{{ c }}</option>
                 </select>
               </label>
               <label>
                 <span>Topluluk İletişim E-Postası</span>
-                <input type="email" [(ngModel)]="clubInfo.email" placeholder="topluluk@edu.tr" [readonly]="!communityApproved" />
+                <input type="email" [(ngModel)]="clubInfo.email" placeholder="topluluk@edu.tr" [readonly]="!communityApproved || isUpdatePending" />
               </label>
               <label>
                 <span>Topluluk Başkanı E-Postası</span>
-                <input type="email" [(ngModel)]="clubInfo.comLeadMail" placeholder="baskan@edu.tr" [readonly]="!communityApproved" />
+                <input type="email" [(ngModel)]="clubInfo.comLeadMail" placeholder="baskan@edu.tr" [readonly]="!communityApproved || isUpdatePending" />
                 <small class="field-hint" *ngIf="communityApproved">Topluluk başkanı e-postası değişimi GSB onayından sonra geçerli olacak; onaylandığında yeni girilen e-posta adresine doğrulama maili gönderilecektir. Topluluk paneline giriş bu e-posta ile yapılacağından lütfen dikkatli ve doğru doldurunuz.</small>
               </label>
             </div>
             <label class="stacked">
               <span>Hakkımızda (Maks. 500 karakter)</span>
               <textarea rows="4" maxlength="500" [(ngModel)]="clubInfo.description"
-                placeholder="Topluluğunuzu anlatan kısa bir yazı yazın..." [readonly]="!communityApproved"></textarea>
+                placeholder="Topluluğunuzu anlatan kısa bir yazı yazın..." [readonly]="!communityApproved || isUpdatePending"></textarea>
             </label>
             <div class="profile-actions" *ngIf="communityApproved && !isUpdatePending">
               <button type="button" class="btn-primary" [disabled]="!isProfileFormValid || isSavingProfile" (click)="saveCommunityProfile()">

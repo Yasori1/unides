@@ -1745,6 +1745,30 @@
   font-weight: 500;
 }
 
+.profile-pending-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 0 0 16px;
+  padding: 14px 16px;
+  background: #fef3c7;
+  border: 1px solid #f59e0b;
+  border-radius: 10px;
+
+  .material-symbols-outlined {
+    flex-shrink: 0;
+    color: #d97706;
+    font-size: 1.4rem;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #92400e;
+    line-height: 1.45;
+  }
+}
+
 .profile-actions {
   margin-top: 20px;
   padding-top: 16px;
