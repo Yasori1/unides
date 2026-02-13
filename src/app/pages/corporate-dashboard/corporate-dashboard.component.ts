@@ -388,13 +388,19 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  /** API'den gelen topluluk listesini işleyip ekrana yansıtır. Backend: active | passive | pending | all. Reddedilen/Silinmiş = all + client filter. */
+  /** API'den gelen topluluk listesini işleyip ekrana yansıtır. Backend: active | passive | pending | all. Duruma göre client-side filtre. */
   private handleCommunitiesLoaded(communities: Community[], statusFilter?: string): void {
     let mapped = communities;
     if (statusFilter === 'Reddedilen') {
       mapped = mapped.filter((c) => c.status === 'Reddedilen');
     } else if (statusFilter === 'Silinmiş') {
       mapped = mapped.filter((c) => c.deletedAt != null && c.deletedAt !== '');
+    } else if (statusFilter === 'Onay Bekleyen') {
+      mapped = mapped.filter((c) => c.status === 'Onay Bekleyen');
+    } else if (statusFilter === 'Pasif') {
+      mapped = mapped.filter((c) => c.status === 'Pasif');
+    } else if (statusFilter === 'Aktif') {
+      mapped = mapped.filter((c) => c.status === 'Aktif');
     }
     // #region agent log
     if (statusFilter === 'Silinmiş' && mapped.length > 0) {
@@ -1343,7 +1349,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
             : this.editingCommunity.status === 'Aktif',
       };
 
-      this.communityService.addOrUpdateCommunity(communityForService).subscribe({
+      this.communityService.addOrUpdateCommunity(communityForService, { fromGSB: true }).subscribe({
         next: (updatedCommunity) => {
           const communityId = updatedCommunity.id;
 
@@ -1501,7 +1507,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         status: this.newCommunity.status || 'Aktif', // Status'u ekle
       } as Community & { presidentEmail?: string; shortDescription?: string };
 
-      this.communityService.addOrUpdateCommunity(communityForService).subscribe({
+      this.communityService.addOrUpdateCommunity(communityForService, { fromGSB: true }).subscribe({
         next: (createdCommunity) => {
           const communityId = createdCommunity.id;
 

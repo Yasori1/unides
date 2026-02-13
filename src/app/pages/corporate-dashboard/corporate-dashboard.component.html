@@ -319,11 +319,11 @@
               <span
                 class="community-status-badge"
                 [ngClass]="getCommunityStatusClass(item)"
-                [title]="item.status === 'Onay Bekleyen' ? (item.hasEverBeenApproved ? 'Profil güncellemesi onay bekliyor' : 'Yeni kayıt onay bekliyor') : item.status"
+                [title]="item.status === 'Onay Bekleyen' ? (item.hasEverBeenApproved ? 'Güncelleme onay bekliyor' : 'Yeni kayıt onay bekliyor') : item.status"
               >
                 {{ item.status || 'Aktif' }}
                 <ng-container *ngIf="item.status === 'Onay Bekleyen'">
-                  <span class="pending-type-hint" *ngIf="item.hasEverBeenApproved">(Profil günc.)</span>
+                  <span class="pending-type-hint" *ngIf="item.hasEverBeenApproved">(Güncelleme)</span>
                   <span class="pending-type-hint" *ngIf="!item.hasEverBeenApproved">(Yeni kayıt)</span>
                 </ng-container>
               </span>
@@ -1090,55 +1090,50 @@
                   </div>
                 </div>
               </div>
-              <div class="new-community-right deleted-detail-fields">
+              <div class="new-community-right">
                 <div class="form-section">
                   <h5 class="section-title">Temel Bilgiler</h5>
-                  <div class="detail-row">
-                    <span class="detail-label">Topluluk İsmi</span
-                    ><span class="detail-value">{{ editingCommunity.name || '—' }}</span>
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">Kategori</span
-                    ><span class="detail-value">{{ editingCommunity.category || '—' }}</span>
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">Kısa Açıklama</span
-                    ><span class="detail-value">{{
-                      editingCommunity.miniAbout || editingCommunity.about || '—'
-                    }}</span>
-                  </div>
-                  <div class="detail-row full">
-                    <span class="detail-label">Topluluk Hakkında</span
-                    ><span class="detail-value">{{ editingCommunity.about || '—' }}</span>
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">Şehir</span
-                    ><span class="detail-value">{{ editingCommunity.city || '—' }}</span>
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">Üniversite</span
-                    ><span class="detail-value">{{ editingCommunity.university || '—' }}</span>
+                  <div class="form-grid-2col">
+                    <div class="form-group">
+                      <label>Topluluk İsmi</label>
+                      <input type="text" [ngModel]="editingCommunity.name" class="modern-input" readonly />
+                    </div>
+                    <div class="form-group">
+                      <label>Kategori</label>
+                      <input type="text" [ngModel]="editingCommunity.category" class="modern-input" readonly />
+                    </div>
+                    <div class="form-group full-width">
+                      <label>Kısa Açıklama</label>
+                      <input type="text" [ngModel]="editingCommunity.miniAbout" class="modern-input" readonly />
+                    </div>
+                    <div class="form-group full-width">
+                      <label>Topluluk Hakkında</label>
+                      <textarea [ngModel]="editingCommunity.about" class="modern-input" rows="3" readonly></textarea>
+                    </div>
+                    <div class="form-group">
+                      <label>Şehir</label>
+                      <input type="text" [ngModel]="editingCommunity.city" class="modern-input" readonly />
+                    </div>
+                    <div class="form-group">
+                      <label>Üniversite</label>
+                      <input type="text" [ngModel]="editingCommunity.university" class="modern-input" readonly />
+                    </div>
                   </div>
                 </div>
                 <div class="form-section">
                   <h5 class="section-title">İletişim Bilgileri</h5>
-                  <div class="detail-row">
-                    <span class="detail-label">E-posta</span
-                    ><span class="detail-value">{{
-                      editingCommunity.email || editingCommunity.comMail || '—'
-                    }}</span>
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">Topluluk Başkanı E-posta</span
-                    ><span class="detail-value">{{
-                      editingCommunity.presidentEmail || editingCommunity.comLeadMail || '—'
-                    }}</span>
+                  <div class="form-grid-2col">
+                    <div class="form-group">
+                      <label>E-posta</label>
+                      <input type="email" [ngModel]="editingCommunity.email" class="modern-input" readonly />
+                    </div>
+                    <div class="form-group">
+                      <label>Topluluk Başkanı E-posta</label>
+                      <input type="email" [ngModel]="editingCommunity.presidentEmail" class="modern-input" readonly />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div class="modal-actions">
-              <button type="button" class="btn-secondary" (click)="closeModal()">Kapat</button>
             </div>
           </div>
 
@@ -1218,7 +1213,7 @@
                   <span class="material-symbols-outlined status-icon">schedule</span>
                   <span class="status-current-label">Mevcut durum</span>
                   <span class="status-current-value">Onay Bekleyen</span>
-                  <span class="pending-type-label" *ngIf="editingCommunity.hasEverBeenApproved === true">(Profil güncellemesi)</span>
+                  <span class="pending-type-label" *ngIf="editingCommunity.hasEverBeenApproved === true">(Güncelleme)</span>
                   <span class="pending-type-label" *ngIf="editingCommunity.hasEverBeenApproved !== true">(Yeni kayıt)</span>
                   <p class="status-current-hint">
                     Topluluk GSB onayı bekliyor. Onayla veya Reddet ile işlem yapabilirsiniz.

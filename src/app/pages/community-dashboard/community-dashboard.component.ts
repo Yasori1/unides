@@ -1222,7 +1222,13 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
           this.displayName = community.name || this.userName;
           this.userInitial = this.displayName.charAt(0).toUpperCase();
           this.communityApproved = community.isActivity === true;
-          this.isUpdatePending = false;
+          // Güncelleme onayı beklerken panel açık kalsın: isUpdatePending sadece onaylıyken false
+          const profileUpdateFlag =
+            isPlatformBrowser(this.platformId) &&
+            localStorage.getItem('community_profile_update_pending') === 'true';
+          this.isUpdatePending =
+            !this.communityApproved &&
+            (community.hasEverBeenApproved === true || profileUpdateFlag);
           if (isPlatformBrowser(this.platformId)) {
             localStorage.setItem('community_approved', JSON.stringify(this.communityApproved));
             if (this.communityApproved) localStorage.removeItem('community_profile_update_pending');

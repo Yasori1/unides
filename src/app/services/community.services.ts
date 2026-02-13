@@ -222,12 +222,16 @@ export class CommunityService {
         : true;
 
     // comConfirm: 0=beklemede, 1=onaylandı, 2=reddedildi. deletedAt varsa Silinmiş.
+    // hasEverBeenApproved: true ise daha önce onaylanmış (şu anki bekleme = güncelleme onayı) → Onay Bekleyen
     const deletedAt = dto.deletedAt ?? dto.DeletedAt ?? null;
     const comConfirm = dto.comConfirm ?? dto.ComConfirm;
+    const hasEverBeenApproved = dto.hasEverBeenApproved ?? dto.HasEverBeenApproved ?? false;
     let status: 'Aktif' | 'Pasif' | 'Onay Bekleyen' | 'Reddedilen' | 'Silinmiş';
     if (deletedAt != null && deletedAt !== '') {
       status = 'Silinmiş';
     } else if (comConfirm === 0 || (comConfirm === undefined && !isActivity)) {
+      status = 'Onay Bekleyen';
+    } else if (hasEverBeenApproved === true && !isActivity) {
       status = 'Onay Bekleyen';
     } else if (comConfirm === 2) {
       status = 'Reddedilen';
@@ -574,14 +578,26 @@ export class CommunityService {
   }
 
   // Topluluk Güncelle (Backend: PUT /api/Communities/{id:guid})
-  // Auth interceptor automatically adds Authorization header and Content-Type if token exists
-  updateCommunity(id: string, dto: UpdateCommunityDto): Observable<Community> {
+  // options.fromGSB: true ise X-From-GSB header gönderilir; backend GSB güncellemesini anında uygular (onay kuyruğuna almaz)
+  updateCommunity(
+    id: string,
+    dto: UpdateCommunityDto,
+    options?: { fromGSB?: boolean }
+  ): Observable<Community> {
     // Debug log - DTO'nun içeriğini kontrol et
     console.log('updateCommunity - Sending DTO to backend:', JSON.stringify(dto, null, 2));
     console.log('updateCommunity - Community ID:', id);
 
+    const headers = new HttpHeaders();
+    const headersWithGSB =
+      options?.fromGSB === true
+        ? headers.set('X-From-GSB', 'true')
+        : undefined;
+
     // Backend endpoint: PUT /api/Communities/update/{id:guid}
-    return this.http.put<void>(`${this.apiUrl}/update/${id}`, dto).pipe(
+    return this.http
+      .put<void>(`${this.apiUrl}/update/${id}`, dto, { ...(headersWithGSB && { headers: headersWithGSB }) })
+      .pipe(
       switchMap(() => {
         // Backend'de pasif topluluklar GET endpoint'inde döndürülmüyor (!com.IsActivity kontrolü var)
         // Bu yüzden güncellenmiş veriyi direkt oluştur
@@ -1082,7 +1098,11 @@ export class CommunityService {
   }
 
   // Corporate dashboard için uyumluluk metodu (eski interface ile çalışır)
-  addOrUpdateCommunity(community: Community & { presidentEmail?: string }): Observable<Community> {
+  // options.fromGSB: true → GSB panelinden güncelleme; backend onay kuyruğuna almadan anında uygular
+  addOrUpdateCommunity(
+    community: Community & { presidentEmail?: string },
+    options?: { fromGSB?: boolean }
+  ): Observable<Community> {
     if (community.id && community.id !== '') {
       // Status'u isActivity boolean'a çevir
       // ÖNEMLİ: status değerine öncelik ver (butonlardan gelen değer)
@@ -1146,7 +1166,7 @@ export class CommunityService {
         comLeadMail: toValueOrUndefined(community.presidentEmail || community.comLeadMail),
       };
 
-      return this.updateCommunity(community.id, updateDto);
+      return this.updateCommunity(community.id, updateDto, options);
     } else {
       // Yeni topluluk oluşturma - ComLeadMail zorunlu
       if (!community.presidentEmail && !community.comLeadMail) {
@@ -1192,7 +1212,7 @@ export class CommunityService {
             const updateDto: UpdateCommunityDto = {
               isActivity: false,
             };
-            return this.updateCommunity(createdCommunity.id, updateDto);
+            return this.updateCommunity(createdCommunity.id, updateDto, options);
           }
           return of(createdCommunity);
         })
