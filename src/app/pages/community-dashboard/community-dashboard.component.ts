@@ -297,8 +297,10 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
   categories: string[] = [];
   isLoading = true;
 
-  /** Topluluk onaylı mı? null = yükleniyor, true = onaylı (dashboard açık), false = henüz onay aşamasında */
+  /** Topluluk onaylı mı? null = yükleniyor, true = onaylı, false = onay bekliyor (ilk kayıt veya güncelleme) */
   communityApproved: boolean | null = null;
+  /** Onay beklerken girişe izin: true = güncelleme onayı bekliyor (dashboard açık, Profil salt okunur), false = ilk kayıt onayı (dashboard kapalı) */
+  isUpdatePending = false;
 
   /** Profilim sekmesinden topluluk güncelleme gönderiliyor mu */
   isSavingProfile = false;
@@ -412,17 +414,29 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
             this.userInitial = this.displayName.charAt(0).toUpperCase();
             this.communityApproved = community.isActivity === true;
             this.isLoadingCommunity = false;
+
+            // İlk kayıt onayı vs güncelleme onayı ayrımı: backend hasEverBeenApproved veya localStorage flag
+            const profileUpdatePendingFlag =
+              isPlatformBrowser(this.platformId) &&
+              localStorage.getItem('community_profile_update_pending') === 'true';
+            this.isUpdatePending =
+              !this.communityApproved &&
+              (community.hasEverBeenApproved === true || profileUpdatePendingFlag);
+
             if (this.communityApproved) {
-              // Topluluk onaylı — localStorage'ı güncelle ve dashboard'ı yükle
-              localStorage.setItem('community_approved', JSON.stringify(true));
-              this.isLoadingEvents = true;
-              this.loadCommunityEvents(community.id);
-              this.loadLeaderStats();
+              if (isPlatformBrowser(this.platformId)) {
+                localStorage.setItem('community_approved', JSON.stringify(true));
+                localStorage.removeItem('community_profile_update_pending');
+              }
             } else {
-              // Topluluk onaylanmamış — community-login'deki pending ekranına yönlendir
-              localStorage.setItem('community_approved', JSON.stringify(false));
-              this.router.navigate(['/community-login']);
+              if (isPlatformBrowser(this.platformId)) {
+                localStorage.setItem('community_approved', JSON.stringify(false));
+              }
             }
+
+            this.isLoadingEvents = true;
+            this.loadCommunityEvents(community.id);
+            this.loadLeaderStats();
             return;
           }
           // lead-by-me 404/403 döndüyse eski akışa düş (aktif listeden bul)
@@ -523,23 +537,15 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
               this.userInitial = this.displayName.charAt(0).toUpperCase();
 
               this.communityApproved = communityDetail.isActivity === true;
+              this.isUpdatePending = false;
               this.isLoadingCommunity = false;
-
-              if (this.communityApproved) {
-                // Topluluk onaylı — localStorage'ı güncelle ve dashboard verilerini yükle
-                localStorage.setItem('community_approved', JSON.stringify(true));
-                this.isLoadingEvents = true;
-
-                // Load events for this community
-                this.loadCommunityEvents(communityDetail.id);
-
-                // Load statistics for overview
-                this.loadLeaderStats();
-              } else {
-                // Topluluk onaylanmamış — community-login'deki pending ekranına yönlendir
-                localStorage.setItem('community_approved', JSON.stringify(false));
-                this.router.navigate(['/community-login']);
+              if (isPlatformBrowser(this.platformId)) {
+                localStorage.setItem('community_approved', JSON.stringify(this.communityApproved));
+                localStorage.removeItem('community_profile_update_pending');
               }
+              this.isLoadingEvents = true;
+              this.loadCommunityEvents(communityDetail.id);
+              this.loadLeaderStats();
             }
             resolve();
           },
@@ -1165,6 +1171,11 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
           this.pendingLogoFile = null;
           if (this.clubInfo.banner?.startsWith('blob:')) URL.revokeObjectURL(this.clubInfo.banner);
           if (this.clubInfo.logo?.startsWith('blob:')) URL.revokeObjectURL(this.clubInfo.logo);
+          if (isPlatformBrowser(this.platformId)) {
+            localStorage.setItem('community_profile_update_pending', 'true');
+          }
+          this.communityApproved = false;
+          this.isUpdatePending = true;
           this.showToast(
             'Topluluk bilgileri GSB onayına gönderildi. Onay bekleyen topluluklar kategorisinde görünecek; GSB onayından sonra değişiklikler yayına alınacaktır.',
             'success'
@@ -1211,7 +1222,11 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
           this.displayName = community.name || this.userName;
           this.userInitial = this.displayName.charAt(0).toUpperCase();
           this.communityApproved = community.isActivity === true;
-          localStorage.setItem('community_approved', JSON.stringify(this.communityApproved));
+          this.isUpdatePending = false;
+          if (isPlatformBrowser(this.platformId)) {
+            localStorage.setItem('community_approved', JSON.stringify(this.communityApproved));
+            if (this.communityApproved) localStorage.removeItem('community_profile_update_pending');
+          }
           if (this.communityApproved) {
             this.loadCommunityEvents(community.id);
             this.loadLeaderStats();

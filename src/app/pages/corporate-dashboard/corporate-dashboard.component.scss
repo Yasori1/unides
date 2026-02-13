@@ -1627,6 +1627,15 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
         background: rgba(55, 65, 81, 0.95);
         color: rgba(255, 255, 255, 0.9);
       }
+
+      .pending-type-hint {
+        display: inline-block;
+        margin-left: 4px;
+        font-size: 0.6rem;
+        font-weight: 600;
+        opacity: 0.95;
+        text-transform: none;
+      }
     }
 
     .category-badge {
@@ -2355,11 +2364,31 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
       background: rgba($primary, 0.08);
       color: $primary;
     }
-    &.status-aktif.active { background: rgba(34, 197, 94, 0.15); border-color: #22c55e; color: #15803d; }
-    &.status-onay-bekleyen.active { background: rgba(245, 158, 11, 0.2); border-color: #f59e0b; color: #b45309; }
-    &.status-pasif.active { background: rgba(107, 114, 128, 0.2); border-color: #6b7280; color: #4b5563; }
-    &.status-reddedilen.active { background: rgba(239, 68, 68, 0.15); border-color: #ef4444; color: #b91c1c; }
-    &.status-silinmis.active { background: rgba(55, 65, 81, 0.2); border-color: #374151; color: #1f2937; }
+    &.status-aktif.active {
+      background: rgba(34, 197, 94, 0.15);
+      border-color: #22c55e;
+      color: #15803d;
+    }
+    &.status-onay-bekleyen.active {
+      background: rgba(245, 158, 11, 0.2);
+      border-color: #f59e0b;
+      color: #b45309;
+    }
+    &.status-pasif.active {
+      background: rgba(107, 114, 128, 0.2);
+      border-color: #6b7280;
+      color: #4b5563;
+    }
+    &.status-reddedilen.active {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: #ef4444;
+      color: #b91c1c;
+    }
+    &.status-silinmis.active {
+      background: rgba(55, 65, 81, 0.2);
+      border-color: #374151;
+      color: #1f2937;
+    }
   }
 }
 
@@ -2623,27 +2652,21 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
       }
     }
 
-    // Onay Bekleyen topluluk detay pop-up: buton düzeni ve Topluluğu Sil güzelleştirme
+    // Onay Bekleyen topluluk detay pop-up: üç buton alt kısımda tek satırda, düzenli
     &.modal-actions--community-pending {
-      flex-wrap: wrap;
-      gap: 16px;
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: nowrap;
+      padding-top: 20px;
+      margin-top: 8px;
+      border-top: 1px solid #e5e7eb;
 
-      .modal-actions-right {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 16px;
-      }
-
-      .modal-actions-approve-reject {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding-left: 16px;
-        border-left: 1px solid #e5e7eb;
-      }
-
-      .btn-delete-community-outline {
+      .btn-delete-community-outline,
+      .btn-danger,
+      .btn-primary {
         display: inline-flex;
         align-items: center;
         gap: 8px;
@@ -2654,19 +2677,46 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
         cursor: pointer;
         transition: all 0.2s ease;
         font-family: inherit;
-        background: #fff;
-        color: #991b1b;
-        border: 1px solid #fecaca;
 
         .material-symbols-outlined {
           font-size: 20px;
         }
+      }
+
+      .btn-delete-community-outline {
+        background: #fff;
+        color: #991b1b;
+        border: 1px solid #fecaca;
 
         &:hover {
           background: #fef2f2;
           color: #b91c1c;
           border-color: #f87171;
           box-shadow: 0 2px 8px rgba(185, 28, 28, 0.12);
+        }
+      }
+    }
+
+    // Reddedilen topluluk detay: sadece Topluluğu Sil, alt kısımda düzenli
+    &.modal-actions--community-rejected {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      padding-top: 20px;
+      margin-top: 8px;
+      border-top: 1px solid #e5e7eb;
+
+      .btn-danger {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 20px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 14px;
+
+        .material-symbols-outlined {
+          font-size: 20px;
         }
       }
     }
@@ -2734,6 +2784,14 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
       font-size: 13px;
       color: #a16207;
       line-height: 1.45;
+    }
+    .pending-type-label {
+      display: inline-block;
+      margin-left: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #92400e;
+      opacity: 0.9;
     }
   }
 
@@ -3685,6 +3743,14 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
     margin-bottom: 0;
     padding-bottom: 0;
   }
+}
+
+// Topluluğu Onayla detay açıkken Reddet pop-up'ı ana modalın üstünde
+.reject-sub-modal-backdrop {
+  z-index: 2100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 // Topluluk Reddet modalı — alttaki boşluğu kaldır, pop-up daha sıkı dursun
@@ -4658,14 +4724,13 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
 }
 
 // ================= TOPLULUK ONAY/RED BUTONLARI =================
-// Kart footer: Onay Bekleyen olduğunda butonlar tam genişlikte alt satırda
+// Onay Bekleyen kartı footer'ı diğer kartlarla aynı: sol tarafta şehir/üniversite, sağ tarafta aksiyonlar (İncele ile aynı hizada)
 .card-footer.card-footer--with-actions {
-  flex-direction: column;
-  align-items: stretch;
-  gap: 12px;
-
+  // Aynı row layout; review-actions sağda, .action-text gibi
   .review-actions {
     margin-top: 0;
+    padding-top: 0;
+    border-top: none;
   }
 }
 
@@ -4674,15 +4739,12 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
   flex-wrap: wrap;
   align-items: center;
   justify-content: flex-end;
-  gap: 10px;
-  margin-top: 8px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  gap: 8px;
 
   .review-actions-primary {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
   }
 
   .btn-approve,
@@ -4691,11 +4753,11 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    padding: 8px 16px;
+    gap: 4px;
+    padding: 6px 12px;
     border: none;
-    border-radius: 10px;
-    font-size: 13px;
+    border-radius: 8px;
+    font-size: 12px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -4703,7 +4765,7 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
     white-space: nowrap;
 
     .material-symbols-outlined {
-      font-size: 18px;
+      font-size: 16px;
     }
   }
 

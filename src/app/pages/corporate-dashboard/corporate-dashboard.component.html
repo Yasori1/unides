@@ -319,9 +319,13 @@
               <span
                 class="community-status-badge"
                 [ngClass]="getCommunityStatusClass(item)"
-                [title]="item.status"
+                [title]="item.status === 'Onay Bekleyen' ? (item.hasEverBeenApproved ? 'Profil güncellemesi onay bekliyor' : 'Yeni kayıt onay bekliyor') : item.status"
               >
                 {{ item.status || 'Aktif' }}
+                <ng-container *ngIf="item.status === 'Onay Bekleyen'">
+                  <span class="pending-type-hint" *ngIf="item.hasEverBeenApproved">(Profil günc.)</span>
+                  <span class="pending-type-hint" *ngIf="!item.hasEverBeenApproved">(Yeni kayıt)</span>
+                </ng-container>
               </span>
               <span class="category-badge" *ngIf="item.category">{{ item.category }}</span>
             </div>
@@ -343,7 +347,10 @@
 
               <p class="description">{{ item.description || item.about }}</p>
 
-              <div class="card-footer" [class.card-footer--with-actions]="item.status === 'Onay Bekleyen'">
+              <div
+                class="card-footer"
+                [class.card-footer--with-actions]="item.status === 'Onay Bekleyen'"
+              >
                 <div class="footer-info">
                   <span class="city-tag" *ngIf="item.city">
                     <i class="bx bxs-map"></i> {{ item.city }}
@@ -688,6 +695,10 @@
               ? 'Topluluk Detayı'
               : modalType === 'edit-community' && editingCommunity?.status === 'Silinmiş'
               ? 'Silinmiş Topluluk Detayı'
+              : modalType === 'edit-community' && editingCommunity?.status === 'Onay Bekleyen'
+              ? 'Topluluğu Onayla'
+              : modalType === 'edit-community' && editingCommunity?.status === 'Reddedilen'
+              ? 'Reddedilen Topluluk Detayı'
               : modalType === 'edit-community'
               ? 'Topluluk Güncelle'
               : modalType === 'reject-event'
@@ -1025,10 +1036,7 @@
       </div>
 
       <!-- Topluluk Düzenleme Modal - Önce spinner, yükleme bitince duruma göre tasarım -->
-      <div
-        class="modal-body modal-body-new-community"
-        *ngIf="modalType === 'edit-community'"
-      >
+      <div class="modal-body modal-body-new-community" *ngIf="modalType === 'edit-community'">
         <!-- Yükleniyor: spinner -->
         <div class="community-detail-loading" *ngIf="communityDetailLoading">
           <app-luma-spin></app-luma-spin>
@@ -1036,278 +1044,365 @@
         </div>
         <!-- Yükleme bitti: Silinmiş / Reddedilen / Aktif-Pasif / Onay Bekleyen tasarımı -->
         <ng-container *ngIf="!communityDetailLoading && editingCommunity">
-        <!-- Silinmiş topluluk: sadece görüntüleme, bilgi detayı, kaydet/sil yok -->
-        <div class="deleted-community-detail" *ngIf="editingCommunity.status === 'Silinmiş'">
-          <div class="new-community-layout">
-            <div class="new-community-left">
-              <div class="image-uploads-section">
-                <div class="banner-upload-wrapper no-url-input readonly-overlay">
-                  <div class="upload-hint-wrapper">
-                    <app-image-upload
-                      label="Banner Görseli"
-                      [previewUrl]="editingCommunity.banner || null"
-                      [uploadToServer]="false"
-                      [allowUrl]="false"
-                      [enableCrop]="false"
-                    ></app-image-upload>
+          <!-- Silinmiş topluluk: sadece görüntüleme, bilgi detayı, kaydet/sil yok -->
+          <div class="deleted-community-detail" *ngIf="editingCommunity.status === 'Silinmiş'">
+            <div class="new-community-layout">
+              <div class="new-community-left">
+                <div class="image-uploads-section">
+                  <div class="banner-upload-wrapper no-url-input readonly-overlay">
+                    <div class="upload-hint-wrapper">
+                      <app-image-upload
+                        label="Banner Görseli"
+                        [previewUrl]="editingCommunity.banner || null"
+                        [uploadToServer]="false"
+                        [allowUrl]="false"
+                        [enableCrop]="false"
+                      ></app-image-upload>
+                    </div>
+                  </div>
+                  <div class="logo-upload-wrapper no-url-input readonly-overlay">
+                    <div class="upload-hint-wrapper">
+                      <app-image-upload
+                        label="Logo"
+                        [previewUrl]="editingCommunity.logo || null"
+                        [uploadToServer]="false"
+                        [allowUrl]="false"
+                        [enableCrop]="false"
+                      ></app-image-upload>
+                    </div>
                   </div>
                 </div>
-                <div class="logo-upload-wrapper no-url-input readonly-overlay">
-                  <div class="upload-hint-wrapper">
-                    <app-image-upload
-                      label="Logo"
-                      [previewUrl]="editingCommunity.logo || null"
-                      [uploadToServer]="false"
-                      [allowUrl]="false"
-                      [enableCrop]="false"
-                    ></app-image-upload>
+                <div class="status-display status-display-deleted">
+                  <label class="section-title">Durum</label>
+                  <div class="status-badge-row">
+                    <span class="material-symbols-outlined status-icon deleted">delete</span>
+                    <span class="status-badge deleted">Silinmiş</span>
+                  </div>
+                  <p class="status-deleted-hint">
+                    Bu topluluk silindi olarak işaretlenmiştir. Sadece bilgileri
+                    görüntüleyebilirsiniz.
+                  </p>
+                  <div class="delete-reason-row" *ngIf="editingCommunity.deleteReason">
+                    <label class="detail-label">Silinme Nedeni</label>
+                    <p class="detail-value delete-reason-value">
+                      {{ editingCommunity.deleteReason }}
+                    </p>
                   </div>
                 </div>
               </div>
-              <div class="status-display status-display-deleted">
-                <label class="section-title">Durum</label>
-                <div class="status-badge-row">
-                  <span class="material-symbols-outlined status-icon deleted">delete</span>
-                  <span class="status-badge deleted">Silinmiş</span>
+              <div class="new-community-right deleted-detail-fields">
+                <div class="form-section">
+                  <h5 class="section-title">Temel Bilgiler</h5>
+                  <div class="detail-row">
+                    <span class="detail-label">Topluluk İsmi</span
+                    ><span class="detail-value">{{ editingCommunity.name || '—' }}</span>
+                  </div>
+                  <div class="detail-row">
+                    <span class="detail-label">Kategori</span
+                    ><span class="detail-value">{{ editingCommunity.category || '—' }}</span>
+                  </div>
+                  <div class="detail-row">
+                    <span class="detail-label">Kısa Açıklama</span
+                    ><span class="detail-value">{{
+                      editingCommunity.miniAbout || editingCommunity.about || '—'
+                    }}</span>
+                  </div>
+                  <div class="detail-row full">
+                    <span class="detail-label">Topluluk Hakkında</span
+                    ><span class="detail-value">{{ editingCommunity.about || '—' }}</span>
+                  </div>
+                  <div class="detail-row">
+                    <span class="detail-label">Şehir</span
+                    ><span class="detail-value">{{ editingCommunity.city || '—' }}</span>
+                  </div>
+                  <div class="detail-row">
+                    <span class="detail-label">Üniversite</span
+                    ><span class="detail-value">{{ editingCommunity.university || '—' }}</span>
+                  </div>
                 </div>
-                <p class="status-deleted-hint">Bu topluluk silindi olarak işaretlenmiştir. Sadece bilgileri görüntüleyebilirsiniz.</p>
-                <div class="delete-reason-row" *ngIf="editingCommunity.deleteReason">
-                  <label class="detail-label">Silinme Nedeni</label>
-                  <p class="detail-value delete-reason-value">{{ editingCommunity.deleteReason }}</p>
+                <div class="form-section">
+                  <h5 class="section-title">İletişim Bilgileri</h5>
+                  <div class="detail-row">
+                    <span class="detail-label">E-posta</span
+                    ><span class="detail-value">{{
+                      editingCommunity.email || editingCommunity.comMail || '—'
+                    }}</span>
+                  </div>
+                  <div class="detail-row">
+                    <span class="detail-label">Topluluk Başkanı E-posta</span
+                    ><span class="detail-value">{{
+                      editingCommunity.presidentEmail || editingCommunity.comLeadMail || '—'
+                    }}</span>
+                  </div>
                 </div>
               </div>
             </div>
-            <div class="new-community-right deleted-detail-fields">
+            <div class="modal-actions">
+              <button type="button" class="btn-secondary" (click)="closeModal()">Kapat</button>
+            </div>
+          </div>
+
+          <!-- Düzenlenebilir topluluk (Aktif, Pasif, Onay Bekleyen, Reddedilen) -->
+          <div class="new-community-layout" *ngIf="editingCommunity.status !== 'Silinmiş'">
+            <div class="new-community-left">
+              <div class="image-uploads-section">
+                <div
+                  class="banner-upload-wrapper no-url-input"
+                  [class.readonly-overlay]="editingCommunity.status === 'Onay Bekleyen' || editingCommunity.status === 'Reddedilen'"
+                >
+                  <div class="upload-hint-wrapper">
+                    <app-image-upload
+                      label="Banner Görseli (1920×500 px)"
+                      [previewUrl]="editingCommunity.banner || null"
+                      [uploadToServer]="true"
+                      [allowUrl]="false"
+                      [enableCrop]="true"
+                      [cropMaintainAspectRatio]="true"
+                      [cropAspectRatio]="1920 / 500"
+                      cropHint="Banner detay sayfası ve anasayfa kartlarında bu oranda gösterilir; önemli alanı ortada seçin."
+                      (onImageSelected)="onBannerSelected($event)"
+                      (onFileSelected)="onBannerFileSelected($event)"
+                    ></app-image-upload>
+                    <span class="size-hint">Max 1 MB</span>
+                  </div>
+                </div>
+                <div
+                  class="logo-upload-wrapper no-url-input"
+                  [class.readonly-overlay]="editingCommunity.status === 'Onay Bekleyen' || editingCommunity.status === 'Reddedilen'"
+                >
+                  <div class="upload-hint-wrapper">
+                    <app-image-upload
+                      label="Logo (220×220 px)"
+                      [previewUrl]="editingCommunity.logo || null"
+                      [uploadToServer]="true"
+                      [allowUrl]="false"
+                      [enableCrop]="true"
+                      [cropMaintainAspectRatio]="true"
+                      [cropAspectRatio]="1"
+                      cropHint="Logo detay sayfasında ve topluluk kartlarında kare çerçevede gösterilir; yazı ve simgeyi ortada tutun ki kesilmesin."
+                      (onImageSelected)="onLogoSelected($event)"
+                      (onFileSelected)="onLogoFileSelected($event)"
+                    ></app-image-upload>
+                    <span class="size-hint">Max 1 MB</span>
+                  </div>
+                </div>
+              </div>
+              <div class="status-toggle-section" *ngIf="editingCommunity.status !== 'Reddedilen'">
+                <label class="section-title">Durum</label>
+                <div class="status-toggle-buttons">
+                  <button
+                    type="button"
+                    class="status-btn"
+                    [class.active]="editingCommunity.status === 'Aktif'"
+                    [disabled]="editingCommunity.status === 'Onay Bekleyen'"
+                    (click)="editingCommunity.status = 'Aktif'; editingCommunity.isActivity = true"
+                  >
+                    <span class="material-symbols-outlined">check_circle</span>
+                    Aktif
+                  </button>
+                  <button
+                    type="button"
+                    class="status-btn passive"
+                    [class.active]="editingCommunity.status === 'Pasif'"
+                    [disabled]="editingCommunity.status === 'Onay Bekleyen'"
+                    (click)="editingCommunity.status = 'Pasif'; editingCommunity.isActivity = false"
+                  >
+                    <span class="material-symbols-outlined">cancel</span>
+                    Pasif
+                  </button>
+                </div>
+                <div
+                  class="status-current-box pending"
+                  *ngIf="editingCommunity.status === 'Onay Bekleyen'"
+                >
+                  <span class="material-symbols-outlined status-icon">schedule</span>
+                  <span class="status-current-label">Mevcut durum</span>
+                  <span class="status-current-value">Onay Bekleyen</span>
+                  <span class="pending-type-label" *ngIf="editingCommunity.hasEverBeenApproved === true">(Profil güncellemesi)</span>
+                  <span class="pending-type-label" *ngIf="editingCommunity.hasEverBeenApproved !== true">(Yeni kayıt)</span>
+                  <p class="status-current-hint">
+                    Topluluk GSB onayı bekliyor. Onayla veya Reddet ile işlem yapabilirsiniz.
+                  </p>
+                </div>
+              </div>
+              <div
+                class="status-display status-display-rejected"
+                *ngIf="editingCommunity.status === 'Reddedilen'"
+              >
+                <label class="section-title">Durum</label>
+                <div class="status-badge-row">
+                  <span class="material-symbols-outlined status-icon rejected">cancel</span>
+                  <span class="status-badge rejected">Reddedilen</span>
+                </div>
+                <div class="rejection-reason-section">
+                  <label class="section-title">Reddedilme Nedeni</label>
+                  <div class="rejection-reason-text">
+                    {{
+                      editingCommunity.confirmAbout && editingCommunity.confirmAbout.trim()
+                        ? editingCommunity.confirmAbout
+                        : 'Reddedilme nedeni belirtilmemiş.'
+                    }}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="new-community-right">
               <div class="form-section">
                 <h5 class="section-title">Temel Bilgiler</h5>
-                <div class="detail-row"><span class="detail-label">Topluluk İsmi</span><span class="detail-value">{{ editingCommunity.name || '—' }}</span></div>
-                <div class="detail-row"><span class="detail-label">Kategori</span><span class="detail-value">{{ editingCommunity.category || '—' }}</span></div>
-                <div class="detail-row"><span class="detail-label">Kısa Açıklama</span><span class="detail-value">{{ editingCommunity.miniAbout || editingCommunity.about || '—' }}</span></div>
-                <div class="detail-row full"><span class="detail-label">Topluluk Hakkında</span><span class="detail-value">{{ editingCommunity.about || '—' }}</span></div>
-                <div class="detail-row"><span class="detail-label">Şehir</span><span class="detail-value">{{ editingCommunity.city || '—' }}</span></div>
-                <div class="detail-row"><span class="detail-label">Üniversite</span><span class="detail-value">{{ editingCommunity.university || '—' }}</span></div>
+                <div class="form-grid-2col">
+                  <div class="form-group">
+                    <label>Topluluk İsmi <span class="required">*</span></label>
+                    <input
+                      type="text"
+                      [(ngModel)]="editingCommunity.name"
+                      class="modern-input"
+                      placeholder="Topluluk adı..."
+                      [readonly]="editingCommunity.status === 'Onay Bekleyen' || editingCommunity.status === 'Reddedilen'"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label>Kategori <span class="required">*</span></label>
+                    <select
+                      [(ngModel)]="editingCommunity.category"
+                      class="modern-input"
+                      [disabled]="editingCommunity.status === 'Onay Bekleyen' || editingCommunity.status === 'Reddedilen'"
+                    >
+                      <option value="">Kategori Seçin</option>
+                      <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+                    </select>
+                  </div>
+                  <div class="form-group full-width">
+                    <label>Topluluk Kısa Açıklama (Max 70 Karakter)</label>
+                    <input
+                      type="text"
+                      [(ngModel)]="editingCommunity.miniAbout"
+                      class="modern-input"
+                      placeholder="Kısa açıklama..."
+                      maxlength="70"
+                      [readonly]="editingCommunity.status === 'Onay Bekleyen' || editingCommunity.status === 'Reddedilen'"
+                    />
+                  </div>
+                  <div class="form-group full-width">
+                    <label>Topluluk Hakkında (Maks. 500)</label>
+                    <textarea
+                      [(ngModel)]="editingCommunity.about"
+                      class="modern-input"
+                      rows="3"
+                      placeholder="Topluluğunuz hakkında bilgi verin..."
+                      maxlength="500"
+                      [readonly]="editingCommunity.status === 'Onay Bekleyen' || editingCommunity.status === 'Reddedilen'"
+                    ></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label>Şehir</label>
+                    <select
+                      [(ngModel)]="editingCommunity.city"
+                      class="modern-input"
+                      [disabled]="editingCommunity.status === 'Onay Bekleyen' || editingCommunity.status === 'Reddedilen'"
+                    >
+                      <option value="">Şehir Seçin</option>
+                      <option *ngFor="let city of cities" [value]="city">{{ city }}</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>Üniversite (Maks. 40)</label>
+                    <input
+                      type="text"
+                      [(ngModel)]="editingCommunity.university"
+                      class="modern-input"
+                      placeholder="Üniversite adı..."
+                      maxlength="40"
+                      [readonly]="editingCommunity.status === 'Onay Bekleyen' || editingCommunity.status === 'Reddedilen'"
+                    />
+                  </div>
+                </div>
               </div>
               <div class="form-section">
                 <h5 class="section-title">İletişim Bilgileri</h5>
-                <div class="detail-row"><span class="detail-label">E-posta</span><span class="detail-value">{{ editingCommunity.email || editingCommunity.comMail || '—' }}</span></div>
-                <div class="detail-row"><span class="detail-label">Topluluk Başkanı E-posta</span><span class="detail-value">{{ editingCommunity.presidentEmail || editingCommunity.comLeadMail || '—' }}</span></div>
-              </div>
-            </div>
-          </div>
-          <div class="modal-actions">
-            <button type="button" class="btn-secondary" (click)="closeModal()">Kapat</button>
-          </div>
-        </div>
-
-        <!-- Düzenlenebilir topluluk (Aktif, Pasif, Onay Bekleyen, Reddedilen) -->
-        <div class="new-community-layout" *ngIf="editingCommunity.status !== 'Silinmiş'">
-          <div class="new-community-left">
-            <div class="image-uploads-section">
-              <div class="banner-upload-wrapper no-url-input" [class.readonly-overlay]="editingCommunity.status === 'Onay Bekleyen'">
-                <div class="upload-hint-wrapper">
-                  <app-image-upload
-                    label="Banner Görseli (1920×500 px)"
-                    [previewUrl]="editingCommunity.banner || null"
-                    [uploadToServer]="true"
-                    [allowUrl]="false"
-                    [enableCrop]="true"
-                    [cropMaintainAspectRatio]="true"
-                    [cropAspectRatio]="1920 / 500"
-                    cropHint="Banner detay sayfası ve anasayfa kartlarında bu oranda gösterilir; önemli alanı ortada seçin."
-                    (onImageSelected)="onBannerSelected($event)"
-                    (onFileSelected)="onBannerFileSelected($event)"
-                  ></app-image-upload>
-                  <span class="size-hint">Max 1 MB</span>
-                </div>
-              </div>
-              <div class="logo-upload-wrapper no-url-input" [class.readonly-overlay]="editingCommunity.status === 'Onay Bekleyen'">
-                <div class="upload-hint-wrapper">
-                  <app-image-upload
-                    label="Logo (220×220 px)"
-                    [previewUrl]="editingCommunity.logo || null"
-                    [uploadToServer]="true"
-                    [allowUrl]="false"
-                    [enableCrop]="true"
-                    [cropMaintainAspectRatio]="true"
-                    [cropAspectRatio]="1"
-                    cropHint="Logo detay sayfasında ve topluluk kartlarında kare çerçevede gösterilir; yazı ve simgeyi ortada tutun ki kesilmesin."
-                    (onImageSelected)="onLogoSelected($event)"
-                    (onFileSelected)="onLogoFileSelected($event)"
-                  ></app-image-upload>
-                  <span class="size-hint">Max 1 MB</span>
-                </div>
-              </div>
-            </div>
-            <div class="status-toggle-section" *ngIf="editingCommunity.status !== 'Reddedilen'">
-              <label class="section-title">Durum</label>
-              <div class="status-toggle-buttons">
-                <button
-                  type="button"
-                  class="status-btn"
-                  [class.active]="editingCommunity.status === 'Aktif'"
-                  [disabled]="editingCommunity.status === 'Onay Bekleyen'"
-                  (click)="editingCommunity.status = 'Aktif'; editingCommunity.isActivity = true"
-                >
-                  <span class="material-symbols-outlined">check_circle</span>
-                  Aktif
-                </button>
-                <button
-                  type="button"
-                  class="status-btn passive"
-                  [class.active]="editingCommunity.status === 'Pasif'"
-                  [disabled]="editingCommunity.status === 'Onay Bekleyen'"
-                  (click)="editingCommunity.status = 'Pasif'; editingCommunity.isActivity = false"
-                >
-                  <span class="material-symbols-outlined">cancel</span>
-                  Pasif
-                </button>
-              </div>
-              <div class="status-current-box pending" *ngIf="editingCommunity.status === 'Onay Bekleyen'">
-                <span class="material-symbols-outlined status-icon">schedule</span>
-                <span class="status-current-label">Mevcut durum</span>
-                <span class="status-current-value">Onay Bekleyen</span>
-                <p class="status-current-hint">Topluluk GSB onayı bekliyor. Onayla veya Reddet ile işlem yapabilirsiniz.</p>
-              </div>
-            </div>
-            <div class="status-display status-display-rejected" *ngIf="editingCommunity.status === 'Reddedilen'">
-              <label class="section-title">Durum</label>
-              <div class="status-badge-row">
-                <span class="material-symbols-outlined status-icon rejected">cancel</span>
-                <span class="status-badge rejected">Reddedilen</span>
-              </div>
-              <div class="rejection-reason-section">
-                <label class="section-title">Reddedilme Nedeni</label>
-                <div class="rejection-reason-text">
-                  {{ editingCommunity.confirmAbout && editingCommunity.confirmAbout.trim() ? editingCommunity.confirmAbout : 'Reddedilme nedeni belirtilmemiş.' }}
+                <div class="form-grid-2col">
+                  <div class="form-group">
+                    <label>E-posta (Maks. 60)</label>
+                    <input
+                      type="email"
+                      [(ngModel)]="editingCommunity.email"
+                      class="modern-input"
+                      placeholder="topluluk@mail.com"
+                      maxlength="60"
+                      [readonly]="editingCommunity.status === 'Onay Bekleyen' || editingCommunity.status === 'Reddedilen'"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label>Topluluk Başkanı E-posta <span style="color: red">*</span></label>
+                    <input
+                      type="email"
+                      [(ngModel)]="editingCommunity.presidentEmail"
+                      class="modern-input"
+                      placeholder="baskan@mail.com"
+                      maxlength="60"
+                      [readonly]="editingCommunity.status === 'Onay Bekleyen' || editingCommunity.status === 'Reddedilen'"
+                    />
+                    <small style="color: #666; font-size: 12px; margin-top: 4px; display: block">
+                      Topluluk başkanının sistemde kayıtlı e-posta adresi.
+                    </small>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-          <div class="new-community-right">
-            <div class="form-section">
-              <h5 class="section-title">Temel Bilgiler</h5>
-              <div class="form-grid-2col">
-                <div class="form-group">
-                  <label>Topluluk İsmi <span class="required">*</span></label>
-                  <input
-                    type="text"
-                    [(ngModel)]="editingCommunity.name"
-                    class="modern-input"
-                    placeholder="Topluluk adı..."
-                    [readonly]="editingCommunity.status === 'Onay Bekleyen'"
-                  />
-                </div>
-                <div class="form-group">
-                  <label>Kategori <span class="required">*</span></label>
-                  <select [(ngModel)]="editingCommunity.category" class="modern-input" [disabled]="editingCommunity.status === 'Onay Bekleyen'">
-                    <option value="">Kategori Seçin</option>
-                    <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
-                  </select>
-                </div>
-                <div class="form-group full-width">
-                  <label>Topluluk Kısa Açıklama (Max 70 Karakter)</label>
-                  <input
-                    type="text"
-                    [(ngModel)]="editingCommunity.miniAbout"
-                    class="modern-input"
-                    placeholder="Kısa açıklama..."
-                    maxlength="70"
-                    [readonly]="editingCommunity.status === 'Onay Bekleyen'"
-                  />
-                </div>
-                <div class="form-group full-width">
-                  <label>Topluluk Hakkında (Maks. 500)</label>
-                  <textarea
-                    [(ngModel)]="editingCommunity.about"
-                    class="modern-input"
-                    rows="3"
-                    placeholder="Topluluğunuz hakkında bilgi verin..."
-                    maxlength="500"
-                    [readonly]="editingCommunity.status === 'Onay Bekleyen'"
-                  ></textarea>
-                </div>
-                <div class="form-group">
-                  <label>Şehir</label>
-                  <select [(ngModel)]="editingCommunity.city" class="modern-input" [disabled]="editingCommunity.status === 'Onay Bekleyen'">
-                    <option value="">Şehir Seçin</option>
-                    <option *ngFor="let city of cities" [value]="city">{{ city }}</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label>Üniversite (Maks. 40)</label>
-                  <input
-                    type="text"
-                    [(ngModel)]="editingCommunity.university"
-                    class="modern-input"
-                    placeholder="Üniversite adı..."
-                    maxlength="40"
-                    [readonly]="editingCommunity.status === 'Onay Bekleyen'"
-                  />
-                </div>
-              </div>
-            </div>
-            <div class="form-section">
-              <h5 class="section-title">İletişim Bilgileri</h5>
-              <div class="form-grid-2col">
-                <div class="form-group">
-                  <label>E-posta (Maks. 60)</label>
-                  <input
-                    type="email"
-                    [(ngModel)]="editingCommunity.email"
-                    class="modern-input"
-                    placeholder="topluluk@mail.com"
-                    maxlength="60"
-                    [readonly]="editingCommunity.status === 'Onay Bekleyen'"
-                  />
-                </div>
-                <div class="form-group">
-                  <label>Topluluk Başkanı E-posta <span style="color: red">*</span></label>
-                  <input
-                    type="email"
-                    [(ngModel)]="editingCommunity.presidentEmail"
-                    class="modern-input"
-                    placeholder="baskan@mail.com"
-                    maxlength="60"
-                    [readonly]="editingCommunity.status === 'Onay Bekleyen'"
-                  />
-                  <small style="color: #666; font-size: 12px; margin-top: 4px; display: block">
-                    Topluluk başkanının sistemde kayıtlı e-posta adresi.
-                  </small>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- Onay Bekleyen: Onayla / Reddet / Topluluğu Sil | Diğer: Topluluk Sil / Topluluk Kaydet -->
-        <div class="modal-actions modal-actions--community-pending" *ngIf="editingCommunity.status === 'Onay Bekleyen'">
-          <button type="button" class="btn-secondary" (click)="closeModal()">Kapat</button>
-          <div class="modal-actions-right">
-            <button type="button" class="btn-delete-community-outline" (click)="deleteCommunity()">
+          <!-- Onay Bekleyen: Reddet / Onayla / Topluluğu Sil (Kapat yok; butonlar alt kısımda düzenli) -->
+          <div
+            class="modal-actions modal-actions--community-pending"
+            *ngIf="editingCommunity.status === 'Onay Bekleyen'"
+          >
+            <button
+              type="button"
+              class="btn-delete-community-outline"
+              (click)="deleteCommunity()"
+            >
               <span class="material-symbols-outlined">delete</span>
               Topluluğu Sil
             </button>
-            <div class="modal-actions-approve-reject">
-              <button type="button" class="btn-danger" (click)="openRejectCommunityModal(editingCommunity)">
-                <span class="material-symbols-outlined">cancel</span>
-                Reddet
-              </button>
-              <button type="button" class="btn-primary" (click)="openApproveCommunityModal(editingCommunity)">
-                <span class="material-symbols-outlined">check_circle</span>
-                Onayla
-              </button>
-            </div>
+            <button
+              type="button"
+              class="btn-danger"
+              (click)="openRejectCommunityModal(editingCommunity)"
+            >
+              <span class="material-symbols-outlined">cancel</span>
+              Reddet
+            </button>
+            <button
+              type="button"
+              class="btn-primary"
+              (click)="openApproveCommunityModal(editingCommunity)"
+            >
+              <span class="material-symbols-outlined">check_circle</span>
+              Onayla
+            </button>
           </div>
-        </div>
-        <div class="modal-actions" *ngIf="editingCommunity.status !== 'Onay Bekleyen' && !isEditingCommunityDeleted()">
-          <button type="button" class="btn-danger" (click)="deleteCommunity()">
-            <span class="material-symbols-outlined">delete</span>
-            Topluluğu Sil
-          </button>
-          <button type="button" class="btn-primary" (click)="saveCommunity()">
-            <span class="material-symbols-outlined">save</span>
-            Topluluk Kaydet
-          </button>
-        </div>
+          <!-- Reddedilen: sadece Topluluğu Sil, alt kısımda düzenli -->
+          <div
+            class="modal-actions modal-actions--community-rejected"
+            *ngIf="editingCommunity.status === 'Reddedilen'"
+          >
+            <button type="button" class="btn-danger" (click)="deleteCommunity()">
+              <span class="material-symbols-outlined">delete</span>
+              Topluluğu Sil
+            </button>
+          </div>
+          <!-- Aktif / Pasif: Topluluğu Sil + Topluluk Kaydet -->
+          <div
+            class="modal-actions"
+            *ngIf="editingCommunity.status !== 'Onay Bekleyen' && editingCommunity.status !== 'Reddedilen' && !isEditingCommunityDeleted()"
+          >
+            <button type="button" class="btn-danger" (click)="deleteCommunity()">
+              <span class="material-symbols-outlined">delete</span>
+              Topluluğu Sil
+            </button>
+            <button type="button" class="btn-primary" (click)="saveCommunity()">
+              <span class="material-symbols-outlined">save</span>
+              Topluluk Kaydet
+            </button>
+          </div>
         </ng-container>
       </div>
 
@@ -1836,8 +1931,11 @@
         </div>
       </div>
 
-      <!-- Topluluk Reddet Modal (reddetme nedeni pop-up) -->
-      <div class="modal-body modal-body-reject-community" *ngIf="modalType === 'rejectCommunity' && communityToReject">
+      <!-- Topluluk Reddet Modal (liste veya başka yerden açıldığında tek modal) -->
+      <div
+        class="modal-body modal-body-reject-community"
+        *ngIf="modalType === 'rejectCommunity' && communityToReject"
+      >
         <div class="form-section">
           <p class="reject-community-intro">
             "<strong>{{ communityToReject.name }}</strong
@@ -1855,6 +1953,52 @@
           </div>
           <div class="modal-actions">
             <button class="btn-secondary" (click)="closeModal()">Vazgeç</button>
+            <button
+              class="btn-danger"
+              [disabled]="!rejectionReasonCommunity || !rejectionReasonCommunity.trim()"
+              (click)="confirmRejectCommunity()"
+            >
+              <span class="material-symbols-outlined">cancel</span>
+              Topluluğu Reddet
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Topluluk Reddet üst katman (Topluluğu Onayla detay açıkken Reddet'e basılınca) -->
+  <div
+    class="modal-backdrop reject-sub-modal-backdrop"
+    *ngIf="isRejectCommunitySubModalOpen && communityToReject"
+    (click)="closeRejectCommunitySubModal()"
+  >
+    <div
+      class="modal-content modal-content-reject-community"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="modal-header">
+        <h3>Topluluk Reddet</h3>
+        <button class="close-btn" (click)="closeRejectCommunitySubModal()">✕</button>
+      </div>
+      <div class="modal-body modal-body-reject-community">
+        <div class="form-section">
+          <p class="reject-community-intro">
+            "<strong>{{ communityToReject.name }}</strong
+            >" topluluğunu reddetmek istediğinize emin misiniz? Reddetme nedeni topluluk başkanına
+            e-posta ile iletilecektir.
+          </p>
+          <div class="form-group full">
+            <label>Reddetme Nedeni <span class="required">*</span></label>
+            <textarea
+              [(ngModel)]="rejectionReasonCommunity"
+              class="modern-input"
+              rows="4"
+              placeholder="Reddetme nedeninizi yazınız (zorunlu)..."
+            ></textarea>
+          </div>
+          <div class="modal-actions">
+            <button class="btn-secondary" (click)="closeRejectCommunitySubModal()">Vazgeç</button>
             <button
               class="btn-danger"
               [disabled]="!rejectionReasonCommunity || !rejectionReasonCommunity.trim()"
@@ -1897,14 +2041,19 @@
     <div class="modal-content modal-content-reject-community" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3>Topluluğu Sil</h3>
-        <button type="button" class="icon-btn ghost close-modern" (click)="closeDeleteCommunityModal()">
+        <button
+          type="button"
+          class="icon-btn ghost close-modern"
+          (click)="closeDeleteCommunityModal()"
+        >
           <span class="material-symbols-outlined">close</span>
         </button>
       </div>
       <div class="modal-body modal-body-reject-community">
         <p class="reject-community-intro">
-          "<strong>{{ communityToDelete.name }}</strong>" topluluğunu silmek istediğinize emin misiniz?
-          Bu işlem geri alınamaz. Lütfen silme nedeninizi yazınız.
+          "<strong>{{ communityToDelete.name }}</strong
+          >" topluluğunu silmek istediğinize emin misiniz? Bu işlem geri alınamaz. Lütfen silme
+          nedeninizi yazınız.
         </p>
         <div class="form-group full">
           <label>Silme Nedeni <span class="required">*</span></label>
@@ -1916,7 +2065,9 @@
           ></textarea>
         </div>
         <div class="modal-actions">
-          <button type="button" class="btn-secondary" (click)="closeDeleteCommunityModal()">Vazgeç</button>
+          <button type="button" class="btn-secondary" (click)="closeDeleteCommunityModal()">
+            Vazgeç
+          </button>
           <button
             type="button"
             class="btn-danger"

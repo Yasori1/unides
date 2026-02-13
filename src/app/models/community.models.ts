@@ -50,6 +50,8 @@ export interface CommunityDetailDto {
   isActivity: boolean;
   comConfirm?: number;
   confirmAbout?: string; // Reddetme gerekçesi (ComConfirm=2)
+  /** Backend: true ise topluluk daha önce en az bir kez onaylanmış (şu anki bekleme = güncelleme onayı) */
+  hasEverBeenApproved?: boolean;
   events: CommunityEventDto[];
 }
 
@@ -140,6 +142,8 @@ export interface Community {
   miniAbout?: string;
   isActivity?: boolean;
   comConfirm?: number; // 0=beklemede, 1=onaylandı, 2=reddedildi
+  /** true ise topluluk daha önce en az bir kez onaylanmış (şu anki bekleme = profil güncellemesi onayı); ilk kayıt onayı vs güncelleme onayı ayrımı için */
+  hasEverBeenApproved?: boolean;
   events?: CommunityEventDto[];
   upcomingEventCount?: number; // Featured communities için
 }

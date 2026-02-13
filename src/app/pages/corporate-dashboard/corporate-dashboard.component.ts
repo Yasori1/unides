@@ -1025,6 +1025,8 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   // --- TOPLULUK ONAY/RED (GSB) ---
   rejectionReasonCommunity = '';
   communityToReject: Community | null = null;
+  /** Topluluğu Onayla detay pop-up'ı açıkken Reddet'e basılınca açılan üst katman pop-up */
+  isRejectCommunitySubModalOpen = false;
   communityToApprove: Community | null = null;
   /** Backend liste ConfirmAbout dönmediği için: reddederken girilen neden burada tutulur, detay popup'ta gösterilir. */
   rejectedCommunityReasons: Map<string, string> = new Map();
@@ -1055,8 +1057,19 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   openRejectCommunityModal(community: Community): void {
     this.communityToReject = community;
     this.rejectionReasonCommunity = '';
+    // Detay pop-up (Topluluğu Onayla) açıksa Reddet'i üst katmanda aç, detayı kapatma
+    if (this.isModalOpen && this.modalType === 'edit-community' && this.editingCommunity?.id === community?.id) {
+      this.isRejectCommunitySubModalOpen = true;
+      return;
+    }
     this.modalType = 'rejectCommunity';
     this.isModalOpen = true;
+  }
+
+  closeRejectCommunitySubModal(): void {
+    this.isRejectCommunitySubModalOpen = false;
+    this.communityToReject = null;
+    this.rejectionReasonCommunity = '';
   }
 
   confirmRejectCommunity(): void {
@@ -1071,6 +1084,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       next: () => {
         this.rejectedCommunityReasons.set(community.id, reason);
         this.toastService.show(`${community.name} topluluğu reddedildi.`, 'success');
+        this.isRejectCommunitySubModalOpen = false;
         this.isModalOpen = false;
         this.communityToReject = null;
         this.rejectionReasonCommunity = '';

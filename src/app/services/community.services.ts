@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpContext, HttpHeaders } from '@angular/common/http';
 import { SKIP_AUTH } from '../core/http-context-tokens';
-import { Observable, map, catchError, of, switchMap, forkJoin } from 'rxjs';
+import { Observable, map, catchError, of, switchMap, forkJoin, from } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Logger } from '../utils/logger.util';
 import {
@@ -98,9 +98,15 @@ export class CommunityService {
     };
   }
 
-  // Featured communities için endpoint
-  getFeaturedCommunities(limit: number = 6): Observable<Community[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/featured`).pipe(
+  // Featured communities için endpoint. options.skipAuth: true ise token gönderilmez (anasayfa tüm şehirler).
+  getFeaturedCommunities(limit: number = 6, options?: { skipAuth?: boolean }): Observable<Community[]> {
+    const headers = options?.skipAuth ? new HttpHeaders({ 'X-Public-List': '1' }) : undefined;
+    const context = options?.skipAuth ? new HttpContext().set(SKIP_AUTH, true) : undefined;
+    return this.http.get<any[]>(`${this.apiUrl}/featured`, {
+      ...(headers && { headers }),
+      ...(context && { context }),
+      ...(options?.skipAuth && { withCredentials: false }),
+    }).pipe(
       map((list) => {
         return list.slice(0, limit).map((dto) => {
           const community = this.mapFeaturedDtoToCommunity(dto);
@@ -158,9 +164,15 @@ export class CommunityService {
     };
   }
 
-  // Yeni katılanlar için - en son eklenen aktif toplulukları getir
-  getNewestCommunities(limit: number = 12): Observable<Community[]> {
-    return this.http.get<CommunityMiniDto[]>(`${this.apiUrl}?status=active`).pipe(
+  // Yeni katılanlar için - en son eklenen aktif toplulukları getir. options.skipAuth: true ise token gönderilmez (anasayfa tüm şehirler).
+  getNewestCommunities(limit: number = 12, options?: { skipAuth?: boolean }): Observable<Community[]> {
+    const headers = options?.skipAuth ? new HttpHeaders({ 'X-Public-List': '1' }) : undefined;
+    const context = options?.skipAuth ? new HttpContext().set(SKIP_AUTH, true) : undefined;
+    return this.http.get<CommunityMiniDto[]>(`${this.apiUrl}?status=active`, {
+      ...(headers && { headers }),
+      ...(context && { context }),
+      ...(options?.skipAuth && { withCredentials: false }),
+    }).pipe(
       map((list) => {
         // Backend'den gelen listeyi ComCreatedAt'e göre sırala (eğer varsa)
         // Not: Backend'den ComCreatedAt gelmiyorsa, backend'in döndürdüğü sırayı kullanıyoruz
@@ -263,6 +275,7 @@ export class CommunityService {
       email: dto.comMail || dto.ComMail || '',
       comMail: dto.comMail || dto.ComMail || '',
       comLeadMail: dto.comLeadMail || dto.ComLeadMail || '',
+      hasEverBeenApproved: dto.hasEverBeenApproved ?? dto.HasEverBeenApproved ?? undefined,
     };
   }
 
@@ -328,8 +341,39 @@ export class CommunityService {
           : dto.IsActivity !== undefined
           ? dto.IsActivity
           : true,
+      hasEverBeenApproved: dto.hasEverBeenApproved ?? dto.HasEverBeenApproved ?? undefined,
       events: dto.events || dto.Events || [],
     };
+  }
+
+  /**
+   * Public topluluk listesi — HttpClient ve interceptor kullanmaz; fetch() ile credentials: 'omit'.
+   * Token ve çerez kesinlikle gitmez; backend tüm şehirlerdeki aktif toplulukları döner.
+   * Sadece communities-page (ve gerekirse anasayfa) için kullanın.
+   */
+  getAllCommunitiesPublic(params?: { name?: string; category?: string; university?: string }): Observable<Community[]> {
+    const searchParams = new URLSearchParams();
+    searchParams.set('status', 'active');
+    if (params?.name) searchParams.set('name', params.name);
+    if (params?.category) searchParams.set('category', params.category);
+    if (params?.university) searchParams.set('university', params.university);
+    const url = `${this.apiUrl}?${searchParams.toString()}`;
+    return from(
+      fetch(url, {
+        method: 'GET',
+        credentials: 'omit',
+        headers: { Accept: 'application/json' },
+      }).then((r) => {
+        if (!r.ok) throw new Error(r.statusText);
+        return r.json();
+      })
+    ).pipe(
+      map((list: any[]) => (list || []).map((dto) => this.mapMiniDtoToCommunity(dto))),
+      catchError((err) => {
+        Logger.error('Topluluklar yüklenemedi (public):', err);
+        return of([]);
+      })
+    );
   }
 
   // Tüm Toplulukları Getir (Backend: GET /api/Communities)
@@ -360,7 +404,8 @@ export class CommunityService {
     options?: { skipAuth?: boolean }
   ): Observable<Community[]> {
     let httpParams = new HttpParams();
-    if (params?.city) httpParams = httpParams.set('city', params.city);
+    // skipAuth (public liste) iken şehir filtresi gönderme — tüm şehirlerdeki topluluklar gelsin
+    if (params?.city && !options?.skipAuth) httpParams = httpParams.set('city', params.city);
     if (params?.university) httpParams = httpParams.set('university', params.university);
     if (params?.category) httpParams = httpParams.set('category', params.category);
     if (params?.name) httpParams = httpParams.set('name', params.name);
@@ -372,6 +417,7 @@ export class CommunityService {
       params: httpParams,
       ...(context && { context }),
       ...(headers && { headers }),
+      ...(options?.skipAuth && { withCredentials: false }),
     }).pipe(
       map((response) => {
         const mapped = response.map((dto) => this.mapMiniDtoToCommunity(dto));

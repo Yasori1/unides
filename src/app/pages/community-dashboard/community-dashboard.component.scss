@@ -82,6 +82,14 @@
   justify-content: center;
   min-height: 60vh;
   padding: 2rem;
+
+  &.fullscreen-pending {
+    position: fixed;
+    inset: 0;
+    min-height: 100vh;
+    background: #f8fafc;
+    z-index: 100;
+  }
 }
 .pending-approval-card {
   text-align: center;
@@ -1726,6 +1734,14 @@
   border-radius: 10px;
   font-size: 0.8rem;
   color: #0369a1;
+  font-weight: 500;
+}
+
+/* Profilim: onay aşamasında sadece yazı (kart/banner yok) */
+.profile-pending-text {
+  margin: 0 0 16px;
+  font-size: 0.95rem;
+  color: #64748b;
   font-weight: 500;
 }
 

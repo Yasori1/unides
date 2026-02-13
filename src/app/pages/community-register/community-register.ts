@@ -441,6 +441,12 @@ export class CommunityRegisterComponent implements OnInit {
           sessionStorage.removeItem('community_setup_token');
           sessionStorage.removeItem('community_register_email');
           sessionStorage.removeItem('community_register_return');
+          // Backend bazen accessToken döndürmez (örn. onay bekleyen durum); token yoksa banner/logo 401 alır.
+          // Görsel yüklemeden hemen önce token varsa kaydet ki istekler Authorization ile gitsin.
+          const token = response?.accessToken ?? response?.AccessToken ?? response?.token ?? response?.Token;
+          if (token) {
+            this.authService.saveToken(token);
+          }
           this.uploadBannerAndLogoThenSuccess(communityId);
         },
         error: (err) => {

@@ -2,6 +2,18 @@
   <!-- Toast Component - Modal'ların üzerinde görünmesi için en üstte -->
   <app-toast></app-toast>
 
+  <!-- İlk kayıt onayı bekliyor: girişe izin yok, sadece bu ekran -->
+  <div class="pending-approval-container fullscreen-pending" *ngIf="communityApproved === false && !isUpdatePending && !isLoadingCommunity">
+    <div class="pending-approval-card">
+      <span class="material-symbols-outlined pending-icon">schedule</span>
+      <h2>Henüz onay aşamasında</h2>
+      <p>Topluluğunuz kurumsal onay bekliyor. Onaylandığında Topluluk Panelini kullanabileceksiniz.</p>
+      <a routerLink="/" class="btn-primary">Anasayfaya Dön</a>
+    </div>
+  </div>
+
+  <!-- Onaylı veya güncelleme onayı bekliyor: tam dashboard -->
+  <ng-container *ngIf="communityApproved !== false || isUpdatePending || isLoadingCommunity">
   <!-- Mobile Sidebar Overlay -->
   <div class="sidebar-mobile-overlay" [class.active]="isSidebarCollapsed" (click)="toggleSidebar()"></div>
 
@@ -98,17 +110,7 @@
       </div>
     </div>
 
-    <!-- Topluluk henüz onaylanmadıysa -->
-    <div class="pending-approval-container" *ngIf="communityApproved === false && !isLoadingCommunity">
-      <div class="pending-approval-card">
-        <span class="material-symbols-outlined pending-icon">schedule</span>
-        <h2>Henüz onay aşamasında</h2>
-        <p>Topluluğunuz kurumsal onay bekliyor. Onaylandığında Topluluk Panelini kullanabileceksiniz.</p>
-        <a routerLink="/" class="btn-primary">Anasayfaya Dön</a>
-      </div>
-    </div>
-
-    <div class="view-container" *ngIf="communityApproved !== false && activeTab === 'overview'">
+    <div class="view-container" *ngIf="(communityApproved !== false || isUpdatePending) && activeTab === 'overview'">
       <!-- Loading State for Overview -->
       <div class="loading-container" *ngIf="isLoadingCommunity || isLoadingEvents">
         <app-luma-spin></app-luma-spin>
@@ -228,7 +230,7 @@
       </div>
     </div>
 
-    <div class="view-container" *ngIf="communityApproved !== false && activeTab === 'projects'">
+    <div class="view-container" *ngIf="(communityApproved !== false || isUpdatePending) && activeTab === 'projects'">
       <div class="page-header projects-header">
         <h2>Etkinliklerim</h2>
         <div class="header-controls">
@@ -300,13 +302,13 @@
       </ng-template>
     </div>
 
-    <div class="view-container" *ngIf="communityApproved !== false && activeTab === 'settings'">
+    <div class="view-container" *ngIf="activeTab === 'settings'">
       <div class="card settings-card">
         <div class="settings-hero">
           <div class="hero-banner">
             <img [src]="clubInfo.banner || 'assets/img/placeholder-cover.svg'" alt="Banner"
               (error)="onImageError($event, 'cover')" />
-            <button type="button" class="edit-banner-btn" (click)="showBannerModal = true" title="Banner Güncelle">
+            <button *ngIf="communityApproved" type="button" class="edit-banner-btn" (click)="showBannerModal = true" title="Banner Güncelle">
               <span class="material-symbols-outlined">photo_camera</span>
               <span>Banner Güncelle</span>
             </button>
@@ -315,7 +317,7 @@
             <div class="avatar-wrapper">
               <img [src]="clubInfo.logo || 'assets/img/placeholder-logo.svg'" alt="Logo"
                 (error)="onImageError($event, 'logo')" />
-              <button type="button" class="edit-avatar-btn" (click)="showAvatarModal = true" title="Logo Güncelle">
+              <button *ngIf="communityApproved" type="button" class="edit-avatar-btn" (click)="showAvatarModal = true" title="Logo Güncelle">
                 <span class="material-symbols-outlined">photo_camera</span>
               </button>
             </div>
@@ -323,55 +325,55 @@
               <p class="eyebrow">Profil</p>
               <h3>{{ clubInfo.name }}</h3>
               <p class="muted">
-                Görsel, iletişim ve sosyal alanlarını güncelleyerek üyelerine tutarlı bir profil
-                göster.
+                Görsel, iletişim ve sosyal alanlarını güncelleyerek üyelerine tutarlı bir profil göster.
               </p>
             </div>
           </div>
         </div>
         <div class="form-grid">
           <div class="form-section">
+            <p class="profile-pending-text" *ngIf="!communityApproved">Henüz Onay aşamasında.</p>
+            <p class="profile-hint" *ngIf="communityApproved">Bilgileri güncelledikten sonra "Güncelle ve Onaya Gönder" ile GSB onayına iletebilirsiniz. Onaylandığında değişiklikler yayına alınır.</p>
             <h3>Kulüp Bilgileri</h3>
-            <p class="profile-hint">Bilgileri güncelledikten sonra "Güncelle ve Onaya Gönder" ile GSB onayına iletebilirsiniz. Onaylandığında değişiklikler yayına alınır.</p>
             <div class="input-grid">
               <label>
                 <span>Kulüp Adı</span>
-                <input type="text" [(ngModel)]="clubInfo.name" placeholder="Topluluk adı" />
+                <input type="text" [(ngModel)]="clubInfo.name" placeholder="Topluluk adı" [readonly]="!communityApproved" />
               </label>
               <label>
                 <span>Üniversite</span>
-                <input type="text" [(ngModel)]="clubInfo.university" placeholder="Üniversite" />
+                <input type="text" [(ngModel)]="clubInfo.university" placeholder="Üniversite" [readonly]="!communityApproved" />
               </label>
               <label>
                 <span>Şehir</span>
-                <select [(ngModel)]="clubInfo.city" class="profile-select">
+                <select [(ngModel)]="clubInfo.city" class="profile-select" [disabled]="!communityApproved">
                   <option value="" disabled>Şehir seçin</option>
                   <option *ngFor="let c of profileCities" [value]="c">{{ c }}</option>
                 </select>
               </label>
               <label>
                 <span>Kategori</span>
-                <select [(ngModel)]="clubInfo.category" class="profile-select">
+                <select [(ngModel)]="clubInfo.category" class="profile-select" [disabled]="!communityApproved">
                   <option value="" disabled>Kategori seçin</option>
                   <option *ngFor="let c of profileCategories" [value]="c">{{ c }}</option>
                 </select>
               </label>
               <label>
                 <span>Topluluk İletişim E-Postası</span>
-                <input type="email" [(ngModel)]="clubInfo.email" placeholder="topluluk@edu.tr" />
+                <input type="email" [(ngModel)]="clubInfo.email" placeholder="topluluk@edu.tr" [readonly]="!communityApproved" />
               </label>
               <label>
                 <span>Topluluk Başkanı E-Postası</span>
-                <input type="email" [(ngModel)]="clubInfo.comLeadMail" placeholder="baskan@edu.tr" />
-                <small class="field-hint">Topluluk başkanı e-postası değişimi GSB onayından sonra geçerli olacak; onaylandığında yeni girilen e-posta adresine doğrulama maili gönderilecektir. Topluluk paneline giriş bu e-posta ile yapılacağından lütfen dikkatli ve doğru doldurunuz.</small>
+                <input type="email" [(ngModel)]="clubInfo.comLeadMail" placeholder="baskan@edu.tr" [readonly]="!communityApproved" />
+                <small class="field-hint" *ngIf="communityApproved">Topluluk başkanı e-postası değişimi GSB onayından sonra geçerli olacak; onaylandığında yeni girilen e-posta adresine doğrulama maili gönderilecektir. Topluluk paneline giriş bu e-posta ile yapılacağından lütfen dikkatli ve doğru doldurunuz.</small>
               </label>
             </div>
             <label class="stacked">
               <span>Hakkımızda (Maks. 500 karakter)</span>
               <textarea rows="4" maxlength="500" [(ngModel)]="clubInfo.description"
-                placeholder="Topluluğunuzu anlatan kısa bir yazı yazın..."></textarea>
+                placeholder="Topluluğunuzu anlatan kısa bir yazı yazın..." [readonly]="!communityApproved"></textarea>
             </label>
-            <div class="profile-actions">
+            <div class="profile-actions" *ngIf="communityApproved">
               <button type="button" class="btn-primary" [disabled]="!isProfileFormValid || isSavingProfile" (click)="saveCommunityProfile()">
                 {{ isSavingProfile ? 'Gönderiliyor...' : 'Güncelle ve Onaya Gönder' }}
               </button>
@@ -381,6 +383,7 @@
       </div>
     </div>
   </main>
+  </ng-container>
 
   <div class="modal-overlay" *ngIf="isModalOpen" (click)="closeModal()">
     <div class="modal-card" [class.event-modal]="modalType === 'new-event'" (click)="$event.stopPropagation()">

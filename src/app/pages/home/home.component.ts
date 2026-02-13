@@ -352,7 +352,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.isLoading = true;
 
     // Öne Çıkan Topluluklar
-    this.communityService.getFeaturedCommunities(6).subscribe({
+    this.communityService.getFeaturedCommunities(6, { skipAuth: true }).subscribe({
       next: (communities) => {
         this.featuredCommunities = communities.map((c: any) => {
           // Backend'den gelen ID'yi direkt kullan (Guid string veya number)
@@ -455,7 +455,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
 
     // Aramıza Yeni Katılanlar - 24 topluluk
-    this.communityService.getNewestCommunities(24).subscribe({
+    this.communityService.getNewestCommunities(24, { skipAuth: true }).subscribe({
       next: (communities) => {
         this.newestCommunities = communities.map((c: any) => {
           // Backend'den gelen ID'yi direkt kullan (Guid string veya number)

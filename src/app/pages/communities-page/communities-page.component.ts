@@ -85,33 +85,23 @@ export class CommunitiesPageComponent implements OnInit {
 
     this.isLoading = true;
 
-    // URL parametrelerini kontrol et (şehir filtresi uygulanmıyor; tüm aktif topluluklar çekiliyor)
+    // URL parametrelerini kontrol et. Şehir (city) backend'e GÖNDERİLMİYOR — sadece frontend'de filtre.
     const queryParams = this.route.snapshot.queryParams;
-    const backendParams: {
-      university?: string;
-      category?: string;
-      name?: string;
-    } = {};
+    const backendParams: { university?: string; category?: string; name?: string } = {};
 
     if (queryParams['search']) {
       this.searchText = queryParams['search'];
       backendParams.name = queryParams['search'];
     }
-
     if (queryParams['category']) {
       this.selectedCategory = queryParams['category'];
       backendParams.category = queryParams['category'];
     }
-
     if (queryParams['university']) {
       backendParams.university = queryParams['university'];
     }
-
-    // Backend'e istek: token göndermiyoruz (skipAuth) — kurumsal giriş yapılmış olsa bile tüm aktif topluluklar gelsin
-    this.communityService.getAllCommunities(
-      { ...backendParams, status: 'active' },
-      { skipAuth: true }
-    ).subscribe({
+    // Token/çerez göndermemek için HttpClient yerine fetch (getAllCommunitiesPublic) — tüm şehirler gelir
+    this.communityService.getAllCommunitiesPublic(backendParams).subscribe({
       next: (data) => {
         this.allCommunities = data;
 

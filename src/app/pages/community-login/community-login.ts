@@ -110,14 +110,9 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
           // #region agent log
           fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'community-login.ts:checkIfAlreadyLoggedIn-getMyLeadCommunity',message:'getMyLeadCommunity result on init',data:{hasCommunity:!!community,id:community?.id,isActivity:community?.isActivity,name:community?.name?.substring(0,50)},timestamp:Date.now(),hypothesisId:'H3'})}).catch(()=>{});
           // #endregion
-          if (community && community.isActivity === false) {
-            // Topluluk hâlâ onay bekliyor — pending ekranını göster
-            this.authService.saveCommunityApproved(false);
-            this.showPendingApprovalMessage = true;
-            this.pendingCommunityName = community.name || '';
-          } else if (community && community.isActivity === true) {
-            // Topluluk onaylı — localStorage'ı güncelle ve yönlendir
-            this.authService.saveCommunityApproved(true);
+          if (community) {
+            // Onay beklese de onaylı olsa da anasayfaya yönlendir (Onay Sürecindedir sayfası kaldırıldı)
+            this.authService.saveCommunityApproved(community.isActivity === true);
             this.router.navigate(['/']);
           }
           // community === null → lead-by-me yok, formu göstermeye devam et
@@ -189,17 +184,8 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
               // #endregion
               const nextUrl = this.route.snapshot.queryParams['next'];
 
-              if (community && community.isActivity === false) {
-                // Topluluk henüz onaylanmamış: sayfada kal, pending ekranı göster
-                this.authService.saveCommunityApproved(false);
-                this.showPendingApprovalMessage = true;
-                this.pendingCommunityName = community.name || '';
-                this.toastService.show('Giriş başarılı.', 'success');
-                return;
-              }
-
-              // Onaylı topluluk: localStorage'ı güncelle ve yönlendir
-              this.authService.saveCommunityApproved(true);
+              // Giriş başarılı (onay beklese de onaylı olsa da): anasayfaya yönlendir
+              this.authService.saveCommunityApproved(community?.isActivity === true);
               const target = nextUrl || '/';
               this.toastService.show('Giriş başarılı! Yönlendiriliyorsunuz...', 'success');
               setTimeout(() => this.router.navigateByUrl(target), 800);
