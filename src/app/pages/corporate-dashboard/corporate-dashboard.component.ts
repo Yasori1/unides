@@ -394,7 +394,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     if (statusFilter === 'Reddedilen') {
       mapped = mapped.filter((c) => c.status === 'Reddedilen');
     } else if (statusFilter === 'Silinmiş') {
-      mapped = mapped.filter((c) => c.deletedAt != null && c.deletedAt !== '');
+      mapped = mapped.filter((c) => c.status === 'Silinmiş');
     } else if (statusFilter === 'Onay Bekleyen') {
       mapped = mapped.filter((c) => c.status === 'Onay Bekleyen');
     } else if (statusFilter === 'Pasif') {
@@ -554,7 +554,8 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     if (statusFilter === 'Aktif') {
       backendStatus = 'active';
     } else if (statusFilter === 'Onay Bekleyen') {
-      backendStatus = 'pending';
+      // comConfirm=0 (yeni kayıt) ve comConfirm=4 (güncelleme onayı) ikisini de listeleyebilmek için tümünü çekip client-side filtre
+      backendStatus = 'all';
     } else if (statusFilter === 'Pasif') {
       backendStatus = 'passive';
     } else if (statusFilter === 'Reddedilen') {

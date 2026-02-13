@@ -5,6 +5,7 @@ import { Router, RouterModule } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ImageUploadComponent } from '../../components/ui/image-upload/image-upload';
 import { CommunityService, Community } from '../../services/community.services';
+import { UpdateCommunityDto } from '../../models/community.models';
 import { EventService } from '../../services/event.services';
 import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
 import { ToastComponent } from '../../components/ui/toast/toast.component';
@@ -1019,7 +1020,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     this.pendingLogoFile = file;
     this.clubInfo.logo = URL.createObjectURL(file);
     this.showToast(
-      'Logo seçildi. Değişiklikler "Güncelle ve Onaya Gönder" ile GSB onayına gönderilecektir.',
+      'Logo seçildi. Değişiklikler "Güncellemeleri Onaya Gönder" ile GSB onayına gönderilecektir.',
       'success'
     );
     this.showAvatarModal = false;
@@ -1041,7 +1042,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     this.pendingBannerFile = file;
     this.clubInfo.banner = URL.createObjectURL(file);
     this.showToast(
-      'Banner seçildi. Değişiklikler "Güncelle ve Onaya Gönder" ile GSB onayına gönderilecektir.',
+      'Banner seçildi. Değişiklikler "Güncellemeleri Onaya Gönder" ile GSB onayına gönderilecektir.',
       'success'
     );
     this.showBannerModal = false;
@@ -1115,25 +1116,9 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     forkJoin({ bannerUrl: bannerUpload$, logoUrl: logoUpload$ })
       .pipe(
         switchMap(({ bannerUrl, logoUrl }) => {
-          // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              location: 'community-dashboard:saveCommunityProfile',
-              message: 'DTO before update',
-              data: {
-                bannerUrl,
-                bannerUrlLen: bannerUrl?.length,
-                logoUrl,
-                logoUrlLen: logoUrl?.length,
-              },
-              timestamp: Date.now(),
-              hypothesisId: 'B',
-            }),
-          }).catch(() => {});
-          // #endregion
-          const dto: any = {
+          // Profil alanları only; isActivity gönderilmez (backend topluluk rolünde isActivity değişikliğini kabul etmeyebilir).
+          // X-Submit-For-Approval ile backend güncellemeyi "onay bekleyen" olarak kaydeder ve Kurumsal'da Onay Bekleyen (Güncelleme) görünür.
+          const dto: UpdateCommunityDto = {
             comName: this.clubInfo.name?.trim() || undefined,
             comCategory: this.clubInfo.category?.trim() || undefined,
             comAbout: this.clubInfo.description?.trim() || undefined,
@@ -1145,7 +1130,6 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
             instagramUrl:
               this.clubInfo.instagramUrl?.trim() || this.clubInfo.instagram?.trim() || undefined,
             miniAbout: this.clubInfo.miniAbout?.trim() || undefined,
-            isActivity: false, // GSB onay bekleyen kategorisine düşsün; GSB onaylayınca tekrar aktif olur
           };
           if (bannerUrl !== undefined) dto.bannerUrl = bannerUrl;
           else if (
@@ -1162,7 +1146,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
           )
             dto.logoUrl = this.clubInfo.logo;
 
-          return this.communityService.updateCommunity(id, dto);
+          return this.communityService.updateCommunity(id, dto, { submitForApproval: true });
         })
       )
       .subscribe({

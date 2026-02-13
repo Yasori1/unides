@@ -18,7 +18,7 @@ export interface CommunityMiniDto {
   ComCreatedAt?: string; // PascalCase variant
   comMail?: string;
   comLeadMail?: string;
-  comConfirm?: number; // 0=beklemede, 1=onaylandı, 2=reddedildi
+  comConfirm?: number; // 0=yeni kayıt beklemede, 1=onaylandı, 2=reddedildi, 3=silinmiş, 4=güncelleme onayı beklemede
   confirmAbout?: string; // Reddedilme gerekçesi (ComConfirm=2)
   ConfirmAbout?: string;
 }
@@ -141,7 +141,7 @@ export interface Community {
   instagramUrl?: string;
   miniAbout?: string;
   isActivity?: boolean;
-  comConfirm?: number; // 0=beklemede, 1=onaylandı, 2=reddedildi
+  comConfirm?: number; // 0=yeni kayıt beklemede, 1=onaylandı, 2=reddedildi, 3=silinmiş, 4=güncelleme onayı beklemede
   /** true ise topluluk daha önce en az bir kez onaylanmış (şu anki bekleme = profil güncellemesi onayı); ilk kayıt onayı vs güncelleme onayı ayrımı için */
   hasEverBeenApproved?: boolean;
   events?: CommunityEventDto[];

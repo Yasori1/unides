@@ -221,15 +221,14 @@ export class CommunityService {
         ? dto.IsActivity
         : true;
 
-    // comConfirm: 0=beklemede, 1=onaylandı, 2=reddedildi. deletedAt varsa Silinmiş.
-    // hasEverBeenApproved: true ise daha önce onaylanmış (şu anki bekleme = güncelleme onayı) → Onay Bekleyen
+    // comConfirm: 0=yeni kayıt beklemede, 1=onaylandı, 2=reddedildi, 3=silinmiş, 4=güncelleme onayı beklemede. deletedAt varsa da Silinmiş.
     const deletedAt = dto.deletedAt ?? dto.DeletedAt ?? null;
     const comConfirm = dto.comConfirm ?? dto.ComConfirm;
     const hasEverBeenApproved = dto.hasEverBeenApproved ?? dto.HasEverBeenApproved ?? false;
     let status: 'Aktif' | 'Pasif' | 'Onay Bekleyen' | 'Reddedilen' | 'Silinmiş';
-    if (deletedAt != null && deletedAt !== '') {
+    if ((deletedAt != null && deletedAt !== '') || comConfirm === 3) {
       status = 'Silinmiş';
-    } else if (comConfirm === 0 || (comConfirm === undefined && !isActivity)) {
+    } else if (comConfirm === 0 || comConfirm === 4 || (comConfirm === undefined && !isActivity)) {
       status = 'Onay Bekleyen';
     } else if (hasEverBeenApproved === true && !isActivity) {
       status = 'Onay Bekleyen';
@@ -240,6 +239,7 @@ export class CommunityService {
     } else {
       status = 'Pasif';
     }
+    const isUpdatePending = comConfirm === 4;
     // #region agent log
     if (status === 'Reddedilen' || status === 'Silinmiş') {
       fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'community.services.ts:mapMiniDtoToCommunity',message:'Status mapping',data:{dtoDeletedAt: dto.deletedAt ?? dto.DeletedAt, deletedAt, comConfirm, resultingStatus: status},timestamp:Date.now(),hypothesisId:'H1'})}).catch(()=>{});
@@ -279,28 +279,30 @@ export class CommunityService {
       email: dto.comMail || dto.ComMail || '',
       comMail: dto.comMail || dto.ComMail || '',
       comLeadMail: dto.comLeadMail || dto.ComLeadMail || '',
-      hasEverBeenApproved: dto.hasEverBeenApproved ?? dto.HasEverBeenApproved ?? undefined,
+      hasEverBeenApproved: isUpdatePending ? true : (dto.hasEverBeenApproved ?? dto.HasEverBeenApproved ?? undefined),
     };
   }
 
-  private statusFromDetailDto(dto: any): 'Aktif' | 'Pasif' | 'Onay Bekleyen' | 'Reddedilen' {
+  private statusFromDetailDto(dto: any): 'Aktif' | 'Pasif' | 'Onay Bekleyen' | 'Reddedilen' | 'Silinmiş' {
     const comConfirm = dto.comConfirm ?? dto.ComConfirm;
+    if (comConfirm === 3) return 'Silinmiş';
     if (comConfirm === 2) return 'Reddedilen';
-    if (comConfirm === 0) return 'Onay Bekleyen';
+    if (comConfirm === 0 || comConfirm === 4) return 'Onay Bekleyen';
     const isActivity = dto.isActivity !== undefined ? dto.isActivity : dto.IsActivity;
     return isActivity ? 'Aktif' : 'Pasif';
   }
 
   // CommunityDetailDto'yu Community'ye dönüştür (Detail için)
   // Backend'den gelen DTO: CommunityDetailDto (CommunityId, ComName, ComAbout, DeletedAt, vb.)
-  // Silinmiş topluluk: DeletedAt set ise status 'Silinmiş' (liste ile aynı mantık); yoksa statusFromDetailDto.
+  // Silinmiş topluluk: DeletedAt set veya comConfirm===3 ise status 'Silinmiş'; yoksa statusFromDetailDto.
   private mapDetailDtoToCommunity(dto: any): Community {
     // Backend'den gelen ID - hem communityId (camelCase) hem CommunityId (PascalCase) kontrol et
     const communityId = dto.communityId || dto.CommunityId;
     const idString = typeof communityId === 'string' ? communityId : String(communityId);
 
     const deletedAt = dto.deletedAt ?? dto.DeletedAt ?? null;
-    const isDeleted = deletedAt != null && deletedAt !== '';
+    const comConfirm = dto.comConfirm ?? dto.ComConfirm;
+    const isDeleted = (deletedAt != null && deletedAt !== '') || comConfirm === 3;
     const status: 'Aktif' | 'Pasif' | 'Onay Bekleyen' | 'Reddedilen' | 'Silinmiş' = isDeleted
       ? 'Silinmiş'
       : this.statusFromDetailDto(dto);
@@ -578,25 +580,25 @@ export class CommunityService {
   }
 
   // Topluluk Güncelle (Backend: PUT /api/Communities/{id:guid})
-  // options.fromGSB: true ise X-From-GSB header gönderilir; backend GSB güncellemesini anında uygular (onay kuyruğuna almaz)
+  // options.fromGSB: true → X-From-GSB; backend anında uygular.
+  // options.submitForApproval: true → X-Submit-For-Approval; backend güncellemeyi onay bekleyene alır, isActivity gönderilmez.
   updateCommunity(
     id: string,
     dto: UpdateCommunityDto,
-    options?: { fromGSB?: boolean }
+    options?: { fromGSB?: boolean; submitForApproval?: boolean }
   ): Observable<Community> {
     // Debug log - DTO'nun içeriğini kontrol et
     console.log('updateCommunity - Sending DTO to backend:', JSON.stringify(dto, null, 2));
     console.log('updateCommunity - Community ID:', id);
 
-    const headers = new HttpHeaders();
-    const headersWithGSB =
-      options?.fromGSB === true
-        ? headers.set('X-From-GSB', 'true')
-        : undefined;
+    let headers = new HttpHeaders();
+    if (options?.fromGSB === true) headers = headers.set('X-From-GSB', 'true');
+    if (options?.submitForApproval === true) headers = headers.set('X-Submit-For-Approval', 'true');
+    const hasOpts = options?.fromGSB === true || options?.submitForApproval === true;
 
     // Backend endpoint: PUT /api/Communities/update/{id:guid}
     return this.http
-      .put<void>(`${this.apiUrl}/update/${id}`, dto, { ...(headersWithGSB && { headers: headersWithGSB }) })
+      .put<void>(`${this.apiUrl}/update/${id}`, dto, { ...(hasOpts && { headers }) })
       .pipe(
       switchMap(() => {
         // Backend'de pasif topluluklar GET endpoint'inde döndürülmüyor (!com.IsActivity kontrolü var)

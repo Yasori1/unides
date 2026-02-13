@@ -333,7 +333,7 @@
         <div class="form-grid">
           <div class="form-section">
             <p class="profile-pending-text" *ngIf="!communityApproved">Henüz Onay aşamasında.</p>
-            <p class="profile-hint" *ngIf="communityApproved">Bilgileri güncelledikten sonra "Güncelle ve Onaya Gönder" ile GSB onayına iletebilirsiniz. Onaylandığında değişiklikler yayına alınır.</p>
+            <p class="profile-hint" *ngIf="communityApproved && !isUpdatePending">Bilgileri güncelledikten sonra "Güncellemeleri Onaya Gönder" ile GSB onayına iletebilirsiniz. Onaylandığında değişiklikler yayına alınır.</p>
             <h3>Kulüp Bilgileri</h3>
             <div class="input-grid">
               <label>
@@ -373,9 +373,9 @@
               <textarea rows="4" maxlength="500" [(ngModel)]="clubInfo.description"
                 placeholder="Topluluğunuzu anlatan kısa bir yazı yazın..." [readonly]="!communityApproved"></textarea>
             </label>
-            <div class="profile-actions" *ngIf="communityApproved">
+            <div class="profile-actions" *ngIf="communityApproved && !isUpdatePending">
               <button type="button" class="btn-primary" [disabled]="!isProfileFormValid || isSavingProfile" (click)="saveCommunityProfile()">
-                {{ isSavingProfile ? 'Gönderiliyor...' : 'Güncelle ve Onaya Gönder' }}
+                {{ isSavingProfile ? 'Gönderiliyor...' : 'Güncellemeleri Onaya Gönder' }}
               </button>
             </div>
           </div>
