@@ -39,18 +39,18 @@ export class AboutPageComponent implements OnInit, AfterViewInit {
   ];
 
   applicationSteps = [
-    { id: '01', title: 'Genç Ol', desc: 'Genç ve Üniversite Öğrencisi Olmak.' },
+    { id: '1', title: 'Üniversite öğrencisi olmak', desc: '' },
+    { id: '2', title: 'Kulüp/Topluluk Üyesi olmak', desc: '' },
     {
-      id: '02',
-      title: 'Kulüp Üyesi Ol',
-      desc: 'Üniversitende aktif faaliyet gösteren bir kulübe üye olmak.',
+      id: '3',
+      title: 'Gençlik ve Spor Bakanlığı çatısı altındaki "Genç Ofislere" giderek başvuru yap.',
+      desc: '',
     },
     {
-      id: '03',
-      title: 'Ofise Git',
-      desc: 'Gençlik ve Spor Bakanlığı çatısı altındaki genç ofislere giderek başvuru yap.',
+      id: '4',
+      title: 'Topluluğunun projesini danışmanına tüm detaylarıyla anlat.',
+      desc: '',
     },
-    { id: '04', title: 'Projeyi Anlat', desc: 'Danışmanına projeni tüm detaylarıyla anlat.' },
   ];
 
   projectItems = [

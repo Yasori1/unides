@@ -49,8 +49,7 @@ export class FaqPageComponent implements OnInit, AfterViewInit {
       items: [
         {
           question: 'Sisteme nasıl giriş yapabilirim?',
-          answer: `Giriş ekranında üç farklı seçenek bulunmaktadır:<br><br>
-          <strong>• Öğrenci Girişi:</strong> Üniversite öğrencileri bu sekmeyi kullanarak, üniversite e-postaları ile giriş yapmalıdır.<br>
+          answer: `Giriş ekranında iki farklı seçenek bulunmaktadır:<br><br>
           <strong>• Topluluk Girişi:</strong> Topluluk Başkanları bu sekmeyi kullanarak, üniversite e-postaları ile giriş yapmalıdır.<br>
           <strong>• Kurumsal Giriş:</strong> Yalnızca Gençlik ve Spor Bakanlığı (GSB) yetkilileri bu alanı kullanmalıdır.`,
           isOpen: true,
@@ -81,27 +80,15 @@ export class FaqPageComponent implements OnInit, AfterViewInit {
       icon: 'groups',
       items: [
         {
-          question: '"Benim Topluluğum" panelini neden göremiyorum?',
-          answer:
-            '"Benim Topluluğum" paneli, sistemde yalnızca Topluluk Başkanı yetkisine sahip kullanıcılara görünür. Eğer topluluk başkanı olduğunuz halde bu alanı göremiyorsanız, yetki kontrolü için <strong>unidesbilgi@gsb.gov.tr</strong> adresiyle iletişime geçiniz.',
-          isOpen: false,
-        },
-        {
           question: 'Topluluk profil bilgilerini nasıl düzenlerim?',
           answer:
-            'Topluluk bilgileri üniversitelerde bulunan GSB Genç Ofislerde bulunan yetkili kişi tarafından düzenlenebilir. Topluluk Başkanı kendisi güncelleyemez. Güncelleme talepleriniz için üniversitenizdeki GSB Genç Ofis ile iletişime geçebilirsiniz.',
+            'Topluluk bilgileri, topluluk yöneticisi tarafından Benim Topluluğum paneli üzerinden değiştirilebilir. İlgili GSB Genç Ofis yetkilisinin onayı ile düzenleme tamamlanır.',
           isOpen: false,
         },
         {
-          question: 'Topluluk nasıl kaydedebilirim?',
+          question: 'Topluluğumu nasıl kaydedebilirim?',
           answer:
-            'Üniversitenizde bulunan GSB Genç Ofise başvuru yaparak topluluk kaydınızı sistemde oluşturtabilirsiniz. GSB Genç Ofis yetkilileri başvurunuzu değerlendirecek ve onaylandıktan sonra topluluğunuz platformda görünür hale gelecektir.',
-          isOpen: false,
-        },
-        {
-          question: 'Topluluğuma nasıl üye ekleyebilirim?',
-          answer:
-            'Topluluk Başkanı olarak "Benim Topluluğum" panelinden "Üyeler" sekmesine giderek e-posta adresi ile üye arayabilir veya toplu üye ekleme özelliğini kullanabilirsiniz.',
+            'Topluluk yöneticisi olarak "edu" uzantılı mailiniz ile Dijital Portala kaydolmanız gereklidir.',
           isOpen: false,
         },
         {
@@ -133,19 +120,6 @@ export class FaqPageComponent implements OnInit, AfterViewInit {
           question: 'Etkinliğim reddedildi, ne yapmalıyım?',
           answer:
             'Etkinlik detay sayfasında reddedilme nedeni görüntülenir. Gerekli düzenlemeleri yaptıktan sonra etkinliği tekrar düzenleyip onaya gönderebilirsiniz.',
-          isOpen: false,
-        },
-      ],
-    },
-    {
-      id: 'cat4',
-      title: 'Topluluklar',
-      icon: 'groups',
-      items: [
-        {
-          question: 'Topluluklara nasıl üye olabilirim?',
-          answer:
-            'Topluluklara sadece Topluluk Başkanları kendi panellerinden üyeleri kaydedebilir. Topluluğa üye olmak için topluluğun yetkilisiyle (Topluluk Başkanı) iletişime geçmeniz gerekmektedir.',
           isOpen: false,
         },
       ],

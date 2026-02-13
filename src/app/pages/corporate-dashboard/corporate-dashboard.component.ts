@@ -394,6 +394,16 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     } else if (statusFilter === 'Silinmiş') {
       mapped = mapped.filter((c) => c.deletedAt != null && c.deletedAt !== '');
     }
+    // #region agent log
+    if (statusFilter === 'Silinmiş' && mapped.length > 0) {
+      const s0 = mapped[0];
+      fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'corporate-dashboard:handleCommunitiesLoaded',message:'Silinmiş list after filter',data:{statusFilter, displayStatus: s0?.status, displayDeletedAt: s0?.deletedAt, count: mapped.length},timestamp:Date.now(),hypothesisId:'H3'})}).catch(()=>{});
+    }
+    if (statusFilter === 'Reddedilen' && mapped.length > 0) {
+      const s0 = mapped[0];
+      fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'corporate-dashboard:handleCommunitiesLoaded',message:'Reddedilen list after filter',data:{statusFilter, displayStatus: s0?.status, count: mapped.length},timestamp:Date.now(),hypothesisId:'H3'})}).catch(()=>{});
+    }
+    // #endregion
     this.allCommunities = mapped;
     const uniqueCategories = [
       ...new Set(
@@ -606,6 +616,16 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     this.communityService.getAllCommunities(apiParams).subscribe({
       next: (data) => {
         const mapped = mapApiDataToCommunities(data || []);
+        // #region agent log
+        if (statusFilter === 'Silinmiş' && mapped.length > 0) {
+          const first = mapped[0];
+          fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'corporate-dashboard:afterMap',message:'After mapApiDataToCommunities',data:{statusFilter, firstStatus: first?.status, firstDeletedAt: first?.deletedAt, firstComConfirm: (first as any)?.comConfirm, total: mapped.length},timestamp:Date.now(),hypothesisId:'H2'})}).catch(()=>{});
+        }
+        if (statusFilter === 'Reddedilen' && mapped.length > 0) {
+          const first = mapped[0];
+          fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'corporate-dashboard:afterMap',message:'Reddedilen filter first item',data:{statusFilter, firstStatus: first?.status, firstDeletedAt: first?.deletedAt},timestamp:Date.now(),hypothesisId:'H2'})}).catch(()=>{});
+        }
+        // #endregion
         this.handleCommunitiesLoaded(mapped, statusFilter);
       },
       error: (err) => this.handleCommunitiesError(err),

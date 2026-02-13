@@ -13,8 +13,7 @@
   <div class="container relative-content">
     <h1 class="page-title">ÜNİDES <span class="highlight-text">HAKKIMIZDA</span></h1>
     <p class="page-subtitle">
-      Gençliğin enerjisi dijital dünyayla buluşuyor. Geleceği inşa eden toplulukların buluşma
-      noktası.
+      Gençliğin enerjisi ile geleceği inşa eden toplulukların buluşma noktası.
     </p>
   </div>
 
@@ -27,114 +26,30 @@
 
 <div class="about-page-wrapper">
   <!-- HERO SECTION -->
-  <div class="about-area ptb-100">
+  <div class="about-area">
+    <!-- UNİDES Dijital Portal Nedir? -->
     <section class="hero-section">
       <div class="container hero-container">
         <div class="hero-text-side" #animItem>
-          <h1>ÜNİDES <br /><span class="highlight">Dijital Portal</span> Nedir?</h1>
+          <h1>ÜNİDES <span class="highlight">Dijital Portal</span> Nedir?</h1>
           <p class="lead">
-            Portal, ÜNİDES kapsamında geliştirilen projeleri, topluluk iş birliklerini ve sponsorluk
-            süreçlerini tek bir merkezi yapı altında sunan bütünleşik bir platformdur.
-          </p>
-          <p class="sub-text">
-            Projelerini sergile, diğer öğrencilerle iletişime geç ve sesini duyur. Burası senin
-            alanın.
+            ÜNİDES programı kapsamında geliştirilen projelerin, iş birliklerinin ve toplulukların tek
+            bir çatı altında toplandığı, Gençlik ve Spor Bakanlığı tarafından desteklenen bütünleşik
+            bir dijital platformdur.
           </p>
         </div>
-
         <div class="hero-visual-side" #animItem>
-          <!-- Kart 1: Topluluk İş Birlikleri -->
-          <div class="floating-wrapper pos-1"
-            [style.transform]="'translate(' + heroMoveX * 0.5 + 'px, ' + heroMoveY * 0.5 + 'px)'">
-            <div class="glass-card float-anim-1">
-              <span class="material-symbols-outlined icon">hub</span>
-              <span>Topluluk İş Birlikleri</span>
-            </div>
-          </div>
-
-          <!-- Kart 2: Proje Yönetimi -->
-          <div class="floating-wrapper pos-2"
-            [style.transform]="'translate(' + heroMoveX * -0.5 + 'px, ' + heroMoveY * -0.5 + 'px)'">
-            <div class="glass-card float-anim-2">
-              <span class="material-symbols-outlined icon">rocket_launch</span>
-              <span>Proje Yönetimi</span>
-            </div>
-          </div>
-
-          <!-- Kart 3: Sponsorluk Süreçleri (Beyaz Tema) -->
-          <div class="floating-wrapper pos-3"
-            [style.transform]="'translate(' + heroMoveX * 0.3 + 'px, ' + heroMoveY * 0.3 + 'px)'">
-            <div class="glass-card theme-white float-anim-3">
-              <span class="material-symbols-outlined icon">handshake</span>
-              <span>Sponsorluk Süreçleri</span>
-            </div>
-          </div>
-
-          <!-- Kart 4: Etkinlik Takvimi -->
-          <div class="floating-wrapper pos-4"
-            [style.transform]="'translate(' + heroMoveX * -0.35 + 'px, ' + heroMoveY * 0.35 + 'px)'">
-            <div class="glass-card float-anim-4">
-              <span class="material-symbols-outlined icon">event</span>
-              <span>Etkinlik Takvimi</span>
-            </div>
-          </div>
-
-          <!-- Kart 5: Duyurular -->
-          <div class="floating-wrapper pos-5"
-            [style.transform]="'translate(' + heroMoveX * 0.2 + 'px, ' + heroMoveY * -0.2 + 'px)'">
-            <div class="glass-card float-anim-5">
-              <span class="material-symbols-outlined icon">campaign</span>
-              <span>Duyurular</span>
-            </div>
-          </div>
-
-          <!-- Kart 6: Network -->
-          <div class="floating-wrapper pos-6"
-            [style.transform]="'translate(' + heroMoveX * 0.55 + 'px, ' + heroMoveY * -0.1 + 'px)'">
-            <div class="glass-card theme-white float-anim-6">
-              <span class="material-symbols-outlined icon">groups</span>
-              <span>Güçlü Network</span>
-            </div>
+          <div class="about-image clean-logo-wrapper">
+            <img [src]="gsbLogoUrl" alt="GSB Logosu" class="gsb-main-logo"
+              onerror="this.src='assets/images/logos/gsb.png'" />
           </div>
         </div>
       </div>
     </section>
 
-    <!-- MİSYON & VİZYON -->
+    <!-- ÜNİDES Nedir? -->
     <section class="mission-section">
       <div class="container">
-        <div class="row align-items-center mb-5">
-          <div class="col-lg-5 col-md-12">
-            <div class="about-content">
-              <span class="sub-title">Vizyonumuz</span>
-              <h2>ÜNİDES Dijital Portal</h2>
-              <h6>Gençliğin enerjisi dijital dünyayla buluşuyor.</h6>
-
-              <p>
-                <strong>ÜNİDES</strong> hesabı oluşturarak sadece bir profil değil, geleceğin için
-                güçlü bir ağ kurarsın. Üniversite ekosistemini tek bir çatı altında toplayan bu
-                platformda yerini al.
-              </p>
-              <p>Projelerini sergile, diğer öğrencilerle iletişime geç ve sesini duyur.</p>
-
-              <div class="features-text">
-                <h5><i class="bx bx-planet"></i> Potansiyelini keşfetmeye hazır mısın?</h5>
-                <p>
-                  Sıradan bir sosyal ağdan fazlası. ÜNİDES, kariyer basamaklarını tırmanırken
-                  yanındaki en büyük dijital destekçindir.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-lg-5 offset-lg-2 col-md-12">
-            <div class="about-image clean-logo-wrapper">
-              <img [src]="gsbLogoUrl" alt="GSB Logo" class="gsb-main-logo"
-                onerror="this.src='assets/images/logos/gsb.png'" />
-            </div>
-          </div>
-        </div>
-
         <div class="mission-header" #animItem>
           <h2>ÜNİDES <span class="light-text">Nedir?</span></h2>
           <p>
@@ -153,57 +68,11 @@
       </div>
     </section>
 
-    <!-- DETAYLI BİLGİ ALANI -->
-    <div class="about-inner-area container">
-      <div class="row justify-content-center">
-        <div class="col-lg-4 col-md-6 col-sm-6">
-          <div class="about-text">
-            <h3>Hikayemiz</h3>
-            <p>Dijitalleşen dünyada gençlerin daha güçlü bir iz bırakması için yola çıktık.</p>
-            <ul class="features-list">
-              <li><i class="bx bx-check"></i> Güçlü iletişim ağı</li>
-              <li><i class="bx bx-check"></i> Öğrenci odaklı yaklaşım</li>
-              <li><i class="bx bx-check"></i> Birbirini tanıyan topluluk</li>
-              <li><i class="bx bx-check"></i> Güvenilir platform</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="col-lg-4 col-md-6 col-sm-6">
-          <div class="about-text">
-            <h3>Değerlerimiz</h3>
-            <p>Bizi bir arada tutan ve geliştiren temel prensiplerimiz.</p>
-            <ul class="features-list">
-              <li><i class="bx bx-check"></i> Öğrenme ve Destek</li>
-              <li><i class="bx bx-check"></i> Yenilikçilik ve Üretkenlik</li>
-              <li><i class="bx bx-check"></i> Kendini keşfetme</li>
-              <li><i class="bx bx-check"></i> Eksiksiz profil deneyimi</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="col-lg-4 col-md-6 col-sm-6">
-          <div class="about-text">
-            <h3>Neler Sunuyoruz?</h3>
-            <p>Ünides dünyasında seni bekleyen fırsatlardan sadece birkaçı.</p>
-            <ul class="features-list">
-              <li><i class="bx bx-check"></i> Onaylı topluluklar</li>
-              <li><i class="bx bx-check"></i> Severek takip edilen içerikler</li>
-              <li><i class="bx bx-check"></i> 7/24 Online Erişim</li>
-              <li><i class="bx bx-check"></i> Her dönem güncel fırsatlar</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- SÜREÇ -->
     <section class="process-section">
       <div class="container">
         <div class="section-header-dark" #animItem>
-          <span class="section-label">ADIM ADIM BAŞARI</span>
           <h2>Başvuru Süreci</h2>
-          <p>Projeni hayata geçirmek için izlemen gereken 4 basit adım.</p>
         </div>
 
         <div class="steps-grid">
@@ -212,7 +81,7 @@
               <span class="step-number">{{ step.id }}</span>
             </div>
             <h3>{{ step.title }}</h3>
-            <p>{{ step.desc }}</p>
+            <p *ngIf="step.desc">{{ step.desc }}</p>
           </div>
         </div>
       </div>

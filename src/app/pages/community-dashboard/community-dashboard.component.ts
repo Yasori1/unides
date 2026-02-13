@@ -291,6 +291,9 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       // Önce "lead-by-me" ile kendi topluluğunu getir (onay bekleyen dahil)
       this.communityService.getMyLeadCommunity().subscribe({
         next: (community) => {
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'community-dashboard.component.ts:loadCommunityProfile-getMyLeadCommunity',message:'getMyLeadCommunity result',data:{hasCommunity:!!community,id:community?.id,isActivity:community?.isActivity,status:(community as any)?.status},timestamp:Date.now(),hypothesisId:'H3'})}).catch(()=>{});
+          // #endregion
           if (community) {
             this.clubInfo = {
               id: community.id,

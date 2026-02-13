@@ -107,7 +107,9 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (community) => {
           this.isCheckingApproval = false;
-
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'community-login.ts:checkIfAlreadyLoggedIn-getMyLeadCommunity',message:'getMyLeadCommunity result on init',data:{hasCommunity:!!community,id:community?.id,isActivity:community?.isActivity,name:community?.name?.substring(0,50)},timestamp:Date.now(),hypothesisId:'H3'})}).catch(()=>{});
+          // #endregion
           if (community && community.isActivity === false) {
             // Topluluk hâlâ onay bekliyor — pending ekranını göster
             this.authService.saveCommunityApproved(false);
@@ -182,6 +184,9 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
           .subscribe({
             next: (community) => {
               this.isLoading = false;
+              // #region agent log
+              fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'community-login.ts:onSubmit-success-getMyLeadCommunity',message:'getMyLeadCommunity after login success',data:{hasCommunity:!!community,id:community?.id,isActivity:community?.isActivity,name:community?.name?.substring(0,50)},timestamp:Date.now(),hypothesisId:'H3'})}).catch(()=>{});
+              // #endregion
               const nextUrl = this.route.snapshot.queryParams['next'];
 
               if (community && community.isActivity === false) {
@@ -214,7 +219,37 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
         this.isLoading = false;
         Logger.error('Giriş Hatası:', error);
 
-        const message = error.error?.message || error.message || 'E-posta veya şifre hatalı!';
+        const rawMessage =
+          error.error?.message ||
+          (error.error as any)?.Message ||
+          error.message ||
+          '';
+        const rawLower = (rawMessage || '').toLowerCase();
+
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'community-login.ts:onSubmit-error',message:'Login error callback',data:{status:error?.status,rawMessage:rawMessage?.substring(0,200),hasSilinmistir:rawLower.includes('silinmiştir')||rawLower.includes('silinmis'),hasReddedilmis:rawLower.includes('reddedilmiştir')||rawLower.includes('reddedilmis')},timestamp:Date.now(),hypothesisId:'H1'})}).catch(()=>{});
+        // #endregion
+
+        // Backend LoginCommand: önce reddedilmiş, sonra silinmiş kontrolü — birbiriyle çakışmasın diye ayrı mesajlar
+        if (rawLower.includes('reddedilmiştir') || rawLower.includes('reddedilmis')) {
+          this.toastService.show(
+            'Topluluğunuz Reddedilmiştir. Gelen e-posta\'daki reddetme gerekçesini düzelterek yeniden topluluk kaydı yapınız.',
+            'error'
+          );
+          return;
+        }
+        if (rawLower.includes('silinmiştir') || rawLower.includes('silinmis')) {
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'community-login.ts:show-silinmistir-toast',message:'Showing Silinmistir toast from login error',data:{status:error?.status},timestamp:Date.now(),hypothesisId:'H1'})}).catch(()=>{});
+          // #endregion
+          this.toastService.show(
+            'Topluluğunuz silinmiştir. Gelen e-posta\'daki gerekçeyi düzelterek yeniden topluluk kaydı yapınız. Yeni kayıt oluşturup onay aldıysanız unidesbilgi@gsb.gov.tr ile iletişime geçin.',
+            'error'
+          );
+          return;
+        }
+
+        const message = rawMessage || 'E-posta veya şifre hatalı!';
         this.toastService.show(message, 'error');
       },
     });
@@ -264,7 +299,9 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (community) => {
           this.isCheckingApproval = false;
-
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'community-login.ts:recheckApprovalStatus-getMyLeadCommunity',message:'getMyLeadCommunity on recheck',data:{hasCommunity:!!community,id:community?.id,isActivity:community?.isActivity},timestamp:Date.now(),hypothesisId:'H3'})}).catch(()=>{});
+          // #endregion
           if (community && community.isActivity === true) {
             // Topluluk onaylandı!
             this.authService.saveCommunityApproved(true);

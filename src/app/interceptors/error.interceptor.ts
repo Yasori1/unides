@@ -27,6 +27,16 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       const isSpamFilterEndpoint = req.url.includes('/spamfilter/api/moderate') || req.url.includes('/api/moderate');
       // Topluluk kaydı 3. adım: complete-community-setup bazen 401/400 "onay aşamasındadır" döner; component başarı ekranını gösterecek, logout/yönlendirme yapma
       const isCompleteCommunitySetup = req.url.includes('complete-community-setup');
+      // Topluluk girişi: silinmiş/reddedilmiş topluluk başkanı girişinde backend mesajı döner; community-login kendi uyarısını gösterecek (çakışma olmasın)
+      const isAuthLogin = req.url.includes('/api/Auth/login') || req.url.includes('/Auth/login');
+      const loginMsg =
+        (error.error?.message || (error.error as any)?.Message || '').toString().toLowerCase();
+      const isCommunityRejectedOrDeleted =
+        isAuthLogin &&
+        (loginMsg.includes('silinmiştir') ||
+          loginMsg.includes('silinmis') ||
+          loginMsg.includes('reddedilmiştir') ||
+          loginMsg.includes('reddedilmis'));
       const skipErrorHandling = req.url.includes('/api/Search') || 
                                 req.url.includes('/api/About') ||
                                 req.url.includes('/api/Forkod') ||
@@ -34,7 +44,8 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
                                 isEventDetailReFetch || // Event detail re-fetch için 404'leri sessizce handle et
                                 isLogoutEndpoint || // Logout endpoint'i için hata handling'i skip et (döngüyü önlemek için)
                                 isSpamFilterEndpoint || // Spam filter endpoint'i için hata handling'i skip et (component'te handle ediliyor)
-                                (isCompleteCommunitySetup && (error.status === 401 || error.status === 400)); // Topluluk kaydı başarılı sayılır, başarı sayfasına kalsın
+                                (isCompleteCommunitySetup && (error.status === 401 || error.status === 400)) || // Topluluk kaydı başarılı sayılır, başarı sayfasına kalsın
+                                isCommunityRejectedOrDeleted; // Silinmiş/reddedilmiş topluluk girişi: community-login kendi mesajını gösterecek
 
       if (skipErrorHandling) {
         // Event detail re-fetch için 404'leri tamamen sessizce handle et (toast ve log yok)

@@ -223,6 +223,11 @@ export class CommunityService {
     } else {
       status = 'Pasif';
     }
+    // #region agent log
+    if (status === 'Reddedilen' || status === 'Silinmiş') {
+      fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'community.services.ts:mapMiniDtoToCommunity',message:'Status mapping',data:{dtoDeletedAt: dto.deletedAt ?? dto.DeletedAt, deletedAt, comConfirm, resultingStatus: status},timestamp:Date.now(),hypothesisId:'H1'})}).catch(()=>{});
+    }
+    // #endregion
 
     return {
       id: dto.communityId || dto.CommunityId,
@@ -268,12 +273,18 @@ export class CommunityService {
   }
 
   // CommunityDetailDto'yu Community'ye dönüştür (Detail için)
-  // Backend'den gelen DTO: CommunityDetailDto (CommunityId, ComName, ComAbout, vb.)
-  // C# JSON serialization genellikle camelCase'e çevirir, ama hem camelCase hem PascalCase kontrol ediyoruz
+  // Backend'den gelen DTO: CommunityDetailDto (CommunityId, ComName, ComAbout, DeletedAt, vb.)
+  // Silinmiş topluluk: DeletedAt set ise status 'Silinmiş' (liste ile aynı mantık); yoksa statusFromDetailDto.
   private mapDetailDtoToCommunity(dto: any): Community {
     // Backend'den gelen ID - hem communityId (camelCase) hem CommunityId (PascalCase) kontrol et
     const communityId = dto.communityId || dto.CommunityId;
     const idString = typeof communityId === 'string' ? communityId : String(communityId);
+
+    const deletedAt = dto.deletedAt ?? dto.DeletedAt ?? null;
+    const isDeleted = deletedAt != null && deletedAt !== '';
+    const status: 'Aktif' | 'Pasif' | 'Onay Bekleyen' | 'Reddedilen' | 'Silinmiş' = isDeleted
+      ? 'Silinmiş'
+      : this.statusFromDetailDto(dto);
 
     return {
       id: idString,
@@ -299,7 +310,8 @@ export class CommunityService {
       website: dto.webSiteUrl || dto.WebSiteUrl || '',
       email: dto.comMail || dto.ComMail || '',
       instagram: dto.instagramUrl || dto.InstagramUrl || '',
-      status: this.statusFromDetailDto(dto),
+      status,
+      deletedAt: isDeleted ? (deletedAt ?? undefined) : undefined,
       confirmAbout: dto.confirmAbout || dto.ConfirmAbout || '',
       presidentEmail: dto.comLeadMail || dto.ComLeadMail || '',
       comMail: dto.comMail || dto.ComMail || '',

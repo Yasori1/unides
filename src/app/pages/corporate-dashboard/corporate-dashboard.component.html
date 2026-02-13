@@ -286,19 +286,6 @@
                 Silinmiş
               </button>
             </div>
-            <select
-              class="status-filter status-filter-select"
-              [(ngModel)]="statusFilter"
-              (change)="onStatusFilterChange()"
-              title="Durum filtresi"
-            >
-              <option value="">Tüm Durumlar</option>
-              <option value="Aktif">Aktif</option>
-              <option value="Onay Bekleyen">Onay Bekleyen</option>
-              <option value="Pasif">Pasif</option>
-              <option value="Reddedilen">Reddedilen</option>
-              <option value="Silinmiş">Silinmiş</option>
-            </select>
             <button class="btn-primary" (click)="openNewCommunityModal()">
               <span class="material-symbols-outlined">add</span>
               Yeni Topluluk Ekle
