@@ -1050,6 +1050,10 @@
                   <span class="status-badge deleted">Silinmiş</span>
                 </div>
                 <p class="status-deleted-hint">Bu topluluk silindi olarak işaretlenmiştir. Sadece bilgileri görüntüleyebilirsiniz.</p>
+                <div class="delete-reason-row" *ngIf="editingCommunity.deleteReason">
+                  <label class="detail-label">Silinme Nedeni</label>
+                  <p class="detail-value delete-reason-value">{{ editingCommunity.deleteReason }}</p>
+                </div>
               </div>
             </div>
             <div class="new-community-right deleted-detail-fields">

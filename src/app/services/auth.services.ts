@@ -143,12 +143,13 @@ export class AuthService {
   }
 
   // --- 6. TOPLULUK KAYIT ---
+  // Backend: RoleId 4 (reddedilmiş) veya 5 (silinmiş) olanlar tekrar kayıt olabilir; RegisterCommand bu e-postaları kabul eder.
   registerCommunity(data: RegisterRequest): Observable<any> {
     const backendData = {
       fullName: data.name,
       email: data.email,
       password: data.password,
-      roleId: 3, // 3 = Topluluk
+      roleId: 3, // 3 = Topluluk Başkanı
     };
     return this.http.post(`${this.apiUrl}/Auth/register`, backendData);
   }
@@ -156,9 +157,8 @@ export class AuthService {
   // --- 7. TOPLULUK KURULUM TAMAMLA ---
   // POST /api/Auth/complete-community-setup
   // E-posta doğrulandıktan sonra topluluk başkanı topluluk bilgilerini girerek hesap+topluluk oluşturur.
-  // setupToken: verify-email cevabından gelen token
-  // community: CreateCommunityDto — topluluk bilgileri
-  // Cevap: AuthResponse (accessToken, refreshToken, user info)
+  // Backend: Mevcut kullanıcı RoleId 4 veya 5 ise RoleId 3'e çevrilir (tekrar topluluk oluşturma).
+  // setupToken: verify-email cevabından gelen token; community: CreateCommunityDto
   completeCommunitySetup(setupToken: string, community: any): Observable<any> {
     return this.http
       .post<any>(`${this.apiUrl}/Auth/complete-community-setup`, {

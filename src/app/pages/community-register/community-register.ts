@@ -531,7 +531,6 @@ export class CommunityRegisterComponent implements OnInit {
           })
         )
       : of(null);
-    // Önce banner, sonra logo — sıralı çalıştır ki backend'de ikinci UpdateAsync birincinin alanını ezmesin
     banner$.pipe(switchMap(() => logo$)).subscribe({
       next: () => this.onCommunitySetupSuccess(),
       error: () => this.onCommunitySetupSuccess(),

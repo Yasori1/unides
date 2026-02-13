@@ -230,22 +230,22 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
         fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'community-login.ts:onSubmit-error',message:'Login error callback',data:{status:error?.status,rawMessage:rawMessage?.substring(0,200),hasSilinmistir:rawLower.includes('silinmiştir')||rawLower.includes('silinmis'),hasReddedilmis:rawLower.includes('reddedilmiştir')||rawLower.includes('reddedilmis')},timestamp:Date.now(),hypothesisId:'H1'})}).catch(()=>{});
         // #endregion
 
-        // Backend LoginCommand: önce reddedilmiş, sonra silinmiş kontrolü — birbiriyle çakışmasın diye ayrı mesajlar
-        if (rawLower.includes('reddedilmiştir') || rawLower.includes('reddedilmis')) {
-          this.toastService.show(
-            'Topluluğunuz Reddedilmiştir. Gelen e-posta\'daki reddetme gerekçesini düzelterek yeniden topluluk kaydı yapınız.',
-            'error'
-          );
-          return;
-        }
-        if (rawLower.includes('silinmiştir') || rawLower.includes('silinmis')) {
-          // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'community-login.ts:show-silinmistir-toast',message:'Showing Silinmistir toast from login error',data:{status:error?.status},timestamp:Date.now(),hypothesisId:'H1'})}).catch(()=>{});
-          // #endregion
-          this.toastService.show(
-            'Topluluğunuz silinmiştir. Gelen e-posta\'daki gerekçeyi düzelterek yeniden topluluk kaydı yapınız. Yeni kayıt oluşturup onay aldıysanız unidesbilgi@gsb.gov.tr ile iletişime geçin.',
-            'error'
-          );
+        // Backend LoginCommand: RoleId 4 = reddedilmiş, RoleId 5 = silinmiş; bu kullanıcılar giriş yapamaz, tekrar topluluk kaydı oluşturabilir.
+        // Sıra: en özel mesaj önce (önce reddedilmiş sonra silinmiş), sonra reddedilmiş, sonra silinmiş. Backend mesajını aynen gösteriyoruz.
+        const isOnceRejectedThenDeleted =
+          rawLower.includes('önce reddedilmiş') && (rawLower.includes('sonra silinmiştir') || rawLower.includes('sonra silinmis'));
+        const isRejected = rawLower.includes('reddedilmiştir') || rawLower.includes('reddedilmis');
+        const isDeleted = rawLower.includes('silinmiştir') || rawLower.includes('silinmis');
+
+        if (isOnceRejectedThenDeleted || isRejected || isDeleted) {
+          const displayMessage =
+            rawMessage?.trim() ||
+            (isOnceRejectedThenDeleted
+              ? 'Topluluğunuz önce reddedilmiş, sonra silinmiştir. Tekrar topluluk kaydı oluşturup GSB\'ye yollayınız.'
+              : isRejected
+                ? 'Topluluğunuz reddedilmiştir. Tekrar topluluk kaydı oluşturup GSB\'ye yollayınız.'
+                : 'Topluluğunuz silinmiştir. Tekrar topluluk kaydı oluşturup GSB\'ye yollayınız.');
+          this.toastService.show(displayMessage + ' Tekrar kayıt olmak veya yeni topluluk oluşturmak için Topluluk Kaydı sayfasını kullanabilirsiniz.', 'error');
           return;
         }
 

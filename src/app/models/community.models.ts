@@ -129,6 +129,8 @@ export interface Community {
   confirmAbout?: string;
   /** Soft delete: Backend DeletedAt döndürürse dolu (Silinmiş filtresi için) */
   deletedAt?: string | null;
+  /** Silinme gerekçesi (Backend DeleteReason) */
+  deleteReason?: string | null;
   presidentEmail?: string;
   // Backend'den gelen ek alanlar
   comMail?: string;

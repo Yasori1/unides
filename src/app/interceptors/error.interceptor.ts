@@ -27,16 +27,22 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       const isSpamFilterEndpoint = req.url.includes('/spamfilter/api/moderate') || req.url.includes('/api/moderate');
       // Topluluk kaydı 3. adım: complete-community-setup bazen 401/400 "onay aşamasındadır" döner; component başarı ekranını gösterecek, logout/yönlendirme yapma
       const isCompleteCommunitySetup = req.url.includes('complete-community-setup');
+      // Topluluk kaydı sonrası banner/logo yükleme: token yok (onay bekliyor), 401 gelir; logout yapma ve toast gösterme, component başarı sayfasını gösterir
+      const isCommunityUploadAfterSetup =
+        (req.url.includes('/Communities/') && (req.url.includes('/banner') || req.url.includes('/logo'))) &&
+        error.status === 401;
       // Topluluk girişi: silinmiş/reddedilmiş topluluk başkanı girişinde backend mesajı döner; community-login kendi uyarısını gösterecek (çakışma olmasın)
       const isAuthLogin = req.url.includes('/api/Auth/login') || req.url.includes('/Auth/login');
       const loginMsg =
         (error.error?.message || (error.error as any)?.Message || '').toString().toLowerCase();
+      // Backend: RoleId 4 = reddedilmiş, RoleId 5 = silinmiş; bu kullanıcılar giriş yapamaz. community-login kendi mesajını gösterecek.
       const isCommunityRejectedOrDeleted =
         isAuthLogin &&
         (loginMsg.includes('silinmiştir') ||
           loginMsg.includes('silinmis') ||
           loginMsg.includes('reddedilmiştir') ||
-          loginMsg.includes('reddedilmis'));
+          loginMsg.includes('reddedilmis') ||
+          loginMsg.includes('önce reddedilmiş'));
       const skipErrorHandling = req.url.includes('/api/Search') || 
                                 req.url.includes('/api/About') ||
                                 req.url.includes('/api/Forkod') ||
@@ -45,6 +51,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
                                 isLogoutEndpoint || // Logout endpoint'i için hata handling'i skip et (döngüyü önlemek için)
                                 isSpamFilterEndpoint || // Spam filter endpoint'i için hata handling'i skip et (component'te handle ediliyor)
                                 (isCompleteCommunitySetup && (error.status === 401 || error.status === 400)) || // Topluluk kaydı başarılı sayılır, başarı sayfasına kalsın
+                                isCommunityUploadAfterSetup || // Topluluk kaydı sonrası banner/logo 401: logout/toast yok, component başarı sayfasını gösterir
                                 isCommunityRejectedOrDeleted; // Silinmiş/reddedilmiş topluluk girişi: community-login kendi mesajını gösterecek
 
       if (skipErrorHandling) {
@@ -79,7 +86,8 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         errorMessage = 'Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.';
 
         const isCompleteCommunitySetupUrl = error.url?.includes('complete-community-setup');
-        if (typeof window !== 'undefined' && !error.url?.includes('/api/Auth/logout') && !isCompleteCommunitySetupUrl) {
+        const isCommunityUploadUrl = error.url?.includes('/Communities/') && (error.url?.includes('/banner') || error.url?.includes('/logo'));
+        if (typeof window !== 'undefined' && !error.url?.includes('/api/Auth/logout') && !isCompleteCommunitySetupUrl && !isCommunityUploadUrl) {
           authService.logout();
         }
       } else if (error.status === 403) {

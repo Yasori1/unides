@@ -2791,6 +2791,26 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
       color: #6b7280;
       line-height: 1.45;
     }
+    .delete-reason-row {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid #e5e7eb;
+      .detail-label {
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 6px;
+      }
+      .delete-reason-value {
+        margin: 0;
+        font-size: 13px;
+        color: #4b5563;
+        line-height: 1.5;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+    }
   }
 }
 
