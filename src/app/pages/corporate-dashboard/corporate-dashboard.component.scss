@@ -2483,6 +2483,30 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
   padding: 0 4px 0 0;
   max-height: calc(90vh - 100px);
 
+  .community-detail-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    min-height: 280px;
+    padding: 32px;
+
+    app-luma-spin {
+      transform: scale(1.5);
+      ::ng-deep .spin-shape {
+        box-shadow: inset 0 0 0 2px #14d2cc !important;
+      }
+    }
+
+    .community-detail-loading-text {
+      margin: 0;
+      font-size: 15px;
+      color: #64748b;
+      font-weight: 500;
+    }
+  }
+
   .new-community-layout {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -2585,6 +2609,66 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
       display: flex;
       gap: 12px;
       align-items: center;
+    }
+
+    .btn-danger-outline {
+      background: transparent;
+      color: #6b7280;
+      border: 1px solid #9ca3af;
+
+      &:hover {
+        background: #f3f4f6;
+        color: #374151;
+        border-color: #6b7280;
+      }
+    }
+
+    // Onay Bekleyen topluluk detay pop-up: buton düzeni ve Topluluğu Sil güzelleştirme
+    &.modal-actions--community-pending {
+      flex-wrap: wrap;
+      gap: 16px;
+
+      .modal-actions-right {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .modal-actions-approve-reject {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding-left: 16px;
+        border-left: 1px solid #e5e7eb;
+      }
+
+      .btn-delete-community-outline {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 20px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-family: inherit;
+        background: #fff;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+
+        .material-symbols-outlined {
+          font-size: 20px;
+        }
+
+        &:hover {
+          background: #fef2f2;
+          color: #b91c1c;
+          border-color: #f87171;
+          box-shadow: 0 2px 8px rgba(185, 28, 28, 0.12);
+        }
+      }
     }
   }
 
@@ -4574,27 +4658,52 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
 }
 
 // ================= TOPLULUK ONAY/RED BUTONLARI =================
+// Kart footer: Onay Bekleyen olduğunda butonlar tam genişlikte alt satırda
+.card-footer.card-footer--with-actions {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+
+  .review-actions {
+    margin-top: 0;
+  }
+}
+
 .review-actions {
   display: flex;
-  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
   margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+
+  .review-actions-primary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
 
   .btn-approve,
-  .btn-reject {
+  .btn-reject,
+  .btn-delete-review {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    padding: 6px 14px;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 16px;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
     font-family: inherit;
+    white-space: nowrap;
 
     .material-symbols-outlined {
-      font-size: 16px;
+      font-size: 18px;
     }
   }
 
@@ -4619,6 +4728,24 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
     &:hover {
       background: #dc2626;
       color: #fff;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+    }
+  }
+
+  .btn-delete-review {
+    background: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    &:hover {
+      background: #dc2626;
+      color: #fff;
+      border-color: #dc2626;
       transform: translateY(-1px);
       box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
     }

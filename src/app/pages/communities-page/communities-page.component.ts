@@ -85,10 +85,9 @@ export class CommunitiesPageComponent implements OnInit {
 
     this.isLoading = true;
 
-    // URL Parametrelerini Kontrol Et ve backend'e query params olarak gönder
+    // URL parametrelerini kontrol et (şehir filtresi uygulanmıyor; tüm aktif topluluklar çekiliyor)
     const queryParams = this.route.snapshot.queryParams;
     const backendParams: {
-      city?: string;
       university?: string;
       category?: string;
       name?: string;
@@ -97,13 +96,6 @@ export class CommunitiesPageComponent implements OnInit {
     if (queryParams['search']) {
       this.searchText = queryParams['search'];
       backendParams.name = queryParams['search'];
-    }
-
-    if (queryParams['city']) {
-      if (this.cities.includes(queryParams['city'])) {
-        this.selectedCity = queryParams['city'];
-        backendParams.city = queryParams['city'];
-      }
     }
 
     if (queryParams['category']) {
@@ -115,12 +107,11 @@ export class CommunitiesPageComponent implements OnInit {
       backendParams.university = queryParams['university'];
     }
 
-    // Backend'e query parametreleriyle istek at
-    // Anasayfada sadece aktif toplulukları göster
-    this.communityService.getAllCommunities({
-      ...backendParams,
-      status: 'active', // Backend'de sadece aktif toplulukları getir
-    }).subscribe({
+    // Backend'e istek: token göndermiyoruz (skipAuth) — kurumsal giriş yapılmış olsa bile tüm aktif topluluklar gelsin
+    this.communityService.getAllCommunities(
+      { ...backendParams, status: 'active' },
+      { skipAuth: true }
+    ).subscribe({
       next: (data) => {
         this.allCommunities = data;
 
@@ -167,9 +158,9 @@ export class CommunitiesPageComponent implements OnInit {
       );
     }
 
-    // 2. Şehir Filtresi
+    // 2. Şehir filtresi (sadece frontend; API'den tüm aktif topluluklar zaten çekildi)
     if (this.selectedCity) {
-      temp = temp.filter((c) => c.city === this.selectedCity);
+      temp = temp.filter((c) => (c.city || '').trim() === this.selectedCity);
     }
 
     // 3. Kategori Filtresi (URL'den gelen)

@@ -64,7 +64,14 @@ interface DashboardEvent {
 @Component({
   selector: 'app-community-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, ImageUploadComponent, LumaSpinComponent, ToastComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterModule,
+    ImageUploadComponent,
+    LumaSpinComponent,
+    ToastComponent,
+  ],
   templateUrl: './community-dashboard.component.html',
   styleUrls: ['./community-dashboard.component.scss'],
 })
@@ -138,15 +145,87 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
 
   /** Profilim sekmesi: Şehir dropdown seçenekleri (community-register ile aynı) */
   profileCities: string[] = [
-    'Adana', 'Adıyaman', 'Afyonkarahisar', 'Ağrı', 'Amasya', 'Ankara', 'Antalya', 'Artvin', 'Aydın',
-    'Balıkesir', 'Bilecik', 'Bingöl', 'Bitlis', 'Bolu', 'Burdur', 'Bursa', 'Çanakkale', 'Çankırı', 'Çorum',
-    'Denizli', 'Diyarbakır', 'Edirne', 'Elazığ', 'Erzincan', 'Erzurum', 'Eskişehir', 'Gaziantep', 'Giresun',
-    'Gümüşhane', 'Hakkari', 'Hatay', 'Isparta', 'Mersin', 'İstanbul', 'İzmir', 'Kars', 'Kastamonu', 'Kayseri',
-    'Kırklareli', 'Kırşehir', 'Kocaeli', 'Konya', 'Kütahya', 'Malatya', 'Manisa', 'Kahramanmaraş', 'Mardin',
-    'Muğla', 'Muş', 'Nevşehir', 'Niğde', 'Ordu', 'Rize', 'Sakarya', 'Samsun', 'Siirt', 'Sinop', 'Sivas',
-    'Tekirdağ', 'Tokat', 'Trabzon', 'Tunceli', 'Şanlıurfa', 'Uşak', 'Van', 'Yozgat', 'Zonguldak', 'Aksaray',
-    'Bayburt', 'Karaman', 'Kırıkkale', 'Batman', 'Şırnak', 'Bartın', 'Ardahan', 'Iğdır', 'Yalova', 'Karabük',
-    'Kilis', 'Osmaniye', 'Düzce',
+    'Adana',
+    'Adıyaman',
+    'Afyonkarahisar',
+    'Ağrı',
+    'Amasya',
+    'Ankara',
+    'Antalya',
+    'Artvin',
+    'Aydın',
+    'Balıkesir',
+    'Bilecik',
+    'Bingöl',
+    'Bitlis',
+    'Bolu',
+    'Burdur',
+    'Bursa',
+    'Çanakkale',
+    'Çankırı',
+    'Çorum',
+    'Denizli',
+    'Diyarbakır',
+    'Edirne',
+    'Elazığ',
+    'Erzincan',
+    'Erzurum',
+    'Eskişehir',
+    'Gaziantep',
+    'Giresun',
+    'Gümüşhane',
+    'Hakkari',
+    'Hatay',
+    'Isparta',
+    'Mersin',
+    'İstanbul',
+    'İzmir',
+    'Kars',
+    'Kastamonu',
+    'Kayseri',
+    'Kırklareli',
+    'Kırşehir',
+    'Kocaeli',
+    'Konya',
+    'Kütahya',
+    'Malatya',
+    'Manisa',
+    'Kahramanmaraş',
+    'Mardin',
+    'Muğla',
+    'Muş',
+    'Nevşehir',
+    'Niğde',
+    'Ordu',
+    'Rize',
+    'Sakarya',
+    'Samsun',
+    'Siirt',
+    'Sinop',
+    'Sivas',
+    'Tekirdağ',
+    'Tokat',
+    'Trabzon',
+    'Tunceli',
+    'Şanlıurfa',
+    'Uşak',
+    'Van',
+    'Yozgat',
+    'Zonguldak',
+    'Aksaray',
+    'Bayburt',
+    'Karaman',
+    'Kırıkkale',
+    'Batman',
+    'Şırnak',
+    'Bartın',
+    'Ardahan',
+    'Iğdır',
+    'Yalova',
+    'Karabük',
+    'Kilis',
+    'Osmaniye',
+    'Düzce',
   ].sort();
 
   eventCategories: string[] = [
@@ -242,7 +321,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     private spamService: SpamService,
     private imageErrorHandler: ImageErrorHandlerService,
     @Inject(PLATFORM_ID) private platformId: Object
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
@@ -292,7 +371,22 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       this.communityService.getMyLeadCommunity().subscribe({
         next: (community) => {
           // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'community-dashboard.component.ts:loadCommunityProfile-getMyLeadCommunity',message:'getMyLeadCommunity result',data:{hasCommunity:!!community,id:community?.id,isActivity:community?.isActivity,status:(community as any)?.status},timestamp:Date.now(),hypothesisId:'H3'})}).catch(()=>{});
+          fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              location: 'community-dashboard.component.ts:loadCommunityProfile-getMyLeadCommunity',
+              message: 'getMyLeadCommunity result',
+              data: {
+                hasCommunity: !!community,
+                id: community?.id,
+                isActivity: community?.isActivity,
+                status: (community as any)?.status,
+              },
+              timestamp: Date.now(),
+              hypothesisId: 'H3',
+            }),
+          }).catch(() => {});
           // #endregion
           if (community) {
             this.clubInfo = {
@@ -519,7 +613,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     this.eventService.getCommunityEvents(communityId, [0, 1, 2]).subscribe({
       next: (communityEvents) => {
         // Debug: Backend'den gelen veriyi kontrol et
-        Logger.log('Backend\'den gelen etkinlikler (raw):', communityEvents);
+        Logger.log("Backend'den gelen etkinlikler (raw):", communityEvents);
         communityEvents.forEach((e, idx) => {
           if (e.status === 'Reddedildi' || (e as any).status === 'Reddedildi') {
             Logger.log(`Etkinlik ${idx} - Reddedildi:`, {
@@ -527,7 +621,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
               title: e.title,
               status: e.status,
               rejectionReason: e.rejectionReason,
-              raw: e
+              raw: e,
             });
           }
         });
@@ -582,7 +676,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
                 dateStr = startDate.toLocaleDateString('tr-TR', {
                   day: 'numeric',
                   month: 'long',
-                  year: 'numeric'
+                  year: 'numeric',
                 });
                 // Türkçe saat formatı: "14:30" (24 saat formatı)
                 timeStr = startDate.toLocaleTimeString('tr-TR', {
@@ -593,7 +687,14 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
                 startDateIso = startDate.toISOString();
               }
             } catch (error) {
-              Logger.error('Tarih parse hatası:', error, 'Event ID:', e.id, 'startDate:', e.startDate);
+              Logger.error(
+                'Tarih parse hatası:',
+                error,
+                'Event ID:',
+                e.id,
+                'startDate:',
+                e.startDate
+              );
               startDate = new Date();
               dateStr = 'Tarih belirtilmemiş';
               timeStr = 'Saat belirtilmemiş';
@@ -622,7 +723,8 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
           // imageUrl EventService.mapToEvent tarafından zaten convertImagePathToFullUrl ile tam URL'ye çevriliyor
           // Eğer imageUrl boşsa veya geçersizse, boş string kullan (placeholder image-error-handler service tarafından yönetilecek)
           // Backend'den gelen imageUrl'i direkt kullan - eğer boşsa boş string, yoksa tam URL
-          const finalImageUrl = e.imageUrl && e.imageUrl.trim() && e.imageUrl.length > 10 ? e.imageUrl : '';
+          const finalImageUrl =
+            e.imageUrl && e.imageUrl.trim() && e.imageUrl.length > 10 ? e.imageUrl : '';
 
           return {
             id: e.id,
@@ -636,11 +738,27 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
             description: e.description || e.shortDescription || '',
             rejectionReason: (() => {
               // EventItem'dan gelen rejectionReason'ı kontrol et
-              const reason = e.rejectionReason || (e as any).rejectionReason || (e as any).confirmAbout || (e as any).ConfirmAbout;
+              const reason =
+                e.rejectionReason ||
+                (e as any).rejectionReason ||
+                (e as any).confirmAbout ||
+                (e as any).ConfirmAbout;
               if (reason) {
-                Logger.log('DashboardEvent mapping: rejectionReason bulundu:', reason, 'Event ID:', e.id);
+                Logger.log(
+                  'DashboardEvent mapping: rejectionReason bulundu:',
+                  reason,
+                  'Event ID:',
+                  e.id
+                );
               } else {
-                Logger.log('DashboardEvent mapping: rejectionReason YOK, Event ID:', e.id, 'Status:', e.status, 'Raw event:', e);
+                Logger.log(
+                  'DashboardEvent mapping: rejectionReason YOK, Event ID:',
+                  e.id,
+                  'Status:',
+                  e.status,
+                  'Raw event:',
+                  e
+                );
               }
               return reason || undefined;
             })(), // Backend'den gelirse (ConfirmAbout olarak da gelebilir)
@@ -708,7 +826,11 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     const target = event.target as HTMLElement;
 
     // Profil dropdown kontrolü
-    if (!target.closest('.profile-wrapper') && !target.closest('.profile-dropdown') && !target.closest('.profile-info')) {
+    if (
+      !target.closest('.profile-wrapper') &&
+      !target.closest('.profile-dropdown') &&
+      !target.closest('.profile-info')
+    ) {
       this.isProfileOpen = false;
     }
 
@@ -890,7 +1012,10 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     }
     this.pendingLogoFile = file;
     this.clubInfo.logo = URL.createObjectURL(file);
-    this.showToast('Logo seçildi. Değişiklikler "Güncelle ve Onaya Gönder" ile GSB onayına gönderilecektir.', 'success');
+    this.showToast(
+      'Logo seçildi. Değişiklikler "Güncelle ve Onaya Gönder" ile GSB onayına gönderilecektir.',
+      'success'
+    );
     this.showAvatarModal = false;
   }
 
@@ -909,10 +1034,12 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     }
     this.pendingBannerFile = file;
     this.clubInfo.banner = URL.createObjectURL(file);
-    this.showToast('Banner seçildi. Değişiklikler "Güncelle ve Onaya Gönder" ile GSB onayına gönderilecektir.', 'success');
+    this.showToast(
+      'Banner seçildi. Değişiklikler "Güncelle ve Onaya Gönder" ile GSB onayına gönderilecektir.',
+      'success'
+    );
     this.showBannerModal = false;
   }
-
 
   updateSettings() {
     if (!this.isSettingsValid) {
@@ -956,8 +1083,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     }
 
     this.isSavingProfile = true;
-    const id =
-      typeof this.clubInfo.id === 'string' ? this.clubInfo.id : String(this.clubInfo.id);
+    const id = typeof this.clubInfo.id === 'string' ? this.clubInfo.id : String(this.clubInfo.id);
 
     const bannerUpload$ = this.pendingBannerFile
       ? this.communityService.uploadBanner(id, this.pendingBannerFile).pipe(
@@ -980,53 +1106,79 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
         )
       : of(undefined);
 
-    forkJoin({ bannerUrl: bannerUpload$, logoUrl: logoUpload$ }).pipe(
-      switchMap(({ bannerUrl, logoUrl }) => {
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'community-dashboard:saveCommunityProfile',message:'DTO before update',data:{bannerUrl,bannerUrlLen:bannerUrl?.length,logoUrl,logoUrlLen:logoUrl?.length},timestamp:Date.now(),hypothesisId:'B'})}).catch(()=>{});
-        // #endregion
-        const dto: any = {
-          comName: this.clubInfo.name?.trim() || undefined,
-          comCategory: this.clubInfo.category?.trim() || undefined,
-          comAbout: this.clubInfo.description?.trim() || undefined,
-          city: this.clubInfo.city?.trim() || undefined,
-          university: this.clubInfo.university?.trim() || undefined,
-          comMail: this.clubInfo.email?.trim() || undefined,
-          comLeadMail: this.clubInfo.comLeadMail?.trim() || undefined,
-          webSiteUrl: this.clubInfo.webSiteUrl?.trim() || undefined,
-          instagramUrl: this.clubInfo.instagramUrl?.trim() || this.clubInfo.instagram?.trim() || undefined,
-          miniAbout: this.clubInfo.miniAbout?.trim() || undefined,
-          isActivity: false, // GSB onay bekleyen kategorisine düşsün; GSB onaylayınca tekrar aktif olur
-        };
-        if (bannerUrl !== undefined) dto.bannerUrl = bannerUrl;
-        else if (this.clubInfo.banner && !this.clubInfo.banner.startsWith('data:') && !this.clubInfo.banner.startsWith('blob:'))
-          dto.bannerUrl = this.clubInfo.banner;
-        if (logoUrl !== undefined) dto.logoUrl = logoUrl;
-        else if (this.clubInfo.logo && !this.clubInfo.logo.startsWith('data:') && !this.clubInfo.logo.startsWith('blob:'))
-          dto.logoUrl = this.clubInfo.logo;
+    forkJoin({ bannerUrl: bannerUpload$, logoUrl: logoUpload$ })
+      .pipe(
+        switchMap(({ bannerUrl, logoUrl }) => {
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              location: 'community-dashboard:saveCommunityProfile',
+              message: 'DTO before update',
+              data: {
+                bannerUrl,
+                bannerUrlLen: bannerUrl?.length,
+                logoUrl,
+                logoUrlLen: logoUrl?.length,
+              },
+              timestamp: Date.now(),
+              hypothesisId: 'B',
+            }),
+          }).catch(() => {});
+          // #endregion
+          const dto: any = {
+            comName: this.clubInfo.name?.trim() || undefined,
+            comCategory: this.clubInfo.category?.trim() || undefined,
+            comAbout: this.clubInfo.description?.trim() || undefined,
+            city: this.clubInfo.city?.trim() || undefined,
+            university: this.clubInfo.university?.trim() || undefined,
+            comMail: this.clubInfo.email?.trim() || undefined,
+            comLeadMail: this.clubInfo.comLeadMail?.trim() || undefined,
+            webSiteUrl: this.clubInfo.webSiteUrl?.trim() || undefined,
+            instagramUrl:
+              this.clubInfo.instagramUrl?.trim() || this.clubInfo.instagram?.trim() || undefined,
+            miniAbout: this.clubInfo.miniAbout?.trim() || undefined,
+            isActivity: false, // GSB onay bekleyen kategorisine düşsün; GSB onaylayınca tekrar aktif olur
+          };
+          if (bannerUrl !== undefined) dto.bannerUrl = bannerUrl;
+          else if (
+            this.clubInfo.banner &&
+            !this.clubInfo.banner.startsWith('data:') &&
+            !this.clubInfo.banner.startsWith('blob:')
+          )
+            dto.bannerUrl = this.clubInfo.banner;
+          if (logoUrl !== undefined) dto.logoUrl = logoUrl;
+          else if (
+            this.clubInfo.logo &&
+            !this.clubInfo.logo.startsWith('data:') &&
+            !this.clubInfo.logo.startsWith('blob:')
+          )
+            dto.logoUrl = this.clubInfo.logo;
 
-        return this.communityService.updateCommunity(id, dto);
-      })
-    ).subscribe({
-      next: () => {
-        this.pendingBannerFile = null;
-        this.pendingLogoFile = null;
-        if (this.clubInfo.banner?.startsWith('blob:')) URL.revokeObjectURL(this.clubInfo.banner);
-        if (this.clubInfo.logo?.startsWith('blob:')) URL.revokeObjectURL(this.clubInfo.logo);
-        this.showToast(
-          'Topluluk bilgileri GSB onayına gönderildi. Onay bekleyen topluluklar kategorisinde görünecek; GSB onayından sonra değişiklikler yayına alınacaktır.',
-          'success'
-        );
-        this.initialClubInfo = JSON.parse(JSON.stringify(this.clubInfo));
-        this.refreshCommunityProfileAfterUpdate();
-      },
-      error: (err: any) => {
-        this.isSavingProfile = false;
-        const msg =
-          err?.error?.message || err?.error || 'Topluluk güncellenirken bir hata oluştu.';
-        this.showToast(typeof msg === 'string' ? msg : 'Güncelleme hatası.', 'error');
-      },
-    });
+          return this.communityService.updateCommunity(id, dto);
+        })
+      )
+      .subscribe({
+        next: () => {
+          this.pendingBannerFile = null;
+          this.pendingLogoFile = null;
+          if (this.clubInfo.banner?.startsWith('blob:')) URL.revokeObjectURL(this.clubInfo.banner);
+          if (this.clubInfo.logo?.startsWith('blob:')) URL.revokeObjectURL(this.clubInfo.logo);
+          this.showToast(
+            'Topluluk bilgileri GSB onayına gönderildi. Onay bekleyen topluluklar kategorisinde görünecek; GSB onayından sonra değişiklikler yayına alınacaktır.',
+            'success'
+          );
+          this.initialClubInfo = JSON.parse(JSON.stringify(this.clubInfo));
+          this.refreshCommunityProfileAfterUpdate();
+        },
+        error: (err: any) => {
+          this.isSavingProfile = false;
+          const msg =
+            err?.error?.message || err?.error || 'Topluluk güncellenirken bir hata oluştu.';
+          this.showToast(typeof msg === 'string' ? msg : 'Güncelleme hatası.', 'error');
+        },
+      });
   }
 
   /**
@@ -1193,46 +1345,50 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
 
             // Eğer fotoğraf seçildiyse, ayrı endpoint ile yükle
             if (this.newEventData.imageFile && this.editingEventId) {
-              this.eventService.uploadEventImage(this.editingEventId, this.newEventData.imageFile).subscribe({
-                next: (uploadResponse) => {
-                  Logger.log('Event image uploaded successfully:', uploadResponse);
-                  Logger.log('Uploaded image path:', uploadResponse.ImagePath);
+              this.eventService
+                .uploadEventImage(this.editingEventId, this.newEventData.imageFile)
+                .subscribe({
+                  next: (uploadResponse) => {
+                    Logger.log('Event image uploaded successfully:', uploadResponse);
+                    Logger.log('Uploaded image path:', uploadResponse.ImagePath);
 
-                  // Backend'den gelen ImagePath zaten full URL (convert edilmiş)
-                  const imageUrl = uploadResponse.ImagePath || '';
+                    // Backend'den gelen ImagePath zaten full URL (convert edilmiş)
+                    const imageUrl = uploadResponse.ImagePath || '';
 
-                  // Backend'den gelen ImagePath'i event listesinde güncelle
-                  const eventInList = this.dashboardEvents.find((e) => e.id === this.editingEventId);
-                  if (eventInList && imageUrl) {
-                    eventInList.imageUrl = imageUrl;
-                  }
+                    // Backend'den gelen ImagePath'i event listesinde güncelle
+                    const eventInList = this.dashboardEvents.find(
+                      (e) => e.id === this.editingEventId
+                    );
+                    if (eventInList && imageUrl) {
+                      eventInList.imageUrl = imageUrl;
+                    }
 
-                  this.showToast(
-                    "Etkinlik ve fotoğrafı güncellendi ve tekrar onaya gönderildi! Kurumsal Dashboard'daki etkinlik onaylama ekranına iletildi.",
-                    'success'
-                  );
-                  this.closeModal();
-                  this.editingEventId = null; // Reset editing state
-                  if (this.clubInfo.id) {
-                    setTimeout(() => {
-                      this.loadCommunityEvents(this.clubInfo.id, true); // skipLoading = true
-                    }, 1500); // Backend'in fotoğrafı kaydetmesi ve event objesine set etmesi için daha uzun bekleme
-                  }
-                },
-                error: (uploadErr: any) => {
-                  Logger.error('Etkinlik fotoğrafı yüklenemedi:', uploadErr);
-                  // Etkinlik güncellendi ama fotoğraf yüklenemedi
-                  this.showToast(
-                    "Etkinlik güncellendi ancak fotoğraf yüklenirken bir hata oluştu. Etkinliği düzenleyerek fotoğrafı tekrar yükleyebilirsiniz.",
-                    'error'
-                  );
-                  this.closeModal();
-                  this.editingEventId = null; // Reset editing state
-                  if (this.clubInfo.id) {
-                    this.loadCommunityEvents(this.clubInfo.id);
-                  }
-                },
-              });
+                    this.showToast(
+                      "Etkinlik ve fotoğrafı güncellendi ve tekrar onaya gönderildi! Kurumsal Dashboard'daki etkinlik onaylama ekranına iletildi.",
+                      'success'
+                    );
+                    this.closeModal();
+                    this.editingEventId = null; // Reset editing state
+                    if (this.clubInfo.id) {
+                      setTimeout(() => {
+                        this.loadCommunityEvents(this.clubInfo.id, true); // skipLoading = true
+                      }, 1500); // Backend'in fotoğrafı kaydetmesi ve event objesine set etmesi için daha uzun bekleme
+                    }
+                  },
+                  error: (uploadErr: any) => {
+                    Logger.error('Etkinlik fotoğrafı yüklenemedi:', uploadErr);
+                    // Etkinlik güncellendi ama fotoğraf yüklenemedi
+                    this.showToast(
+                      'Etkinlik güncellendi ancak fotoğraf yüklenirken bir hata oluştu. Etkinliği düzenleyerek fotoğrafı tekrar yükleyebilirsiniz.',
+                      'error'
+                    );
+                    this.closeModal();
+                    this.editingEventId = null; // Reset editing state
+                    if (this.clubInfo.id) {
+                      this.loadCommunityEvents(this.clubInfo.id);
+                    }
+                  },
+                });
             } else {
               // Fotoğraf yok, sadece etkinlik güncellendi
               this.showToast(
@@ -1294,12 +1450,23 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
                 setTimeout(() => {
                   const newEventInList = this.dashboardEvents.find((e) => e.id === eventId);
                   if (newEventInList && imageUrl) {
-                    Logger.log('Updating event in list - Event ID:', eventId, 'New imageUrl:', imageUrl);
+                    Logger.log(
+                      'Updating event in list - Event ID:',
+                      eventId,
+                      'New imageUrl:',
+                      imageUrl
+                    );
                     // Cache-busting için timestamp ekle
-                    const imageUrlWithCacheBust = imageUrl + (imageUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
+                    const imageUrlWithCacheBust =
+                      imageUrl + (imageUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
                     newEventInList.imageUrl = imageUrlWithCacheBust;
                   } else {
-                    Logger.warn('Event not found in list for ID:', eventId, 'Available IDs:', this.dashboardEvents.map(e => e.id));
+                    Logger.warn(
+                      'Event not found in list for ID:',
+                      eventId,
+                      'Available IDs:',
+                      this.dashboardEvents.map((e) => e.id)
+                    );
                   }
                 }, 100);
 
@@ -1329,7 +1496,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
                 Logger.error('Etkinlik fotoğrafı yüklenemedi:', uploadErr);
                 // Etkinlik oluşturuldu ama fotoğraf yüklenemedi
                 this.showToast(
-                  "Etkinlik oluşturuldu ancak fotoğraf yüklenirken bir hata oluştu. Etkinliği düzenleyerek fotoğrafı tekrar yükleyebilirsiniz.",
+                  'Etkinlik oluşturuldu ancak fotoğraf yüklenirken bir hata oluştu. Etkinliği düzenleyerek fotoğrafı tekrar yükleyebilirsiniz.',
                   'error'
                 );
                 // Modal'ı kapat
@@ -1396,7 +1563,16 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
 
   onEventFileSelected(file: File) {
     if (file) {
-      Logger.log('[onEventFileSelected] File selected:', file.name, 'Size:', file.size, 'Type:', file.type, 'isEditingEventDetail:', this.isEditingEventDetail);
+      Logger.log(
+        '[onEventFileSelected] File selected:',
+        file.name,
+        'Size:',
+        file.size,
+        'Type:',
+        file.type,
+        'isEditingEventDetail:',
+        this.isEditingEventDetail
+      );
       if (this.isEditingEventDetail) {
         // Event detail modal'da düzenleme modunda
         this.readFileToBase64ForEdit(file);
@@ -1566,7 +1742,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       status: this.selectedEvent.status,
       rejectionReason: this.selectedEvent.rejectionReason,
       hasRejectionReason: !!this.selectedEvent.rejectionReason,
-      isRejected: this.selectedEvent.status === 'rejected'
+      isRejected: this.selectedEvent.status === 'rejected',
     });
 
     // Eğer etkinlik rejected ise ve rejectionReason yoksa, backend'den detay çek
@@ -1581,7 +1757,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
               this.selectedEvent.rejectionReason = eventDetail.rejectionReason;
             }
             // Dashboard listesindeki event'i de güncelle
-            const eventInList = this.dashboardEvents.find(e => e.id === event.id);
+            const eventInList = this.dashboardEvents.find((e) => e.id === event.id);
             if (eventInList) {
               eventInList.rejectionReason = eventDetail.rejectionReason;
             }
@@ -1589,7 +1765,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           Logger.warn('Could not fetch event detail for rejection reason:', err);
-        }
+        },
       });
     }
 
@@ -1602,8 +1778,6 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     // Tüm etkinlikler için detay modal aç
     this.openEventDetail(event);
   }
-
-
 
   editEvent(event: DashboardEvent) {
     this.editingEventId = event.id;
@@ -1748,14 +1922,26 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     if (!this.selectedEvent || !this.isEditingEventDetail) return;
 
     // Validation - daha detaylı kontrol
-    const hasValidTitle = this.editedEventData.title?.trim() && this.editedEventData.title.trim().length > 0;
+    const hasValidTitle =
+      this.editedEventData.title?.trim() && this.editedEventData.title.trim().length > 0;
     const hasValidDate = this.editedEventData.date && this.editedEventData.date.trim().length > 0;
     const hasValidTime = this.editedEventData.time && this.editedEventData.time.trim().length > 0;
-    const hasValidLocation = this.editedEventData.location?.trim() && this.editedEventData.location.trim().length > 0;
-    const hasValidQuota = this.editedEventData.quota && String(this.editedEventData.quota).trim().length > 0;
-    const hasValidDescription = this.editedEventData.description?.trim() && this.editedEventData.description.trim().length > 0;
+    const hasValidLocation =
+      this.editedEventData.location?.trim() && this.editedEventData.location.trim().length > 0;
+    const hasValidQuota =
+      this.editedEventData.quota && String(this.editedEventData.quota).trim().length > 0;
+    const hasValidDescription =
+      this.editedEventData.description?.trim() &&
+      this.editedEventData.description.trim().length > 0;
 
-    if (!hasValidTitle || !hasValidDate || !hasValidTime || !hasValidLocation || !hasValidQuota || !hasValidDescription) {
+    if (
+      !hasValidTitle ||
+      !hasValidDate ||
+      !hasValidTime ||
+      !hasValidLocation ||
+      !hasValidQuota ||
+      !hasValidDescription
+    ) {
       // Hangi alanların eksik olduğunu belirt
       const missingFields: string[] = [];
       if (!hasValidTitle) missingFields.push('Etkinlik İsmi');
@@ -1803,13 +1989,14 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
 
     // Fotoğraf silme durumunu kontrol et
     const isImageDeleted = this.editedEventData.image === '' && !this.editedEventData.imageFile;
-    const hasNewImage = this.editedEventData.imageFile !== null && this.editedEventData.imageFile !== undefined;
+    const hasNewImage =
+      this.editedEventData.imageFile !== null && this.editedEventData.imageFile !== undefined;
 
     Logger.log('[saveEventFromDetail] Image state check:', {
       isImageDeleted,
       hasNewImage,
       imageFile: !!this.editedEventData.imageFile,
-      image: this.editedEventData.image ? 'has value' : 'empty'
+      image: this.editedEventData.image ? 'has value' : 'empty',
     });
 
     this.eventService
@@ -1873,11 +2060,22 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
 
           // Eğer yeni fotoğraf seçildiyse, ayrı endpoint ile yükle
           if (hasNewImage && eventId) {
-            Logger.log('[saveEventFromDetail] Uploading image for event:', eventId, 'File:', this.editedEventData.imageFile?.name);
+            Logger.log(
+              '[saveEventFromDetail] Uploading image for event:',
+              eventId,
+              'File:',
+              this.editedEventData.imageFile?.name
+            );
             this.eventService.uploadEventImage(eventId, this.editedEventData.imageFile).subscribe({
               next: (uploadResponse) => {
-                Logger.log('[saveEventFromDetail] Event image uploaded successfully:', uploadResponse);
-                Logger.log('[saveEventFromDetail] Raw ImagePath from backend:', uploadResponse.ImagePath);
+                Logger.log(
+                  '[saveEventFromDetail] Event image uploaded successfully:',
+                  uploadResponse
+                );
+                Logger.log(
+                  '[saveEventFromDetail] Raw ImagePath from backend:',
+                  uploadResponse.ImagePath
+                );
 
                 // Backend'den gelen ImagePath zaten full URL (convert edilmiş)
                 const imageUrl = uploadResponse.ImagePath || '';
@@ -1885,22 +2083,44 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
 
                 // Backend'den gelen ImagePath'i direkt olarak selectedEvent'e ata
                 if (this.selectedEvent && imageUrl) {
-                  Logger.log('[saveEventFromDetail] Updating selectedEvent.imageUrl from', this.selectedEvent.imageUrl, 'to', imageUrl);
+                  Logger.log(
+                    '[saveEventFromDetail] Updating selectedEvent.imageUrl from',
+                    this.selectedEvent.imageUrl,
+                    'to',
+                    imageUrl
+                  );
                   // Cache-busting için timestamp ekle (yeni yüklenen image'ler için)
-                  const imageUrlWithCacheBust = imageUrl + (imageUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
-                  Logger.log('[saveEventFromDetail] Image URL with cache-bust:', imageUrlWithCacheBust);
+                  const imageUrlWithCacheBust =
+                    imageUrl + (imageUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
+                  Logger.log(
+                    '[saveEventFromDetail] Image URL with cache-bust:',
+                    imageUrlWithCacheBust
+                  );
                   // Object reference'ı değiştir ki Angular change detection çalışsın
                   this.selectedEvent = { ...this.selectedEvent, imageUrl: imageUrlWithCacheBust };
                   // Dashboard events listesinde de güncelle (cache-bust olmadan, çünkü liste için gerekli değil)
                   const eventInList = this.dashboardEvents.find((e) => e.id === eventId);
                   if (eventInList) {
-                    Logger.log('[saveEventFromDetail] Updating eventInList.imageUrl from', eventInList.imageUrl, 'to', imageUrl);
+                    Logger.log(
+                      '[saveEventFromDetail] Updating eventInList.imageUrl from',
+                      eventInList.imageUrl,
+                      'to',
+                      imageUrl
+                    );
                     eventInList.imageUrl = imageUrl;
                   } else {
-                    Logger.warn('[saveEventFromDetail] Event not found in dashboardEvents list, ID:', eventId);
+                    Logger.warn(
+                      '[saveEventFromDetail] Event not found in dashboardEvents list, ID:',
+                      eventId
+                    );
                   }
                 } else {
-                  Logger.warn('[saveEventFromDetail] Cannot update imageUrl - selectedEvent:', !!this.selectedEvent, 'imageUrl:', imageUrl);
+                  Logger.warn(
+                    '[saveEventFromDetail] Cannot update imageUrl - selectedEvent:',
+                    !!this.selectedEvent,
+                    'imageUrl:',
+                    imageUrl
+                  );
                 }
 
                 // Approved event'ten düzenleniyorsa özel mesaj
@@ -1933,7 +2153,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
                 Logger.error('Etkinlik fotoğrafı yüklenemedi:', uploadErr);
                 // Etkinlik güncellendi ama fotoğraf yüklenemedi
                 this.showToast(
-                  "Etkinlik güncellendi ancak fotoğraf yüklenirken bir hata oluştu. Etkinliği düzenleyerek fotoğrafı tekrar yükleyebilirsiniz.",
+                  'Etkinlik güncellendi ancak fotoğraf yüklenirken bir hata oluştu. Etkinliği düzenleyerek fotoğrafı tekrar yükleyebilirsiniz.',
                   'error'
                 );
                 this.isEditingEventDetail = false;
@@ -2025,9 +2245,9 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
   proceedToEditRejectedEvent() {
     this.closeRejectionModal();
     // Ensure the underlying event detail modal stays open and switches to edit mode
-    // active scroll lock again because closeRejectionModal removed it, 
+    // active scroll lock again because closeRejectionModal removed it,
     // but we want it for the underlying modal if needed, though typically modal-overlay handles it?
-    // Actually closeRejectionModal removes overflow:hidden. 
+    // Actually closeRejectionModal removes overflow:hidden.
     // But since selectedEvent is still true, the underlying modal is visible.
     // We should probably ensure overflow is hidden if valid.
     if (isPlatformBrowser(this.platformId) && this.selectedEvent) {
@@ -2066,11 +2286,14 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
         body || '',
         eventData.location ? `Konum: ${eventData.location}` : '',
         eventData.startDate ? `Başlangıç: ${eventData.startDate}` : '',
-        eventData.communityName ? `Topluluk: ${eventData.communityName}` : ''
-      ].filter(Boolean).join('\n');
+        eventData.communityName ? `Topluluk: ${eventData.communityName}` : '',
+      ]
+        .filter(Boolean)
+        .join('\n');
 
       // SpamService kullanarak spam kontrolü yap
-      this.spamService.checkSpam(fullText)
+      this.spamService
+        .checkSpam(fullText)
         .pipe(
           catchError((error) => {
             // Hata durumunda
@@ -2080,11 +2303,18 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
             if (error.name === 'HttpErrorResponse' && error.status === 0) {
               const errorMsg = error.message || '';
               if (errorMsg.includes('CORS') || errorMsg.includes('Access-Control')) {
-                errorMessage = 'Spam filter servisi CORS hatası veriyor. Sunucu yöneticisiyle iletişime geçin.';
-              } else if (errorMsg.includes('SSL') || errorMsg.includes('certificate') || errorMsg.includes('ERR_CERT')) {
-                errorMessage = 'Spam filter servisinde SSL sertifika hatası var. Sunucu yöneticisiyle iletişime geçin.';
+                errorMessage =
+                  'Spam filter servisi CORS hatası veriyor. Sunucu yöneticisiyle iletişime geçin.';
+              } else if (
+                errorMsg.includes('SSL') ||
+                errorMsg.includes('certificate') ||
+                errorMsg.includes('ERR_CERT')
+              ) {
+                errorMessage =
+                  'Spam filter servisinde SSL sertifika hatası var. Sunucu yöneticisiyle iletişime geçin.';
               } else {
-                errorMessage = 'Spam filter servisine bağlanılamıyor. Lütfen daha sonra tekrar deneyin.';
+                errorMessage =
+                  'Spam filter servisine bağlanılamıyor. Lütfen daha sonra tekrar deneyin.';
               }
             } else if (
               error.error &&
@@ -2109,7 +2339,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
               return;
             }
 
-            // Backend formatı: 
+            // Backend formatı:
             // {
             //   "analysis": { "forbidden": {...}, "spam": {...}, "politics": {...} },
             //   "moderation": { "status": "yeniden_admin_kontrolu_politics" | "kabul" | ..., "reason": [], "scores": {...} },
@@ -2123,15 +2353,23 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
             const moderationStatus = moderation.status || '';
 
             // Status kontrolü
-            const isClean = (moderationStatus === 'kabul' || moderationStatus === 'accept' || moderationStatus === 'approved') ||
-              (forbiddenCount === 0 && spamCount === 0 && politicsCount === 0 && !moderationStatus.includes('admin_kontrolu') && !moderationStatus.includes('red'));
+            const isClean =
+              moderationStatus === 'kabul' ||
+              moderationStatus === 'accept' ||
+              moderationStatus === 'approved' ||
+              (forbiddenCount === 0 &&
+                spamCount === 0 &&
+                politicsCount === 0 &&
+                !moderationStatus.includes('admin_kontrolu') &&
+                !moderationStatus.includes('red'));
 
             const status = moderationStatus || (isClean ? 'kabul' : 'red');
             const reasonArray = moderation.reason || [];
-            const reason = Array.isArray(reasonArray) ? reasonArray.join(', ') : (reasonArray || '');
+            const reason = Array.isArray(reasonArray) ? reasonArray.join(', ') : reasonArray || '';
 
             if (isClean) {
-              const cleanMessage = reason || 'İçerik temizdir. Spam, yasak kelime veya siyasi içerik tespit edilmedi.';
+              const cleanMessage =
+                reason || 'İçerik temizdir. Spam, yasak kelime veya siyasi içerik tespit edilmedi.';
               resolve({ clean: true, message: cleanMessage });
             } else {
               const issues: string[] = [];
@@ -2147,9 +2385,11 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
               if (moderationStatus && moderationStatus.includes('admin_kontrolu')) {
                 issues.push('Admin kontrolü gerekli');
               }
-              const errorMessage = reason || (issues.length > 0
-                ? `İçerikte sorun tespit edildi: ${issues.join(', ')}.`
-                : 'İçerik kontrol edilmeli.');
+              const errorMessage =
+                reason ||
+                (issues.length > 0
+                  ? `İçerikte sorun tespit edildi: ${issues.join(', ')}.`
+                  : 'İçerik kontrol edilmeli.');
               reject({ clean: false, message: errorMessage });
             }
           },
@@ -2236,7 +2476,8 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
         const pathname = new URL(pathStr).pathname;
         if (pathname.startsWith('/ImagesUnides/')) return pathname;
         if (pathname.startsWith('/images/')) return pathname.replace('/images/', '/ImagesUnides/');
-        if (pathname.startsWith('/assets/img/')) return pathname.replace('/assets/img/', '/ImagesUnides/');
+        if (pathname.startsWith('/assets/img/'))
+          return pathname.replace('/assets/img/', '/ImagesUnides/');
         return pathname || pathStr;
       } catch {
         return pathStr;
@@ -2281,10 +2522,12 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
   }
 
   // Image error handler - ImageErrorHandlerService kullanarak tutarlı hata yönetimi
-  onImageError(event: Event, type: 'announcement' | 'event' | 'logo' | 'cover' | 'avatar' = 'event'): void {
+  onImageError(
+    event: Event,
+    type: 'announcement' | 'event' | 'logo' | 'cover' | 'avatar' = 'event'
+  ): void {
     this.imageErrorHandler.handleImageError(event, type);
   }
-
 
   ngOnDestroy(): void {
     // AFK Detection'ı durdur

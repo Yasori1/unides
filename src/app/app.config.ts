@@ -15,6 +15,7 @@ import { provideClientHydration } from '@angular/platform-browser';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { AuthService } from './services/auth.services';
 import { errorInterceptor } from './interceptors/error.interceptor';
+import { SKIP_AUTH } from './core/http-context-tokens';
 
 /**
  * Auth Interceptor
@@ -38,12 +39,21 @@ const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, next: Htt
     headers['Accept'] = 'application/json';
   }
 
-  // Eğer token varsa, Authorization header'ını ekle
-  if (token) {
+  // Public liste isteklerinde token ekleme (header veya context ile; backend tüm toplulukları dönsün)
+  const skipAuthHeader = req.headers.get('X-Public-List') === '1';
+  const skipAuthContext = req.context.get(SKIP_AUTH);
+  const skipAuth = skipAuthHeader || skipAuthContext;
+
+  let reqToUse = req;
+  if (skipAuthHeader) {
+    reqToUse = req.clone({ headers: req.headers.delete('X-Public-List') });
+  }
+
+  if (token && !skipAuth) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const cloned = req.clone({
+  const cloned = reqToUse.clone({
     setHeaders: headers,
   });
 

@@ -107,6 +107,8 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   isLoadingEvents = false;
   isLoadingAnnouncements = false;
   isLoadingOverview = false;
+  /** Topluluk detay modalı açıldığında API cevabı gelene kadar spinner gösterilir */
+  communityDetailLoading = false;
   spamResults: Map<
     number,
     {
@@ -586,12 +588,16 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         const status: Community['status'] = isDeleted
           ? 'Silinmiş'
           : (c.status ?? (isActivity ? 'Aktif' : 'Pasif'));
+        const placeholders = {
+          cover: 'assets/img/placeholder-cover.svg',
+          logo: 'assets/img/placeholder-logo.svg',
+        };
         return {
           ...rest,
           about: c.description || c.about || '',
-          banner: coverUrl || 'assets/img/placeholder-cover.svg',
-          coverImage: coverUrl || 'assets/img/placeholder-cover.svg',
-          logo: logoUrl || 'assets/img/placeholder-logo.svg',
+          banner: coverUrl || placeholders.cover,
+          coverImage: coverUrl || placeholders.cover,
+          logo: logoUrl || placeholders.logo,
           description: c.description || c.about || '',
           city: c.city || '',
           category: c.category || 'Genel',
@@ -637,16 +643,24 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     return item?.id ?? '';
   }
 
-  /** Topluluk logosu URL'si; null/boş ise placeholder kullanılır (veritabanında LogoUrl null olabilir) */
+  /** Topluluk logosu URL'si; null/boş ise placeholder. Silinmiş topluluklarda data URI kullan (her zaman görünsün). */
   getCommunityLogo(item: Community): string | null {
     const url = item?.logo;
-    return url && String(url).trim() ? url : null;
+    const resolved = url && String(url).trim() ? url : null;
+    if (!resolved && (item?.status as string) === 'Silinmiş') {
+      return this.imageErrorHandler.getPlaceholderDataUri('logo');
+    }
+    return resolved;
   }
 
-  /** Topluluk kapak görseli URL'si; null/boş ise placeholder kullanılır (veritabanında BannerUrl null olabilir) */
+  /** Topluluk kapak görseli URL'si; null/boş ise placeholder. Silinmiş topluluklarda data URI kullan (her zaman görünsün). */
   getCommunityCover(item: Community): string | null {
     const url = item?.coverImage || item?.banner;
-    return url && String(url).trim() ? url : null;
+    const resolved = url && String(url).trim() ? url : null;
+    if (!resolved && (item?.status as string) === 'Silinmiş') {
+      return this.imageErrorHandler.getPlaceholderDataUri('cover');
+    }
+    return resolved;
   }
 
   // Üniversite kısaltması için yardımcı metod
@@ -1069,18 +1083,13 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Topluluk detay ve güncelleme
-  openCommunityDetail(community: Community) {
-    this.selectedCommunity = community;
-
-    // Önce mevcut veriyi editingCommunity'ye set et (silme işlemi için gerekli)
-    // Backend'den detay çekmeye çalışırken bile mevcut veriyi kullanabiliriz
-    // CommunityMiniDto'dan gelen miniAbout'u kullan
+  /** Liste verisinden editingCommunity'ye map (detay API çağrılmadığında veya hata durumunda kullanılır) */
+  private mapListCommunityToEditing(community: Community): Community & { presidentEmail?: string; shortDescription?: string } {
     const miniAboutValue =
       community.miniAbout || (community as any).MiniAbout || (community as any).miniAbout || '';
     const isRejected = community.status === 'Reddedilen' || (community as any).comConfirm === 2;
     const cachedRejectionReason = isRejected ? this.rejectedCommunityReasons.get(community.id) : undefined;
-    this.editingCommunity = {
+    return {
       ...community,
       about: community.description || community.about || '',
       email: community.email || (community as any).comMail || '',
@@ -1102,16 +1111,19 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         community.isActivity !== undefined ? community.isActivity : community.status === 'Aktif',
       confirmAbout: (community.confirmAbout && community.confirmAbout.trim()) || cachedRejectionReason || community.confirmAbout || '',
     } as Community & { presidentEmail?: string; shortDescription?: string };
+  }
 
-    // Modal'ı aç
+  // Topluluk detay ve güncelleme
+  openCommunityDetail(community: Community) {
+    this.selectedCommunity = community;
+    this.editingCommunity = null;
+    this.communityDetailLoading = true;
     this.modalType = 'edit-community';
     this.isModalOpen = true;
 
     // Backend'den detay çek (aktif/pasif durumuna göre)
-    // Aktif topluluklar için: GET /api/Communities/{id}
-    // Pasif topluluklar için: GET /api/Communities?status=passive (liste endpoint'inden ID'ye göre filtrele)
-    if (community.id && community.id !== '' && !community.id.includes('mock')) {
-      // Topluluğun aktif/pasif durumunu kontrol et
+    const hasValidId = community.id && community.id !== '' && !community.id.includes('mock');
+    if (hasValidId) {
       const isActive =
         community.isActivity !== undefined ? community.isActivity : community.status === 'Aktif';
 
@@ -1195,22 +1207,24 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
             email: this.editingCommunity.email,
             presidentEmail: this.editingCommunity.presidentEmail,
           });
+          this.communityDetailLoading = false;
         },
         error: (err) => {
-          // Hata durumunda mevcut (liste) verisini kullanmaya devam et
-          // editingCommunity zaten set edildi, bu yüzden kullanıcı formu görebilir
           if (err.status === 404) {
             Logger.warn(
               'Topluluk detayı alınamadı (404), mevcut liste verisi kullanılıyor:',
               community.id
             );
-            // editingCommunity zaten set edildi, ek bir işlem gerekmez
           } else {
             Logger.error('Topluluk detayı yüklenirken hata:', err);
-            // editingCommunity zaten set edildi, ek bir işlem gerekmez
           }
+          this.editingCommunity = this.mapListCommunityToEditing(community);
+          this.communityDetailLoading = false;
         },
       });
+    } else {
+      this.editingCommunity = this.mapListCommunityToEditing(community);
+      this.communityDetailLoading = false;
     }
   }
 
@@ -1590,6 +1604,14 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     this.isDeleteCommunityModalOpen = true;
   }
 
+  /** Onay bekleyen topluluk kartından silme modalını açar (editingCommunity gerekmez). */
+  openDeleteCommunityModalForItem(community: Community) {
+    if (!community?.id) return;
+    this.communityToDelete = { id: community.id, name: community.name || 'bu topluluk' };
+    this.deleteReasonCommunity = '';
+    this.isDeleteCommunityModalOpen = true;
+  }
+
   closeDeleteCommunityModal() {
     this.isDeleteCommunityModalOpen = false;
     this.communityToDelete = null;
@@ -1614,7 +1636,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   }
 
   private performDeleteCommunity(communityId: string, reason: string) {
-    this.communityService.deleteCommunity(communityId, reason).subscribe({
+    this.communityService.setPassiveAndDeleteCommunity(communityId, reason).subscribe({
       next: (response) => {
         Logger.log('Topluluk başarıyla silindi - ID:', communityId);
         Logger.log('Response (204 No Content):', response);
@@ -2707,6 +2729,8 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     this.selectedAnnouncement = null;
     this.communityToApprove = null;
     this.communityToReject = null;
+    this.editingCommunity = null;
+    this.communityDetailLoading = false;
   }
 
   // Duyuru detay ve güncelleme

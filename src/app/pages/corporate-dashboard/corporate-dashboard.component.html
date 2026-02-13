@@ -343,7 +343,7 @@
 
               <p class="description">{{ item.description || item.about }}</p>
 
-              <div class="card-footer">
+              <div class="card-footer" [class.card-footer--with-actions]="item.status === 'Onay Bekleyen'">
                 <div class="footer-info">
                   <span class="city-tag" *ngIf="item.city">
                     <i class="bx bxs-map"></i> {{ item.city }}
@@ -352,25 +352,37 @@
                     <i class="bx bxs-graduation"></i> {{ item.university }}
                   </span>
                 </div>
-                <!-- Onay Bekleyen topluluklar için onay/red butonları -->
+                <!-- Onay Bekleyen topluluklar için Onayla / Reddet / Topluluğu Sil -->
                 <div
                   class="review-actions"
                   *ngIf="item.status === 'Onay Bekleyen'"
                   (click)="$event.stopPropagation()"
                 >
+                  <div class="review-actions-primary">
+                    <button
+                      class="btn-approve"
+                      title="Onayla"
+                      (click)="openApproveCommunityModal(item)"
+                    >
+                      <span class="material-symbols-outlined">check_circle</span>
+                      <span>Onayla</span>
+                    </button>
+                    <button
+                      class="btn-reject"
+                      title="Reddet"
+                      (click)="openRejectCommunityModal(item)"
+                    >
+                      <span class="material-symbols-outlined">cancel</span>
+                      <span>Reddet</span>
+                    </button>
+                  </div>
                   <button
-                    class="btn-approve"
-                    title="Onayla"
-                    (click)="openApproveCommunityModal(item)"
+                    class="btn-delete-review"
+                    title="Topluluğu Sil"
+                    (click)="openDeleteCommunityModalForItem(item)"
                   >
-                    <span class="material-symbols-outlined">check_circle</span> Onayla
-                  </button>
-                  <button
-                    class="btn-reject"
-                    title="Reddet"
-                    (click)="openRejectCommunityModal(item)"
-                  >
-                    <span class="material-symbols-outlined">cancel</span> Reddet
+                    <span class="material-symbols-outlined">delete</span>
+                    <span>Topluluğu Sil</span>
                   </button>
                 </div>
                 <span class="action-text" *ngIf="item.status !== 'Onay Bekleyen'"
@@ -672,6 +684,8 @@
               ? 'Etkinlik Detayı'
               : modalType === 'new-community'
               ? 'Yeni Topluluk Ekle'
+              : modalType === 'edit-community' && communityDetailLoading
+              ? 'Topluluk Detayı'
               : modalType === 'edit-community' && editingCommunity?.status === 'Silinmiş'
               ? 'Silinmiş Topluluk Detayı'
               : modalType === 'edit-community'
@@ -1010,11 +1024,18 @@
         </div>
       </div>
 
-      <!-- Topluluk Düzenleme Modal - Yeni Topluluk Ekle ile aynı geniş düzen -->
+      <!-- Topluluk Düzenleme Modal - Önce spinner, yükleme bitince duruma göre tasarım -->
       <div
         class="modal-body modal-body-new-community"
-        *ngIf="modalType === 'edit-community' && editingCommunity"
+        *ngIf="modalType === 'edit-community'"
       >
+        <!-- Yükleniyor: spinner -->
+        <div class="community-detail-loading" *ngIf="communityDetailLoading">
+          <app-luma-spin></app-luma-spin>
+          <p class="community-detail-loading-text">Topluluk detayı yükleniyor...</p>
+        </div>
+        <!-- Yükleme bitti: Silinmiş / Reddedilen / Aktif-Pasif / Onay Bekleyen tasarımı -->
+        <ng-container *ngIf="!communityDetailLoading && editingCommunity">
         <!-- Silinmiş topluluk: sadece görüntüleme, bilgi detayı, kaydet/sil yok -->
         <div class="deleted-community-detail" *ngIf="editingCommunity.status === 'Silinmiş'">
           <div class="new-community-layout">
@@ -1257,18 +1278,24 @@
             </div>
           </div>
         </div>
-        <!-- Onay Bekleyen: Onayla / Reddet | Diğer: Topluluk Sil / Topluluk Kaydet -->
-        <div class="modal-actions" *ngIf="editingCommunity.status === 'Onay Bekleyen'">
+        <!-- Onay Bekleyen: Onayla / Reddet / Topluluğu Sil | Diğer: Topluluk Sil / Topluluk Kaydet -->
+        <div class="modal-actions modal-actions--community-pending" *ngIf="editingCommunity.status === 'Onay Bekleyen'">
           <button type="button" class="btn-secondary" (click)="closeModal()">Kapat</button>
-          <div class="modal-actions-group">
-            <button type="button" class="btn-danger" (click)="openRejectCommunityModal(editingCommunity)">
-              <span class="material-symbols-outlined">cancel</span>
-              Reddet
+          <div class="modal-actions-right">
+            <button type="button" class="btn-delete-community-outline" (click)="deleteCommunity()">
+              <span class="material-symbols-outlined">delete</span>
+              Topluluğu Sil
             </button>
-            <button type="button" class="btn-primary" (click)="openApproveCommunityModal(editingCommunity)">
-              <span class="material-symbols-outlined">check_circle</span>
-              Onayla
-            </button>
+            <div class="modal-actions-approve-reject">
+              <button type="button" class="btn-danger" (click)="openRejectCommunityModal(editingCommunity)">
+                <span class="material-symbols-outlined">cancel</span>
+                Reddet
+              </button>
+              <button type="button" class="btn-primary" (click)="openApproveCommunityModal(editingCommunity)">
+                <span class="material-symbols-outlined">check_circle</span>
+                Onayla
+              </button>
+            </div>
           </div>
         </div>
         <div class="modal-actions" *ngIf="editingCommunity.status !== 'Onay Bekleyen' && !isEditingCommunityDeleted()">
@@ -1281,6 +1308,7 @@
             Topluluk Kaydet
           </button>
         </div>
+        </ng-container>
       </div>
 
       <!-- Etkinlik Detay Modal - Duyuru pop-up ile aynı düzen: fotoğraf solda, bilgiler sağda, scroll yok -->

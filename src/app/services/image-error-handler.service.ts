@@ -198,6 +198,13 @@ export class ImageErrorHandlerService {
   }
 
   /**
+   * Placeholder'ın data URI'sini döndür (ağ isteği yok; silinmiş topluluklar vb. için garantili görünür).
+   */
+  getPlaceholderDataUri(type: 'announcement' | 'event' | 'logo' | 'cover' | 'avatar' = 'cover'): string {
+    return this.defaultPlaceholders[type] || this.defaultPlaceholders['cover'];
+  }
+
+  /**
    * Placeholder URL'i al - eğer placeholder yoksa data URI döndür
    * @param type Placeholder tipi
    * @returns Placeholder URL (path veya data URI)

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpContext, HttpHeaders } from '@angular/common/http';
+import { SKIP_AUTH } from '../core/http-context-tokens';
 import { Observable, map, catchError, of, switchMap, forkJoin } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Logger } from '../utils/logger.util';
@@ -334,26 +335,30 @@ export class CommunityService {
   // Tüm Toplulukları Getir (Backend: GET /api/Communities)
   // Query parametreleri: city, university, category, name, status
   // status: active | passive | pending | rejected | deleted | all (backend ParseStatus ile uyumlu)
-  getAllCommunities(params?: {
-    city?: string;
-    university?: string;
-    category?: string;
-    name?: string;
-    status?:
-      | 'active'
-      | 'aktif'
-      | 'passive'
-      | 'pasif'
-      | 'pending'
-      | 'rejected'
-      | 'reddedilen'
-      | 'deleted'
-      | 'silinmis'
-      | 'silinmiş'
-      | 'all'
-      | 'tumu'
-      | 'tümü';
-  }): Observable<Community[]> {
+  // options.skipAuth: true ise Authorization gönderilmez — anasayfa topluluk listesinde tüm aktif topluluklar gelsin (kurumsal giriş olsa bile)
+  getAllCommunities(
+    params?: {
+      city?: string;
+      university?: string;
+      category?: string;
+      name?: string;
+      status?:
+        | 'active'
+        | 'aktif'
+        | 'passive'
+        | 'pasif'
+        | 'pending'
+        | 'rejected'
+        | 'reddedilen'
+        | 'deleted'
+        | 'silinmis'
+        | 'silinmiş'
+        | 'all'
+        | 'tumu'
+        | 'tümü';
+    },
+    options?: { skipAuth?: boolean }
+  ): Observable<Community[]> {
     let httpParams = new HttpParams();
     if (params?.city) httpParams = httpParams.set('city', params.city);
     if (params?.university) httpParams = httpParams.set('university', params.university);
@@ -361,8 +366,13 @@ export class CommunityService {
     if (params?.name) httpParams = httpParams.set('name', params.name);
     if (params?.status) httpParams = httpParams.set('status', params.status);
 
-    // Auth interceptor automatically adds Authorization header if token exists
-    return this.http.get<CommunityMiniDto[]>(this.apiUrl, { params: httpParams }).pipe(
+    const context = options?.skipAuth ? new HttpContext().set(SKIP_AUTH, true) : undefined;
+    const headers = options?.skipAuth ? new HttpHeaders({ 'X-Public-List': '1' }) : undefined;
+    return this.http.get<CommunityMiniDto[]>(this.apiUrl, {
+      params: httpParams,
+      ...(context && { context }),
+      ...(headers && { headers }),
+    }).pipe(
       map((response) => {
         const mapped = response.map((dto) => this.mapMiniDtoToCommunity(dto));
         return mapped;
@@ -629,6 +639,18 @@ export class CommunityService {
           throw error;
         })
       );
+  }
+
+  /**
+   * Önce topluluğun aktif durumunu pasife çevirir (isActivity: false), sonra topluluğu siler.
+   * Kurumsal dashboard "Topluluğu Sil" için kullanılır.
+   */
+  setPassiveAndDeleteCommunity(id: string, reason: string): Observable<void> {
+    const updateDto: UpdateCommunityDto = { isActivity: false };
+    return this.updateCommunity(id, updateDto).pipe(
+      catchError(() => of(null as unknown as Community)),
+      switchMap(() => this.deleteCommunity(id, reason))
+    );
   }
 
   // Üye Ekle (Backend: POST /api/Communities/me/members)
