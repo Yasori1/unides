@@ -188,49 +188,50 @@
             <p>Etkinlikler yükleniyor...</p>
           </div>
 
-          <!-- Events Grid -->
-          <div class="events-grid compact"
-            *ngIf="!isLoadingEvents && displayedDashboardEvents.length; else emptyEvents">
-            <div class="event-card" *ngFor="let event of displayedDashboardEvents" (click)="onEventCardClick(event)"
-              [class.rejected-card]="event.status === 'rejected'">
-              <div class="card-image">
-                <img [src]="event.imageUrl" [alt]="event.title" loading="lazy"
-                  (error)="onImageError($event, 'event')" />
-                <span class="date-badge">
-                  <span *ngIf="event.date">{{ event.date }}</span>
-                  <span *ngIf="event.time" class="time-badge">{{ event.time }}</span>
-                </span>
-                <div class="rejected-badge" *ngIf="event.status === 'rejected'">
-                  <span class="material-symbols-outlined">priority_high</span>
-                </div>
-                <span class="status-chip" [ngClass]="event.status">{{
-                  statusLabels[event.status]
-                  }}</span>
-              </div>
-              <div class="card-info">
-                <div class="top-row">
-                  <span class="tag">{{ event.category }}</span>
-                  <span class="location">
-                    <span class="material-symbols-outlined">location_on</span>
-                    {{ event.location }}
+          <!-- Events Grid or Empty State (centered) -->
+          <div class="events-status-body" *ngIf="!isLoadingEvents">
+            <div class="events-grid compact" *ngIf="displayedDashboardEvents.length">
+              <div class="event-card" *ngFor="let event of displayedDashboardEvents" (click)="onEventCardClick(event)"
+                [class.rejected-card]="event.status === 'rejected'">
+                <div class="card-image">
+                  <img [src]="event.imageUrl" [alt]="event.title" loading="lazy"
+                    (error)="onImageError($event, 'event')" />
+                  <span class="date-badge">
+                    <span *ngIf="event.date">{{ event.date }}</span>
+                    <span *ngIf="event.time" class="time-badge">{{ event.time }}</span>
                   </span>
+                  <div class="rejected-badge" *ngIf="event.status === 'rejected'">
+                    <span class="material-symbols-outlined">priority_high</span>
+                  </div>
+                  <span class="status-chip" [ngClass]="event.status">{{
+                    statusLabels[event.status]
+                    }}</span>
                 </div>
-                <h4>{{ event.title }}</h4>
-                <p class="desc">{{ event.description }}</p>
+                <div class="card-info">
+                  <div class="top-row">
+                    <span class="tag">{{ event.category }}</span>
+                    <span class="location">
+                      <span class="material-symbols-outlined">location_on</span>
+                      {{ event.location }}
+                    </span>
+                  </div>
+                  <h4>{{ event.title }}</h4>
+                  <p class="desc">{{ event.description }}</p>
+                </div>
+              </div>
+            </div>
+            <div class="events-empty-center" *ngIf="!displayedDashboardEvents.length">
+              <div class="empty-state">
+                <span class="material-symbols-outlined">event_busy</span>
+                <p>Henüz listelenecek etkinlik yok.</p>
               </div>
             </div>
           </div>
-          <ng-template #emptyEvents>
-            <div class="empty-state" *ngIf="!isLoadingEvents">
-              <span class="material-symbols-outlined">event_busy</span>
-              <p>Henüz listelenecek etkinlik yok.</p>
-            </div>
-          </ng-template>
         </div>
       </div>
     </div>
 
-    <div class="view-container" *ngIf="(communityApproved !== false || isUpdatePending) && activeTab === 'projects'">
+    <div class="view-container view-container-events" *ngIf="(communityApproved !== false || isUpdatePending) && activeTab === 'projects'">
       <div class="page-header projects-header">
         <h2>Etkinliklerim</h2>
         <div class="header-controls">
@@ -263,43 +264,44 @@
         <p>Etkinlikler yükleniyor...</p>
       </div>
 
-      <!-- Events Grid -->
-      <div class="events-grid compact"
-        *ngIf="!isLoadingEvents && filteredDashboardEvents.length; else emptyProjectEvents">
-        <div class="event-card" *ngFor="let event of filteredDashboardEvents" (click)="onEventCardClick(event)"
-          [class.rejected-card]="event.status === 'rejected'">
-          <div class="card-image">
-            <img [src]="event.imageUrl" [alt]="event.title" loading="lazy" (error)="onImageError($event)" />
-            <span class="date-badge">
-              <span *ngIf="event.date">{{ event.date }}</span>
-              <span *ngIf="event.time" class="time-badge">{{ event.time }}</span>
-            </span>
-            <div class="rejected-badge" *ngIf="event.status === 'rejected'">
-              <span class="material-symbols-outlined">priority_high</span>
-            </div>
-            <span class="status-chip" [ngClass]="event.status">{{
-              statusLabels[event.status]
-              }}</span>
-          </div>
-          <div class="card-info">
-            <div class="top-row">
-              <span class="tag">{{ event.category }}</span>
-              <span class="location">
-                <span class="material-symbols-outlined">location_on</span>
-                {{ event.location }}
+      <!-- Events Grid or Empty State (centered) -->
+      <div class="events-tab-body" *ngIf="!isLoadingEvents">
+        <div class="events-grid compact" *ngIf="filteredDashboardEvents.length">
+          <div class="event-card" *ngFor="let event of filteredDashboardEvents" (click)="onEventCardClick(event)"
+            [class.rejected-card]="event.status === 'rejected'">
+            <div class="card-image">
+              <img [src]="event.imageUrl" [alt]="event.title" loading="lazy" (error)="onImageError($event)" />
+              <span class="date-badge">
+                <span *ngIf="event.date">{{ event.date }}</span>
+                <span *ngIf="event.time" class="time-badge">{{ event.time }}</span>
               </span>
+              <div class="rejected-badge" *ngIf="event.status === 'rejected'">
+                <span class="material-symbols-outlined">priority_high</span>
+              </div>
+              <span class="status-chip" [ngClass]="event.status">{{
+                statusLabels[event.status]
+                }}</span>
             </div>
-            <h4>{{ event.title }}</h4>
-            <p class="desc">{{ event.description }}</p>
+            <div class="card-info">
+              <div class="top-row">
+                <span class="tag">{{ event.category }}</span>
+                <span class="location">
+                  <span class="material-symbols-outlined">location_on</span>
+                  {{ event.location }}
+                </span>
+              </div>
+              <h4>{{ event.title }}</h4>
+              <p class="desc">{{ event.description }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="events-empty-center" *ngIf="!filteredDashboardEvents.length">
+          <div class="empty-state">
+            <span class="material-symbols-outlined">event_busy</span>
+            <p>Henüz listelenecek etkinlik yok.</p>
           </div>
         </div>
       </div>
-      <ng-template #emptyProjectEvents>
-        <div class="empty-state" *ngIf="!isLoadingEvents">
-          <span class="material-symbols-outlined">event_busy</span>
-          <p>Henüz listelenecek etkinlik yok.</p>
-        </div>
-      </ng-template>
     </div>
 
     <div class="view-container" *ngIf="activeTab === 'settings'">
@@ -370,6 +372,11 @@
                 <span>Topluluk Başkanı E-Postası</span>
                 <input type="email" [(ngModel)]="clubInfo.comLeadMail" placeholder="baskan@edu.tr" [readonly]="!communityApproved || isUpdatePending" />
                 <small class="field-hint" *ngIf="communityApproved">Topluluk başkanı e-postası değişimi GSB onayından sonra geçerli olacak; onaylandığında yeni girilen e-posta adresine doğrulama maili gönderilecektir. Topluluk paneline giriş bu e-posta ile yapılacağından lütfen dikkatli ve doğru doldurunuz.</small>
+              </label>
+              <label class="input-grid-span-full">
+                <span>Topluluk Kısa Açıklama (Maks. 70 karakter)</span>
+                <input type="text" [(ngModel)]="clubInfo.miniAbout" placeholder="Kartlarda ve özetlerde görünen kısa açıklama" maxlength="70"
+                  [readonly]="!communityApproved || isUpdatePending" />
               </label>
             </div>
             <label class="stacked">

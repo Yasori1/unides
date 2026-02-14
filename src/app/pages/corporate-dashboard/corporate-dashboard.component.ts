@@ -161,6 +161,8 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   selectedCommunity: Community | null = null;
   editingCommunity: (Community & { presidentEmail?: string; shortDescription?: string }) | null =
     null;
+  /** Güncelleme onayı pop-up'ında "Eskiden / Yeni" karşılaştırması için mevcut (merge öncesi) veri */
+  editingCommunityCurrentLive: (Community & { presidentEmail?: string; shortDescription?: string }) | null = null;
   newCommunity: (Community & { presidentEmail?: string; shortDescription?: string }) | null = null;
 
   // Duyuru düzenleme için
@@ -620,6 +622,9 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
           instagram: undefined,
           instagramUrl: undefined,
           socialMedia: undefined,
+          // Onay Bekleyen (Güncelleme) kartında "güncellenecek" verilerin gösterilmesi için zorunlu
+          hasEverBeenApproved: (c as any).hasEverBeenApproved ?? rest.hasEverBeenApproved,
+          pendingUpdateData: (c as any).pendingUpdateData ?? rest.pendingUpdateData,
         } as Community;
       });
     };
@@ -668,6 +673,31 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       return this.imageErrorHandler.getPlaceholderDataUri('cover');
     }
     return resolved;
+  }
+
+  /** Güncelleme onayı pop-up'ında "Eskiden / Yeni" listesi; sadece değişen alanlar döner. */
+  getUpdateChangeList(): { label: string; oldValue: string; newValue: string }[] {
+    const cur = this.editingCommunityCurrentLive;
+    const next = this.editingCommunity;
+    if (!cur || !next) return [];
+    const norm = (v: string | undefined | null) => (v == null ? '' : String(v).trim());
+    const changes: { label: string; oldValue: string; newValue: string }[] = [];
+    const fields: { key: keyof Community; label: string }[] = [
+      { key: 'name', label: 'Topluluk İsmi' },
+      { key: 'category', label: 'Kategori' },
+      { key: 'miniAbout', label: 'Topluluk Kısa Açıklama (Max 70 Karakter)' },
+      { key: 'about', label: 'Topluluk Hakkında (Maks. 500)' },
+      { key: 'city', label: 'Şehir' },
+      { key: 'university', label: 'Üniversite (Maks. 40)' },
+      { key: 'email', label: 'E-posta (Maks. 60)' },
+      { key: 'presidentEmail', label: 'Topluluk Başkanı E-posta' },
+    ];
+    for (const { key, label } of fields) {
+      const oldVal = norm((cur as any)[key]);
+      const newVal = norm((next as any)[key]);
+      changes.push({ label, oldValue: oldVal || '—', newValue: newVal || '—' });
+    }
+    return changes;
   }
 
   /** Onay Bekleyen (Güncelleme) kartında gösterilecek veri: pendingUpdateData varsa onaya gönderilen alanlar. */
@@ -1053,6 +1083,10 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   communityToReject: Community | null = null;
   /** Topluluğu Onayla detay pop-up'ı açıkken Reddet'e basılınca açılan üst katman pop-up */
   isRejectCommunitySubModalOpen = false;
+  /** Etkinlik Detayı açıkken İçerik Kontrolünü İncele'ye basılınca açılan Spam Raporu üst katman pop-up */
+  spamReportOverlayOpen = false;
+  /** Etkinlik Detayı açıkken Revize'ye basılınca açılan Revize Nedeni üst katman pop-up */
+  isRejectEventSubModalOpen = false;
   communityToApprove: Community | null = null;
   /** Backend liste ConfirmAbout dönmediği için: reddederken girilen neden burada tutulur, detay popup'ta gösterilir. */
   rejectedCommunityReasons: Map<string, string> = new Map();
@@ -1100,6 +1134,10 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     this.isRejectCommunitySubModalOpen = false;
     this.communityToReject = null;
     this.rejectionReasonCommunity = '';
+  }
+
+  closeSpamReportOverlay(): void {
+    this.spamReportOverlayOpen = false;
   }
 
   confirmRejectCommunity(): void {
@@ -1167,6 +1205,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   openCommunityDetail(community: Community) {
     this.selectedCommunity = community;
     this.editingCommunity = null;
+    this.editingCommunityCurrentLive = null;
     this.communityDetailLoading = true;
     this.modalType = 'edit-community';
     this.isModalOpen = true;
@@ -1238,6 +1277,13 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
             category: detailedCommunity.category || 'Genel',
             // Durum ve reddetme nedeni (backend detay/liste ConfirmAbout dönmeyebilir; frontend cache kullanılır)
             status: detailedCommunity.status || (detailedCommunity.isActivity ? 'Aktif' : 'Pasif'),
+            // comConfirm=4 veya hasEverBeenApproved ile Güncelleme / Yeni Kayıt ayrımı (pop-up tasarımı için)
+            hasEverBeenApproved:
+              detailedCommunity.hasEverBeenApproved ??
+              ((detailedCommunity as any).comConfirm === 4 || (detailedCommunity as any).ComConfirm === 4
+                ? true
+                : community.hasEverBeenApproved ?? false),
+            comConfirm: (detailedCommunity as any).comConfirm ?? (detailedCommunity as any).ComConfirm ?? community.comConfirm,
             confirmAbout:
               (detailedCommunity.confirmAbout && detailedCommunity.confirmAbout.trim()) ||
               (detailedCommunity as any).confirmAbout ||
@@ -1251,18 +1297,21 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
                 : detailedCommunity.status === 'Aktif',
           } as Community & { presidentEmail?: string; shortDescription?: string };
 
-          // Onay Bekleyen (Güncelleme) ise PendingUpdateData varsa onaya gelen verileri göster
+          // Onay Bekleyen (Güncelleme) ise PendingUpdateData varsa onaya gelen verileri göster; "Eskiden" için mevcut veriyi sakla
           if (
             this.editingCommunity &&
             detailedCommunity.status === 'Onay Bekleyen' &&
             detailedCommunity.hasEverBeenApproved === true &&
             (detailedCommunity.pendingUpdateData ?? (detailedCommunity as any).pendingUpdateData)
           ) {
+            this.editingCommunityCurrentLive = { ...this.editingCommunity } as Community & { presidentEmail?: string; shortDescription?: string };
             const pendingJson = detailedCommunity.pendingUpdateData ?? (detailedCommunity as any).pendingUpdateData;
             this.editingCommunity = this.communityService.applyPendingUpdateToCommunity(
               this.editingCommunity,
               pendingJson
             ) as Community & { presidentEmail?: string; shortDescription?: string };
+          } else {
+            this.editingCommunityCurrentLive = null;
           }
 
           Logger.log('Topluluk detayı başarıyla yüklendi:', {
@@ -1282,11 +1331,13 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
           } else {
             Logger.error('Topluluk detayı yüklenirken hata:', err);
           }
+          this.editingCommunityCurrentLive = null;
           this.editingCommunity = this.mapListCommunityToEditing(community);
           this.communityDetailLoading = false;
         },
       });
     } else {
+      this.editingCommunityCurrentLive = null;
       this.editingCommunity = this.mapListCommunityToEditing(community);
       this.communityDetailLoading = false;
     }
@@ -1541,7 +1592,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       const communityForService = {
         ...this.newCommunity,
         id: '', // Service otomatik ID (Guid) atayacak - string olmalı
-        miniAbout: (this.newCommunity as any).shortDescription || '', // Kısa açıklama miniAbout'a (backend MiniAbout)
+        miniAbout: this.newCommunity.miniAbout ?? (this.newCommunity as any).shortDescription ?? '', // Kısa açıklama (form miniAbout'a bağlı, backend MiniAbout)
         about: this.newCommunity.about || '', // Detaylı açıklama about'a (backend ComAbout)
         description: this.newCommunity.about || '', // description da about'a eşit
         coverImage: bannerUrl || '',
@@ -2019,55 +2070,26 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       status = 'rejected';
     }
 
-    // Body'yi oluştur (description + shortDescription birleşimi)
-    const bodyParts: string[] = [];
-    if (ev.shortDescription) {
-      bodyParts.push(ev.shortDescription);
-    }
-    if (ev.description) {
-      bodyParts.push(ev.description);
-    }
-    const body = bodyParts.join('\n\n');
-
-    // Tüm içeriği birleştir - ETKİNLİK DETAYINDAKİ TÜM VERİLER
-    const fullText = [
-      // Başlık
-      ev.eventName || '',
-      // Açıklamalar
-      body || '',
-      // Kategori
-      ev.category ? `Kategori: ${ev.category}` : '',
-      // Konum bilgileri
-      ev.location ? `Konum: ${ev.location}` : '',
-      ev.city ? `Şehir: ${ev.city}` : '',
-      // Kapasite
-      ev.capacity ? `Kontenjan: ${ev.capacity}` : '',
-      // Topluluk bilgisi
-      ev.communityName ? `Topluluk: ${ev.communityName}` : '',
-      // Notlar (eğer varsa)
-      (ev as any).notes ? `Notlar: ${(ev as any).notes}` : '',
-      // Tarih bilgileri
-      ev.startDate ? `Başlangıç: ${ev.startDate}` : '',
-      ev.endDate ? `Bitiş: ${ev.endDate}` : '',
-      ev.date ? `Tarih: ${ev.date}` : '',
-      // Diğer alanlar
-      (ev as any).title ? `Başlık: ${(ev as any).title}` : '',
-      (ev as any).eventType ? `Etkinlik Tipi: ${(ev as any).eventType}` : '',
-    ]
-      .filter(Boolean)
-      .join('\n');
+    // Backend spam API'si: title=etkinlik adı, category=konum, body=detaylı açıklama, notes=kısa açıklama
+    const spamPayload = {
+      title: ev.eventName || (ev as any).title || '',
+      category: (ev as any).location || ev.location || '',
+      body: ev.description || (ev as any).description || '',
+      notes: ev.shortDescription || (ev as any).shortDescription || '',
+    };
 
     // Debug: Gönderilen veriyi logla
-    Logger.log('[Spam Check] Sending full event data:', {
+    Logger.log('[Spam Check] Sending event data (title, category, body, notes):', {
       eventId: id,
-      eventName: ev.eventName,
-      fullText: fullText.substring(0, 200) + '...', // İlk 200 karakter
-      fullTextLength: fullText.length,
+      title: spamPayload.title,
+      category: spamPayload.category,
+      bodyLength: spamPayload.body.length,
+      notesLength: spamPayload.notes.length,
     });
 
     // SpamService kullanarak spam kontrolü yap
     this.spamService
-      .checkSpam(fullText)
+      .checkSpam(spamPayload)
       .pipe(
         catchError((error) => {
           // Hata durumunda
@@ -2472,7 +2494,13 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Spam kontrolü yapılmışsa, modalı aç
+    // Etkinlik Detayı açıksa Spam Raporu'nu üst katmanda aç, etkinlik detayını kapatma
+    if (this.isModalOpen && this.modalType === 'event-detail') {
+      this.spamReportOverlayOpen = true;
+      return;
+    }
+
+    // Spam kontrolü yapılmışsa ve event-detail değilse, ana modalda spam raporu aç
     this.selectedEvent = this.allEvents.find((e) => e.id === eventId) || null;
     this.modalType = 'spam-report';
     this.isModalOpen = true;
@@ -2521,12 +2549,22 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
 
   executeReject(id: number) {
     const event = this.allEvents.find((e) => e.id === id);
-    if (event) {
-      this.eventToReject = event;
-      this.rejectionReason = ''; // Reset reason
-      this.modalType = 'reject-event'; // Set modal type for rejection
-      this.isModalOpen = true;
+    if (!event) return;
+    this.eventToReject = event;
+    this.rejectionReason = '';
+    // Etkinlik Detayı açıksa Revize Nedeni pop-up'ını üst katmanda aç, etkinlik detayını kapatma
+    if (this.isModalOpen && this.modalType === 'event-detail') {
+      this.isRejectEventSubModalOpen = true;
+      return;
     }
+    this.modalType = 'reject-event';
+    this.isModalOpen = true;
+  }
+
+  closeRejectEventSubModal(): void {
+    this.isRejectEventSubModalOpen = false;
+    this.eventToReject = null;
+    this.rejectionReason = '';
   }
 
   confirmRejection() {
@@ -2557,7 +2595,15 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         }
 
         this.showToast('Etkinlik reddedildi ve revizeye gönderildi', 'success');
-        this.closeModal();
+        if (this.isRejectEventSubModalOpen) {
+          if (this.selectedEvent && this.selectedEvent.id === this.eventToReject!.id) {
+            this.selectedEvent.status = 'Reddedildi';
+            this.selectedEvent.rejectionReason = this.rejectionReason;
+          }
+          this.closeRejectEventSubModal();
+        } else {
+          this.closeModal();
+        }
         this.eventToReject = null;
         this.rejectionReason = '';
 
@@ -2710,7 +2756,8 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         Logger.error('Etkinlik oluşturulamadı:', error);
-        this.showToast('Etkinlik oluşturulamadı', 'error');
+        const message = error?.message || 'Etkinlik oluşturulamadı';
+        this.showToast(message, 'error');
       },
     });
   }
@@ -2789,6 +2836,9 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   closeModal() {
     this.isModalOpen = false;
     this.modalType = '';
+    this.spamReportOverlayOpen = false;
+    this.isRejectEventSubModalOpen = false;
+    this.editingCommunityCurrentLive = null;
     this.editingAnnouncement = null;
     this.selectedAnnouncement = null;
     this.communityToApprove = null;

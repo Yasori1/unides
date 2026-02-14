@@ -2956,6 +2956,289 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
   }
 }
 
+// Onay Bekleyen (Güncelleme) — diğer topluluk detayı ile aynı düzen: sol Banner/Logo Eskiden-Yeni, sağ metin değişiklikleri
+.community-update-approval-only {
+  padding: 24px 0;
+  width: 100%;
+  text-align: left;
+
+  .update-approval-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin-bottom: 24px;
+    min-height: 0;
+  }
+
+  .new-community-left .image-uploads-section {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    grid-template-columns: 1fr;
+  }
+
+  .update-image-block {
+    .section-title {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 10px;
+    }
+    .update-image-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .update-image-cell {
+      flex: 1;
+      min-width: 0;
+      .update-image-label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #94a3b8;
+        margin-bottom: 6px;
+      }
+    }
+    .update-image-preview {
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #f8fafc;
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 80px;
+      &.banner-preview {
+        aspect-ratio: 2.4 / 1;
+      }
+      &.logo-preview {
+        aspect-ratio: 1;
+        max-width: 120px;
+      }
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .no-image {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        color: #94a3b8;
+        font-size: 0.8rem;
+        .material-symbols-outlined {
+          font-size: 1.5rem;
+        }
+      }
+    }
+    .update-image-arrow {
+      flex-shrink: 0;
+      color: #94a3b8;
+      font-size: 1.1rem;
+      margin-top: 22px;
+    }
+  }
+
+  .new-community-right .update-changes-list {
+    margin-bottom: 0;
+    padding: 16px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+  }
+
+  .update-no-text-changes {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #64748b;
+    font-style: italic;
+  }
+
+  .update-changes-list {
+    margin-bottom: 24px;
+    padding: 16px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+  }
+
+  .update-changes-title {
+    margin: 0 0 8px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #1e293b;
+  }
+
+  .update-changes-hint {
+    margin: 0 0 14px;
+    font-size: 0.8rem;
+    color: #64748b;
+    font-style: italic;
+  }
+
+  .update-change-item {
+    margin-bottom: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #e2e8f0;
+
+    &:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+  }
+
+  .change-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+
+  .change-values {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 10px 12px;
+  }
+
+  .change-old,
+  .change-new {
+    flex: 1;
+    min-width: 120px;
+  }
+
+  .change-value-label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #94a3b8;
+    margin-bottom: 2px;
+  }
+
+  .change-old .change-value-text {
+    color: #94a3b8;
+    opacity: 0.9;
+  }
+
+  .change-new .change-value-text {
+    color: #0f766e;
+    font-weight: 500;
+  }
+
+  .change-value-text {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    word-break: break-word;
+  }
+
+  .change-arrow {
+    flex-shrink: 0;
+    color: #94a3b8;
+    font-size: 1rem;
+    margin-top: 14px;
+  }
+
+  .update-approval-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: center;
+    align-items: center;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #e2e8f0;
+
+    .btn-danger,
+    .btn-primary {
+      min-width: 180px;
+      padding: 14px 24px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+      .material-symbols-outlined {
+        font-size: 1.35rem;
+      }
+    }
+
+    .btn-danger {
+      background: linear-gradient(180deg, #fef2f2 0%, #fee2e2 100%);
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+
+      &:hover {
+        background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        border-color: #dc2626;
+        box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
+        transform: translateY(-2px);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+    }
+
+    .btn-primary {
+      background: linear-gradient(180deg, #0d9488 0%, #0f766e 100%);
+      color: white;
+      border: none;
+
+      &:hover {
+        background: linear-gradient(180deg, #0f766e 0%, #115e59 100%);
+        box-shadow: 0 4px 14px rgba(15, 118, 110, 0.4);
+        transform: translateY(-2px);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+    }
+  }
+
+  @media (max-width: 480px) {
+    .update-approval-actions {
+      flex-direction: column;
+      width: 100%;
+      gap: 12px;
+      margin-top: 20px;
+      padding-top: 20px;
+
+      .btn-danger,
+      .btn-primary {
+        width: 100%;
+        min-width: unset;
+        padding: 13px 20px;
+      }
+    }
+
+    .change-values {
+      flex-direction: column;
+    }
+
+    .change-arrow {
+      margin-top: 4px;
+      margin-left: 0;
+    }
+  }
+}
+
 // Silinmiş topluluk detay: sadece görüntüleme, label-value satırları
 .deleted-community-detail {
   display: flex;
@@ -3213,8 +3496,9 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
     gap: 4px;
     min-width: 0;
     min-height: 0;
-    overflow: hidden;
     flex: 1;
+    overflow-x: hidden;
+    overflow-y: auto;
 
     .form-section {
       margin-bottom: 0;
@@ -3255,6 +3539,10 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
           line-height: 1.35;
           margin: 0;
           color: #1e293b;
+          white-space: normal;
+          overflow: visible;
+          word-wrap: break-word;
+          overflow-wrap: break-word;
         }
 
         &.full {
@@ -3264,6 +3552,10 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
             font-size: clamp(0.77rem, 1.35vh, 0.92rem);
             line-height: 1.4;
             color: #334155;
+            white-space: normal;
+            overflow: visible;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
           }
         }
       }
@@ -3277,6 +3569,10 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
       .rejection-reason {
         font-size: clamp(0.75rem, 1.2vh, 0.87rem);
         padding: 5px 8px;
+        white-space: normal;
+        overflow: visible;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
       }
     }
 
@@ -3751,6 +4047,40 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+// Etkinlik Detayı açıkken Spam Analiz Raporu pop-up'ı etkinlik detayının üstünde
+.spam-report-overlay-backdrop {
+  z-index: 2100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spam-report-overlay-content {
+  max-width: 90vw;
+  max-height: 85vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  .modal-actions {
+    justify-content: flex-end;
+    margin-top: 16px;
+  }
+}
+
+// Etkinlik Detayı açıkken Revize Nedeni pop-up'ı etkinlik detayının üstünde
+.reject-event-sub-modal-backdrop {
+  z-index: 2100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reject-event-sub-modal-content {
+  max-width: 90vw;
+  width: 480px;
 }
 
 // Topluluk Reddet modalı — alttaki boşluğu kaldır, pop-up daha sıkı dursun
@@ -4745,6 +5075,27 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
     display: flex;
     align-items: center;
     gap: 6px;
+  }
+
+  // Onay Bekleyen (Güncelleme) kartı: butonlar daha ferah, metin kesilmesin
+  &.review-actions--update {
+    gap: 14px;
+
+    .review-actions-primary {
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .btn-approve,
+    .btn-reject {
+      min-width: 160px;
+      padding: 8px 14px;
+      font-size: 13px;
+
+      .material-symbols-outlined {
+        font-size: 18px;
+      }
+    }
   }
 
   .btn-approve,

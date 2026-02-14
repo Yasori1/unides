@@ -117,6 +117,9 @@ export class EventService {
 
   // Backend'den gelen relative path'i tam URL'ye çevir
   private convertImagePathToFullUrl(imagePath: string): string {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'event.services.ts:convertImagePathToFullUrl:entry',message:'convertImagePathToFullUrl input',data:{imagePath:imagePath||'(empty)'},timestamp:Date.now(),hypothesisId:'B,E'})}).catch(()=>{});
+    // #endregion
     if (!imagePath) {
       return '';
     }
@@ -212,6 +215,9 @@ export class EventService {
     }
 
     // ImagePath olarak sadece /ImagesUnides/ path döndür (link bağlamada tam URL yok)
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'event.services.ts:convertImagePathToFullUrl:exit',message:'convertImagePathToFullUrl output',data:{finalPath},timestamp:Date.now(),hypothesisId:'B,E'})}).catch(()=>{});
+    // #endregion
     return finalPath;
   }
 
@@ -449,6 +455,10 @@ export class EventService {
         const rawImagePath = dto.eventPictureLink || dto.EventPictureLink || dto.resimUrl || dto.ResimUrl || dto.imageUrl || dto.ImageUrl || '';
         const imagePathStr = rawImagePath ? String(rawImagePath).trim() : '';
 
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'event.services.ts:mapToEvent:imageUrl',message:'mapToEvent image fields',data:{eventId:dto.eventId||dto.EventId,rawImagePath:imagePathStr||'(empty)',dtoImageKeys:Object.keys(dto).filter(k=>/picture|image|resim|Picture|Image|Resim/i.test(k)),dtoImageValues:Object.fromEntries(Object.entries(dto).filter(([k])=>/picture|image|resim|Picture|Image|Resim/i.test(k)))},timestamp:Date.now(),hypothesisId:'A,E'})}).catch(()=>{});
+        // #endregion
+
         // "string", "null", "undefined" gibi placeholder değerleri kontrol et
         const normalizedPath = imagePathStr.toLowerCase().trim();
         if (normalizedPath === 'string' || normalizedPath === 'null' || normalizedPath === 'undefined' || !imagePathStr) {
@@ -462,6 +472,10 @@ export class EventService {
 
         // convertImagePathToFullUrl ile işle
         const convertedUrl = this.convertImagePathToFullUrl(imagePathStr);
+
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'event.services.ts:mapToEvent:imageUrl:afterConvert',message:'mapToEvent converted imageUrl',data:{eventId:dto.eventId||dto.EventId,convertedUrl:convertedUrl||'(empty)'},timestamp:Date.now(),hypothesisId:'A,B,E'})}).catch(()=>{});
+        // #endregion
 
         // Debug: Convert edilmiş URL'yi logla (sadece development modunda)
         if (convertedUrl && convertedUrl.length > 0) {
@@ -754,21 +768,41 @@ export class EventService {
       eventClock = `${hours}:${minutes}`;
     }
 
-    const createDto: CreateEventDto = {
-      eventName: event.title || '',
-      eventPictureLink: event.imageUrl || undefined, // Fotoğraf optional
-      eventDate: eventDate, // DateOnly format: "dd.MM.yyyy" (Backend DateOnlyJsonConverter bekliyor)
-      eventClock: eventClock, // TimeOnly format: "HH:mm"
-      eventLocation: event.location || undefined,
-      eventKontenjan: event.quota || undefined,
-      eventAbout: event.description || undefined, // Detaylı açıklama
-      miniAbout: event.shortDescription || event.description || undefined, // Kısa açıklama
-      // comId backend'de otomatik olarak creator'ın topluluğundan alınıyor
+    // Backend .NET çoğu zaman PascalCase bekler (EventName, EventDate, ...)
+    // EventPictureLink her zaman gönderiliyor (görsel yoksa null) - backend'de property varlığı beklenebilir
+    const payload: Record<string, unknown> = {
+      EventName: event.title || '',
+      EventDate: eventDate,
+      EventClock: eventClock,
+      EventLocation: event.location || '',
+      EventAbout: event.description || '',
+      MiniAbout: event.shortDescription || event.description || '',
+      EventPictureLink: event.imageUrl || null,
     };
+    if (event.quota != null) {
+      const num = Number(event.quota);
+      if (!Number.isNaN(num)) payload['EventKontenjan'] = num;
+    }
 
-    return this.http.post<{ eventId: number }>(`${this.apiUrl}/create`, createDto).pipe(
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'event.services.ts:createEvent:request',message:'createEvent payload',data:{url:`${this.apiUrl}/create`,payload},timestamp:Date.now(),hypothesisId:'create500'})}).catch(()=>{});
+    // #endregion
+
+    return this.http.post<{ eventId: number }>(`${this.apiUrl}/create`, payload).pipe(
       catchError((error) => {
-        console.error('Etkinlik oluşturulamadı:', error);
+        // #region agent log
+        const errBody = error?.error;
+        const errMsg = typeof errBody === 'string' ? errBody : (errBody?.message ?? errBody?.title ?? error?.message);
+        fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'event.services.ts:createEvent:error',message:'createEvent 500 response',data:{status:error?.status,errorMessage:errMsg,errorBody:errBody,errorKeys:errBody&&typeof errBody==='object'?Object.keys(errBody):null},timestamp:Date.now(),hypothesisId:'create500'})}).catch(()=>{});
+        // #endregion
+        const msg = error?.error?.message || error?.error?.title || error?.message || 'Sunucu hatası';
+        const detail = error?.error?.detail || error?.error?.errors || error?.error;
+        console.error('Etkinlik oluşturulamadı:', msg, detail ? { detail } : '', error);
+        // Backend CreateEventCommandHandler 500: topluluk bulunamadı / aktif değil / yetki yok (backend read-only)
+        if (error?.status === 500) {
+          const backendMsg = typeof errBody === 'string' && errBody.length > 0 ? errBody : null;
+          (error as any).message = backendMsg ?? 'Etkinlik oluşturulamadı. Giriş yaptığınız hesabın topluluk yöneticisi (lider) olması ve topluluğunuzun aktif olması gerekir.';
+        }
         throw error;
       })
     );
@@ -849,14 +883,21 @@ export class EventService {
   // Auth interceptor automatically adds Authorization header if token exists
   // FormData için Content-Type header'ı eklenmemeli (browser otomatik ekler)
   uploadEventImage(eventId: number, file: File): Observable<{ ImagePath: string; imagePath?: string }> {
+    const uploadUrl = `${this.apiUrl}/${eventId}/image`;
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'event.services.ts:uploadEventImage',message:'uploadEventImage request',data:{eventId,uploadUrl,fileName:file?.name},timestamp:Date.now(),hypothesisId:'C'})}).catch(()=>{});
+    // #endregion
     const formData = new FormData();
     // Backend'in beklediği parametre adı (EventImageUploadRequest.File)
     formData.append('File', file, file.name);
 
     // FormData için Content-Type header'ı EKLEME - browser otomatik multipart/form-data ekler
     // Topluluk banner/logo yükleme ile aynı pattern (options objesi yok)
-    return this.http.post<{ ImagePath?: string; imagePath?: string }>(`${this.apiUrl}/${eventId}/image`, formData).pipe(
+    return this.http.post<{ ImagePath?: string; imagePath?: string }>(uploadUrl, formData).pipe(
       map((response) => {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'event.services.ts:uploadEventImage:response',message:'uploadEventImage response',data:{responseKeys:Object.keys(response||{}),responseRaw:response,path:response?.ImagePath||response?.imagePath||'(none)'},timestamp:Date.now(),hypothesisId:'D'})}).catch(()=>{});
+        // #endregion
         // Backend'den imagePath (küçük harf) veya ImagePath (büyük harf) gelebilir
         const path = response.ImagePath || response.imagePath || '';
         // Backend'den `/assets/img/Etkinlikler/...` formatında gelir, `/ImagesUnides/Etkinlikler/...` formatına çevir

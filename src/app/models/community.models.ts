@@ -21,6 +21,10 @@ export interface CommunityMiniDto {
   comConfirm?: number; // 0=yeni kayıt beklemede, 1=onaylandı, 2=reddedildi, 3=silinmiş, 4=güncelleme onayı beklemede
   confirmAbout?: string; // Reddedilme gerekçesi (ComConfirm=2)
   ConfirmAbout?: string;
+  /** comConfirm=4 iken liste kartlarında "güncellenecek" veriyi göstermek için (opsiyonel) */
+  pendingUpdateData?: string | null;
+  /** comConfirm=4 iken true; ilk kayıt vs güncelleme onayı ayrımı (opsiyonel) */
+  hasEverBeenApproved?: boolean;
 }
 
 // Backend: CommunityEventDto

@@ -359,9 +359,9 @@
                     <i class="bx bxs-graduation"></i> {{ getPendingDisplay(item)?.university ?? item.university }}
                   </span>
                 </div>
-                <!-- Onay Bekleyen (Güncelleme): sadece Güncellemeyi Onayla / Güncellemeyi Reddet -->
+                <!-- Onay Bekleyen (Güncelleme): sadece Güncellemeyi Reddet / Güncellemeyi Kabul Et -->
                 <div
-                  class="review-actions"
+                  class="review-actions review-actions--update"
                   *ngIf="item.status === 'Onay Bekleyen' && item.hasEverBeenApproved === true"
                   (click)="$event.stopPropagation()"
                 >
@@ -376,11 +376,11 @@
                     </button>
                     <button
                       class="btn-approve"
-                      title="Güncellemeyi Onayla"
+                      title="Güncellemeyi Kabul Et"
                       (click)="openApproveCommunityModal(item)"
                     >
                       <span class="material-symbols-outlined">check_circle</span>
-                      <span>Güncellemeyi Onayla</span>
+                      <span>Güncellemeyi Kabul Et</span>
                     </button>
                   </div>
                 </div>
@@ -1071,6 +1071,120 @@
         </div>
         <!-- Yükleme bitti: Silinmiş / Reddedilen / Aktif-Pasif / Onay Bekleyen tasarımı -->
         <ng-container *ngIf="!communityDetailLoading && editingCommunity">
+          <!-- Onay Bekleyen (Güncelleme): diğer topluluk detayı ile aynı düzen — sol: Banner/Logo Eskiden-Yeni, sağ: metin alanları Eskiden-Yeni -->
+          <div
+            class="community-update-approval-only"
+            *ngIf="editingCommunity.status === 'Onay Bekleyen' && editingCommunity.hasEverBeenApproved === true"
+          >
+            <div class="new-community-layout update-approval-layout">
+              <div class="new-community-left">
+                <div class="image-uploads-section">
+                  <!-- Banner: Eskiden / Yeni -->
+                  <div class="update-image-block banner-update">
+                    <label class="section-title">Banner Görseli</label>
+                    <div class="update-image-row">
+                      <div class="update-image-cell old">
+                        <span class="update-image-label">Eskiden</span>
+                        <div class="update-image-preview banner-preview">
+                          <img
+                            *ngIf="editingCommunityCurrentLive?.banner || editingCommunityCurrentLive?.coverImage"
+                            [src]="editingCommunityCurrentLive?.banner || editingCommunityCurrentLive?.coverImage"
+                            alt="Eskiden banner"
+                          />
+                          <div *ngIf="!editingCommunityCurrentLive?.banner && !editingCommunityCurrentLive?.coverImage" class="no-image">
+                            <span class="material-symbols-outlined">image</span>
+                            <span>Görsel yok</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="update-image-arrow" aria-hidden="true">→</div>
+                      <div class="update-image-cell new">
+                        <span class="update-image-label">Yeni</span>
+                        <div class="update-image-preview banner-preview">
+                          <img
+                            *ngIf="editingCommunity.banner || editingCommunity.coverImage"
+                            [src]="editingCommunity.banner || editingCommunity.coverImage"
+                            alt="Yeni banner"
+                          />
+                          <div *ngIf="!editingCommunity.banner && !editingCommunity.coverImage" class="no-image">
+                            <span class="material-symbols-outlined">image</span>
+                            <span>Görsel yok</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Logo: Eskiden / Yeni -->
+                  <div class="update-image-block logo-update">
+                    <label class="section-title">Logo</label>
+                    <div class="update-image-row">
+                      <div class="update-image-cell old">
+                        <span class="update-image-label">Eskiden</span>
+                        <div class="update-image-preview logo-preview">
+                          <img
+                            *ngIf="editingCommunityCurrentLive?.logo"
+                            [src]="editingCommunityCurrentLive?.logo"
+                            alt="Eskiden logo"
+                          />
+                          <div *ngIf="!editingCommunityCurrentLive?.logo" class="no-image">
+                            <span class="material-symbols-outlined">image</span>
+                            <span>Görsel yok</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="update-image-arrow" aria-hidden="true">→</div>
+                      <div class="update-image-cell new">
+                        <span class="update-image-label">Yeni</span>
+                        <div class="update-image-preview logo-preview">
+                          <img
+                            *ngIf="editingCommunity.logo"
+                            [src]="editingCommunity.logo"
+                            alt="Yeni logo"
+                          />
+                          <div *ngIf="!editingCommunity.logo" class="no-image">
+                            <span class="material-symbols-outlined">image</span>
+                            <span>Görsel yok</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="new-community-right">
+                <div class="update-changes-list">
+                  <h4 class="update-changes-title">Yapılan Değişiklikler</h4>
+                  <p class="update-changes-hint">Eskiden burada şu yazıyordu → Şu anda bu yazacak.</p>
+                  <div class="update-change-item" *ngFor="let c of getUpdateChangeList()">
+                    <span class="change-label">{{ c.label }}</span>
+                    <div class="change-values">
+                      <div class="change-old">
+                        <span class="change-value-label">Eskiden:</span>
+                        <span class="change-value-text">{{ c.oldValue }}</span>
+                      </div>
+                      <div class="change-arrow" aria-hidden="true">→</div>
+                      <div class="change-new">
+                        <span class="change-value-label">Yeni:</span>
+                        <span class="change-value-text">{{ c.newValue }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p *ngIf="getUpdateChangeList().length === 0" class="update-no-text-changes">Metin alanında değişiklik yok.</p>
+                </div>
+              </div>
+            </div>
+            <div class="update-approval-actions">
+              <button type="button" class="btn-danger" (click)="openRejectCommunityModal(editingCommunity)">
+                <span class="material-symbols-outlined">cancel</span>
+                Güncellemeyi Reddet
+              </button>
+              <button type="button" class="btn-primary" (click)="openApproveCommunityModal(editingCommunity)">
+                <span class="material-symbols-outlined">check_circle</span>
+                Güncellemeyi Kabul Et
+              </button>
+            </div>
+          </div>
+
           <!-- Silinmiş topluluk: sadece görüntüleme, bilgi detayı, kaydet/sil yok -->
           <div class="deleted-community-detail" *ngIf="editingCommunity.status === 'Silinmiş'">
             <div class="new-community-layout">
@@ -1164,8 +1278,14 @@
             </div>
           </div>
 
-          <!-- Düzenlenebilir topluluk (Aktif, Pasif, Onay Bekleyen, Reddedilen) -->
-          <div class="new-community-layout" *ngIf="editingCommunity.status !== 'Silinmiş'">
+          <!-- Düzenlenebilir topluluk (Aktif, Pasif, Onay Bekleyen Yeni Kayıt, Reddedilen) — Güncelleme için ayrı minimal pop-up kullanılıyor -->
+          <div
+            class="new-community-layout"
+            *ngIf="
+              editingCommunity.status !== 'Silinmiş' &&
+              !(editingCommunity.status === 'Onay Bekleyen' && editingCommunity.hasEverBeenApproved === true)
+            "
+          >
             <div class="new-community-left">
               <div class="image-uploads-section">
                 <div
@@ -1371,29 +1491,7 @@
               </div>
             </div>
           </div>
-          <!-- Onay Bekleyen (Güncelleme): sadece Güncellemeyi Onayla / Güncellemeyi Reddet; Topluluğu Sil YOK -->
-          <div
-            class="modal-actions modal-actions--community-pending"
-            *ngIf="editingCommunity.status === 'Onay Bekleyen' && editingCommunity.hasEverBeenApproved === true"
-          >
-            <button
-              type="button"
-              class="btn-danger"
-              (click)="openRejectCommunityModal(editingCommunity)"
-            >
-              <span class="material-symbols-outlined">cancel</span>
-              Güncellemeyi Reddet
-            </button>
-            <button
-              type="button"
-              class="btn-primary"
-              (click)="openApproveCommunityModal(editingCommunity)"
-            >
-              <span class="material-symbols-outlined">check_circle</span>
-              Güncellemeyi Onayla
-            </button>
-          </div>
-          <!-- Onay Bekleyen (Yeni Kayıt): Reddet / Onayla / Topluluğu Sil -->
+          <!-- Onay Bekleyen (Yeni Kayıt): Reddet / Onayla / Topluluğu Sil — Güncelleme için community-update-approval-only kullanılıyor -->
           <div
             class="modal-actions modal-actions--community-pending"
             *ngIf="editingCommunity.status === 'Onay Bekleyen' && editingCommunity.hasEverBeenApproved !== true"
@@ -1450,7 +1548,7 @@
         </ng-container>
       </div>
 
-      <!-- Etkinlik Detay Modal - Duyuru pop-up ile aynı düzen: fotoğraf solda, bilgiler sağda, scroll yok -->
+      <!-- Etkinlik Detay Modal - Duyuru pop-up ile aynı düzen: fotoğraf solda, bilgiler sağda, detay alanı scroll -->
       <div
         class="modal-body modal-body-event"
         *ngIf="modalType === 'event-detail' && selectedEvent"
@@ -2012,6 +2110,262 @@
               {{ communityToReject.hasEverBeenApproved === true ? 'Güncellemeyi Reddet' : 'Topluluğu Reddet' }}
             </button>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Spam Analiz Raporu üst katman (Etkinlik Detayı açıkken İçerik Kontrolünü İncele'ye basılınca) -->
+  <div
+    class="modal-backdrop spam-report-overlay-backdrop"
+    *ngIf="spamReportOverlayOpen && modalType === 'event-detail' && selectedEvent"
+    (click)="closeSpamReportOverlay()"
+  >
+    <div class="modal-content spam-report-overlay-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Spam Filtresi Analiz Raporu</h3>
+        <button class="close-btn" (click)="closeSpamReportOverlay()">✕</button>
+      </div>
+      <div class="modal-body modal-body-scrollable">
+        <div class="spam-report-section">
+          <div
+            class="spam-report-header"
+            [ngClass]="{
+              clean: getSpamReport(selectedEvent.id)?.clean,
+              'not-clean': !getSpamReport(selectedEvent.id)?.clean
+            }"
+          >
+            <span class="material-symbols-outlined">
+              {{ getSpamReport(selectedEvent.id)?.clean ? 'check_circle' : 'error' }}
+            </span>
+            <h4>Spam Filtresi Analiz Raporu</h4>
+          </div>
+          <div class="spam-report-content">
+            <div class="spam-status-info" *ngIf="getSpamReport(selectedEvent.id)?.status">
+              <span
+                class="status-badge"
+                [ngClass]="{
+                  'status-kabul':
+                    getSpamReport(selectedEvent.id)?.status === 'kabul' ||
+                    getSpamReport(selectedEvent.id)?.status === 'accept' ||
+                    getSpamReport(selectedEvent.id)?.status === 'approved',
+                  'status-red':
+                    getSpamReport(selectedEvent.id)?.status === 'red' ||
+                    getSpamReport(selectedEvent.id)?.status === 'reject' ||
+                    getSpamReport(selectedEvent.id)?.status === 'rejected',
+                  'status-beklemede':
+                    getSpamReport(selectedEvent.id)?.status === 'beklemede' ||
+                    getSpamReport(selectedEvent.id)?.status === 'pending'
+                }"
+              >
+                {{
+                  getSpamReport(selectedEvent.id)?.status === 'kabul' ||
+                  getSpamReport(selectedEvent.id)?.status === 'accept' ||
+                  getSpamReport(selectedEvent.id)?.status === 'approved'
+                    ? 'Kabul Edildi'
+                    : getSpamReport(selectedEvent.id)?.status === 'red' ||
+                      getSpamReport(selectedEvent.id)?.status === 'reject' ||
+                      getSpamReport(selectedEvent.id)?.status === 'rejected'
+                    ? 'Reddedildi'
+                    : 'Beklemede'
+                }}
+              </span>
+            </div>
+            <p
+              class="spam-report-message"
+              [ngClass]="{
+                success: getSpamReport(selectedEvent.id)?.clean,
+                error: !getSpamReport(selectedEvent.id)?.clean
+              }"
+            >
+              {{ getSpamReport(selectedEvent.id)?.message }}
+            </p>
+            <div *ngIf="getSpamReport(selectedEvent.id)?.reason" class="spam-reason-box">
+              <h5>Açıklama:</h5>
+              <p>{{ getSpamReport(selectedEvent.id)?.reason }}</p>
+            </div>
+            <div
+              *ngIf="
+                !getSpamReport(selectedEvent.id)?.clean &&
+                getSpamReport(selectedEvent.id)?.reasons &&
+                getSpamReport(selectedEvent.id)!.reasons!.length > 0
+              "
+              class="spam-reasons"
+            >
+              <h5>Tespit Edilen Sorunlar:</h5>
+              <ul>
+                <li *ngFor="let reason of getSpamReport(selectedEvent.id)!.reasons">
+                  {{ reason }}
+                </li>
+              </ul>
+            </div>
+            <div *ngIf="!getSpamReport(selectedEvent.id)?.clean" class="spam-analysis-details">
+              <div
+                *ngIf="(getSpamReport(selectedEvent.id)?.forbidden?.count ?? 0) > 0"
+                class="analysis-item forbidden"
+              >
+                <h5>
+                  <span class="material-symbols-outlined">block</span>
+                  Yasak Kelimeler ({{ getSpamReport(selectedEvent.id)?.forbidden?.count || 0 }})
+                </h5>
+                <div
+                  class="keywords-list"
+                  *ngIf="
+                    getSpamReport(selectedEvent.id)?.forbidden?.words &&
+                    getSpamReport(selectedEvent.id)!.forbidden!.words!.length > 0
+                  "
+                >
+                  <span
+                    class="keyword-tag"
+                    *ngFor="let word of getSpamReport(selectedEvent.id)!.forbidden!.words"
+                    >{{ word }}</span
+                  >
+                </div>
+                <div
+                  *ngIf="
+                    !getSpamReport(selectedEvent.id)?.forbidden?.words ||
+                    (getSpamReport(selectedEvent.id)?.forbidden?.words?.length ?? 0) === 0
+                  "
+                  class="no-keywords-message"
+                >
+                  <span class="material-symbols-outlined">info</span>
+                  <span>Yasak kelime listesi mevcut değil</span>
+                </div>
+              </div>
+              <div
+                *ngIf="(getSpamReport(selectedEvent.id)?.spam?.count ?? 0) > 0"
+                class="analysis-item spam"
+              >
+                <h5>
+                  <span class="material-symbols-outlined">warning</span>
+                  Spam Kelimeler ({{ getSpamReport(selectedEvent.id)?.spam?.count || 0 }})
+                </h5>
+                <div
+                  class="keywords-list"
+                  *ngIf="
+                    getSpamReport(selectedEvent.id)?.spam?.keywords &&
+                    getSpamReport(selectedEvent.id)!.spam!.keywords!.length > 0
+                  "
+                >
+                  <span
+                    class="keyword-tag"
+                    *ngFor="let keyword of getSpamReport(selectedEvent.id)!.spam!.keywords"
+                    >{{ keyword }}</span
+                  >
+                </div>
+                <div
+                  *ngIf="
+                    !getSpamReport(selectedEvent.id)?.spam?.keywords ||
+                    (getSpamReport(selectedEvent.id)?.spam?.keywords?.length ?? 0) === 0
+                  "
+                  class="no-keywords-message"
+                >
+                  <span class="material-symbols-outlined">info</span>
+                  <span>Spam kelime listesi mevcut değil</span>
+                </div>
+              </div>
+              <div
+                *ngIf="(getSpamReport(selectedEvent.id)?.politics?.count ?? 0) > 0"
+                class="analysis-item politics"
+              >
+                <h5>
+                  <span class="material-symbols-outlined">gavel</span>
+                  Siyasi İçerik ({{ getSpamReport(selectedEvent.id)?.politics?.count || 0 }})
+                </h5>
+                <div
+                  class="keywords-list"
+                  *ngIf="
+                    getSpamReport(selectedEvent.id)?.politics?.keywords &&
+                    getSpamReport(selectedEvent.id)!.politics!.keywords!.length > 0
+                  "
+                >
+                  <span
+                    class="keyword-tag"
+                    *ngFor="let keyword of getSpamReport(selectedEvent.id)!.politics!.keywords"
+                    >{{ keyword }}</span
+                  >
+                </div>
+                <div
+                  *ngIf="
+                    !getSpamReport(selectedEvent.id)?.politics?.keywords ||
+                    (getSpamReport(selectedEvent.id)?.politics?.keywords?.length ?? 0) === 0
+                  "
+                  class="no-keywords-message"
+                >
+                  <span class="material-symbols-outlined">info</span>
+                  <span>Siyasi içerik listesi mevcut değil</span>
+                </div>
+              </div>
+            </div>
+            <div
+              *ngIf="
+                getSpamReport(selectedEvent.id)?.details &&
+                getSpamReport(selectedEvent.id)!.details!.length > 0
+              "
+              class="spam-details"
+            >
+              <h5>
+                {{ getSpamReport(selectedEvent.id)?.clean ? 'Detaylar:' : 'Detaylı Açıklamalar:' }}
+              </h5>
+              <ul>
+                <li *ngFor="let detail of getSpamReport(selectedEvent.id)!.details">
+                  {{ detail }}
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button
+            class="btn-danger"
+            *ngIf="!getSpamReport(selectedEvent.id)?.clean"
+            (click)="closeSpamReportOverlay(); rejectEvent(selectedEvent.id)"
+          >
+            <span class="material-symbols-outlined">edit_note</span> Revize İste
+          </button>
+          <button
+            class="btn-success"
+            *ngIf="getSpamReport(selectedEvent.id)?.clean"
+            (click)="closeSpamReportOverlay(); approveEvent(selectedEvent.id)"
+          >
+            <span class="material-symbols-outlined">check</span> Etkinliği Onayla
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Revize Nedeni üst katman (Etkinlik Detayı açıkken Revize'ye basılınca) -->
+  <div
+    class="modal-backdrop reject-event-sub-modal-backdrop"
+    *ngIf="isRejectEventSubModalOpen && eventToReject"
+    (click)="closeRejectEventSubModal()"
+  >
+    <div class="modal-content reject-event-sub-modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Revize İste</h3>
+        <button class="close-btn" (click)="closeRejectEventSubModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group full">
+          <label>Revize Nedeni</label>
+          <textarea
+            [(ngModel)]="rejectionReason"
+            class="modern-input"
+            rows="4"
+            placeholder="Lütfen revize nedenini belirtiniz..."
+          ></textarea>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="closeRejectEventSubModal()">İptal</button>
+          <button
+            class="btn-danger"
+            [disabled]="!rejectionReason || !rejectionReason.trim()"
+            (click)="confirmRejection()"
+          >
+            <span class="material-symbols-outlined">edit_note</span>
+            Revizeye Gönder
+          </button>
         </div>
       </div>
     </div>

@@ -12,7 +12,7 @@ import { ToastComponent } from '../../components/ui/toast/toast.component';
 import { AfkDetectionService } from '../../services/afk-detection.service';
 import { ImageErrorHandlerService } from '../../services/image-error-handler.service';
 import { catchError, switchMap, map } from 'rxjs/operators';
-import { of, forkJoin } from 'rxjs';
+import { of } from 'rxjs';
 import { SpamService } from '../../services/spam.service';
 import { Logger } from '../../utils/logger.util';
 
@@ -264,6 +264,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     phone: '',
     instagram: '',
     description: '',
+    miniAbout: '', // Topluluk kısa açıklaması (kartlarda/özetlerde)
   };
 
   stats = { totalMembers: 0, approvedEvents: 0, pendingEvents: 0, totalEvents: 0 };
@@ -373,75 +374,74 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       // Önce "lead-by-me" ile kendi topluluğunu getir (onay bekleyen dahil)
       this.communityService.getMyLeadCommunity().subscribe({
         next: (community) => {
-          // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              location: 'community-dashboard.component.ts:loadCommunityProfile-getMyLeadCommunity',
-              message: 'getMyLeadCommunity result',
-              data: {
-                hasCommunity: !!community,
-                id: community?.id,
-                isActivity: community?.isActivity,
-                status: (community as any)?.status,
-              },
-              timestamp: Date.now(),
-              hypothesisId: 'H3',
-            }),
-          }).catch(() => {});
-          // #endregion
+          // Aynı başkan e-postasına sahip birden fazla toplulukta lead-by-me reddedilmiş/silinmiş dönebilir.
+          // Panelde her zaman aktif veya onay bekleyen topluluk gösterilmeli; reddedilmiş/silinmiş dönerse
+          // aktif listeden başkan e-postasına göre (yeni) topluluğu bul.
+          if (community && (community.status === 'Reddedilen' || community.status === 'Silinmiş')) {
+            this.loadCommunityProfileFallback();
+            return;
+          }
           if (community) {
+            // comConfirm=4 ve pendingUpdateData varsa onaya gönderilen veriyi göster (Kurumsal Dashboard ile aynı mantık)
+            const comConfirm = (community as any).comConfirm ?? (community as any).ComConfirm;
+            const pendingJson = (community as any).pendingUpdateData ?? (community as any).PendingUpdateData;
+            const displayCommunity =
+              comConfirm === 4 && pendingJson
+                ? this.communityService.applyPendingUpdateToCommunity(community, pendingJson)
+                : community;
             this.clubInfo = {
-              id: community.id,
-              name: community.name,
-              university: community.university || '',
-              city: community.city || '',
-              category: community.category || 'Genel',
-              logo: community.logo || this.clubInfo.logo,
-              banner: community.banner || community.coverImage || this.clubInfo.banner,
-              email: community.email || community.comMail || '',
+              id: displayCommunity.id,
+              name: displayCommunity.name,
+              university: displayCommunity.university || '',
+              city: displayCommunity.city || '',
+              category: displayCommunity.category || 'Genel',
+              logo: displayCommunity.logo || this.clubInfo.logo,
+              banner: displayCommunity.banner || displayCommunity.coverImage || this.clubInfo.banner,
+              email: displayCommunity.email || displayCommunity.comMail || '',
               phone: this.clubInfo.phone,
-              instagram: community.instagram || community.instagramUrl || '',
-              description: community.about || community.description || '',
-              comMail: community.comMail,
-              comLeadMail: community.comLeadMail,
-              webSiteUrl: community.webSiteUrl,
-              instagramUrl: community.instagramUrl,
-              miniAbout: community.miniAbout,
+              instagram: displayCommunity.instagram || displayCommunity.instagramUrl || '',
+              description: displayCommunity.about || displayCommunity.description || '',
+              comMail: displayCommunity.comMail,
+              comLeadMail: displayCommunity.comLeadMail,
+              webSiteUrl: displayCommunity.webSiteUrl,
+              instagramUrl: displayCommunity.instagramUrl,
+              miniAbout: displayCommunity.miniAbout,
             };
             this.initialClubInfo = JSON.parse(JSON.stringify(this.clubInfo));
-            this.displayName = community.name || this.userName;
+            this.displayName = displayCommunity.name || this.userName;
             this.userInitial = this.displayName.charAt(0).toUpperCase();
             this.isLoadingCommunity = false;
 
-            // Güncelleme bekliyor = "Onay Bekleyen" + daha önce onaylanmış (comConfirm=4). Bu durum öncelikli;
-            // F5 sonrası da buton görünmesin ve alanlar kilitli kalsın.
+            // Tek kaynak: comConfirm. 1 = onaylı → buton görünsün. 4 = güncelleme onayı bekliyor → banner, buton yok. F5/çık-gir aynı kalır.
             const profileUpdatePendingFlag =
               isPlatformBrowser(this.platformId) &&
               localStorage.getItem('community_profile_update_pending') === 'true';
-            const isUpdatePendingFromBackend =
-              community.status === 'Onay Bekleyen' && community.hasEverBeenApproved === true;
 
-            if (isUpdatePendingFromBackend || profileUpdatePendingFlag) {
-              this.communityApproved = true;
-              this.isUpdatePending = true;
-              if (isPlatformBrowser(this.platformId)) {
-                localStorage.setItem('community_approved', JSON.stringify(true));
-                localStorage.setItem('community_profile_update_pending', 'true');
-              }
-            } else if (community.isActivity === true) {
+            if (comConfirm === 1) {
               this.communityApproved = true;
               this.isUpdatePending = false;
               if (isPlatformBrowser(this.platformId)) {
                 localStorage.setItem('community_approved', JSON.stringify(true));
                 localStorage.removeItem('community_profile_update_pending');
               }
+            } else if (comConfirm === 4) {
+              this.communityApproved = true;
+              this.isUpdatePending = true;
+              if (isPlatformBrowser(this.platformId)) {
+                localStorage.setItem('community_approved', JSON.stringify(true));
+                localStorage.setItem('community_profile_update_pending', 'true');
+              }
+            } else if (profileUpdatePendingFlag) {
+              this.communityApproved = true;
+              this.isUpdatePending = true;
+              if (isPlatformBrowser(this.platformId)) {
+                localStorage.setItem('community_profile_update_pending', 'true');
+              }
             } else {
-              this.communityApproved = false;
+              this.communityApproved = community.isActivity === true;
               this.isUpdatePending = false;
               if (isPlatformBrowser(this.platformId)) {
-                localStorage.setItem('community_approved', JSON.stringify(false));
+                localStorage.setItem('community_approved', JSON.stringify(this.communityApproved));
                 localStorage.removeItem('community_profile_update_pending');
               }
             }
@@ -521,44 +521,63 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
             if (comLeadMail === userEmail && !found) {
               found = true;
 
-              // Update clubInfo with backend data
+              // comConfirm=4 ve pendingUpdateData varsa onaya gönderilen veriyi göster (Kurumsal Dashboard ile aynı mantık)
+              const comConfirm = (communityDetail as any).comConfirm ?? (communityDetail as any).ComConfirm;
+              const pendingJson = (communityDetail as any).pendingUpdateData ?? (communityDetail as any).PendingUpdateData;
+              const displayCommunity =
+                comConfirm === 4 && pendingJson
+                  ? this.communityService.applyPendingUpdateToCommunity(communityDetail, pendingJson)
+                  : communityDetail;
+
+              // Update clubInfo with backend data (onaya gönderilen veri varsa onu kullan)
               this.clubInfo = {
-                id: communityDetail.id,
-                name: communityDetail.name,
-                university: communityDetail.university || '',
-                city: communityDetail.city || '',
-                category: communityDetail.category || 'Genel',
-                logo: communityDetail.logo || this.clubInfo.logo,
+                id: displayCommunity.id,
+                name: displayCommunity.name,
+                university: displayCommunity.university || '',
+                city: displayCommunity.city || '',
+                category: displayCommunity.category || 'Genel',
+                logo: displayCommunity.logo || this.clubInfo.logo,
                 banner:
-                  communityDetail.banner || communityDetail.coverImage || this.clubInfo.banner,
-                email: communityDetail.email || communityDetail.comMail || '',
+                  displayCommunity.banner || displayCommunity.coverImage || this.clubInfo.banner,
+                email: displayCommunity.email || displayCommunity.comMail || '',
                 phone: this.clubInfo.phone, // Backend'de phone yok, mevcut değeri koru
-                instagram: communityDetail.instagram || communityDetail.instagramUrl || '',
-                description: communityDetail.about || communityDetail.description || '',
-                comMail: communityDetail.comMail,
-                comLeadMail: communityDetail.comLeadMail,
-                webSiteUrl: communityDetail.webSiteUrl,
-                instagramUrl: communityDetail.instagramUrl,
-                miniAbout: communityDetail.miniAbout,
+                instagram: displayCommunity.instagram || displayCommunity.instagramUrl || '',
+                description: displayCommunity.about || displayCommunity.description || '',
+                comMail: displayCommunity.comMail,
+                comLeadMail: displayCommunity.comLeadMail,
+                webSiteUrl: displayCommunity.webSiteUrl,
+                instagramUrl: displayCommunity.instagramUrl,
+                miniAbout: displayCommunity.miniAbout,
               };
               // Update initialClubInfo for change detection
               this.initialClubInfo = JSON.parse(JSON.stringify(this.clubInfo));
 
-              // Update displayName to show community name instead of user name
-              this.displayName = communityDetail.name || this.userName;
+              // Update displayName to show community name (onaya gönderilen varsa onu)
+              this.displayName = displayCommunity.name || this.userName;
               this.userInitial = this.displayName.charAt(0).toUpperCase();
 
-              const isUpdatePendingFromBackend =
-                communityDetail.status === 'Onay Bekleyen' && communityDetail.hasEverBeenApproved === true;
               const profileUpdatePendingFlag =
                 isPlatformBrowser(this.platformId) &&
                 localStorage.getItem('community_profile_update_pending') === 'true';
 
-              if (isUpdatePendingFromBackend || profileUpdatePendingFlag) {
+              if (comConfirm === 1) {
+                this.communityApproved = true;
+                this.isUpdatePending = false;
+                if (isPlatformBrowser(this.platformId)) {
+                  localStorage.setItem('community_approved', JSON.stringify(true));
+                  localStorage.removeItem('community_profile_update_pending');
+                }
+              } else if (comConfirm === 4) {
                 this.communityApproved = true;
                 this.isUpdatePending = true;
                 if (isPlatformBrowser(this.platformId)) {
                   localStorage.setItem('community_approved', JSON.stringify(true));
+                  localStorage.setItem('community_profile_update_pending', 'true');
+                }
+              } else if (profileUpdatePendingFlag) {
+                this.communityApproved = true;
+                this.isUpdatePending = true;
+                if (isPlatformBrowser(this.platformId)) {
                   localStorage.setItem('community_profile_update_pending', 'true');
                 }
               } else {
@@ -1106,8 +1125,8 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
 
   /**
    * Profilim sekmesinden topluluk bilgilerini güncelle ve GSB onayına gönder.
-   * Önce bekleyen banner/logo dosyaları yüklenir, sonra form + URL'ler ile update gönderilir.
-   * Topluluk GSB onay bekleyen kategorisine düşer; GSB Kurumsal Panel'den onaylayabilir.
+   * Tüm fotoğraflar sunucuda tutulur: önce banner (varsa), sonra logo (varsa) sırayla yüklenir,
+   * ardından PUT ile metin + sunucudan dönen URL'ler gönderilir. Görseller her zaman sunucudan çekilir.
    */
   saveCommunityProfile(): void {
     if (!this.isProfileFormValid || this.isSavingProfile || !this.clubInfo?.id) {
@@ -1118,69 +1137,78 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     this.isSavingProfile = true;
     const id = typeof this.clubInfo.id === 'string' ? this.clubInfo.id : String(this.clubInfo.id);
 
+    const existingBannerUrl = this.getServerBannerUrl();
+    const existingLogoUrl = this.getServerLogoUrl();
+
     const bannerUpload$ = this.pendingBannerFile
       ? this.communityService.uploadBanner(id, this.pendingBannerFile).pipe(
           map((r) => r.BannerUrl || (r as any).bannerUrl),
           catchError((err) => {
             this.isSavingProfile = false;
-            this.showToast('Banner yüklenirken bir hata oluştu.', 'error');
-            throw err;
-          })
-        )
-      : of(undefined);
-    const logoUpload$ = this.pendingLogoFile
-      ? this.communityService.uploadLogo(id, this.pendingLogoFile).pipe(
-          map((r) => r.LogoUrl || (r as any).logoUrl),
-          catchError((err) => {
-            this.isSavingProfile = false;
-            this.showToast('Logo yüklenirken bir hata oluştu.', 'error');
+            const msg =
+              (typeof err?.error?.message === 'string' ? err.error.message : null) ||
+              (typeof err?.error === 'string' ? err.error : null) ||
+              '';
+            this.showToast(msg && msg.trim() ? msg : 'Banner yüklenirken hata oluştu.', 'error');
             throw err;
           })
         )
       : of(undefined);
 
-    forkJoin({ bannerUrl: bannerUpload$, logoUrl: logoUpload$ })
+    const logoUpload$ = (bannerUrl: string | undefined) =>
+      this.pendingLogoFile
+        ? this.communityService.uploadLogo(id, this.pendingLogoFile!).pipe(
+            map((r) => r.LogoUrl || (r as any).logoUrl),
+            catchError((err) => {
+              this.isSavingProfile = false;
+              const msg =
+                (typeof err?.error?.message === 'string' ? err.error.message : null) ||
+                (typeof err?.error === 'string' ? err.error : null) ||
+                '';
+              this.showToast(msg && msg.trim() ? msg : 'Logo yüklenirken hata oluştu.', 'error');
+              throw err;
+            }),
+            map((logoUrl) => ({ bannerUrl, logoUrl }))
+          )
+        : of({ bannerUrl, logoUrl: undefined as string | undefined });
+
+    const dto: UpdateCommunityDto = {
+      comName: this.clubInfo.name?.trim() || undefined,
+      comCategory: this.clubInfo.category?.trim() || undefined,
+      comAbout: this.clubInfo.description?.trim() || undefined,
+      city: this.clubInfo.city?.trim() || undefined,
+      university: this.clubInfo.university?.trim() || undefined,
+      comMail: this.clubInfo.email?.trim() || undefined,
+      comLeadMail: this.clubInfo.comLeadMail?.trim() || undefined,
+      webSiteUrl: this.clubInfo.webSiteUrl?.trim() || undefined,
+      instagramUrl:
+        this.clubInfo.instagramUrl?.trim() || this.clubInfo.instagram?.trim() || undefined,
+      miniAbout: this.clubInfo.miniAbout?.trim() || undefined,
+    };
+
+    bannerUpload$
       .pipe(
+        switchMap((bannerUrl) => logoUpload$(bannerUrl)),
         switchMap(({ bannerUrl, logoUrl }) => {
-          // Profil alanları only; isActivity gönderilmez (backend topluluk rolünde isActivity değişikliğini kabul etmeyebilir).
-          // X-Submit-For-Approval ile backend güncellemeyi "onay bekleyen" olarak kaydeder ve Kurumsal'da Onay Bekleyen (Güncelleme) görünür.
-          const dto: UpdateCommunityDto = {
-            comName: this.clubInfo.name?.trim() || undefined,
-            comCategory: this.clubInfo.category?.trim() || undefined,
-            comAbout: this.clubInfo.description?.trim() || undefined,
-            city: this.clubInfo.city?.trim() || undefined,
-            university: this.clubInfo.university?.trim() || undefined,
-            comMail: this.clubInfo.email?.trim() || undefined,
-            comLeadMail: this.clubInfo.comLeadMail?.trim() || undefined,
-            webSiteUrl: this.clubInfo.webSiteUrl?.trim() || undefined,
-            instagramUrl:
-              this.clubInfo.instagramUrl?.trim() || this.clubInfo.instagram?.trim() || undefined,
-            miniAbout: this.clubInfo.miniAbout?.trim() || undefined,
-          };
-          if (bannerUrl !== undefined) dto.bannerUrl = bannerUrl;
-          else if (
-            this.clubInfo.banner &&
-            !this.clubInfo.banner.startsWith('data:') &&
-            !this.clubInfo.banner.startsWith('blob:')
-          )
-            dto.bannerUrl = this.clubInfo.banner;
-          if (logoUrl !== undefined) dto.logoUrl = logoUrl;
-          else if (
-            this.clubInfo.logo &&
-            !this.clubInfo.logo.startsWith('data:') &&
-            !this.clubInfo.logo.startsWith('blob:')
-          )
-            dto.logoUrl = this.clubInfo.logo;
-
+          dto.bannerUrl = bannerUrl ?? existingBannerUrl;
+          dto.logoUrl = logoUrl ?? existingLogoUrl;
           return this.communityService.updateCommunity(id, dto, { submitForApproval: true });
         })
       )
       .subscribe({
         next: () => {
+          if (this.clubInfo?.banner?.startsWith('blob:')) {
+            try {
+              URL.revokeObjectURL(this.clubInfo.banner);
+            } catch {}
+          }
+          if (this.clubInfo?.logo?.startsWith('blob:')) {
+            try {
+              URL.revokeObjectURL(this.clubInfo.logo);
+            } catch {}
+          }
           this.pendingBannerFile = null;
           this.pendingLogoFile = null;
-          if (this.clubInfo.banner?.startsWith('blob:')) URL.revokeObjectURL(this.clubInfo.banner);
-          if (this.clubInfo.logo?.startsWith('blob:')) URL.revokeObjectURL(this.clubInfo.logo);
           if (isPlatformBrowser(this.platformId)) {
             localStorage.setItem('community_profile_update_pending', 'true');
           }
@@ -1188,6 +1216,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
           this.isUpdatePending = true;
           this.initialClubInfo = JSON.parse(JSON.stringify(this.clubInfo));
           this.refreshCommunityProfileAfterUpdate();
+          this.showToast('Güncellemeler onaya gönderildi. Görseller sunucuda saklandı.', 'success');
         },
         error: (err: any) => {
           this.isSavingProfile = false;
@@ -1195,8 +1224,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
             (typeof err?.error?.message === 'string' ? err.error.message : null) ||
             (typeof err?.error === 'string' ? err.error : null) ||
             '';
-          const isAlreadyPending =
-            msg && msg.includes('güncelleme isteği onay bekliyor');
+          const isAlreadyPending = msg && msg.includes('güncelleme isteği onay bekliyor');
           if (isAlreadyPending) {
             if (isPlatformBrowser(this.platformId)) {
               localStorage.setItem('community_profile_update_pending', 'true');
@@ -1209,59 +1237,96 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
             );
             return;
           }
-          this.showToast(
-            msg && msg.trim() ? msg : 'Topluluk güncellenirken bir hata oluştu.',
-            'error'
-          );
+          if (!msg?.includes('Banner yüklenirken') && !msg?.includes('Logo yüklenirken')) {
+            this.showToast(
+              msg && msg.trim() ? msg : 'Topluluk güncellenirken bir hata oluştu.',
+              'error'
+            );
+          }
         },
       });
   }
 
+  /** Mevcut banner URL'ini sunucu kaynaklı döndürür (blob/data hariç). */
+  private getServerBannerUrl(): string | undefined {
+    const b = this.clubInfo?.banner;
+    if (b && !b.startsWith('data:') && !b.startsWith('blob:')) return b;
+    const i = this.initialClubInfo?.banner;
+    if (i && !String(i).startsWith('data:') && !String(i).startsWith('blob:')) return i;
+    return undefined;
+  }
+
+  /** Mevcut logo URL'ini sunucu kaynaklı döndürür (blob/data hariç). */
+  private getServerLogoUrl(): string | undefined {
+    const b = this.clubInfo?.logo;
+    if (b && !b.startsWith('data:') && !b.startsWith('blob:')) return b;
+    const i = this.initialClubInfo?.logo;
+    if (i && !String(i).startsWith('data:') && !String(i).startsWith('blob:')) return i;
+    return undefined;
+  }
+
   /**
    * Güncelleme sonrası topluluk bilgisini yeniden yükle (GSB onayına gittiği için navigate etme).
+   * ComConfirm=4 ve pendingUpdateData varsa onaya gönderilen veriyi göster (Profilim sekmesinde güncel veri).
    */
   private refreshCommunityProfileAfterUpdate(): void {
     this.communityService.getMyLeadCommunity().subscribe({
       next: (community) => {
         this.isSavingProfile = false;
         if (community) {
+          const comConfirm = (community as any).comConfirm ?? (community as any).ComConfirm;
+          const pendingJson = (community as any).pendingUpdateData ?? (community as any).PendingUpdateData;
+          const displayCommunity =
+            comConfirm === 4 && pendingJson
+              ? this.communityService.applyPendingUpdateToCommunity(community, pendingJson)
+              : community;
+
           this.clubInfo = {
-            id: community.id,
-            name: community.name,
-            university: community.university || '',
-            city: community.city || '',
-            category: community.category || 'Genel',
-            logo: community.logo || this.clubInfo.logo,
-            banner: community.banner || community.coverImage || this.clubInfo.banner,
-            email: community.email || community.comMail || '',
+            id: displayCommunity.id,
+            name: displayCommunity.name,
+            university: displayCommunity.university || '',
+            city: displayCommunity.city || '',
+            category: displayCommunity.category || 'Genel',
+            logo: displayCommunity.logo || this.clubInfo.logo,
+            banner: displayCommunity.banner || displayCommunity.coverImage || this.clubInfo.banner,
+            email: displayCommunity.email || displayCommunity.comMail || '',
             phone: this.clubInfo.phone,
-            instagram: community.instagram || community.instagramUrl || '',
-            description: community.about || community.description || '',
-            comMail: community.comMail,
-            comLeadMail: community.comLeadMail,
-            webSiteUrl: community.webSiteUrl,
-            instagramUrl: community.instagramUrl,
-            miniAbout: community.miniAbout,
+            instagram: displayCommunity.instagram || displayCommunity.instagramUrl || '',
+            description: displayCommunity.about || displayCommunity.description || '',
+            comMail: displayCommunity.comMail,
+            comLeadMail: displayCommunity.comLeadMail,
+            webSiteUrl: displayCommunity.webSiteUrl,
+            instagramUrl: displayCommunity.instagramUrl,
+            miniAbout: displayCommunity.miniAbout,
           };
           this.initialClubInfo = JSON.parse(JSON.stringify(this.clubInfo));
-          this.displayName = community.name || this.userName;
+          this.displayName = displayCommunity.name || this.userName;
           this.userInitial = this.displayName.charAt(0).toUpperCase();
           const profileUpdateFlag =
             isPlatformBrowser(this.platformId) &&
             localStorage.getItem('community_profile_update_pending') === 'true';
-          // Onaya gönderdikten sonra buton geri gelmesin: localStorage flag varsa hep pending kabul et
-          if (profileUpdateFlag) {
-            this.communityApproved = false;
+
+          if (comConfirm === 1) {
+            this.communityApproved = true;
+            this.isUpdatePending = false;
+            if (isPlatformBrowser(this.platformId)) {
+              localStorage.removeItem('community_profile_update_pending');
+            }
+          } else if (comConfirm === 4 || profileUpdateFlag) {
+            this.communityApproved = true;
             this.isUpdatePending = true;
+            if (isPlatformBrowser(this.platformId) && comConfirm === 4) {
+              localStorage.setItem('community_profile_update_pending', 'true');
+            }
           } else {
             this.communityApproved = community.isActivity === true;
-            this.isUpdatePending =
-              !this.communityApproved &&
-              (community.hasEverBeenApproved === true || profileUpdateFlag);
+            this.isUpdatePending = false;
+            if (isPlatformBrowser(this.platformId)) {
+              localStorage.removeItem('community_profile_update_pending');
+            }
           }
           if (isPlatformBrowser(this.platformId)) {
             localStorage.setItem('community_approved', JSON.stringify(this.communityApproved));
-            if (this.communityApproved) localStorage.removeItem('community_profile_update_pending');
           }
           if (this.communityApproved) {
             this.loadCommunityEvents(community.id);
@@ -1577,6 +1642,8 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
           let errorMessage = 'Etkinlik oluşturulurken bir hata oluştu';
           if (err.status === 401 || err.status === 403) {
             errorMessage = 'Bu işlem için yetkiniz bulunmamaktadır.';
+          } else if (err?.message) {
+            errorMessage = err.message;
           } else if (err.error?.message) {
             errorMessage = err.error.message;
           }
@@ -2313,38 +2380,23 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     title: string;
     description: string;
     shortDescription?: string;
+    city?: string;
     location?: string;
     startDate?: string;
     communityName?: string;
   }): Promise<{ clean: boolean; message: string }> {
     return new Promise((resolve, reject) => {
-      // Status'u backend formatına çevir
-      const status = 'pending';
-
-      // Body'yi oluştur (description + shortDescription birleşimi)
-      const bodyParts: string[] = [];
-      if (eventData.shortDescription) {
-        bodyParts.push(eventData.shortDescription);
-      }
-      if (eventData.description) {
-        bodyParts.push(eventData.description);
-      }
-      const body = bodyParts.join('\n\n');
-
-      // Tüm içeriği birleştir (SpamService sadece text alıyor)
-      const fullText = [
-        eventData.title || '',
-        body || '',
-        eventData.location ? `Konum: ${eventData.location}` : '',
-        eventData.startDate ? `Başlangıç: ${eventData.startDate}` : '',
-        eventData.communityName ? `Topluluk: ${eventData.communityName}` : '',
-      ]
-        .filter(Boolean)
-        .join('\n');
+      // Backend spam API'si: title=etkinlik adı, category=konum, body=detaylı açıklama, notes=kısa açıklama
+      const spamPayload = {
+        title: eventData.title || '',
+        category: eventData.location || '',
+        body: eventData.description || '',
+        notes: eventData.shortDescription || '',
+      };
 
       // SpamService kullanarak spam kontrolü yap
       this.spamService
-        .checkSpam(fullText)
+        .checkSpam(spamPayload)
         .pipe(
           catchError((error) => {
             // Hata durumunda

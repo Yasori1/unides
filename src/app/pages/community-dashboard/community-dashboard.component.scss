@@ -156,6 +156,92 @@
 
 .events-status-card {
   margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  min-height: 320px;
+
+  .events-status-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 240px;
+  }
+
+  .events-empty-center {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 240px;
+  }
+
+  .events-empty-center .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: #64748b;
+    text-align: center;
+    padding: 24px;
+
+    .material-symbols-outlined {
+      font-size: 64px;
+      color: #94a3b8;
+    }
+
+    p {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #64748b;
+    }
+  }
+}
+
+// Etkinliklerim sekmesi: boş durum sayfanın tam ortasında
+.view-container-events {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 120px);
+}
+
+.view-container-events .events-tab-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 320px;
+}
+
+.view-container-events .events-empty-center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 320px;
+}
+
+.view-container-events .events-empty-center .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #64748b;
+  text-align: center;
+  padding: 24px;
+
+  .material-symbols-outlined {
+    font-size: 64px;
+    color: #94a3b8;
+  }
+
+  p {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #64748b;
+  }
 }
 
 .status-filters {
@@ -2212,6 +2298,10 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 12px;
+}
+
+.input-grid label.input-grid-span-full {
+  grid-column: 1 / -1;
 }
 
 .input-grid label,

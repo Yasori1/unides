@@ -433,9 +433,14 @@ export class CommunityService {
           : dto.IsActivity !== undefined
           ? dto.IsActivity
           : true,
-      hasEverBeenApproved: dto.hasEverBeenApproved ?? dto.HasEverBeenApproved ?? undefined,
+      // comConfirm=4 = güncelleme onayı bekliyor → hasEverBeenApproved true (detay pop-up Güncelleme tasarımı için)
+      hasEverBeenApproved:
+        dto.hasEverBeenApproved ??
+        dto.HasEverBeenApproved ??
+        (dto.comConfirm === 4 || dto.ComConfirm === 4 ? true : undefined),
       pendingUpdateData: dto.pendingUpdateData ?? dto.PendingUpdateData ?? undefined,
       events: dto.events || dto.Events || [],
+      comConfirm: dto.comConfirm ?? dto.ComConfirm ?? undefined,
     };
   }
 
