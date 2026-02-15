@@ -252,9 +252,13 @@
               Reddedilen
             </button>
           </div>
-          <button class="btn-primary" (click)="openModal('new-event')">
+          <button class="btn-primary" (click)="openModal('new-event')" [disabled]="isUpdatePending"
+            [title]="isUpdatePending ? 'Topluluğunuzun güncellemesi onay bekliyor. GSB onayından sonra etkinlik oluşturabilirsiniz.' : ''">
             <span class="material-symbols-outlined">add</span> Etkinlik Oluştur
           </button>
+          <p class="events-tab-hint" *ngIf="isUpdatePending">
+            Topluluğunuzun güncellemesi onay bekliyor. Etkinlik oluşturmak için GSB onayının tamamlanmasını bekleyin.
+          </p>
         </div>
       </div>
 

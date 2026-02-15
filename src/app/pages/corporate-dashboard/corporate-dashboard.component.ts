@@ -11,7 +11,7 @@ import { ToastService } from '../../services/toast.services';
 import { ToastComponent } from '../../components/ui/toast/toast.component';
 import { AfkDetectionService } from '../../services/afk-detection.service';
 import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
-import { catchError } from 'rxjs/operators';
+import { catchError, switchMap, map } from 'rxjs/operators';
 import { of, forkJoin } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ImageErrorHandlerService } from '../../services/image-error-handler.service';
@@ -1448,48 +1448,51 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         next: (updatedCommunity) => {
           const communityId = updatedCommunity.id;
 
-          // Logo ve Banner yükleme işlemleri - forkJoin ile bekle
           const logoFile = (this.editingCommunity as any)?.logoFile;
           const bannerFile = (this.editingCommunity as any)?.bannerFile;
 
-          // Yüklenecek görseller varsa, tamamlanmasını bekle
-          const uploadTasks: any[] = [];
-
-          if (logoFile && communityId) {
-            uploadTasks.push(
-              this.communityService.uploadLogo(communityId, logoFile).pipe(
-                catchError((err) => {
-                  Logger.error('Logo yüklenirken hata:', err);
-                  return of(null); // Hata durumunda null döndür, devam et
-                })
-              )
-            );
-          }
+          const doAfterUploads = () => {
+            this.loadCommunitiesFromService(this.statusFilter);
+            this.showToast('Topluluk ve görseller başarıyla güncellendi', 'success');
+            this.closeModal();
+          };
 
           if (bannerFile && communityId) {
-            uploadTasks.push(
-              this.communityService.uploadBanner(communityId, bannerFile).pipe(
-                catchError((err) => {
-                  Logger.error('Banner yüklenirken hata:', err);
-                  return of(null); // Hata durumunda null döndür, devam et
-                })
-              )
-            );
-          }
-
-          // Görsel yükleme varsa bekle, yoksa direkt listeyi güncelle
-          if (uploadTasks.length > 0) {
-            forkJoin(uploadTasks).subscribe({
-              next: (results) => {
-                Logger.log('Tüm görseller yüklendi:', results);
-                // Görseller yüklendikten sonra listeyi mevcut durum filtresiyle yeniden çek
-                this.loadCommunitiesFromService(this.statusFilter);
-                this.showToast('Topluluk ve görseller başarıyla güncellendi', 'success');
-                this.closeModal();
-              },
+            this.communityService.uploadBanner(communityId, bannerFile).pipe(
+              catchError((err) => {
+                Logger.error('Banner yüklenirken hata:', err);
+                return of(null);
+              }),
+              switchMap(() => {
+                if (logoFile && communityId) {
+                  return this.communityService.uploadLogo(communityId, logoFile).pipe(
+                    catchError((err) => {
+                      Logger.error('Logo yüklenirken hata:', err);
+                      return of(null);
+                    })
+                  );
+                }
+                return of(null);
+              })
+            ).subscribe({
+              next: () => { doAfterUploads(); },
               error: (err) => {
                 Logger.error('Görsel yükleme hatası:', err);
-                // Hata olsa bile listeyi güncelle
+                this.loadCommunitiesFromService(this.statusFilter);
+                this.showToast('Topluluk güncellendi ancak bazı görseller yüklenemedi', 'error');
+                this.closeModal();
+              },
+            });
+          } else if (logoFile && communityId) {
+            this.communityService.uploadLogo(communityId, logoFile).pipe(
+              catchError((err) => {
+                Logger.error('Logo yüklenirken hata:', err);
+                return of(null);
+              })
+            ).subscribe({
+              next: () => { doAfterUploads(); },
+              error: (err) => {
+                Logger.error('Görsel yükleme hatası:', err);
                 this.loadCommunitiesFromService(this.statusFilter);
                 this.showToast('Topluluk güncellendi ancak bazı görseller yüklenemedi', 'error');
                 this.closeModal();

@@ -1125,8 +1125,8 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
 
   /**
    * Profilim sekmesinden topluluk bilgilerini güncelle ve GSB onayına gönder.
-   * Tüm fotoğraflar sunucuda tutulur: önce banner (varsa), sonra logo (varsa) sırayla yüklenir,
-   * ardından PUT ile metin + sunucudan dönen URL'ler gönderilir. Görseller her zaman sunucudan çekilir.
+   * Sıra: (1) Banner yükle → (2) Logo yükle → (3) PUT ile metin + banner/logo URL.
+   * Başarı yalnızca üç adım da 200 döndüğünde kabul edilir; eksik veri ile başarı gösterilmez.
    */
   saveCommunityProfile(): void {
     if (!this.isProfileFormValid || this.isSavingProfile || !this.clubInfo?.id) {
@@ -1139,6 +1139,20 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
 
     const existingBannerUrl = this.getServerBannerUrl();
     const existingLogoUrl = this.getServerLogoUrl();
+
+    const dto: UpdateCommunityDto = {
+      comName: this.clubInfo.name?.trim() || undefined,
+      comCategory: this.clubInfo.category?.trim() || undefined,
+      comAbout: this.clubInfo.description?.trim() || undefined,
+      city: this.clubInfo.city?.trim() || undefined,
+      university: this.clubInfo.university?.trim() || undefined,
+      comMail: this.clubInfo.email?.trim() || undefined,
+      comLeadMail: this.clubInfo.comLeadMail?.trim() || undefined,
+      webSiteUrl: this.clubInfo.webSiteUrl?.trim() || undefined,
+      instagramUrl:
+        this.clubInfo.instagramUrl?.trim() || this.clubInfo.instagram?.trim() || undefined,
+      miniAbout: this.clubInfo.miniAbout?.trim() || undefined,
+    };
 
     const bannerUpload$ = this.pendingBannerFile
       ? this.communityService.uploadBanner(id, this.pendingBannerFile).pipe(
@@ -1159,6 +1173,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       this.pendingLogoFile
         ? this.communityService.uploadLogo(id, this.pendingLogoFile!).pipe(
             map((r) => r.LogoUrl || (r as any).logoUrl),
+            map((logoUrl) => ({ bannerUrl, logoUrl })),
             catchError((err) => {
               this.isSavingProfile = false;
               const msg =
@@ -1167,24 +1182,9 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
                 '';
               this.showToast(msg && msg.trim() ? msg : 'Logo yüklenirken hata oluştu.', 'error');
               throw err;
-            }),
-            map((logoUrl) => ({ bannerUrl, logoUrl }))
+            })
           )
         : of({ bannerUrl, logoUrl: undefined as string | undefined });
-
-    const dto: UpdateCommunityDto = {
-      comName: this.clubInfo.name?.trim() || undefined,
-      comCategory: this.clubInfo.category?.trim() || undefined,
-      comAbout: this.clubInfo.description?.trim() || undefined,
-      city: this.clubInfo.city?.trim() || undefined,
-      university: this.clubInfo.university?.trim() || undefined,
-      comMail: this.clubInfo.email?.trim() || undefined,
-      comLeadMail: this.clubInfo.comLeadMail?.trim() || undefined,
-      webSiteUrl: this.clubInfo.webSiteUrl?.trim() || undefined,
-      instagramUrl:
-        this.clubInfo.instagramUrl?.trim() || this.clubInfo.instagram?.trim() || undefined,
-      miniAbout: this.clubInfo.miniAbout?.trim() || undefined,
-    };
 
     bannerUpload$
       .pipe(
@@ -1197,26 +1197,8 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: () => {
-          if (this.clubInfo?.banner?.startsWith('blob:')) {
-            try {
-              URL.revokeObjectURL(this.clubInfo.banner);
-            } catch {}
-          }
-          if (this.clubInfo?.logo?.startsWith('blob:')) {
-            try {
-              URL.revokeObjectURL(this.clubInfo.logo);
-            } catch {}
-          }
-          this.pendingBannerFile = null;
-          this.pendingLogoFile = null;
-          if (isPlatformBrowser(this.platformId)) {
-            localStorage.setItem('community_profile_update_pending', 'true');
-          }
-          this.communityApproved = false;
-          this.isUpdatePending = true;
-          this.initialClubInfo = JSON.parse(JSON.stringify(this.clubInfo));
-          this.refreshCommunityProfileAfterUpdate();
-          this.showToast('Güncellemeler onaya gönderildi. Görseller sunucuda saklandı.', 'success');
+          this.finishProfileUpdate();
+          this.showToast('Güncellemeler onaya gönderildi. Banner, logo ve metin bilgileri sunucuya iletildi.', 'success');
         },
         error: (err: any) => {
           this.isSavingProfile = false;
@@ -1226,14 +1208,9 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
             '';
           const isAlreadyPending = msg && msg.includes('güncelleme isteği onay bekliyor');
           if (isAlreadyPending) {
-            if (isPlatformBrowser(this.platformId)) {
-              localStorage.setItem('community_profile_update_pending', 'true');
-            }
-            this.communityApproved = false;
-            this.isUpdatePending = true;
             this.showToast(
-              'Zaten bir güncelleme onay bekliyor. GSB sonucunu bekleyin; bu sürede buton kapatıldı.',
-              'success'
+              'Tüm veriler iletilmedi. GSB tarafında güncelleme onayı bekleniyor; backend güncellemesi sonrası banner, logo ve metin birlikte iletilebilir.',
+              'error'
             );
             return;
           }
@@ -1245,6 +1222,25 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
           }
         },
       });
+  }
+
+  /** Güncelleme başarılı olduğunda: blob temizle, state güncelle, refresh. */
+  private finishProfileUpdate(): void {
+    if (this.clubInfo?.banner?.startsWith('blob:')) {
+      try { URL.revokeObjectURL(this.clubInfo.banner); } catch {}
+    }
+    if (this.clubInfo?.logo?.startsWith('blob:')) {
+      try { URL.revokeObjectURL(this.clubInfo.logo); } catch {}
+    }
+    this.pendingBannerFile = null;
+    this.pendingLogoFile = null;
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem('community_profile_update_pending', 'true');
+    }
+    this.communityApproved = false;
+    this.isUpdatePending = true;
+    this.initialClubInfo = JSON.parse(JSON.stringify(this.clubInfo));
+    this.refreshCommunityProfileAfterUpdate();
   }
 
   /** Mevcut banner URL'ini sunucu kaynaklı döndürür (blob/data hariç). */
@@ -1342,6 +1338,13 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
 
   openModal(type: any) {
     this.clearToast();
+    if (type === 'new-event' && this.isUpdatePending) {
+      this.showToast(
+        'Topluluğunuzun güncellemesi onay bekliyor. Etkinlik oluşturmak için GSB onayının tamamlanmasını bekleyin.',
+        'error'
+      );
+      return;
+    }
     this.modalType = type;
     this.isModalOpen = true;
     this.editingEventId = null; // Reset editing state

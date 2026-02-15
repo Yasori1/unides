@@ -206,6 +206,14 @@
   min-height: calc(100vh - 120px);
 }
 
+.view-container-events .events-tab-hint {
+  margin: 8px 0 0;
+  font-size: 0.875rem;
+  color: #64748b;
+  max-width: 420px;
+  flex-basis: 100%;
+}
+
 .view-container-events .events-tab-body {
   flex: 1;
   display: flex;
