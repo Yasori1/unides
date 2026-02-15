@@ -346,6 +346,10 @@
               </div>
 
               <p class="description">{{ getPendingDisplay(item)?.description ?? item.description ?? item.about }}</p>
+              <!-- Onay Bekleyen (Güncelleme): kartta banner/logo ve metinler onay sonrası yayına alınacak yeni hali gösterir -->
+              <p class="card-pending-preview-hint" *ngIf="item.status === 'Onay Bekleyen' && item.hasEverBeenApproved === true">
+                Onay sonrası yayına alınacak bilgiler önizlemesi
+              </p>
 
               <div
                 class="card-footer"
@@ -359,30 +363,28 @@
                     <i class="bx bxs-graduation"></i> {{ getPendingDisplay(item)?.university ?? item.university }}
                   </span>
                 </div>
-                <!-- Onay Bekleyen (Güncelleme): sadece Güncellemeyi Reddet / Güncellemeyi Kabul Et -->
+                <!-- Onay Bekleyen (Güncelleme): Güncellemeyi Reddet / Güncellemeyi Kabul Et — sağda düzgün hizalı -->
                 <div
                   class="review-actions review-actions--update"
                   *ngIf="item.status === 'Onay Bekleyen' && item.hasEverBeenApproved === true"
                   (click)="$event.stopPropagation()"
                 >
-                  <div class="review-actions-primary">
-                    <button
-                      class="btn-reject"
-                      title="Güncellemeyi Reddet"
-                      (click)="openRejectCommunityModal(item)"
-                    >
-                      <span class="material-symbols-outlined">cancel</span>
-                      <span>Güncellemeyi Reddet</span>
-                    </button>
-                    <button
-                      class="btn-approve"
-                      title="Güncellemeyi Kabul Et"
-                      (click)="openApproveCommunityModal(item)"
-                    >
-                      <span class="material-symbols-outlined">check_circle</span>
-                      <span>Güncellemeyi Kabul Et</span>
-                    </button>
-                  </div>
+                  <button
+                    class="btn-reject"
+                    title="Güncellemeyi Reddet"
+                    (click)="openRejectCommunityModal(item)"
+                  >
+                    <span class="material-symbols-outlined">cancel</span>
+                    <span>Güncellemeyi Reddet</span>
+                  </button>
+                  <button
+                    class="btn-approve"
+                    title="Güncellemeyi Kabul Et"
+                    (click)="openApproveCommunityModal(item)"
+                  >
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>Güncellemeyi Kabul Et</span>
+                  </button>
                 </div>
                 <!-- Onay Bekleyen (Yeni Kayıt): Onayla / Reddet / Topluluğu Sil -->
                 <div
@@ -1153,8 +1155,8 @@
               </div>
               <div class="new-community-right">
                 <div class="update-changes-list">
-                  <h4 class="update-changes-title">Yapılan Değişiklikler</h4>
-                  <p class="update-changes-hint">Eskiden burada şu yazıyordu → Şu anda bu yazacak.</p>
+                  <h4 class="update-changes-title">Metin Değişiklikleri</h4>
+                  <p class="update-changes-hint">Banner ve logo yukarıda Eskiden → Yeni olarak gösterildi. Aşağıda sadece değişen metin alanları listelenir (Eskiden → Yeni).</p>
                   <div class="update-change-item" *ngFor="let c of getUpdateChangeList()">
                     <span class="change-label">{{ c.label }}</span>
                     <div class="change-values">

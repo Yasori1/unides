@@ -380,6 +380,10 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
           // Panelde her zaman aktif veya onay bekleyen topluluk gösterilmeli; reddedilmiş/silinmiş dönerse
           // aktif listeden başkan e-postasına göre (yeni) topluluğu bul.
           if (community && (community.status === 'Reddedilen' || community.status === 'Silinmiş')) {
+            this.showToast(
+              'Topluluğunuz silinmiş veya reddedilmiş olabilir, mail adresinize gelen gerekçe ile tekrardan topluluğunuzu oluşturabilirsiniz.',
+              'error'
+            );
             this.loadCommunityProfileFallback();
             return;
           }

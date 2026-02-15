@@ -634,17 +634,36 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     this.communityService.getAllCommunities(apiParams).subscribe({
       next: (data) => {
         const mapped = mapApiDataToCommunities(data || []);
-        // #region agent log
-        if (statusFilter === 'Silinmiş' && mapped.length > 0) {
-          const first = mapped[0];
-          fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'corporate-dashboard:afterMap',message:'After mapApiDataToCommunities',data:{statusFilter, firstStatus: first?.status, firstDeletedAt: first?.deletedAt, firstComConfirm: (first as any)?.comConfirm, total: mapped.length},timestamp:Date.now(),hypothesisId:'H2'})}).catch(()=>{});
+        // Liste endpoint'i PendingUpdateData döndürmez; ComConfirm === 4 (güncelleme onayı) olanlar için detay çekip kartta yeni banner/logo gösterilebilsin
+        const updatePending = mapped.filter((c) => (c as any).comConfirm === 4);
+        if (updatePending.length === 0) {
+          this.handleCommunitiesLoaded(mapped, statusFilter);
+          return;
         }
-        if (statusFilter === 'Reddedilen' && mapped.length > 0) {
-          const first = mapped[0];
-          fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'corporate-dashboard:afterMap',message:'Reddedilen filter first item',data:{statusFilter, firstStatus: first?.status, firstDeletedAt: first?.deletedAt},timestamp:Date.now(),hypothesisId:'H2'})}).catch(()=>{});
-        }
-        // #endregion
-        this.handleCommunitiesLoaded(mapped, statusFilter);
+        forkJoin(
+          updatePending.map((c) =>
+            this.communityService.getCommunityById(c.id).pipe(catchError(() => of(null)))
+          )
+        ).subscribe((details) => {
+          details.forEach((detail, i) => {
+            const item = updatePending[i];
+            if (item && detail?.pendingUpdateData) {
+              (item as any).pendingUpdateData = detail.pendingUpdateData;
+              (item as any).hasEverBeenApproved = true;
+            }
+          });
+          // #region agent log
+          if (statusFilter === 'Silinmiş' && mapped.length > 0) {
+            const first = mapped[0];
+            fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'corporate-dashboard:afterMap',message:'After mapApiDataToCommunities',data:{statusFilter, firstStatus: first?.status, firstDeletedAt: first?.deletedAt, firstComConfirm: (first as any)?.comConfirm, total: mapped.length},timestamp:Date.now(),hypothesisId:'H2'})}).catch(()=>{});
+          }
+          if (statusFilter === 'Reddedilen' && mapped.length > 0) {
+            const first = mapped[0];
+            fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'corporate-dashboard:afterMap',message:'Reddedilen filter first item',data:{statusFilter, firstStatus: first?.status, firstDeletedAt: first?.deletedAt},timestamp:Date.now(),hypothesisId:'H2'})}).catch(()=>{});
+          }
+          // #endregion
+          this.handleCommunitiesLoaded(mapped, statusFilter);
+        });
       },
       error: (err) => this.handleCommunitiesError(err),
     });
@@ -695,7 +714,9 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     for (const { key, label } of fields) {
       const oldVal = norm((cur as any)[key]);
       const newVal = norm((next as any)[key]);
-      changes.push({ label, oldValue: oldVal || '—', newValue: newVal || '—' });
+      if (oldVal !== newVal) {
+        changes.push({ label, oldValue: oldVal || '—', newValue: newVal || '—' });
+      }
     }
     return changes;
   }

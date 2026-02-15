@@ -217,21 +217,16 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
         // #endregion
 
         // Backend LoginCommand: RoleId 4 = reddedilmiş, RoleId 5 = silinmiş; bu kullanıcılar giriş yapamaz, tekrar topluluk kaydı oluşturabilir.
-        // Sıra: en özel mesaj önce (önce reddedilmiş sonra silinmiş), sonra reddedilmiş, sonra silinmiş. Backend mesajını aynen gösteriyoruz.
         const isOnceRejectedThenDeleted =
           rawLower.includes('önce reddedilmiş') && (rawLower.includes('sonra silinmiştir') || rawLower.includes('sonra silinmis'));
         const isRejected = rawLower.includes('reddedilmiştir') || rawLower.includes('reddedilmis');
         const isDeleted = rawLower.includes('silinmiştir') || rawLower.includes('silinmis');
 
         if (isOnceRejectedThenDeleted || isRejected || isDeleted) {
-          const displayMessage =
-            rawMessage?.trim() ||
-            (isOnceRejectedThenDeleted
-              ? 'Topluluğunuz önce reddedilmiş, sonra silinmiştir. Tekrar topluluk kaydı oluşturup GSB\'ye yollayınız.'
-              : isRejected
-                ? 'Topluluğunuz reddedilmiştir. Tekrar topluluk kaydı oluşturup GSB\'ye yollayınız.'
-                : 'Topluluğunuz silinmiştir. Tekrar topluluk kaydı oluşturup GSB\'ye yollayınız.');
-          this.toastService.show(displayMessage + ' Tekrar kayıt olmak veya yeni topluluk oluşturmak için Topluluk Kaydı sayfasını kullanabilirsiniz.', 'error');
+          this.toastService.show(
+            'Topluluğunuz silinmiş veya reddedilmiş olabilir, mail adresinize gelen gerekçe ile tekrardan topluluğunuzu oluşturabilirsiniz.',
+            'error'
+          );
           return;
         }
 
