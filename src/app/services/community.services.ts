@@ -555,15 +555,16 @@ export class CommunityService {
   /**
    * Topluluk başkanının kendi topluluğunu getirir (onay bekleyen dahil).
    * Backend: GET /api/Communities/lead-by-me — sadece RolId 3 için.
-   * 404/403 dönerse null.
+   * 404 dönerse null (topluluk yok). 403 dönerse hata fırlatılır (başkan değişti, erişim kaldırıldı).
    */
   getMyLeadCommunity(): Observable<Community | null> {
     return this.http.get<CommunityDetailDto>(`${this.apiUrl}/lead-by-me`).pipe(
       map((dto) => this.mapDetailDtoToCommunity(dto)),
       catchError((err) => {
-        if (err?.status === 404 || err?.status === 403) {
+        if (err?.status === 404) {
           return of(null);
         }
+        // 403: Topluluk başkanı e-postası Kurumsal'da onaylandı, eski başkanın erişimi kaldırıldı
         throw err;
       })
     );
@@ -1315,17 +1316,26 @@ export class CommunityService {
   }
 
   // Topluluk banner yükle (Backend: POST /api/Communities/{id}/banner)
-  // Auth interceptor automatically adds Authorization header if token exists
-  // FormData için Content-Type header'ı eklenmemeli (browser otomatik ekler)
-  uploadBanner(communityId: string, file: File): Observable<{ BannerUrl: string }> {
+  // options.setupToken: Topluluk kaydı sırasında complete-community-setup sonrası JWT dönmezse bu token ile yetkilendirme (X-Setup-Token header)
+  uploadBanner(
+    communityId: string,
+    file: File,
+    options?: { setupToken?: string }
+  ): Observable<{ BannerUrl: string }> {
     const formData = new FormData();
-    // Backend'in beklediği parametre adı (CommunityImageUploadRequest.File)
     formData.append('File', file, file.name);
+
+    const useSetupToken = !!options?.setupToken?.trim();
+    const ctx = useSetupToken ? new HttpContext().set(SKIP_AUTH, true) : undefined;
+    const headers = useSetupToken
+      ? new HttpHeaders().set('X-Setup-Token', options!.setupToken!.trim())
+      : undefined;
 
     return this.http
       .post<{ BannerUrl?: string; bannerUrl?: string }>(
         `${this.apiUrl}/${communityId}/banner`,
-        formData
+        formData,
+        { ...(ctx && { context: ctx }), ...(headers && { headers }) }
       )
       .pipe(
         map((response: any) => {
@@ -1347,10 +1357,7 @@ export class CommunityService {
             } else if (finalPath.startsWith('/images/')) {
               finalPath = finalPath.replace('/images/', '/ImagesUnides/');
             }
-            // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'community.services.ts:uploadBanner',message:'Banner upload response',data:{rawPath:path,returnedBannerUrl:finalPath,len:finalPath?.length},timestamp:Date.now(),hypothesisId:'A'})}).catch(()=>{});
-          // #endregion
-          return { BannerUrl: finalPath };
+            return { BannerUrl: finalPath };
           }
           if (path.startsWith('http')) {
             try {
@@ -1379,15 +1386,27 @@ export class CommunityService {
   }
 
   // Topluluk logo yükle (Backend: POST /api/Communities/{id}/logo)
-  // Auth interceptor automatically adds Authorization header if token exists
-  // FormData için Content-Type header'ı eklenmemeli (browser otomatik ekler)
-  uploadLogo(communityId: string, file: File): Observable<{ LogoUrl: string }> {
+  // options.setupToken: Topluluk kaydı sırasında complete-community-setup sonrası JWT dönmezse bu token ile yetkilendirme (X-Setup-Token header)
+  uploadLogo(
+    communityId: string,
+    file: File,
+    options?: { setupToken?: string }
+  ): Observable<{ LogoUrl: string }> {
     const formData = new FormData();
-    // Backend'in beklediği parametre adı (CommunityImageUploadRequest.File)
     formData.append('File', file, file.name);
 
+    const useSetupToken = !!options?.setupToken?.trim();
+    const ctx = useSetupToken ? new HttpContext().set(SKIP_AUTH, true) : undefined;
+    const headers = useSetupToken
+      ? new HttpHeaders().set('X-Setup-Token', options!.setupToken!.trim())
+      : undefined;
+
     return this.http
-      .post<{ LogoUrl?: string; logoUrl?: string }>(`${this.apiUrl}/${communityId}/logo`, formData)
+      .post<{ LogoUrl?: string; logoUrl?: string }>(
+        `${this.apiUrl}/${communityId}/logo`,
+        formData,
+        { ...(ctx && { context: ctx }), ...(headers && { headers }) }
+      )
       .pipe(
         map((response: any) => {
           const path = response.LogoUrl || response.logoUrl || '';

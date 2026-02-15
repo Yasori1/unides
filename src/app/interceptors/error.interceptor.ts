@@ -31,6 +31,9 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       const isCommunityUploadAfterSetup =
         (req.url.includes('/Communities/') && (req.url.includes('/banner') || req.url.includes('/logo'))) &&
         error.status === 401;
+      // Setup akışı: POST /api/Auth/community-setup/banner ve .../logo (X-Setup-Token); 401/403 gelirse logout yapma, component hata göstersin
+      const isCommunitySetupUpload =
+        req.url.includes('community-setup') && (req.url.includes('/banner') || req.url.includes('/logo'));
       // Topluluk girişi: silinmiş/reddedilmiş topluluk başkanı girişinde backend mesajı döner; community-login kendi uyarısını gösterecek (çakışma olmasın)
       const isAuthLogin = req.url.includes('/api/Auth/login') || req.url.includes('/Auth/login');
       const loginMsg =
@@ -43,6 +46,13 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
           loginMsg.includes('reddedilmiştir') ||
           loginMsg.includes('reddedilmis') ||
           loginMsg.includes('önce reddedilmiş'));
+      // Topluluk başkanı erişim kaldırıldı (403): community-dashboard kendi mesajını gösterir ve yönlendirir
+      const isCommunityAccessRevoked =
+        error.status === 403 &&
+        (req.url.includes('/api/Communities/lead-by-me') ||
+          req.url.includes('/Communities/leader-stats') ||
+          (req.url.includes('/api/Communities/') && req.method === 'GET') ||
+          (req.url.includes('/api/Events/') && req.url.includes('community')));
       const skipErrorHandling = req.url.includes('/api/Search') || 
                                 req.url.includes('/api/About') ||
                                 req.url.includes('/api/Forkod') ||
@@ -52,7 +62,9 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
                                 isSpamFilterEndpoint || // Spam filter endpoint'i için hata handling'i skip et (component'te handle ediliyor)
                                 (isCompleteCommunitySetup && (error.status === 401 || error.status === 400)) || // Topluluk kaydı başarılı sayılır, başarı sayfasına kalsın
                                 isCommunityUploadAfterSetup || // Topluluk kaydı sonrası banner/logo 401: logout/toast yok, component başarı sayfasını gösterir
-                                isCommunityRejectedOrDeleted; // Silinmiş/reddedilmiş topluluk girişi: community-login kendi mesajını gösterecek
+                                (isCommunitySetupUpload && (error.status === 401 || error.status === 403)) || // Setup upload 401/403: logout yapma, component hata göstersin
+                                isCommunityRejectedOrDeleted || // Silinmiş/reddedilmiş topluluk girişi: community-login kendi mesajını gösterecek
+                                isCommunityAccessRevoked; // 403 başkan erişim kaldırıldı: community-dashboard kendi mesajını gösterir
 
       if (skipErrorHandling) {
         // Event detail re-fetch için 404'leri tamamen sessizce handle et (toast ve log yok)
@@ -87,7 +99,8 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
         const isCompleteCommunitySetupUrl = error.url?.includes('complete-community-setup');
         const isCommunityUploadUrl = error.url?.includes('/Communities/') && (error.url?.includes('/banner') || error.url?.includes('/logo'));
-        if (typeof window !== 'undefined' && !error.url?.includes('/api/Auth/logout') && !isCompleteCommunitySetupUrl && !isCommunityUploadUrl) {
+        const isCommunitySetupUploadUrl = error.url?.includes('community-setup') && (error.url?.includes('/banner') || error.url?.includes('/logo'));
+        if (typeof window !== 'undefined' && !error.url?.includes('/api/Auth/logout') && !isCompleteCommunitySetupUrl && !isCommunityUploadUrl && !isCommunitySetupUploadUrl) {
           authService.logout();
         }
       } else if (error.status === 403) {

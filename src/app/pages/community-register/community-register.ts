@@ -11,7 +11,7 @@ import { ImageUploadComponent } from '../../components/ui/image-upload/image-upl
 import { Logger } from '../../utils/logger.util';
 import { CreateCommunityDto } from '../../models/community.models';
 import { of } from 'rxjs';
-import { catchError, switchMap } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-community-register',
@@ -407,10 +407,6 @@ export class CommunityRegisterComponent implements OnInit {
 
     this.isLoading = true;
 
-    // Banner ve Logo: Placeholder (kısa ID) göndermiyoruz; yükleme sonrası backend Guid path atayacak. Kısa path kaydedilirse banner görüntülenmez.
-    const bannerUrl = undefined;
-    const logoUrl = undefined;
-
     const dto: CreateCommunityDto = {
       comName: this.comName.trim(),
       comCategory: this.comCategory || undefined,
@@ -421,40 +417,59 @@ export class CommunityRegisterComponent implements OnInit {
       comLeadMail: this.comLeadMail.trim(),
       webSiteUrl: this.webSiteUrl?.trim() || undefined,
       instagramUrl: this.instagramUrl?.trim() || undefined,
-      bannerUrl,
-      logoUrl,
+      bannerUrl: undefined,
+      logoUrl: undefined,
       miniAbout: this.miniAbout?.trim() || undefined,
       isActivity: false, // Onay bekleyen; ilgili şehir kurumsal dashboard'da onaylanacak
     };
 
-    // SetupToken varsa complete-community-setup kullan (hesap+topluluk birlikte oluşturulur)
     const token = this.setupToken || sessionStorage.getItem('community_setup_token') || '';
 
     if (token) {
-      // --- YENI AKIŞ: complete-community-setup ---
-      // Backend topluluk oluşturduktan sonra "Topluluğunuz hala onay aşamasındadır" hatası fırlatır.
-      // Bu hata beklenen bir durumdur: topluluk VE kullanıcı veritabanında oluşturulmuştur.
-      // Hata mesajını kontrol edip başarılı kayıt olarak ele alıyoruz.
-      this.authService.completeCommunitySetup(token, dto).subscribe({
+      // --- SETUP AKIŞI: Önce POST /api/Auth/community-setup/banner ve .../logo (X-Setup-Token), sonra complete-community-setup (bannerUrl/logoUrl body'de) ---
+      const bannerUrl$ = this.bannerFile
+        ? this.authService.uploadSetupBanner(this.bannerFile, token).pipe(
+            catchError((err) => {
+              Logger.error('Banner yüklenirken hata:', err);
+              return of('');
+            })
+          )
+        : of('');
+      const logoUrl$ = this.logoFile
+        ? this.authService.uploadSetupLogo(this.logoFile, token).pipe(
+            catchError((err) => {
+              Logger.error('Logo yüklenirken hata:', err);
+              return of('');
+            })
+          )
+        : of('');
+
+      bannerUrl$.pipe(
+        switchMap((bannerUrl) =>
+          logoUrl$.pipe(
+            map((logoUrl) => ({
+              bannerUrl: bannerUrl || undefined,
+              logoUrl: logoUrl || undefined,
+            }))
+          )
+        ),
+        switchMap(({ bannerUrl, logoUrl }) =>
+          this.authService.completeCommunitySetup(token, { ...dto, bannerUrl, logoUrl })
+        )
+      ).subscribe({
         next: (response: any) => {
-          const communityId = response?.community?.communityId ?? response?.community?.CommunityId ?? response?.communityId;
-          sessionStorage.removeItem('community_setup_token');
           sessionStorage.removeItem('community_register_email');
           sessionStorage.removeItem('community_register_return');
-          // Backend bazen accessToken döndürmez (örn. onay bekleyen durum); token yoksa banner/logo 401 alır.
-          // Görsel yüklemeden hemen önce token varsa kaydet ki istekler Authorization ile gitsin.
-          const token = response?.accessToken ?? response?.AccessToken ?? response?.token ?? response?.Token;
-          if (token) {
-            this.authService.saveToken(token);
+          const accessToken = response?.accessToken ?? response?.AccessToken ?? response?.token ?? response?.Token;
+          if (accessToken) {
+            this.authService.saveToken(accessToken);
           }
-          this.uploadBannerAndLogoThenSuccess(communityId);
+          this.onCommunitySetupSuccess();
         },
         error: (err) => {
           const msg = err?.error?.message || err?.message || '';
           const msgLower = msg.toLowerCase();
 
-          // Backend topluluk oluşturduktan sonra "onay aşamasındadır" hatası fırlatır.
-          // Bu BEKLENEN bir durumdur — topluluk başarıyla oluşturuldu ama onay bekliyor.
           if (
             msgLower.includes('onay') ||
             msgLower.includes('aşamasındadır') ||
@@ -463,10 +478,8 @@ export class CommunityRegisterComponent implements OnInit {
             sessionStorage.removeItem('community_setup_token');
             sessionStorage.removeItem('community_register_email');
             sessionStorage.removeItem('community_register_return');
-            // Hata branch'te communityId yok; görsel yüklemesi atlanır
             this.onCommunitySetupSuccess();
           } else {
-            // Gerçek hata (validation, token geçersiz, vb.)
             this.isLoading = false;
             this.toastService.show(msg || 'Topluluk oluşturulurken bir hata oluştu.', 'error');
             Logger.error('Topluluk kurulum hatası:', err);
@@ -514,30 +527,32 @@ export class CommunityRegisterComponent implements OnInit {
   }
 
   /**
-   * Topluluk oluşturulduktan sonra banner/logo dosyalarını sunucuya sırayla yükler (paralel yükleme ikinci update'in birincisini ezmesin diye).
+   * Topluluk oluşturulduktan sonra önce logo, sonra banner sunucuya sırayla yüklenir.
+   * setupToken: complete-community-setup sonrası JWT dönmezse backend'in X-Setup-Token ile yetkilendirmesi için.
    */
-  private uploadBannerAndLogoThenSuccess(communityId: string): void {
+  private uploadBannerAndLogoThenSuccess(communityId: string, setupToken?: string): void {
     if (!communityId) {
       this.onCommunitySetupSuccess();
       return;
     }
-    const banner$ = this.bannerFile
-      ? this.communityService.uploadBanner(communityId, this.bannerFile).pipe(
-          catchError((err) => {
-            Logger.error('Banner yüklenirken hata:', err);
-            return of(null);
-          })
-        )
-      : of(null);
+    const opts = setupToken ? { setupToken } : undefined;
     const logo$ = this.logoFile
-      ? this.communityService.uploadLogo(communityId, this.logoFile).pipe(
+      ? this.communityService.uploadLogo(communityId, this.logoFile, opts).pipe(
           catchError((err) => {
             Logger.error('Logo yüklenirken hata:', err);
             return of(null);
           })
         )
       : of(null);
-    banner$.pipe(switchMap(() => logo$)).subscribe({
+    const banner$ = this.bannerFile
+      ? this.communityService.uploadBanner(communityId, this.bannerFile, opts).pipe(
+          catchError((err) => {
+            Logger.error('Banner yüklenirken hata:', err);
+            return of(null);
+          })
+        )
+      : of(null);
+    logo$.pipe(switchMap(() => banner$)).subscribe({
       next: () => this.onCommunitySetupSuccess(),
       error: () => this.onCommunitySetupSuccess(),
     });
@@ -549,6 +564,7 @@ export class CommunityRegisterComponent implements OnInit {
    */
   private onCommunitySetupSuccess(): void {
     this.isLoading = false;
+    sessionStorage.removeItem('community_setup_token');
 
     // Topluluk yeni oluşturuldu → ComConfirm=0, IsActivity=false
     localStorage.setItem('community_approved', JSON.stringify(false));

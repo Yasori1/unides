@@ -98,6 +98,8 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
   confirmHiding = false;
   private confirmTimer: any;
   private toastTimer: any;
+  /** Kurumsal'da başkan e-postası onaylandığında eski başkanı hesaptan çıkarmak için periyodik lead-by-me kontrolü */
+  private accessCheckIntervalId: ReturnType<typeof setInterval> | null = null;
   showBannerModal = false;
   showAvatarModal = false;
   /** Güncelle ve Onaya Gönder ile birlikte yüklenecek; hemen sunucuya gitmez */
@@ -449,12 +451,18 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
             this.isLoadingEvents = true;
             this.loadCommunityEvents(community.id);
             this.loadLeaderStats();
+            this.startPeriodicAccessCheck();
             return;
           }
-          // lead-by-me 404/403 döndüyse eski akışa düş (aktif listeden bul)
+          // lead-by-me 404 döndüyse eski akışa düş (aktif listeden bul)
           this.loadCommunityProfileFallback();
         },
-        error: () => {
+        error: (err: any) => {
+          // 403: Topluluk başkanı e-postası Kurumsal'da onaylandı, eski başkanın erişimi kaldırıldı
+          if (err?.status === 403) {
+            this.handleCommunityAccessRevoked();
+            return;
+          }
           this.loadCommunityProfileFallback();
         },
       });
@@ -462,6 +470,53 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       Logger.error('Error in loadCommunityProfile:', e);
       this.communityApproved = false;
     }
+  }
+
+  /**
+   * Kurumsal'da başkan e-postası onaylandığında giriş yapmış eski başkanı hesaptan çıkarmak için
+   * periyodik olarak lead-by-me çağrılır. 403 gelirse (başkan değişti, onaylandı) oturum kapatılır.
+   */
+  private startPeriodicAccessCheck(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    this.stopPeriodicAccessCheck();
+    const intervalMs = 90 * 1000; // 90 saniye
+    this.accessCheckIntervalId = setInterval(() => {
+      this.communityService.getMyLeadCommunity().subscribe({
+        next: () => {},
+        error: (err: any) => {
+          if (err?.status === 403) {
+            this.stopPeriodicAccessCheck();
+            this.handleCommunityAccessRevoked();
+          }
+        },
+      });
+    }, intervalMs);
+  }
+
+  private stopPeriodicAccessCheck(): void {
+    if (this.accessCheckIntervalId != null) {
+      clearInterval(this.accessCheckIntervalId);
+      this.accessCheckIntervalId = null;
+    }
+  }
+
+  /**
+   * Topluluk başkanı e-postası Kurumsal Dashboard'da değiştirilip onaylandığında eski başkanın
+   * panele erişimi kaldırıldığında çağrılır. Oturumu kapatır ve anasayfaya yönlendirir.
+   */
+  private handleCommunityAccessRevoked(): void {
+    this.isLoadingCommunity = false;
+    this.showToast(
+      'Topluluk başkanı e-postası değişti. Bu panele erişim yetkiniz kaldırıldı.',
+      'error'
+    );
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('user_info');
+      localStorage.removeItem('user_type');
+    }
+    this.router.navigate(['/']);
   }
 
   private loadCommunityProfileFallback(): void {
@@ -592,10 +647,16 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
               this.isLoadingEvents = true;
               this.loadCommunityEvents(communityDetail.id);
               this.loadLeaderStats();
+              this.startPeriodicAccessCheck();
             }
             resolve();
           },
           error: (err: any) => {
+            if (err?.status === 403) {
+              this.handleCommunityAccessRevoked();
+              resolve();
+              return;
+            }
             Logger.error(`Community detail yüklenemedi (${community.id}):`, err);
             resolve();
           },
@@ -612,9 +673,9 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
         this.isLoadingCommunity = false;
         this.communityApproved = false;
 
-        // Kullanıcı bir topluluğun başkanı değil, ana sayfaya yönlendir
+        // Kullanıcı bir topluluğun başkanı değil veya başkan e-postası Kurumsal'da değiştirilip onaylandı
         this.showToast(
-          'Bu e-posta adresi ile ilişkili bir topluluk bulunamadı. Topluluk girişi için topluluk başkanı e-postası ile giriş yapmanız gerekmektedir.',
+          'Bu e-posta adresi ile ilişkili bir topluluk bulunamadı. Topluluk başkanı e-postası Kurumsal Dashboard\'da değiştirildiyse artık bu panele erişemezsiniz.',
           'error'
         );
 
@@ -644,6 +705,10 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
         };
       },
       error: (err: any) => {
+        if (err?.status === 403) {
+          this.handleCommunityAccessRevoked();
+          return;
+        }
         // Hata durumunda stats'ı sıfırla veya varsayılan değerlerde bırak
         this.stats = {
           totalMembers: 0,
@@ -827,6 +892,10 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
         }
       },
       error: (err: any) => {
+        if (err?.status === 403) {
+          this.handleCommunityAccessRevoked();
+          return;
+        }
         Logger.error('Etkinlikler yüklenemedi:', err);
         // Hata durumunda boş array kullan
         this.dashboardEvents = [];
@@ -2636,6 +2705,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.stopPeriodicAccessCheck();
     // AFK Detection'ı durdur
     this.afkDetectionService.stop();
   }

@@ -1,9 +1,11 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpContext } from '@angular/common/http';
 import { Observable, tap, catchError, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
 import { Logger } from '../utils/logger.util';
+import { SKIP_AUTH } from '../core/http-context-tokens';
 
 export interface LoginResponse {
   // Eski/varsayılan alanlar
@@ -154,11 +156,41 @@ export class AuthService {
     return this.http.post(`${this.apiUrl}/Auth/register`, backendData);
   }
 
+  // --- TOPLULUK KURULUM: BANNER / LOGO UPLOAD (JWT yok, X-Setup-Token ile) ---
+  // POST /api/Auth/community-setup/banner ve .../logo — setupToken header veya body'den.
+  uploadSetupBanner(file: File, setupToken: string): Observable<string> {
+    const formData = new FormData();
+    formData.append('File', file, file.name);
+    const headers = new HttpHeaders().set('X-Setup-Token', setupToken.trim());
+    const context = new HttpContext().set(SKIP_AUTH, true);
+    return this.http
+      .post<{ BannerUrl?: string; bannerUrl?: string }>(
+        `${this.apiUrl}/Auth/community-setup/banner`,
+        formData,
+        { headers, context }
+      )
+      .pipe(map((r) => r.BannerUrl ?? r.bannerUrl ?? ''));
+  }
+
+  uploadSetupLogo(file: File, setupToken: string): Observable<string> {
+    const formData = new FormData();
+    formData.append('File', file, file.name);
+    const headers = new HttpHeaders().set('X-Setup-Token', setupToken.trim());
+    const context = new HttpContext().set(SKIP_AUTH, true);
+    return this.http
+      .post<{ LogoUrl?: string; logoUrl?: string }>(
+        `${this.apiUrl}/Auth/community-setup/logo`,
+        formData,
+        { headers, context }
+      )
+      .pipe(map((r) => r.LogoUrl ?? r.logoUrl ?? ''));
+  }
+
   // --- 7. TOPLULUK KURULUM TAMAMLA ---
   // POST /api/Auth/complete-community-setup
   // E-posta doğrulandıktan sonra topluluk başkanı topluluk bilgilerini girerek hesap+topluluk oluşturur.
   // Backend: Mevcut kullanıcı RoleId 4 veya 5 ise RoleId 3'e çevrilir (tekrar topluluk oluşturma).
-  // setupToken: verify-email cevabından gelen token; community: CreateCommunityDto
+  // setupToken: verify-email cevabından gelen token; community: CreateCommunityDto (bannerUrl/logoUrl upload sonrası eklenir)
   completeCommunitySetup(setupToken: string, community: any): Observable<any> {
     return this.http
       .post<any>(`${this.apiUrl}/Auth/complete-community-setup`, {

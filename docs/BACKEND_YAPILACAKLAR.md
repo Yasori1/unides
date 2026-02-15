@@ -81,10 +81,27 @@ Frontend, **BACKEND_PENDING_UPDATE_DATA.md**’deki gibi **PascalCase** anahtarl
 
 ## 5. Özet checklist (backend ekibi için)
 
-| # | Yapılacak | Açıklama |
-|---|-----------|----------|
-| 1 | ComConfirm = 4 iken **POST /{id}/banner** reddedilmesin | Gelen BannerUrl, mevcut PendingUpdateData ile merge edilip kaydedilsin. |
-| 2 | ComConfirm = 4 iken **POST /{id}/logo** reddedilmesin | Gelen LogoUrl, mevcut PendingUpdateData ile merge edilip kaydedilsin. |
-| 3 | ComConfirm = 4 iken **PUT /update/{id}** (X-Submit-For-Approval: true) reddedilmesin | Gönderilen DTO alanları mevcut PendingUpdateData ile merge edilip kaydedilsin; ComConfirm = 4 kalsın. |
+| #   | Yapılacak                                                                            | Açıklama                                                                                              |
+| --- | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| 1   | ComConfirm = 4 iken **POST /{id}/banner** reddedilmesin                              | Gelen BannerUrl, mevcut PendingUpdateData ile merge edilip kaydedilsin.                               |
+| 2   | ComConfirm = 4 iken **POST /{id}/logo** reddedilmesin                                | Gelen LogoUrl, mevcut PendingUpdateData ile merge edilip kaydedilsin.                                 |
+| 3   | ComConfirm = 4 iken **PUT /update/{id}** (X-Submit-For-Approval: true) reddedilmesin | Gönderilen DTO alanları mevcut PendingUpdateData ile merge edilip kaydedilsin; ComConfirm = 4 kalsın. |
+
+---
+
+## 6. Topluluk kaydı: Banner/Logo 403 (X-Setup-Token)
+
+**Durum:** Topluluk kaydı 3. adımda `POST /api/Auth/complete-community-setup` başarılı (200) dönüyor; ardından frontend `POST /api/Communities/{id}/banner` ve `POST /api/Communities/{id}/logo` ile görsel yüklüyor. Backend bazen complete-community-setup yanıtında **JWT (accessToken) döndürmüyor** (örn. topluluk onay bekliyor). Bu durumda frontend bu iki istekte **Authorization** yerine **`X-Setup-Token`** header'ı ile (e-posta doğrulama sonrası verilen setup token) istek atıyor. Backend 403 "Kullanıcı bilgisi bulunamadı." dönüyorsa banner/logo yüklenemiyor.
+
+**Yapılacak:**
+
+- **`POST /api/Communities/{id}/banner`** ve **`POST /api/Communities/{id}/logo`** endpoint'lerinde:
+  - İstekte **`X-Setup-Token`** header'ı varsa, bu token'ı doğrulayın (complete-community-setup ile aynı token; süresi dolmamış olmalı).
+  - Token geçerliyse ve ilgili topluluk bu kuruluma aitse, **Authorization Bearer zorunlu olmasın**; X-Setup-Token ile yükleme yapılabilsin.
+  - Böylece topluluk kaydı tamamlandıktan hemen sonra (JWT dönmeden) logo ve banner yüklenebilir.
+
+Alternatif: complete-community-setup yanıtında her durumda (onay bekleyen dahil) kısa süreli bir **accessToken** döndürürseniz, frontend bunu kullanır ve X-Setup-Token'a gerek kalmaz.
+
+**Güvenlik notu:** Verify-email sonrası topluluk başkanı için bilerek User/JWT üretilmiyor; kullanıcı sadece setup linkine (e-posta doğrulamış) sahip. Bu durumda **JWT yerine SetupToken ile yetkilendirme** güvenli kabul edilir: SetupToken da bir kimlik kanıtıdır (uzun-rastgele, süreli, tek kişiye mail ile gidiyor). Endpoint JWT'siz ama açık değildir: setupToken zorunlu, PendingEmailVerification üzerinde token + expiry doğrulanıyor, sadece RoleId == 3, dosya limiti ve extension kontrolü var. Yani "Bu linki kim aldıysa (mail sahibi), o upload yapabilir" mantığı.
 
 Bu üç madde uygulandığında frontend’in “tüm fotoğraflar sunucuda, önce upload’lar sonra PUT” akışı backend ile uyumlu çalışır.
