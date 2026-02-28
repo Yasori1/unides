@@ -1,0 +1,145 @@
+<app-header></app-header>
+
+<div class="st-main-wrapper">
+    <div class="st-container">
+
+        <div class="category-top-section">
+            <div class="breadcrumb">
+                <a routerLink="/"><i class='fa-solid fa-house'></i></a>
+                <span class="sep">/</span>
+                <a routerLink="/">Forumlar</a>
+                <span class="sep">/</span>
+                <a href="#">{{ categoryInfo.parent }}</a>
+                <span class="sep">/</span>
+                <span class="current">{{ categoryInfo.title }}</span>
+            </div>
+
+            <div class="cat-title-bar">
+                <div class="info">
+                    <h1>{{ categoryInfo.title }}</h1>
+                    <p>{{ categoryInfo.desc }}</p>
+                </div>
+                <button class="btn-new-topic"><i class='fa-solid fa-pen-to-square'></i> YENİ KONU AÇ</button>
+            </div>
+        </div>
+
+        <div class="forum-grid-layout">
+            
+            <div class="topic-list-area">
+                
+                <div class="toolbar">
+                    <div class="filters">
+                        <a href="#" class="active">Tümü</a>
+                        <a href="#">Açık</a>
+                        <a href="#">Popüler</a>
+                        <a href="#">Kilitli</a>
+                    </div>
+                    <div class="pagination">
+                        <span class="active">1</span>
+                        <a href="#">2</a>
+                        <a href="#">3</a>
+                        <a href="#"><i class='fa-solid fa-chevron-right'></i></a>
+                    </div>
+                </div>
+
+                <div class="st-topic-table">
+                    <div class="table-header">
+                        <div class="th-main">KONU / BAŞLATAN</div>
+                        <div class="th-stats">İSTATİSTİK</div>
+                        <div class="th-last">SON MESAJ</div>
+                    </div>
+
+                    <div class="topic-group-label">SABİT KONULAR</div>
+                    
+                    <div class="topic-row sticky" *ngFor="let topic of stickyTopics">
+                        <div class="t-icon">
+                            <i class='fa-solid fa-lock icon-red' *ngIf="topic.status === 'locked'"></i>
+                            <i class='fa-solid fa-thumbtack icon-gold' *ngIf="topic.status !== 'locked'"></i>
+                        </div>
+                        <div class="t-main">
+                            <div class="t-tags" *ngIf="topic.tag">
+                                <span class="tag" [ngClass]="topic.tagColor">{{ topic.tag }}</span>
+                            </div>
+                            <h3><a routerLink="/forum-topic">{{ topic.title }}</a></h3>
+                            <span class="t-author"><i class='fa-solid fa-user'></i> {{ topic.author }} &bull; {{ topic.date }}</span>
+                        </div>
+                        <div class="t-stats">
+                            <div class="stat-item"><strong>{{ topic.replies }}</strong> Cevap</div>
+                            <div class="stat-item sub"><strong>{{ topic.views }}</strong> Gösterim</div>
+                        </div>
+                        <div class="t-last">
+                            <img [src]="'https://ui-avatars.com/api/?name=' + topic.lastPost.user + '&background=random'" class="avatar">
+                            <div class="meta">
+                                <span class="time">{{ topic.lastPost.time }}</span>
+                                <span class="user">by <strong>{{ topic.lastPost.user }}</strong></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="topic-group-label normal">FORUM KONULARI</div>
+
+                    <div class="topic-row" *ngFor="let topic of topics">
+                        <div class="t-icon normal">
+                            <i class='fa-regular fa-file-lines'></i>
+                        </div>
+                        <div class="t-main">
+                            <div class="t-tags" *ngIf="topic.tag">
+                                <span class="tag" [ngClass]="topic.tagColor">{{ topic.tag }}</span>
+                            </div>
+                            <h3><a routerLink="/forum-topic">{{ topic.title }}</a></h3>
+                            <span class="t-author"><i class='fa-solid fa-user'></i> {{ topic.author }} &bull; {{ topic.date }}</span>
+                        </div>
+                        <div class="t-stats">
+                            <div class="stat-item"><strong>{{ topic.replies }}</strong> Cevap</div>
+                            <div class="stat-item sub"><strong>{{ topic.views }}</strong> Gösterim</div>
+                        </div>
+                        <div class="t-last">
+                            <img [src]="'https://ui-avatars.com/api/?name=' + topic.lastPost.user + '&background=random'" class="avatar">
+                            <div class="meta">
+                                <span class="time">{{ topic.lastPost.time }}</span>
+                                <span class="user">by <strong>{{ topic.lastPost.user }}</strong></span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="toolbar bottom">
+                     <button class="btn-new-topic small"><i class='fa-solid fa-plus'></i> Konu Aç</button>
+                     <div class="pagination">
+                        <span class="active">1</span>
+                        <a href="#">2</a>
+                        <a href="#">3</a>
+                        <span class="dots">...</span>
+                        <a href="#">12</a>
+                        <a href="#"><i class='fa-solid fa-chevron-right'></i></a>
+                    </div>
+                </div>
+
+            </div>
+
+            <aside class="forum-sidebar">
+                <div class="sidebar-box">
+                    <div class="box-header">Kategori İstatistikleri</div>
+                    <div class="box-content stats-rows">
+                        <div class="row"><span>Toplam Konu:</span> <strong>12.4K</strong></div>
+                        <div class="row"><span>Toplam Mesaj:</span> <strong>95K</strong></div>
+                        <div class="row"><span>Aktif İzleyen:</span> <strong>42 Üye</strong></div>
+                    </div>
+                </div>
+
+                <div class="sidebar-box">
+                    <div class="box-header">Popüler Etiketler</div>
+                    <div class="box-content tags-cloud">
+                        <span class="tag-cloud-item">#Angular</span>
+                        <span class="tag-cloud-item">#Python</span>
+                        <span class="tag-cloud-item">#Java</span>
+                    </div>
+                </div>
+            </aside>
+
+        </div>
+    </div>
+</div>
+
+<app-footer></app-footer>

@@ -1,0 +1,134 @@
+<app-header></app-header>
+
+<div class="st-main-wrapper">
+    <div class="st-container">
+
+        <div class="breadcrumb mb-20">
+            <a routerLink="/"><i class='fa-solid fa-house'></i></a>
+            <span class="sep">/</span>
+            <a routerLink="/">Forumlar</a>
+            <span class="sep">/</span>
+            <a routerLink="/forum-category">{{ topicInfo.parent }}</a>
+            <span class="sep">/</span>
+            <span class="current">{{ topicInfo.title }}</span>
+        </div>
+
+        <div class="topic-header-section mb-20">
+            <div class="title-wrapper">
+                <div class="tags">
+                    <span class="tag" *ngFor="let tag of topicInfo.tags">{{ tag }}</span>
+                </div>
+                <h1>{{ topicInfo.title }}</h1>
+            </div>
+            <div class="actions">
+                <button class="btn-reply"><i class='fa-solid fa-reply'></i> CEVAP YAZ</button>
+            </div>
+        </div>
+
+        <div class="toolbar top mb-10">
+            <div class="pagination">
+                <span class="active">1</span>
+                <a href="#">2</a>
+                <a href="#">3</a>
+            </div>
+            <div class="tools">
+                <a href="#"><i class='fa-solid fa-bell'></i> Takip Et</a>
+            </div>
+        </div>
+
+        <div class="forum-grid-layout">
+            
+            <div class="posts-area">
+                
+                <div class="st-post-block" *ngFor="let post of posts; let i = index">
+                    
+                    <div class="post-user-col">
+                        <div class="user-avatar-area">
+                            <img [src]="'https://ui-avatars.com/api/?name=' + post.user.avatar + '&background=random&size=128'" alt="Avatar">
+                            <span class="online-status"></span>
+                        </div>
+                        
+                        <div class="user-names">
+                            <h3><a href="#">{{ post.user.name }}</a></h3>
+                            <span class="user-title">{{ post.user.title }}</span>
+                        </div>
+
+                        <div class="user-banner" [ngClass]="post.user.roleColor">
+                            <span *ngIf="post.user.roleColor === 'admin'">YÖNETİCİ</span>
+                            <span *ngIf="post.user.roleColor === 'mod'">MODERATÖR</span>
+                            <span *ngIf="post.user.roleColor === 'member'">ÜYE</span>
+                        </div>
+
+                        <div class="user-stats">
+                            <div class="row">
+                                <span>Üyelik:</span> {{ post.user.stats.joinDate }}
+                            </div>
+                            <div class="row">
+                                <span>Mesaj:</span> {{ post.user.stats.messages }}
+                            </div>
+                            <div class="row">
+                                <span>Beğeni:</span> {{ post.user.stats.likes }}
+                            </div>
+                            <div class="row" *ngIf="post.user.stats.location">
+                                <span>Konum:</span> {{ post.user.stats.location }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="post-content-col">
+                        
+                        <div class="post-meta-header">
+                            <span class="date"><i class='fa-regular fa-clock'></i> {{ post.date }}</span>
+                            <div class="meta-right">
+                                <span class="share-link">#{{ post.id }}</span>
+                            </div>
+                        </div>
+
+                        <div class="post-body">
+                            <div [innerHTML]="post.content"></div>
+                        </div>
+
+                        <div class="post-signature" *ngIf="post.signature">
+                            {{ post.signature }}
+                        </div>
+
+                        <div class="post-footer-actions">
+                            <div class="left">
+                                <a href="#" class="btn-action report"><i class='fa-solid fa-triangle-exclamation'></i> Rapor</a>
+                            </div>
+                            <div class="right">
+                                <button class="btn-action like"><i class='fa-regular fa-thumbs-up'></i> Beğen ({{ post.likes }})</button>
+                                <button class="btn-action quote"><i class='fa-solid fa-quote-right'></i> Alıntıla</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <aside class="forum-sidebar">
+                <div class="sidebar-box">
+                    <div class="box-header">Konu Bilgisi</div>
+                    <div class="box-content info-list">
+                        <div class="row"><span>Görüntüleme:</span> <strong>1,204</strong></div>
+                        <div class="row"><span>Cevaplar:</span> <strong>34</strong></div>
+                        <div class="row"><span>Son Mesaj:</span> <strong>Az önce</strong></div>
+                    </div>
+                </div>
+
+                <div class="sidebar-box">
+                    <div class="box-header">Benzer Konular</div>
+                    <div class="box-content similar-topics">
+                        <a href="#"><i class='fa-solid fa-angle-right'></i> Angular 17 Signals Rehberi</a>
+                        <a href="#"><i class='fa-solid fa-angle-right'></i> RxJS vs Signals?</a>
+                        <a href="#"><i class='fa-solid fa-angle-right'></i> State Management Önerileri</a>
+                    </div>
+                </div>
+            </aside>
+
+        </div>
+    </div>
+</div>
+
+<app-footer></app-footer>
