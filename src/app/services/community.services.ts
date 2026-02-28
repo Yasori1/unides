@@ -325,11 +325,6 @@ export class CommunityService {
       status = 'Pasif';
     }
     const isUpdatePending = comConfirm === 4;
-    // #region agent log
-    if (status === 'Reddedilen' || status === 'Silinmiş') {
-      fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'community.services.ts:mapMiniDtoToCommunity',message:'Status mapping',data:{dtoDeletedAt: dto.deletedAt ?? dto.DeletedAt, deletedAt, comConfirm, resultingStatus: status},timestamp:Date.now(),hypothesisId:'H1'})}).catch(()=>{});
-    }
-    // #endregion
 
     return {
       id: dto.communityId || dto.CommunityId,

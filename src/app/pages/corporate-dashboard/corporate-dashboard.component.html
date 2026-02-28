@@ -327,7 +327,7 @@
                   <span class="pending-type-hint" *ngIf="!item.hasEverBeenApproved">(Yeni kayıt)</span>
                 </ng-container>
               </span>
-              <span class="category-badge" *ngIf="(getPendingDisplay(item)?.category ?? item.category)">{{ getPendingDisplay(item)?.category ?? item.category }}</span>
+              <span class="category-badge" *ngIf="(getPendingDisplay(item)?.category ?? item.category)">{{ (getPendingDisplay(item)?.category ?? item.category) | turkishUppercase }}</span>
             </div>
 
             <div class="card-content">

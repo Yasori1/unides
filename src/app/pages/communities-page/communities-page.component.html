@@ -92,7 +92,7 @@
           <div class="cover-bg-blur" [style.background-image]="'url(' + item.coverImage + ')'"></div>
 
           <img [src]="item.coverImage" [alt]="item.name" class="cover-img" (error)="onImageError($event, 'cover')" />
-          <span class="category-badge">{{ item.category }}</span>
+          <span class="category-badge">{{ item.category | turkishUppercase }}</span>
         </div>
 
         <div class="card-content">
@@ -142,9 +142,6 @@
             <div class="footer-info">
               <span class="city-tag" *ngIf="item.city">
                 <i class="bx bxs-map"></i> {{ item.city }}
-              </span>
-              <span class="email-tag" *ngIf="item.email">
-                <i class="bx bx-envelope"></i> {{ item.email }}
               </span>
             </div>
             <span class="action-text">İncele <i class="bx bx-right-arrow-alt"></i></span>

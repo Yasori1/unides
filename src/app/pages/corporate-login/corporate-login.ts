@@ -107,20 +107,26 @@ export class CorporateLoginComponent implements OnInit, OnDestroy {
     // Yükleniyor durumunu başlat
     this.isLoading = true;
 
-    this.authService.loginCorporate(email, password).subscribe({
-      next: (response) => {
-        // --- BAŞARILI ---
-        // 1. Toast Mesajı
+    this.authService.loginCorporate(email.trim(), password).subscribe({
+      next: (response: any) => {
+        if (response?.requiresVerification === true && response?.email) {
+          this.isLoading = false;
+          this.router.navigate(['/corporate-verification'], {
+            queryParams: { email: response.email },
+          });
+          this.toastService.show(
+            'Doğrulama kodu e-posta adresinize gönderildi. Lütfen kodu girin.',
+            'success'
+          );
+          return;
+        }
         this.toastService.show(
           'Giriş başarılı! Ana sayfaya yönlendiriliyorsunuz...',
           'success'
         );
-
-        // 2. Yönlendirme - Anasayfaya yönlendir
         setTimeout(() => {
-          this.isLoading = false; // Spinner durur, yazı geri gelir
+          this.isLoading = false;
           this.router.navigateByUrl('/').catch((err) => {
-            // Navigation hatası durumunda window.location kullan
             if (isPlatformBrowser(this.platformId)) {
               window.location.href = '/';
             }
@@ -128,12 +134,7 @@ export class CorporateLoginComponent implements OnInit, OnDestroy {
         }, 1500);
       },
       error: (error) => {
-        // --- HATA ---
-
-        // 1. Spinner'ı durdur, butonu eski haline getir
         this.isLoading = false;
-
-        // 2. Özel Hata Mesajı
         const errorMessage =
           error.error?.message ||
           'Giriş yapılamadı. Lütfen bilgilerinizi kontrol edip tekrar deneyiniz.';

@@ -161,17 +161,20 @@ $border-color: #e2e8f0; // Slate 200
 }
 
 .hero-section {
-  padding: 40px 0 50px;
+  padding: 100px 0 100px;
   overflow: hidden;
 
   .hero-container {
     display: grid;
     grid-template-columns: 1.1fr 0.9fr;
-    align-items: center;
+    align-items: stretch;
     gap: 40px;
   }
 
   .hero-text-side {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     opacity: 0;
     animation: fadeIn 1s forwards;
 
@@ -200,13 +203,21 @@ $border-color: #e2e8f0; // Slate 200
 
   .hero-visual-side {
     position: relative;
-    height: 460px;
-    width: 560px;
+    min-height: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     opacity: 0;
     animation: fadeIn 1s 0.5s forwards;
+
+    .about-image.clean-logo-wrapper {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
 
     // --- YENİ: Floating Wrapper Yapısı ---
     .floating-wrapper {
@@ -354,7 +365,7 @@ $border-color: #e2e8f0; // Slate 200
   }
 }
 
-// YENİ GSB LOGO STİLİ
+// YENİ GSB LOGO STİLİ (hero içinde yükseklik metin bloğu ile aynı)
 .about-image.clean-logo-wrapper {
   display: flex;
   justify-content: center;
@@ -362,9 +373,11 @@ $border-color: #e2e8f0; // Slate 200
   padding: 0;
 
   .gsb-main-logo {
-    max-width: 350px;
-    width: 100%;
-    height: auto;
+    height: 100%;
+    width: auto;
+    max-width: 260px;
+    margin-left: 150px;
+    object-fit: contain;
     border-radius: 0;
     filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.08));
     transition: transform 0.3s;
@@ -390,6 +403,9 @@ $border-color: #e2e8f0; // Slate 200
       font-weight: 800;
       margin-bottom: 20px;
       color: $text-dark;
+      .highlight {
+        color: $primary-blue;
+      }
       .light-text {
         font-weight: 300;
         color: $text-gray;

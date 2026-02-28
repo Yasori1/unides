@@ -26,7 +26,8 @@
     "logLevel": "debug",
     "ws": true,
     "headers": {
-      "Accept": "application/json"
+      "Accept": "application/json",
+      "Origin": "https://unidesportal.org"
     }
   },
   "/spam-check": {

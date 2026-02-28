@@ -181,7 +181,7 @@
                     <div class="tags-row">
                       <span class="tag uni" *ngIf="event.university">{{ event.university }}</span>
                       <span class="tag category" *ngIf="event.category" [style.color]="event.color || '#2563eb'">
-                        {{ event.category }}
+                        {{ event.category | turkishUppercase }}
                       </span>
                     </div>
 
@@ -190,7 +190,7 @@
 
                     <div class="bottom-meta">
                       <span class="category" *ngIf="event.category" [style.color]="event.color || '#2563eb'">
-                        {{ event.category }}
+                        {{ event.category | turkishUppercase }}
                       </span>
                       <div class="mini-location">
                         <span class="material-symbols-outlined">location_on</span>
@@ -236,7 +236,7 @@
                     <img [src]="
                         community.coverImage || community.banner || 'assets/img/placeholder-cover.svg'
                       " [alt]="community.name" class="cover-img" (error)="onImageError($event, 'cover')" />
-                    <span class="category-badge">{{ community.category }}</span>
+                    <span class="category-badge">{{ community.category | turkishUppercase }}</span>
                   </div>
                   <div class="card-content">
                     <div class="header-row">
@@ -305,7 +305,7 @@
               <img [src]="
                   community.coverImage || community.banner || 'assets/img/placeholder-cover.svg'
                 " [alt]="community.name" class="cover-img" onerror="this.src='assets/img/placeholder-cover.svg'" />
-              <span class="category-badge">{{ community.category }}</span>
+              <span class="category-badge">{{ community.category | turkishUppercase }}</span>
             </div>
 
             <div class="card-content">
@@ -393,7 +393,7 @@
               <div class="tags-row">
                 <span class="tag uni" *ngIf="event.university">{{ event.university }}</span>
                 <span class="tag category" *ngIf="event.category" [style.color]="event.color || '#2563eb'">
-                  {{ event.category }}
+                  {{ event.category | turkishUppercase }}
                 </span>
               </div>
 
@@ -402,7 +402,7 @@
 
               <div class="bottom-meta">
                 <span class="category" *ngIf="event.category" [style.color]="event.color || '#2563eb'">
-                  {{ event.category }}
+                  {{ event.category | turkishUppercase }}
                 </span>
                 <div class="mini-location">
                   <span class="material-symbols-outlined">location_on</span>

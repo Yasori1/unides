@@ -35,6 +35,14 @@
   width: 100%;
 }
 
+/* Navbar: Geliştiriciler sayfasında beyaz arka plan */
+:host ::ng-deep app-site-navbar .navbar {
+  background: #ffffff !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
 /* Refractive Circuit Background */
 .circuit-overlay {
   position: fixed;

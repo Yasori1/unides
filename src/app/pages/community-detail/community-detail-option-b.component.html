@@ -53,7 +53,7 @@
                 onerror="this.src='assets/img/placeholder-logo.png'"
               />
               <div class="header-text">
-                <div class="category-badge">{{ community.category }}</div>
+                <div class="category-badge">{{ community.category | turkishUppercase }}</div>
                 <h1 class="community-title">{{ community.name }}</h1>
                 <div class="community-meta">
                   <div class="meta-item" *ngIf="community.university">

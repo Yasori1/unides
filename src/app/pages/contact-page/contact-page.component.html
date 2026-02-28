@@ -78,16 +78,6 @@
               Aşağıdaki formu doldurarak bize ulaşabilirsin. Ekibimiz en kısa sürede dönüş
               yapacaktır.
             </p>
-
-            <div class="mini-faq">
-              <div class="faq-item">
-                <i class="bx bx-question-mark"></i>
-                <div>
-                  <strong>Topluluk başvurusu nasıl yapılır?</strong>
-                  <p>En yakın gençlik merkezinden kaydını oluşturabilirsin.</p>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -98,21 +88,23 @@
               <div class="form-grid">
                 <div class="input-group">
                   <label>Ad Soyad</label>
-                  <input type="text" placeholder="Adınız Soyadınız" class="modern-input" />
+                  <input type="text" placeholder="Adınız Soyadınız" class="modern-input"
+                    [(ngModel)]="fullName" name="fullName" />
                 </div>
                 <div class="input-group">
                   <label>E-Posta</label>
-                  <input type="email" placeholder="ornek@email.com" class="modern-input" />
+                  <input type="email" placeholder="adınız@mail.com" class="modern-input"
+                    [(ngModel)]="email" name="email" />
                 </div>
               </div>
 
               <div class="input-group mt-3">
                 <label>Konu</label>
-                <select class="modern-input">
-                  <option>Genel Bilgi</option>
-                  <option>Teknik Destek</option>
-                  <option>Proje İş Birliği</option>
-                  <option>Diğer</option>
+                <select class="modern-input" [(ngModel)]="topic" name="topic">
+                  <option value="Genel Bilgi">Genel Bilgi</option>
+                  <option value="Teknik Destek">Teknik Destek</option>
+                  <option value="Proje İş Birliği">Proje İş Birliği</option>
+                  <option value="Diğer">Diğer</option>
                 </select>
               </div>
 
@@ -125,8 +117,14 @@
                 </div>
               </div>
 
-              <button type="submit" class="btn-submit mt-4">
-                Gönder <i class="bx bx-send"></i>
+              <!-- Honeypot: spam botları için gizli alan (doldurulursa backend spam sayar) -->
+              <div class="visually-hidden" aria-hidden="true">
+                <label>Website</label>
+                <input type="text" [(ngModel)]="website" name="website" tabindex="-1" autocomplete="off" />
+              </div>
+
+              <button type="submit" class="btn-submit mt-4" [disabled]="isSubmitting">
+                {{ isSubmitting ? 'Gönderiliyor...' : 'Gönder' }} <i class="bx bx-send"></i>
               </button>
             </form>
           </div>
@@ -163,6 +161,7 @@
 </div>
 
 <app-site-footer />
+<app-toast />
 
 <link rel="stylesheet"
   href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />

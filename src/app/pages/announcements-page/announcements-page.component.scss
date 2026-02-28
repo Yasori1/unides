@@ -463,8 +463,10 @@
 
     .date-badge {
       position: absolute;
-      bottom: 15px;
-      left: 15px;
+      top: 8px;
+      right: 8px;
+      left: auto;
+      bottom: auto;
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(4px);
       color: var(--primary-color);
@@ -506,12 +508,13 @@
       margin-bottom: 20px;
       flex-grow: 1;
       display: -webkit-box;
-      -webkit-line-clamp: 3;
-      line-clamp: 3;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
-      word-break: break-word; // Fix wrapping
-      overflow-wrap: break-word; // Fix wrapping
+      text-overflow: ellipsis;
+      word-break: break-word;
+      overflow-wrap: break-word;
     }
 
     .card-footer {

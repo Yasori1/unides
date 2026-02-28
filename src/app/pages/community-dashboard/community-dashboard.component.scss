@@ -1691,7 +1691,8 @@
     width: 100%;
   }
 
-  .char-counter {
+  .char-counter,
+  .char-count {
     font-size: 0.75rem;
     font-weight: 500;
     color: #94a3b8;
@@ -1700,6 +1701,11 @@
     &.limit-near {
       color: #f59e0b;
     }
+  }
+
+  .char-count {
+    margin-left: 6px;
+    font-style: normal;
   }
 
   input,

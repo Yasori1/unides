@@ -107,9 +107,6 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (community) => {
           this.isCheckingApproval = false;
-          // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'community-login.ts:checkIfAlreadyLoggedIn-getMyLeadCommunity',message:'getMyLeadCommunity result on init',data:{hasCommunity:!!community,id:community?.id,isActivity:community?.isActivity,name:community?.name?.substring(0,50)},timestamp:Date.now(),hypothesisId:'H3'})}).catch(()=>{});
-          // #endregion
           if (community) {
             // Onay beklese de onaylı olsa da anasayfaya yönlendir (Onay Sürecindedir sayfası kaldırıldı)
             this.authService.saveCommunityApproved(community.isActivity === true);
@@ -171,7 +168,26 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
     this.isLoading = true;
 
     this.authService.loginCommunity(email, password).subscribe({
-      next: () => {
+      next: (response: LoginResponse) => {
+        const requiresOtp = (response as any)?.requiresOtp === true;
+        const otpRequestId =
+          (response as any)?.otpRequestId || (response as any)?.OtpRequestId || '';
+        const responseEmail =
+          (response as any)?.email || (response as any)?.Email || email;
+
+        if (requiresOtp && otpRequestId) {
+          this.isLoading = false;
+          this.toastService.show(
+            'Doğrulama kodu e-posta adresinize gönderildi. Lütfen kodu girin.',
+            'success'
+          );
+          this.router.navigate(['/community-verification'], {
+            state: { email: responseEmail, otpRequestId },
+            queryParams: { email: responseEmail, otpRequestId },
+          });
+          return;
+        }
+
         // Giriş başarılı; token kaydedildi. Kendi topluluğumuzu (onay bekleyen dahil) lead-by-me ile al
         this.communityService
           .getMyLeadCommunity()
@@ -179,9 +195,6 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
           .subscribe({
             next: (community) => {
               this.isLoading = false;
-              // #region agent log
-              fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'community-login.ts:onSubmit-success-getMyLeadCommunity',message:'getMyLeadCommunity after login success',data:{hasCommunity:!!community,id:community?.id,isActivity:community?.isActivity,name:community?.name?.substring(0,50)},timestamp:Date.now(),hypothesisId:'H3'})}).catch(()=>{});
-              // #endregion
               const nextUrl = this.route.snapshot.queryParams['next'];
 
               // Giriş başarılı (onay beklese de onaylı olsa da): anasayfaya yönlendir
@@ -211,10 +224,6 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
           error.message ||
           '';
         const rawLower = (rawMessage || '').toLowerCase();
-
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'community-login.ts:onSubmit-error',message:'Login error callback',data:{status:error?.status,rawMessage:rawMessage?.substring(0,200),hasSilinmistir:rawLower.includes('silinmiştir')||rawLower.includes('silinmis'),hasReddedilmis:rawLower.includes('reddedilmiştir')||rawLower.includes('reddedilmis')},timestamp:Date.now(),hypothesisId:'H1'})}).catch(()=>{});
-        // #endregion
 
         // Backend LoginCommand: RoleId 4 = reddedilmiş, RoleId 5 = silinmiş; bu kullanıcılar giriş yapamaz, tekrar topluluk kaydı oluşturabilir.
         const isOnceRejectedThenDeleted =
@@ -280,9 +289,6 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (community) => {
           this.isCheckingApproval = false;
-          // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'community-login.ts:recheckApprovalStatus-getMyLeadCommunity',message:'getMyLeadCommunity on recheck',data:{hasCommunity:!!community,id:community?.id,isActivity:community?.isActivity},timestamp:Date.now(),hypothesisId:'H3'})}).catch(()=>{});
-          // #endregion
           if (community && community.isActivity === true) {
             // Topluluk onaylandı!
             this.authService.saveCommunityApproved(true);

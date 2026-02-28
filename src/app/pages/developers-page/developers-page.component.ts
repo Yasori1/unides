@@ -64,10 +64,10 @@ export class DevelopersPageComponent implements OnInit, OnDestroy {
     {
       name: 'Abdullah Gönç',
       role: 'Frontend Geliştirici',
-      image: 'assets/abdullahgonc.jpg',
+      image: 'assets/abdullahgonc.png',
       codeBg: 'while(true) { innovate(); }',
       description:
-        'Kullanıcı arayüzü geliştirmelerinde aktif rol alan frontend geliştirici. Responsive ve kullanıcı dostu arayüzler oluşturuyor.',
+        'Gençlere yönelik frontend geliştirmelerinde aktif rol aldım. Responsive, performans odaklı ve kullanıcı dostu arayüzler kodladım, ölçeklenebilir frontend yapıları oluşturdum.',
       socialLinks: { linkedin: '#', github: '#' },
     },
     {

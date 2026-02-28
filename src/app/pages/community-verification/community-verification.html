@@ -1,0 +1,110 @@
+<!-- Google Fonts & Icons -->
+<link
+  href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+  rel="stylesheet"
+/>
+<link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+
+<div class="main-container">
+  <div class="split-layout">
+    <div class="visual-side">
+      <div class="visual-overlay"></div>
+      <div class="visual-content">
+        <div class="brand-badge" style="cursor: pointer" routerLink="/">
+          <div class="logo-box" style="width: auto; height: auto; padding: 12px 24px; gap: 8px">
+            <i class="bx bx-home-alt" style="font-size: 1.2rem"></i>
+            <span style="font-size: 1rem">Ana Sayfa</span>
+          </div>
+        </div>
+        <div class="quote-container">
+          <h1>Topluluk<br />Doğrulama</h1>
+          <p>E-postanıza gelen kodu girin</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-side">
+      <div class="form-wrapper">
+        <div class="mobile-logo">
+          <div class="back-to-home" routerLink="/community-login">
+            <i class="bx bx-left-arrow-alt"></i>
+            <span>Topluluk Girişe Dön</span>
+          </div>
+        </div>
+
+        <div class="header-text">
+          <h3>E-Posta Doğrulama Kodu</h3>
+          <p class="email-display" *ngIf="email">
+            <strong>{{ email }}</strong> adresine gönderilen 6 haneli kodu girin.
+          </p>
+        </div>
+
+        <div class="instructions">
+          <p>E-postanıza gelen 6 haneli doğrulama kodunu aşağıya girin.</p>
+          <ul>
+            <li><i class="bx bx-check"></i> Gelen kutusunu kontrol edin</li>
+            <li><i class="bx bx-check"></i> Spam klasörünü de kontrol etmeyi unutmayın</li>
+            <li><i class="bx bx-check"></i> 6 haneli kodu eksiksiz girin</li>
+          </ul>
+        </div>
+
+        <form (submit)="onSubmit($event)">
+          <div class="code-input-group">
+            <div class="icon-wrapper">
+              <i class="bx bx-lock-alt"></i>
+            </div>
+            <input
+              type="text"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              maxlength="6"
+              placeholder="000000"
+              class="code-input"
+              [(ngModel)]="code"
+              name="code"
+              (input)="onCodeInput($event)"
+              [class.input-error]="errorMessage"
+            />
+          </div>
+
+          <button
+            type="submit"
+            class="btn-primary"
+            [disabled]="isLoading || code.length !== 6"
+            [style.opacity]="isLoading || code.length !== 6 ? '0.7' : '1'"
+          >
+            <span *ngIf="!isLoading">Doğrula <i class="bx bx-right-arrow-alt"></i></span>
+            <div *ngIf="isLoading" class="spinner-container">
+              <app-luma-spin></app-luma-spin>
+            </div>
+          </button>
+
+          <div *ngIf="errorMessage" class="error-message error-below-btn">
+            <i class="bx bx-error-circle"></i> {{ errorMessage }}
+          </div>
+
+          <div class="resend-row">
+            <span class="resend-label">Kod gelmedi mi?</span>
+            <button
+              type="button"
+              class="btn-link btn-resend"
+              (click)="resendCode()"
+              [disabled]="resendCountdown > 0 || !otpRequestId"
+            >
+              <span *ngIf="resendCountdown === 0">Kodu tekrar gönder</span>
+              <span *ngIf="resendCountdown > 0">Kodu tekrar gönder ({{ resendCountdown }} sn)</span>
+            </button>
+          </div>
+        </form>
+
+        <a routerLink="/community-login" class="back-link">
+          <i class="bx bx-arrow-back"></i> Topluluk girişe dön
+        </a>
+      </div>
+
+      <footer class="simple-footer">© ÜNİDES</footer>
+    </div>
+  </div>
+</div>
+
+<app-toast></app-toast>

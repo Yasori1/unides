@@ -27,6 +27,12 @@ export interface LoginResponse {
   id?: number;
   fullName?: string;
   email?: string;
+  /** OTP gerekli ise token dönülmez; doğrulama sayfasına yönlendirilir */
+  requiresOtp?: boolean;
+  otpRequestId?: string;
+  OtpRequestId?: string;
+  otpExpiresAt?: string;
+  OtpExpiresAt?: string;
 }
 
 export interface RegisterRequest {
@@ -55,10 +61,11 @@ export class AuthService {
   // Tüm kullanıcı tipleri aynı endpoint üzerinden giriş yapar,
   // Backend rolü response içinde döner veya token'a gömer.
   private login(email: string, password: string, roleId: number): Observable<LoginResponse> {
-    // --- TEST USER BYPASS ---
     const payload = { email, password, roleId };
     return this.http.post<LoginResponse>(`${this.apiUrl}/Auth/login`, payload).pipe(
       tap((response: any) => {
+        const requiresOtp = response?.requiresOtp === true;
+        if (requiresOtp) return;
         const token =
           response?.accessToken ||
           response?.AccessToken ||
@@ -82,10 +89,11 @@ export class AuthService {
           email: response?.email || response?.Email || response?.user?.email,
           role: roleName,
         };
-        this.saveUser(userObj);
-
-        if (roleName) {
-          this.saveUserType(roleName);
+        if (token) {
+          this.saveUser(userObj);
+          if (roleName) {
+            this.saveUserType(roleName);
+          }
         }
       })
     );
@@ -109,6 +117,98 @@ export class AuthService {
     return this.login(email, password, 2).pipe(
       // 2 = Kurumsal (GSB)
       tap(() => this.saveUserType('corporate'))
+    );
+  }
+
+  /** Kurumsal giriş doğrulama kodu ile giriş tamamla. Backend: POST /api/Auth/verify-corporate-login */
+  verifyCorporateCode(email: string, code: string): Observable<LoginResponse> {
+    return this.http
+      .post<LoginResponse>(`${this.apiUrl}/Auth/verify-corporate-login`, {
+        email: email.trim(),
+        code: code.trim(),
+      })
+      .pipe(
+        tap((response: any) => {
+          const token =
+            response?.accessToken ||
+            response?.AccessToken ||
+            response?.token ||
+            response?.Token ||
+            null;
+          const refresh =
+            response?.refreshToken || response?.RefreshToken || response?.refresh || null;
+          const roleName =
+            response?.roleName || response?.RoleName || response?.user?.role || 'corporate';
+
+          if (token) {
+            this.saveToken(token);
+          }
+          if (refresh) {
+            localStorage.setItem('refresh_token', refresh);
+          }
+          const userObj = {
+            id: response?.id || response?.Id || response?.user?.id,
+            name: response?.fullName || response?.FullName || response?.user?.name,
+            email: response?.email || response?.Email || response?.user?.email,
+            role: roleName,
+          };
+          this.saveUser(userObj);
+          this.saveUserType('corporate');
+        })
+      );
+  }
+
+  /** Kurumsal doğrulama kodunu tekrar gönder. Backend: POST /api/Auth/resend-corporate-code */
+  resendCorporateVerificationCode(email: string): Observable<{ message?: string }> {
+    return this.http.post<{ message?: string }>(`${this.apiUrl}/Auth/resend-corporate-code`, {
+      email: email.trim(),
+    });
+  }
+
+  /** OTP ile giriş tamamla (topluluk ve kurumsal için ortak). Backend: POST /api/Auth/login-otp */
+  verifyLoginOtp(otpRequestId: string, code: string): Observable<LoginResponse> {
+    return this.http
+      .post<LoginResponse>(`${this.apiUrl}/Auth/login-otp`, {
+        otpRequestId: otpRequestId.trim(),
+        code: code.trim(),
+        rememberDevice: true,
+      })
+      .pipe(
+        tap((response: any) => {
+          const token =
+            response?.accessToken ||
+            response?.AccessToken ||
+            response?.token ||
+            response?.Token ||
+            null;
+          const refresh =
+            response?.refreshToken || response?.RefreshToken || response?.refresh || null;
+          const roleName =
+            response?.roleName || response?.RoleName || response?.user?.role || 'community';
+
+          if (token) {
+            this.saveToken(token);
+          }
+          if (refresh) {
+            localStorage.setItem('refresh_token', refresh);
+          }
+          const userObj = {
+            id: response?.id || response?.Id || response?.user?.id,
+            name: response?.fullName || response?.FullName || response?.user?.name,
+            email: response?.email || response?.Email || response?.user?.email,
+            role: roleName,
+          };
+          this.saveUser(userObj);
+          this.saveUserType(roleName);
+        })
+      );
+  }
+
+  /** OTP kodunu tekrar gönder. Backend: POST /api/Auth/login-otp/resend */
+  resendLoginOtp(otpRequestId: string): Observable<LoginResponse & { otpRequestId?: string }> {
+    return this.http.post<LoginResponse & { otpRequestId?: string }>(
+      `${this.apiUrl}/Auth/login-otp/resend`,
+      { otpRequestId: otpRequestId.trim() }
     );
   }
 

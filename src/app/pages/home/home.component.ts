@@ -12,6 +12,7 @@ import { CommunityService } from '../../services/community.services';
 import { EventService } from '../../services/event.services';
 import { SearchService } from '../../services/search.services';
 import { ImageErrorHandlerService } from '../../services/image-error-handler.service';
+import { TurkishUppercasePipe } from '../../pipes/turkish-uppercase.pipe';
 import { environment } from '../../../environments/environment';
 
 // --- Veri Tipleri (Interfaces) ---
@@ -23,6 +24,7 @@ interface Community {
   memberCount: number;
   eventCount: number;
   email: string;
+  city?: string;
 }
 
 interface UpcomingEvent {
@@ -62,6 +64,7 @@ interface Announcement {
     SiteNavbarComponent,
     SiteFooterComponent,
     TurkeySkylineComponent,
+    TurkishUppercasePipe,
   ],
   templateUrl: './home.component.html', // DÜZELTİLDİ
   styleUrls: ['./home.component.scss'], // DÜZELTİLDİ
@@ -366,6 +369,7 @@ export class HomeComponent implements OnInit, OnDestroy {
             memberCount: c.memberCount || 0,
             eventCount: c.upcomingEventCount || 0, // Backend'den gelen event sayısı
             email: c.email || c.comMail || '', // Backend'den gelen email (varsa)
+            city: c.city || '', // Topluluğun bulunduğu şehir
             image: c.banner || c.coverImage || c.logo || 'assets/img/placeholder-cover.svg',
           };
         });
@@ -548,6 +552,30 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
   goToEventDetail(id: number) {
     this.router.navigate(['/events', id]);
+  }
+
+  onEventCardHover(event: MouseEvent): void {
+    const card = event.currentTarget as HTMLElement;
+
+    const locationInner = card.querySelector('.location-inner');
+    if (locationInner && locationInner.scrollWidth > (locationInner.parentElement?.clientWidth ?? 0)) {
+      card.classList.add('location-overflows');
+    }
+
+    const communityInner = card.querySelector('.host-community-inner');
+    if (communityInner && communityInner.scrollWidth > (communityInner.parentElement?.clientWidth ?? 0)) {
+      card.classList.add('community-overflows');
+    }
+
+    const descInner = card.querySelector('.event-desc-short-inner');
+    if (descInner && descInner.scrollWidth > (descInner.parentElement?.clientWidth ?? 0)) {
+      card.classList.add('desc-overflows');
+    }
+  }
+
+  onEventCardLeave(event: MouseEvent): void {
+    const card = event.currentTarget as HTMLElement;
+    card.classList.remove('location-overflows', 'community-overflows', 'desc-overflows');
   }
 
   getRemainingTime(date: Date): string {

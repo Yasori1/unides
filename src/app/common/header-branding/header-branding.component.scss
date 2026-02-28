@@ -22,10 +22,19 @@ $primary-dark: #0f172a;
 }
 
 .brand {
-  margin-left: -60px;
-  /* Logo'yu sola kaydır */
+  margin-left: 0px;
   pointer-events: auto;
-  /* Logo tıklanabilir olmalı */
+
+  /* Desktop: Logo ve Giriş Yap merkeze eşit uzaklıkta (araları çok açık) */
+  @media (min-width: 1025px) {
+    position: fixed;
+    left: calc(50% - 700px);
+    top: 0;
+    height: 75px;
+    display: flex;
+    align-items: center;
+    z-index: 1001;
+  }
 
   img.logo-transparent {
     height: 58px;
@@ -52,7 +61,7 @@ $primary-dark: #0f172a;
 
   @media (min-width: 1025px) {
     position: fixed;
-    right: clamp(20px, 2vw, 28px);
+    right: calc(50% - 800px);
     top: 0;
     height: 75px;
     margin-right: 0;

@@ -209,7 +209,7 @@
                 </div>
                 <div class="card-info">
                   <div class="top-row">
-                    <span class="tag">{{ event.category }}</span>
+                    <span class="tag">{{ event.category | turkishUppercase }}</span>
                     <span class="location">
                       <span class="material-symbols-outlined">location_on</span>
                       {{ event.location }}
@@ -288,7 +288,7 @@
             </div>
             <div class="card-info">
               <div class="top-row">
-                <span class="tag">{{ event.category }}</span>
+                <span class="tag">{{ event.category | turkishUppercase }}</span>
                 <span class="location">
                   <span class="material-symbols-outlined">location_on</span>
                   {{ event.location }}
@@ -458,7 +458,7 @@
                 min="0" />
             </label>
             <label class="stacked">
-              <span>Etkinlik Kısa Açıklama (Max 70)</span>
+              <span>Etkinlik Kısa Açıklama (Max 70) <em class="char-count">{{ (newEventData.shortDescription || '').length }}/70</em></span>
               <input type="text" placeholder="Kısa açıklama..." [(ngModel)]="newEventData.shortDescription"
                 maxlength="70" />
             </label>
@@ -570,9 +570,9 @@
           </label>
 
           <label class="stacked">
-            <span>Etkinlik Kısa Açıklama (Max 70)</span>
+            <span>Etkinlik Kısa Açıklama (Max 70) <em class="char-count" *ngIf="isEditingEventDetail">{{ (editedEventData.shortDescription || '').length }}/70</em></span>
             <input type="text" [value]="
-                (selectedEvent.description || '').substring(0, 70) || 'Kısa açıklama belirtilmemiş.'
+                selectedEvent.shortDescription || selectedEvent.description || 'Kısa açıklama belirtilmemiş.'
               " [readonly]="!isEditingEventDetail" *ngIf="!isEditingEventDetail" />
             <input type="text" [(ngModel)]="editedEventData.shortDescription" maxlength="70" *ngIf="isEditingEventDetail" />
           </label>

@@ -61,7 +61,7 @@
             <input
               type="email"
               (input)="validateCommunityEmail($event)"
-              placeholder="Topluluk E-Posta (xxx@univ.edu.tr)"
+              placeholder="E-Postanız"
               class="modern-input"
               [class.input-error]="emailError"
             />
@@ -98,7 +98,7 @@
             [disabled]="isLoading"
           >
             <ng-container *ngIf="!isLoading">
-              Panelime Gir <i class="bx bx-right-arrow-alt"></i>
+              Giriş Yap <i class="bx bx-right-arrow-alt"></i>
             </ng-container>
 
             <ng-container *ngIf="isLoading">
@@ -169,7 +169,7 @@
           type="email"
           [(ngModel)]="forgotPasswordEmail"
           (input)="validateForgotEmail($event)"
-          placeholder="Topluluk E-Posta (xxx@univ.edu.tr)"
+          placeholder="E-Postanız"
           class="modern-input"
           [class.input-error]="forgotEmailError"
         />

@@ -156,17 +156,17 @@
 
                 <!-- Additional Info -->
                 <div class="info-section" *ngIf="community.category">
-                  <div class="info-label">KATEGORI</div>
-                  <div class="info-text">{{ community.category }}</div>
+                  <div class="info-label">KATEGORİ</div>
+                  <div class="info-text">{{ community.category | turkishUppercase }}</div>
                 </div>
 
                 <div class="info-section" *ngIf="community.university">
-                  <div class="info-label">ÜNIVERSITE</div>
+                  <div class="info-label">ÜNİVERSİTE</div>
                   <div class="info-text">{{ community.university }}</div>
                 </div>
 
                 <div class="info-section" *ngIf="community.city">
-                  <div class="info-label">ŞEHIR</div>
+                  <div class="info-label">ŞEHİR</div>
                   <div class="info-text">{{ community.city }}</div>
                 </div>
               </div>

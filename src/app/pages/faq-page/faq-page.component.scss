@@ -121,7 +121,6 @@ $white: #ffffff;
 // --- 2. FAQ WRAPPER ---
 .faq-page-wrapper {
   width: 100%;
-  overflow-x: hidden;
   font-family: 'Inter', system-ui, sans-serif;
   color: $text-dark;
   background: #f8fafc;
@@ -376,7 +375,6 @@ $white: #ffffff;
   background: linear-gradient(180deg, #e0f7fa 0%, #f0fcfc 40%, #f8fafc 100%);
   padding-top: 36px;
   padding-bottom: 100px;
-  overflow: hidden;
 
   &::before {
     content: '';
@@ -401,10 +399,12 @@ $white: #ffffff;
   z-index: 2;
 }
 
-// Sidebar
+// Sidebar — sayfa kaydıkça solda sabit kalır (sticky)
+aside.sidebar,
 .sidebar {
-  position: sticky;
-  top: 40px;
+  position: sticky !important;
+  top: 100px !important;
+  align-self: start;
   .sidebar-inner {
     padding: 10px 0;
     h3 {
@@ -731,7 +731,7 @@ $white: #ffffff;
   }
 }
 
-@media (max-width: 992px) {
+@media (max-width: 768px) {
   .layout-grid {
     grid-template-columns: 1fr;
   }

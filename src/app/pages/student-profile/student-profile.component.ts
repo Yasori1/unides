@@ -12,6 +12,7 @@ import { AuthService } from '../../services/auth.services';
 import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
 import { ImageErrorHandlerService } from '../../services/image-error-handler.service';
 import { Logger } from '../../utils/logger.util';
+import { TurkishUppercasePipe } from '../../pipes/turkish-uppercase.pipe';
 
 interface Stat {
   label: string;
@@ -48,7 +49,7 @@ interface EventCard {
 @Component({
   selector: 'app-student-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, ToastComponent, LumaSpinComponent],
+  imports: [CommonModule, FormsModule, ToastComponent, LumaSpinComponent, TurkishUppercasePipe],
   templateUrl: './student-profile.component.html',
   styleUrls: ['./student-profile.component.scss'],
 })

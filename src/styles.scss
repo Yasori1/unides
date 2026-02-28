@@ -1147,3 +1147,10 @@ textarea {
     }
 
 }
+
+/* FAQ sayfası: Kategoriler sidebar sayfa kaydıkça solda sabit kalır (sticky) */
+app-faq-page .sidebar,
+app-faq-page aside.sidebar {
+    position: sticky !important;
+    top: 100px !important;
+}

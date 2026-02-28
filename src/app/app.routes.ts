@@ -26,7 +26,9 @@ import { CommunitiesPageComponent } from './pages/communities-page/communities-p
 import { EventsComponent } from './pages/events-page/events.component';
 import { EventsDetailComponent } from './pages/events-detail/events-detail.component';
 import { CorporateLoginComponent } from './pages/corporate-login/corporate-login';
+import { CorporateVerificationComponent } from './pages/corporate-verification/corporate-verification';
 import { CommunityLoginComponent } from './pages/community-login/community-login';
+import { CommunityVerificationComponent } from './pages/community-verification/community-verification';
 import { CorporateRegisterComponent } from './pages/corporate-register/corporate-register';
 import { CommunityRegisterComponent } from './pages/community-register/community-register';
 import { DevelopersPageComponent } from './pages/developers-page/developers-page.component';
@@ -71,7 +73,9 @@ export const routes: Routes = [
   // { path: 'login', component: LoginPageComponent },
   { path: 'login', redirectTo: '/', pathMatch: 'full' },
   { path: 'corporate-login', component: CorporateLoginComponent },
+  { path: 'corporate-verification', component: CorporateVerificationComponent },
   { path: 'community-login', component: CommunityLoginComponent },
+  { path: 'community-verification', component: CommunityVerificationComponent },
 
   // Topluluk Kaydı açık (3 adımlı: e-posta/şifre → doğrulama → topluluk bilgileri)
   { path: 'community-register', component: CommunityRegisterComponent },

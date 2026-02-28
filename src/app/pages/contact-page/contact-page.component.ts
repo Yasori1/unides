@@ -13,24 +13,36 @@ import { FormsModule } from '@angular/forms';
 
 import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
 import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
+import { ToastComponent } from '../../components/ui/toast/toast.component';
+import { ContactService } from '../../services/contact.service';
+import { ToastService } from '../../services/toast.services';
 import { Logger } from '../../utils/logger.util';
 
 @Component({
   selector: 'app-contact-page',
   standalone: true,
-  imports: [CommonModule, SiteNavbarComponent, SiteFooterComponent, FormsModule],
+  imports: [CommonModule, SiteNavbarComponent, SiteFooterComponent, FormsModule, ToastComponent],
   templateUrl: './contact-page.component.html',
   styleUrls: ['./contact-page.component.scss'],
 })
 export class ContactPageComponent implements OnInit, AfterViewInit {
   heroMoveX = 0;
   heroMoveY = 0;
-  message: string = '';
-  messageLength: number = 0;
+  fullName = '';
+  email = '';
+  topic = 'Genel Bilgi';
+  message = '';
+  messageLength = 0;
+  website = '';
+  isSubmitting = false;
 
   @ViewChildren('animItem') animItems!: QueryList<ElementRef>;
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
+  constructor(
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private contactService: ContactService,
+    private toastService: ToastService
+  ) {}
 
   ngOnInit(): void {
     Logger.log('İletişim sayfası yüklendi.');
@@ -92,6 +104,36 @@ export class ContactPageComponent implements OnInit, AfterViewInit {
 
   onSubmit(event: Event) {
     event.preventDefault();
-    alert('Mesajınız başarıyla gönderildi! En kısa sürede size dönüş yapacağız.');
+    if (this.isSubmitting) return;
+    if (!this.fullName?.trim() || !this.email?.trim() || !this.message?.trim()) {
+      this.toastService.show('Lütfen Ad Soyad, E-posta ve Mesaj alanlarını doldurun.', 'error');
+      return;
+    }
+    this.isSubmitting = true;
+    this.contactService
+      .sendMessage({
+        fullName: this.fullName.trim(),
+        email: this.email.trim(),
+        topic: this.topic || 'Genel Bilgi',
+        message: this.message.trim(),
+        website: this.website || '',
+      })
+      .subscribe({
+        next: (res) => {
+          this.isSubmitting = false;
+          this.toastService.show(res.message || 'Mesajınız alındı. En kısa sürede dönüş yapacağız.', 'success');
+          this.fullName = '';
+          this.email = '';
+          this.topic = 'Genel Bilgi';
+          this.message = '';
+          this.messageLength = 0;
+          this.website = '';
+        },
+        error: (err) => {
+          this.isSubmitting = false;
+          const msg = err?.error?.message || 'Mesaj gönderilemedi. Lütfen daha sonra tekrar deneyiniz.';
+          this.toastService.show(msg, 'error');
+        },
+      });
   }
 }

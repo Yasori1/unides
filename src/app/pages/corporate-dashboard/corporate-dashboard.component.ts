@@ -18,6 +18,7 @@ import { ImageErrorHandlerService } from '../../services/image-error-handler.ser
 import { AuthService } from '../../services/auth.services';
 import { SpamService } from '../../services/spam.service';
 import { Logger } from '../../utils/logger.util';
+import { TurkishUppercasePipe } from '../../pipes/turkish-uppercase.pipe';
 
 // ==========================================
 // MAIN DASHBOARD COMPONENT
@@ -74,7 +75,7 @@ interface Notification {
 @Component({
   selector: 'app-corporate-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, ToastComponent, ImageUploadComponent, LumaSpinComponent],
+  imports: [CommonModule, FormsModule, ToastComponent, ImageUploadComponent, LumaSpinComponent, TurkishUppercasePipe],
   templateUrl: './corporate-dashboard.component.html',
   styleUrls: ['./corporate-dashboard.component.scss'],
 })
@@ -404,16 +405,6 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     } else if (statusFilter === 'Aktif') {
       mapped = mapped.filter((c) => c.status === 'Aktif');
     }
-    // #region agent log
-    if (statusFilter === 'Silinmiş' && mapped.length > 0) {
-      const s0 = mapped[0];
-      fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'corporate-dashboard:handleCommunitiesLoaded',message:'Silinmiş list after filter',data:{statusFilter, displayStatus: s0?.status, displayDeletedAt: s0?.deletedAt, count: mapped.length},timestamp:Date.now(),hypothesisId:'H3'})}).catch(()=>{});
-    }
-    if (statusFilter === 'Reddedilen' && mapped.length > 0) {
-      const s0 = mapped[0];
-      fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'corporate-dashboard:handleCommunitiesLoaded',message:'Reddedilen list after filter',data:{statusFilter, displayStatus: s0?.status, count: mapped.length},timestamp:Date.now(),hypothesisId:'H3'})}).catch(()=>{});
-    }
-    // #endregion
     this.allCommunities = mapped;
     const uniqueCategories = [
       ...new Set(
@@ -569,20 +560,6 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       if (this.isBartinUser()) backendCity = 'Bartın';
     }
 
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        location: 'corporate-dashboard:loadCommunitiesFromService',
-        message: 'Request',
-        data: { statusFilter, backendStatus },
-        timestamp: Date.now(),
-        hypothesisId: 'H1',
-      }),
-    }).catch(() => {});
-    // #endregion
-
     const mapApiDataToCommunities = (data: any[]) => {
       return (data || []).map((c) => {
         const { website, webSiteUrl, instagram, instagramUrl, socialMedia, ...rest } = c;
@@ -652,16 +629,6 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
               (item as any).hasEverBeenApproved = true;
             }
           });
-          // #region agent log
-          if (statusFilter === 'Silinmiş' && mapped.length > 0) {
-            const first = mapped[0];
-            fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'corporate-dashboard:afterMap',message:'After mapApiDataToCommunities',data:{statusFilter, firstStatus: first?.status, firstDeletedAt: first?.deletedAt, firstComConfirm: (first as any)?.comConfirm, total: mapped.length},timestamp:Date.now(),hypothesisId:'H2'})}).catch(()=>{});
-          }
-          if (statusFilter === 'Reddedilen' && mapped.length > 0) {
-            const first = mapped[0];
-            fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'corporate-dashboard:afterMap',message:'Reddedilen filter first item',data:{statusFilter, firstStatus: first?.status, firstDeletedAt: first?.deletedAt},timestamp:Date.now(),hypothesisId:'H2'})}).catch(()=>{});
-          }
-          // #endregion
           this.handleCommunitiesLoaded(mapped, statusFilter);
         });
       },
@@ -991,31 +958,6 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     temp.sort((a, b) => statusOrder(a.status) - statusOrder(b.status));
 
     this.filteredCommunities = temp;
-    // #region agent log
-    const citiesFiltered = [
-      ...new Set(this.filteredCommunities.map((c) => c.city).filter(Boolean)),
-    ];
-    fetch('http://127.0.0.1:7242/ingest/e6794e23-5632-4fdd-a837-2f9289c5988e', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        location: 'corporate-dashboard:applyFilters',
-        message: 'After filters',
-        data: {
-          cityFilter: this.cityFilter,
-          searchText: this.searchText,
-          filteredCount: this.filteredCommunities.length,
-          cities: citiesFiltered,
-          hasBartin: citiesFiltered.some(
-            (x) =>
-              typeof x === 'string' && /bartin/i.test(x.normalize('NFD').replace(/\u0131/g, 'i'))
-          ),
-        },
-        timestamp: Date.now(),
-        hypothesisId: 'H2',
-      }),
-    }).catch(() => {});
-    // #endregion
     this.currentPage = 1;
     this.initPagination();
   }

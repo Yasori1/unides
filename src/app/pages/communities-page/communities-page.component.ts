@@ -7,11 +7,12 @@ import { SiteFooterComponent } from '../../common/site-footer/site-footer.compon
 import { CommunityService, Community } from '../../services/community.services';
 import { ImageErrorHandlerService } from '../../services/image-error-handler.service';
 import { Logger } from '../../utils/logger.util';
+import { TurkishUppercasePipe } from '../../pipes/turkish-uppercase.pipe';
 
 @Component({
   selector: 'app-communities-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, SiteNavbarComponent, SiteFooterComponent],
+  imports: [CommonModule, RouterModule, FormsModule, SiteNavbarComponent, SiteFooterComponent, TurkishUppercasePipe],
   templateUrl: './communities-page.component.html',
   styleUrls: ['./communities-page.component.scss'],
 })

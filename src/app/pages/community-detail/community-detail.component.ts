@@ -7,6 +7,7 @@ import { CommunityService, Community } from '../../services/community.services';
 import { EventService, EventItem } from '../../services/event.services';
 import { ImageErrorHandlerService } from '../../services/image-error-handler.service';
 import { Logger } from '../../utils/logger.util';
+import { TurkishUppercasePipe } from '../../pipes/turkish-uppercase.pipe';
 
 // CommunityEvent interface for mock data
 export interface CommunityEvent {
@@ -21,7 +22,7 @@ export interface CommunityEvent {
 @Component({
   selector: 'app-community-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, SiteNavbarComponent, SiteFooterComponent],
+  imports: [CommonModule, RouterModule, SiteNavbarComponent, SiteFooterComponent, TurkishUppercasePipe],
   templateUrl: './community-detail.component.html',
   styleUrls: ['./community-detail.component.scss'],
 })

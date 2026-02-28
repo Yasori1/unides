@@ -15,6 +15,7 @@ import { catchError, switchMap, map } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { SpamService } from '../../services/spam.service';
 import { Logger } from '../../utils/logger.util';
+import { TurkishUppercasePipe } from '../../pipes/turkish-uppercase.pipe';
 
 // --- Interfaces ---
 interface Project {
@@ -57,6 +58,7 @@ interface DashboardEvent {
   location: string;
   category: string;
   description: string;
+  shortDescription?: string;
   rejectionReason?: string;
   time?: string;
   quota?: number;
@@ -72,6 +74,7 @@ interface DashboardEvent {
     ImageUploadComponent,
     LumaSpinComponent,
     ToastComponent,
+    TurkishUppercasePipe,
   ],
   templateUrl: './community-dashboard.component.html',
   styleUrls: ['./community-dashboard.component.scss'],
@@ -857,6 +860,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
             location: e.location || 'Konum belirtilmemiş',
             category: 'Etkinlik', // Backend'de category yok, varsayılan değer
             description: e.description || e.shortDescription || '',
+            shortDescription: (e as any).shortDescription || undefined,
             rejectionReason: (() => {
               // EventItem'dan gelen rejectionReason'ı kontrol et
               const reason =
