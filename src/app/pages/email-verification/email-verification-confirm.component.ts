@@ -6,7 +6,6 @@ import { ToastComponent } from '../../components/ui/toast/toast.component';
 import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
 import { AuthService } from '../../services/auth.services';
 import { Logger } from '../../utils/logger.util';
-import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-email-verification-confirm',
@@ -36,9 +35,9 @@ export class EmailVerificationConfirmComponent implements OnInit, OnDestroy {
     this.isCommunityFlow = !!(
       typeof sessionStorage !== 'undefined' && sessionStorage.getItem('community_register_return')
     );
-    // URL'den token'ı al
-    this.token =
-      this.route.snapshot.queryParams['token'] || this.route.snapshot.params['token'] || '';
+    // Backend maildeki linki /verify-email#token=... olarak gönderiyor (token fragment'ta).
+    // Query (?token=) ve route param da yedek olarak okunur.
+    this.token = this.getTokenFromRoute();
 
     if (this.token) {
       this.verifyEmail();
@@ -54,50 +53,51 @@ export class EmailVerificationConfirmComponent implements OnInit, OnDestroy {
     }
   }
 
+  /** Token'ı önce fragment (#token=...), sonra query (?token=), sonra route param'dan al */
+  private getTokenFromRoute(): string {
+    const fragment = this.route.snapshot.fragment;
+    if (fragment) {
+      const params = new URLSearchParams(fragment);
+      const fromHash = params.get('token');
+      if (fromHash) return fromHash;
+    }
+    return (
+      this.route.snapshot.queryParams['token'] ||
+      this.route.snapshot.params['token'] ||
+      ''
+    );
+  }
+
   ngOnDestroy(): void {
     if (this.redirectTimeout) {
       clearTimeout(this.redirectTimeout);
     }
   }
 
-  async verifyEmail() {
+  verifyEmail(): void {
     this.isLoading = true;
     this.isError = false;
     this.isVerified = false;
 
-    try {
-      // POST API_BASE_URL/api/auth/verify-email — Body: { "token": "URL'den_alinan_token" }
-      const response = await fetch(`${environment.apiUrl}/Auth/verify-email`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          token: this.token,
-        }),
-      });
-
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        throw new Error('Backend sunucusuna bağlanılamıyor...');
-      }
-
-      const data = await response.json();
-
-      if (response.ok) {
+    this.authService.verifyEmail(this.token).subscribe({
+      next: (data) => {
         this.isVerified = true;
         this.isLoading = false;
 
-        // Backend AuthResponse alanları: requiresCommunitySetup, setupToken, accessToken, refreshToken
         const requiresSetup = data.requiresCommunitySetup ?? data.RequiresCommunitySetup;
         const setupToken = data.setupToken ?? data.SetupToken;
 
-        // --- Topluluk başkanı akışı: hesap henüz oluşmadı, SetupToken ile community oluşturulacak ---
         if (requiresSetup && setupToken) {
           sessionStorage.setItem('community_setup_token', setupToken);
-          // E-posta adresini de koru (Adım 3'te comLeadMail için kullanılacak)
-          if (data.email || data.Email) {
-            sessionStorage.setItem('community_register_email', data.email || data.Email);
+          const email = data.email ?? data.Email;
+          if (email) {
+            sessionStorage.setItem('community_register_email', email);
+          }
+          if (data.setupTokenExpiresAt ?? data.SetupTokenExpiresAt) {
+            sessionStorage.setItem(
+              'community_setup_token_expires',
+              (data.setupTokenExpiresAt ?? data.SetupTokenExpiresAt) ?? ''
+            );
           }
           this.toastService.show(
             'E-posta doğrulandı. Topluluk bilgilerini gireceğiniz adıma yönlendiriliyorsunuz...',
@@ -109,7 +109,6 @@ export class EmailVerificationConfirmComponent implements OnInit, OnDestroy {
           return;
         }
 
-        // --- Normal akış: token'ları sakla ve yönlendir ---
         const accessToken = data.accessToken ?? data.AccessToken ?? data.token ?? data.Token;
         const refreshToken = data.refreshToken ?? data.RefreshToken ?? data.refresh;
 
@@ -120,13 +119,12 @@ export class EmailVerificationConfirmComponent implements OnInit, OnDestroy {
           }
           if (data.user) {
             this.authService.saveUser(data.user);
-            const role = data.user.role ?? data.user.RoleName ?? data.roleName ?? 'student';
+            const role = data.user.role ?? (data.user as any).RoleName ?? data.roleName ?? 'student';
             this.authService.saveUserType(role);
           } else {
-            // roleName doğrudan response'da olabilir
             const roleName = data.roleName ?? data.RoleName ?? 'student';
             const userObj = {
-              id: data.id ?? data.Id,
+              id: data.id,
               name: data.fullName ?? data.FullName,
               email: data.email ?? data.Email,
               role: roleName,
@@ -148,27 +146,18 @@ export class EmailVerificationConfirmComponent implements OnInit, OnDestroy {
         this.redirectTimeout = setTimeout(() => {
           this.router.navigateByUrl(target);
         }, 2000);
-      } else {
+      },
+      error: (err) => {
         this.isLoading = false;
         this.isError = true;
-        const errorMessage = data.message || 'E-posta doğrulama işlemi başarısız oldu.';
-        this.errorMessage = errorMessage;
-        this.toastService.show(errorMessage, 'error');
-
+        const message = err?.error?.message ?? err?.message ?? 'E-posta doğrulama işlemi başarısız oldu.';
+        this.errorMessage = message;
+        this.toastService.show(message, 'error');
+        Logger.error('E-posta doğrulama hatası:', err);
         this.redirectTimeout = setTimeout(() => {
           this.router.navigate(['/login']);
         }, 3000);
-      }
-    } catch (error: any) {
-      Logger.error('E-posta doğrulama hatası:', error);
-      this.isLoading = false;
-      this.isError = true;
-      this.errorMessage = error.message || 'Bir hata oluştu. Lütfen tekrar deneyiniz.';
-      this.toastService.show(this.errorMessage, 'error');
-
-      this.redirectTimeout = setTimeout(() => {
-        this.router.navigate(['/login']);
-      }, 3000);
-    }
+      },
+    });
   }
 }

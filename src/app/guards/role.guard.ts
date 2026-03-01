@@ -16,10 +16,9 @@ export const roleGuard: CanActivateFn = (route, state) => {
 
     // 2. Beklenen rolü kontrol et
     const expectedRole = route.data['expectedRole'];
-    const userType = authService.getUserType();
+    const userType = authService.getNormalizedUserType();
 
-    // Rol kontrolü:
-    // Eğer route data'da 'expectedRole' tanımlıysa, kullanıcının rolüyle eşleşmeli
+    // Rol kontrolü: expectedRole ile normalize edilmiş rolü karşılaştır (eski localStorage "ToplulukBaskani" vb. de geçer)
     if (expectedRole && userType !== expectedRole) {
         // Yanlış rol (örn: öğrenci, kurumsal dashboard'a girmeye çalışıyor)
         // Ana sayfaya veya kendi dashboard'una yönlendirebiliriz

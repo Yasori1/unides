@@ -296,6 +296,24 @@ export class CommunityService {
     );
   }
 
+  /**
+   * Anasayfa sayaç için genel istatistikler (Backend: GET /api/Communities/stats).
+   * Public endpoint, auth gerekmez.
+   */
+  getStats(): Observable<{ totalEvents: number; totalCommunities: number }> {
+    const context = new HttpContext().set(SKIP_AUTH, true);
+    return this.http.get<{ totalEvents?: number; totalCommunities?: number; TotalEvents?: number; TotalCommunities?: number }>(`${this.apiUrl}/stats`, { context }).pipe(
+      map((res) => ({
+        totalEvents: res.totalEvents ?? res.TotalEvents ?? 0,
+        totalCommunities: res.totalCommunities ?? res.TotalCommunities ?? 0,
+      })),
+      catchError((err) => {
+        Logger.warn('Communities stats yüklenemedi:', err);
+        return of({ totalEvents: 0, totalCommunities: 0 });
+      })
+    );
+  }
+
   // CommunityMiniDto'yu Community'ye dönüştür (List için)
   private mapMiniDtoToCommunity(dto: CommunityMiniDto | any): Community {
     // Backend'den PascalCase (IsActivity) veya camelCase (isActivity) gelebilir

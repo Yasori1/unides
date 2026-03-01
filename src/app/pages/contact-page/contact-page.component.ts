@@ -131,7 +131,10 @@ export class ContactPageComponent implements OnInit, AfterViewInit {
         },
         error: (err) => {
           this.isSubmitting = false;
-          const msg = err?.error?.message || 'Mesaj gönderilemedi. Lütfen daha sonra tekrar deneyiniz.';
+          let msg = err?.error?.message || 'Mesaj gönderilemedi. Lütfen daha sonra tekrar deneyiniz.';
+          if (err?.status === 429) {
+            msg = 'Çok fazla deneme yaptınız, başka zaman deneyiniz.';
+          }
           this.toastService.show(msg, 'error');
         },
       });

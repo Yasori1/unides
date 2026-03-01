@@ -109,6 +109,25 @@ export class CorporateLoginComponent implements OnInit, OnDestroy {
 
     this.authService.loginCorporate(email.trim(), password).subscribe({
       next: (response: any) => {
+        // Backend OTP akışı: requiresOtp + otpRequestId (GSB/Kurumsal)
+        const requiresOtp = response?.requiresOtp === true;
+        const otpRequestId = response?.otpRequestId || response?.OtpRequestId || '';
+        const responseEmail = response?.email || response?.Email || email.trim();
+
+        if (requiresOtp && otpRequestId) {
+          this.isLoading = false;
+          this.toastService.show(
+            'Doğrulama kodu e-posta adresinize gönderildi. Lütfen kodu girin.',
+            'success'
+          );
+          this.router.navigate(['/corporate-verification'], {
+            state: { email: responseEmail, otpRequestId },
+            queryParams: { email: responseEmail, otpRequestId },
+          });
+          return;
+        }
+
+        // Eski backend: requiresVerification + email (yedek)
         if (response?.requiresVerification === true && response?.email) {
           this.isLoading = false;
           this.router.navigate(['/corporate-verification'], {
@@ -120,13 +139,14 @@ export class CorporateLoginComponent implements OnInit, OnDestroy {
           );
           return;
         }
+
         this.toastService.show(
           'Giriş başarılı! Ana sayfaya yönlendiriliyorsunuz...',
           'success'
         );
         setTimeout(() => {
           this.isLoading = false;
-          this.router.navigateByUrl('/').catch((err) => {
+          this.router.navigateByUrl('/').catch(() => {
             if (isPlatformBrowser(this.platformId)) {
               window.location.href = '/';
             }

@@ -48,6 +48,32 @@ export interface RegisterResponse {
   email: string;
 }
 
+/** E-posta doğrulama cevabı (POST /api/Auth/verify-email). Topluluk akışında requiresCommunitySetup + setupToken; diğer durumda accessToken/refreshToken. */
+export interface VerifyEmailResponse {
+  requiresCommunitySetup?: boolean;
+  RequiresCommunitySetup?: boolean;
+  setupToken?: string;
+  SetupToken?: string;
+  setupTokenExpiresAt?: string;
+  SetupTokenExpiresAt?: string;
+  email?: string;
+  Email?: string;
+  accessToken?: string;
+  AccessToken?: string;
+  refreshToken?: string;
+  RefreshToken?: string;
+  token?: string;
+  Token?: string;
+  refresh?: string;
+  user?: { id?: number; name?: string; email?: string; role?: string };
+  roleName?: string;
+  RoleName?: string;
+  id?: number;
+  fullName?: string;
+  FullName?: string;
+  message?: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -336,6 +362,16 @@ export class AuthService {
     });
   }
 
+  /**
+   * E-posta doğrulama (mail linkindeki token ile).
+   * Backend: POST /api/Auth/verify-email — Body: { "token": "MAIL_TOKEN" }
+   * Cevap: requiresCommunitySetup, setupToken, setupTokenExpiresAt, email (topluluk akışında); veya accessToken/refreshToken.
+   */
+  verifyEmail(token: string): Observable<VerifyEmailResponse> {
+    const context = new HttpContext().set(SKIP_AUTH, true);
+    return this.http.post<VerifyEmailResponse>(`${this.apiUrl}/Auth/verify-email`, { token: token.trim() }, { context });
+  }
+
   // --- REFRESH TOKEN (SWAGGER: POST /api/Auth/refresh) ---
   refreshToken(): Observable<any> {
     // Token yenileme ihtiyacı olursa bu metot kullanılabilir
@@ -349,6 +385,16 @@ export class AuthService {
   }
 
   // --- ORTAK YARDIMCI METOTLAR ---
+  /** Backend rol adlarını frontend beklenen değerlere çevirir (roleGuard ve menü 'community' bekler). */
+  private normalizeRoleForFrontend(roleName: string | null | undefined): 'student' | 'corporate' | 'community' {
+    if (!roleName || typeof roleName !== 'string') return 'student';
+    const r = roleName.trim().toLowerCase();
+    if (r === 'community' || r === 'toplulukbaskani' || r === 'topluluk' || r.includes('topluluk')) return 'community';
+    if (r === 'corporate' || r === 'kurumsal' || r === 'gsb' || r.includes('kurumsal')) return 'corporate';
+    if (r === 'student' || r === 'öğrenci' || r === 'ogrenci' || r === 'üye' || r === 'uye' || r.includes('öğrenci')) return 'student';
+    return 'student';
+  }
+
   saveToken(token: string): void {
     localStorage.setItem('auth_token', token);
   }
@@ -363,10 +409,15 @@ export class AuthService {
     return user ? JSON.parse(user) : null;
   }
   saveUserType(type: string): void {
-    localStorage.setItem('user_type', type);
+    const normalized = this.normalizeRoleForFrontend(type);
+    localStorage.setItem('user_type', normalized);
   }
   getUserType(): string | null {
     return localStorage.getItem('user_type');
+  }
+  /** Guard ve menü için: backend'den gelen veya eski kayıtlı rol adını 'student'|'corporate'|'community' olarak döner. */
+  getNormalizedUserType(): 'student' | 'corporate' | 'community' {
+    return this.normalizeRoleForFrontend(this.getUserType());
   }
 
   // --- TOPLULUK ONAY DURUMU ---

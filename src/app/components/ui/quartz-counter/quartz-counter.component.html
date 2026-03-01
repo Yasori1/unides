@@ -1,0 +1,24 @@
+<div class="quartz-counter-wrapper">
+  <div class="counter-label">{{ label }}</div>
+  <div class="quartz-container">
+    <ng-container *ngFor="let slot of slots">
+      <div *ngIf="slot.type === 'separator'" class="separator">,</div>
+      <div
+        *ngIf="slot.type === 'digit'"
+        class="leaf-slot"
+        [class.animating]="slot.next !== undefined"
+      >
+        <div class="shimmer"></div>
+        <div
+          class="digit digit-current"
+          [class.digit-old]="slot.next !== undefined"
+        >
+          {{ slot.current }}
+        </div>
+        <div class="digit digit-new" *ngIf="slot.next !== undefined">
+          {{ slot.next }}
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</div>

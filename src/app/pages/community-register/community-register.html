@@ -38,7 +38,7 @@
         </div>
         <div class="header-text" *ngIf="!showRegistrationSuccess">
           <h3>Topluluk Kaydı 👥</h3>
-          <p>
+          <p *ngIf="step === 2 || step === 3">
             Zaten hesabınız var mı?
             <a routerLink="/community-login" class="login-link">Giriş Yap</a>
           </p>
@@ -127,6 +127,10 @@
           >
             Kayıt sürecine başla <i class="bx bx-right-arrow-alt"></i>
           </button>
+          <p class="intro-have-account">
+            Zaten hesabınız var mı?
+            <a routerLink="/community-login" class="login-link">Giriş Yap</a>
+          </p>
         </div>
 
         <!-- Adım 1: .edu.tr e-posta ve şifre -->

@@ -91,7 +91,7 @@
               type="button"
               class="btn-link btn-resend"
               (click)="resendCode()"
-              [disabled]="resendCountdown > 0"
+              [disabled]="resendCountdown > 0 || (!otpRequestId && !email)"
             >
               <span *ngIf="resendCountdown === 0">Kodu tekrar gönder</span>
               <span *ngIf="resendCountdown > 0">Kodu tekrar gönder ({{ resendCountdown }} sn)</span>

@@ -71,7 +71,7 @@ export class HeaderBrandingComponent implements OnInit, OnDestroy {
     const oldUserRole = this.userRole;
 
     this.isLoggedIn = this.authService.isAuthenticated();
-    this.userRole = this.authService.getUserType();
+    this.userRole = this.authService.getNormalizedUserType();
 
     // Kullanıcı bilgilerini al
     if (this.isLoggedIn) {

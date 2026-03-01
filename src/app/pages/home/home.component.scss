@@ -148,44 +148,44 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
   z-index: 3; // Section-communities'den (z-index: 2) daha yüksek - banner her zaman üstte kalır
   overflow: hidden;
 
-  // Mobil varsayılan
-  padding-top: 110px;
+  // Mobil varsayılan — banner alt kenarı çok az yukarı
+  padding-top: 112px;
   padding-bottom: 200px;
 
   // Tablet
   @media (min-width: 768px) {
-    padding-top: 115px;
-    padding-bottom: 250px;
+    padding-top: 118px;
+    padding-bottom: 256px;
   }
 
   // Laptop (küçük)
   @media (min-width: 1024px) {
-    padding-top: 100px;
-    padding-bottom: 280px;
+    padding-top: 124px;
+    padding-bottom: 292px;
   }
 
   // Laptop (büyük)/Desktop
   @media (min-width: 1280px) {
-    padding-top: 100px;
-    padding-bottom: 310px;
+    padding-top: 130px;
+    padding-bottom: 332px;
   }
 
   // Full HD
   @media (min-width: 1440px) {
-    padding-top: 110px; // 10px daha yukarı (110 -> 250)
-    padding-bottom: 380px; // Yükseklik korundu (400 -> 410)
+    padding-top: 136px;
+    padding-bottom: 372px;
   }
 
   // Large screens
   @media (min-width: 1920px) {
-    padding-top: 140px; // Daha aşağı çekildi (70px -> 140px)
-    padding-bottom: 400px;
+    padding-top: 142px;
+    padding-bottom: 412px;
   }
 
   // Extra large screens
   @media (min-width: 2560px) {
-    padding-top: 150px; // Daha aşağı çekildi (70px -> 150px)
-    padding-bottom: 500px;
+    padding-top: 148px;
+    padding-bottom: 492px;
   }
 
   /* Yeni Mavi-Beyaz Geçişli Arka Plan */
@@ -206,10 +206,7 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
       background-size: 100% 100%;
     }
 
-    // High resolution vertical adjustment: Push image down for displays >= 1920px
-    @media (min-width: 1920px) {
-      top: 0px; // Pushed down from -100px
-    }
+    // Eski hâl: arka görsel aşağı kaydırılmıyor (top aynı kalır)
 
     // Tablet: Arka plan görselini optimize et
     @media (min-width: 768px) and (max-width: 1024px) {
@@ -233,33 +230,168 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
     display: none;
   }
 
-  /* Responsive for mobile - Kısıtlamalar kaldırıldı, akışkan yapı kullanılıyor */
+  /* Responsive for mobile */
   @media only screen and (max-width : 767px) {
     padding-top: 110px;
-    padding-bottom: 150px;
+    padding-bottom: 184px;
   }
 }
 
 .banner-wrapper-content {
   position: relative;
   z-index: 10;
-  max-width: 1000px;
+  max-width: 1280px;
   margin: 0 auto;
-  margin-top: -15px; // 15px yukarı taşındı
+  margin-top: 40px;
   text-align: center;
-  padding: 0 5%; // Yüzdelik padding ile site sağdan soldan küçülür
+  padding: 0 3%;
+
+  .banner-hero-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    width: 100%;
+
+    @media (max-width: 900px) {
+      flex-direction: column;
+      gap: 28px;
+    }
+  }
+
+  .banner-hero-center {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    order: 2;
+
+    @media (max-width: 900px) {
+      order: 1;
+    }
+  }
+
+  /* Quartz / Chrono-Leaf sayaç sarmalayıcıları — site temasına uyumlu */
+  .banner-quartz-left,
+  .banner-quartz-right {
+    flex-shrink: 0;
+    order: 1;
+    align-self: center;
+    position: relative;
+    overflow: visible;
+    padding: 20px 24px;
+    padding-top: 28px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(248, 250, 252, 0.98) 100%);
+    border-radius: 16px;
+    border: 1px solid rgba(30, 58, 138, 0.15);
+    box-shadow:
+      0 4px 20px rgba(30, 58, 138, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+
+    /* Sol üst: halka — sol bacak arkada (z 0), sayaç ortada (z 1), sağ bacak önde (z 2) */
+    .quartz-card-hooks {
+      position: absolute;
+      top: -8px;
+      left: 10px;
+      display: flex;
+      align-items: center;
+      gap: 0;
+      pointer-events: none;
+    }
+
+    .quartz-card-hooks-back {
+      z-index: 0;
+    }
+
+    .quartz-card-hooks-front {
+      z-index: 2;
+    }
+
+    /* Sol üst köşe örtüsü: sol bacağı çerçevenin arkasında bırakır (sayaç bu alanı kaplamıyor) */
+    .quartz-card-hooks-cover {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 72px;
+      height: 40px;
+      z-index: 1;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(248, 250, 252, 0.98) 100%);
+      border-radius: 16px 0 20px 0;
+    }
+
+    /* Sayaç içeriği önde + aynı arka plan */
+    app-quartz-counter {
+      position: relative;
+      z-index: 1;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(248, 250, 252, 0.98) 100%);
+    }
+
+    .quartz-hook-icon {
+      display: inline-flex;
+      width: 26px;
+      height: 26px;
+      flex-shrink: 0;
+      margin-right: -2px;
+
+      svg {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+    }
+
+    @media (max-width: 900px) {
+      order: 2;
+    }
+  }
+
+  .banner-quartz-left {
+    margin-left: -56px;
+
+    @media (min-width: 1100px) {
+      margin-left: -96px;
+    }
+
+    @media (min-width: 1400px) {
+      margin-left: -120px;
+    }
+
+    @media (max-width: 900px) {
+      margin-left: 0;
+    }
+  }
+
+  .banner-quartz-right {
+    order: 3;
+    margin-right: -56px;
+
+    @media (min-width: 1100px) {
+      margin-right: -96px;
+    }
+
+    @media (min-width: 1400px) {
+      margin-right: -120px;
+    }
+
+    @media (max-width: 900px) {
+      order: 3;
+      margin-right: 0;
+    }
+  }
 
   h1 {
-    // Yazı biraz küçültüldü: max 50px -> 38px, min 28px -> 22px
     font-size: clamp(22px, 3.2vw, 38px);
     margin-top: 0;
     margin-bottom: 20px;
     font-weight: 700;
     color: $primary-dark;
     text-shadow:
-      0 0 20px rgba(255, 255, 255, 1),
-      0 0 10px rgba(255, 255, 255, 0.8),
-      0 2px 8px rgba(0, 0, 0, 0.2);
+      0 0 24px rgba(255, 255, 255, 1),
+      0 0 14px rgba(255, 255, 255, 0.95),
+      0 1px 3px rgba(0, 0, 0, 0.35),
+      0 2px 10px rgba(0, 0, 0, 0.15);
     line-height: 1.2;
     display: block;
     white-space: normal;
@@ -283,15 +415,28 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
     line-height: 1.6;
     max-width: 600px;
     color: $primary-dark;
-    text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+    text-shadow:
+      0 0 18px rgba(255, 255, 255, 1),
+      0 0 10px rgba(255, 255, 255, 0.9),
+      0 1px 2px rgba(0, 0, 0, 0.3);
     margin-left: auto;
     margin-right: auto;
     margin-bottom: 0;
-    // Yazı biraz küçültüldü: max 1.1rem -> 1rem
     font-size: clamp(0.85rem, 1.2vw, 1rem);
     font-weight: 500;
     background: transparent;
     border: none;
+  }
+
+  .banner-hero-center form.banner-search-form {
+    margin-top: 24px;
+    width: 100%;
+    max-width: 520px;
+  }
+
+  .banner-hero-center .banner-search-input-wrap {
+    position: relative;
+    width: 100%;
   }
 
   form {
@@ -365,6 +510,7 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
       }
     }
   }
+
 }
 
 // --- RESPONSIVE AYARLAR (BANNER İÇİN) ---
@@ -441,36 +587,36 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
   border-top: none;
   position: relative;
   z-index: 2;
-  /* Header arka plan fotoğrafının alt kenarı ile "Keşfet" yazısı arasında 80-100px boşluk */
-  padding-top: 90px;
+  /* Banner alt kenarı ile KEŞFET / Öne Çıkan Topluluklar arasındaki boşluk azaltıldı */
+  padding-top: 28px;
 
   // Tüm ekran boyutları için tutarlı margin-top değerleri (clamp ile akışkan)
   // Mobil varsayılan
-  margin-top: 20px;
+  margin-top: 0;
 
   // Tablet
   @media (min-width: 768px) {
-    margin-top: -80px;
+    margin-top: -60px;
   }
 
   // Laptop (küçük)
   @media (min-width: 1024px) {
-    margin-top: -100px;
+    margin-top: -80px;
   }
 
   // Laptop (büyük)/Desktop
   @media (min-width: 1280px) {
-    margin-top: -120px;
+    margin-top: -100px;
   }
 
   // Full HD - Resmin altında olması için margin ayarlandı
   @media (min-width: 1440px) {
-    margin-top: -160px; // Dengeleme için yukarı çekildi (-150 -> -160)
+    margin-top: -120px;
   }
 
-  // Large screens - Resmin altında olması için margin sıfırlandı/azaltıldı
+  // Large screens
   @media (min-width: 1920px) {
-    margin-top: -30px;
+    margin-top: -20px;
   }
 
   // Extra large screens
@@ -914,7 +1060,7 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
 .section-3d-marquee {
   position: relative;
   z-index: 20;
-  padding: 70px 0 30px;
+  padding: 70px 0 100px; /* Alt padding artırıldı: bilgi baloncuğu ikonun altında gösterilsin diye */
   background: transparent;
   margin: 40px 0;
   display: flex;
@@ -1005,9 +1151,9 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
 
       .nc-tooltip {
         position: absolute;
-        bottom: calc(100% + 10px);
+        top: calc(100% + 10px);
         left: 50%;
-        transform: translateX(-50%) translateY(4px);
+        transform: translateX(-50%) translateY(-4px);
         padding: 14px 16px;
         background: $primary;
         color: #fff;
@@ -1029,11 +1175,11 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
         &::after {
           content: '';
           position: absolute;
-          top: 100%;
+          bottom: 100%;
           left: 50%;
           margin-left: -6px;
           border: 6px solid transparent;
-          border-top-color: $primary;
+          border-bottom-color: $primary;
         }
       }
 
@@ -1301,7 +1447,7 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
     .mobile-slider-container {
       width: 100%;
       overflow: hidden; // Auto scroll yerine hidden - animasyon kullanacağız
-      padding-bottom: 15px;
+      padding-bottom: 70px; // Bilgi baloncuğu ikonun altında tam görünsün
       position: relative;
 
       .mobile-slider-track {
@@ -1338,9 +1484,9 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
 
           .nc-tooltip {
             position: absolute;
-            bottom: calc(100% + 10px);
+            top: calc(100% + 10px);
             left: 50%;
-            transform: translateX(-50%) translateY(4px);
+            transform: translateX(-50%) translateY(-4px);
             padding: 14px 16px;
             background: $primary;
             color: #fff;
@@ -1362,11 +1508,11 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
             &::after {
               content: '';
               position: absolute;
-              top: 100%;
+              bottom: 100%;
               left: 50%;
               margin-left: -6px;
               border: 6px solid transparent;
-              border-top-color: $primary;
+              border-bottom-color: $primary;
             }
           }
 

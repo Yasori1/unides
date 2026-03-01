@@ -8,6 +8,7 @@ import { map, catchError } from 'rxjs/operators';
 import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
 import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
 import { TurkeySkylineComponent } from '../../components/ui/turkey-skyline/turkey-skyline.component';
+import { QuartzCounterComponent } from '../../components/ui/quartz-counter/quartz-counter.component';
 import { CommunityService } from '../../services/community.services';
 import { EventService } from '../../services/event.services';
 import { SearchService } from '../../services/search.services';
@@ -64,6 +65,7 @@ interface Announcement {
     SiteNavbarComponent,
     SiteFooterComponent,
     TurkeySkylineComponent,
+    QuartzCounterComponent,
     TurkishUppercasePipe,
   ],
   templateUrl: './home.component.html', // DÜZELTİLDİ
@@ -95,16 +97,21 @@ export class HomeComponent implements OnInit, OnDestroy {
   upcomingEvents: UpcomingEvent[] = [];
   newestCommunities: NewCommunity[] = [];
 
+  // --- Anasayfa sayaç (GET /api/Communities/stats) ---
+  homeStats: { totalEvents: number; totalCommunities: number } = { totalEvents: 0, totalCommunities: 0 };
+  private statsRefreshInterval: any;
+  private readonly STATS_REFRESH_MS = 18000;
+
   // --- Responsive Placeholder ---
   isMobile: boolean = false;
 
   // --- Geçmişten Kareler Slider ---
   sliderImages: string[] = [
-    'https://images.unsplash.com/photo-1544531586-fde5298cdd40?q=80&w=800&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1523580494863-6f3031224c94?q=80&w=800&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=800&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=800&auto=format&fit=crop',
-    'https://media.istockphoto.com/id/1486287149/tr/foto%C4%9Fraf/group-of-multiracial-asian-business-participants-casual-chat-after-successful-conference.jpg?s=612x612&w=0&k=20&c=UIA06kHeAHdKyPRyREEGmmkfyvi0RMyjbldymvolJiY=',
+    'assets/gecmisten-kareler/gecmisten-kareler-1.png',
+    'assets/gecmisten-kareler/gecmisten-kareler-2.png',
+    'assets/gecmisten-kareler/gecmisten-kareler-3.png',
+    'assets/gecmisten-kareler/gecmisten-kareler-4.png',
+    'assets/gecmisten-kareler/gecmisten-kareler-5.png',
   ];
 
   // --- Lightbox ---
@@ -142,6 +149,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     if (this.typewriterInterval) clearTimeout(this.typewriterInterval);
+    if (this.statsRefreshInterval) clearInterval(this.statsRefreshInterval);
     if (isPlatformBrowser(this.platformId)) {
       window.removeEventListener('resize', () => this.checkMobile());
     }
@@ -347,12 +355,29 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   // --- Veri Yükleme (Backend'den) ---
+  /** Anasayfa sayaç verisini yükle (Quartz sayaç kendi animasyonunu yapar) */
+  loadHomeStats() {
+    if (!isPlatformBrowser(this.platformId)) return;
+    this.communityService.getStats().subscribe({
+      next: (stats) => {
+        this.homeStats = stats;
+      },
+      error: () => {
+        this.homeStats = { totalEvents: 0, totalCommunities: 0 };
+      },
+    });
+  }
+
   loadData() {
     if (!isPlatformBrowser(this.platformId)) {
       return;
     }
 
     this.isLoading = true;
+
+    // Anasayfa sayaç: toplam etkinlik ve topluluk (GET /api/Communities/stats) + periyodik güncelleme
+    this.loadHomeStats();
+    this.statsRefreshInterval = setInterval(() => this.loadHomeStats(), this.STATS_REFRESH_MS);
 
     // Öne Çıkan Topluluklar
     this.communityService.getFeaturedCommunities(6, { skipAuth: true }).subscribe({

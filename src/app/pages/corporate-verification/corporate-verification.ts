@@ -18,10 +18,11 @@ import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.compo
 export class CorporateVerificationComponent implements OnInit, OnDestroy {
   email: string = '';
   code: string = '';
+  /** OTP akışı (login-otp) için backend'den gelen istek id */
+  otpRequestId: string = '';
   isLoading: boolean = false;
   isResending: boolean = false;
   errorMessage: string = '';
-  /** Kodu tekrar gönder butonu için geri sayım (saniye). 0 = tıklanabilir */
   resendCountdown: number = 0;
   private resendInterval: ReturnType<typeof setInterval> | null = null;
 
@@ -36,8 +37,10 @@ export class CorporateVerificationComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
     const params = this.route.snapshot.queryParams;
-    this.email = params['email'] || '';
-    if (!this.email) {
+    const state = history.state || {};
+    this.email = params['email'] || state['email'] || '';
+    this.otpRequestId = params['otpRequestId'] || state['otpRequestId'] || '';
+    if (!this.email && !this.otpRequestId) {
       this.router.navigate(['/corporate-login']);
     }
   }
@@ -59,10 +62,6 @@ export class CorporateVerificationComponent implements OnInit, OnDestroy {
 
   onSubmit(event: Event): void {
     event.preventDefault();
-    if (!this.email) {
-      this.toastService.show('E-posta adresi bulunamadı.', 'error');
-      return;
-    }
     if (!this.code || this.code.length !== 6) {
       this.errorMessage = 'Lütfen 6 haneli doğrulama kodunu girin.';
       this.toastService.show(this.errorMessage, 'error');
@@ -72,6 +71,39 @@ export class CorporateVerificationComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.errorMessage = '';
 
+    // OTP akışı (login-otp): otpRequestId varsa bunu kullan
+    if (this.otpRequestId) {
+      this.authService.verifyLoginOtp(this.otpRequestId, this.code).subscribe({
+        next: () => {
+          this.toastService.show('Doğrulama başarılı! Yönlendiriliyorsunuz...', 'success');
+          setTimeout(() => {
+            this.isLoading = false;
+            this.router.navigate(['/']).catch(() => {
+              if (isPlatformBrowser(this.platformId)) {
+                window.location.href = '/';
+              }
+            });
+          }, 1000);
+        },
+        error: (err) => {
+          this.isLoading = false;
+          const msg =
+            err?.error?.message ||
+            err?.message ||
+            'Geçersiz veya süresi dolmuş OTP isteği. Lütfen tekrar deneyin veya yeni kod isteyin.';
+          this.errorMessage = msg;
+          this.toastService.show(msg, 'error');
+        },
+      });
+      return;
+    }
+
+    // Eski akış: e-posta + verify-corporate-login
+    if (!this.email) {
+      this.toastService.show('E-posta adresi bulunamadı.', 'error');
+      this.isLoading = false;
+      return;
+    }
     this.authService.verifyCorporateCode(this.email, this.code).subscribe({
       next: () => {
         this.toastService.show('Doğrulama başarılı! Yönlendiriliyorsunuz...', 'success');
@@ -97,12 +129,34 @@ export class CorporateVerificationComponent implements OnInit, OnDestroy {
   }
 
   resendCode(): void {
-    if (!this.email || this.resendCountdown > 0) return;
+    if (this.resendCountdown > 0) return;
 
-    // Sayaç hemen başlasın; buton tıklanamaz kalsın, metin sayacı göstersin
     this.startResendCountdown();
     this.isResending = true;
 
+    // OTP akışı: login-otp/resend
+    if (this.otpRequestId) {
+      this.authService.resendLoginOtp(this.otpRequestId).subscribe({
+        next: (data) => {
+          const newId = data?.otpRequestId || data?.OtpRequestId;
+          if (newId) this.otpRequestId = newId;
+          this.toastService.show('Doğrulama kodu e-posta adresinize tekrar gönderildi.', 'success');
+        },
+        error: (err) => {
+          const msg = err?.error?.message || err?.message || 'Kod gönderilemedi. Lütfen tekrar deneyin.';
+          this.toastService.show(msg, 'error');
+        },
+        complete: () => {
+          this.isResending = false;
+        },
+      });
+      return;
+    }
+
+    if (!this.email) {
+      this.isResending = false;
+      return;
+    }
     this.authService.resendCorporateVerificationCode(this.email).subscribe({
       next: (data) => {
         const message = data?.message || 'Doğrulama kodu e-posta adresinize tekrar gönderildi.';

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28">
+  <!-- Takvim deli?i -->
+  <circle cx="14" cy="13" r="5.5" fill="rgba(255,255,255,0.98)" stroke="rgba(30,58,138,0.35)" stroke-width="1.2"/>
+  <!-- K?rm?z? halka: delikten geçen, yukar? sola k?vr?lan çengel -->
+  <path d="M 8.5 13.2
+           L 8.5 16
+           Q 8.5 4 14 4
+           Q 19.5 4 19.5 13.2
+           L 19.5 16"
+        fill="none" stroke="#c53030" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
