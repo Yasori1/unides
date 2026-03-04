@@ -148,6 +148,14 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
   z-index: 3; // Section-communities'den (z-index: 2) daha yüksek - banner her zaman üstte kalır
   overflow: hidden;
 
+  /* Mobilde Toplam Etkinlik ve Toplam Topluluk sayaçlarını gizle; sadece PC/tablet (769px+) görünsün */
+  @media (max-width: 768px) {
+    .banner-quartz-left,
+    .banner-quartz-right {
+      display: none !important;
+    }
+  }
+
   // Mobil varsayılan — banner alt kenarı çok az yukarı
   padding-top: 112px;
   padding-bottom: 200px;
@@ -1071,6 +1079,12 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
   border-bottom: none;
   isolation: isolate;
 
+  /* Bilgi kutucuğu (tooltip) hover'da kesilmesin, her zaman üstte görünsün */
+  &:has(.nc-item:hover),
+  &:has(.mobile-card:hover) {
+    overflow: visible;
+  }
+
   .marquee-border {
     display: none;
   }
@@ -1100,6 +1114,7 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
     width: 1100px;
     height: $cube-height;
     position: relative;
+    overflow: visible;
   }
 
   /* Topluluk üzerine gelindiğinde (bilgi balonu açıkken) küp animasyonunu durdur */
@@ -1114,7 +1129,7 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
     transform-style: preserve-3d;
     animation: rotateCube 12s infinite cubic-bezier(0.25, 1, 0.5, 1);
     will-change: transform;
-    /* Performans */
+    overflow: visible;
   }
 
   .cube-face {
@@ -1129,6 +1144,7 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
     justify-content: space-around;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
+    overflow: visible;
 
     /* Safari */
     .nc-item {
@@ -1165,12 +1181,13 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
         opacity: 0;
         visibility: hidden;
         transition: opacity 0.2s ease, visibility 0.2s, transform 0.2s ease;
-        z-index: 9999;
+        z-index: 99999;
         pointer-events: none;
         max-width: 280px;
         text-align: center;
         line-height: 1.4;
         overflow: visible;
+        isolation: isolate;
 
         &::after {
           content: '';
@@ -1450,6 +1467,10 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
       padding-bottom: 70px; // Bilgi baloncuğu ikonun altında tam görünsün
       position: relative;
 
+      &:has(.mobile-card:hover) {
+        overflow: visible; // Bilgi kutucuğu kesilmesin
+      }
+
       .mobile-slider-track {
         display: flex;
         gap: 12px;
@@ -1498,12 +1519,13 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.2s ease, visibility 0.2s, transform 0.2s ease;
-            z-index: 9999;
+            z-index: 99999;
             pointer-events: none;
             max-width: 260px;
             text-align: center;
             line-height: 1.4;
             overflow: visible;
+            isolation: isolate;
 
             &::after {
               content: '';

@@ -311,10 +311,12 @@
     <div class="slider-container">
       <div class="slider-track">
         <div class="slide" *ngFor="let img of sliderImages">
-          <img [src]="img" alt="Etkinlik Karesi" loading="lazy" (click)="openLightbox(img)" />
+          <img [src]="img" alt="Etkinlik Karesi" loading="lazy" (click)="openLightbox(img)"
+            (error)="onImageError($event, 'cover')" />
         </div>
         <div class="slide" *ngFor="let img of sliderImages">
-          <img [src]="img" alt="Etkinlik Karesi" loading="lazy" (click)="openLightbox(img)" />
+          <img [src]="img" alt="Etkinlik Karesi" loading="lazy" (click)="openLightbox(img)"
+            (error)="onImageError($event, 'cover')" />
         </div>
       </div>
     </div>
