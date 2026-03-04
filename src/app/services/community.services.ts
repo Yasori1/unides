@@ -638,7 +638,6 @@ export class CommunityService {
                   return this.mapMiniDtoToCommunity(communityDto);
                 }),
                 catchError((fallbackError) => {
-                  console.error("Pasif topluluk liste endpoint'inden çekilemedi:", fallbackError);
                   throw fallbackError;
                 })
               );
@@ -693,10 +692,6 @@ export class CommunityService {
     dto: UpdateCommunityDto,
     options?: { fromGSB?: boolean; submitForApproval?: boolean }
   ): Observable<Community> {
-    // Debug log - DTO'nun içeriğini kontrol et
-    console.log('updateCommunity - Sending DTO to backend:', JSON.stringify(dto, null, 2));
-    console.log('updateCommunity - Community ID:', id);
-
     let headers = new HttpHeaders();
     if (options?.fromGSB === true) headers = headers.set('X-From-GSB', 'true');
     if (options?.submitForApproval === true) headers = headers.set('X-Submit-For-Approval', 'true');
@@ -867,13 +862,6 @@ export class CommunityService {
       }
     }
 
-    // Debug için console.log (production'da kaldırılabilir)
-    console.log('Original email:', JSON.stringify(dto.email));
-    console.log('Cleaned email:', JSON.stringify(cleanEmail));
-    console.log('Email length:', cleanEmail.length);
-    console.log('Email ends with .edu.tr:', cleanEmail.toLowerCase().endsWith('.edu.tr'));
-    console.log('Last 7 chars:', JSON.stringify(cleanEmail.slice(-7)));
-
     // DTO'yu backend'in beklediği formata çevir
     const backendDto = {
       Email: cleanEmail,
@@ -915,8 +903,7 @@ export class CommunityService {
           university: '',
         }));
       }),
-      catchError((error) => {
-        console.error('Topluluk üyeleri yüklenirken hata:', error);
+      catchError(() => {
         return of([]);
       })
     );
@@ -927,7 +914,6 @@ export class CommunityService {
   // Gelecekte backend'de endpoint eklendiğinde buraya bağlanacak
   searchNonMemberStudents(query: string): Observable<any[]> {
     // Backend'de search-students endpoint'i yok, şimdilik boş array döndürüyoruz
-    console.warn("search-students endpoint backend'de henüz mevcut değil");
     return of([]);
   }
 
@@ -992,7 +978,6 @@ export class CommunityService {
         }
       }),
       catchError((error: any) => {
-        console.error('Email kontrol hatası:', error);
         // Hata durumunda kullanıcının var olduğunu varsayalım
         // Gerçek kontrol "Kaydet" butonuna basıldığında yapılacak
         return of({
@@ -1103,7 +1088,6 @@ export class CommunityService {
       })
       .pipe(
         catchError((error) => {
-          console.error('Leave community error:', error);
           throw error;
         })
       );
@@ -1175,7 +1159,6 @@ export class CommunityService {
       return this.getAllCommunities().pipe(
         map((allCommunities) => {
           if (allCommunities.length === 0) {
-            console.log('getMyCommunities: Tüm topluluklar listesi boş');
             return [];
           }
 
@@ -1184,15 +1167,6 @@ export class CommunityService {
           // via current endpoints. This filters only by president role.
           const myCommunities = allCommunities.filter(
             (c) => c.comLeadMail?.toLowerCase() === userEmail.toLowerCase()
-          );
-
-          console.log(
-            'getMyCommunities: Tüm topluluklar:',
-            allCommunities.length,
-            'Başkan olduğu topluluklar:',
-            myCommunities.length,
-            'Kullanıcı email:',
-            userEmail
           );
 
           return myCommunities;
@@ -1392,13 +1366,12 @@ export class CommunityService {
           return { BannerUrl: path };
         }),
         catchError((error) => {
-          console.error('Banner yüklenemedi:', error);
           throw error;
         })
       );
   }
 
-  // Topluluk logo yükle (Backend: POST /api/Communities/{id}/logo)
+  // Topluluk logo yükle
   // options.setupToken: Topluluk kaydı sırasında complete-community-setup sonrası JWT dönmezse bu token ile yetkilendirme (X-Setup-Token header)
   uploadLogo(
     communityId: string,
@@ -1462,13 +1435,12 @@ export class CommunityService {
           return { LogoUrl: path };
         }),
         catchError((error) => {
-          console.error('Logo yüklenemedi:', error);
           throw error;
         })
       );
   }
 
-  // Topluluk başkanı için istatistikleri getir (Backend: GET /api/Communities/leader-stats)
+  // Topluluk başkanı için istatistikleri getir
   // Auth interceptor automatically adds Authorization header if token exists
   getLeaderStats(): Observable<{
     totalMembers: number;

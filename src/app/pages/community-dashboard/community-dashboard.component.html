@@ -123,12 +123,6 @@
           <div class="stat-card-mini" *ngFor="
               let stat of [
                 {
-                  label: 'Toplam Üye',
-                  value: stats.totalMembers,
-                  icon: 'group',
-                  colorClass: 'cyan'
-                },
-                {
                   label: 'Toplam Etkinlik',
                   value: stats.totalEvents,
                   icon: 'event',
@@ -400,7 +394,7 @@
   </main>
   </ng-container>
 
-  <div class="modal-overlay" *ngIf="isModalOpen" (click)="closeModal()">
+  <div class="modal-overlay" *ngIf="isModalOpen" (click)="modalType !== 'new-event' && closeModal()">
     <div class="modal-card" [class.event-modal]="modalType === 'new-event'" (click)="$event.stopPropagation()">
       <div class="modal-head">
         <h3>
@@ -428,6 +422,10 @@
               </div>
               <app-image-upload label="Fotoğraf seç / sürükle" [previewUrl]="newEventData.image || null"
                 [uploadToServer]="true" [allowUrl]="false"
+                [enableCrop]="true"
+                [cropMaintainAspectRatio]="true"
+                [cropAspectRatio]="2"
+                cropHint="Etkinlik kartlarında 2:1 oranında gösterilir; önemli alanı ortada seçin."
                 (onImageSelected)="onEventImageSelected($event)"
                 (onFileSelected)="onEventFileSelected($event)"></app-image-upload>
             </div>
@@ -467,10 +465,12 @@
               <textarea rows="3" placeholder="Etkinlik Açıklaması" [(ngModel)]="newEventData.description"
                 maxlength="2000"></textarea>
             </label>
-            <button class="btn-primary full" [disabled]="!isEventFormValid" (click)="saveEvent()" type="button">
+            <button class="btn-primary full" [disabled]="!isEventFormValid || isSavingEvent" (click)="saveEvent()" type="button">
               <span *ngIf="!isEventFormValid">Lütfen Tüm Alanları Doldurun</span>
-              <span *ngIf="isEventFormValid && !editingEventId">Etkinlik Oluştur ve Kurumsal Tarafa Yönlendir</span>
-              <span *ngIf="isEventFormValid && editingEventId">Etkinliği Güncelle ve Onaya Gönder</span>
+              <span *ngIf="isEventFormValid && !editingEventId && !isSavingEvent">Etkinlik Oluştur ve Kurumsal Tarafa Yönlendir</span>
+              <span *ngIf="isEventFormValid && !editingEventId && isSavingEvent">Oluşturuluyor...</span>
+              <span *ngIf="isEventFormValid && editingEventId && !isSavingEvent">Etkinliği Güncelle ve Onaya Gönder</span>
+              <span *ngIf="isEventFormValid && editingEventId && isSavingEvent">Güncelleniyor...</span>
             </button>
           </div>
         </div>

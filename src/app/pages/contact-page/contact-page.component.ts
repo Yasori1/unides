@@ -131,10 +131,9 @@ export class ContactPageComponent implements OnInit, AfterViewInit {
         },
         error: (err) => {
           this.isSubmitting = false;
-          let msg = err?.error?.message || 'Mesaj gönderilemedi. Lütfen daha sonra tekrar deneyiniz.';
-          if (err?.status === 429) {
-            msg = 'Çok fazla deneme yaptınız, başka zaman deneyiniz.';
-          }
+          // 429 (Too Many Requests) interceptor'da zaten toast ile gösteriliyor, tekrar gösterme
+          if (err?.status === 429) return;
+          const msg = err?.error?.message || 'Mesaj gönderilemedi. Lütfen daha sonra tekrar deneyiniz.';
           this.toastService.show(msg, 'error');
         },
       });

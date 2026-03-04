@@ -4,7 +4,6 @@ import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 import { ToastService } from '../services/toast.services';
 import { AuthService } from '../services/auth.services';
-import { environment } from '../../environments/environment';
 
 /**
  * Global Error Interceptor
@@ -113,6 +112,10 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         } else {
           errorMessage = error.error?.message || 'İstenen kaynak bulunamadı.';
         }
+      } else if (error.status === 429) {
+        // Too Many Requests - rate limit aşıldı
+        errorMessage = error.error?.message ||
+          'Çok fazla istek gönderdiniz. Lütfen kısa bir süre bekleyip tekrar deneyin.';
       } else if (error.status === 500) {
         // Server Error
         errorMessage = error.error?.message || 
@@ -131,20 +134,6 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       // Show toast notification
       if (typeof window !== 'undefined') {
         toastService.show(errorMessage, 'error');
-      }
-
-      // Log error for debugging (only in development and skip certain endpoints)
-      // Event detail re-fetch için 404'leri loglama
-      const shouldSkipLogging = error.url?.includes('/api/Search') || 
-                                (error.url?.match(/\/api\/Events\/\d+$/) && error.status === 404);
-      
-      if (!shouldSkipLogging && !environment.production) {
-        console.error('HTTP Error:', {
-          url: error.url,
-          status: error.status,
-          message: errorMessage,
-          error: error.error,
-        });
       }
 
       // Re-throw the error so components can still handle it if needed

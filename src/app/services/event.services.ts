@@ -502,9 +502,6 @@ export class EventService {
         // Negatif değerler için 0 döndür (sınırsız gösterilir)
         // 0 ve pozitif değerler için direkt döndür (0 da geçerli bir değer olabilir, ama genelde sınırsız anlamına gelir)
         const result = numValue >= 0 ? numValue : 0;
-        if (!environment.production) {
-          console.log('[mapToEvent] Kontenjan map edildi:', kontenjan, '->', numValue, '->', result, 'Event ID:', dto.eventId || dto.EventId);
-        }
         return result;
       })(),
       city: dto.city || dto.City || '',
@@ -512,16 +509,6 @@ export class EventService {
         // Backend'den gelen tüm olası field adlarını kontrol et
         const confirmAbout = (dto as any).ConfirmAbout || (dto as any).confirmAbout || (dto as any).ConfirmAbout || (dto as any).confirmAbout;
         const rejectionReason = (dto as any).RejectionReason || (dto as any).rejectionReason;
-
-        // Debug (sadece development modunda)
-        if (!environment.production) {
-          if (confirmAbout) {
-            console.log('mapToEvent: ConfirmAbout bulundu:', confirmAbout, 'Event ID:', dto.eventId || dto.EventId);
-          }
-          if (rejectionReason) {
-            console.log('mapToEvent: RejectionReason bulundu:', rejectionReason, 'Event ID:', dto.eventId || dto.EventId);
-          }
-        }
 
         return confirmAbout || rejectionReason || undefined;
       })(),
@@ -551,8 +538,7 @@ export class EventService {
         // İlk limit kadarını al
         return futureEvents.slice(0, limit);
       }),
-      catchError((error) => {
-        console.error('Home upcoming events yüklenemedi:', error);
+      catchError(() => {
         return of([]);
       })
     );
@@ -570,8 +556,7 @@ export class EventService {
         });
         return apiEvents;
       }),
-      catchError((error) => {
-        console.error('Etkinlikler yüklenemedi:', error);
+      catchError(() => {
         return of([]);
       })
     );
@@ -655,39 +640,13 @@ export class EventService {
             return [];
           }
 
-          // Debug: Backend'den gelen raw response'u kontrol et
-          console.log('Backend raw response:', response);
-
-          // EventsByStatusDto: { Pending: EventListItemDto[], Accepted: EventListItemDto[], Rejected: EventListItemDto[] }
           const pending = response.Pending || response.pending || [];
           const accepted = response.Accepted || response.accepted || [];
           const rejected = response.Rejected || response.rejected || [];
 
-          // Debug: Rejected events'i kontrol et
-          console.log('Rejected events (raw):', rejected);
-          rejected.forEach((event: any, idx: number) => {
-            console.log(`Rejected event ${idx}:`, {
-              id: event.eventId || event.EventId,
-              name: event.eventName || event.EventName,
-              confirmAbout: event.ConfirmAbout || event.confirmAbout,
-              allKeys: Object.keys(event)
-            });
-          });
-
-          // Tüm status'leri birleştir
           const allEvents: EventListItemDto[] = [...pending, ...accepted, ...rejected];
 
-          // EventListItemDto'ları EventItem'a map et
-          const mappedEvents = allEvents.map((dto) => {
-            // Debug: Backend'den gelen raw DTO'yu kontrol et
-            console.log('Raw DTO:', dto);
-            if (dto && ((dto as any).ConfirmAbout || (dto as any).confirmAbout)) {
-              console.log('Backend\'den ConfirmAbout geldi:', (dto as any).ConfirmAbout || (dto as any).confirmAbout, 'Event ID:', dto.eventId || dto.EventId);
-            }
-            const mapped = this.mapToEvent(dto);
-            console.log('Mapped event rejectionReason:', mapped.rejectionReason, 'Event ID:', mapped.id);
-            return mapped;
-          });
+          const mappedEvents = allEvents.map((dto) => this.mapToEvent(dto));
 
           return mappedEvents;
         }),
@@ -710,16 +669,12 @@ export class EventService {
           // Component'ler bu durumu handle edebilir
           return throwError(() => error);
         }
-        // Diğer hatalar için sadece development modunda log yaz
-        if (!environment.production) {
-          console.warn('Etkinlik detayı yüklenemedi:', error.status || error.message);
-        }
         throw error;
       })
     );
   }
 
-  // Yeni etkinlik ekleme (Backend: POST /api/Events/create)
+  // Yeni etkinlik ekleme
   // comId backend'de otomatik olarak creator'ın topluluğundan alınıyor, bu yüzden artık gerekli değil
   // Auth interceptor automatically adds Authorization header and Content-Type if token exists
   createEvent(event: Partial<EventItem>): Observable<{ eventId: number }> {
@@ -775,7 +730,6 @@ export class EventService {
         const errBody = error?.error;
         const msg = error?.error?.message || error?.error?.title || error?.message || 'Sunucu hatası';
         const detail = error?.error?.detail || error?.error?.errors || error?.error;
-        console.error('Etkinlik oluşturulamadı:', msg, detail ? { detail } : '', error);
         // Backend CreateEventCommandHandler 500: topluluk bulunamadı / aktif değil / yetki yok (backend read-only)
         if (error?.status === 500) {
           const backendMsg = typeof errBody === 'string' && errBody.length > 0 ? errBody : null;
@@ -840,7 +794,6 @@ export class EventService {
 
     return this.http.put<{ updated: number }>(`${this.apiUrl}/update/${id}`, updateDto).pipe(
       catchError((error) => {
-        console.error('Etkinlik güncellenemedi:', error);
         throw error;
       })
     );
@@ -851,7 +804,6 @@ export class EventService {
   deleteEvent(id: number): Observable<{ deleted: boolean }> {
     return this.http.delete<{ deleted: boolean }>(`${this.apiUrl}/delete/${id}`).pipe(
       catchError((error) => {
-        console.error('Etkinlik silinemedi:', error);
         throw error;
       })
     );
@@ -906,21 +858,18 @@ export class EventService {
         return { ImagePath: path };
       }),
       catchError((error) => {
-        console.error('Etkinlik görseli yüklenemedi:', error);
-        console.error('Hata detayı:', error.error);
         throw error;
       })
     );
   }
 
-  // Etkinlik onayla (Backend: POST /api/Events/{id}/approve)
+  // Etkinlik onayla
   // Auth interceptor automatically adds Authorization header and Content-Type if token exists
   approveEvent(id: number, comment?: string): Observable<{ approved: boolean }> {
     const body = comment ? { comment } : {};
 
     return this.http.post<{ approved: boolean }>(`${this.apiUrl}/${id}/approve`, body).pipe(
       catchError((error) => {
-        console.error('Etkinlik onaylanamadı:', error);
         throw error;
       })
     );
@@ -933,7 +882,6 @@ export class EventService {
 
     return this.http.post<{ approved: boolean }>(`${this.apiUrl}/${id}/reject`, body).pipe(
       catchError((error) => {
-        console.error('Etkinlik reddedilemedi:', error);
         throw error;
       })
     );

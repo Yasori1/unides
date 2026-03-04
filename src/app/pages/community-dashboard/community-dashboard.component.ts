@@ -123,6 +123,9 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
   // Event editing state
   editingEventId: number | null = null;
 
+  /** Etkinlik oluştur/güncelle gönderiminde çift tıklamayı engellemek için */
+  isSavingEvent = false;
+
   // Event creation modal
   newEventData = {
     title: '',
@@ -1521,6 +1524,8 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     const comId =
       typeof this.clubInfo.id === 'string' ? this.clubInfo.id : String(this.clubInfo.id);
 
+    this.isSavingEvent = true;
+
     // Düzenleme modu kontrolü
     if (this.editingEventId) {
       this.eventService
@@ -1565,6 +1570,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
                     );
                     this.closeModal();
                     this.editingEventId = null; // Reset editing state
+                    this.isSavingEvent = false;
                     if (this.clubInfo.id) {
                       setTimeout(() => {
                         this.loadCommunityEvents(this.clubInfo.id, true); // skipLoading = true
@@ -1580,6 +1586,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
                     );
                     this.closeModal();
                     this.editingEventId = null; // Reset editing state
+                    this.isSavingEvent = false;
                     if (this.clubInfo.id) {
                       this.loadCommunityEvents(this.clubInfo.id);
                     }
@@ -1593,6 +1600,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
               );
               this.closeModal();
               this.editingEventId = null; // Reset editing state
+              this.isSavingEvent = false;
               if (this.clubInfo.id) {
                 this.loadCommunityEvents(this.clubInfo.id);
               }
@@ -1600,6 +1608,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
           },
           error: (err: any) => {
             Logger.error('Etkinlik güncellenemedi:', err);
+            this.isSavingEvent = false;
             let errorMessage = 'Etkinlik güncellenirken bir hata oluştu.';
             if (err.status === 401 || err.status === 403) {
               errorMessage = 'Bu işlem için yetkiniz bulunmamaktadır.';
@@ -1672,8 +1681,8 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
                 );
                 // Modal'ı kapat
                 this.closeModal();
-
-                // Reload events from backend to get fresh data (fotoğraf path'i ile birlikte)
+                this.isSavingEvent = false;
+                // Reload events from backend
                 // Backend'in fotoğrafı işlemesi ve event objesine set etmesi için bekleme
                 if (this.clubInfo.id) {
                   setTimeout(() => {
@@ -1697,6 +1706,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
                 );
                 // Modal'ı kapat
                 this.closeModal();
+                this.isSavingEvent = false;
                 // Etkinlikleri yeniden yükle
                 if (this.clubInfo.id) {
                   this.loadCommunityEvents(this.clubInfo.id);
@@ -1711,6 +1721,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
             );
             // Modal'ı kapat
             this.closeModal();
+            this.isSavingEvent = false;
             // Etkinlikleri yeniden yükle
             if (this.clubInfo.id) {
               this.loadCommunityEvents(this.clubInfo.id);
@@ -1719,6 +1730,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
         },
         error: (err: any) => {
           Logger.error('Etkinlik oluşturulamadı:', err);
+          this.isSavingEvent = false;
           let errorMessage = 'Etkinlik oluşturulurken bir hata oluştu';
           if (err.status === 401 || err.status === 403) {
             errorMessage = 'Bu işlem için yetkiniz bulunmamaktadır.';

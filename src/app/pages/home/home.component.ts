@@ -14,7 +14,6 @@ import { EventService } from '../../services/event.services';
 import { SearchService } from '../../services/search.services';
 import { ImageErrorHandlerService } from '../../services/image-error-handler.service';
 import { TurkishUppercasePipe } from '../../pipes/turkish-uppercase.pipe';
-import { environment } from '../../../environments/environment';
 
 // --- Veri Tipleri (Interfaces) ---
 interface Community {
@@ -213,10 +212,6 @@ export class HomeComponent implements OnInit, OnDestroy {
   // --- Tarih Formatlama ---
   // Topluluk logolarını yükle
   loadCommunityLogos(events: UpcomingEvent[]): void {
-    if (!environment.production) {
-      console.log('[Home] loadCommunityLogos çağrıldı, event sayısı:', events.length);
-    }
-
     // Her event için detay endpoint'inden communityId çek (daha güvenli)
     const eventDetailRequests = events.map((event) => {
       return this.eventService.getById(event.id).pipe(
@@ -227,9 +222,6 @@ export class HomeComponent implements OnInit, OnDestroy {
           };
         }),
         catchError((error) => {
-          if (!environment.production) {
-            console.warn('[Home] Event detayı yüklenemedi:', error, 'Event ID:', event.id);
-          }
           // Hata durumunda mevcut communityId'yi kullan (varsa)
           return of({
             eventId: event.id,
@@ -242,10 +234,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     // Tüm event detaylarını paralel çek
     forkJoin(eventDetailRequests).subscribe({
       next: (eventDetails) => {
-        if (!environment.production) {
-          console.log('[Home] Event detayları alındı:', eventDetails);
-        }
-
         // Her event için topluluk logo isteklerini hazırla
         const logoRequests = eventDetails.map((detail) => {
           const event = events.find((e) => e.id === detail.eventId);
@@ -256,30 +244,18 @@ export class HomeComponent implements OnInit, OnDestroy {
           const communityId = detail.communityId;
 
           if (!communityId || communityId === 0 || communityId === '0') {
-            if (!environment.production) {
-              console.warn('[Home] Event için communityId bulunamadı:', detail.eventId);
-            }
             return of({ eventId: detail.eventId, logo: 'assets/img/placeholder-avatar.svg' });
           }
 
           // Topluluk detayını çek (logo için)
-          if (!environment.production) {
-            console.log('[Home] Topluluk detayı çekiliyor, Community ID:', communityId, 'Event ID:', detail.eventId);
-          }
           return this.communityService.getCommunityById(String(communityId)).pipe(
             map((community) => {
-              if (!environment.production) {
-                console.log('[Home] Topluluk detayı alındı:', community.id, 'Logo:', community.logo, 'Event ID:', detail.eventId);
-              }
               return {
                 eventId: detail.eventId,
                 logo: community.logo || 'assets/img/placeholder-avatar.svg',
               };
             }),
-            catchError((error) => {
-              if (!environment.production) {
-                console.warn('[Home] Topluluk logosu yüklenemedi:', error, 'Community ID:', communityId, 'Event ID:', detail.eventId);
-              }
+            catchError(() => {
               return of({ eventId: detail.eventId, logo: 'assets/img/placeholder-avatar.svg' });
             })
           );
@@ -288,31 +264,18 @@ export class HomeComponent implements OnInit, OnDestroy {
         // Tüm logo isteklerini paralel olarak çalıştır
         forkJoin(logoRequests).subscribe({
           next: (logoResults) => {
-            if (!environment.production) {
-              console.log('[Home] Logo sonuçları alındı:', logoResults);
-            }
             // Logo sonuçlarını event'lere ekle
             logoResults.forEach((result) => {
               const event = events.find((e) => e.id === result.eventId);
               if (event) {
-                if (!environment.production) {
-                  console.log('[Home] Event logo güncelleniyor:', event.id, 'Eski logo:', event.communityLogo, 'Yeni logo:', result.logo);
-                }
                 event.communityLogo = result.logo;
               }
             });
 
             // Event'leri güncelle
-            if (!environment.production) {
-              console.log('[Home] Events guncelleniyor, yeni event listesi:', events);
-            }
             this.upcomingEvents = [...events]; // Yeni array referansı ile güncelleme
           },
-          error: (error) => {
-            if (!environment.production) {
-              console.error('[Home] Topluluk logoları yüklenirken hata:', error);
-            }
-            // Hata durumunda placeholder logoları kullan
+          error: () => {
             events.forEach((event) => {
               if (!event.communityLogo || event.communityLogo === 'assets/img/placeholder-avatar.svg') {
                 event.communityLogo = 'assets/img/placeholder-avatar.svg';
@@ -322,10 +285,7 @@ export class HomeComponent implements OnInit, OnDestroy {
           },
         });
       },
-      error: (error) => {
-        if (!environment.production) {
-          console.error('[Home] Event detayları yüklenirken hata:', error);
-        }
+      error: () => {
         // Hata durumunda placeholder logoları kullan
         events.forEach((event) => {
           event.communityLogo = 'assets/img/placeholder-avatar.svg';
@@ -399,8 +359,7 @@ export class HomeComponent implements OnInit, OnDestroy {
           };
         });
       },
-      error: (error) => {
-        console.error('Featured communities yüklenemedi:', error);
+      error: () => {
         this.featuredCommunities = [];
       },
     });
@@ -415,28 +374,8 @@ export class HomeComponent implements OnInit, OnDestroy {
         // Etkinlikleri map et ve geçici olarak dateOnly ekle
         const eventsWithDateOnly = events.map((e) => {
           const eventDate = e.startDate ? new Date(e.startDate) : new Date();
-          // Sadece tarih kısmını al (saat bilgisini sıfırla)
           const eventDateOnly = new Date(eventDate);
           eventDateOnly.setHours(0, 0, 0, 0);
-
-          // Debug: imageUrl ve communityLogo'yu logla (sadece development'ta)
-          if (!environment.production) {
-            if (e.imageUrl) {
-              console.log('[Home] Event imageUrl:', e.imageUrl, 'Event ID:', e.id, 'Event Title:', e.title);
-            } else {
-              console.warn('[Home] Event imageUrl is empty or undefined:', 'Event ID:', e.id, 'Event Title:', e.title);
-            }
-
-            // Debug: Event verisini logla
-            console.log('[Home] Event verisi:', {
-              id: e.id,
-              title: e.title,
-              communityName: e.communityName,
-              communityId: e.communityId,
-              communityLogo: e.communityLogo,
-              fullEvent: e
-            });
-          }
 
           return {
             id: e.id,
@@ -475,10 +414,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         // Her event için topluluk logolarını çek
         this.loadCommunityLogos(selectedEvents);
       },
-      error: (error) => {
-        if (!environment.production) {
-          console.error('Upcoming events yüklenemedi:', error);
-        }
+      error: () => {
         this.upcomingEvents = [];
       },
     });
@@ -500,10 +436,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         });
         this.isLoading = false;
       },
-      error: (error) => {
-        if (!environment.production) {
-          console.error('Newest communities yüklenemedi:', error);
-        }
+      error: () => {
         this.newestCommunities = [];
         this.isLoading = false;
       },
@@ -560,10 +493,7 @@ export class HomeComponent implements OnInit, OnDestroy {
           this.router.navigate(['/communities'], { queryParams: { search: query } });
         }
       },
-      error: (error) => {
-        if (!environment.production) {
-          console.error('Search error:', error);
-        }
+      error: () => {
         // Hata durumunda varsayılan olarak topluluklar sayfasına yönlendir
         this.router.navigate(['/communities'], { queryParams: { search: query } });
       },

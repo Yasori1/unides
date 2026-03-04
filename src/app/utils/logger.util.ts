@@ -1,37 +1,25 @@
-import { environment } from '../../environments/environment';
-
 /**
- * Production'da console loglarını devre dışı bırakan utility fonksiyonlar
- * Güvenlik açığı oluşturmamak için production'da hiçbir log gösterilmez
+ * Production'da ve canlıda console'da hiçbir log gösterilmemesi için
+ * tüm metodlar no-op (boş). Dışarıya gözükmemeli.
  */
 export class Logger {
-  static log(...args: any[]): void {
-    if (!environment.production) {
-      console.log(...args);
-    }
+  static log(..._args: any[]): void {
+    // No-op: console'da görünmesin
   }
 
-  static error(...args: any[]): void {
-    if (!environment.production) {
-      console.error(...args);
-    }
+  static error(..._args: any[]): void {
+    // No-op: console'da görünmesin
   }
 
-  static warn(...args: any[]): void {
-    if (!environment.production) {
-      console.warn(...args);
-    }
+  static warn(..._args: any[]): void {
+    // No-op: console'da görünmesin
   }
 
-  static info(...args: any[]): void {
-    if (!environment.production) {
-      console.info(...args);
-    }
+  static info(..._args: any[]): void {
+    // No-op: console'da görünmesin
   }
 
-  static debug(...args: any[]): void {
-    if (!environment.production) {
-      console.debug(...args);
-    }
+  static debug(..._args: any[]): void {
+    // No-op: console'da görünmesin
   }
 }

@@ -9,5 +9,5 @@ import 'zone.js';
 registerLocaleData(localeTr);
 
 bootstrapApplication(AppComponent, appConfig)
-    .catch((err) => console.error(err));
+    .catch(() => {});
 
