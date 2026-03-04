@@ -75,6 +75,9 @@ export class CorporateVerificationComponent implements OnInit, OnDestroy {
     if (this.otpRequestId) {
       this.authService.verifyLoginOtp(this.otpRequestId, this.code).subscribe({
         next: () => {
+          // Kurumsal girişten geldiğimiz için rolü kurumsal olarak zorla kaydet
+          // (verifyLoginOtp backend yanıtında rol yoksa varsayılan 'community' yazıyordu)
+          this.authService.saveUserType('corporate');
           this.toastService.show('Doğrulama başarılı! Yönlendiriliyorsunuz...', 'success');
           setTimeout(() => {
             this.isLoading = false;
