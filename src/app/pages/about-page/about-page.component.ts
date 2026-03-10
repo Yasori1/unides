@@ -39,7 +39,7 @@ export class AboutPageComponent implements OnInit, AfterViewInit {
   ];
 
   applicationSteps = [
-    { id: '1', title: 'edu.tr uzantılı mail adresinizle portala kaydol.', desc: '' },
+    { id: '1', title: 'edu.tr uzantılı mail adresinle portala kaydol.', desc: '' },
     { id: '2', title: 'Topluluk bilgilerinizi doldurarak yetkili onayına gönder.', desc: '' },
     {
       id: '3',
