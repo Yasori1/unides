@@ -161,8 +161,24 @@ $border-color: #e2e8f0; // Slate 200
 }
 
 .hero-section {
-  padding: 100px 0 100px;
+  padding: 90px 0 90px;
   overflow: hidden;
+  position: relative;
+
+  // Arka planda transparan ÜNİDES logosu
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url('/assets/unides1.png');
+    background-repeat: no-repeat;
+    background-position: center 35%;
+    background-size: 420px auto;
+    opacity: 0.06;
+    filter: grayscale(1);
+    pointer-events: none;
+    z-index: 1;
+  }
 
   .hero-container {
     display: grid;
@@ -170,6 +186,8 @@ $border-color: #e2e8f0; // Slate 200
     align-items: stretch;
     gap: 40px;
     justify-items: center;
+    position: relative;
+    z-index: 2;
   }
 
   .hero-text-side {
@@ -178,11 +196,13 @@ $border-color: #e2e8f0; // Slate 200
     justify-content: center;
     align-items: center;
     text-align: center;
+    max-width: 860px;
+    margin: 0 auto;
     opacity: 0;
     animation: fadeIn 1s forwards;
 
-    h1 {
-      font-size: clamp(2.2rem, 4vw, 3.5rem);
+    h2 {
+      font-size: 2.5rem;
       font-weight: 800;
       line-height: 1.2;
       margin-bottom: 25px;
@@ -192,11 +212,11 @@ $border-color: #e2e8f0; // Slate 200
       }
     }
     .lead {
-      font-size: 1.15rem;
-      font-weight: 500;
+      font-size: 1.1rem;
+      font-weight: 400;
       line-height: 1.7;
       margin-bottom: 20px;
-      color: $text-dark;
+      color: $text-dark; // daha koyu metin rengi
     }
     .sub-text {
       color: $text-gray;
@@ -393,31 +413,45 @@ $border-color: #e2e8f0; // Slate 200
 
 // --- 4. MİSYON & VİZYON & TAGS ---
 .mission-section {
-  padding: 40px 0 50px;
+  padding: 24px 0 50px;
   background: linear-gradient(to bottom, #fff, $bg-light);
 
   .mission-header {
-    max-width: 800px;
+    max-width: 1100px;
     margin: 0 auto 30px;
-    text-align: center;
+    text-align: left;
 
-    h2 {
-      font-size: 2.5rem;
-      font-weight: 800;
-      margin-bottom: 20px;
-      color: $text-dark;
-      .brand-blue {
-        color: $primary-blue;
-      }
-      .light-text {
-        font-weight: 300;
-        color: $text-gray;
-      }
+    .mission-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 28px;
+      align-items: stretch;
     }
-    p {
-      font-size: 1.1rem;
-      line-height: 1.7;
-      color: $text-gray;
+
+    .mission-card {
+      background: $white;
+      border-radius: 20px;
+      padding: 26px 28px;
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.06);
+      border: 1px solid $border-color;
+
+      h3 {
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin-bottom: 12px;
+        color: $text-dark;
+
+        .brand-blue {
+          color: $primary-blue;
+        }
+      }
+
+      p {
+        font-size: 1rem;
+        line-height: 1.7;
+        color: $text-dark;
+        margin: 0;
+      }
     }
   }
 
@@ -546,6 +580,22 @@ $border-color: #e2e8f0; // Slate 200
     height: 200%;
     background: radial-gradient(circle, rgba($primary-blue, 0.15) 0%, transparent 70%);
     pointer-events: none;
+    z-index: 1;
+  }
+
+  // Arka planda düşük parlaklıklı büyük görsel
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url('/assets/hakkimizda-basvuru.png');
+    background-position: center bottom;
+    background-size: cover;
+    background-repeat: no-repeat;
+    opacity: 0.3; // hafif transparan görünüm
+    filter: brightness(0.5);
+    pointer-events: none;
+    z-index: 1;
   }
 
   .section-header-dark {
@@ -621,13 +671,9 @@ $border-color: #e2e8f0; // Slate 200
 
 // Başvuru süreci altındaki görsel kutusu
 .process-image-wrapper {
+  // Artık görsel arka planda kullanıldığı için bu blok gizlendi
   margin-top: 40px;
-  display: block;
-  position: relative;
-  z-index: 2;
-  width: 100vw;
-  left: 50%;
-  transform: translateX(-50%);
+  display: none;
 
   .process-image-card {
     width: 100%;
@@ -889,7 +935,7 @@ $border-color: #e2e8f0; // Slate 200
       padding: 0 10px; 
       width: 100%;
       
-      h1 {
+      h2 {
         font-size: 2rem; 
         br {
           display: none; // Let text flow naturally
@@ -904,6 +950,17 @@ $border-color: #e2e8f0; // Slate 200
 
   .guide-grid {
     grid-template-columns: 1fr !important;
+  }
+
+  .mission-section {
+    .mission-header {
+      .mission-grid {
+        grid-template-columns: 1fr;
+      }
+      .mission-card {
+        padding: 22px 20px;
+      }
+    }
   }
 
 
