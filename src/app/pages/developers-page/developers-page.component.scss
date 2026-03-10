@@ -196,7 +196,7 @@ h1 {
 
 .dev-cell {
   background: var(--glass);
-  height: 400px;
+  height: 480px;
   border: 1px solid rgba(255, 255, 255, 0.05);
   position: relative;
   overflow: hidden;
@@ -256,7 +256,7 @@ h1 {
   width: 100%;
   padding: 1.5rem 2rem 2rem 2rem; // Yazıları yukarı kaldırmak için alt padding artırıldı
   background: linear-gradient(to top, var(--bg), transparent);
-  z-index: 5;
+  z-index: 20; // Overlay (z-index: 10) üstünde kalsın; LinkedIn/GitHub tıklanabilsin
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
@@ -280,9 +280,10 @@ h1 {
   color: rgba(255, 255, 255, 0.9);
   letter-spacing: 0.1em;
   display: block;
-  white-space: nowrap; // Tek satırda kalması için
-  overflow: hidden;
-  text-overflow: ellipsis; // Uzun metinler için ellipsis
+  white-space: normal;
+  line-height: 1.25;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .dev-name {
@@ -291,8 +292,10 @@ h1 {
   font-weight: 500;
   color: #ffffff;
   display: block;
-  white-space: nowrap;
-  line-height: 1.3; // Satır yüksekliğini azalt
+  white-space: normal;
+  line-height: 1.3;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 /* Social Buttons */
@@ -348,7 +351,7 @@ h1 {
 .biometric-frame {
   position: relative;
   width: 200px;
-  height: 250px;
+  height: 320px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -391,28 +394,29 @@ h1 {
   border-color: var(--accent);
 }
 
-/* Description Overlay - Hover'da yukarıya doğru çıkan açıklama */
+/* Description Overlay - Hover'da tüm kartı kaplayan, kaydırılabilir açıklama */
 .dev-description-overlay {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  top: 0;
+  inset: 0;
   width: 100%;
-  height: 100%; // Tüm fotoğraf boyutu kadar
-  background: linear-gradient(to top, rgba(3, 7, 18, 0.75), rgba(3, 7, 18, 0.65));
-  backdrop-filter: blur(8px);
+  height: 100%;
+  background: linear-gradient(to top, rgba(3, 7, 18, 0.97), rgba(3, 7, 18, 0.92));
+  backdrop-filter: blur(10px);
   border: 2px solid var(--accent);
-  border-radius: 8px;
-  padding: 1.5rem 1rem;
+  border-radius: 0;
+  padding: 1.25rem 1rem;
   transform: translateY(100%);
   opacity: 0;
   transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.4s ease;
   z-index: 10;
   box-shadow: 0 -10px 30px rgba(0, 242, 255, 0.15);
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 .dev-cell:hover .dev-description-overlay {
@@ -421,48 +425,39 @@ h1 {
 }
 
 .description-content {
-  color: #e0f7fa; // Beyaz tonlarda turkuaza çalan renk
-  font-size: clamp(0.45rem, 0.75vw, 0.6rem); // Font boyutu daha fazla küçültüldü
-  line-height: 1.25; // Satır aralığı daha da azaltıldı - daha fazla metin sığması için
-  letter-spacing: -0.02em; // Harf arası boşluk daha fazla azaltıldı
-  word-spacing: 0; // Kelime arası boşluk kaldırıldı
+  color: #e0f7fa;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  letter-spacing: 0.01em;
   font-family: var(--sans);
-  text-align: left; // Sola hizala - justify boşluk yaratıyor
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
+  text-align: left;
+  display: block;
   width: 100%;
-  padding: 0.5rem; // İç padding eklendi - kenarlardan boşluk
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); // Daha belirgin gölge - okunabilirlik için
-  box-sizing: border-box; // Padding dahil hesaplama
-  overflow-wrap: break-word; // Kelimeleri kontrollü şekilde böl
-  word-break: break-word; // Kelimeleri hece sınırlarından böl
-  hyphens: auto; // Otomatik hece bölme - düzgün heceleme için
-  -webkit-hyphens: auto; // WebKit tarayıcılar için
-  -moz-hyphens: auto; // Firefox için
-  hyphenate-limit-chars: 6 3 2; // Minimum kelime uzunluğu, hece öncesi, hece sonrası
-  -webkit-hyphenate-limit-before: 3; // WebKit için hece öncesi minimum
-  -webkit-hyphenate-limit-after: 2; // WebKit için hece sonrası minimum
+  padding: 0;
+  flex: 1;
+  min-height: 0;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  box-sizing: border-box;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  -moz-hyphens: auto;
 
   p {
     margin: 0;
     padding: 0;
     word-wrap: break-word;
-    overflow-wrap: break-word; // Kelimeleri kontrollü şekilde böl
-    word-break: break-word; // Kelimeleri hece sınırlarından böl
+    overflow-wrap: break-word;
+    word-break: break-word;
     max-width: 100%;
-    color: #e0f7fa; // Beyaz tonlarda turkuaza çalan renk
-    text-align: left; // Sola hizala - justify boşluk yaratıyor
-    line-height: 1.25; // Paragraflar için de satır aralığı azaltıldı
-    letter-spacing: -0.02em; // Harf arası boşluk daha fazla azaltıldı
-    word-spacing: 0; // Kelime arası boşluk kaldırıldı
-    hyphens: auto; // Otomatik hece bölme - düzgün heceleme için
-    -webkit-hyphens: auto; // WebKit tarayıcılar için
-    -moz-hyphens: auto; // Firefox için
-    hyphenate-limit-chars: 6 3 2; // Minimum kelime uzunluğu, hece öncesi, hece sonrası
-    -webkit-hyphenate-limit-before: 3; // WebKit için hece öncesi minimum
-    -webkit-hyphenate-limit-after: 2; // WebKit için hece sonrası minimum
+    color: #e0f7fa;
+    text-align: left;
+    line-height: 1.45;
+    letter-spacing: 0.01em;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    -moz-hyphens: auto;
   }
 }
 
@@ -575,17 +570,15 @@ h1 {
 
   .biometric-frame {
     width: 180px;
-    height: 220px;
+    height: 280px;
   }
 
   .dev-description-overlay {
-    padding: 1.25rem 0.875rem;
+    padding: 1rem 0.75rem;
 
     .description-content {
-      font-size: clamp(0.45rem, 0.75vw, 0.6rem); // Tablet'te font küçültüldü
-      line-height: 1.2; // Satır aralığı daha da azaltıldı
-      letter-spacing: -0.02em; // Harf arası boşluk daha fazla azaltıldı
-      word-spacing: -0.05em; // Kelime arası boşluk azaltıldı
+      font-size: 0.75rem;
+      line-height: 1.4;
     }
   }
 
@@ -625,26 +618,24 @@ h1 {
 
   .dev-cell {
     grid-column: span 10;
-    height: 320px; // Mobilde kart yüksekliğini azalt
+    height: 400px; // Açıklama alanı scroll olmadan sığsın
     padding-top: 1.5rem; // Üst padding'i azalt
     /* Mobilde tek sütun */
   }
 
   .biometric-frame {
     width: 180px; // Fotoğraf boyutunu artır
-    height: 220px; // Fotoğraf boyutunu artır
-    margin-bottom: 0.5rem; // Alt margin ekle
+    height: 280px; // Açıklama scroll olmadan sığsın
+    margin-bottom: 0.5rem;
   }
 
   .dev-description-overlay {
-    padding: 0.875rem 0.625rem; // Mobilde padding daha da azaltıldı
+    padding: 0.875rem 0.75rem;
 
     .description-content {
-      font-size: clamp(0.4rem, 0.65vw, 0.55rem); // Mobilde font daha fazla küçültüldü
-      line-height: 1.2; // Satır aralığı daha da azaltıldı
-      letter-spacing: -0.02em; // Harf arası boşluk daha fazla azaltıldı
-      word-spacing: -0.05em; // Kelime arası boşluk azaltıldı
-      padding: 0.3rem; // Mobilde iç padding minimum
+      font-size: 0.7rem;
+      line-height: 1.4;
+      padding: 0;
     }
   }
 

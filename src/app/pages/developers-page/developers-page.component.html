@@ -40,11 +40,11 @@
         <div class="biometric-frame" *ngIf="dev.image">
           <div class="frame-border"></div>
           <img [src]="dev.image" class="dev-avatar" alt="Geliştirici Avatarı" />
-          <!-- Hover Description Overlay -->
-          <div class="dev-description-overlay" *ngIf="dev.description">
-            <div class="description-content" lang="tr">
-              <p>{{ dev.description }}</p>
-            </div>
+        </div>
+        <!-- Hover Description Overlay - covers full card for readable text -->
+        <div class="dev-description-overlay" *ngIf="dev.description">
+          <div class="description-content" lang="tr">
+            <p>{{ dev.description }}</p>
           </div>
         </div>
 

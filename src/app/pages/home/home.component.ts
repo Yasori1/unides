@@ -131,7 +131,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     private imageErrorHandler: ImageErrorHandlerService
   ) {
     this.safeVideoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
-      'https://www.youtube.com/embed/z-3j8kP0D48?autoplay=1'
+      'https://www.youtube.com/embed/f-c3iY-Mq3Y?autoplay=1'
     );
   }
 

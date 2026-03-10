@@ -48,7 +48,7 @@ export class CommunitiesPageComponent implements OnInit {
   selectedCity: string = '';
   selectedCategory: string = '';
   selectedTag: string = ''; // Yeni tag seçimi
-  sortOrder: 'default' | 'member_desc' | 'member_asc' = 'default';
+  sortOrder: 'default' | 'name_asc' | 'name_desc' = 'default';
 
   // Custom Dropdown States
   isCityDropdownOpen: boolean = false;
@@ -168,10 +168,10 @@ export class CommunitiesPageComponent implements OnInit {
     }
 
     // 5. Sıralama
-    if (this.sortOrder === 'member_desc') {
-      temp.sort((a, b) => b.memberCount - a.memberCount);
-    } else if (this.sortOrder === 'member_asc') {
-      temp.sort((a, b) => a.memberCount - b.memberCount);
+    if (this.sortOrder === 'name_asc') {
+      temp.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'tr'));
+    } else if (this.sortOrder === 'name_desc') {
+      temp.sort((a, b) => (b.name || '').localeCompare(a.name || '', 'tr'));
     }
 
     this.filteredCommunities = temp;
@@ -249,7 +249,7 @@ export class CommunitiesPageComponent implements OnInit {
     this.isTagDropdownOpen = false;
   }
 
-  selectSort(order: 'default' | 'member_desc' | 'member_asc') {
+  selectSort(order: 'default' | 'name_asc' | 'name_desc') {
     this.sortOrder = order;
     this.applyFilters();
     this.isSortDropdownOpen = false;
@@ -257,8 +257,8 @@ export class CommunitiesPageComponent implements OnInit {
 
   getSortLabel(order: string): string {
     switch (order) {
-      case 'member_desc': return 'Üye Sayısı (Çoktan Az)';
-      case 'member_asc': return 'Üye Sayısı (Azdan Çok)';
+      case 'name_asc': return "A'dan Z'ye Sıralama";
+      case 'name_desc': return "Z'den A'ya Sıralama";
       default: return 'Önerilen Sıralama';
     }
   }

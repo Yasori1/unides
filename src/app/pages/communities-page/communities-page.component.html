@@ -64,10 +64,10 @@
           <div class="custom-options">
             <div class="option" (click)="selectSort('default')" [class.selected]="sortOrder === 'default'">Önerilen
               Sıralama</div>
-            <div class="option" (click)="selectSort('member_desc')" [class.selected]="sortOrder === 'member_desc'">Üye
-              Sayısı (Çoktan Az)</div>
-            <div class="option" (click)="selectSort('member_asc')" [class.selected]="sortOrder === 'member_asc'">Üye
-              Sayısı (Azdan Çok)</div>
+            <div class="option" (click)="selectSort('name_asc')" [class.selected]="sortOrder === 'name_asc'">A'dan Z'ye
+              Sıralama</div>
+            <div class="option" (click)="selectSort('name_desc')" [class.selected]="sortOrder === 'name_desc'">Z'den A'ya
+              Sıralama</div>
           </div>
         </div>
       </div>

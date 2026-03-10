@@ -40,8 +40,11 @@ export class DevelopersPageComponent implements OnInit, OnDestroy {
       image: 'assets/EmircanSazli.png',
       codeBg: 'void main() { init_core(); }',
       description:
-        'Projenin genel mimarisini tasarlayan sistemin temel yapısını oluşturarak, ölçeklenebilir ve sürdürülebilir bir altyapı kurdu.',
-      socialLinks: { linkedin: '#', github: '#' },
+        'Proje yürütücüsü ve Backend takım lideri olarak, aynı zamanda sunucu sorumluluğunu üstlenmiştir. Süreçleri düzenleyerek ekipler arası iletişimi güçlendirmiş ve proje planlamasını etkin bir şekilde yürütmüştür. Projenin genel mimarisini tasarlamış, sistemin temel yapısını oluşturarak ölçeklenebilir ve sürdürülebilir bir altyapı kurmuştur.',
+      socialLinks: {
+        linkedin: 'https://www.linkedin.com/in/emircansazli/',
+        github: 'https://github.com/emircansazli',
+      },
     },
     {
       name: 'Alper Uğur Acar',
@@ -50,7 +53,10 @@ export class DevelopersPageComponent implements OnInit, OnDestroy {
       codeBg: 'import { crystal } from "unides"',
       description:
         'Veritabanı geliştiricisi olarak veri modelleri tasarladı, performanslı ve güvenli veritabanları geliştirdi; sistemlerin sürdürülebilirliğine katkı sağladı.',
-      socialLinks: { linkedin: '#', github: '#' },
+      socialLinks: {
+        linkedin: 'https://www.linkedin.com/in/alper-u%C4%9Fur-acar-31b508210/',
+        github: 'https://github.com/alperuguracar',
+      },
     },
     {
       name: 'Safa Rahman Cenkci',
@@ -58,8 +64,11 @@ export class DevelopersPageComponent implements OnInit, OnDestroy {
       image: 'assets/safarahmancenkci.png',
       codeBg: 'SELECT * FROM futures',
       description:
-        'Frontend ekibini yöneten ve kullanıcı arayüzü geliştirmelerini koordine eden takım lideri. Modern web teknolojileri ile kullanıcı deneyimini optimize ediyor.',
-      socialLinks: { linkedin: '#', github: '#' },
+        "ÜNİDES Dijital Portal'ın arayüz geliştirme süreçlerini ve frontend ekibinin koordinasyonunu yönettim. Angular ile geliştirdiğim arayüzün, API bağlantıları aracılığıyla sunucuyla olan tam entegrasyonunu sağladım.",
+      socialLinks: {
+        linkedin: 'https://www.linkedin.com/in/safarahmancenkci/',
+        github: 'https://github.com/safacenkci',
+      },
     },
     {
       name: 'Abdullah Gönç',
@@ -76,8 +85,11 @@ export class DevelopersPageComponent implements OnInit, OnDestroy {
       image: 'assets/huseyinceykel.png',
       codeBg: 'Flutter.run()',
       description:
-        ' İş ihtiyaçlarına uygun tablolar ve veri modelleri oluşturdu; veritabanı fonksiyonları, prosedürleri ve metotları geliştirerek sorgu performansını artırdı, güvenli ve ölçeklenebilir bir sistem yapısı sağladı.',
-      socialLinks: { linkedin: '#', github: '#' },
+        'Veri modeli, ilişkisel şema ve indeks yapısını tasarlayarak bütünlük, performans ve ölçeklenebilirlik odaklı bir altyapı inşa ettim.',
+      socialLinks: {
+        linkedin: 'https://www.linkedin.com/in/huseyinerenceykel/',
+        github: 'https://github.com/huseyinceykel',
+      },
     },
     {
       name: 'Oğuzhan Akkoç',
@@ -86,7 +98,10 @@ export class DevelopersPageComponent implements OnInit, OnDestroy {
       codeBg: 'import pandas as pd',
       description:
         'Sunucu tarafı geliştirmelerini yapan backend geliştirici. API tasarımı ve veri işleme mantığını geliştiriyor.',
-      socialLinks: { linkedin: '#', github: '#' },
+      socialLinks: {
+        linkedin: 'https://www.linkedin.com/in/o%C4%9Fuzhan-akko%C3%A7/',
+        github: 'https://github.com/oguzakkoc0',
+      },
     },
     {
       name: 'Yunus Emre Güler',
@@ -95,7 +110,10 @@ export class DevelopersPageComponent implements OnInit, OnDestroy {
       codeBg: 'docker-compose up -d',
       description:
         'Yapay zeka modelleri ve algoritmaları geliştiren AI uzmanı. Makine öğrenmesi çözümleri ile projeye değer katıyor.',
-      socialLinks: { linkedin: '#', github: '#' },
+      socialLinks: {
+        linkedin: 'https://www.linkedin.com/in/yunus-emre-g%C3%BCler-b33a3123a/',
+        github: 'https://github.com/yunusemre23023',
+      },
     },
     {
       name: 'Ali Kadir Güzel',
@@ -104,7 +122,10 @@ export class DevelopersPageComponent implements OnInit, OnDestroy {
       codeBg: 'expect(result).toBe(true)',
       description:
         'Yapay zeka teknolojileri ile akıllı sistemler geliştiren AI geliştirici. NLP ve makine öğrenmesi alanlarında çalışıyor.',
-      socialLinks: { linkedin: '#', github: '#' },
+      socialLinks: {
+        linkedin: 'https://www.linkedin.com/in/alikadirguzel',
+        github: 'https://github.com/alikadirguzel',
+      },
     },
     {
       name: 'Hamza Ketenci',
@@ -113,7 +134,10 @@ export class DevelopersPageComponent implements OnInit, OnDestroy {
       codeBg: '.design { beauty: true; }',
       description:
         'Hem frontend hem backend geliştirme yapan full stack geliştirici. Projenin tüm katmanlarında aktif rol alıyor.',
-      socialLinks: { linkedin: '#', github: '#' },
+      socialLinks: {
+        linkedin: 'https://www.linkedin.com/in/hamzaketenci',
+        github: 'https://github.com/HamzaKetenci',
+      },
     },
     {
       name: 'Burak Erken',
@@ -122,7 +146,10 @@ export class DevelopersPageComponent implements OnInit, OnDestroy {
       codeBg: 'const future = await build();',
       description:
         'Uçtan uca geliştirme yapan full stack geliştirici. Frontend ve backend entegrasyonlarını sağlayarak, bütünsel çözümler üretiyor.',
-      socialLinks: { linkedin: '#', github: '#' },
+      socialLinks: {
+        linkedin: 'https://www.linkedin.com/in/burak-erken',
+        github: 'https://github.com/BurakErken',
+      },
     },
   ];
 
@@ -165,7 +192,7 @@ export class DevelopersPageComponent implements OnInit, OnDestroy {
             }
           });
         },
-        { threshold: 0.1 }
+        { threshold: 0.1 },
       );
 
       setTimeout(() => {
