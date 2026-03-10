@@ -97,7 +97,7 @@ export class DevelopersPageComponent implements OnInit, OnDestroy {
       image: 'assets/oguzhanakkoc.png',
       codeBg: 'import pandas as pd',
       description:
-        'Sunucu tarafı geliştirmelerini yapan backend geliştirici. API tasarımı ve veri işleme mantığını geliştiriyor.',
+        'Sunucu tarafı uygulamalarını geliştirerek API servislerini tasarladım, veritabanı entegrasyonlarını yönettim ve iş mantığını backend katmanında kurguladım. Performans, güvenlik ve ölçeklenebilirlik odaklı bir sistem altyapısı oluşturdum.',
       socialLinks: {
         linkedin: 'https://www.linkedin.com/in/o%C4%9Fuzhan-akko%C3%A7/',
         github: 'https://github.com/oguzakkoc0',
