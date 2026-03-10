@@ -196,8 +196,14 @@ $border-color: #e2e8f0; // Slate 200
     justify-content: center;
     align-items: center;
     text-align: center;
+<<<<<<< HEAD
     max-width: 860px;
     margin: 0 auto;
+=======
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 0 16px;
+>>>>>>> e707e195034f9759349b8a2d49ba04e5baa0dc69
     opacity: 0;
     animation: fadeIn 1s forwards;
 
@@ -216,7 +222,11 @@ $border-color: #e2e8f0; // Slate 200
       font-weight: 400;
       line-height: 1.7;
       margin-bottom: 20px;
+<<<<<<< HEAD
       color: $text-dark; // daha koyu metin rengi
+=======
+      color: $text-gray;
+>>>>>>> e707e195034f9759349b8a2d49ba04e5baa0dc69
     }
     .sub-text {
       color: $text-gray;
