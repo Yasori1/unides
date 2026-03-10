@@ -1,5 +1,10 @@
-/* Topluluk için Login ile aynı tema */
+/* Topluluk için Login ile aynı tema, ama arka plan görselini override edebiliriz */
 @use '../community-login/community-login' as *;
+
+/* Kayıt sayfasında da aynı community görselini kullan */
+.visual-side {
+  background-image: url('/assets/community-hero.png');
+}
 
 /* Ekstra Register Özellikleri */
 .form-side {

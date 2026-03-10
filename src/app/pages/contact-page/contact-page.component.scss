@@ -171,6 +171,18 @@ $border-color: #e2e8f0;
     gap: 30px;
     align-items: stretch;
 
+    /* Tek kartlı durumda (sadece e-posta kartı) ortala */
+    &.single-card {
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+
+      .info-card {
+        max-width: 420px;
+        width: 100%;
+      }
+    }
+
     @media (max-width: 992px) {
       grid-template-columns: repeat(2, 1fr);
     }

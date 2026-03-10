@@ -106,13 +106,9 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   // --- Geçmişten Kareler Slider ---
   sliderImages: string[] = [
-    '/assets/gecmisten-kareler/gecmisten-kareler-1.png',
-    '/assets/gecmisten-kareler/gecmisten-kareler-2.png',
-    '/assets/gecmisten-kareler/gecmisten-kareler-3.png',
-    '/assets/gecmisten-kareler/gecmisten-kareler-4.png',
-    '/assets/gecmisten-kareler/gecmisten-kareler-5.png',
-    '/assets/gecmisten-kareler/gecmisten-kareler-6.png',
-    '/assets/gecmisten-kareler/gecmisten-kareler-7.png?v=1',
+    '/assets/gecmisten-kareler-1.png',
+    '/assets/gecmisten-kareler-2.png',
+    '/assets/gecmisten-kareler-3.png',
   ];
 
   // --- Lightbox ---

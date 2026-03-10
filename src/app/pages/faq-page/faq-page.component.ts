@@ -151,19 +151,19 @@ export class FaqPageComponent implements OnInit, AfterViewInit {
         {
           question: 'Teknik bir sorun yaşıyorum, ne yapmalıyım?',
           answer:
-            'Teknik sorunlarınız için <strong>unidesbilgi@gsb.gov.tr</strong> adresine e-posta gönderebilirsiniz. Sorunun çözümü için ekran görüntüsü veya hata mesajı eklemeniz faydalı olacaktır.',
+            'Teknik sorunlarınız için <strong>bilgi@unidesportal.org</strong> adresine e-posta gönderebilirsiniz. Sorunun çözümü için ekran görüntüsü veya hata mesajı eklemeniz faydalı olacaktır.',
           isOpen: false,
         },
         {
           question: 'Genel sorularım için nereye başvurabilirim?',
           answer:
-            'Genel sorularınız için "İletişim" sayfasından bize ulaşabilir veya <strong>unidesbilgi@gsb.gov.tr</strong> adresine e-posta gönderebilirsiniz.',
+            'Genel sorularınız için "İletişim" sayfasından bize ulaşabilir veya <strong>bilgi@unidesportal.org</strong> adresine e-posta gönderebilirsiniz.',
           isOpen: false,
         },
         {
           question: 'Yetki veya erişim sorunum var, ne yapmalıyım?',
           answer:
-            'Yetki veya erişim sorunlarınız için <strong>unidesbilgi@gsb.gov.tr</strong> adresine e-posta göndererek durumunuzu açıklayabilirsiniz. Yetkililer en kısa sürede size yardımcı olacaktır.',
+            'Yetki veya erişim sorunlarınız için <strong>bilgi@unidesportal.org</strong> adresine e-posta göndererek durumunuzu açıklayabilirsiniz. Yetkililer en kısa sürede size yardımcı olacaktır.',
           isOpen: false,
         },
       ],

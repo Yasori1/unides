@@ -13,7 +13,7 @@
   <div class="container relative-content">
     <h1 class="page-title">ÜNİDES <span class="highlight-text">HAKKIMIZDA</span></h1>
     <p class="page-subtitle">
-      Gençliğin enerjisi ile geleceği inşa eden toplulukların buluşma noktası.
+      Gençliğin enerjisi ile geleceği inşa eden toplulukların buluşma noktası
     </p>
   </div>
 
@@ -31,18 +31,12 @@
     <section class="hero-section">
       <div class="container hero-container">
         <div class="hero-text-side" #animItem>
-          <h1>ÜNİDES <span class="highlight">Dijital Portal</span> Nedir?</h1>
+          <h1><span class="brand-blue">ÜNİDES Dijital Portal</span> Nedir?</h1>
           <p class="lead">
             ÜNİDES programı kapsamında geliştirilen projelerin, iş birliklerinin ve toplulukların tek
             bir çatı altında toplandığı, Gençlik ve Spor Bakanlığı tarafından desteklenen bütünleşik
             bir dijital platformdur.
           </p>
-        </div>
-        <div class="hero-visual-side" #animItem>
-          <div class="about-image clean-logo-wrapper">
-            <img [src]="gsbLogoUrl" alt="GSB Logosu" class="gsb-main-logo"
-              onerror="this.src='assets/images/logos/gsb.png'" />
-          </div>
         </div>
       </div>
     </section>
@@ -51,7 +45,7 @@
     <section class="mission-section">
       <div class="container">
         <div class="mission-header" #animItem>
-          <h2>ÜNİDES <span class="highlight">Nedir?</span></h2>
+          <h2><span class="brand-blue">ÜNİDES</span> Nedir?</h2>
           <p>
             Üniversite Öğrenci Toplulukları İş Birliği ve Destek Programı (ÜNİDES), öğrenci
             topluluklarının projelerini hayata geçirmelerine kolaylık sağlayan, genç ofislerin etkin
@@ -84,43 +78,11 @@
             <p *ngIf="step.desc">{{ step.desc }}</p>
           </div>
         </div>
-      </div>
-    </section>
 
-    <!-- HOLO KARTLAR -->
-    <section class="innovative-guide-section">
-      <div class="container">
-        <div class="guide-grid">
-          <div class="holo-card project-theme" #animItem (mousemove)="cardTilt($event, card1)"
-            (mouseleave)="cardReset(card1)" #card1>
-            <div class="card-content">
-              <div class="icon-glow">
-                <span class="material-symbols-outlined">architecture</span>
-              </div>
-              <h3>Projeler</h3>
-              <p class="subtitle">ÜNİDES'in Yapı Taşları</p>
-              <div class="list-wrapper">
-                <div class="list-item" *ngFor="let item of projectItems">
-                  <span class="dot"></span> {{ item }}
-                </div>
-              </div>
-            </div>
-            <div class="holo-bg"></div>
-          </div>
-
-          <div class="holo-card report-theme" #animItem (mousemove)="cardTilt($event, card2)"
-            (mouseleave)="cardReset(card2)" #card2>
-            <div class="card-content">
-              <div class="icon-glow"><span class="material-symbols-outlined">analytics</span></div>
-              <h3>Sonuç Raporu</h3>
-              <p class="subtitle">Geleceğe İz Bırak</p>
-              <div class="list-wrapper">
-                <div class="list-item" *ngFor="let item of reportItems">
-                  <span class="dot"></span> {{ item }}
-                </div>
-              </div>
-            </div>
-            <div class="holo-bg"></div>
+        <!-- Başvuru süreci altındaki görsel -->
+        <div class="process-image-wrapper">
+          <div class="process-image-card">
+            <img src="/assets/hakkimizda-basvuru.png" alt="ÜNİDES Başvuru Süreci" loading="lazy" />
           </div>
         </div>
       </div>

@@ -29,36 +29,15 @@
   <!-- İLETİŞİM KARTLARI (Holo Kart Efekti ile) -->
   <section class="contact-cards-section">
     <div class="container">
-      <div class="cards-grid">
-        <!-- Kart 1: Adres -->
-        <div class="info-card" #animItem (mousemove)="cardTilt($event, c1)" (mouseleave)="cardReset(c1)" #c1>
-          <div class="card-icon">
-            <span class="material-symbols-outlined">location_on</span>
-          </div>
-          <h3>Adresimiz</h3>
-          <p>Örnek Mahallesi Oruç Reis Caddesi No:13<br />Altındağ / Ankara</p>
-          <div class="hover-bg"></div>
-        </div>
-
-        <!-- Kart 2: E-Posta -->
+      <div class="cards-grid single-card">
+        <!-- E-Posta Kartı (Adres ve Çağrı Merkezi kaldırıldı) -->
         <div class="info-card" #animItem (mousemove)="cardTilt($event, c2)" (mouseleave)="cardReset(c2)" #c2>
           <div class="card-icon blue">
             <span class="material-symbols-outlined">mail</span>
           </div>
           <h3>E-Posta</h3>
           <p>Destek ve iş birlikleri için:</p>
-          <a href="mailto:kim@gsb.gov.tr" class="link-text">kim@gsb.gov.tr</a>
-          <div class="hover-bg"></div>
-        </div>
-
-        <!-- Kart 3: Telefon -->
-        <div class="info-card" #animItem (mousemove)="cardTilt($event, c3)" (mouseleave)="cardReset(c3)" #c3>
-          <div class="card-icon purple">
-            <span class="material-symbols-outlined">call</span>
-          </div>
-          <h3>Çağrı Merkezi</h3>
-          <p>kim@gsb.gov.tr</p>
-          <a href="tel:4440472" class="link-text big">444 0 472</a>
+          <a href="mailto:bilgi@unidesportal.org" class="link-text">bilgi@unidesportal.org</a>
           <div class="hover-bg"></div>
         </div>
       </div>

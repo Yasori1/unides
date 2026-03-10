@@ -32,23 +32,20 @@ export class AboutPageComponent implements OnInit, AfterViewInit {
     'Eğitim ve Hayat Boyu Öğrenme',
     'Gençlik Bilgilendirmesi',
     'Gençlik Sağlığı ve Spor',
-    'Gönüllülük ve Sivil Toplum',
+    'Gönüllülük, Gençlik Katılımı ve Sivil Toplum',
     'İstihdam ve Girişimcilik',
     'Sosyal Kapsayıcılık',
     'Uluslararası Gençlik Çalışmaları',
   ];
 
   applicationSteps = [
-    { id: '1', title: 'Üniversite öğrencisi olmak', desc: '' },
-    { id: '2', title: 'Kulüp/Topluluk Üyesi olmak', desc: '' },
-    {
-      id: '3',
-      title: 'Gençlik ve Spor Bakanlığı çatısı altındaki "Genç Ofislere" giderek başvuru yap.',
-      desc: '',
-    },
+    { id: '1', title: 'Üniversite öğrencisi olmak.', desc: '' },
+    { id: '2', title: 'edu.tr uzantılı mail adresinizle portala kaydolmak.', desc: '' },
+    { id: '3', title: 'Topluluk bilgilerinizi doldurarak yetkili onayına göndermek.', desc: '' },
     {
       id: '4',
-      title: 'Topluluğunun projesini danışmanına tüm detaylarıyla anlat.',
+      title:
+        'Kayıtla birlikte topluluğunuza ait etkinlikleri duyurmak ve diğer topluluklarla iletişime geçmek.',
       desc: '',
     },
   ];

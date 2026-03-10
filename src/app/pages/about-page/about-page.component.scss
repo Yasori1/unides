@@ -166,15 +166,18 @@ $border-color: #e2e8f0; // Slate 200
 
   .hero-container {
     display: grid;
-    grid-template-columns: 1.1fr 0.9fr;
+    grid-template-columns: 1fr;
     align-items: stretch;
     gap: 40px;
+    justify-items: center;
   }
 
   .hero-text-side {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    align-items: center;
+    text-align: center;
     opacity: 0;
     animation: fadeIn 1s forwards;
 
@@ -184,7 +187,7 @@ $border-color: #e2e8f0; // Slate 200
       line-height: 1.2;
       margin-bottom: 25px;
       color: $text-dark;
-      .highlight {
+      .brand-blue {
         color: $primary-blue;
       }
     }
@@ -403,7 +406,7 @@ $border-color: #e2e8f0; // Slate 200
       font-weight: 800;
       margin-bottom: 20px;
       color: $text-dark;
-      .highlight {
+      .brand-blue {
         color: $primary-blue;
       }
       .light-text {
@@ -612,6 +615,36 @@ $border-color: #e2e8f0; // Slate 200
         color: #cbd5e1;
         font-size: 0.95rem;
       }
+    }
+  }
+}
+
+// Başvuru süreci altındaki görsel kutusu
+.process-image-wrapper {
+  margin-top: 40px;
+  display: block;
+  position: relative;
+  z-index: 2;
+  width: 100vw;
+  left: 50%;
+  transform: translateX(-50%);
+
+  .process-image-card {
+    width: 100%;
+    max-width: none;
+    border-radius: 0;
+    border: none;
+    background: transparent;
+    overflow: hidden;
+    box-shadow: none;
+    padding: 0;
+
+    img {
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+      border-radius: 0;
+      display: block;
     }
   }
 }
