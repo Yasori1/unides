@@ -139,7 +139,7 @@ export class PrivacyPolicyPageComponent implements OnInit {
           <li>İtiraz etme</li>
           <li>Veri taşıma</li>
         </ul>
-        <p class="contact">Talepleriniz için: <strong>info@unides.com</strong></p>
+        <p class="contact">Talepleriniz için: <strong>bilgi@unidesportal.org</strong></p>
       `,
     },
     {
@@ -186,7 +186,7 @@ export class PrivacyPolicyPageComponent implements OnInit {
       content: `
         <p class="contact">
           <strong>GSB – Veri Koruma Birimi</strong><br>
-          E-posta: info@unides.com<br>
+          E-posta: bilgi@unidesportal.org<br>
           Telefon: (0312) 551 70 00
         </p>
       `,

@@ -37,7 +37,7 @@ export class FooterComponent {
       links: [
         { name: 'Sıkça Sorulan Sorular', href: '/faq' },
         { name: 'İletişim', href: '/contact' },
-        { name: 'info@unides.com', href: 'mailto:info@unides.com' },
+        { name: 'bilgi@unidesportal.org', href: 'mailto:bilgi@unidesportal.org' },
         { name: '(0312) 551 70 00', href: 'tel:+903125517000' },
       ],
     },
