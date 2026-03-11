@@ -77,7 +77,10 @@ export class DevelopersPageComponent implements OnInit, OnDestroy {
       codeBg: 'while(true) { innovate(); }',
       description:
         'Gençlere yönelik frontend geliştirmelerinde aktif rol aldım. Responsive, performans odaklı ve kullanıcı dostu arayüzler kodladım, ölçeklenebilir frontend yapıları oluşturdum.',
-      socialLinks: { linkedin: '#', github: '#' },
+      socialLinks: {
+        linkedin: 'https://www.linkedin.com/in/abdullah-g%C3%B6n%C3%A7-6b773b293',
+        github: 'https://github.com/karoxyyy',
+      },
     },
     {
       name: 'Hüseyin Eren Çeykel',
