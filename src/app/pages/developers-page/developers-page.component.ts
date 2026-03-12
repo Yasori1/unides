@@ -161,9 +161,18 @@ export class DevelopersPageComponent implements OnInit, OnDestroy {
   private mouseMoveListener: any;
 
   isAlumniExpanded = false;
+  tappedDevIndex: number | null = null;
 
   toggleAlumni() {
     this.isAlumniExpanded = !this.isAlumniExpanded;
+  }
+
+  toggleDevTap(index: number, event: Event): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    if (window.innerWidth > 600) return;
+    const target = event.target as HTMLElement;
+    if (target.closest('a')) return;
+    this.tappedDevIndex = this.tappedDevIndex === index ? null : index;
   }
 
   alumni: Alumni[] = [

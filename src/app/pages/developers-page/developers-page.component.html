@@ -34,7 +34,10 @@
 
     <section class="dev-grid">
       <!-- Dynamic Developers Loop -->
-      <div class="dev-cell" *ngFor="let dev of developers">
+      <div class="dev-cell"
+           *ngFor="let dev of developers; let i = index"
+           [class.tapped]="tappedDevIndex === i"
+           (click)="toggleDevTap(i, $event)">
         <div class="dev-code-bg">{{ dev.codeBg }}</div>
         <!-- Biometric Frame for Profile Image -->
         <div class="biometric-frame" *ngIf="dev.image">

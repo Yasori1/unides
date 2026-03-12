@@ -222,6 +222,8 @@ h1 {
   opacity: 1;
   transform: none;
   pointer-events: auto;
+  z-index: 25;
+  background: linear-gradient(to top, rgba(3, 7, 18, 0.98), rgba(3, 7, 18, 0.7));
 }
 
 /* Crystalline Refraction Effect on Hover */
@@ -408,7 +410,7 @@ h1 {
   top: 0;
   left: 0;
   right: 0;
-  bottom: var(--dev-info-h);
+  bottom: 0;
   width: 100%;
   height: auto;
   background: linear-gradient(to top, rgba(3, 7, 18, 0.97), rgba(3, 7, 18, 0.92));
@@ -630,31 +632,77 @@ h1 {
 @media (max-width: 600px) {
   .dev-grid {
     grid-template-columns: repeat(10, 1fr);
-    gap: 1rem; // Mobilde gap azalt
+    gap: 1rem;
   }
 
   .dev-cell {
     grid-column: span 10;
     height: auto;
     min-height: 400px;
-    padding-top: 1.5rem; // Üst padding'i azalt
-    /* Mobilde tek sütun */
+    padding-top: 1.5rem;
+    cursor: pointer;
   }
 
+  // Fotoğraf boyutunu küçült
   .biometric-frame {
-    width: 180px; // Fotoğraf boyutunu artır
-    height: 280px; // Açıklama scroll olmadan sığsın
+    width: 160px;
+    height: 240px;
     margin-bottom: 0.5rem;
   }
 
-  .dev-description-overlay {
-    padding: 0.875rem 0.75rem;
+  // Mobilde :hover overlay'i devre dışı bırak — yalnızca .tapped çalışsın
+  .dev-cell:hover .dev-description-overlay {
+    transform: translateY(100%);
+    opacity: 0;
+  }
 
-    .description-content {
-      font-size: 0.7rem;
-      line-height: 1.4;
-      padding: 0;
+  .dev-cell:hover {
+    transform: none;
+  }
+
+  // Tapped: overlay aşağıdan kayarak tüm kartı kaplar
+  .dev-cell.tapped .dev-description-overlay {
+    transform: translateY(0);
+    opacity: 1;
+    bottom: 0;
+  }
+
+  // Dev-info her zaman görünür, tap durumunda overlay'in üstünde
+  .dev-info {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .dev-cell.tapped .dev-info {
+    z-index: 25;
+    background: linear-gradient(to top, rgba(3, 7, 18, 0.98), rgba(3, 7, 18, 0.7));
+  }
+
+  // Social butonları büyüt - kolay tıklanabilsin
+  .social-btn {
+    width: 34px;
+    height: 34px;
+    pointer-events: auto;
+
+    svg {
+      width: 14px;
+      height: 14px;
     }
+  }
+
+  .dev-name {
+    font-size: 1rem;
+    line-height: 1.2;
+  }
+
+  .dev-role {
+    font-size: 0.6rem;
+  }
+
+  .text-info {
+    min-width: 0;
+    flex: 1;
+    max-width: calc(100% - 70px);
   }
 
   h1 {
@@ -667,27 +715,7 @@ h1 {
 
   main {
     padding: 1.5rem;
-    padding-top: calc(75px + 1.5rem); // Navbar height + mobil spacing
-  }
-
-  .dev-info {
-    padding: 1rem 1.5rem 1.25rem 1.5rem; // Mobilde padding ayarla
-    gap: 0.75rem; // Mobilde gap azalt
-  }
-
-  .dev-name {
-    font-size: 1rem; // Mobilde font boyutunu artır
-    line-height: 1.2; // Satır yüksekliğini azalt
-  }
-
-  .dev-role {
-    font-size: 0.6rem; // Mobilde rol fontunu artır
-  }
-
-  .text-info {
-    min-width: 0; // Flexbox'ta text overflow için
-    flex: 1; // Kalan alanı kapla
-    max-width: calc(100% - 60px); // Mobilde social butonlar için alan bırak
+    padding-top: calc(75px + 1.5rem);
   }
 }
 
