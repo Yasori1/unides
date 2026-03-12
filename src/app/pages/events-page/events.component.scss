@@ -875,10 +875,25 @@ $border-color: #e2e8f0;
 
 // Remove old media queries at the bottom
 @media (max-width: 768px) {
+  .page-spacer {
+    padding-top: 100px;
+    padding-bottom: 40px;
+
+    .page-title {
+      font-size: clamp(1.5rem, 5vw, 2.8rem);
+    }
+  }
+
   .events-filter-menu .filter-btn {
-    display: block;
-    width: 100%;
-    margin: 8px 0;
+    display: inline-flex;
+    width: auto;
+    margin: 4px;
+  }
+
+  .events-filter-menu {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
   }
 
   .filter-bar-container {

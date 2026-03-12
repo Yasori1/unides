@@ -320,72 +320,120 @@ $card-bg: rgba(241, 245, 249, 0.7);
   }
 
   .modal-header {
-    padding: 40px 40px 20px;
+    padding: 32px 40px 24px;
     background: linear-gradient(to bottom right, $bg-light, $white);
     border-bottom: 1px solid $border-color;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+
     .modal-icon {
-      width: 60px;
-      height: 60px;
+      flex-shrink: 0;
+      width: 56px;
+      height: 56px;
       background: $primary-blue;
       color: white;
       border-radius: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 20px;
       span {
-        font-size: 2rem;
+        font-size: 1.8rem;
       }
     }
+
     h2 {
-      font-size: 1.8rem;
+      font-size: 1.5rem;
       font-weight: 800;
       color: $text-dark;
       margin: 0;
+      line-height: 1.25;
     }
   }
 
   .modal-body {
-    padding: 30px 40px;
+    padding: 28px 40px;
     overflow-y: auto;
     flex-grow: 1;
+
     ::ng-deep h3 {
-      font-size: 1.1rem;
+      font-size: 1rem;
       color: $primary-blue;
       margin-top: 20px;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       font-weight: 700;
+      letter-spacing: 0.01em;
+
+      &:first-child {
+        margin-top: 0;
+      }
     }
+
+    ::ng-deep p {
+      margin-bottom: 14px;
+      color: $text-gray;
+      line-height: 1.7;
+      font-size: 0.95rem;
+
+      &:first-child {
+        margin-top: 0;
+      }
+    }
+
     ::ng-deep ul {
-      padding-left: 20px;
-      margin-bottom: 15px;
+      padding-left: 18px;
+      margin: 0 0 16px;
+
       li {
         margin-bottom: 8px;
         color: $text-gray;
-        line-height: 1.6;
+        line-height: 1.65;
+        font-size: 0.95rem;
+
+        strong {
+          color: $text-dark;
+          font-weight: 600;
+        }
+
         &::marker {
           color: $primary-blue;
         }
       }
     }
-    ::ng-deep p {
-      margin-bottom: 15px;
-      color: $text-gray;
-      line-height: 1.7;
-    }
+
     ::ng-deep .highlight {
       background: #eff6ff;
-      padding: 15px;
-      border-radius: 8px;
+      padding: 14px 16px;
+      border-radius: 10px;
       border-left: 4px solid $primary-blue;
       color: $dark-blue;
+      font-size: 0.92rem;
+      margin-top: 16px;
     }
+
+    ::ng-deep .disclaimer {
+      background: #fff7ed;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border-left: 4px solid #f59e0b;
+      color: #92400e;
+      font-size: 0.9rem;
+      margin-top: 16px;
+    }
+
     ::ng-deep .contact {
       background: $bg-light;
-      padding: 15px;
-      border-radius: 8px;
+      padding: 16px 18px;
+      border-radius: 10px;
       border: 1px solid $border-color;
-      font-weight: 600;
+      font-size: 0.92rem;
+      color: $text-dark;
+      line-height: 1.8;
+      margin-top: 16px;
+
+      strong {
+        color: $text-dark;
+      }
     }
   }
 
@@ -410,7 +458,6 @@ $card-bg: rgba(241, 245, 249, 0.7);
     }
   }
 }
-
 @keyframes fadeIn {
   from {
     opacity: 0;

@@ -953,6 +953,14 @@ $border-color: #e2e8f0; // Slate 200
     grid-template-columns: 1fr !important;
   }
 
+  .holo-card {
+    padding: 24px;
+  }
+
+  .process-section .section-header-dark h2 {
+    font-size: 1.8rem;
+  }
+
   .mission-section {
     .mission-header {
       .mission-grid {

@@ -224,3 +224,18 @@ $light-text: #475569;
     }
   }
 }
+
+@media (max-width: 480px) {
+  .final-footer {
+    padding: 20px 0 15px 0;
+
+    .footer-layout {
+      gap: 20px;
+    }
+
+    .footer-bottom {
+      font-size: 10px;
+      gap: 6px;
+    }
+  }
+}

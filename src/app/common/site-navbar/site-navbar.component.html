@@ -19,40 +19,40 @@
 
       <ul class="nav-links">
         <li>
-          <a routerLink="/" (click)="closeMobileMenu()">
+          <a routerLink="/" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}" (click)="closeMobileMenu()">
             <span class="material-symbols-outlined nav-icon">home</span>
             Ana Sayfa
           </a>
         </li>
         <li>
-          <a routerLink="/communities" (click)="closeMobileMenu()">
+          <a routerLink="/communities" routerLinkActive="active-link" (click)="closeMobileMenu()">
             <span class="material-symbols-outlined nav-icon">groups</span>
             Topluluklar
           </a>
         </li>
         <li>
-          <a routerLink="/events" (click)="closeMobileMenu()">
+          <a routerLink="/events" routerLinkActive="active-link" (click)="closeMobileMenu()">
             <span class="material-symbols-outlined nav-icon">event</span>
             Etkinlikler
           </a>
         </li>
         <li>
-          <a routerLink="/announcements" (click)="closeMobileMenu()">
+          <a routerLink="/announcements" routerLinkActive="active-link" (click)="closeMobileMenu()">
             <span class="material-symbols-outlined nav-icon">campaign</span>
             Duyurular
           </a>
         </li>
 
         <li class="dropdown-parent" [class.mobile-expanded]="isMobileDropdownOpen">
-          <a href="javascript:void(0)" (click)="toggleMobileDropdown()">
+          <a href="javascript:void(0)" routerLinkActive="active-link" (click)="toggleMobileDropdown()">
             <span class="material-symbols-outlined nav-icon">info</span>
             Bilgi <i class="icon-arrow-down" [class.rotated]="isMobileDropdownOpen"></i>
           </a>
           <ul class="dropdown-content">
-            <li><a routerLink="/about" (click)="closeMobileMenu()">Hakkımızda</a></li>
-            <li><a routerLink="/faq" (click)="closeMobileMenu()">SSS</a></li>
-            <li><a routerLink="/contact" (click)="closeMobileMenu()">İletişim</a></li>
-            <li><a routerLink="/developers" (click)="closeMobileMenu()">Geliştiriciler</a></li>
+            <li><a routerLink="/about" routerLinkActive="active-link" (click)="closeMobileMenu()">Hakkımızda</a></li>
+            <li><a routerLink="/faq" routerLinkActive="active-link" (click)="closeMobileMenu()">SSS</a></li>
+            <li><a routerLink="/contact" routerLinkActive="active-link" (click)="closeMobileMenu()">İletişim</a></li>
+            <li><a routerLink="/developers" routerLinkActive="active-link" (click)="closeMobileMenu()">Geliştiriciler</a></li>
           </ul>
         </li>
       </ul>

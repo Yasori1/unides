@@ -793,21 +793,42 @@
 }
 
 @media (max-width: 768px) {
-  .page-spacer .page-title {
-    font-size: 2rem;
+  .page-spacer {
+    padding-top: 100px;
+    padding-bottom: 40px;
+
+    .page-title {
+      font-size: clamp(1.5rem, 5vw, 2.8rem);
+    }
   }
 
   .filters-bar {
     flex-direction: column;
     align-items: stretch;
+    gap: 12px;
 
-    .search-group,
-    .filter-groups {
+    .search-group {
       flex: 1;
     }
 
     .filter-groups {
+      flex: 1;
       flex-direction: column;
+      gap: 8px;
+
+      .select-wrapper {
+        min-width: unset;
+
+        select {
+          font-size: 0.85rem;
+          padding: 10px 35px 10px 12px;
+        }
+
+        .custom-select-trigger {
+          font-size: 0.85rem;
+          padding: 10px 12px;
+        }
+      }
     }
   }
 }

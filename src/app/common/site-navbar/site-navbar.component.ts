@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
-import { RouterLink, Router, NavigationEnd } from '@angular/router';
+import { RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HeaderBrandingComponent } from '../header-branding/header-branding.component';
 import { AuthService } from '../../services/auth.services';
@@ -8,7 +8,7 @@ import { Subscription, filter } from 'rxjs';
 @Component({
   selector: 'app-site-navbar',
   standalone: true,
-  imports: [RouterLink, CommonModule, HeaderBrandingComponent],
+  imports: [RouterLink, RouterLinkActive, CommonModule, HeaderBrandingComponent],
   templateUrl: './site-navbar.component.html',
   styleUrls: ['./site-navbar.component.scss'],
 })
@@ -45,6 +45,7 @@ export class SiteNavbarComponent implements OnInit, OnDestroy {
     if (this.routerSubscription) {
       this.routerSubscription.unsubscribe();
     }
+    document.body.style.overflow = '';
   }
 
   checkLoginStatus() {
@@ -67,11 +68,13 @@ export class SiteNavbarComponent implements OnInit, OnDestroy {
 
   toggleMobileMenu() {
     this.isMobileMenuOpen = !this.isMobileMenuOpen;
+    document.body.style.overflow = this.isMobileMenuOpen ? 'hidden' : '';
   }
 
   closeMobileMenu() {
     this.isMobileMenuOpen = false;
     this.isMobileDropdownOpen = false;
+    document.body.style.overflow = '';
   }
 
   toggleMobileDropdown() {
@@ -86,5 +89,6 @@ export class SiteNavbarComponent implements OnInit, OnDestroy {
     this.authService.logout();
     this.isLoggedIn = false;
     this.isMobileMenuOpen = false;
+    document.body.style.overflow = '';
   }
 }

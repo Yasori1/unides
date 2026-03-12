@@ -654,8 +654,13 @@
 }
 
 @media (max-width: 768px) {
-  .page-spacer .page-title {
-    font-size: 2rem;
+  .page-spacer {
+    padding-top: 100px;
+    padding-bottom: 40px;
+
+    .page-title {
+      font-size: clamp(1.5rem, 5vw, 2.8rem);
+    }
   }
 
   .filters-bar {

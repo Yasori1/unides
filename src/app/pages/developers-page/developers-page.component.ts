@@ -136,7 +136,7 @@ export class DevelopersPageComponent implements OnInit, OnDestroy {
       image: 'assets/hamzaketenci.png',
       codeBg: '.design { beauty: true; }',
       description:
-        'Hem frontend hem backend geliştirme yapan full stack geliştirici. Projenin tüm katmanlarında aktif rol alıyor.',
+        'Full-stack geliştirici olarak veritabanı yönetimi ve backend geliştirme süreçlerinde görev aldım. Veritabanı yapısını düzenledim ve veri yönetimini sağladım. Proje sürecinde farklı alanlarda destek vererek projenin birçok katmanında aktif rol aldım.',
       socialLinks: {
         linkedin: 'https://www.linkedin.com/in/hamzaketenci',
         github: 'https://github.com/HamzaKetenci',

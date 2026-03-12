@@ -5,8 +5,11 @@ import {
   SimpleChanges,
   ChangeDetectorRef,
   OnInit,
+  OnDestroy,
+  Inject,
+  PLATFORM_ID,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 
 export interface QuartzSlot {
   type: 'digit' | 'separator';
@@ -21,27 +24,86 @@ export interface QuartzSlot {
   templateUrl: './quartz-counter.component.html',
   styleUrls: ['./quartz-counter.component.scss'],
 })
-export class QuartzCounterComponent implements OnInit, OnChanges {
+export class QuartzCounterComponent implements OnInit, OnChanges, OnDestroy {
   @Input() value: number = 0;
   @Input() label: string = '';
 
   slots: QuartzSlot[] = [];
   private previousValue: number = -1;
+  private animFrameId: number | null = null;
+  private countUpTarget: number = 0;
 
-  constructor(private cdr: ChangeDetectorRef) {}
+  constructor(
+    private cdr: ChangeDetectorRef,
+    @Inject(PLATFORM_ID) private platformId: object
+  ) {}
 
   ngOnInit(): void {
-    this.buildSlots(this.value, -1);
-    this.previousValue = this.value;
+    if (this.previousValue < 0) {
+      this.buildSlots(0, -1);
+      this.previousValue = 0;
+    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['value']) {
       const newVal = this.value;
       const oldVal = this.previousValue;
-      this.buildSlots(newVal, oldVal);
-      this.previousValue = newVal;
+
+      if (oldVal <= 0 && newVal > 0) {
+        // İlk gerçek veri geldi: 0'dan hedefe doğru say
+        this.previousValue = newVal;
+        this.startCountUp(newVal);
+      } else if (oldVal >= 0 && newVal !== oldVal) {
+        // Canlı güncelleme: flip animasyonu
+        this.buildSlots(newVal, oldVal);
+        this.previousValue = newVal;
+      } else {
+        this.buildSlots(newVal, -1);
+        this.previousValue = newVal;
+      }
     }
+  }
+
+  ngOnDestroy(): void {
+    if (this.animFrameId !== null && isPlatformBrowser(this.platformId)) {
+      cancelAnimationFrame(this.animFrameId);
+    }
+  }
+
+  private startCountUp(targetValue: number): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      this.buildSlots(targetValue, -1);
+      return;
+    }
+
+    if (this.animFrameId !== null) {
+      cancelAnimationFrame(this.animFrameId);
+      this.animFrameId = null;
+    }
+
+    this.countUpTarget = targetValue;
+    const duration = 1800;
+    const startTime = performance.now();
+
+    const step = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease-out cubic: hızlı başla, hedefe yaklaşırken yavaşla
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(eased * targetValue);
+
+      this.buildSlots(current, -1);
+
+      if (progress < 1) {
+        this.animFrameId = requestAnimationFrame(step);
+      } else {
+        this.animFrameId = null;
+        this.buildSlots(targetValue, -1);
+      }
+    };
+
+    this.animFrameId = requestAnimationFrame(step);
   }
 
   private buildSlots(newValue: number, oldValue: number): void {

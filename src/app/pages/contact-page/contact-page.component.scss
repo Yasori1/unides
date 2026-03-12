@@ -530,8 +530,13 @@ $border-color: #e2e8f0;
 }
 
 @media (max-width: 768px) {
-  .page-spacer .page-title {
-    font-size: 2rem;
+  .page-spacer {
+    padding-top: 100px;
+    padding-bottom: 40px;
+
+    .page-title {
+      font-size: clamp(1.5rem, 5vw, 2.8rem);
+    }
   }
   
   .form-section {
@@ -543,5 +548,11 @@ $border-color: #e2e8f0;
           
           h2 { font-size: 2rem; }
       }
+  }
+}
+
+@media (max-width: 576px) {
+  .contact-form-wrapper {
+    padding: 20px 16px;
   }
 }

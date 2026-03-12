@@ -241,7 +241,7 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
   /* Responsive for mobile */
   @media only screen and (max-width : 767px) {
     padding-top: 110px;
-    padding-bottom: 184px;
+    padding-bottom: 100px;
   }
 }
 
@@ -600,7 +600,7 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
 
   // Tüm ekran boyutları için tutarlı margin-top değerleri (clamp ile akışkan)
   // Mobil varsayılan
-  margin-top: 0;
+  margin-top: -30px;
 
   // Tablet
   @media (min-width: 768px) {
@@ -1401,9 +1401,16 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
 
   // Mobilde logo boyutunu küçült
   .event-card-modern .logo-box-modern {
-    width: 80px;
-    height: 80px;
-    padding: 6px;
+    width: 56px;
+    height: 56px;
+    padding: 5px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 992px) {
+  .why-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
   }
 }
 
@@ -1411,10 +1418,13 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
 
   .communities-grid,
   .events-grid-modern,
-  .why-grid,
   .about-grid-modern {
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
+  }
+
+  .about-grid-modern {
+    gap: 30px;
   }
 }
 

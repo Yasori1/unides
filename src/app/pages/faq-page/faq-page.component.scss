@@ -732,6 +732,15 @@ aside.sidebar,
 }
 
 @media (max-width: 768px) {
+  .page-spacer {
+    padding-top: 100px;
+    padding-bottom: 40px;
+
+    .page-title {
+      font-size: clamp(1.5rem, 5vw, 2.8rem);
+    }
+  }
+
   .layout-grid {
     grid-template-columns: 1fr;
   }
@@ -740,5 +749,8 @@ aside.sidebar,
   }
   .hero-content h1 {
     font-size: 2.5rem;
+  }
+  .floater {
+    display: none;
   }
 }

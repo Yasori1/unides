@@ -115,11 +115,13 @@ $border-color: #e2e8f0;
           transition: width 0.3s ease;
         }
 
-        &:hover {
+        &:hover,
+        &.active-link {
           color: $primary;
         }
 
-        &:hover::after {
+        &:hover::after,
+        &.active-link::after {
           width: 100%;
         }
       }
@@ -340,17 +342,6 @@ $border-color: #e2e8f0;
             animation-delay: #{$i * 0.05}s;
           }
 
-          // Ana Sayfa - first item more prominent in mobile
-          &:first-child a {
-            background: linear-gradient(135deg, rgba($primary, 0.1) 0%, rgba($primary, 0.05) 100%);
-            border-left: 3px solid $primary;
-            font-weight: 700;
-
-            .nav-icon {
-              color: $primary;
-            }
-          }
-
           a {
             padding: 12px 16px;
             border-radius: 12px;
@@ -359,6 +350,8 @@ $border-color: #e2e8f0;
             font-weight: 600;
             background: transparent;
             justify-content: flex-start;
+            border-left: 3px solid transparent;
+            transition: background 0.2s, color 0.2s, border-color 0.2s;
 
             .nav-icon {
               display: inline-block;
@@ -368,10 +361,20 @@ $border-color: #e2e8f0;
               transition: color 0.3s;
             }
 
-            &:hover,
-            &.active-link {
+            &:hover {
               background: #eff6ff;
               color: $primary;
+
+              .nav-icon {
+                color: $primary;
+              }
+            }
+
+            &.active-link {
+              background: linear-gradient(135deg, rgba($primary, 0.1) 0%, rgba($primary, 0.05) 100%);
+              border-left: 3px solid $primary;
+              color: $primary;
+              font-weight: 700;
 
               .nav-icon {
                 color: $primary;
