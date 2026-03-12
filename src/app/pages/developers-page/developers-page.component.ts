@@ -84,7 +84,7 @@ export class DevelopersPageComponent implements OnInit, OnDestroy {
     },
     {
       name: 'Hüseyin Eren Çeykel',
-      role: 'Database Sorumlusu',
+      role: 'Database Yöneticisi',
       image: 'assets/huseyinceykel.png',
       codeBg: 'Flutter.run()',
       description:
