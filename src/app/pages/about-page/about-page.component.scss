@@ -988,11 +988,34 @@ $border-color: #e2e8f0; // Slate 200
     }
   }
 }
-@media (max-width: 576px) {
+@media (max-width: 768px) {
   .page-spacer {
-    padding-top: 120px;
+    padding-top: 100px;
+    padding-bottom: 40px;
+
+    .container {
+      padding-left: 24px;
+      padding-right: 24px;
+    }
+
     .page-title {
-      font-size: 2rem;
+      font-size: clamp(1.3rem, 6vw, 2.8rem);
+      letter-spacing: -0.5px;
+      line-height: 1.25;
+
+      .highlight-text {
+        margin-left: 6px;
+      }
+    }
+
+    .page-subtitle {
+      font-size: clamp(0.85rem, 3.5vw, 1.05rem);
+      line-height: 1.55;
+      padding: 0 8px;
+    }
+
+    .scroll-indicator {
+      display: none;
     }
   }
 }

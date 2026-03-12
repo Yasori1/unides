@@ -23,11 +23,13 @@
   z-index: -1;
   /* Opaque gradient: Left Turquoise (#e0fbfc) -> Right White (#ffffff) */
   background:
-    repeating-linear-gradient(90deg,
+    repeating-linear-gradient(
+      90deg,
       transparent,
       transparent 1px,
       rgba(224, 251, 252, 0.15) 1px,
-      rgba(224, 251, 252, 0.15) 2px),
+      rgba(224, 251, 252, 0.15) 2px
+    ),
     linear-gradient(to right, #e0fbfc 0%, #ffffff 100%);
   overflow: hidden;
   pointer-events: none;
@@ -58,10 +60,12 @@
       left: 50%;
       margin-top: -225px;
       margin-left: -225px;
-      background: radial-gradient(circle,
-          rgba(37, 99, 235, 0.12) 0%,
-          rgba(6, 182, 212, 0.08) 40%,
-          rgba(255, 255, 255, 0) 70%);
+      background: radial-gradient(
+        circle,
+        rgba(37, 99, 235, 0.12) 0%,
+        rgba(6, 182, 212, 0.08) 40%,
+        rgba(255, 255, 255, 0) 70%
+      );
       filter: blur(70px);
       border-radius: 50%;
       transition: transform 0.1s ease-out;
@@ -450,7 +454,9 @@
       object-fit: contain; // Görsellerin kırpılmadan tam sığması için
       object-position: center;
       transition: transform 0.5s ease;
-      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3)); // Stronger shadow to pop against the colored bg
+      filter: drop-shadow(
+        0 4px 8px rgba(0, 0, 0, 0.3)
+      ); // Stronger shadow to pop against the colored bg
     }
 
     .category-badge {
@@ -632,7 +638,6 @@
       margin-top: auto;
       /* Push footer to bottom if content is short */
 
-
       .footer-info {
         display: flex;
         flex-direction: column;
@@ -667,7 +672,6 @@
     }
   }
 }
-
 
 // --- 4. NO DATA & PAGINATION ---
 .no-data {
@@ -797,8 +801,29 @@
     padding-top: 100px;
     padding-bottom: 40px;
 
+    .container {
+      padding-left: 24px;
+      padding-right: 24px;
+    }
+
     .page-title {
-      font-size: clamp(1.5rem, 5vw, 2.8rem);
+      font-size: clamp(1.3rem, 6vw, 2.8rem);
+      letter-spacing: -0.5px;
+      line-height: 1.25;
+
+      .highlight-text {
+        margin-left: 6px;
+      }
+    }
+
+    .page-subtitle {
+      font-size: clamp(0.85rem, 3.5vw, 1.1rem);
+      line-height: 1.55;
+      padding: 0 8px;
+    }
+
+    .scroll-indicator {
+      display: none;
     }
   }
 

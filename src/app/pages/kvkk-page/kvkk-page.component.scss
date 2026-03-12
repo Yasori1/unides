@@ -159,7 +159,24 @@
 }
 
 @media (max-width: 768px) {
-  .page-spacer .page-title {
-    font-size: 2rem;
+  .page-spacer {
+    padding-left: 16px;
+    padding-right: 16px;
+
+    .page-title {
+      font-size: clamp(1rem, 4.5vw, 2rem);
+      letter-spacing: 0;
+      word-break: break-word;
+
+      .highlight-text {
+        margin-left: 6px;
+      }
+    }
+
+    .page-subtitle {
+      font-size: clamp(0.85rem, 3.5vw, 1.1rem);
+      padding: 0 8px;
+      word-break: break-word;
+    }
   }
 }
