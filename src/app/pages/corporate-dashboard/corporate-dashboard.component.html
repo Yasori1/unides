@@ -200,7 +200,7 @@
         <div class="card quick-actions-card">
           <h3>Hızlı İşlemler</h3>
           <div class="actions-grid">
-            <button class="tile-btn" (click)="openModal('new-announcement')">
+            <button class="tile-btn" *ngIf="canManageAnnouncements" (click)="openModal('new-announcement')">
               <span class="material-symbols-outlined">campaign</span>
               <span>Duyuru Yap</span>
             </button>
@@ -586,7 +586,7 @@
                 (input)="applyAnnouncementFilters()"
               />
             </div>
-            <button class="btn-primary" (click)="openModal('new-announcement')">
+            <button class="btn-primary" *ngIf="canManageAnnouncements" (click)="openModal('new-announcement')">
               <span class="material-symbols-outlined">add</span> Yeni Duyuru
             </button>
           </div>
@@ -745,7 +745,7 @@
       </div>
 
       <!-- Yeni Duyuru Modal - Geniş iki sütunlu düzen -->
-      <div class="modal-body modal-body-announcement" *ngIf="modalType === 'new-announcement'">
+      <div class="modal-body modal-body-announcement" *ngIf="canManageAnnouncements && modalType === 'new-announcement'">
         <div class="announcement-layout">
           <div class="announcement-left">
             <div class="single-image-upload no-url-input announcement-image-upload">
@@ -805,7 +805,7 @@
             </div>
           </div>
         </div>
-        <div class="modal-actions">
+        <div class="modal-actions" *ngIf="canManageAnnouncements">
           <button class="btn-secondary" (click)="closeModal()">İptal</button>
           <button class="btn-primary" (click)="saveAnnouncement()">
             <span class="material-symbols-outlined">publish</span>
@@ -887,7 +887,7 @@
             </div>
           </div>
         </div>
-        <div class="modal-actions">
+        <div class="modal-actions" *ngIf="canManageAnnouncements">
           <button class="btn-danger" (click)="deleteAnnouncement()">
             <span class="material-symbols-outlined">delete</span>
             Duyuruyu Sil

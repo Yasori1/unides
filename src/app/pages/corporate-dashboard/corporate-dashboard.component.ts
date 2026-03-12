@@ -91,6 +91,8 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   userEmail: string = '';
   displayName: string = '';
   userInitial: string = '';
+  /** Duyuruları yönetme (ekleme/güncelleme/silme) yetkisi var mı? RoleId 6 veya 7 için true. */
+  canManageAnnouncements: boolean = false;
   isModalOpen = false;
   modalType = '';
   searchText = '';
@@ -389,6 +391,10 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       this.displayName = this.userName;
       this.userInitial = this.userName.charAt(0).toUpperCase();
     }
+
+    // RoleId bilgisine göre duyuru yönetim yetkisi
+    const roleId = this.authService.getRoleId();
+    this.canManageAnnouncements = roleId === 6 || roleId === 7;
   }
 
   /** API'den gelen topluluk listesini işleyip ekrana yansıtır. Backend: active | passive | pending | all. Duruma göre client-side filtre. */

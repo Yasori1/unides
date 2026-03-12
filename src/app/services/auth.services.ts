@@ -27,6 +27,9 @@ export interface LoginResponse {
   id?: number;
   fullName?: string;
   email?: string;
+  /** Backend RoleId değeri (ör: 2, 3, 6, 7) */
+  roleId?: number;
+  RoleId?: number;
   /** OTP gerekli ise token dönülmez; doğrulama sayfasına yönlendirilir */
   requiresOtp?: boolean;
   otpRequestId?: string;
@@ -120,6 +123,10 @@ export class AuthService {
           if (roleName) {
             this.saveUserType(roleName);
           }
+          const numericRoleId = this.extractRoleIdFromResponse(response, token);
+          if (numericRoleId !== null) {
+            this.saveRoleId(numericRoleId);
+          }
         }
       })
     );
@@ -180,6 +187,16 @@ export class AuthService {
           };
           this.saveUser(userObj);
           this.saveUserType('corporate');
+          const tokenValue =
+            response?.accessToken ||
+            response?.AccessToken ||
+            response?.token ||
+            response?.Token ||
+            null;
+          const numericRoleId = this.extractRoleIdFromResponse(response, tokenValue);
+          if (numericRoleId !== null) {
+            this.saveRoleId(numericRoleId);
+          }
         })
       );
   }
@@ -226,6 +243,16 @@ export class AuthService {
           };
           this.saveUser(userObj);
           this.saveUserType(roleName);
+          const tokenValue =
+            response?.accessToken ||
+            response?.AccessToken ||
+            response?.token ||
+            response?.Token ||
+            null;
+          const numericRoleId = this.extractRoleIdFromResponse(response, tokenValue);
+          if (numericRoleId !== null) {
+            this.saveRoleId(numericRoleId);
+          }
         })
       );
   }
@@ -350,6 +377,16 @@ export class AuthService {
           };
           this.saveUser(userObj);
           this.saveUserType('community');
+          const tokenValue =
+            response?.accessToken ||
+            response?.AccessToken ||
+            response?.token ||
+            response?.Token ||
+            null;
+          const numericRoleId = this.extractRoleIdFromResponse(response, tokenValue);
+          if (numericRoleId !== null) {
+            this.saveRoleId(numericRoleId);
+          }
         })
       );
   }
@@ -414,6 +451,71 @@ export class AuthService {
   }
   getUserType(): string | null {
     return localStorage.getItem('user_type');
+  }
+  /** RoleId bilgisini localStorage'a yazar (ör: 2, 3, 6, 7). */
+  private saveRoleId(roleId: number): void {
+    try {
+      localStorage.setItem('role_id', String(roleId));
+    } catch {
+      // localStorage erişilemezse sessizce geç
+    }
+  }
+  /** Backend cevabından veya JWT token payload'ından RoleId bilgisini çıkarır. */
+  private extractRoleIdFromResponse(response: any, token?: string | null): number | null {
+    let rawRoleId: any =
+      response?.roleId ??
+      response?.RoleId ??
+      response?.user?.roleId ??
+      response?.user?.RoleId ??
+      null;
+
+    if (typeof rawRoleId === 'string') {
+      const parsed = parseInt(rawRoleId, 10);
+      rawRoleId = isNaN(parsed) ? null : parsed;
+    }
+
+    if (typeof rawRoleId === 'number' && !isNaN(rawRoleId)) {
+      return rawRoleId;
+    }
+
+    // Cevapta yoksa token içinden okumayı dene
+    const tokenToUse =
+      token ||
+      response?.accessToken ||
+      response?.AccessToken ||
+      response?.token ||
+      response?.Token ||
+      null;
+
+    if (tokenToUse && tokenToUse.split('.').length === 3) {
+      try {
+        const payloadJson = atob(tokenToUse.split('.')[1]);
+        const payload = JSON.parse(payloadJson);
+        let claimRoleId: any = payload?.roleId ?? payload?.RoleId ?? payload?.RoleID;
+        if (typeof claimRoleId === 'string') {
+          const parsed = parseInt(claimRoleId, 10);
+          claimRoleId = isNaN(parsed) ? null : parsed;
+        }
+        if (typeof claimRoleId === 'number' && !isNaN(claimRoleId)) {
+          return claimRoleId;
+        }
+      } catch {
+        // Token parse edilemezse sessizce geç
+      }
+    }
+
+    return null;
+  }
+  /** RoleId bilgisini döner; yoksa null. */
+  getRoleId(): number | null {
+    try {
+      const raw = localStorage.getItem('role_id');
+      if (!raw) return null;
+      const n = parseInt(raw, 10);
+      return isNaN(n) ? null : n;
+    } catch {
+      return null;
+    }
   }
   /** Guard ve menü için: backend'den gelen veya eski kayıtlı rol adını 'student'|'corporate'|'community' olarak döner. */
   getNormalizedUserType(): 'student' | 'corporate' | 'community' {

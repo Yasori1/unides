@@ -41,8 +41,12 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
-    // URL'den token'ı al - hem query params hem route params'tan kontrol et
-    this.token = this.route.snapshot.queryParams['token'] ||
+    // URL'den token'ı al:
+    // 1) Önce window.location.search içindeki ?token= query parametresine bak
+    // 2) Eğer yoksa window.location.hash içindeki #token=... formatından token'ı çek
+    // 3) Son çare olarak Angular route query/route params'ı kullan
+    this.token = this.getTokenFromUrl() ||
+      this.route.snapshot.queryParams['token'] ||
       this.route.snapshot.params['token'] ||
       '';
 
@@ -50,8 +54,9 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
     if (!this.token) {
       // Kısa bir gecikme ile kontrol et (bazı durumlarda params geç yüklenebilir)
       setTimeout(() => {
-        // Tekrar kontrol et - hem query hem route params
-        const retryToken = this.route.snapshot.queryParams['token'] ||
+        // Tekrar kontrol et - önce window.location üzerinden, sonra Angular route üzerinden
+        const retryToken = this.getTokenFromUrl() ||
+          this.route.snapshot.queryParams['token'] ||
           this.route.snapshot.params['token'] ||
           '';
         if (retryToken) {
@@ -74,6 +79,33 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
     if (this.redirectTimeout) {
       clearTimeout(this.redirectTimeout);
     }
+  }
+
+  /**
+   * URL'den token'ı okur.
+   * Öncelik sırası:
+   * 1) window.location.search içindeki ?token=
+   * 2) window.location.hash içindeki #token=...
+   */
+  private getTokenFromUrl(): string {
+    if (typeof window === 'undefined') {
+      return '';
+    }
+
+    // Query parametrelerinden token
+    const searchParams = new URLSearchParams(window.location.search || '');
+    const queryToken = searchParams.get('token');
+    if (queryToken) {
+      return queryToken;
+    }
+
+    // Hash fragment (#token=XYZ) içinden token
+    const rawHash = window.location.hash || '';
+    const hashWithoutSharp = rawHash.startsWith('#') ? rawHash.substring(1) : rawHash;
+    const hashParams = new URLSearchParams(hashWithoutSharp);
+    const hashToken = hashParams.get('token');
+
+    return hashToken || '';
   }
 
   /** Şifre güç kurallarını kontrol et */
