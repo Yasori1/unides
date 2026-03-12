@@ -153,6 +153,18 @@ export class AuthService {
     );
   }
 
+   /**
+    * Gizli "Genç Duyuru" kurumsal girişi.
+    * Normal kurumsal girişle aynı endpoint'i kullanır fakat farklı roleId ile backend'e gider.
+    * Bu sayede sadece belirli RoleId (ör. 6 veya 7) için özel yetkiler tanımlanabilir.
+    */
+  loginCorporateAnnouncement(email: string, password: string): Observable<LoginResponse> {
+    // RoleId 6: Özel yetkili GSB kullanıcısı
+    return this.login(email, password, 6).pipe(
+      tap(() => this.saveUserType('corporate'))
+    );
+  }
+
   /** Kurumsal giriş doğrulama kodu ile giriş tamamla. Backend: POST /api/Auth/verify-corporate-login */
   verifyCorporateCode(email: string, code: string): Observable<LoginResponse> {
     return this.http

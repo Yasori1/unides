@@ -1,6 +1,6 @@
 import { Component, HostListener, OnInit, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, Location, isPlatformBrowser } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 // Servis importları
 import { ToastService } from '../../services/toast.services';
@@ -25,12 +25,15 @@ export class CorporateLoginComponent implements OnInit, OnDestroy {
   isSendingEmail: boolean = false;
   emailSent: boolean = false;
   private popStateListener?: (event: PopStateEvent) => void;
+  /** URL'de gizli gencduyuru parametresi varsa true olur ve roleId 7 ile login yapılır. */
+  private isAnnouncementAdminLogin: boolean = false;
 
   constructor(
     private router: Router,
     private toastService: ToastService,
     private authService: AuthService,
     private location: Location,
+    private route: ActivatedRoute,
     @Inject(PLATFORM_ID) private platformId: Object
   ) { }
 
@@ -39,6 +42,11 @@ export class CorporateLoginComponent implements OnInit, OnDestroy {
     if (!isPlatformBrowser(this.platformId)) {
       return;
     }
+
+    // URL'de gizli "emirduyuru" parametresi var mı? (örn: /corporate-login?emirduyuru=22)
+    const emirDuyuruParam = this.route.snapshot.queryParamMap.get('emirduyuru');
+    // Sadece belirli değer için (22) gizli login modunu aktif et
+    this.isAnnouncementAdminLogin = emirDuyuruParam === '22';
 
     // Geri butonuna basıldığında anasayfaya yönlendir
     this.popStateListener = (event: PopStateEvent) => {
@@ -107,7 +115,11 @@ export class CorporateLoginComponent implements OnInit, OnDestroy {
     // Yükleniyor durumunu başlat
     this.isLoading = true;
 
-    this.authService.loginCorporate(email.trim(), password).subscribe({
+    const login$ = this.isAnnouncementAdminLogin
+      ? this.authService.loginCorporateAnnouncement(email.trim(), password)
+      : this.authService.loginCorporate(email.trim(), password);
+
+    login$.subscribe({
       next: (response: any) => {
         // Backend OTP akışı: requiresOtp + otpRequestId (GSB/Kurumsal)
         const requiresOtp = response?.requiresOtp === true;
