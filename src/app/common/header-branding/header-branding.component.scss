@@ -28,7 +28,7 @@ $primary-dark: #0f172a;
   /* Desktop: Logo ve Giriş Yap merkeze eşit uzaklıkta (araları çok açık) */
   @media (min-width: 1025px) {
     position: fixed;
-    left: calc(50% - 700px);
+    left: max(20px, calc(50% - 700px));
     top: 0;
     height: 75px;
     display: flex;
@@ -61,7 +61,7 @@ $primary-dark: #0f172a;
 
   @media (min-width: 1025px) {
     position: fixed;
-    right: calc(50% - 800px);
+    right: max(20px, calc(50% - 800px));
     top: 0;
     height: 75px;
     margin-right: 0;

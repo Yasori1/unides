@@ -69,7 +69,7 @@ $border-color: #e2e8f0;
   .nav-links {
     display: flex;
     justify-content: center;
-    gap: 30px;
+    gap: clamp(14px, 2vw, 30px);
     list-style: none;
     margin: 0;
     padding: 0;
@@ -79,7 +79,6 @@ $border-color: #e2e8f0;
     left: 50%;
     transform: translate(-50%, -50%);
 
-    /* Kullanıcı isteği: Navigasyon linklerini 2cm (yaklaşık 75px) sola kaydır */
     margin-left: 5px;
 
     width: auto;
@@ -93,7 +92,7 @@ $border-color: #e2e8f0;
         text-decoration: none;
         color: $dark-text;
         font-weight: 600;
-        font-size: 0.95rem;
+        font-size: clamp(0.8rem, 1.1vw, 0.95rem);
         position: relative;
         transition: color 0.3s;
         display: flex;
