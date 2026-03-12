@@ -178,11 +178,11 @@ export class DevelopersPageComponent implements OnInit, OnDestroy {
   alumni: Alumni[] = [
     { name: 'Ahmet Berkan Çiçek', socialLinks: { linkedin: '#', github: '#' } },
     { name: 'Yunus Yaman', socialLinks: { linkedin: '#', github: '#' } },
-    { name: 'Yaşar Eren Güre', socialLinks: { linkedin: '#', github: '#' } },
+    { name: 'Yaşar Eren Güre', socialLinks: { linkedin: 'https://www.linkedin.com/in/ya%C5%9Far-eren-g%C3%BCre-436696255', github: 'https://github.com/Yasori1' } },
     { name: 'Derya Gökçeli', socialLinks: { linkedin: '#', github: '#' } },
     { name: 'Melikhan Atay', socialLinks: { linkedin: '#', github: '#' } },
-    { name: 'Melike Kuyucaklıoğlu', socialLinks: { linkedin: '#', github: '#' } },
-    { name: 'Mehmet Sezer Altun', socialLinks: { linkedin: '#', github: '#' } },
+    { name: 'Melike Kuyucaklıoğlu', socialLinks: { linkedin: 'https://www.linkedin.com/in/melike-kuyucakl%C4%B1o%C4%9Flu-7810a8246' } },
+    { name: 'Mehmet Sezer Altun', socialLinks: { linkedin: 'https://www.linkedin.com/in/mehmet-sezer-altun-8a4197224' } },
   ];
 
   constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
