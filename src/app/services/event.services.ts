@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpContext, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, catchError, map, of, switchMap, throwError } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Logger } from '../utils/logger.util';
+import { SKIP_AUTH } from '../core/http-context-tokens';
 
 export interface EventItem {
   id: number;
@@ -522,15 +523,28 @@ export class EventService {
     };
   }
 
-  /** Backend sayfalı yanıt: { page, pageSize, totalCount, totalPages, items } */
-  getEventsPage(page: number = 1, pageSize: number = 12): Observable<{
+  /**
+   * Backend: GET /api/Events/all?page=&pageSize=&search=&city=&sortBy=&sortOrder=
+   * sortBy=name → etkinlik adına göre Türkçe A–Z/Z–A; sortBy=date veya boş → tarihe göre (en yakın/en uzak).
+   * sortOrder=asc veya boş → tarih için en yakın önce, isim için A–Z; sortOrder=desc → tersi.
+   * Filtre/sıralama değişince page=1 ile, sayfa değişince sadece page ile yeniden istek atın.
+   */
+  getEventsPage(
+    page: number = 1,
+    pageSize: number = 12,
+    filters?: { search?: string; city?: string; sortBy?: 'name' | 'date'; sortOrder?: 'asc' | 'desc' }
+  ): Observable<{
     page: number;
     pageSize: number;
     totalCount: number;
     totalPages: number;
     items: EventItem[];
   }> {
-    const params = new HttpParams().set('page', String(page)).set('pageSize', String(pageSize));
+    let params = new HttpParams().set('page', String(page)).set('pageSize', String(pageSize));
+    if (filters?.search?.trim()) params = params.set('search', filters.search.trim());
+    if (filters?.city?.trim()) params = params.set('city', filters.city.trim());
+    if (filters?.sortBy) params = params.set('sortBy', filters.sortBy);
+    if (filters?.sortOrder) params = params.set('sortOrder', filters.sortOrder);
     return this.http
       .get<{ page?: number; pageSize?: number; totalCount?: number; totalPages?: number; items?: any[] }>(
         `${this.apiUrl}/all`,
@@ -554,7 +568,19 @@ export class EventService {
       );
   }
 
-  // Anasayfa için yaklaşan etkinlikleri getir (Backend: GET /api/Events/all — sayfalı)
+  /**
+   * Anasayfa için yaklaşan etkinlikler.
+   * Backend: GET /api/Events/upcoming/home — AllowAnonymous, sabit 6 etkinlik (GetHomePageEventsQuery(6)).
+   */
+  getUpcomingEventsForHome(): Observable<EventItem[]> {
+    const context = new HttpContext().set(SKIP_AUTH, true);
+    return this.http.get<any[]>(`${this.apiUrl}/upcoming/home`, { context }).pipe(
+      map((list) => (Array.isArray(list) ? list : []).map((dto) => this.mapToEvent(dto))),
+      catchError(() => of([]))
+    );
+  }
+
+  // Eski davranış: GET /api/Events/all ile sayfalı çekip client'ta filtreler (geriye dönük uyumluluk)
   getHomeUpcomingEvents(limit: number = 6): Observable<EventItem[]> {
     return this.getEventsPage(1, Math.max(limit, 12)).pipe(
       map((res) => {

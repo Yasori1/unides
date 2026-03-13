@@ -58,7 +58,6 @@ interface DashboardEvent {
   date: string;
   startDateIso: string;
   location: string;
-  category: string;
   description: string;
   shortDescription?: string;
   rejectionReason?: string;
@@ -76,7 +75,6 @@ interface DashboardEvent {
     ImageUploadComponent,
     LumaSpinComponent,
     ToastComponent,
-    TurkishUppercasePipe,
   ],
   templateUrl: './community-dashboard.component.html',
   styleUrls: ['./community-dashboard.component.scss'],
@@ -797,7 +795,6 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
             date: dateStr,
             startDateIso: startDateIso,
             location: e.location || 'Konum belirtilmemiş',
-            category: 'Etkinlik', // Backend'de category yok, varsayılan değer
             description: e.description || e.shortDescription || '',
             shortDescription: (e as any).shortDescription || undefined,
             rejectionReason: (() => {

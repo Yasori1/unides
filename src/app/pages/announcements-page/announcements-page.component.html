@@ -24,7 +24,7 @@
     <div class="filters-bar">
       <div class="search-group">
         <i class="bx bx-search"></i>
-        <input type="text" placeholder="Duyuru ara..." [(ngModel)]="searchText" (input)="applyFilters()" />
+        <input type="text" placeholder="Duyuru ara..." [(ngModel)]="searchText" (input)="onFiltersOrSortChange()" />
       </div>
 
       <div class="filter-groups">
@@ -46,9 +46,9 @@
       </div>
     </div>
 
-    <div class="results-count" *ngIf="!isLoading">
+    <div class="results-count" *ngIf="!isLoading && totalCount > 0">
       <p>
-        Toplam <strong>{{ filteredAnnouncements.length }}</strong> duyuru bulundu.
+        Toplam <strong>{{ totalCount }}</strong> duyuru listeleniyor.
       </p>
     </div>
 
@@ -83,7 +83,7 @@
       <h3>Sonuç Bulunamadı</h3>
       <p>Aradığınız kriterlere uygun duyuru bulunamadı. Filtreleri temizlemeyi deneyin.</p>
       <!-- resetFilters metodu TS tarafında eksik olabilir, applyFilters ile sıfırlama yapılabilir veya metot eklenebilir -->
-      <button class="reset-btn" (click)="searchText=''; sortOrder='default'; applyFilters()">Filtreleri Temizle</button>
+      <button class="reset-btn" (click)="searchText=''; sortOrder='default'; onFiltersOrSortChange()">Filtreleri Temizle</button>
     </div>
 
     <div class="pagination-area" *ngIf="!isLoading && totalPages > 1">

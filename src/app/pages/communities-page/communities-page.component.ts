@@ -47,10 +47,11 @@ export class CommunitiesPageComponent implements OnInit {
   isTagDropdownOpen: boolean = false;
   isSortDropdownOpen: boolean = false;
 
-  // Sayfalama
+  // Sayfalama (backend'den gelen totalCount / totalPages kullanılır)
   currentPage: number = 1;
   itemsPerPage: number = 12;
   totalPages: number = 0;
+  totalCount: number = 0;
   pages: number[] = [];
 
   isLoading: boolean = true;
@@ -80,87 +81,48 @@ export class CommunitiesPageComponent implements OnInit {
     const requestedPage = page ?? this.currentPage ?? 1;
 
     const queryParams = this.route.snapshot.queryParams;
-    const backendParams: { university?: string; category?: string; name?: string } = {};
     if (queryParams['search']) this.searchText = queryParams['search'];
     if (queryParams['category']) this.selectedCategory = queryParams['category'];
-    if (queryParams['university']) backendParams.university = queryParams['university'];
+
+    const backendParams: { name?: string; city?: string; category?: string; university?: string; sortBy?: string; sortOrder?: 'asc' | 'desc' } = {};
     if (this.searchText?.trim()) backendParams.name = this.searchText.trim();
-    if (this.selectedCategory?.trim()) backendParams.category = this.selectedCategory.trim();
+    if (this.selectedCity?.trim()) backendParams.city = this.selectedCity.trim();
+    if ((this.selectedTag || this.selectedCategory)?.trim()) backendParams.category = (this.selectedTag || this.selectedCategory)!.trim();
+    if (this.sortOrder === 'name_asc') {
+      backendParams.sortBy = 'name';
+      backendParams.sortOrder = 'asc';
+    } else if (this.sortOrder === 'name_desc') {
+      backendParams.sortBy = 'name';
+      backendParams.sortOrder = 'desc';
+    }
 
     this.communityService.getCommunitiesPublicPage(requestedPage, this.itemsPerPage, backendParams).subscribe({
       next: (res) => {
         this.allCommunities = res.items;
+        this.filteredCommunities = res.items;
+        this.displayedCommunities = res.items;
         this.currentPage = res.page;
         this.totalPages = res.totalPages;
+        this.totalCount = res.totalCount ?? res.items.length;
         this.pages = Array.from({ length: this.totalPages }, (_, i) => i + 1);
-        this.categories = [...new Set(this.allCommunities.map(c => c.category))].sort();
-        this.applyFilters();
         this.isLoading = false;
       },
       error: (err) => {
         Logger.error('Topluluklar yüklenirken hata oluştu:', err);
         this.allCommunities = [];
-        this.categories = [];
+        this.filteredCommunities = [];
+        this.displayedCommunities = [];
         this.totalPages = 0;
+        this.totalCount = 0;
         this.pages = [];
-        this.applyFilters();
         this.isLoading = false;
       }
     });
   }
 
-  // --- FİLTRELEME MANTIĞI ---
-  applyFilters() {
-    let temp = [...this.allCommunities];
-
-    // Backend'den zaten sadece aktif topluluklar geldiği için (status='active' ile istek atıldı)
-    // Frontend'de ekstra filtreleme yapmaya gerek yok
-    // Ancak güvenlik için yine de kontrol ediyoruz
-    temp = temp.filter((c) => {
-      // isActivity boolean değeri varsa onu kullan, yoksa status string'ini kontrol et
-      if (c.isActivity !== undefined) {
-        return c.isActivity === true;
-      }
-      return c.status === 'Aktif' || c.status === undefined;
-    });
-
-    // 1. Arama Metni
-    if (this.searchText.trim()) {
-      const term = this.searchText.toLowerCase();
-      temp = temp.filter(
-        (c) =>
-          c.name.toLowerCase().includes(term) ||
-          c.university.toLowerCase().includes(term)
-      );
-    }
-
-    // 2. Şehir filtresi (sadece frontend; API'den tüm aktif topluluklar zaten çekildi)
-    if (this.selectedCity) {
-      temp = temp.filter((c) => (c.city || '').trim() === this.selectedCity);
-    }
-
-    // 3. Kategori Filtresi (URL'den gelen)
-    if (this.selectedCategory) {
-      temp = temp.filter((c) => c.category === this.selectedCategory);
-    }
-
-    // 4. Tag Filtresi (Yeni eklenen - Kategoriye göre filtreler)
-    if (this.selectedTag) {
-      // Not: Şu an için tag'ler kategori alanında tutuluyor varsayıyoruz veya kategori ile eşleşiyor
-      // İleride ayrı bir tag alanı olursa burası güncellenebilir.
-      // Şimdilik kategori içinde arama yapıyoruz veya tam eşleşme
-      temp = temp.filter((c) => c.category === this.selectedTag || c.category.includes(this.selectedTag));
-    }
-
-    // 5. Sıralama
-    if (this.sortOrder === 'name_asc') {
-      temp.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'tr'));
-    } else if (this.sortOrder === 'name_desc') {
-      temp.sort((a, b) => (b.name || '').localeCompare(a.name || '', 'tr'));
-    }
-
-    this.filteredCommunities = temp;
-    this.displayedCommunities = [...this.filteredCommunities];
+  /** Filtre/sıralama değişince sayfa 1 ile yeniden istek at (backend tüm filtrelemeyi yapar). */
+  onFiltersOrSortChange() {
+    this.fetchCommunities(1);
   }
 
   resetFilters() {
@@ -207,19 +169,19 @@ export class CommunitiesPageComponent implements OnInit {
 
   selectCity(city: string) {
     this.selectedCity = city;
-    this.applyFilters();
+    this.onFiltersOrSortChange();
     this.isCityDropdownOpen = false;
   }
 
   selectTag(tag: string) {
     this.selectedTag = tag;
-    this.applyFilters();
+    this.onFiltersOrSortChange();
     this.isTagDropdownOpen = false;
   }
 
   selectSort(order: 'default' | 'name_asc' | 'name_desc') {
     this.sortOrder = order;
-    this.applyFilters();
+    this.onFiltersOrSortChange();
     this.isSortDropdownOpen = false;
   }
 

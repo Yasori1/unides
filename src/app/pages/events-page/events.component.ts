@@ -23,7 +23,6 @@ interface EventCard {
   id: number;
   title: string;
   description: string;
-  category: string;
   date: string;
   dateObj: Date;
   time: string;
@@ -51,21 +50,6 @@ export class EventsComponent implements OnInit, AfterViewInit {
   heroMoveY: number = 0;
 
   // Filtreleme
-  activeCategory: string = 'Tümü';
-  categories: string[] = [
-    'Tümü',
-    'Afet Yönetimi ve Dayanıklılık',
-    'Aile ve Değerler',
-    'Bilim ve Teknoloji',
-    'Çevre ve İklim',
-    'Eğitim ve Hayat Boyu Öğrenme',
-    'Gençlik Bilgilendirmesi',
-    'Gençlik Sağlığı ve Spor',
-    'Gönüllülük, Gençlik Katılımı ve Sivil Toplum',
-    'İstihdam ve Girişimcilik',
-    'Sosyal Kapsayıcılık',
-    'Uluslararası Gençlik Çalışmaları'
-  ];
   searchQuery: string = '';
   currentFilter: 'all' | 'active' | 'upcoming' = 'all';
 
@@ -73,7 +57,6 @@ export class EventsComponent implements OnInit, AfterViewInit {
   sortOrder: 'date_asc' | 'date_desc' | 'name_asc' | 'name_desc' = 'date_asc';
 
   // Custom Dropdown States
-  isCategoryDropdownOpen: boolean = false;
   isSortDropdownOpen: boolean = false;
   // Removed old sort vars
 
@@ -113,7 +96,6 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 101,
       title: 'Geleceğin Teknolojileri ve Yapay Zeka Zirvesi',
       description: 'Yapay zeka, blok zincir ve geleceğin teknolojilerinin tartışılacağı dev bir zirveye hazır olun. Sektörün öncüleri ile tanışma fırsatı.',
-      category: 'Bilim ve Teknoloji',
       date: '25 Ekim 2025',
       dateObj: new Date('2025-10-25'),
       time: '10:00',
@@ -131,7 +113,6 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 102,
       title: 'Kampüs Caz Festivali',
       description: 'Sonbaharın renkleri cazın büyüleyici ritimleriyle buluşuyor. Açık hava konserleri ve workshoplar sizi bekliyor.',
-      category: 'Eğitim ve Hayat Boyu Öğrenme',
       date: '15 Kasım 2025',
       dateObj: new Date('2025-11-15'),
       time: '18:30',
@@ -149,7 +130,6 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 103,
       title: 'Modern Sanat ve Tasarım Bienali',
       description: 'Genç sanatçıların eserlerinin sergileneceği, interaktif enstalasyonların yer aldığı sanat dolu bir hafta.',
-      category: 'Aile ve Değerler',
       date: '01 Aralık 2025',
       dateObj: new Date('2025-12-01'),
       time: '09:00',
@@ -168,7 +148,6 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 104,
       title: 'Kariyer ve Networking Günleri',
       description: 'Türkiye\'nin önde gelen firmalarının İK yöneticileri ile birebir görüşme şansı. Staj ve iş imkanlarını kaçırmayın.',
-      category: 'İstihdam ve Girişimcilik',
       date: '20 Eylül 2025',
       dateObj: new Date('2025-09-20'),
       time: '11:00',
@@ -186,7 +165,6 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 105,
       title: 'Doğa Yürüyüşü ve Kamp',
       description: 'Şehrin gürültüsünden uzaklaşıp doğayla iç içe bir hafta sonu. Çadırını kap gel!',
-      category: 'Gençlik Sağlığı ve Spor',
       date: '05 Ekim 2025',
       dateObj: new Date('2025-10-05'),
       time: '07:00',
@@ -204,7 +182,6 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 106,
       title: 'Siber Güvenlik Bootcamp',
       description: 'Uygulamalı laboratuvarlarla siber güvenliğin temellerini öğren. CTF mini yarışması da var.',
-      category: 'Bilim ve Teknoloji',
       date: '10 Ocak 2026',
       dateObj: new Date('2026-01-10'),
       time: '13:00',
@@ -222,7 +199,6 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 107,
       title: 'Fotoğrafçılık Şehir Turu',
       description: 'Şehir turunda sokak fotoğrafçılığı teknikleri, kompozisyon ve ışık kullanımı üzerine pratik.',
-      category: 'Aile ve Değerler',
       date: '18 Ocak 2026',
       dateObj: new Date('2026-01-18'),
       time: '09:30',
@@ -240,7 +216,6 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 108,
       title: 'Kariyer CV Atölyesi',
       description: 'CV ve LinkedIn profilini güçlendirmek için uygulamalı atölye. Örnek mülakat simülasyonu da yapılacak.',
-      category: 'İstihdam ve Girişimcilik',
       date: '28 Ocak 2026',
       dateObj: new Date('2026-01-28'),
       time: '16:00',
@@ -258,7 +233,6 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 109,
       title: 'Veri Bilimi ve R Atölyesi',
       description: 'Veri analizine giriş yapmak isteyenler için kapsamlı bir atölye. R dili ile uygulama yapılacak.',
-      category: 'Bilim ve Teknoloji',
       date: '05 Şubat 2026',
       dateObj: new Date('2026-02-05'),
       time: '14:00',
@@ -276,7 +250,6 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 110,
       title: 'Klasik Müzik Akşamı',
       description: 'Üniversite orkestrasından unutulmaz bir klasik müzik dinletisi.',
-      category: 'Eğitim ve Hayat Boyu Öğrenme',
       date: '12 Şubat 2026',
       dateObj: new Date('2026-02-12'),
       time: '19:30',
@@ -294,7 +267,6 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 111,
       title: 'Modern Dans Gösterisi',
       description: 'Dans topluluğunun hazırladığı modern dans koreografileri sahneleniyor.',
-      category: 'Aile ve Değerler',
       date: '20 Şubat 2026',
       dateObj: new Date('2026-02-20'),
       time: '18:00',
@@ -312,7 +284,6 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 112,
       title: 'Startup Pitching Day',
       description: 'Girişim fikirlerini yatırımcılara sunmak isteyen öğrenciler için büyük fırsat.',
-      category: 'İstihdam ve Girişimcilik',
       date: '25 Şubat 2026',
       dateObj: new Date('2026-02-25'),
       time: '10:00',
@@ -330,7 +301,6 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 113,
       title: 'Kampüs Koşusu',
       description: 'Sağlıklı yaşam için kampüste 5K koşusu düzenliyoruz. Herkes davetli!',
-      category: 'Gençlik Sağlığı ve Spor',
       date: '01 Mart 2026',
       dateObj: new Date('2026-03-01'),
       time: '08:00',
@@ -348,7 +318,6 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 114,
       title: 'Ege Köyleri Gezisi',
       description: 'Ege\'nin saklı kalmış köylerini keşfetmeye gidiyoruz. Fotoğraf makinenizi unutmayın.',
-      category: 'Uluslararası Gençlik Çalışmaları',
       date: '10 Mart 2026',
       dateObj: new Date('2026-03-10'),
       time: '07:30',
@@ -366,7 +335,6 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 115,
       title: 'Blockchain 101',
       description: 'Blokzincir teknolojisinin temelleri ve kripto varlıklar üzerine seminer.',
-      category: 'Bilim ve Teknoloji',
       date: '15 Mart 2026',
       dateObj: new Date('2026-03-15'),
       time: '13:00',
@@ -384,7 +352,6 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 116,
       title: 'Rock Festivali',
       description: 'Amatör ve profesyonel rock gruplarının sahne alacağı müzik şöleni.',
-      category: 'Eğitim ve Hayat Boyu Öğrenme',
       date: '22 Mart 2026',
       dateObj: new Date('2026-03-22'),
       time: '15:00',
@@ -402,7 +369,6 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 117,
       title: 'Seramik Atölyesi',
       description: 'Kendi seramik kupanı tasarla ve üret. Malzemeler bizden!',
-      category: 'Aile ve Değerler',
       date: '28 Mart 2026',
       dateObj: new Date('2026-03-28'),
       time: '11:00',
@@ -420,7 +386,6 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 118,
       title: 'Staj Fuarı 2026',
       description: 'Yaz dönemi stajı için firmalarla buluşma noktası.',
-      category: 'İstihdam ve Girişimcilik',
       date: '05 Nisan 2026',
       dateObj: new Date('2026-04-05'),
       time: '10:00',
@@ -438,7 +403,6 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 119,
       title: 'Voleybol Turnuvası',
       description: 'Fakülteler arası voleybol turnuvası final maçı.',
-      category: 'Gençlik Sağlığı ve Spor',
       date: '12 Nisan 2026',
       dateObj: new Date('2026-04-12'),
       time: '17:00',
@@ -456,7 +420,6 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: 120,
       title: 'Kapadokya Turu',
       description: 'Peribacaları ve balon turu ile eşsiz bir hafta sonu gezisi.',
-      category: 'Uluslararası Gençlik Çalışmaları',
       date: '20 Nisan 2026',
       dateObj: new Date('2026-04-20'),
       time: '06:00',
@@ -498,35 +461,45 @@ export class EventsComponent implements OnInit, AfterViewInit {
 
   private loadEventsFromBackend(page?: number) {
     const requestedPage = page ?? this.currentPage ?? 1;
-    this.eventService.getEventsPage(requestedPage, this.itemsPerPage).subscribe({
+    const filters: { search?: string; city?: string; sortBy?: 'name' | 'date'; sortOrder?: 'asc' | 'desc' } = {};
+    if (this.searchQuery?.trim()) filters.search = this.searchQuery.trim();
+    if (this.sortOrder === 'date_asc') {
+      filters.sortBy = 'date';
+      filters.sortOrder = 'asc';
+    } else if (this.sortOrder === 'date_desc') {
+      filters.sortBy = 'date';
+      filters.sortOrder = 'desc';
+    } else if (this.sortOrder === 'name_asc') {
+      filters.sortBy = 'name';
+      filters.sortOrder = 'asc';
+    } else if (this.sortOrder === 'name_desc') {
+      filters.sortBy = 'name';
+      filters.sortOrder = 'desc';
+    }
+
+    this.eventService.getEventsPage(requestedPage, this.itemsPerPage, filters).subscribe({
       next: (res) => {
         const data = res.items || [];
-        if (data.length) {
-          const fetchedEvents = data.map((e) => this.mapToCard(e));
-          const approvedEventsList = fetchedEvents.filter((e) => {
-            const eventItem = data.find((item) => item.id === e.id);
-            return eventItem?.status === 'Onaylandı';
-          });
-          this.baseEvents = approvedEventsList;
-          this.attachCommunityNames();
-        } else {
-          this.baseEvents = [];
-        }
-        this.allEventsPool = [...this.baseEvents];
+        const fetchedEvents = data.map((e) => this.mapToCard(e));
+        const approvedEventsList = fetchedEvents.filter((e) => {
+          const eventItem = data.find((item) => item.id === e.id);
+          return eventItem?.status === 'Onaylandı';
+        });
+        this.baseEvents = approvedEventsList;
+        this.attachCommunityNames();
+        this.displayedEvents = [...this.baseEvents];
         this.currentPage = res.page;
         this.totalPages = res.totalPages;
         this.pages = Array.from({ length: this.totalPages }, (_, i) => i + 1);
-        this.filteredEventsCount = res.totalCount ?? this.baseEvents.length;
-        this.displayedEvents = [...this.allEventsPool];
+        this.filteredEventsCount = res.totalCount ?? 0;
         this.isLoading = false;
       },
       error: () => {
         this.baseEvents = [];
-        this.allEventsPool = [];
+        this.displayedEvents = [];
         this.currentPage = 1;
         this.totalPages = 0;
         this.pages = [];
-        this.displayedEvents = [];
         this.filteredEventsCount = 0;
         this.isLoading = false;
       },
@@ -564,7 +537,6 @@ export class EventsComponent implements OnInit, AfterViewInit {
       id: e.id,
       title: e.title || '',
       description: e.description || e.shortDescription || '',
-      category: 'Etkinlik',
       date: formattedDate,
       dateObj: start || new Date(),
       time: formattedTime,
@@ -652,10 +624,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
 
   // --- FİLTRELEME MANTIĞI ---
   getFilteredAndSortedPool(): EventCard[] {
-    let filtered =
-      this.activeCategory === 'Tümü'
-        ? [...this.allEventsPool]
-        : this.allEventsPool.filter((e) => e.category === this.activeCategory);
+    let filtered = [...this.allEventsPool];
 
     if (this.currentFilter !== 'all') {
       filtered = filtered.filter((e) => e.status === this.currentFilter);
@@ -721,11 +690,6 @@ export class EventsComponent implements OnInit, AfterViewInit {
     this.applyFiltersAndGoFirstPage();
   }
 
-  setCategory(cat: string) {
-    this.activeCategory = cat;
-    this.applyFiltersAndGoFirstPage();
-  }
-
   onSearch(event: Event) {
     const inputElement = event.target as HTMLInputElement;
     this.searchQuery = inputElement.value;
@@ -733,27 +697,14 @@ export class EventsComponent implements OnInit, AfterViewInit {
   }
 
   // --- CUSTOM DROPDOWN MANTIĞI ---
-  toggleCategoryDropdown(event: Event) {
-    event.stopPropagation();
-    this.isCategoryDropdownOpen = !this.isCategoryDropdownOpen;
-    this.isSortDropdownOpen = false;
-  }
-
   toggleSortDropdown(event: Event) {
     event.stopPropagation();
     this.isSortDropdownOpen = !this.isSortDropdownOpen;
-    this.isCategoryDropdownOpen = false;
   }
 
   // Image error handler - Placeholder görsellerin sürekli istek atmasını engeller
   onImageError(event: Event): void {
     this.imageErrorHandler.handleImageError(event, 'event');
-  }
-
-  selectCategory(cat: string) {
-    this.activeCategory = cat;
-    this.applyFiltersAndGoFirstPage();
-    this.isCategoryDropdownOpen = false;
   }
 
   selectSort(order: 'date_asc' | 'date_desc' | 'name_asc' | 'name_desc') {
@@ -774,7 +725,6 @@ export class EventsComponent implements OnInit, AfterViewInit {
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
-    this.isCategoryDropdownOpen = false;
     this.isSortDropdownOpen = false;
   }
 

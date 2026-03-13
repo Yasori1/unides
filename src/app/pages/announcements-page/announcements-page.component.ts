@@ -39,10 +39,11 @@ export class AnnouncementsPageComponent implements OnInit {
   // Custom Dropdown States
   isSortDropdownOpen: boolean = false;
 
-  // Sayfalama
+  // Sayfalama (backend'den gelen totalCount / totalPages kullanılır)
   currentPage: number = 1;
   itemsPerPage: number = 12;
   totalPages: number = 0;
+  totalCount: number = 0;
   pages: number[] = [];
 
   isLoading: boolean = true;
@@ -64,19 +65,24 @@ export class AnnouncementsPageComponent implements OnInit {
   loadAnnouncements(page?: number) {
     this.isLoading = true;
     const requestedPage = page ?? this.currentPage ?? 1;
+    const params: { search?: string; sortOrder?: 'asc' | 'desc' } = {};
+    if (this.searchText?.trim()) params.search = this.searchText.trim();
+    if (this.sortOrder === 'date_desc') params.sortOrder = 'desc';
+    else if (this.sortOrder === 'date_asc') params.sortOrder = 'asc';
 
-    this.announcementService.getAnnouncementsPage(requestedPage, this.itemsPerPage).subscribe({
+    this.announcementService.getAnnouncementsPage(requestedPage, this.itemsPerPage, params).subscribe({
       next: (res) => {
         const generalData: ExtendedAnnouncement[] = (res.items || []).map(item => ({
           ...item,
           link: item.link || ''
         }));
         this.allAnnouncements = generalData;
-        this.filteredAnnouncements = [...generalData];
+        this.filteredAnnouncements = generalData;
+        this.displayedAnnouncements = generalData;
         this.currentPage = res.page;
         this.totalPages = res.totalPages;
+        this.totalCount = res.totalCount ?? res.items.length;
         this.pages = Array.from({ length: this.totalPages }, (_, i) => i + 1);
-        this.applyFilters();
         this.isLoading = false;
       },
       error: (err) => {
@@ -84,44 +90,17 @@ export class AnnouncementsPageComponent implements OnInit {
         this.isLoading = false;
         this.allAnnouncements = [];
         this.filteredAnnouncements = [];
+        this.displayedAnnouncements = [];
         this.totalPages = 0;
+        this.totalCount = 0;
         this.pages = [];
       }
     });
   }
 
-  // --- FİLTRELEME MANTIĞI ---
-  onSearch(event: Event) {
-    const input = event.target as HTMLInputElement;
-    this.searchText = input.value;
-    this.applyFilters();
-  }
-
-  applyFilters() {
-    let temp = [...this.allAnnouncements];
-
-    // 1. Arama Metni (Türkçe Karakter Destekli)
-    if (this.searchText && this.searchText.trim()) {
-      const term = this.searchText.toLocaleLowerCase('tr-TR');
-      temp = temp.filter(
-        (a) =>
-          (a.title && a.title.toLocaleLowerCase('tr-TR').includes(term)) ||
-          (a.shortDescription && a.shortDescription.toLocaleLowerCase('tr-TR').includes(term))
-      );
-    }
-
-    // 2. Sıralama
-    if (this.sortOrder === 'date_desc') {
-      temp.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    } else if (this.sortOrder === 'date_asc') {
-      temp.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    } else {
-      // Varsayılan: Tarihe göre (Yeni -> Eski)
-      temp.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    }
-
-    this.filteredAnnouncements = temp;
-    this.displayedAnnouncements = [...this.filteredAnnouncements];
+  /** Arama veya sıralama değişince sayfa 1 ile yeniden istek at (backend tüm filtrelemeyi yapar). */
+  onFiltersOrSortChange() {
+    this.loadAnnouncements(1);
   }
 
   // --- SAYFALAMA (backend sayfa bazlı) ---
@@ -139,7 +118,7 @@ export class AnnouncementsPageComponent implements OnInit {
 
   selectSort(order: 'default' | 'date_desc' | 'date_asc') {
     this.sortOrder = order;
-    this.applyFilters();
+    this.onFiltersOrSortChange();
     this.isSortDropdownOpen = false;
   }
 

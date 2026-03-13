@@ -362,19 +362,11 @@ export class HomeComponent implements OnInit, OnDestroy {
       },
     });
 
-    // Yaklaşan Etkinlikler
-    this.eventService.getHomeUpcomingEvents(20).subscribe({
-      // Backend'den daha fazla alıp frontend'de filtrele ve sırala
+    // Yaklaşan Etkinlikler — GET /api/Events/upcoming/home (AllowAnonymous, 6 etkinlik)
+    this.eventService.getUpcomingEventsForHome().subscribe({
       next: (events) => {
-        const now = new Date();
-        now.setHours(0, 0, 0, 0); // Bugünün başlangıcı
-
-        // Etkinlikleri map et ve geçici olarak dateOnly ekle
-        const eventsWithDateOnly = events.map((e) => {
+        const selectedEvents: UpcomingEvent[] = events.map((e) => {
           const eventDate = e.startDate ? new Date(e.startDate) : new Date();
-          const eventDateOnly = new Date(eventDate);
-          eventDateOnly.setHours(0, 0, 0, 0);
-
           return {
             id: e.id,
             title: e.title,
@@ -383,55 +375,29 @@ export class HomeComponent implements OnInit, OnDestroy {
             time: eventDate.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
             description: e.shortDescription || e.description || 'Açıklama belirtilmemiş',
             communityName: e.communityName || 'Topluluk',
-            communityLogo: e.communityLogo || 'assets/img/placeholder-avatar.svg', // Geçici placeholder, sonra topluluk servisinden güncellenecek
-            communityId: e.communityId && e.communityId !== 0 ? e.communityId : undefined, // Topluluk ID'si eklendi (0 değilse)
-            imageUrl: e.imageUrl || '', // Etkinlik görseli
-            dateOnly: eventDateOnly, // Sıralama için
+            communityLogo: e.communityLogo || 'assets/img/placeholder-avatar.svg',
+            communityId: e.communityId && e.communityId !== 0 ? e.communityId : undefined,
+            imageUrl: e.imageUrl || '',
+            remainingTimeStr: this.getRemainingTime(eventDate),
           };
         });
-
-        // Geçmiş etkinlikleri filtrele (bugün ve gelecekteki etkinlikler)
-        const futureEvents = eventsWithDateOnly.filter(
-          (e) => e.dateOnly.getTime() >= now.getTime()
-        );
-
-        // Bugüne en yakın etkinlikten en uzağa doğru sırala
-        futureEvents.sort((a, b) => a.dateOnly.getTime() - b.dateOnly.getTime());
-
-        // İlk 6 tanesini al ve dateOnly'yi kaldır
-        const selectedEvents = futureEvents.slice(0, 6).map((e) => {
-          const { dateOnly, ...rest } = e;
-          return rest as UpcomingEvent;
-        });
-
-        // Performans optimizasyonu: Template içinde fonksiyon çağırmak yerine hesaplayıp sakla
-        selectedEvents.forEach((e) => {
-          e.remainingTimeStr = this.getRemainingTime(e.date);
-        });
-
-        // Her event için topluluk logolarını çek
-        this.loadCommunityLogos(selectedEvents);
+        this.upcomingEvents = selectedEvents;
       },
       error: () => {
         this.upcomingEvents = [];
       },
     });
 
-    // Aramıza Yeni Katılanlar - 24 topluluk
-    this.communityService.getNewestCommunities(24, { skipAuth: true }).subscribe({
-      next: (communities) => {
-        this.newestCommunities = communities.map((c: any) => {
-          // Backend'den gelen ID'yi direkt kullan (Guid string veya number)
-          const id = c.id || '';
-
-          return {
-            id, // Backend'den gelen gerçek ID (Guid string)
-            name: c.name || '',
-            university: c.university || 'Üniversite',
-            email: c.email || c.comMail || '',
-            image: c.logo || 'assets/img/placeholder-avatar.svg',
-          };
-        });
+    // Aramıza Yeni Katılanlar — GET /api/Communities/latest (AllowAnonymous, 24 topluluk)
+    this.communityService.getLatestCommunities({ skipAuth: true }).subscribe({
+      next: (items) => {
+        this.newestCommunities = items.map((c) => ({
+          id: c.id ?? '',
+          name: c.comName || '',
+          university: 'Üniversite',
+          email: '',
+          image: c.logoUrl || 'assets/img/placeholder-avatar.svg',
+        }));
         this.isLoading = false;
       },
       error: () => {

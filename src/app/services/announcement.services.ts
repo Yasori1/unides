@@ -180,13 +180,20 @@ export class AnnouncementService {
 
   /**
    * Sayfa bazlı duyuru listesi (backend pagination).
-   * GET /api/Announcements/list?page=1&pageSize=12
+   * GET /api/Announcements/list?page=1&pageSize=12&search=&sortOrder=
+   * Arama/sıralama değişince page=1 ile, sayfa değişince sadece page ile yeniden istek atın.
    */
-  getAnnouncementsPage(page: number = 1, pageSize: number = 12): Observable<AnnouncementsPageResponse> {
-    const params = new HttpParams().set('page', String(page)).set('pageSize', String(pageSize));
+  getAnnouncementsPage(
+    page: number = 1,
+    pageSize: number = 12,
+    params?: { search?: string; sortOrder?: 'asc' | 'desc' }
+  ): Observable<AnnouncementsPageResponse> {
+    let httpParams = new HttpParams().set('page', String(page)).set('pageSize', String(pageSize));
+    if (params?.search?.trim()) httpParams = httpParams.set('search', params.search.trim());
+    if (params?.sortOrder) httpParams = httpParams.set('sortOrder', params.sortOrder);
     return this.http.get<{ page: number; pageSize: number; totalCount: number; totalPages: number; items: any[] }>(
       `${this.apiUrl}/list`,
-      { params }
+      { params: httpParams }
     ).pipe(
       map((response) => {
         const items = (response.items || []).map((dto) => this.mapToAnnouncement(dto));
@@ -201,6 +208,20 @@ export class AnnouncementService {
       catchError((error) => {
         Logger.error('Duyurular yüklenemedi:', error);
         return of({ page: 1, pageSize: pageSize, totalCount: 0, totalPages: 0, items: [] });
+      })
+    );
+  }
+
+  /**
+   * Son duyurular (mini liste, sayfalama yok).
+   * GET /api/Announcements/latest — backend sabit 4 adet döndürür.
+   */
+  getLatestAnnouncements(): Observable<Announcement[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/latest`).pipe(
+      map((list) => (Array.isArray(list) ? list : []).map((dto) => this.mapToAnnouncement(dto))),
+      catchError((error) => {
+        Logger.error('Son duyurular yüklenemedi:', error);
+        return of([]);
       })
     );
   }

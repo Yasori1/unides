@@ -18,6 +18,13 @@ import {
 // Re-export Community for backward compatibility
 export type { Community } from '../models/community.models';
 
+/** Backend CommunityLogoDto (GET /api/Communities/latest): comName, logoUrl; id opsiyonel. */
+export interface LatestCommunityItem {
+  id?: string;
+  comName: string;
+  logoUrl: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -249,6 +256,36 @@ export class CommunityService {
     };
   }
 
+  /**
+   * Anasayfa "Aramıza yeni katılanlar" için.
+   * Backend: GET /api/Communities/latest — AllowAnonymous, 24 topluluk (GetLatestCommunitiesAsync(24)).
+   * Response: CommunityLogoDto listesi (comName, logoUrl; backend'de communityId de olabilir).
+   */
+  getLatestCommunities(options?: { skipAuth?: boolean }): Observable<LatestCommunityItem[]> {
+    const context = (options?.skipAuth !== false) ? new HttpContext().set(SKIP_AUTH, true) : undefined;
+    const headers = (options?.skipAuth !== false) ? new HttpHeaders({ 'X-Public-List': '1' }) : undefined;
+    return this.http.get<any[]>(`${this.apiUrl}/latest`, {
+      ...(headers && { headers }),
+      ...(context && { context }),
+      ...((options?.skipAuth !== false) && { withCredentials: false }),
+    }).pipe(
+      map((list) => {
+        const arr = Array.isArray(list) ? list : [];
+        return arr.map((dto: any) => ({
+          id: dto.communityId ?? dto.CommunityId ?? undefined,
+          comName: dto.comName ?? dto.ComName ?? '',
+          logoUrl: (dto.logoUrl ?? dto.LogoUrl ?? '') && String(dto.logoUrl ?? dto.LogoUrl).trim()
+            ? this.convertImagePathToFullUrl(dto.logoUrl ?? dto.LogoUrl)
+            : this.placeholderLogo,
+        }));
+      }),
+      catchError((err) => {
+        Logger.error('Latest communities yüklenemedi:', err);
+        return of([]);
+      })
+    );
+  }
+
   // Yeni katılanlar için - en son eklenen aktif toplulukları getir. options.skipAuth: true ise token gönderilmez (anasayfa tüm şehirler).
   getNewestCommunities(limit: number = 12, options?: { skipAuth?: boolean }): Observable<Community[]> {
     const headers = options?.skipAuth ? new HttpHeaders({ 'X-Public-List': '1' }) : undefined;
@@ -459,20 +496,24 @@ export class CommunityService {
 
   /**
    * Public topluluk listesi — sayfa bazlı (backend pagination).
-   * fetch() ile credentials: 'omit'. communities-page için.
+   * GET /api/Communities?page=&pageSize=&name=&city=&category=&university=&sortBy=&sortOrder=
+   * Filtre/sıralama değişince page=1 ile, sayfa değişince sadece page ile yeniden istek atın.
    */
   getCommunitiesPublicPage(
     page: number,
     pageSize: number,
-    params?: { name?: string; category?: string; university?: string }
+    params?: { name?: string; city?: string; category?: string; university?: string; sortBy?: string; sortOrder?: 'asc' | 'desc' }
   ): Observable<{ page: number; pageSize: number; totalCount: number; totalPages: number; items: Community[] }> {
     const searchParams = new URLSearchParams();
     searchParams.set('status', 'active');
     searchParams.set('page', String(page));
     searchParams.set('pageSize', String(pageSize));
-    if (params?.name) searchParams.set('name', params.name);
-    if (params?.category) searchParams.set('category', params.category);
-    if (params?.university) searchParams.set('university', params.university);
+    if (params?.name?.trim()) searchParams.set('name', params.name.trim());
+    if (params?.city?.trim()) searchParams.set('city', params.city.trim());
+    if (params?.category?.trim()) searchParams.set('category', params.category.trim());
+    if (params?.university?.trim()) searchParams.set('university', params.university.trim());
+    if (params?.sortBy?.trim()) searchParams.set('sortBy', params.sortBy.trim());
+    if (params?.sortOrder) searchParams.set('sortOrder', params.sortOrder);
     const url = `${this.apiUrl}?${searchParams.toString()}`;
     return from(
       fetch(url, {

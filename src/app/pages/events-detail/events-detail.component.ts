@@ -5,12 +5,11 @@ import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.compon
 import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
 import { EventService, EventItem } from '../../services/event.services';
 import { ImageErrorHandlerService } from '../../services/image-error-handler.service';
-import { TurkishUppercasePipe } from '../../pipes/turkish-uppercase.pipe';
 
 @Component({
   selector: 'app-events-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, SiteNavbarComponent, SiteFooterComponent, TurkishUppercasePipe],
+  imports: [CommonModule, RouterModule, SiteNavbarComponent, SiteFooterComponent],
   templateUrl: './events-detail.component.html',
   styleUrls: ['./events-detail.component.scss'],
 })
@@ -101,7 +100,6 @@ export class EventsDetailComponent implements OnInit {
       id: e.id,
       title: e.title || '',
       description: e.description || e.shortDescription || '',
-      category: 'Etkinlik',
       date: formattedDate,
       dateObj: start || new Date(),
       time: formattedTime,

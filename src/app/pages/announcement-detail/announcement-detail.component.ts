@@ -138,23 +138,13 @@ export class AnnouncementDetailComponent implements OnInit {
   }
 
   loadRecentAnnouncements(currentId: number) {
-    // Backend'den tüm duyuruları çek, mevcut duyuruyu hariç tut, tarihe göre sırala (en yeni en üstte) ve en son 4 tanesini al
-    this.announcementService.getAllAnnouncements().subscribe({
+    // GET /api/Announcements/latest — backend 4 adet döndürür; mevcut duyuruyu hariç tutup göster
+    this.announcementService.getLatestAnnouncements().subscribe({
       next: (announcements) => {
-        // Mevcut duyuruyu hariç tut
         const filtered = announcements.filter(a => a.id !== currentId);
-        
-        // Tarihe göre sırala (en yeni en üstte - en son yayınlanan ilk sırada)
-        const sorted = filtered.sort((a, b) => {
-          const dateA = new Date(a.date).getTime();
-          const dateB = new Date(b.date).getTime();
-          return dateB - dateA; // Büyükten küçüğe (en yeni en üstte)
-        });
-        
-        // En son 4 tanesini al
-        this.recentAnnouncements = sorted.slice(0, 4).map(a => ({
+        this.recentAnnouncements = filtered.slice(0, 4).map(a => ({
           ...a,
-          category: 'Genel', // Varsayılan kategori
+          category: 'Genel',
           link: a.link || ''
         }));
       },

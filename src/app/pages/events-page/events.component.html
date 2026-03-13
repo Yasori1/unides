@@ -32,20 +32,6 @@
         </div>
 
         <div class="filter-groups">
-          <!-- Category Filter -->
-          <div class="select-wrapper custom-dropdown" [class.open]="isCategoryDropdownOpen">
-            <div class="custom-select-trigger" (click)="toggleCategoryDropdown($event)">
-              <span>{{ activeCategory }}</span>
-              <i class="bx bx-chevron-down"></i>
-            </div>
-            <div class="custom-options">
-              <div *ngFor="let cat of categories" class="option" (click)="selectCategory(cat)"
-                [class.selected]="activeCategory === cat">
-                {{ cat }}
-              </div>
-            </div>
-          </div>
-
           <!-- Sort Filter -->
           <div class="select-wrapper custom-dropdown" [class.open]="isSortDropdownOpen">
             <div class="custom-select-trigger" (click)="toggleSortDropdown($event)">
