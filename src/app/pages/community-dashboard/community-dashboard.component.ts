@@ -17,6 +17,7 @@ import { of } from 'rxjs';
 import { SpamService } from '../../services/spam.service';
 import { Logger } from '../../utils/logger.util';
 import { TurkishUppercasePipe } from '../../pipes/turkish-uppercase.pipe';
+import { CITY_NAMES } from '../../data/cities';
 
 // --- Interfaces ---
 interface Project {
@@ -167,90 +168,8 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     'Genel',
   ];
 
-  /** Profilim sekmesi: Şehir dropdown seçenekleri (community-register ile aynı) */
-  profileCities: string[] = [
-    'Adana',
-    'Adıyaman',
-    'Afyonkarahisar',
-    'Ağrı',
-    'Amasya',
-    'Ankara',
-    'Antalya',
-    'Artvin',
-    'Aydın',
-    'Balıkesir',
-    'Bilecik',
-    'Bingöl',
-    'Bitlis',
-    'Bolu',
-    'Burdur',
-    'Bursa',
-    'Çanakkale',
-    'Çankırı',
-    'Çorum',
-    'Denizli',
-    'Diyarbakır',
-    'Edirne',
-    'Elazığ',
-    'Erzincan',
-    'Erzurum',
-    'Eskişehir',
-    'Gaziantep',
-    'Giresun',
-    'Gümüşhane',
-    'Hakkari',
-    'Hatay',
-    'Isparta',
-    'Mersin',
-    'İstanbul',
-    'İzmir',
-    'Kars',
-    'Kastamonu',
-    'Kayseri',
-    'Kırklareli',
-    'Kırşehir',
-    'Kocaeli',
-    'Konya',
-    'Kütahya',
-    'Malatya',
-    'Manisa',
-    'Kahramanmaraş',
-    'Mardin',
-    'Muğla',
-    'Muş',
-    'Nevşehir',
-    'Niğde',
-    'Ordu',
-    'Rize',
-    'Sakarya',
-    'Samsun',
-    'Siirt',
-    'Sinop',
-    'Sivas',
-    'Tekirdağ',
-    'Tokat',
-    'Trabzon',
-    'Tunceli',
-    'Şanlıurfa',
-    'Uşak',
-    'Van',
-    'Yozgat',
-    'Zonguldak',
-    'Aksaray',
-    'Bayburt',
-    'Karaman',
-    'Kırıkkale',
-    'Batman',
-    'Şırnak',
-    'Bartın',
-    'Ardahan',
-    'Iğdır',
-    'Yalova',
-    'Karabük',
-    'Kilis',
-    'Osmaniye',
-    'Düzce',
-  ].sort();
+  /** Profilim sekmesi: Şehir dropdown — tek kaynak data/cities.json */
+  profileCities: string[] = CITY_NAMES;
 
   eventCategories: string[] = [
     'Afet Yönetimi ve Dayanıklılık',
@@ -318,7 +237,8 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
   selectedCity: string = '';
   selectedCategory: string = '';
   sortOrder: 'default' | 'member_desc' | 'member_asc' = 'default';
-  cities: string[] = [];
+  /** İşbirlikleri filtre dropdown — tüm iller tek kaynak: data/cities.json */
+  cities: string[] = CITY_NAMES;
   categories: string[] = [];
   isLoading = true;
 
@@ -949,11 +869,6 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
           city: c.city,
           category: c.category,
         }));
-        this.cities = [
-          ...new Set(
-            this.collaborations.map((c) => c.city || 'Belirsiz').filter((c) => c !== 'Belirsiz')
-          ),
-        ].sort();
         this.categories = [
           ...new Set(this.collaborations.map((c) => c.category || '').filter((cat) => !!cat)),
         ].sort();
