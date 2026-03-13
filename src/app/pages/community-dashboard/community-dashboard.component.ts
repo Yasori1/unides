@@ -16,6 +16,7 @@ import { catchError, switchMap, map } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { SpamService } from '../../services/spam.service';
 import { Logger } from '../../utils/logger.util';
+import { toTitleCase } from '../../utils/title-case.util';
 import { TurkishUppercasePipe } from '../../pipes/turkish-uppercase.pipe';
 import { CITY_NAMES } from '../../data/cities';
 
@@ -80,6 +81,7 @@ interface DashboardEvent {
   styleUrls: ['./community-dashboard.component.scss'],
 })
 export class CommunityDashboardComponent implements OnInit, OnDestroy {
+  readonly toTitleCase = toTitleCase;
   activeTab: string = 'overview';
 
   // UI State

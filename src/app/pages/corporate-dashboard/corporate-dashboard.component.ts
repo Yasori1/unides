@@ -24,6 +24,7 @@ import {
   EmirUpdateGsbRequest,
 } from '../../services/gsb-users.service';
 import { Logger } from '../../utils/logger.util';
+import { toTitleCase } from '../../utils/title-case.util';
 import { TurkishUppercasePipe } from '../../pipes/turkish-uppercase.pipe';
 import { CITY_NAMES } from '../../data/cities';
 
@@ -94,6 +95,7 @@ interface Notification {
   styleUrls: ['./corporate-dashboard.component.scss'],
 })
 export class CorporateDashboardComponent implements OnInit, OnDestroy {
+  readonly toTitleCase = toTitleCase;
   isSidebarCollapsed = false;
   activeTab = 'overview';
   showNotifications = false;

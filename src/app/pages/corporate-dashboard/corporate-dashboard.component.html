@@ -986,6 +986,7 @@
                 <input
                   type="text"
                   [(ngModel)]="newAnnouncement.title"
+                  (blur)="newAnnouncement.title = toTitleCase(newAnnouncement.title)"
                   class="modern-input"
                   placeholder="Duyuru başlığı..."
                   maxlength="100"
@@ -1069,6 +1070,7 @@
                 <input
                   type="text"
                   [(ngModel)]="editingAnnouncement.title"
+                  (blur)="editingAnnouncement.title = toTitleCase(editingAnnouncement.title)"
                   class="modern-input"
                   [readonly]="!canManageAnnouncements"
                   placeholder="Duyuru başlığı..."
@@ -1208,6 +1210,7 @@
                   <input
                     type="text"
                     [(ngModel)]="newCommunity.name"
+                    (blur)="newCommunity.name = toTitleCase(newCommunity.name)"
                     class="modern-input"
                     placeholder="Topluluk adı..."
                   />
@@ -1705,6 +1708,7 @@
                     <input
                       type="text"
                       [(ngModel)]="editingCommunity.name"
+                      (blur)="editingCommunity.name = toTitleCase(editingCommunity.name)"
                       class="modern-input"
                       placeholder="Topluluk adı..."
                       [readonly]="editingCommunity.status === 'Onay Bekleyen' || editingCommunity.status === 'Reddedilen'"
@@ -2048,6 +2052,7 @@
                   type="text"
                   class="modern-input"
                   [(ngModel)]="newEvent.eventName"
+                  (blur)="newEvent.eventName = toTitleCase(newEvent.eventName)"
                   placeholder="Etkinlik adı..."
                 />
               </div>

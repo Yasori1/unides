@@ -9,6 +9,7 @@ import { ToastComponent } from '../../components/ui/toast/toast.component';
 import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.component';
 import { ImageUploadComponent } from '../../components/ui/image-upload/image-upload';
 import { Logger } from '../../utils/logger.util';
+import { toTitleCase } from '../../utils/title-case.util';
 import { CreateCommunityDto } from '../../models/community.models';
 import { CITY_NAMES } from '../../data/cities';
 import { of } from 'rxjs';
@@ -29,6 +30,7 @@ import { catchError, map, switchMap } from 'rxjs/operators';
   styleUrls: ['./community-register.scss'],
 })
 export class CommunityRegisterComponent implements OnInit {
+  readonly toTitleCase = toTitleCase;
   /** 0 = süreç açıklaması (intro), 1 = e-posta/şifre, 2 = doğrulama (başka sayfada), 3 = topluluk bilgileri */
   step: 0 | 1 | 2 | 3 = 0;
   isLoading = false;

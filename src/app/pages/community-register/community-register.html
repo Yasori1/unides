@@ -364,6 +364,7 @@
                   type="text"
                   [(ngModel)]="comName"
                   (ngModelChange)="comNameMissing = false"
+                  (blur)="comName = toTitleCase(comName)"
                   name="comName"
                   class="modern-input"
                   placeholder="Topluluk adı..."

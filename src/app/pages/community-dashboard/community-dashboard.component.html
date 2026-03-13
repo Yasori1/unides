@@ -340,7 +340,7 @@
             <div class="input-grid">
               <label>
                 <span>Kulüp Adı</span>
-                <input type="text" [(ngModel)]="clubInfo.name" placeholder="Topluluk adı" [readonly]="!communityApproved || isUpdatePending" />
+                <input type="text" [(ngModel)]="clubInfo.name" (blur)="clubInfo.name = toTitleCase(clubInfo.name)" placeholder="Topluluk adı" [readonly]="!communityApproved || isUpdatePending" />
               </label>
               <label>
                 <span>Üniversite</span>
@@ -463,6 +463,7 @@
                 <span>Etkinlik İsmi (Maks. 90) <span class="ev-required-star">*</span></span>
                 <input type="text" placeholder="Etkinlik İsmi" [(ngModel)]="newEventData.title"
                   (ngModelChange)="eventErrors.title = false"
+                  (blur)="newEventData.title = toTitleCase(newEventData.title)"
                   maxlength="90" [class.ev-field-error]="eventErrors.title" />
                 <span class="ev-field-hint" *ngIf="eventErrors.title">
                   <i class="bx bx-error-circle"></i> Etkinlik ismi zorunludur.
@@ -600,7 +601,7 @@
             <span>Etkinlik İsmi (Maks. 90)</span>
             <input type="text" [value]="isEditingEventDetail ? editedEventData.title : selectedEvent.title"
               [readonly]="!isEditingEventDetail" *ngIf="!isEditingEventDetail" />
-            <input type="text" [(ngModel)]="editedEventData.title" maxlength="90" *ngIf="isEditingEventDetail" />
+            <input type="text" [(ngModel)]="editedEventData.title" (blur)="editedEventData.title = toTitleCase(editedEventData.title)" maxlength="90" *ngIf="isEditingEventDetail" />
           </label>
 
           <div class="row two-cols">
