@@ -733,18 +733,25 @@
   .page-btn {
     width: 40px;
     height: 40px;
+    min-width: 40px;   // flex shrink'i engelle
+    flex-shrink: 0;    // flex container'da asla küçülme
     border-radius: 12px;
     border: 1px solid transparent;
     background: white;
     color: var(--secondary-color);
+    font-size: 0.9rem;  // inherit yerine explicit — mobilde kaybolmasın
     font-weight: 600;
+    line-height: 1;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s;
+    overflow: visible;  // içerik kesilmesin
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;  // all yerine explicit
 
-    &:hover:not([disabled]) {
+    &:hover:not([disabled]):not(.active) {
       border-color: var(--accent-color);
       color: var(--accent-color);
     }
@@ -763,6 +770,24 @@
 
     i {
       font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+  }
+
+  // Dar ekranlarda buton boyutunu küçült, sığdır
+  @media (max-width: 480px) {
+    gap: 5px;
+
+    .page-btn {
+      width: 36px;
+      height: 36px;
+      min-width: 36px;
+      border-radius: 10px;
+      font-size: 0.82rem;
+
+      i {
+        font-size: 1.1rem;
+      }
     }
   }
 }
@@ -823,8 +848,12 @@
     }
 
     .scroll-indicator {
-      display: none;
+      position: static;
+      transform: none;
+      margin: 20px auto 0;
+      width: fit-content;
     }
+
   }
 
   .filters-bar {

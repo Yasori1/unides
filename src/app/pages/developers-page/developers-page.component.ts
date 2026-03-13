@@ -52,7 +52,7 @@ export class DevelopersPageComponent implements OnInit, OnDestroy {
       image: 'assets/alperuguracar.png',
       codeBg: 'import { crystal } from "unides"',
       description:
-        'Veritabanı geliştiricisi olarak veri modelleri tasarladı, performanslı ve güvenli veritabanları geliştirdi; sistemlerin sürdürülebilirliğine katkı sağladı.',
+        'Projenin iş analizi ve içerik yönetimi süreçlerini üstlenmiştir. Kullanılacak temel teknolojileri belirleyip görev dağılımını organize etmiş ve hazırladığı iş planlarıyla ekipler arası eşgüdümü sağlamıştır. Ayrıca projenin sistem kurgusu ve tasarım aşamalarına yön vererek içerik altyapısının hazırlanmasını yönetmiştir.',
       socialLinks: {
         linkedin: 'https://www.linkedin.com/in/alper-u%C4%9Fur-acar-31b508210/',
         github: 'https://github.com/alperuguracar',
@@ -64,7 +64,7 @@ export class DevelopersPageComponent implements OnInit, OnDestroy {
       image: 'assets/safarahmancenkci.png',
       codeBg: 'SELECT * FROM futures',
       description:
-        "ÜNİDES Dijital Portal'ın arayüz geliştirme süreçlerini ve frontend ekibinin koordinasyonunu yönettim. Angular ile geliştirdiğim arayüzün, API bağlantıları aracılığıyla sunucuyla olan tam entegrasyonunu sağladım.",
+        'Projenin arayüz grafik geliştirme süreçlerini ve frontend ekibinin koordinasyonunu yönetmiştir. Angular teknolojisi ile geliştirdiği arayüzün, API bağlantıları aracılığıyla sunucuyla tam entegrasyonunu sağlamıştır.',
       socialLinks: {
         linkedin: 'https://www.linkedin.com/in/safarahmancenkci/',
         github: 'https://github.com/safacenkci',
@@ -76,7 +76,7 @@ export class DevelopersPageComponent implements OnInit, OnDestroy {
       image: 'assets/abdullahgonc.png',
       codeBg: 'while(true) { innovate(); }',
       description:
-        'Gençlere yönelik frontend geliştirmelerinde aktif rol aldım. Responsive, performans odaklı ve kullanıcı dostu arayüzler kodladım, ölçeklenebilir frontend yapıları oluşturdum.',
+        'Genç hedef kitleye hitap eden projelerin frontend geliştirme süreçlerinde aktif olarak yer almıştır. Kullanıcı deneyimini merkeze alarak; responsive, yüksek performanslı ve modern arayüzler kodlamış, aynı zamanda sistemin büyümesine uyum sağlayabilecek ölçeklenebilir ve sürdürülebilir frontend mimarileri inşa etmiştir.',
       socialLinks: {
         linkedin: 'https://www.linkedin.com/in/abdullah-g%C3%B6n%C3%A7-6b773b293',
         github: 'https://github.com/karoxyyy',
@@ -88,7 +88,7 @@ export class DevelopersPageComponent implements OnInit, OnDestroy {
       image: 'assets/huseyinceykel.png',
       codeBg: 'Flutter.run()',
       description:
-        'Veri modeli, ilişkisel şema ve indeks yapısını tasarlayarak bütünlük, performans ve ölçeklenebilirlik odaklı bir altyapı inşa ettim.',
+        'Projenin veri modeli, ilişkisel şeması ve indeks yapılarını tasarlayarak; veri bütünlüğünü koruyan, yüksek performanslı ve gelecekteki büyümeye uygun, ölçeklenebilir sağlam bir veritabanı altyapısı kurmuştur.',
       socialLinks: {
         linkedin: 'https://www.linkedin.com/in/huseyinerenceykel/',
         github: 'https://github.com/huseyinceykel',
@@ -100,7 +100,7 @@ export class DevelopersPageComponent implements OnInit, OnDestroy {
       image: 'assets/oguzhanakkoc.png',
       codeBg: 'import pandas as pd',
       description:
-        'Sunucu tarafı uygulamalarını geliştirerek API servislerini tasarladım, veritabanı entegrasyonlarını yönettim ve iş mantığını backend katmanında kurguladım. Performans, güvenlik ve ölçeklenebilirlik odaklı bir sistem altyapısı oluşturdum.',
+        'Sunucu tarafı uygulamalarını geliştirerek API servislerini tasarlamış, veritabanı entegrasyonlarını yönetmiş ve iş mantığını backend katmanında kurgulamıştır. Performans, güvenlik ve ölçeklenebilirlik odaklı bir sistem altyapısı oluşturmuştur.',
       socialLinks: {
         linkedin: 'https://www.linkedin.com/in/o%C4%9Fuzhan-akko%C3%A7/',
         github: 'https://github.com/oguzakkoc0',
@@ -112,7 +112,7 @@ export class DevelopersPageComponent implements OnInit, OnDestroy {
       image: 'assets/yunusemreguler.webp',
       codeBg: 'docker-compose up -d',
       description:
-        'Yapay zeka modelleri ve algoritmaları geliştiren AI uzmanı. Makine öğrenmesi çözümleri ile projeye değer katıyor.',
+        'Projede AI geliştirici olarak görev almış; makine öğrenmesi algoritmaları ve yapay zeka modelleri geliştirmiştir.',
       socialLinks: {
         linkedin: 'https://www.linkedin.com/in/yunus-emre-g%C3%BCler-b33a3123a/',
         github: 'https://github.com/yunusemre23023',
@@ -124,7 +124,7 @@ export class DevelopersPageComponent implements OnInit, OnDestroy {
       image: 'assets/alikadirguzel.png',
       codeBg: 'expect(result).toBe(true)',
       description:
-        'Yapay zeka teknolojileri ile akıllı sistemler geliştiren AI geliştirici. NLP ve makine öğrenmesi alanlarında çalışıyor.',
+        'Projede AI geliştirici olarak görev alarak yapay zeka teknolojileri ile akıllı sistemler geliştirmiş; bu kapsamda uygunsuz içerikleri denetleyen bir argo filtresi tasarlayarak altyapıya entegre etmiştir.',
       socialLinks: {
         linkedin: 'https://www.linkedin.com/in/alikadirguzel',
         github: 'https://github.com/alikadirguzel',
@@ -136,7 +136,7 @@ export class DevelopersPageComponent implements OnInit, OnDestroy {
       image: 'assets/hamzaketenci.png',
       codeBg: '.design { beauty: true; }',
       description:
-        'Full-stack geliştirici olarak veritabanı yönetimi ve backend geliştirme süreçlerinde görev aldım. Veritabanı yapısını düzenledim ve veri yönetimini sağladım. Proje sürecinde farklı alanlarda destek vererek projenin birçok katmanında aktif rol aldım.',
+        'Full-stack geliştirici olarak veritabanı yönetimi ve backend geliştirme süreçlerinde görev almıştır. Veritabanı yapısını düzenlemiş ve veri yönetimini sağlamıştır. Proje sürecinde farklı alanlarda destek vererek projenin birçok katmanında aktif rol almıştır.',
       socialLinks: {
         linkedin: 'https://www.linkedin.com/in/hamzaketenci',
         github: 'https://github.com/HamzaKetenci',
@@ -148,7 +148,7 @@ export class DevelopersPageComponent implements OnInit, OnDestroy {
       image: 'assets/burakerken.png',
       codeBg: 'const future = await build();',
       description:
-        'Uçtan uca geliştirme yapan full stack geliştirici. Frontend ve backend entegrasyonlarını sağlayarak, bütünsel çözümler üretiyor.',
+        'Projede full-stack geliştirici olarak görev alarak uçtan uca geliştirme süreçlerini yürütmüş, ancak ağırlıklı olarak sunucu mimarisi ve yönetimi üzerine yoğunlaşmıştır. Frontend ve backend entegrasyonlarını başarıyla sağlayarak, özellikle sunucu tarafında çözümler üretmiştir.',
       socialLinks: {
         linkedin: 'https://www.linkedin.com/in/burak-erken',
         github: 'https://github.com/BurakErken',
@@ -177,10 +177,10 @@ export class DevelopersPageComponent implements OnInit, OnDestroy {
 
   alumni: Alumni[] = [
     { name: 'Ahmet Berkan Çiçek', socialLinks: { linkedin: '#', github: '#' } },
-    { name: 'Yunus Yaman', socialLinks: { linkedin: '#', github: '#' } },
+    { name: 'Yunus Yaman', socialLinks: { linkedin: 'https://www.linkedin.com/in/yunus-yaman/', github: 'https://github.com/Yunusyamann' } },
     { name: 'Yaşar Eren Güre', socialLinks: { linkedin: 'https://www.linkedin.com/in/ya%C5%9Far-eren-g%C3%BCre-436696255', github: 'https://github.com/Yasori1' } },
-    { name: 'Derya Gökçeli', socialLinks: { linkedin: '#', github: '#' } },
-    { name: 'Melikhan Atay', socialLinks: { linkedin: '#', github: '#' } },
+    { name: 'Derya Gökçeli', socialLinks: { linkedin: 'https://www.linkedin.com/in/derya-gökçeli-839369310', github: 'https://github.com/deryagokceli' } },
+    { name: 'Melikhan Atay', socialLinks: { linkedin: 'https://www.linkedin.com/in/muhammet-melikan-atalay/', github: 'https://github.com/Melikan' } },
     { name: 'Melike Kuyucaklıoğlu', socialLinks: { linkedin: 'https://www.linkedin.com/in/melike-kuyucakl%C4%B1o%C4%9Flu-7810a8246' } },
     { name: 'Mehmet Sezer Altun', socialLinks: { linkedin: 'https://www.linkedin.com/in/mehmet-sezer-altun-8a4197224' } },
   ];

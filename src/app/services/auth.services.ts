@@ -27,9 +27,18 @@ export interface LoginResponse {
   id?: number;
   fullName?: string;
   email?: string;
-  /** Backend RoleId değeri (ör: 2, 3, 6, 7) */
+  /**
+   * Efektif rol ID: 2=Normal GSB, 6=UNIDES_GODMODE, 7=UNIDES_DUYURU
+   * Backend, UserPermission tablosuna göre hesaplayıp döner.
+   */
   roleId?: number;
   RoleId?: number;
+  /**
+   * UserPermission tablosundan gelen görev listesi.
+   * Örn: ["UNIDES_GODMODE"], ["UNIDES_DUYURU"], []
+   */
+  permissions?: string[];
+  Permissions?: string[];
   /** OTP gerekli ise token dönülmez; doğrulama sayfasına yönlendirilir */
   requiresOtp?: boolean;
   otpRequestId?: string;
@@ -127,6 +136,7 @@ export class AuthService {
           if (numericRoleId !== null) {
             this.saveRoleId(numericRoleId);
           }
+          this.savePermissions(this.extractPermissionsFromResponse(response));
         }
       })
     );
@@ -153,16 +163,14 @@ export class AuthService {
     );
   }
 
-   /**
-    * Gizli "Genç Duyuru" kurumsal girişi.
-    * Normal kurumsal girişle aynı endpoint'i kullanır fakat farklı roleId ile backend'e gider.
-    * Bu sayede sadece belirli RoleId (ör. 6 veya 7) için özel yetkiler tanımlanabilir.
-    */
+  /**
+   * @deprecated Artık kullanılmıyor.
+   * Yeni yapıda tüm GSB kullanıcıları roleId=2 ile giriş yapar;
+   * backend UserPermission tablosundan efektif rolü (6/7) hesaplar ve token'a gömer.
+   * loginCorporate() kullanın.
+   */
   loginCorporateAnnouncement(email: string, password: string): Observable<LoginResponse> {
-    // RoleId 6: Özel yetkili GSB kullanıcısı
-    return this.login(email, password, 6).pipe(
-      tap(() => this.saveUserType('corporate'))
-    );
+    return this.loginCorporate(email, password);
   }
 
   /** Kurumsal giriş doğrulama kodu ile giriş tamamla. Backend: POST /api/Auth/verify-corporate-login */
@@ -209,6 +217,7 @@ export class AuthService {
           if (numericRoleId !== null) {
             this.saveRoleId(numericRoleId);
           }
+          this.savePermissions(this.extractPermissionsFromResponse(response));
         })
       );
   }
@@ -265,6 +274,7 @@ export class AuthService {
           if (numericRoleId !== null) {
             this.saveRoleId(numericRoleId);
           }
+          this.savePermissions(this.extractPermissionsFromResponse(response));
         })
       );
   }
@@ -472,6 +482,72 @@ export class AuthService {
       // localStorage erişilemezse sessizce geç
     }
   }
+
+  /** Permissions listesini localStorage'a yazar. */
+  private savePermissions(permissions: string[]): void {
+    try {
+      localStorage.setItem('user_permissions', JSON.stringify(permissions));
+    } catch {
+      // localStorage erişilemezse sessizce geç
+    }
+  }
+
+  /** Backend cevabından permissions listesini çıkarır. */
+  private extractPermissionsFromResponse(response: any): string[] {
+    const raw = response?.permissions ?? response?.Permissions;
+    if (Array.isArray(raw)) return raw.filter((p): p is string => typeof p === 'string');
+    return [];
+  }
+
+  /** UserPermission tablosundan gelen görev listesini döner. */
+  getPermissions(): string[] {
+    try {
+      const raw = localStorage.getItem('user_permissions');
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+
+  /** Belirtilen permission'ın mevcut kullanıcıda olup olmadığını kontrol eder (büyük/küçük harf duyarsız). */
+  hasPermission(perm: string): boolean {
+    return this.getPermissions().some(p => p.toUpperCase() === perm.toUpperCase());
+  }
+
+  /**
+   * Kullanıcının UNIDES_GODMODE yetkisine sahip olup olmadığını döner.
+   * roleId=6 VEYA permissions içinde "UNIDES_GODMODE" varsa true.
+   */
+  isGodMode(): boolean {
+    return this.getRoleId() === 6 || this.hasPermission('UNIDES_GODMODE');
+  }
+
+  /**
+   * Kullanıcının Duyuru Admin yetkisine sahip olup olmadığını döner.
+   * roleId=7 VEYA permissions içinde "UNIDES_DUYURU" varsa true.
+   */
+  isDuyuruAdmin(): boolean {
+    return this.getRoleId() === 7 || this.hasPermission('UNIDES_DUYURU');
+  }
+
+  /**
+   * Herhangi bir GSB kullanıcısı mı? (roleId 2, 6 veya 7)
+   * Dashboard'a erişim için kullanılır.
+   */
+  isGsb(): boolean {
+    const roleId = this.getRoleId();
+    return roleId === 2 || roleId === 6 || roleId === 7;
+  }
+
+  /**
+   * Duyuru oluşturma/güncelleme/silme yetkisi var mı?
+   * Godmode veya DuyuruAdmin ise true.
+   */
+  canManageAnnouncements(): boolean {
+    return this.isGodMode() || this.isDuyuruAdmin();
+  }
   /** Backend cevabından veya JWT token payload'ından RoleId bilgisini çıkarır. */
   private extractRoleIdFromResponse(response: any, token?: string | null): number | null {
     let rawRoleId: any =
@@ -576,6 +652,8 @@ export class AuthService {
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('user_info');
     localStorage.removeItem('user_type');
+    localStorage.removeItem('role_id');
+    localStorage.removeItem('user_permissions');
     localStorage.removeItem('community_approved');
     // Anasayfaya yönlendir
     this.router.navigate(['/']);

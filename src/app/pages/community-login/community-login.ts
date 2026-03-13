@@ -35,6 +35,7 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
   emailError: boolean = false;
   isLoading: boolean = false;
   isCheckingApproval: boolean = false;
+  showPassword: boolean = false;
   showForgotPasswordModal: boolean = false;
   forgotPasswordEmail: string = '';
   forgotEmailError: boolean = false;
@@ -126,6 +127,11 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
     }
   }
 
+  togglePasswordVisibility(input: HTMLInputElement) {
+    this.showPassword = !this.showPassword;
+    input.type = this.showPassword ? 'text' : 'password';
+  }
+
   validateCommunityEmail(event: any) {
     const email = event.target.value;
 
@@ -148,7 +154,7 @@ export class CommunityLoginComponent implements OnInit, OnDestroy {
 
     const form = event.target as HTMLFormElement;
     const emailInput = form.querySelector('input[type="email"]') as HTMLInputElement;
-    const passwordInput = form.querySelector('input[type="password"]') as HTMLInputElement;
+    const passwordInput = form.querySelector('input[name="password"]') as HTMLInputElement;
 
     const email = emailInput.value.trim();
     const password = passwordInput.value.trim();

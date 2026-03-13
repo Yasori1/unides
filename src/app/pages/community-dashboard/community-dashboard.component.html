@@ -350,17 +350,39 @@
               </label>
               <label>
                 <span>Şehir</span>
-                <select [(ngModel)]="clubInfo.city" class="profile-select" [disabled]="!communityApproved || isUpdatePending">
-                  <option value="" disabled>Şehir seçin</option>
-                  <option *ngFor="let c of profileCities" [value]="c">{{ c }}</option>
-                </select>
+                <div class="custom-select-wrapper" data-dropdown="city"
+                     [class.disabled]="!communityApproved || isUpdatePending"
+                     [class.open]="isCityDropdownOpen"
+                     (click)="toggleCityDropdown($event)">
+                  <div class="custom-select-trigger">
+                    <span [class.placeholder]="!clubInfo.city">{{ clubInfo.city || 'Şehir seçin' }}</span>
+                    <svg class="custom-select-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  </div>
+                  <div class="custom-select-dropdown" *ngIf="isCityDropdownOpen" (click)="$event.stopPropagation()">
+                    <div class="custom-select-option"
+                         *ngFor="let c of profileCities"
+                         [class.selected]="clubInfo.city === c"
+                         (click)="selectCity(c, $event)">{{ c }}</div>
+                  </div>
+                </div>
               </label>
               <label>
                 <span>Kategori</span>
-                <select [(ngModel)]="clubInfo.category" class="profile-select" [disabled]="!communityApproved || isUpdatePending">
-                  <option value="" disabled>Kategori seçin</option>
-                  <option *ngFor="let c of profileCategories" [value]="c">{{ c }}</option>
-                </select>
+                <div class="custom-select-wrapper" data-dropdown="category"
+                     [class.disabled]="!communityApproved || isUpdatePending"
+                     [class.open]="isCategoryDropdownOpen"
+                     (click)="toggleCategoryDropdown($event)">
+                  <div class="custom-select-trigger">
+                    <span [class.placeholder]="!clubInfo.category">{{ clubInfo.category || 'Kategori seçin' }}</span>
+                    <svg class="custom-select-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  </div>
+                  <div class="custom-select-dropdown" *ngIf="isCategoryDropdownOpen" (click)="$event.stopPropagation()">
+                    <div class="custom-select-option"
+                         *ngFor="let c of profileCategories"
+                         [class.selected]="clubInfo.category === c"
+                         (click)="selectCategory(c, $event)">{{ c }}</div>
+                  </div>
+                </div>
               </label>
               <label>
                 <span>Topluluk İletişim E-Postası</span>
@@ -383,7 +405,11 @@
                 placeholder="Topluluğunuzu anlatan kısa bir yazı yazın..." [readonly]="!communityApproved || isUpdatePending"></textarea>
             </label>
             <div class="profile-actions" *ngIf="communityApproved && !isUpdatePending">
-              <button type="button" class="btn-primary" [disabled]="!isProfileFormValid || isSavingProfile" (click)="saveCommunityProfile()">
+              <button
+                type="button"
+                class="btn-primary"
+                [disabled]="!isProfileFormValid || !isProfileChanged || isSavingProfile"
+                (click)="saveCommunityProfile()">
                 {{ isSavingProfile ? 'Gönderiliyor...' : 'Güncellemeleri Onaya Gönder' }}
               </button>
             </div>
@@ -413,66 +439,108 @@
         </button>
       </div>
       <div class="modal-body modal-body-event" *ngIf="modalType === 'new-event'">
-        <div class="event-detail-layout">
-          <div class="event-detail-left">
-            <div class="single-image-upload no-url-input">
-              <div class="upload-header">
-                <span class="upload-title">Etkinlik Fotoğrafı</span>
-                <span class="upload-hint">Önerilen: 1200×600px (2:1)</span>
+        <div class="event-form-scroll">
+          <div class="event-detail-layout">
+            <div class="event-detail-left">
+              <div class="single-image-upload no-url-input" [class.ev-image-missing]="eventErrors.image">
+                <div class="upload-header">
+                  <span class="upload-title">Etkinlik Fotoğrafı <span class="ev-required-star">*</span></span>
+                  <span class="upload-hint">Önerilen: 1200×600px (2:1)</span>
+                </div>
+                <app-image-upload label="Fotoğraf seç / sürükle" [previewUrl]="newEventData.image || null"
+                  [uploadToServer]="true" [allowUrl]="false"
+                  [enableCrop]="true"
+                  [cropMaintainAspectRatio]="true"
+                  [cropAspectRatio]="2"
+                  cropHint="Etkinlik kartlarında 2:1 oranında gösterilir; önemli alanı ortada seçin."
+                  (onImageSelected)="onEventImageSelected($event)"
+                  (onFileSelected)="onEventFileSelected($event)"></app-image-upload>
+                <span class="ev-field-hint" *ngIf="eventErrors.image">
+                  <i class="bx bx-error-circle"></i> Etkinlik fotoğrafı zorunludur.
+                </span>
               </div>
-              <app-image-upload label="Fotoğraf seç / sürükle" [previewUrl]="newEventData.image || null"
-                [uploadToServer]="true" [allowUrl]="false"
-                [enableCrop]="true"
-                [cropMaintainAspectRatio]="true"
-                [cropAspectRatio]="2"
-                cropHint="Etkinlik kartlarında 2:1 oranında gösterilir; önemli alanı ortada seçin."
-                (onImageSelected)="onEventImageSelected($event)"
-                (onFileSelected)="onEventFileSelected($event)"></app-image-upload>
             </div>
-          </div>
-          <div class="event-detail-right">
-            <label class="stacked">
-              <span>Etkinlik İsmi (Maks. 90)</span>
-              <input type="text" placeholder="Etkinlik İsmi" [(ngModel)]="newEventData.title" maxlength="90" />
-            </label>
-            <div class="row two-cols">
+            <div class="event-detail-right">
               <label class="stacked">
-                <span>Tarih</span>
-                <input type="date" [(ngModel)]="newEventData.date" />
+                <span>Etkinlik İsmi (Maks. 90) <span class="ev-required-star">*</span></span>
+                <input type="text" placeholder="Etkinlik İsmi" [(ngModel)]="newEventData.title"
+                  (ngModelChange)="eventErrors.title = false"
+                  maxlength="90" [class.ev-field-error]="eventErrors.title" />
+                <span class="ev-field-hint" *ngIf="eventErrors.title">
+                  <i class="bx bx-error-circle"></i> Etkinlik ismi zorunludur.
+                </span>
+              </label>
+              <div class="row two-cols">
+                <label class="stacked">
+                  <span>Tarih <span class="ev-required-star">*</span></span>
+                  <input type="date" [(ngModel)]="newEventData.date"
+                    (ngModelChange)="eventErrors.date = false"
+                    [class.ev-field-error]="eventErrors.date" />
+                  <span class="ev-field-hint" *ngIf="eventErrors.date">
+                    <i class="bx bx-error-circle"></i> Tarih zorunludur.
+                  </span>
+                </label>
+                <label class="stacked">
+                  <span>Saat <span class="ev-required-star">*</span></span>
+                  <input type="time" [(ngModel)]="newEventData.time"
+                    (ngModelChange)="eventErrors.time = false"
+                    [class.ev-field-error]="eventErrors.time" />
+                  <span class="ev-field-hint" *ngIf="eventErrors.time">
+                    <i class="bx bx-error-circle"></i> Saat zorunludur.
+                  </span>
+                </label>
+              </div>
+              <label class="stacked">
+                <span>Konum (Maks. 100) <span class="ev-required-star">*</span></span>
+                <input type="text" placeholder="Konum" [(ngModel)]="newEventData.location"
+                  (ngModelChange)="eventErrors.location = false"
+                  maxlength="100" [class.ev-field-error]="eventErrors.location" />
+                <span class="ev-field-hint" *ngIf="eventErrors.location">
+                  <i class="bx bx-error-circle"></i> Konum zorunludur.
+                </span>
               </label>
               <label class="stacked">
-                <span>Saat</span>
-                <input type="time" [(ngModel)]="newEventData.time" />
+                <span>Kontenjan (Maks. 4 Hane) <span class="ev-required-star">*</span></span>
+                <input type="number" placeholder="Kontenjan" [(ngModel)]="newEventData.quota"
+                  (ngModelChange)="eventErrors.quota = false"
+                  oninput="if(this.value.length > 4) this.value = this.value.slice(0, 4); this.value = this.value.replace(/[^0-9]/g, '');"
+                  min="0" [class.ev-field-error]="eventErrors.quota" />
+                <span class="ev-field-hint" *ngIf="eventErrors.quota">
+                  <i class="bx bx-error-circle"></i> Kontenjan zorunludur.
+                </span>
+              </label>
+              <label class="stacked">
+                <span>Etkinlik Kısa Açıklama (Max 70) <span class="ev-required-star">*</span> <em class="char-count">{{ (newEventData.shortDescription || '').length }}/70</em></span>
+                <input type="text" placeholder="Kısa açıklama..." [(ngModel)]="newEventData.shortDescription"
+                  (ngModelChange)="eventErrors.shortDescription = false"
+                  maxlength="70" [class.ev-field-error]="eventErrors.shortDescription" />
+                <span class="ev-field-hint" *ngIf="eventErrors.shortDescription">
+                  <i class="bx bx-error-circle"></i> Kısa açıklama zorunludur.
+                </span>
+              </label>
+              <label class="stacked">
+                <span>Etkinlik Açıklaması (Maks. 2000) <span class="ev-required-star">*</span></span>
+                <textarea rows="3" placeholder="Etkinlik Açıklaması" [(ngModel)]="newEventData.description"
+                  (ngModelChange)="eventErrors.description = false"
+                  maxlength="2000" [class.ev-field-error]="eventErrors.description"></textarea>
+                <span class="ev-field-hint" *ngIf="eventErrors.description">
+                  <i class="bx bx-error-circle"></i> Etkinlik açıklaması zorunludur.
+                </span>
               </label>
             </div>
-            <label class="stacked">
-              <span>Konum (Maks. 100)</span>
-              <input type="text" placeholder="Konum" [(ngModel)]="newEventData.location" maxlength="100" />
-            </label>
-            <label class="stacked">
-              <span>Kontenjan (Maks. 4 Hane)</span>
-              <input type="number" placeholder="Kontenjan" [(ngModel)]="newEventData.quota"
-                oninput="if(this.value.length > 4) this.value = this.value.slice(0, 4); this.value = this.value.replace(/[^0-9]/g, '');"
-                min="0" />
-            </label>
-            <label class="stacked">
-              <span>Etkinlik Kısa Açıklama (Max 70) <em class="char-count">{{ (newEventData.shortDescription || '').length }}/70</em></span>
-              <input type="text" placeholder="Kısa açıklama..." [(ngModel)]="newEventData.shortDescription"
-                maxlength="70" />
-            </label>
-            <label class="stacked">
-              <span>Etkinlik Açıklaması (Maks. 2000)</span>
-              <textarea rows="3" placeholder="Etkinlik Açıklaması" [(ngModel)]="newEventData.description"
-                maxlength="2000"></textarea>
-            </label>
-            <button class="btn-primary full" [disabled]="!isEventFormValid || isSavingEvent" (click)="saveEvent()" type="button">
-              <span *ngIf="!isEventFormValid">Lütfen Tüm Alanları Doldurun</span>
-              <span *ngIf="isEventFormValid && !editingEventId && !isSavingEvent">Etkinlik Oluştur ve Kurumsal Tarafa Yönlendir</span>
-              <span *ngIf="isEventFormValid && !editingEventId && isSavingEvent">Oluşturuluyor...</span>
-              <span *ngIf="isEventFormValid && editingEventId && !isSavingEvent">Etkinliği Güncelle ve Onaya Gönder</span>
-              <span *ngIf="isEventFormValid && editingEventId && isSavingEvent">Güncelleniyor...</span>
-            </button>
           </div>
+        </div>
+        <div class="event-form-footer">
+          <button class="btn-primary full"
+            [disabled]="!isEventFormValid || isSavingEvent"
+            (click)="saveEvent()"
+            type="button">
+            <span *ngIf="!isEventFormValid">Lütfen Tüm Alanları Doldurun</span>
+            <span *ngIf="isEventFormValid && !isSavingEvent && !editingEventId">Etkinlik Oluştur ve Kurumsal Tarafa Yönlendir</span>
+            <span *ngIf="isEventFormValid && isSavingEvent && !editingEventId">Oluşturuluyor...</span>
+            <span *ngIf="isEventFormValid && !isSavingEvent && editingEventId">Etkinliği Güncelle ve Onaya Gönder</span>
+            <span *ngIf="isEventFormValid && isSavingEvent && editingEventId">Güncelleniyor...</span>
+          </button>
         </div>
       </div>
       <div class="modal-body" *ngIf="modalType === 'new-project'">

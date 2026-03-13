@@ -13,6 +13,7 @@ import { HeadroomModule } from '@ctrl/ngx-headroom';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { filter, Subscription } from 'rxjs';
 import { ToastService } from '../../services/toast.services';
+import { AuthService } from '../../services/auth.services';
 
 @Component({
   selector: 'app-header',
@@ -63,7 +64,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
   constructor(
     public router: Router,
     @Inject(PLATFORM_ID) private platformId: Object,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -136,9 +138,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.isLoggingOut = true;
 
     if (isPlatformBrowser(this.platformId)) {
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('refresh_token');
-      localStorage.removeItem('user_type');
+      // Merkezi AuthService.logout ile tüm oturum ve permission cache'lerini temizle
+      this.authService.logout();
     }
     this._showProfile = false;
     this.toastService.show('Çıkış yapıldı', 'success');

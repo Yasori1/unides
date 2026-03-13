@@ -59,15 +59,6 @@
 
             <div class="event-description" [innerHTML]="formatDescription(event.description)"></div>
           </div>
-          <!-- Image Modal -->
-          <div class="image-modal-backdrop" *ngIf="isImageModalOpen" (click)="closeImageModal()">
-            <button class="close-btn" (click)="closeImageModal()">
-              <i class="bx bx-x"></i>
-            </button>
-            <div class="image-modal-content" (click)="$event.stopPropagation()">
-              <img [src]="event.imageUrl" [alt]="event.title">
-            </div>
-          </div>
         </main>
 
         <!-- Right Sidebar -->
@@ -119,6 +110,17 @@
                   </div>
                 </div>
 
+                <div class="info-section">
+                  <div class="info-label">İLETİŞİM MAİLİ</div>
+                  <div class="info-text">
+                    <i class="bx bx-envelope"></i>
+                    <ng-container *ngIf="event.contactEmail; else noContactEmail">
+                      <a [href]="'mailto:' + event.contactEmail" class="event-contact-email">{{ event.contactEmail }}</a>
+                    </ng-container>
+                    <ng-template #noContactEmail><span class="info-text-muted">Belirtilmemiş</span></ng-template>
+                  </div>
+                </div>
+
               </div>
             </div>
 
@@ -126,6 +128,16 @@
         </aside>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Image Modal (outside content-section to avoid stacking context trap) -->
+<div class="image-modal-backdrop" *ngIf="isImageModalOpen" (click)="closeImageModal()">
+  <button class="close-btn" (click)="closeImageModal()">
+    <i class="bx bx-x"></i>
+  </button>
+  <div class="image-modal-content" (click)="$event.stopPropagation()">
+    <img *ngIf="event" [src]="event.imageUrl" [alt]="event?.title">
   </div>
 </div>
 

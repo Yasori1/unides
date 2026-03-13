@@ -21,6 +21,8 @@ export interface EventItem {
   quota?: number; // Kontenjan (number olarak)
   city?: string; // Şehir bilgisi
   rejectionReason?: string; // Red nedeni / Revize nedeni (ConfirmAbout)
+  /** İletişim e-postası (Backend EventDetailDto: ComMail — topluluk iletişim maili) */
+  contactEmail?: string;
 }
 
 // Backend DTO interfaces
@@ -505,6 +507,11 @@ export class EventService {
         return result;
       })(),
       city: dto.city || dto.City || '',
+      contactEmail: (() => {
+        const raw = (dto as any).comMail ?? (dto as any).ComMail ?? (dto as any).contactEmail ?? (dto as any).ContactEmail;
+        const s = typeof raw === 'string' ? raw.trim() : '';
+        return s || undefined;
+      })(),
       rejectionReason: (() => {
         // Backend'den gelen tüm olası field adlarını kontrol et
         const confirmAbout = (dto as any).ConfirmAbout || (dto as any).confirmAbout || (dto as any).ConfirmAbout || (dto as any).confirmAbout;
@@ -515,14 +522,43 @@ export class EventService {
     };
   }
 
-  // Anasayfa için yaklaşan etkinlikleri getir (Backend: GET /api/Events/all)
+  /** Backend sayfalı yanıt: { page, pageSize, totalCount, totalPages, items } */
+  getEventsPage(page: number = 1, pageSize: number = 12): Observable<{
+    page: number;
+    pageSize: number;
+    totalCount: number;
+    totalPages: number;
+    items: EventItem[];
+  }> {
+    const params = new HttpParams().set('page', String(page)).set('pageSize', String(pageSize));
+    return this.http
+      .get<{ page?: number; pageSize?: number; totalCount?: number; totalPages?: number; items?: any[] }>(
+        `${this.apiUrl}/all`,
+        { params }
+      )
+      .pipe(
+        map((response) => {
+          const rawItems = response.items ?? (Array.isArray(response) ? response : []);
+          const items = rawItems.map((dto) => this.mapToEvent(dto));
+          return {
+            page: response.page ?? page,
+            pageSize: response.pageSize ?? pageSize,
+            totalCount: response.totalCount ?? items.length,
+            totalPages: response.totalPages ?? Math.max(1, Math.ceil((response.totalCount ?? items.length) / pageSize)),
+            items,
+          };
+        }),
+        catchError(() => {
+          return of({ page: 1, pageSize: pageSize, totalCount: 0, totalPages: 0, items: [] });
+        })
+      );
+  }
+
+  // Anasayfa için yaklaşan etkinlikleri getir (Backend: GET /api/Events/all — sayfalı)
   getHomeUpcomingEvents(limit: number = 6): Observable<EventItem[]> {
-    // /api/Events/all endpoint'ini kullan
-    return this.http.get<EventListItemDto[]>(`${this.apiUrl}/all`).pipe(
-      map((list) => {
-        // Tüm etkinlikleri map et
-        const mappedEvents = list.map((dto) => this.mapToEvent(dto));
-        // Gelecekteki etkinlikleri filtrele ve sırala
+    return this.getEventsPage(1, Math.max(limit, 12)).pipe(
+      map((res) => {
+        const mappedEvents = res.items;
         const now = new Date();
         const futureEvents = mappedEvents
           .filter((e) => {
@@ -535,30 +571,17 @@ export class EventService {
             const dateB = b.startDate ? new Date(b.startDate).getTime() : 0;
             return dateA - dateB;
           });
-        // İlk limit kadarını al
         return futureEvents.slice(0, limit);
       }),
-      catchError(() => {
-        return of([]);
-      })
+      catchError(() => of([]))
     );
   }
 
-  // Tüm etkinlikleri getir (Backend: GET /api/Events/all)
-  // Auth interceptor automatically adds Authorization header if token exists
+  // Tüm etkinlikleri getir (Backend: GET /api/Events/all — sayfalı; tek sayfa büyük pageSize)
   getAll(): Observable<EventItem[]> {
-    return this.http.get<EventListItemDto[]>(`${this.apiUrl}/all`).pipe(
-      map((list) => {
-        // Backend'den gelen etkinlikleri map et
-        const apiEvents = list.map((dto) => {
-          const mapped = this.mapToEvent(dto);
-          return mapped;
-        });
-        return apiEvents;
-      }),
-      catchError(() => {
-        return of([]);
-      })
+    return this.getEventsPage(1, 9999).pipe(
+      map((res) => res.items),
+      catchError(() => of([]))
     );
   }
 

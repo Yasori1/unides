@@ -496,37 +496,38 @@ export class EventsComponent implements OnInit, AfterViewInit {
     });
   }
 
-  private loadEventsFromBackend() {
-    this.eventService.getAll().subscribe({
-      next: (data: EventItem[]) => {
-        // Backend'den gelen tüm etkinlikleri map et
-        if (data && data.length) {
+  private loadEventsFromBackend(page?: number) {
+    const requestedPage = page ?? this.currentPage ?? 1;
+    this.eventService.getEventsPage(requestedPage, this.itemsPerPage).subscribe({
+      next: (res) => {
+        const data = res.items || [];
+        if (data.length) {
           const fetchedEvents = data.map((e) => this.mapToCard(e));
-
-          // Sadece onaylanan etkinlikleri göster (status === 'Onaylandı')
-          // EventService zaten eventConfirm: 1 değerini 'Onaylandı' olarak map ediyor
           const approvedEventsList = fetchedEvents.filter((e) => {
-            // EventItem'dan gelen status değerini kontrol et
             const eventItem = data.find((item) => item.id === e.id);
             return eventItem?.status === 'Onaylandı';
           });
-
-          // Sadece backend'den gelen ve onaylanan verileri kullan
           this.baseEvents = approvedEventsList;
           this.attachCommunityNames();
         } else {
-          // Backend'den veri gelmezse boş array
           this.baseEvents = [];
         }
         this.allEventsPool = [...this.baseEvents];
-        this.applyFiltersAndGoFirstPage();
+        this.currentPage = res.page;
+        this.totalPages = res.totalPages;
+        this.pages = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+        this.filteredEventsCount = res.totalCount ?? this.baseEvents.length;
+        this.displayedEvents = [...this.allEventsPool];
         this.isLoading = false;
       },
-      error: (err) => {
-        // Hata durumunda boş array
+      error: () => {
         this.baseEvents = [];
         this.allEventsPool = [];
-        this.applyFiltersAndGoFirstPage();
+        this.currentPage = 1;
+        this.totalPages = 0;
+        this.pages = [];
+        this.displayedEvents = [];
+        this.filteredEventsCount = 0;
         this.isLoading = false;
       },
     });
@@ -699,22 +700,11 @@ export class EventsComponent implements OnInit, AfterViewInit {
 
   applyFiltersAndGoFirstPage() {
     this.currentPage = 1;
-    this.initPagination();
+    this.loadEventsFromBackend(1);
   }
 
   initPagination() {
-    const filteredPool = this.getFilteredAndSortedPool();
-    this.filteredEventsCount = filteredPool.length;
-    this.totalPages = Math.ceil(filteredPool.length / this.itemsPerPage);
     this.pages = Array.from({ length: this.totalPages }, (_, i) => i + 1);
-    this.updateDisplayedData();
-  }
-
-  updateDisplayedData() {
-    const filteredPool = this.getFilteredAndSortedPool();
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
-    this.displayedEvents = filteredPool.slice(startIndex, endIndex);
     if (isPlatformBrowser(this.platformId)) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -722,8 +712,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
 
   changePage(page: number) {
     if (page >= 1 && page <= this.totalPages) {
-      this.currentPage = page;
-      this.updateDisplayedData();
+      this.loadEventsFromBackend(page);
     }
   }
 

@@ -1,6 +1,6 @@
 import { Component, HostListener, OnInit, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, Location, isPlatformBrowser } from '@angular/common';
-import { Router, RouterModule, ActivatedRoute } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 // Servis importları
 import { ToastService } from '../../services/toast.services';
@@ -19,21 +19,19 @@ import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.compo
 export class CorporateLoginComponent implements OnInit, OnDestroy {
   emailError: boolean = false;
   isLoading: boolean = false;
+  showPassword: boolean = false;
   showForgotPasswordModal: boolean = false;
   forgotPasswordEmail: string = '';
   forgotEmailError: boolean = false;
   isSendingEmail: boolean = false;
   emailSent: boolean = false;
   private popStateListener?: (event: PopStateEvent) => void;
-  /** URL'de gizli gencduyuru parametresi varsa true olur ve roleId 7 ile login yapılır. */
-  private isAnnouncementAdminLogin: boolean = false;
 
   constructor(
     private router: Router,
     private toastService: ToastService,
     private authService: AuthService,
     private location: Location,
-    private route: ActivatedRoute,
     @Inject(PLATFORM_ID) private platformId: Object
   ) { }
 
@@ -42,11 +40,6 @@ export class CorporateLoginComponent implements OnInit, OnDestroy {
     if (!isPlatformBrowser(this.platformId)) {
       return;
     }
-
-    // URL'de gizli "emirduyuru" parametresi var mı? (örn: /corporate-login?emirduyuru=22)
-    const emirDuyuruParam = this.route.snapshot.queryParamMap.get('emirduyuru');
-    // Sadece belirli değer için (22) gizli login modunu aktif et
-    this.isAnnouncementAdminLogin = emirDuyuruParam === '22';
 
     // Geri butonuna basıldığında anasayfaya yönlendir
     this.popStateListener = (event: PopStateEvent) => {
@@ -77,6 +70,11 @@ export class CorporateLoginComponent implements OnInit, OnDestroy {
     }
   }
 
+  togglePasswordVisibility(input: HTMLInputElement) {
+    this.showPassword = !this.showPassword;
+    input.type = this.showPassword ? 'text' : 'password';
+  }
+
   validateCorporateEmail(event: any) {
     const email = event.target.value;
     if (!email) {
@@ -97,7 +95,7 @@ export class CorporateLoginComponent implements OnInit, OnDestroy {
 
     const form = event.target as HTMLFormElement;
     const emailInput = form.querySelector('input[type="email"]') as HTMLInputElement;
-    const passwordInput = form.querySelector('input[type="password"]') as HTMLInputElement;
+    const passwordInput = form.querySelector('input[name="password"]') as HTMLInputElement;
 
     const email = emailInput?.value;
     const password = passwordInput?.value;
@@ -115,9 +113,9 @@ export class CorporateLoginComponent implements OnInit, OnDestroy {
     // Yükleniyor durumunu başlat
     this.isLoading = true;
 
-    const login$ = this.isAnnouncementAdminLogin
-      ? this.authService.loginCorporateAnnouncement(email.trim(), password)
-      : this.authService.loginCorporate(email.trim(), password);
+    // Tüm GSB kullanıcıları aynı endpoint üzerinden giriş yapar.
+    // Backend UserPermission tablosuna göre efektif roleId (2/6/7) ve permissions belirler.
+    const login$ = this.authService.loginCorporate(email.trim(), password);
 
     login$.subscribe({
       next: (response: any) => {

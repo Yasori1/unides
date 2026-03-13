@@ -121,6 +121,7 @@ $white: #ffffff;
 // --- 2. FAQ WRAPPER ---
 .faq-page-wrapper {
   width: 100%;
+  overflow-x: hidden; // content-section::before right: -10% blob'unun yatay taşmasını engeller
   font-family: 'Inter', system-ui, sans-serif;
   color: $text-dark;
   background: #f8fafc;
@@ -758,8 +759,12 @@ aside.sidebar,
     }
 
     .scroll-indicator {
-      display: none;
+      position: static;
+      transform: none;
+      margin: 20px auto 0;
+      width: fit-content;
     }
+
   }
 
   .layout-grid {

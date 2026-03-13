@@ -458,13 +458,18 @@ export class CommunityService {
   }
 
   /**
-   * Public topluluk listesi — HttpClient ve interceptor kullanmaz; fetch() ile credentials: 'omit'.
-   * Token ve çerez kesinlikle gitmez; backend tüm şehirlerdeki aktif toplulukları döner.
-   * Sadece communities-page (ve gerekirse anasayfa) için kullanın.
+   * Public topluluk listesi — sayfa bazlı (backend pagination).
+   * fetch() ile credentials: 'omit'. communities-page için.
    */
-  getAllCommunitiesPublic(params?: { name?: string; category?: string; university?: string }): Observable<Community[]> {
+  getCommunitiesPublicPage(
+    page: number,
+    pageSize: number,
+    params?: { name?: string; category?: string; university?: string }
+  ): Observable<{ page: number; pageSize: number; totalCount: number; totalPages: number; items: Community[] }> {
     const searchParams = new URLSearchParams();
     searchParams.set('status', 'active');
+    searchParams.set('page', String(page));
+    searchParams.set('pageSize', String(pageSize));
     if (params?.name) searchParams.set('name', params.name);
     if (params?.category) searchParams.set('category', params.category);
     if (params?.university) searchParams.set('university', params.university);
@@ -479,7 +484,31 @@ export class CommunityService {
         return r.json();
       })
     ).pipe(
-      map((list: any[]) => (list || []).map((dto) => this.mapMiniDtoToCommunity(dto))),
+      map((response: any) => {
+        const rawItems = response.items ?? (Array.isArray(response) ? response : []);
+        const items = rawItems.map((dto: any) => this.mapMiniDtoToCommunity(dto));
+        return {
+          page: response.page ?? page,
+          pageSize: response.pageSize ?? pageSize,
+          totalCount: response.totalCount ?? items.length,
+          totalPages: response.totalPages ?? Math.max(1, Math.ceil((response.totalCount ?? items.length) / pageSize)),
+          items,
+        };
+      }),
+      catchError((err) => {
+        Logger.error('Topluluklar yüklenemedi (public):', err);
+        return of({ page: 1, pageSize: pageSize, totalCount: 0, totalPages: 0, items: [] });
+      })
+    );
+  }
+
+  /**
+   * Public topluluk listesi — tüm sayfayı getirir (sayfa 1, büyük pageSize).
+   * Eski davranış; sayfa bazlı için getCommunitiesPublicPage kullanın.
+   */
+  getAllCommunitiesPublic(params?: { name?: string; category?: string; university?: string }): Observable<Community[]> {
+    return this.getCommunitiesPublicPage(1, 9999, params).pipe(
+      map((res) => res.items),
       catchError((err) => {
         Logger.error('Topluluklar yüklenemedi (public):', err);
         return of([]);
@@ -487,10 +516,69 @@ export class CommunityService {
     );
   }
 
-  // Tüm Toplulukları Getir (Backend: GET /api/Communities)
-  // Query parametreleri: city, university, category, name, status
-  // status: active | passive | pending | rejected | deleted | all (backend ParseStatus ile uyumlu)
-  // options.skipAuth: true ise Authorization gönderilmez — anasayfa topluluk listesinde tüm aktif topluluklar gelsin (kurumsal giriş olsa bile)
+  /** Backend paginated response: { page, pageSize, totalCount, totalPages, items } */
+  getCommunitiesPage(
+    page: number,
+    pageSize: number,
+    params?: {
+      city?: string;
+      university?: string;
+      category?: string;
+      name?: string;
+      status?:
+        | 'active'
+        | 'aktif'
+        | 'passive'
+        | 'pasif'
+        | 'pending'
+        | 'rejected'
+        | 'reddedilen'
+        | 'deleted'
+        | 'silinmis'
+        | 'silinmiş'
+        | 'all'
+        | 'tumu'
+        | 'tümü';
+    },
+    options?: { skipAuth?: boolean }
+  ): Observable<{ page: number; pageSize: number; totalCount: number; totalPages: number; items: Community[] }> {
+    let httpParams = new HttpParams().set('page', String(page)).set('pageSize', String(pageSize));
+    if (params?.city && !options?.skipAuth) httpParams = httpParams.set('city', params.city);
+    if (params?.university) httpParams = httpParams.set('university', params.university);
+    if (params?.category) httpParams = httpParams.set('category', params.category);
+    if (params?.name) httpParams = httpParams.set('name', params.name);
+    if (params?.status) httpParams = httpParams.set('status', params.status);
+
+    const context = options?.skipAuth ? new HttpContext().set(SKIP_AUTH, true) : undefined;
+    const headers = options?.skipAuth ? new HttpHeaders({ 'X-Public-List': '1' }) : undefined;
+    return this.http
+      .get<{ page?: number; pageSize?: number; totalCount?: number; totalPages?: number; items?: any[] }>(this.apiUrl, {
+        params: httpParams,
+        ...(context && { context }),
+        ...(headers && { headers }),
+        ...(options?.skipAuth && { withCredentials: false }),
+      })
+      .pipe(
+        map((response) => {
+          const rawItems = response.items ?? (Array.isArray(response) ? response : []);
+          const items = rawItems.map((dto) => this.mapMiniDtoToCommunity(dto));
+          return {
+            page: response.page ?? page,
+            pageSize: response.pageSize ?? pageSize,
+            totalCount: response.totalCount ?? items.length,
+            totalPages: response.totalPages ?? Math.max(1, Math.ceil((response.totalCount ?? items.length) / pageSize)),
+            items,
+          };
+        }),
+        catchError((error) => {
+          Logger.error('Topluluklar yüklenemedi:', error);
+          return of({ page: 1, pageSize: pageSize, totalCount: 0, totalPages: 0, items: [] });
+        })
+      );
+  }
+
+  // Tüm Toplulukları Getir (Backend: GET /api/Communities — artık sayfalı dönüyor)
+  // Sayfa bazlı kullanım için getCommunitiesPage kullanın.
   getAllCommunities(
     params?: {
       city?: string;
@@ -514,26 +602,8 @@ export class CommunityService {
     },
     options?: { skipAuth?: boolean }
   ): Observable<Community[]> {
-    let httpParams = new HttpParams();
-    // skipAuth (public liste) iken şehir filtresi gönderme — tüm şehirlerdeki topluluklar gelsin
-    if (params?.city && !options?.skipAuth) httpParams = httpParams.set('city', params.city);
-    if (params?.university) httpParams = httpParams.set('university', params.university);
-    if (params?.category) httpParams = httpParams.set('category', params.category);
-    if (params?.name) httpParams = httpParams.set('name', params.name);
-    if (params?.status) httpParams = httpParams.set('status', params.status);
-
-    const context = options?.skipAuth ? new HttpContext().set(SKIP_AUTH, true) : undefined;
-    const headers = options?.skipAuth ? new HttpHeaders({ 'X-Public-List': '1' }) : undefined;
-    return this.http.get<CommunityMiniDto[]>(this.apiUrl, {
-      params: httpParams,
-      ...(context && { context }),
-      ...(headers && { headers }),
-      ...(options?.skipAuth && { withCredentials: false }),
-    }).pipe(
-      map((response) => {
-        const mapped = response.map((dto) => this.mapMiniDtoToCommunity(dto));
-        return mapped;
-      }),
+    return this.getCommunitiesPage(1, 9999, params, options).pipe(
+      map((res) => res.items),
       catchError((error) => {
         Logger.error('Topluluklar yüklenemedi:', error);
         return of([]);
@@ -585,84 +655,20 @@ export class CommunityService {
 
   // Topluluk Detayı Getir (Backend: GET /api/Communities/{id:guid})
   // Pasif topluluklar için isActive=false query parametresi ile liste endpoint'inden çekilir
-  getCommunityById(id: string, isActive?: boolean): Observable<Community> {
+  getCommunityById(id: string, _isActive?: boolean): Observable<Community> {
     // ID validasyonu - GUID formatında olmalı
     if (!id || id === '' || id.includes('mock')) {
-      throw new Error("Geçersiz topluluk ID'si");
+      throw new Error('Geçersiz topluluk ID\'si');
     }
 
-    // Eğer isActive parametresi false ise (pasif topluluk)
-    // Backend'de Detail endpoint'i pasif topluluklar için 404 dönüyor (satır 178: if (!com.IsActivity) return NotFound)
-    // Swagger'a göre GET /api/Communities/{id} email bilgilerini döndürüyor ama backend'de pasif topluluklar için 404
-    // Çözüm: Önce Detail endpoint'ini dene (belki GSB rolü varsa çalışabilir), 404 dönerse list endpoint'inden çek
-    // Ama list endpoint'inden gelen CommunityMiniDto email bilgilerini içermiyor
-    if (isActive === false) {
-      // Önce Detail endpoint'ini dene (GSB rolü varsa pasif toplulukları da görebilir)
-      return this.http.get<CommunityDetailDto>(`${this.apiUrl}/${id}`).pipe(
-        map((response) => {
-          // Backend'den gelen response'u map et (email bilgileri dahil - CommunityDetailDto'da var)
-          return this.mapDetailDtoToCommunity(response);
-        }),
-        catchError((error) => {
-          // Eğer 404 dönerse (pasif topluluk), liste endpoint'inden çek (fallback)
-          // Ama CommunityMiniDto email bilgilerini içermiyor - backend'de sadece: CommunityId, ComName, ComCategory, City, University, BannerUrl, LogoUrl, MiniAbout, IsActivity
-          if (error.status === 404) {
-            Logger.warn(
-              "Pasif topluluk için Detail endpoint 404 döndü, liste endpoint'inden çekiliyor (email bilgileri eksik olacak):",
-              id
-            );
-            // Liste endpoint'inden çek (fallback)
-            return this.http
-              .get<CommunityMiniDto[]>(this.apiUrl, {
-                params: new HttpParams().set('status', 'passive'),
-              })
-              .pipe(
-                map((list) => {
-                  // ID'ye göre topluluğu bul
-                  const communityDto = list.find((c) => {
-                    const communityId = c.communityId;
-                    const idString =
-                      typeof communityId === 'string' ? communityId : String(communityId);
-                    return idString === id;
-                  });
-
-                  if (!communityDto) {
-                    throw new Error('Pasif topluluk bulunamadı.');
-                  }
-
-                  // MiniDto'yu Community'ye map et (email bilgileri eksik - backend'de MiniDto'da yok)
-                  Logger.warn(
-                    "Pasif topluluk için liste endpoint'inden çekildi, email bilgileri (comMail, comLeadMail) eksik:",
-                    id
-                  );
-                  return this.mapMiniDtoToCommunity(communityDto);
-                }),
-                catchError((fallbackError) => {
-                  throw fallbackError;
-                })
-              );
-          }
-          throw error;
-        })
-      );
-    }
-
-    // Aktif topluluklar için normal Detail endpoint'ini kullan
-    // Backend endpoint: GET /api/Communities/{id:guid}
-    // Backend'den CommunityDetailDto döner
-    // Auth interceptor automatically adds Authorization header if token exists
+    // Backend artık hem aktif hem pasif topluluklar için aynı detay endpoint'ini destekliyor.
+    // Bu yüzden her zaman tek bir çağrı yapıyoruz; 404 dönerse gerçekten yok demektir.
     return this.http.get<CommunityDetailDto>(`${this.apiUrl}/${id}`).pipe(
-      map((response) => {
-        // Backend'den gelen response'u map et
-        // Backend'de CommunityId (PascalCase) var, JSON serialization'da camelCase'e çevrilir
-        return this.mapDetailDtoToCommunity(response);
-      }),
+      map((response) => this.mapDetailDtoToCommunity(response)),
       catchError((error) => {
-        // Backend'de IsActivity kontrolü var - pasif topluluklar için 404 döner
         if (error.status === 404) {
-          throw new Error('Topluluk bulunamadı veya pasif durumda.');
+          throw new Error('Topluluk bulunamadı.');
         }
-        // Diğer hatalar için
         throw error;
       })
     );

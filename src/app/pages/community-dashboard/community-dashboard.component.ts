@@ -11,6 +11,7 @@ import { LumaSpinComponent } from '../../components/ui/luma-spin/luma-spin.compo
 import { ToastComponent } from '../../components/ui/toast/toast.component';
 import { AfkDetectionService } from '../../services/afk-detection.service';
 import { ImageErrorHandlerService } from '../../services/image-error-handler.service';
+import { AuthService } from '../../services/auth.services';
 import { catchError, switchMap, map } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { SpamService } from '../../services/spam.service';
@@ -87,6 +88,8 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
   isModalOpen: boolean = false;
   isProfileOpen: boolean = false;
   showNotifications: boolean = false;
+  isCityDropdownOpen: boolean = false;
+  isCategoryDropdownOpen: boolean = false;
 
   // Unified Profile Dropdown Identity
   userRole: string = 'community';
@@ -125,6 +128,18 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
 
   /** Etkinlik oluştur/güncelle gönderiminde çift tıklamayı engellemek için */
   isSavingEvent = false;
+
+  /** Etkinlik form alanlarının eksik olup olmadığını takip eder */
+  eventErrors = {
+    image: false,
+    title: false,
+    date: false,
+    time: false,
+    location: false,
+    quota: false,
+    shortDescription: false,
+    description: false,
+  };
 
   // Event creation modal
   newEventData = {
@@ -332,6 +347,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     private afkDetectionService: AfkDetectionService,
     private spamService: SpamService,
     private imageErrorHandler: ImageErrorHandlerService,
+    private authService: AuthService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -344,19 +360,19 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       const urlParams = new URLSearchParams(window.location.search);
       const tabParam = urlParams.get('tab');
       if (tabParam) {
-        this.activeTab = tabParam;
+        this.activeTab = tabParam as string;
       }
 
       this.loadCommunityProfile();
       this.loadCommunities();
       // Unified Profile Dropdown Initialization
-      const userInfoStr = localStorage.getItem('user_info');
+      const userInfoStr = localStorage.getItem('user_info') as string | null;
       if (userInfoStr) {
         try {
-          const userInfo = JSON.parse(userInfoStr);
+          const userInfo = JSON.parse(userInfoStr as string);
           this.userName = userInfo.name || userInfo.fullName || 'Topluluk';
           this.displayName = this.userName;
-          this.userInitial = this.userName.charAt(0).toUpperCase();
+          this.userInitial = (this.userName as string).charAt(0).toUpperCase();
         } catch (e) {
           Logger.error('Error parsing user info:', e);
         }
@@ -974,6 +990,16 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     ) {
       this.showNotifications = false;
     }
+
+    // Şehir custom dropdown kontrolü
+    if (!target.closest('.custom-select-wrapper[data-dropdown="city"]')) {
+      this.isCityDropdownOpen = false;
+    }
+
+    // Kategori custom dropdown kontrolü
+    if (!target.closest('.custom-select-wrapper[data-dropdown="category"]')) {
+      this.isCategoryDropdownOpen = false;
+    }
   }
 
   get filteredDashboardEvents() {
@@ -1036,6 +1062,37 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     this.activeTab = tab;
     this.showNotifications = false;
     this.isProfileOpen = false;
+    this.isSidebarCollapsed = false;
+    this.isCityDropdownOpen = false;
+    this.isCategoryDropdownOpen = false;
+  }
+
+  toggleCityDropdown(event: MouseEvent) {
+    event.stopPropagation();
+    if (this.communityApproved && !this.isUpdatePending) {
+      this.isCityDropdownOpen = !this.isCityDropdownOpen;
+      this.isCategoryDropdownOpen = false;
+    }
+  }
+
+  selectCity(city: string, event: MouseEvent) {
+    event.stopPropagation();
+    this.clubInfo.city = city;
+    this.isCityDropdownOpen = false;
+  }
+
+  toggleCategoryDropdown(event: MouseEvent) {
+    event.stopPropagation();
+    if (this.communityApproved && !this.isUpdatePending) {
+      this.isCategoryDropdownOpen = !this.isCategoryDropdownOpen;
+      this.isCityDropdownOpen = false;
+    }
+  }
+
+  selectCategory(category: string, event: MouseEvent) {
+    event.stopPropagation();
+    this.clubInfo.category = category;
+    this.isCategoryDropdownOpen = false;
   }
 
   toggleNotifications(event?: MouseEvent) {
@@ -1188,13 +1245,70 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     return emailOk && aboutOk;
   }
 
-  /** Profilim formu: zorunlu alanlar dolu mu (isim, topluluk e-posta, başkan e-posta, hakkımızda) */
+  /** Profilim formu: tüm zorunlu alanlar dolu mu (metin, dropdown, görsel) */
   get isProfileFormValid(): boolean {
+    const normalize = (v: any) => (v === null || v === undefined ? '' : String(v).trim());
+
     const nameOk = !!this.clubInfo.name?.trim();
     const emailOk = !!this.clubInfo.email?.trim();
     const leadMailOk = !!this.clubInfo.comLeadMail?.trim();
     const aboutOk = !!this.clubInfo.description?.trim();
-    return !!(nameOk && emailOk && leadMailOk && aboutOk);
+    const universityOk = !!this.clubInfo.university?.trim();
+    const cityOk = !!this.clubInfo.city?.trim();
+    const categoryOk = !!this.clubInfo.category?.trim();
+    const miniAboutOk = !!this.clubInfo.miniAbout?.trim();
+
+    // Banner / logo: kullanıcı boşaltmışsa (örn. önizlemeyi silmişse) mutlaka geçersiz say
+    const bannerOk = !!normalize(this.clubInfo.banner);
+    const logoOk = !!normalize(this.clubInfo.logo);
+
+    return !!(
+      nameOk &&
+      emailOk &&
+      leadMailOk &&
+      aboutOk &&
+      universityOk &&
+      cityOk &&
+      categoryOk &&
+      miniAboutOk &&
+      bannerOk &&
+      logoOk
+    );
+  }
+
+  /** Profilim sekmesi: herhangi bir alanda (metin, dropdown, görsel) değişiklik var mı? */
+  get isProfileChanged(): boolean {
+    if (!this.initialClubInfo) {
+      return false;
+    }
+
+    const normalize = (v: any) => (v === null || v === undefined ? '' : String(v).trim());
+
+    const fields = [
+      'name',
+      'university',
+      'city',
+      'category',
+      'email',
+      'comLeadMail',
+      'miniAbout',
+      'description',
+      'banner',
+      'logo',
+    ];
+
+    const hasFieldChange = fields.some((f) => {
+      const current = normalize((this.clubInfo as any)?.[f]);
+      const initial = normalize((this.initialClubInfo as any)?.[f]);
+      return current !== initial;
+    });
+
+    // Bekleyen banner/logo dosyası varsa mutlaka değişiklik vardır
+    if (this.pendingBannerFile || this.pendingLogoFile) {
+      return true;
+    }
+
+    return hasFieldChange;
   }
 
   // GÜNCELLEME: Kontrol listesi sadeleştirildi (Website, Youtube vs. çıkarıldı)
@@ -1439,6 +1553,10 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       image: '',
       imageFile: null,
     };
+    this.eventErrors = {
+      image: false, title: false, date: false, time: false,
+      location: false, quota: false, shortDescription: false, description: false,
+    };
     this.newProjectData = { name: '', category: 'Teknoloji', budget: 0, deadline: '' };
   }
 
@@ -1471,8 +1589,19 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     Logger.log('isEventFormValid:', this.isEventFormValid);
     Logger.log('newEventData:', this.newEventData);
 
+    this.eventErrors = {
+      image: !this.newEventData.imageFile,
+      title: !this.newEventData.title?.trim(),
+      date: !this.newEventData.date?.trim(),
+      time: !this.newEventData.time?.trim(),
+      location: !this.newEventData.location?.trim(),
+      quota: !this.newEventData.quota,
+      shortDescription: !this.newEventData.shortDescription?.trim(),
+      description: !this.newEventData.description?.trim(),
+    };
+
     if (!this.isEventFormValid) {
-      this.showToast('Lütfen tüm alanları doldurun.', 'error');
+      this.showToast('Lütfen tüm zorunlu alanları eksiksiz doldurun.', 'error');
       return;
     }
 
@@ -1745,18 +1874,18 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
   }
 
   get isEventFormValid() {
-    const { title, date, time, location, quota, description, image } = this.newEventData;
-    // Tarih ve saat boş string kontrolü de yapılmalı
+    const { title, date, time, location, quota, shortDescription, description, imageFile } = this.newEventData;
     const hasValidDate = date && date.trim().length > 0;
     const hasValidTime = time && time.trim().length > 0;
     return (
+      !!imageFile &&
       !!title?.trim() &&
       hasValidDate &&
       hasValidTime &&
       !!location?.trim() &&
       !!quota &&
+      !!shortDescription?.trim() &&
       !!description?.trim()
-      // !!image // Fotoğraf zorunluluğu şimdilik kaldırıldı
     );
   }
 
@@ -1764,6 +1893,11 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     // image-upload component string base64/url gönderir
     if (typeof image === 'string') {
       this.newEventData.image = image;
+      if (!image) {
+        this.newEventData.imageFile = null;
+      } else {
+        this.eventErrors.image = false;
+      }
       return;
     }
     // fallback: native input event
@@ -1794,6 +1928,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
         this.readFileToBase64(file);
         // File objesini de sakla (backend'e yüklemek için)
         this.newEventData.imageFile = file;
+        this.eventErrors.image = false;
       }
     } else {
       Logger.warn('[onEventFileSelected] No file provided');
@@ -2615,17 +2750,8 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
   logout() {
     if (isPlatformBrowser(this.platformId)) {
       this.showToast('Çıkış yapılıyor...', 'success');
-      // Local storage'ı temizle
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('refresh_token');
-      localStorage.removeItem('user_info');
-      localStorage.removeItem('user_type');
-      localStorage.removeItem('community_info');
-
-      // Anasayfaya yönlendir
-      setTimeout(() => {
-        this.router.navigate(['/']);
-      }, 1000);
+      // Merkezi AuthService.logout ile tüm token, rol ve permission cache'lerini temizle
+      this.authService.logout();
     }
   }
 

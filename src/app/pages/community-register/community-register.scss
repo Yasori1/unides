@@ -42,6 +42,31 @@
   margin-bottom: 15px;
 }
 
+.password-toggle {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  color: #9ca3af;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    color: var(--primary-color);
+  }
+
+  &:focus {
+    outline: none;
+  }
+}
+
 /* Şifre kabul şartları listesi (öğrenci kayıt sayfası ile aynı) */
 .password-rules {
   list-style: none;
@@ -475,4 +500,123 @@
   gap: 8px;
   font-size: 1rem;
   padding: 12px 28px;
+}
+
+.upload-missing {
+  ::ng-deep .drop-zone {
+    border-color: #ef4444 !important;
+    background: #fff5f5 !important;
+  }
+
+  ::ng-deep .image-upload-container label {
+    color: #ef4444;
+  }
+}
+
+.upload-required-hint {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #ef4444;
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-top: 4px;
+
+  i {
+    font-size: 1rem;
+  }
+}
+
+.field-error {
+  border-color: #ef4444 !important;
+  background: #fff5f5 !important;
+  border-radius: 8px;
+
+  input,
+  select,
+  textarea {
+    background: transparent !important;
+  }
+
+  .icon-wrapper i {
+    color: #ef4444 !important;
+  }
+}
+
+.field-required-hint {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #ef4444;
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-top: 4px;
+
+  i {
+    font-size: 1rem;
+  }
+}
+
+.cr-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+  backdrop-filter: blur(4px);
+}
+
+.cr-modal-card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 28px 24px 24px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+  text-align: center;
+}
+
+.cr-modal-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+
+  h3 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #0f172a;
+  }
+}
+
+.cr-modal-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #fef2f2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  i {
+    font-size: 1.75rem;
+    color: #ef4444;
+  }
+}
+
+.cr-modal-message {
+  color: #475569;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 0 0 20px;
+}
+
+.cr-modal-btn {
+  width: 100%;
+  justify-content: center;
 }

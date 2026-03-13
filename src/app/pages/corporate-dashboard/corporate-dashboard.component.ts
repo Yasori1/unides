@@ -17,6 +17,12 @@ import { environment } from '../../../environments/environment';
 import { ImageErrorHandlerService } from '../../services/image-error-handler.service';
 import { AuthService } from '../../services/auth.services';
 import { SpamService } from '../../services/spam.service';
+import {
+  GsbUsersService,
+  EmirGsbUserDto,
+  EmirRegisterGsbRequest,
+  EmirUpdateGsbRequest,
+} from '../../services/gsb-users.service';
 import { Logger } from '../../utils/logger.util';
 import { TurkishUppercasePipe } from '../../pipes/turkish-uppercase.pipe';
 
@@ -91,6 +97,8 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   activeTab = 'overview';
   showNotifications = false;
   isProfileOpen = false;
+  isNewCommunityCityDropdownOpen = false;
+  isNewCommunityCategoryDropdownOpen = false;
 
   // Unified Profile Dropdown Identity
   userRole: string = 'corporate';
@@ -100,7 +108,16 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   userInitial: string = '';
   isModalOpen = false;
   modalType = '';
-  canManageAnnouncements = true;
+  /**
+   * Duyuru oluşturma/güncelleme/silme yetkisi.
+   * AuthService'ten dinamik olarak hesaplanır (isGodMode || isDuyuruAdmin).
+   * ngOnInit içinde set edilir; logout/login arası değişmez.
+   */
+  canManageAnnouncements = false;
+  /** GODMODE: GSB Yetkilileri menüsü ve yönetim sayfası sadece bu true iken görünür. */
+  get isGodMode(): boolean {
+    return this.authService.isGodMode();
+  }
   searchText = '';
   statusFilter: string = ''; // Aktif/Pasif filtre ('' = Tüm Durumlar sadece Bartın için)
   cityFilter: string = ''; // Şehir filtresi
@@ -290,9 +307,31 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   communities: Community[] = [];
   filteredCommunities: Community[] = [];
 
-  // Duyurular API'den yüklenecek, mock data kaldırıldı
+  // Duyurular API'den yüklenecek (sayfa bazlı)
   announcements: Announcement[] = [];
   filteredAnnouncements: Announcement[] = [];
+  announcementPage = 1;
+  announcementPageSize = 12;
+  announcementTotalPages = 0;
+  announcementPages: number[] = [];
+
+  // GSB Yetkilileri (sadece GODMODE)
+  gsbUsers: EmirGsbUserDto[] = [];
+  gsbUsersPage = 1;
+  gsbUsersPageSize = 20;
+  gsbUsersTotalPages = 0;
+  gsbUsersTotalCount = 0;
+  gsbUsersPages: number[] = [];
+  gsbSearchText = '';
+  gsbCityFilter = '';
+  /** 'all' = tümü (isActive gönderilmez), 'active' = sadece aktifler (isActive=true), 'passive' = sadece pasifler (isActive=false) */
+  gsbStatusFilter: 'all' | 'active' | 'passive' = 'all';
+  isLoadingGsbUsers = false;
+  private gsbSearchDebounce: ReturnType<typeof setTimeout> | null = null;
+  newGsbUser: EmirRegisterGsbRequest = { fullName: '', email: '', password: '', city: '' };
+  editingGsbUser: EmirGsbUserDto | null = null;
+  editGsbUserForm: EmirUpdateGsbRequest = {};
+  deleteGsbUserTarget: EmirGsbUserDto | null = null;
 
   newAnnouncement: Partial<Announcement> = {
     title: '',
@@ -345,6 +384,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     private imageErrorHandler: ImageErrorHandlerService,
     private authService: AuthService,
     private spamService: SpamService,
+    private gsbUsersService: GsbUsersService,
     @Inject(PLATFORM_ID) private platformId: Object,
   ) {}
 
@@ -362,25 +402,17 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     const tabParam = urlParams.get('tab');
     const statusParam = urlParams.get('status');
 
+    if (statusParam) {
+      this.statusFilter = statusParam;
+    } else {
+      this.statusFilter = '';
+    }
+
     if (tabParam) {
       this.switchTab(tabParam);
     }
-
-    if (statusParam) {
-      this.statusFilter = statusParam;
-      this.loadCommunitiesFromService(this.statusFilter);
-    } else {
-      // Topluluklar sekmesine her girişte varsayılan "Tüm Durumlar"
-      this.statusFilter = '';
-      this.loadCommunitiesFromService('');
-    }
-    // Overview için loading state'i başlat
+    // Overview için loading state (sekmelere tıklandıkça ilgili veri yüklenecek)
     this.isLoadingOverview = true;
-
-    // AnnouncementService'ten duyuruları çek (announcements-page ile aynı kaynak)
-    this.loadAnnouncementsFromService();
-    // Events'i backend'den çek
-    this.loadEventsFromService();
 
     // Unified Profile Dropdown Initialization - AuthService'den kullanıcı adını ve email'ini çek
     const userInfo = this.authService.getUser();
@@ -399,10 +431,17 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       this.displayName = this.userName;
       this.userInitial = this.userName.charAt(0).toUpperCase();
     }
+
+    // Yetki kontrolü: UserPermission tablosundan gelen efektif rol ve permissions'a göre hesapla
+    this.canManageAnnouncements = this.authService.canManageAnnouncements();
   }
 
-  /** API'den gelen topluluk listesini işleyip ekrana yansıtır. Backend: active | passive | pending | all. Duruma göre client-side filtre. */
-  private handleCommunitiesLoaded(communities: Community[], statusFilter?: string): void {
+  /** API'den gelen topluluk listesini işleyip ekrana yansıtır. pagination verilirse sayfa bilgisi backend'den kullanılır. */
+  private handleCommunitiesLoaded(
+    communities: Community[],
+    statusFilter?: string,
+    pagination?: { totalPages: number; page: number }
+  ): void {
     let mapped = communities;
     if (statusFilter === 'Reddedilen') {
       mapped = mapped.filter((c) => c.status === 'Reddedilen');
@@ -426,6 +465,12 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     this.categories = [...new Set([...this.categories, ...uniqueCategories, 'Genel'])].sort();
     this.communities = [...this.allCommunities];
     this.applyFilters();
+    if (pagination) {
+      this.totalPages = pagination.totalPages;
+      this.currentPage = pagination.page;
+      this.pages = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+      this.displayedCommunities = [...this.filteredCommunities];
+    }
     this.attachCommunityNamesToEvents();
     this.isLoadingCommunities = false;
   }
@@ -535,19 +580,18 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     return n(communityCity.trim()) === n(userCity.trim());
   }
 
-  loadCommunitiesFromService(statusFilter?: string) {
-    // Sadece browser'da çalıştığından emin ol
+  loadCommunitiesFromService(statusFilter?: string, page?: number) {
     if (!isPlatformBrowser(this.platformId)) {
       return;
     }
 
-    // Loading state'i başlat; önceki filtre verisini kaldır ki yanlış liste görünmesin
     this.isLoadingCommunities = true;
     this.allCommunities = [];
     this.communities = [];
     this.filteredCommunities = [];
     this.displayedCommunities = [];
-    this.currentPage = 1;
+    if (page != null) this.currentPage = page;
+    else this.currentPage = 1;
     this.totalPages = 0;
 
     // Backend GET /api/Communities: status = active | passive | pending | rejected | deleted | all
@@ -557,8 +601,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     if (statusFilter === 'Aktif') {
       backendStatus = 'active';
     } else if (statusFilter === 'Onay Bekleyen') {
-      // comConfirm=0 (yeni kayıt) ve comConfirm=4 (güncelleme onayı) ikisini de listeleyebilmek için tümünü çekip client-side filtre
-      backendStatus = 'all';
+      backendStatus = 'pending';
     } else if (statusFilter === 'Pasif') {
       backendStatus = 'passive';
     } else if (statusFilter === 'Reddedilen') {
@@ -618,13 +661,18 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
 
     const apiParams: { status: typeof backendStatus; city?: string } = { status: backendStatus };
     if (backendCity) apiParams.city = backendCity;
-    this.communityService.getAllCommunities(apiParams).subscribe({
-      next: (data) => {
-        const mapped = mapApiDataToCommunities(data || []);
-        // Liste endpoint'i PendingUpdateData döndürmez; ComConfirm === 4 (güncelleme onayı) olanlar için detay çekip kartta yeni banner/logo gösterilebilsin
+    const requestedPage = page ?? this.currentPage ?? 1;
+
+    this.communityService.getCommunitiesPage(requestedPage, this.itemsPerPage, apiParams).subscribe({
+      next: (res) => {
+        const mapped = mapApiDataToCommunities(res.items || []);
         const updatePending = mapped.filter((c) => (c as any).comConfirm === 4);
+        const pagination = { totalPages: res.totalPages, page: res.page };
+
+        const done = () => this.handleCommunitiesLoaded(mapped, statusFilter, pagination);
+
         if (updatePending.length === 0) {
-          this.handleCommunitiesLoaded(mapped, statusFilter);
+          done();
           return;
         }
         forkJoin(
@@ -639,7 +687,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
               (item as any).hasEverBeenApproved = true;
             }
           });
-          this.handleCommunitiesLoaded(mapped, statusFilter);
+          done();
         });
       },
       error: (err) => this.handleCommunitiesError(err),
@@ -885,8 +933,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
 
   changePage(page: number) {
     if (page >= 1 && page <= this.totalPages) {
-      this.currentPage = page;
-      this.updateDisplayedData();
+      this.loadCommunitiesFromService(this.statusFilter, page);
     }
   }
 
@@ -928,14 +975,16 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       );
     }
 
-    // Şehir filtresi
+    // Şehir filtresi (UI'daki şehir dropdown'u) — Godmode da bu filtreyi kullanabilir
     if (this.cityFilter) {
       temp = temp.filter((c) => c.city && c.city === this.cityFilter);
     }
 
-    // Aktif / Pasif / Onay Bekleyen seçiliyse sadece giriş yapan kullanıcının şehrindeki topluluklar (backend city desteklemiyorsa client-side yedek)
+    // Godmode HARİÇ diğer kullanıcılar için: Aktif / Pasif / Onay Bekleyen seçiliyken sadece kendi şehirlerindeki toplulukları göster
+    const isGodMode = this.authService.isGodMode();
     const userCity = this.getUserCity();
     if (
+      !isGodMode &&
       userCity &&
       (this.statusFilter === 'Aktif' ||
         this.statusFilter === 'Pasif' ||
@@ -1348,11 +1397,11 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       name: '',
       about: '',
       shortDescription: '', // Kısa açıklama alanı
-      city: '',
+      city: '', // Default: "Şehir Seçin" placeholder görünsün
       university: '',
       website: '',
       email: '',
-      category: this.categories[0] || 'Teknoloji',
+      category: '', // Default: "Kategori Seçin" placeholder görünsün
       logo: '',
       banner: '',
       status: 'Aktif',
@@ -1937,7 +1986,19 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   }
   switchTab(tab: string) {
     this.activeTab = tab;
-    this.isSidebarCollapsed = window.innerWidth < 768 ? true : this.isSidebarCollapsed;
+    if (window.innerWidth < 768) {
+      this.isSidebarCollapsed = false;
+    }
+    // Sekmeye tıklandığında ilgili veriyi yükle (Topluluklar, Etkinlikler, Duyurular)
+    if (tab === 'communities') {
+      this.loadCommunitiesFromService(this.statusFilter);
+    } else if (tab === 'events') {
+      this.loadEventsFromService();
+    } else if (tab === 'announcements') {
+      this.loadAnnouncementsFromService();
+    } else if (tab === 'gsb-users') {
+      this.loadGsbUsers();
+    }
   }
   toggleNotifications(event?: MouseEvent) {
     if (event) {
@@ -2000,15 +2061,8 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   }
 
   logout() {
-    // Local storage'ı temizle
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('user_info');
-    localStorage.removeItem('user_type');
-    localStorage.removeItem('community_info');
-
-    // Anasayfaya yönlendir
-    this.router.navigate(['/']);
+    // Tüm oturum bilgisini ve permission'ları temizlemek için merkezi AuthService.logout kullan
+    this.authService.logout();
   }
 
   @HostListener('document:click', ['$event'])
@@ -2020,7 +2074,9 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       target.closest('.icon-btn.notification') ||
       target.closest('.notification-btn') ||
       target.closest('.profile-pic') ||
-      target.closest('.profile-info')
+      target.closest('.profile-info') ||
+      target.closest('.custom-select-wrapper[data-dropdown="new-community-city"]') ||
+      target.closest('.custom-select-wrapper[data-dropdown="new-community-category"]')
     ) {
       return;
     }
@@ -2034,6 +2090,47 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     if (!target.closest('.dropdown-menu.notifications')) {
       this.showNotifications = false;
     }
+
+    // Yeni topluluk ekle custom dropdown'ları
+    if (!target.closest('.custom-select-wrapper[data-dropdown="new-community-city"]')) {
+      this.isNewCommunityCityDropdownOpen = false;
+    }
+
+    if (!target.closest('.custom-select-wrapper[data-dropdown="new-community-category"]')) {
+      this.isNewCommunityCategoryDropdownOpen = false;
+    }
+  }
+
+  toggleNewCommunityCityDropdown(event: MouseEvent) {
+    event.stopPropagation();
+    this.isNewCommunityCityDropdownOpen = !this.isNewCommunityCityDropdownOpen;
+    if (this.isNewCommunityCityDropdownOpen) {
+      this.isNewCommunityCategoryDropdownOpen = false;
+    }
+  }
+
+  selectNewCommunityCity(city: string, event: MouseEvent) {
+    event.stopPropagation();
+    if (this.newCommunity) {
+      this.newCommunity.city = city;
+    }
+    this.isNewCommunityCityDropdownOpen = false;
+  }
+
+  toggleNewCommunityCategoryDropdown(event: MouseEvent) {
+    event.stopPropagation();
+    this.isNewCommunityCategoryDropdownOpen = !this.isNewCommunityCategoryDropdownOpen;
+    if (this.isNewCommunityCategoryDropdownOpen) {
+      this.isNewCommunityCityDropdownOpen = false;
+    }
+  }
+
+  selectNewCommunityCategory(category: string, event: MouseEvent) {
+    event.stopPropagation();
+    if (this.newCommunity) {
+      this.newCommunity.category = category;
+    }
+    this.isNewCommunityCategoryDropdownOpen = false;
   }
 
   // Unified Profile Dropdown Helpers
@@ -2856,6 +2953,9 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     this.communityToReject = null;
     this.editingCommunity = null;
     this.communityDetailLoading = false;
+    this.editingGsbUser = null;
+    this.editGsbUserForm = {};
+    this.deleteGsbUserTarget = null;
   }
 
   // Duyuru detay ve güncelleme
@@ -2887,6 +2987,12 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     // Validasyon
     if (!this.newAnnouncement.title || !this.newAnnouncement.title.trim()) {
       this.showToast('Lütfen duyuru başlığını giriniz', 'error');
+      return;
+    }
+
+    // Görsel zorunlu: yeni duyuru için mutlaka görsel seçilmiş olmalı
+    if (!this.pendingNewAnnouncementImage) {
+      this.showToast('Lütfen duyuru için bir görsel ekleyin.', 'error');
       return;
     }
 
@@ -2964,33 +3070,39 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     this.pendingNewAnnouncementImage = null;
   }
 
-  // Duyuruları API'den yükle
-  loadAnnouncementsFromService() {
-    // Sadece browser'da çalıştığından emin ol
+  // Duyuruları API'den sayfa bazlı yükle
+  loadAnnouncementsFromService(page?: number) {
     if (!isPlatformBrowser(this.platformId)) {
       return;
     }
-
-    // Loading state'i başlat
+    const requestedPage = page ?? this.announcementPage ?? 1;
     this.isLoadingAnnouncements = true;
 
-    this.announcementService.getAllAnnouncements().subscribe({
-      next: (data) => {
-        this.announcements = data;
-        this.filteredAnnouncements = [...data];
+    this.announcementService.getAnnouncementsPage(requestedPage, this.announcementPageSize).subscribe({
+      next: (res) => {
+        this.announcements = res.items;
+        this.filteredAnnouncements = [...res.items];
         this.applyAnnouncementFilters();
-        // Loading state'i bitir
+        this.announcementTotalPages = res.totalPages;
+        this.announcementPage = res.page;
+        this.announcementPages = Array.from({ length: this.announcementTotalPages }, (_, i) => i + 1);
         this.isLoadingAnnouncements = false;
       },
-      error: (err) => {
-        // Hata durumunda boş array kullanılıyor
-        // Hata durumunda boş liste kullan
+      error: () => {
         this.announcements = [];
         this.filteredAnnouncements = [];
-        // Loading state'i bitir
+        this.announcementTotalPages = 0;
+        this.announcementPage = 1;
+        this.announcementPages = [];
         this.isLoadingAnnouncements = false;
       },
     });
+  }
+
+  changeAnnouncementPage(page: number) {
+    if (page >= 1 && page <= this.announcementTotalPages) {
+      this.loadAnnouncementsFromService(page);
+    }
   }
 
   applyAnnouncementFilters() {
@@ -3019,6 +3131,13 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     // Validasyon
     if (!this.editingAnnouncement.title || !this.editingAnnouncement.title.trim()) {
       this.showToast('Lütfen duyuru başlığını giriniz', 'error');
+      return;
+    }
+
+    // Görsel zorunlu: mevcut duyurunun ya hali hazırda bir görseli olmalı
+    // ya da bu güncelleme sırasında yeni bir görsel seçilmiş olmalı
+    if (!this.editingAnnouncement.image && !this.pendingEditAnnouncementImage) {
+      this.showToast('Lütfen duyuru için bir görsel ekleyin.', 'error');
       return;
     }
 
@@ -3251,9 +3370,189 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       // Mesajlar case'i silindi
       case 'settings':
         return 'Profilim';
+      case 'gsb-users':
+        return 'GSB Yetkilileri';
       default:
         return '';
     }
+  }
+
+  /** Backend GET /api/admin/gsb/users için query parametreleri. isActive: sadece 'active'/'passive' seçiliyse gönderilir; 'all' ise gönderilmez. */
+  private getGsbUsersFilters(): { isActive?: boolean | null; city?: string; name?: string; email?: string } {
+    const isActive =
+      this.gsbStatusFilter === 'active' ? true : this.gsbStatusFilter === 'passive' ? false : undefined;
+    const city = this.gsbCityFilter?.trim() || undefined;
+    const search = this.gsbSearchText?.trim();
+    const name = search && !search.includes('@') ? search : undefined;
+    const email = search?.includes('@') ? search : undefined;
+    return { isActive, city, name, email };
+  }
+
+  loadGsbUsers(page?: number) {
+    if (!isPlatformBrowser(this.platformId)) return;
+    const requestedPage = page ?? this.gsbUsersPage ?? 1;
+    this.isLoadingGsbUsers = true;
+    const filters = this.getGsbUsersFilters();
+    this.gsbUsersService.getGsbUsers(requestedPage, filters).subscribe({
+      next: (res) => {
+        this.gsbUsers = res.items;
+        this.gsbUsersPage = res.page;
+        this.gsbUsersTotalPages = res.totalPages;
+        this.gsbUsersTotalCount = res.totalCount;
+        this.gsbUsersPages = Array.from({ length: this.gsbUsersTotalPages }, (_, i) => i + 1);
+        this.isLoadingGsbUsers = false;
+      },
+      error: () => {
+        this.gsbUsers = [];
+        this.isLoadingGsbUsers = false;
+      },
+    });
+  }
+
+  /** Arama kutusu değişince debounce ile sayfa 1'den istek at (name/email backend LIKE) */
+  onGsbSearchChange() {
+    if (this.gsbSearchDebounce) clearTimeout(this.gsbSearchDebounce);
+    this.gsbSearchDebounce = setTimeout(() => {
+      this.gsbSearchDebounce = null;
+      this.loadGsbUsers(1);
+    }, 400);
+  }
+
+  /** Durum (Tüm/Aktif/Pasif) veya şehir değişince sayfa 1'den yeniden yükle */
+  onGsbStatusFilterChange(_value: string) {
+    this.loadGsbUsers(1);
+  }
+
+  onGsbCityFilterChange(_value: string) {
+    this.loadGsbUsers(1);
+  }
+
+  changeGsbUsersPage(p: number) {
+    if (p >= 1 && p <= this.gsbUsersTotalPages) this.loadGsbUsers(p);
+  }
+
+  /** Tabloda gösterilecek kayıtlar: backend cevabı (filtreler API'de uygulanıyor) */
+  get filteredGsbUsers(): EmirGsbUserDto[] {
+    return this.gsbUsers;
+  }
+
+  get gsbUsersTotalCountDisplay(): number {
+    return this.gsbUsersTotalCount;
+  }
+
+  get gsbUsersTotalPagesDisplay(): number {
+    return this.gsbUsersTotalPages;
+  }
+
+  get gsbUsersPagesDisplay(): number[] {
+    return this.gsbUsersPages;
+  }
+
+  openCreateGsbUserModal() {
+    this.newGsbUser = { fullName: '', email: '', password: '', city: '' };
+    this.modalType = 'gsb-create-user';
+    this.isModalOpen = true;
+  }
+
+  closeGsbUserModal() {
+    this.modalType = '';
+    this.editingGsbUser = null;
+    this.editGsbUserForm = {};
+    this.deleteGsbUserTarget = null;
+    this.isModalOpen = false;
+  }
+
+  saveCreateGsbUser() {
+    const req = this.newGsbUser;
+    if (!req.fullName?.trim()) {
+      this.showToast('Ad Soyad zorunludur.', 'error');
+      return;
+    }
+    if (!req.email?.trim()) {
+      this.showToast('E-posta zorunludur.', 'error');
+      return;
+    }
+    if (!req.email.trim().toLowerCase().endsWith('@gsb.gov.tr')) {
+      this.showToast('E-posta @gsb.gov.tr ile bitmelidir.', 'error');
+      return;
+    }
+    if (!req.password || req.password.length < 12) {
+      this.showToast('Şifre en az 12 karakter olmalıdır.', 'error');
+      return;
+    }
+    if (!req.city?.trim()) {
+      this.showToast('Şehir seçimi zorunludur.', 'error');
+      return;
+    }
+    this.gsbUsersService.createGsbUser(req).subscribe({
+      next: () => {
+        this.showToast('GSB kullanıcısı oluşturuldu.', 'success');
+        this.isModalOpen = false;
+        this.modalType = '';
+        this.loadGsbUsers(this.gsbUsersPage);
+      },
+      error: (err) => {
+        const msg = err?.status === 409 ? 'Bu e-posta adresi zaten kayıtlı.' : (err?.error?.message || 'Kullanıcı oluşturulamadı.');
+        this.showToast(msg, 'error');
+      },
+    });
+  }
+
+  openEditGsbUser(user: EmirGsbUserDto) {
+    this.editingGsbUser = user;
+    this.editGsbUserForm = {
+      fullName: user.fullName,
+      email: user.email,
+      city: user.city ?? undefined,
+      isActive: user.isActive,
+    };
+    this.modalType = 'gsb-edit-user';
+    this.isModalOpen = true;
+  }
+
+  saveEditGsbUser() {
+    if (!this.editingGsbUser) return;
+    const form = this.editGsbUserForm;
+    if (form.email !== undefined && form.email.trim() && !form.email.trim().toLowerCase().endsWith('@gsb.gov.tr')) {
+      this.showToast('E-posta @gsb.gov.tr ile bitmelidir.', 'error');
+      return;
+    }
+    this.gsbUsersService.updateGsbUser(this.editingGsbUser.id, form).subscribe({
+      next: () => {
+        this.showToast('GSB kullanıcısı güncellendi.', 'success');
+        this.isModalOpen = false;
+        this.modalType = '';
+        this.editingGsbUser = null;
+        this.editGsbUserForm = {};
+        this.loadGsbUsers(this.gsbUsersPage);
+      },
+      error: (err) => {
+        this.showToast(err?.error?.message || 'Güncelleme yapılamadı.', 'error');
+      },
+    });
+  }
+
+  confirmDeleteGsbUser(user: EmirGsbUserDto) {
+    this.deleteGsbUserTarget = user;
+    this.modalType = 'gsb-delete-user';
+    this.isModalOpen = true;
+  }
+
+  deleteGsbUser() {
+    if (!this.deleteGsbUserTarget) return;
+    const id = this.deleteGsbUserTarget.id;
+    this.gsbUsersService.deleteGsbUser(id).subscribe({
+      next: () => {
+        this.showToast('GSB kullanıcısı silindi.', 'success');
+        this.isModalOpen = false;
+        this.modalType = '';
+        this.deleteGsbUserTarget = null;
+        this.loadGsbUsers(this.gsbUsersPage);
+      },
+      error: (err) => {
+        this.showToast(err?.error?.message || 'Silme işlemi başarısız.', 'error');
+      },
+    });
   }
 
   getShortDesc(description: string | undefined): string {

@@ -162,7 +162,8 @@
                 <i class="bx bx-lock-alt"></i>
               </div>
               <input
-                type="password"
+                #step1Password
+                [type]="showPasswordStep1 ? 'text' : 'password'"
                 placeholder="Şifre"
                 class="modern-input"
                 [class.input-error]="hasPasswordInput && !isPasswordStrong"
@@ -170,19 +171,106 @@
                 required
                 minlength="8"
               />
+              <button
+                type="button"
+                class="password-toggle"
+                (click)="togglePasswordVisibilityStep1(step1Password, 'p1')"
+                aria-label="Şifreyi göster/gizle"
+              >
+                <svg
+                  *ngIf="!showPasswordStep1"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+                <svg
+                  *ngIf="showPasswordStep1"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-6.94"
+                  />
+                  <path
+                    d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-3.22 4.32"
+                  />
+                  <path d="M14.12 9.88A3 3 0 0 1 9.88 14.12" />
+                  <path d="m1 1 22 22" />
+                </svg>
+              </button>
             </div>
             <div class="input-group">
               <div class="icon-wrapper" [class.error-icon]="passwordMismatch">
                 <i class="bx bx-lock-alt"></i>
               </div>
               <input
-                type="password"
+                #step1PasswordConfirm
+                [type]="showConfirmPasswordStep1 ? 'text' : 'password'"
                 placeholder="Şifreyi tekrar girin"
                 class="modern-input"
                 [class.input-error]="passwordMismatch"
                 (input)="checkPasswords($event, 'p2')"
                 required
               />
+              <button
+                type="button"
+                class="password-toggle"
+                (click)="togglePasswordVisibilityStep1(step1PasswordConfirm, 'p2')"
+                aria-label="Şifreyi göster/gizle"
+              >
+                <svg
+                  *ngIf="!showConfirmPasswordStep1"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+                <svg
+                  *ngIf="showConfirmPasswordStep1"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-6.94"
+                  />
+                  <path
+                    d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-3.22 4.32"
+                  />
+                  <path d="M14.12 9.88A3 3 0 0 1 9.88 14.12" />
+                  <path d="m1 1 22 22" />
+                </svg>
+              </button>
             </div>
             <div *ngIf="passwordMismatch" class="error-message">
               <i class="bx bx-error-circle"></i> Şifreler eşleşmiyor.
@@ -228,7 +316,7 @@
           <form (submit)="submitStep3($event)">
             <div class="image-uploads-section">
               <div class="banner-upload-wrapper no-url-input">
-                <div class="upload-hint-wrapper">
+                <div class="upload-hint-wrapper" [class.upload-missing]="bannerMissing">
                   <app-image-upload
                     label="Banner Görseli (1920×500 px) *"
                     [previewUrl]="bannerPreviewUrl || null"
@@ -242,10 +330,13 @@
                     (onFileSelected)="onBannerFileSelected($event)"
                   ></app-image-upload>
                   <span class="size-hint">Max 1 MB</span>
+                  <span class="upload-required-hint" *ngIf="bannerMissing">
+                    <i class="bx bx-error-circle"></i> Banner görseli zorunludur.
+                  </span>
                 </div>
               </div>
               <div class="logo-upload-wrapper no-url-input">
-                <div class="upload-hint-wrapper">
+                <div class="upload-hint-wrapper" [class.upload-missing]="logoMissing">
                   <app-image-upload
                     label="Logo (220×220 px — 1:1 kare) *"
                     [previewUrl]="logoPreviewUrl || null"
@@ -259,40 +350,57 @@
                     (onFileSelected)="onLogoFileSelected($event)"
                   ></app-image-upload>
                   <span class="size-hint">Max 1 MB</span>
+                  <span class="upload-required-hint" *ngIf="logoMissing">
+                    <i class="bx bx-error-circle"></i> Logo görseli zorunludur.
+                  </span>
                 </div>
               </div>
             </div>
             <div class="form-section">
               <label>Topluluk adı <span class="required">*</span></label>
-              <div class="input-group">
+              <div class="input-group" [class.field-error]="comNameMissing">
                 <div class="icon-wrapper"><i class="bx bx-group"></i></div>
                 <input
                   type="text"
                   [(ngModel)]="comName"
+                  (ngModelChange)="comNameMissing = false"
                   name="comName"
                   class="modern-input"
                   placeholder="Topluluk adı..."
                   required
                 />
               </div>
+              <span class="field-required-hint" *ngIf="comNameMissing">
+                <i class="bx bx-error-circle"></i> Topluluk adı zorunludur.
+              </span>
             </div>
             <div class="form-section">
               <label>Kategori <span class="required">*</span></label>
-              <div class="input-group">
+              <div class="input-group" [class.field-error]="comCategoryMissing">
                 <div class="icon-wrapper"><i class="bx bx-category"></i></div>
-                <select [(ngModel)]="comCategory" name="comCategory" class="modern-input" required>
+                <select
+                  [(ngModel)]="comCategory"
+                  (ngModelChange)="comCategoryMissing = false"
+                  name="comCategory"
+                  class="modern-input"
+                  required
+                >
                   <option value="">Kategori seçin</option>
                   <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
                 </select>
               </div>
+              <span class="field-required-hint" *ngIf="comCategoryMissing">
+                <i class="bx bx-error-circle"></i> Kategori seçimi zorunludur.
+              </span>
             </div>
             <div class="form-section">
               <label>Kısa açıklama (max 70 karakter) <span class="required">*</span></label>
-              <div class="input-group">
+              <div class="input-group" [class.field-error]="miniAboutMissing">
                 <div class="icon-wrapper"><i class="bx bx-text"></i></div>
                 <input
                   type="text"
                   [(ngModel)]="miniAbout"
+                  (ngModelChange)="miniAboutMissing = false"
                   name="miniAbout"
                   class="modern-input"
                   placeholder="Kısa açıklama..."
@@ -300,13 +408,17 @@
                   required
                 />
               </div>
+              <span class="field-required-hint" *ngIf="miniAboutMissing">
+                <i class="bx bx-error-circle"></i> Kısa açıklama zorunludur.
+              </span>
             </div>
             <div class="form-section">
               <label>Topluluk hakkında (max 500 karakter) <span class="required">*</span></label>
-              <div class="input-group">
+              <div class="input-group" [class.field-error]="aboutMissing">
                 <div class="icon-wrapper"><i class="bx bx-detail"></i></div>
                 <textarea
                   [(ngModel)]="about"
+                  (ngModelChange)="aboutMissing = false"
                   name="about"
                   class="modern-input"
                   rows="4"
@@ -315,24 +427,37 @@
                   required
                 ></textarea>
               </div>
+              <span class="field-required-hint" *ngIf="aboutMissing">
+                <i class="bx bx-error-circle"></i> Topluluk hakkında alanı zorunludur.
+              </span>
             </div>
             <div class="form-section">
               <label>Şehir <span class="required">*</span></label>
-              <div class="input-group">
+              <div class="input-group" [class.field-error]="cityMissing">
                 <div class="icon-wrapper"><i class="bx bx-map"></i></div>
-                <select [(ngModel)]="city" name="city" class="modern-input" required>
+                <select
+                  [(ngModel)]="city"
+                  (ngModelChange)="cityMissing = false"
+                  name="city"
+                  class="modern-input"
+                  required
+                >
                   <option value="">Şehir seçin</option>
                   <option *ngFor="let c of cities" [value]="c">{{ c }}</option>
                 </select>
               </div>
+              <span class="field-required-hint" *ngIf="cityMissing">
+                <i class="bx bx-error-circle"></i> Şehir seçimi zorunludur.
+              </span>
             </div>
             <div class="form-section">
               <label>Üniversite <span class="required">*</span></label>
-              <div class="input-group">
+              <div class="input-group" [class.field-error]="universityMissing">
                 <div class="icon-wrapper"><i class="bx bxs-school"></i></div>
                 <input
                   type="text"
                   [(ngModel)]="university"
+                  (ngModelChange)="universityMissing = false"
                   name="university"
                   class="modern-input"
                   placeholder="Üniversite adı..."
@@ -340,6 +465,9 @@
                   required
                 />
               </div>
+              <span class="field-required-hint" *ngIf="universityMissing">
+                <i class="bx bx-error-circle"></i> Üniversite adı zorunludur.
+              </span>
             </div>
             <div class="form-section">
               <label>Topluluk başkanı e-posta <span class="required">*</span></label>
@@ -360,11 +488,12 @@
             </div>
             <div class="form-section">
               <label>Topluluk iletişim e-postası <span class="required">*</span></label>
-              <div class="input-group">
+              <div class="input-group" [class.field-error]="comMailMissing">
                 <div class="icon-wrapper"><i class="bx bx-envelope"></i></div>
                 <input
                   type="email"
                   [(ngModel)]="comMail"
+                  (ngModelChange)="comMailMissing = false"
                   name="comMail"
                   class="modern-input"
                   placeholder="topluluk@univ.edu.tr"
@@ -373,15 +502,35 @@
                 />
               </div>
               <small class="field-hint">Topluluk iletişimi için kullanılacak e-posta adresini girin.</small>
+              <span class="field-required-hint" *ngIf="comMailMissing">
+                <i class="bx bx-error-circle"></i> İletişim e-postası zorunludur.
+              </span>
             </div>
-            <button type="submit" class="btn-primary" [disabled]="isLoading">
+            <button type="submit" class="btn-primary"
+              [disabled]="isLoading || !isStep3FormValid"
+              [style.opacity]="!isStep3FormValid ? '0.65' : '1'">
               <app-luma-spin *ngIf="isLoading"></app-luma-spin>
-              <span *ngIf="!isLoading">Topluluğu oluştur <i class="bx bx-rocket"></i></span>
+              <span *ngIf="!isLoading && !isStep3FormValid">Lütfen tüm alanları doldurun</span>
+              <span *ngIf="!isLoading && isStep3FormValid">Topluluğu oluştur <i class="bx bx-rocket"></i></span>
             </button>
           </form>
         </div>
       </div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Dosya Boyutu Hata Modalı -->
+<div class="cr-modal-overlay" *ngIf="showFileSizeErrorModal" (click)="showFileSizeErrorModal = false">
+  <div class="cr-modal-card" (click)="$event.stopPropagation()">
+    <div class="cr-modal-head">
+      <div class="cr-modal-icon">
+        <i class="bx bx-error-circle"></i>
+      </div>
+      <h3>Dosya Boyutu Çok Büyük</h3>
+    </div>
+    <p class="cr-modal-message">{{ fileSizeErrorMessage }}</p>
+    <button class="btn primary cr-modal-btn" (click)="showFileSizeErrorModal = false">Tamam</button>
   </div>
 </div>

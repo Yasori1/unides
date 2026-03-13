@@ -1015,7 +1015,11 @@ $border-color: #e2e8f0; // Slate 200
     }
 
     .scroll-indicator {
-      display: none;
+      position: static;
+      transform: none;
+      margin: 20px auto 0;
+      width: fit-content;
     }
+
   }
 }

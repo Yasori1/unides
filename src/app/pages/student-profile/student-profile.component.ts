@@ -1048,16 +1048,8 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
   logout() {
     if (isPlatformBrowser(this.platformId)) {
       this.toastService.show('Çıkış yapılıyor...', 'success');
-      // Local storage'ı temizle
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('refresh_token');
-      localStorage.removeItem('user_info');
-      localStorage.removeItem('user_type');
-
-      // Anasayfaya yönlendir
-      setTimeout(() => {
-        this.router.navigate(['/']);
-      }, 1000);
+      // Merkezi AuthService.logout ile tüm oturum ve permission cache'lerini temizle
+      this.authService.logout();
     }
   }
 

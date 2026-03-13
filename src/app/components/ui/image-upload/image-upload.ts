@@ -109,30 +109,32 @@ export class ImageUploadComponent {
 
   // --- DOSYAYI İŞLEME VE ÖNİZLEME ---
   processFile(file: File) {
-    // Dosya boyutu kontrolü (maxFileSizeMB MB üzeri dosyalar reddedilir)
-    const maxSizeBytes = this.maxFileSizeMB * 1024 * 1024; // MB -> Bytes
-    const actualSizeMB = file.size / (1024 * 1024);
+    // Dosya boyutu kontrolü (maxFileSizeMB > 0 ise uygulanır; 0 veya altı = limitsiz)
+    if (this.maxFileSizeMB > 0) {
+      const maxSizeBytes = this.maxFileSizeMB * 1024 * 1024; // MB -> Bytes
+      const actualSizeMB = file.size / (1024 * 1024);
 
-    if (file.size > maxSizeBytes) {
-      // Dosya çok büyük - hata göster
-      this.showFileSizeError = true;
-      this.fileSizeErrorMessage = `Dosya boyutu çok büyük! Maksimum ${
-        this.maxFileSizeMB
-      }MB yükleyebilirsiniz. Seçilen dosya: ${actualSizeMB.toFixed(2)}MB`;
+      if (file.size > maxSizeBytes) {
+        // Dosya çok büyük - hata göster
+        this.showFileSizeError = true;
+        this.fileSizeErrorMessage = `Dosya boyutu çok büyük! Maksimum ${
+          this.maxFileSizeMB
+        }MB yükleyebilirsiniz. Seçilen dosya: ${actualSizeMB.toFixed(2)}MB`;
 
-      // Input'u temizle
-      if (this.fileInput) {
-        this.fileInput.nativeElement.value = '';
+        // Input'u temizle
+        if (this.fileInput) {
+          this.fileInput.nativeElement.value = '';
+        }
+
+        // Parent component'e hata bildir
+        this.onFileSizeError.emit({
+          file: file,
+          maxSize: this.maxFileSizeMB,
+          actualSize: parseFloat(actualSizeMB.toFixed(2)),
+        });
+
+        return; // İşlemi durdur
       }
-
-      // Parent component'e hata bildir
-      this.onFileSizeError.emit({
-        file: file,
-        maxSize: this.maxFileSizeMB,
-        actualSize: parseFloat(actualSizeMB.toFixed(2)),
-      });
-
-      return; // İşlemi durdur
     }
 
     // Dosya boyutu uygun - hata mesajını temizle
@@ -182,6 +184,23 @@ export class ImageUploadComponent {
   async confirmCrop() {
     if (!this.lastCroppedResult || !this.pendingCropFile) return;
     const event = this.lastCroppedResult;
+
+    // Kırpılmış blob boyut kontrolü — preview set edilmeden önce (sadece maxFileSizeMB > 0 ise)
+    if (this.uploadToServer && event.blob && this.maxFileSizeMB > 0) {
+      const maxSizeBytes = this.maxFileSizeMB * 1024 * 1024;
+      if (event.blob.size > maxSizeBytes) {
+        const actualSizeMB = event.blob.size / (1024 * 1024);
+        this.showFileSizeError = true;
+        this.fileSizeErrorMessage = `Kırpılan görsel boyutu çok büyük! Maksimum ${this.maxFileSizeMB}MB yükleyebilirsiniz. Kırpılan dosya: ${actualSizeMB.toFixed(2)}MB`;
+        this.onFileSizeError.emit({
+          file: new File([event.blob], this.pendingCropFile.name, { type: this.pendingCropFile.type }),
+          maxSize: this.maxFileSizeMB,
+          actualSize: parseFloat(actualSizeMB.toFixed(2)),
+        });
+        this.closeCropModal();
+        return;
+      }
+    }
 
     // Önizleme: objectUrl (blob URL) veya base64
     if (event.objectUrl) {

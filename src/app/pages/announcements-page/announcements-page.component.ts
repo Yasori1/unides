@@ -61,20 +61,21 @@ export class AnnouncementsPageComponent implements OnInit {
     }
   }
 
-  loadAnnouncements() {
+  loadAnnouncements(page?: number) {
     this.isLoading = true;
-    this.announcementService.getAllAnnouncements().subscribe({
-      next: (data) => {
-        // data.map içinde gelen objeyi ExtendedAnnouncement tipine uyduruyoruz
-        const generalData: ExtendedAnnouncement[] = (data || []).map(item => ({
+    const requestedPage = page ?? this.currentPage ?? 1;
+
+    this.announcementService.getAnnouncementsPage(requestedPage, this.itemsPerPage).subscribe({
+      next: (res) => {
+        const generalData: ExtendedAnnouncement[] = (res.items || []).map(item => ({
           ...item,
-          // Eğer servisten gelen veride link yoksa boş string veya undefined gelebilir
           link: item.link || ''
         }));
-
-        // Verileri ata
         this.allAnnouncements = generalData;
-
+        this.filteredAnnouncements = [...generalData];
+        this.currentPage = res.page;
+        this.totalPages = res.totalPages;
+        this.pages = Array.from({ length: this.totalPages }, (_, i) => i + 1);
         this.applyFilters();
         this.isLoading = false;
       },
@@ -83,6 +84,8 @@ export class AnnouncementsPageComponent implements OnInit {
         this.isLoading = false;
         this.allAnnouncements = [];
         this.filteredAnnouncements = [];
+        this.totalPages = 0;
+        this.pages = [];
       }
     });
   }
@@ -118,32 +121,13 @@ export class AnnouncementsPageComponent implements OnInit {
     }
 
     this.filteredAnnouncements = temp;
-    this.currentPage = 1;
-    this.initPagination();
+    this.displayedAnnouncements = [...this.filteredAnnouncements];
   }
 
-  // --- SAYFALAMA ---
-  initPagination() {
-    this.totalPages = Math.ceil(this.filteredAnnouncements.length / this.itemsPerPage);
-    this.pages = Array.from({ length: this.totalPages }, (_, i) => i + 1);
-    this.updateDisplayedData();
-  }
-
-  updateDisplayedData() {
-    const start = (this.currentPage - 1) * this.itemsPerPage;
-    const end = start + this.itemsPerPage;
-    this.displayedAnnouncements = this.filteredAnnouncements.slice(start, end);
-
-    // Sayfa değiştiğinde yukarı kaydır
-    if (isPlatformBrowser(this.platformId)) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }
-
+  // --- SAYFALAMA (backend sayfa bazlı) ---
   changePage(page: number) {
     if (page >= 1 && page <= this.totalPages) {
-      this.currentPage = page;
-      this.updateDisplayedData();
+      this.loadAnnouncements(page);
     }
   }
 

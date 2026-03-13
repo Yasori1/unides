@@ -1579,15 +1579,28 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  overflow: auto;
+  overflow: hidden;
+
+  // Scrollable alan: sadece form içeriği kayar, footer sabit kalır
+  .event-form-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 4px; // scrollbar boşluğu
+  }
+
+  // Buton her zaman alt kısımda görünür, içerik ne kadar uzarsa uzasın
+  .event-form-footer {
+    flex-shrink: 0;
+    padding-top: 12px;
+    border-top: 1px solid #e2e8f0;
+    margin-top: 8px;
+  }
 
   .event-detail-layout {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 16px;
     align-items: start;
-    flex: 1;
-    min-height: 0;
 
     @media (max-width: 900px) {
       grid-template-columns: 1fr;
@@ -1732,6 +1745,41 @@
   border-color: #0ea5e9;
   background: #fff;
 }
+
+// ── Etkinlik formu alan hata stilleri ──────────────────────────────────────
+.ev-required-star {
+  color: #ef4444;
+  margin-left: 2px;
+}
+
+.ev-field-error {
+  border-color: #ef4444 !important;
+  background: #fff5f5 !important;
+}
+
+.ev-field-hint {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #ef4444;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-top: 2px;
+
+  i { font-size: 0.95rem; }
+}
+
+.ev-image-missing {
+  ::ng-deep .drop-zone {
+    border-color: #ef4444 !important;
+    background: #fff5f5 !important;
+  }
+
+  ::ng-deep .image-upload-container label {
+    color: #ef4444;
+  }
+}
+// ───────────────────────────────────────────────────────────────────────────
 
 .upload-input-full {
   display: inline-flex;
@@ -1894,19 +1942,129 @@
 
 .profile-select {
   width: 100%;
-  padding: 12px 14px;
+  padding: 10px 36px 10px 12px;
   border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  font-size: 0.95rem;
-  background: #f8fafc;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  font-family: inherit;
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 10px center;
+  background-size: 16px;
   color: #0f172a;
   cursor: pointer;
-  appearance: auto;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  line-height: 1.4;
 
   &:focus {
     outline: 2px solid #0ea5e9;
     border-color: #0ea5e9;
+    background-color: #fff;
+  }
+
+  &:disabled {
+    background-color: #f8fafc;
+    color: #64748b;
+    cursor: not-allowed;
+    opacity: 1;
+  }
+}
+
+/* Custom dropdown (şehir/kategori profil seçimleri) */
+.custom-select-wrapper {
+  position: relative;
+  width: 100%;
+  user-select: none;
+
+  .custom-select-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 500;
     background: #fff;
+    color: #0f172a;
+    cursor: pointer;
+    min-height: 42px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+
+    span.placeholder {
+      color: #94a3b8;
+    }
+
+    .custom-select-arrow {
+      flex-shrink: 0;
+      color: #64748b;
+      transition: transform 0.2s;
+    }
+  }
+
+  &.open .custom-select-trigger {
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.15);
+
+    .custom-select-arrow {
+      transform: rotate(180deg);
+    }
+  }
+
+  &.disabled .custom-select-trigger {
+    background: #f8fafc;
+    color: #64748b;
+    cursor: not-allowed;
+
+    .custom-select-arrow {
+      opacity: 0.4;
+    }
+  }
+
+  .custom-select-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+    z-index: 200;
+    max-height: 220px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 4px 0;
+
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+  }
+
+  .custom-select-option {
+    padding: 10px 14px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #0f172a;
+    cursor: pointer;
+    transition: background 0.1s;
+
+    &:hover {
+      background: #f0f9ff;
+      color: #0ea5e9;
+    }
+
+    &.selected {
+      background: #e0f2fe;
+      color: #0369a1;
+      font-weight: 600;
+    }
   }
 }
 

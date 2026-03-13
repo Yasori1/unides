@@ -39,4 +39,16 @@ export interface AuthResponse {
   roleName: string;
   accessToken: string;
   refreshToken: string;
+  /**
+   * Efektif rol ID'si:
+   * 2 = Normal GSB personeli
+   * 6 = UNIDES_GODMODE (tam yetkili GSB admin)
+   * 7 = UNIDES_DUYURU (duyuru yöneticisi)
+   */
+  roleId?: number | null;
+  /**
+   * UserPermission tablosundan türetilen görev listesi.
+   * Örn: ["UNIDES_GODMODE"], ["UNIDES_DUYURU"], []
+   */
+  permissions?: string[] | null;
 }

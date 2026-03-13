@@ -79,38 +79,29 @@ export class CommunitiesPageComponent implements OnInit {
     }
   }
 
-  fetchCommunities() {
+  fetchCommunities(page?: number) {
     if (!isPlatformBrowser(this.platformId)) {
       return;
     }
 
     this.isLoading = true;
+    const requestedPage = page ?? this.currentPage ?? 1;
 
-    // URL parametrelerini kontrol et. Şehir (city) backend'e GÖNDERİLMİYOR — sadece frontend'de filtre.
     const queryParams = this.route.snapshot.queryParams;
     const backendParams: { university?: string; category?: string; name?: string } = {};
+    if (queryParams['search']) this.searchText = queryParams['search'];
+    if (queryParams['category']) this.selectedCategory = queryParams['category'];
+    if (queryParams['university']) backendParams.university = queryParams['university'];
+    if (this.searchText?.trim()) backendParams.name = this.searchText.trim();
+    if (this.selectedCategory?.trim()) backendParams.category = this.selectedCategory.trim();
 
-    if (queryParams['search']) {
-      this.searchText = queryParams['search'];
-      backendParams.name = queryParams['search'];
-    }
-    if (queryParams['category']) {
-      this.selectedCategory = queryParams['category'];
-      backendParams.category = queryParams['category'];
-    }
-    if (queryParams['university']) {
-      backendParams.university = queryParams['university'];
-    }
-    // Token/çerez göndermemek için HttpClient yerine fetch (getAllCommunitiesPublic) — tüm şehirler gelir
-    this.communityService.getAllCommunitiesPublic(backendParams).subscribe({
-      next: (data) => {
-        this.allCommunities = data;
-
-        // --- GÜNCELLEME: Şehirleri artık dinamik çekmiyoruz, yukarıdaki sabit listeyi kullanıyoruz. ---
-        // Sadece kategorileri dinamik olarak veriden çekmeye devam ediyoruz.
+    this.communityService.getCommunitiesPublicPage(requestedPage, this.itemsPerPage, backendParams).subscribe({
+      next: (res) => {
+        this.allCommunities = res.items;
+        this.currentPage = res.page;
+        this.totalPages = res.totalPages;
+        this.pages = Array.from({ length: this.totalPages }, (_, i) => i + 1);
         this.categories = [...new Set(this.allCommunities.map(c => c.category))].sort();
-
-        // Backend'den zaten sadece aktif topluluklar geldiği için frontend'de ekstra filtreleme yapmaya gerek yok
         this.applyFilters();
         this.isLoading = false;
       },
@@ -118,6 +109,8 @@ export class CommunitiesPageComponent implements OnInit {
         Logger.error('Topluluklar yüklenirken hata oluştu:', err);
         this.allCommunities = [];
         this.categories = [];
+        this.totalPages = 0;
+        this.pages = [];
         this.applyFilters();
         this.isLoading = false;
       }
@@ -175,8 +168,7 @@ export class CommunitiesPageComponent implements OnInit {
     }
 
     this.filteredCommunities = temp;
-    this.currentPage = 1;
-    this.initPagination();
+    this.displayedCommunities = [...this.filteredCommunities];
   }
 
   resetFilters() {
@@ -185,29 +177,13 @@ export class CommunitiesPageComponent implements OnInit {
     this.selectedCategory = '';
     this.selectedTag = '';
     this.sortOrder = 'default';
-    this.applyFilters();
+    this.fetchCommunities(1);
   }
 
-  // --- SAYFALAMA MANTIĞI ---
-  initPagination() {
-    this.totalPages = Math.ceil(this.filteredCommunities.length / this.itemsPerPage);
-    this.pages = Array.from({ length: this.totalPages }, (_, i) => i + 1);
-    this.updateDisplayedData();
-  }
-
-  updateDisplayedData() {
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
-    this.displayedCommunities = this.filteredCommunities.slice(startIndex, endIndex);
-    if (isPlatformBrowser(this.platformId)) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }
-
+  // --- SAYFALAMA (backend sayfa bazlı) ---
   changePage(page: number) {
     if (page >= 1 && page <= this.totalPages) {
-      this.currentPage = page;
-      this.updateDisplayedData();
+      this.fetchCommunities(page);
     }
   }
 

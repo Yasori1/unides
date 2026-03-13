@@ -44,6 +44,8 @@ export class CommunityRegisterComponent implements OnInit {
   passwordHasNumber = false;
   passwordHasSpecial = false;
   hasPasswordInput = false;
+  showPasswordStep1 = false;
+  showConfirmPasswordStep1 = false;
 
   // Adım 1
   email = '';
@@ -52,7 +54,7 @@ export class CommunityRegisterComponent implements OnInit {
 
   // Adım 3 - Topluluk bilgileri (Topluluk ekle popup ile aynı alanlar)
   comName = '';
-  comCategory = 'Teknoloji';
+  comCategory = '';
   miniAbout = '';
   about = '';
   city = '';
@@ -70,6 +72,20 @@ export class CommunityRegisterComponent implements OnInit {
   logoPreviewUrl = '';
   bannerFile: File | null = null;
   logoFile: File | null = null;
+
+  showFileSizeErrorModal = false;
+  fileSizeErrorMessage = '';
+
+  bannerMissing = false;
+  logoMissing = false;
+
+  comNameMissing = false;
+  comCategoryMissing = false;
+  miniAboutMissing = false;
+  aboutMissing = false;
+  cityMissing = false;
+  universityMissing = false;
+  comMailMissing = false;
 
   categories: string[] = [
     'Teknoloji',
@@ -236,6 +252,21 @@ export class CommunityRegisterComponent implements OnInit {
     this.passwordHasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?.]/.test(pwd);
   }
 
+  get isStep3FormValid(): boolean {
+    return (
+      !!this.bannerFile &&
+      !!this.logoFile &&
+      !!this.comName?.trim() &&
+      !!this.comCategory?.trim() &&
+      !!this.miniAbout?.trim() &&
+      !!this.about?.trim() &&
+      !!this.city?.trim() &&
+      !!this.university?.trim() &&
+      !!this.comLeadMail?.trim() &&
+      !!this.comMail?.trim()
+    );
+  }
+
   get isPasswordStrong(): boolean {
     return (
       this.passwordMinLength &&
@@ -258,24 +289,41 @@ export class CommunityRegisterComponent implements OnInit {
     this.passwordMismatch = !!this.confirmPassword && this.password !== this.confirmPassword;
   }
 
+  togglePasswordVisibilityStep1(input: HTMLInputElement, which: 'p1' | 'p2'): void {
+    if (which === 'p1') {
+      this.showPasswordStep1 = !this.showPasswordStep1;
+      input.type = this.showPasswordStep1 ? 'text' : 'password';
+    } else {
+      this.showConfirmPasswordStep1 = !this.showConfirmPasswordStep1;
+      input.type = this.showConfirmPasswordStep1 ? 'text' : 'password';
+    }
+  }
+
   onBannerSelected(imageUrl: string): void {
     this.bannerPreviewUrl = imageUrl;
+    if (!imageUrl) {
+      this.bannerFile = null;
+    }
   }
 
   onLogoSelected(imageUrl: string): void {
     this.logoPreviewUrl = imageUrl;
+    if (!imageUrl) {
+      this.logoFile = null;
+    }
   }
 
   private readonly maxImageSizeBytes = 1 * 1024 * 1024; // 1 MB
 
   onBannerFileSelected(file: File): void {
     if (file.size > this.maxImageSizeBytes) {
-      this.toastService.show(
-        'Banner görseli 1 MB\'dan büyük olamaz. Lütfen daha küçük bir dosya seçin.',
-        'error'
-      );
+      this.fileSizeErrorMessage = 'Banner görseli 1 MB\'dan büyük olamaz. Lütfen daha küçük bir dosya seçin.';
+      this.showFileSizeErrorModal = true;
+      this.bannerPreviewUrl = '';
+      this.bannerFile = null;
       return;
     }
+    this.bannerMissing = false;
     this.bannerFile = file;
     const reader = new FileReader();
     reader.onload = (e: ProgressEvent<FileReader>) => {
@@ -286,12 +334,13 @@ export class CommunityRegisterComponent implements OnInit {
 
   onLogoFileSelected(file: File): void {
     if (file.size > this.maxImageSizeBytes) {
-      this.toastService.show(
-        'Logo 1 MB\'dan büyük olamaz. Lütfen daha küçük bir dosya seçin.',
-        'error'
-      );
+      this.fileSizeErrorMessage = 'Logo görseli 1 MB\'dan büyük olamaz. Lütfen daha küçük bir dosya seçin.';
+      this.showFileSizeErrorModal = true;
+      this.logoPreviewUrl = '';
+      this.logoFile = null;
       return;
     }
+    this.logoMissing = false;
     this.logoFile = file;
     const reader = new FileReader();
     reader.onload = (e: ProgressEvent<FileReader>) => {
@@ -364,44 +413,29 @@ export class CommunityRegisterComponent implements OnInit {
     event.preventDefault();
     if (this.isLoading) return;
 
-    if (!this.comName?.trim()) {
-      this.toastService.show('Topluluk adı zorunludur.', 'error');
-      return;
-    }
-    if (!this.comCategory?.trim()) {
-      this.toastService.show('Kategori seçiniz.', 'error');
-      return;
-    }
-    if (!this.miniAbout?.trim()) {
-      this.toastService.show('Kısa açıklama zorunludur.', 'error');
-      return;
-    }
-    if (!this.about?.trim()) {
-      this.toastService.show('Topluluk hakkında açıklaması zorunludur.', 'error');
-      return;
-    }
-    if (!this.city?.trim()) {
-      this.toastService.show('Şehir seçiniz.', 'error');
-      return;
-    }
-    if (!this.university?.trim()) {
-      this.toastService.show('Üniversite adı giriniz.', 'error');
-      return;
-    }
-    if (!this.comLeadMail?.trim()) {
-      this.toastService.show('Topluluk başkanı e-postası zorunludur.', 'error');
-      return;
-    }
-    if (!this.comMail?.trim()) {
-      this.toastService.show('Topluluk iletişim e-postası zorunludur.', 'error');
-      return;
-    }
-    if (!this.bannerFile) {
-      this.toastService.show('Lütfen topluluk kapak görseli (banner) yükleyin.', 'error');
-      return;
-    }
-    if (!this.logoFile) {
-      this.toastService.show('Lütfen topluluk logosu yükleyin.', 'error');
+    this.comNameMissing = !this.comName?.trim();
+    this.comCategoryMissing = !this.comCategory?.trim();
+    this.miniAboutMissing = !this.miniAbout?.trim();
+    this.aboutMissing = !this.about?.trim();
+    this.cityMissing = !this.city?.trim();
+    this.universityMissing = !this.university?.trim();
+    this.comMailMissing = !this.comMail?.trim();
+    this.bannerMissing = !this.bannerFile;
+    this.logoMissing = !this.logoFile;
+
+    const hasErrors =
+      this.comNameMissing ||
+      this.comCategoryMissing ||
+      this.miniAboutMissing ||
+      this.aboutMissing ||
+      this.cityMissing ||
+      this.universityMissing ||
+      this.comMailMissing ||
+      this.bannerMissing ||
+      this.logoMissing;
+
+    if (hasErrors) {
+      this.toastService.show('Lütfen tüm zorunlu alanları eksiksiz doldurun.', 'error');
       return;
     }
 
@@ -427,22 +461,18 @@ export class CommunityRegisterComponent implements OnInit {
 
     if (token) {
       // --- SETUP AKIŞI: Önce POST /api/Auth/community-setup/banner ve .../logo (X-Setup-Token), sonra complete-community-setup (bannerUrl/logoUrl body'de) ---
-      const bannerUrl$ = this.bannerFile
-        ? this.authService.uploadSetupBanner(this.bannerFile, token).pipe(
-            catchError((err) => {
-              Logger.error('Banner yüklenirken hata:', err);
-              return of('');
-            })
-          )
-        : of('');
-      const logoUrl$ = this.logoFile
-        ? this.authService.uploadSetupLogo(this.logoFile, token).pipe(
-            catchError((err) => {
-              Logger.error('Logo yüklenirken hata:', err);
-              return of('');
-            })
-          )
-        : of('');
+      const bannerUrl$ = this.authService.uploadSetupBanner(this.bannerFile!, token).pipe(
+        catchError((err) => {
+          Logger.error('Banner yüklenirken hata:', err);
+          return of('');
+        })
+      );
+      const logoUrl$ = this.authService.uploadSetupLogo(this.logoFile!, token).pipe(
+        catchError((err) => {
+          Logger.error('Logo yüklenirken hata:', err);
+          return of('');
+        })
+      );
 
       bannerUrl$.pipe(
         switchMap((bannerUrl) =>
@@ -536,22 +566,18 @@ export class CommunityRegisterComponent implements OnInit {
       return;
     }
     const opts = setupToken ? { setupToken } : undefined;
-    const logo$ = this.logoFile
-      ? this.communityService.uploadLogo(communityId, this.logoFile, opts).pipe(
-          catchError((err) => {
-            Logger.error('Logo yüklenirken hata:', err);
-            return of(null);
-          })
-        )
-      : of(null);
-    const banner$ = this.bannerFile
-      ? this.communityService.uploadBanner(communityId, this.bannerFile, opts).pipe(
-          catchError((err) => {
-            Logger.error('Banner yüklenirken hata:', err);
-            return of(null);
-          })
-        )
-      : of(null);
+    const logo$ = this.communityService.uploadLogo(communityId, this.logoFile!, opts).pipe(
+      catchError((err) => {
+        Logger.error('Logo yüklenirken hata:', err);
+        return of(null);
+      })
+    );
+    const banner$ = this.communityService.uploadBanner(communityId, this.bannerFile!, opts).pipe(
+      catchError((err) => {
+        Logger.error('Banner yüklenirken hata:', err);
+        return of(null);
+      })
+    );
     logo$.pipe(switchMap(() => banner$)).subscribe({
       next: () => this.onCommunitySetupSuccess(),
       error: () => this.onCommunitySetupSuccess(),

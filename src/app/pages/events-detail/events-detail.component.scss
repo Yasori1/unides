@@ -181,7 +181,7 @@
 .content-section {
   padding: 20px 0 100px;
   position: relative;
-          z-index: 10000; // En üstte kalması için çok yüksek z-index
+  z-index: 10; // Hero wave divider (z-index: 5) üstünde, navbar (z-index: 1000) altında
 
   .container-wide {
     max-width: 1400px;
@@ -365,98 +365,6 @@
       }
     }
 
-    // --- Image Modal ---
-    .image-modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.85);
-      z-index: 9999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      backdrop-filter: blur(5px);
-      animation: fadeIn 0.3s ease-out;
-
-      .close-btn {
-        position: fixed; // Fixed yaparak görselin üstünde kalmasını garantile
-        top: 20px;
-        right: 20px;
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        background: rgba(0, 0, 0, 0.7);
-        color: white;
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.75rem;
-        cursor: pointer;
-        transition: all 0.2s;
-        z-index: 10000; // En üstte kalması için çok yüksek z-index
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-
-        &:hover {
-          background: rgba(0, 0, 0, 0.9);
-          border-color: rgba(255, 255, 255, 0.5);
-          transform: scale(1.1);
-        }
-
-        &:active {
-          transform: scale(0.95);
-        }
-      }
-
-      .image-modal-content {
-        position: relative;
-        max-width: 95vw;
-        max-height: 95vh;
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 12px;
-        overflow: visible; // Close button'ın görünür olması için
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-        animation: scaleIn 0.3s ease-out;
-
-        img {
-          display: block;
-          max-width: 95vw;
-          max-height: 95vh;
-          width: auto;
-          height: auto;
-          object-fit: contain;
-          border-radius: 12px;
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-        }
-      }
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-      }
-
-      to {
-        opacity: 1;
-      }
-    }
-
-    @keyframes scaleIn {
-      from {
-        transform: scale(0.95);
-        opacity: 0;
-      }
-
-      to {
-        transform: scale(1);
-        opacity: 1;
-      }
-    }
-
     .description-section {
 
       // Clearfix for floated image
@@ -581,6 +489,23 @@
               font-size: 1.2rem;
               color: var(--accent-color);
             }
+
+            .event-contact-email {
+              color: inherit;
+              font-weight: inherit;
+              text-decoration: none;
+              word-break: break-all;
+              display: inline;
+              &:hover {
+                text-decoration: underline;
+                color: var(--accent-color);
+              }
+            }
+
+            .info-text-muted {
+              color: var(--secondary-color);
+              font-style: italic;
+            }
           }
         }
       }
@@ -625,6 +550,92 @@
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+// --- IMAGE MODAL (root level - outside content-section stacking context) ---
+.image-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(5px);
+  animation: fadeIn 0.3s ease-out;
+
+  .close-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    z-index: 10000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.9);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: scale(1.1);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+
+  .image-modal-content {
+    position: relative;
+    max-width: 95vw;
+    max-height: 95vh;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    overflow: visible;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    animation: scaleIn 0.3s ease-out;
+
+    img {
+      display: block;
+      max-width: 95vw;
+      max-height: 95vh;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      border-radius: 12px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
   }
 }
 
@@ -701,27 +712,27 @@
         }
       }
 
-      // Tablet için modal iyileştirmeleri
-      .image-modal-backdrop {
-        padding: 15px;
+    }
+  }
 
-        .close-btn {
-          top: 15px;
-          right: 15px;
-          width: 46px;
-          height: 46px;
-          font-size: 1.6rem;
-        }
+  .image-modal-backdrop {
+    padding: 15px;
 
-        .image-modal-content {
-          max-width: 95vw;
-          max-height: 95vh;
+    .close-btn {
+      top: 15px;
+      right: 15px;
+      width: 46px;
+      height: 46px;
+      font-size: 1.6rem;
+    }
 
-          img {
-            max-width: 95vw;
-            max-height: 95vh;
-          }
-        }
+    .image-modal-content {
+      max-width: 95vw;
+      max-height: 95vh;
+
+      img {
+        max-width: 95vw;
+        max-height: 95vh;
       }
     }
   }
@@ -782,30 +793,30 @@
         }
       }
 
-      // Mobil için modal iyileştirmeleri
-      .image-modal-backdrop {
-        padding: 10px;
+    }
+  }
 
-        .close-btn {
-          top: 12px;
-          right: 12px;
-          width: 44px;
-          height: 44px;
-          font-size: 1.5rem;
-          background: rgba(0, 0, 0, 0.8);
-          border: 2px solid rgba(255, 255, 255, 0.4);
-        }
+  .image-modal-backdrop {
+    padding: 10px;
 
-        .image-modal-content {
-          max-width: 100vw;
-          max-height: 100vh;
-          padding: 0;
+    .close-btn {
+      top: 12px;
+      right: 12px;
+      width: 44px;
+      height: 44px;
+      font-size: 1.5rem;
+      background: rgba(0, 0, 0, 0.8);
+      border: 2px solid rgba(255, 255, 255, 0.4);
+    }
 
-          img {
-            max-width: 100vw;
-            max-height: 100vh;
-          }
-        }
+    .image-modal-content {
+      max-width: 100vw;
+      max-height: 100vh;
+      padding: 0;
+
+      img {
+        max-width: 100vw;
+        max-height: 100vh;
       }
     }
   }

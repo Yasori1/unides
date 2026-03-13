@@ -387,7 +387,7 @@
       margin-top: -170px;
       margin-bottom: 24px;
       position: relative;
-      z-index: 9999; // Highest z-index - always on top
+      z-index: 10; // Banner'ın (background) üstünde, navbar'ın altında
 
       .community-logo {
         width: 100%;

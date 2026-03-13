@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, map, catchError, of } from 'rxjs';
 import { AuthService } from './auth.services';
 import { environment } from '../../environments/environment';
@@ -64,6 +64,14 @@ interface UpdateAnnouncementRequest {
   imagePath?: string;
 }
 
+/** Backend paginated response: { page, pageSize, totalCount, totalPages, items } */
+export interface AnnouncementsPageResponse {
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+  items: Announcement[];
+}
 
 @Injectable({
   providedIn: 'root',
@@ -170,13 +178,37 @@ export class AnnouncementService {
     };
   }
 
-  getAllAnnouncements(): Observable<Announcement[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/list`).pipe(
+  /**
+   * Sayfa bazlı duyuru listesi (backend pagination).
+   * GET /api/Announcements/list?page=1&pageSize=12
+   */
+  getAnnouncementsPage(page: number = 1, pageSize: number = 12): Observable<AnnouncementsPageResponse> {
+    const params = new HttpParams().set('page', String(page)).set('pageSize', String(pageSize));
+    return this.http.get<{ page: number; pageSize: number; totalCount: number; totalPages: number; items: any[] }>(
+      `${this.apiUrl}/list`,
+      { params }
+    ).pipe(
       map((response) => {
-        // Backend camelCase dönüyor: { annId, title, shortDescription, annDate, imagePath }
-        const realAnnouncements = response.map((dto) => this.mapToAnnouncement(dto));
-        return realAnnouncements;
+        const items = (response.items || []).map((dto) => this.mapToAnnouncement(dto));
+        return {
+          page: response.page ?? page,
+          pageSize: response.pageSize ?? pageSize,
+          totalCount: response.totalCount ?? 0,
+          totalPages: response.totalPages ?? 1,
+          items,
+        };
       }),
+      catchError((error) => {
+        Logger.error('Duyurular yüklenemedi:', error);
+        return of({ page: 1, pageSize: pageSize, totalCount: 0, totalPages: 0, items: [] });
+      })
+    );
+  }
+
+  /** Tüm duyuruları tek seferde getirir (eski davranış; mümkünse getAnnouncementsPage kullanın). */
+  getAllAnnouncements(): Observable<Announcement[]> {
+    return this.getAnnouncementsPage(1, 9999).pipe(
+      map((res) => res.items),
       catchError((error) => {
         Logger.error('Duyurular yüklenemedi:', error);
         return of([]);

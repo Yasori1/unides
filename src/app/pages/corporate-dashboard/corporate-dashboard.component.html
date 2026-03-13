@@ -73,7 +73,17 @@
         <span class="menu-text">Duyurular</span>
       </button>
 
-      <!-- Mesajlar Butonu Silindi -->
+      <div class="menu-divider" *ngIf="isGodMode">KULLANICILAR (GSB Yetkilisi)</div>
+      <button
+        *ngIf="isGodMode"
+        class="menu-item"
+        [class.active]="activeTab === 'gsb-users'"
+        (click)="switchTab('gsb-users')"
+        title="GSB Yetkilileri"
+      >
+        <span class="material-symbols-outlined">admin_panel_settings</span>
+        <span class="menu-text">GSB Yetkilileri</span>
+      </button>
 
       <div class="menu-divider">SİSTEM</div>
 
@@ -626,6 +636,33 @@
           </div>
         </div>
 
+        <!-- Duyurular sayfalama -->
+        <div class="pagination-area" *ngIf="!isLoadingAnnouncements && announcementTotalPages > 1">
+          <button
+            class="page-btn prev"
+            [disabled]="announcementPage === 1"
+            (click)="changeAnnouncementPage(announcementPage - 1)"
+          >
+            <span class="material-symbols-outlined">chevron_left</span>
+          </button>
+          <ng-container *ngFor="let p of announcementPages">
+            <button
+              class="page-btn number"
+              [class.active]="p === announcementPage"
+              (click)="changeAnnouncementPage(p)"
+            >
+              {{ p }}
+            </button>
+          </ng-container>
+          <button
+            class="page-btn next"
+            [disabled]="announcementPage === announcementTotalPages"
+            (click)="changeAnnouncementPage(announcementPage + 1)"
+          >
+            <span class="material-symbols-outlined">chevron_right</span>
+          </button>
+        </div>
+
         <div class="empty-state" *ngIf="filteredAnnouncements.length === 0">
           <span class="material-symbols-outlined">campaign</span>
           <p *ngIf="announcementSearchText.trim()">Arama sonucu bulunamadı.</p>
@@ -634,7 +671,109 @@
       </div>
     </div>
 
-    <!-- 5. TAB: AYARLAR -->
+    <!-- 5. TAB: GSB YETKİLİLERİ (sadece GODMODE) -->
+    <div class="view-container" *ngIf="activeTab === 'gsb-users' && isGodMode">
+      <div class="page-header">
+        <h2>GSB Yetkilileri</h2>
+        <div class="header-controls">
+          <button class="btn-primary" (click)="openCreateGsbUserModal()">
+            <span class="material-symbols-outlined">add</span>
+            Yeni GSB Kullanıcısı
+          </button>
+        </div>
+      </div>
+      <div class="gsb-filters" *ngIf="!isLoadingGsbUsers">
+        <div class="gsb-filters-title">Filtreleme</div>
+        <div class="filter-row">
+          <div class="filter-field">
+            <label class="filter-label">Arama</label>
+            <div class="search-wrap">
+              <span class="material-symbols-outlined search-icon">search</span>
+              <input
+                type="text"
+                [(ngModel)]="gsbSearchText"
+                (ngModelChange)="onGsbSearchChange()"
+                class="modern-input search-input"
+                placeholder="Ad/soyad veya e-posta ile ara..."
+              />
+            </div>
+          </div>
+          <div class="filter-field">
+            <label class="filter-label">Şehir</label>
+            <select [(ngModel)]="gsbCityFilter" (ngModelChange)="onGsbCityFilterChange($event)" class="modern-input filter-select" title="Şehir filtresi">
+              <option value="">Tüm şehirler</option>
+              <option *ngFor="let city of cities" [value]="city">{{ city }}</option>
+            </select>
+          </div>
+          <div class="filter-field">
+            <label class="filter-label">Durum</label>
+            <select [(ngModel)]="gsbStatusFilter" (ngModelChange)="onGsbStatusFilterChange($event)" class="modern-input filter-select" title="Durum filtresi">
+              <option value="all">Tümü</option>
+              <option value="active">Sadece aktifler</option>
+              <option value="passive">Sadece pasifler</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="loading-container" *ngIf="isLoadingGsbUsers">
+        <app-luma-spin></app-luma-spin>
+        <p>Yükleniyor...</p>
+      </div>
+      <div *ngIf="!isLoadingGsbUsers">
+        <div class="table-wrapper" *ngIf="filteredGsbUsers.length > 0">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Ad Soyad</th>
+                <th>E-posta</th>
+                <th>Şehir</th>
+                <th>Durum</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let u of filteredGsbUsers">
+                <td>{{ u.fullName }}</td>
+                <td>{{ u.email }}</td>
+                <td>{{ u.city || '—' }}</td>
+                <td>
+                  <span class="status-badge" [class.aktif]="u.isActive" [class.pasif]="!u.isActive">
+                    {{ u.isActive ? 'Aktif' : 'Pasif' }}
+                  </span>
+                </td>
+                <td>
+                  <button type="button" class="btn-icon" title="Düzenle" (click)="openEditGsbUser(u)">
+                    <span class="material-symbols-outlined">edit</span>
+                  </button>
+                  <button type="button" class="btn-icon danger" title="Sil" (click)="confirmDeleteGsbUser(u)">
+                    <span class="material-symbols-outlined">delete</span>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="empty-state" *ngIf="filteredGsbUsers.length === 0">
+          <span class="material-symbols-outlined">admin_panel_settings</span>
+          <p *ngIf="gsbSearchText || gsbCityFilter || gsbStatusFilter !== 'all'">Arama kriterlerine uygun kullanıcı bulunamadı.</p>
+          <p *ngIf="!gsbSearchText && !gsbCityFilter && gsbStatusFilter === 'all'">Henüz GSB kullanıcısı yok.</p>
+        </div>
+        <div class="pagination-area" *ngIf="gsbUsersTotalPagesDisplay > 1">
+          <button class="page-btn prev" [disabled]="gsbUsersPage === 1" (click)="changeGsbUsersPage(gsbUsersPage - 1)">
+            <span class="material-symbols-outlined">chevron_left</span>
+          </button>
+          <ng-container *ngFor="let p of gsbUsersPagesDisplay">
+            <button class="page-btn number" [class.active]="p === gsbUsersPage" (click)="changeGsbUsersPage(p)">{{ p }}</button>
+          </ng-container>
+          <button class="page-btn next" [disabled]="gsbUsersPage === gsbUsersTotalPagesDisplay" (click)="changeGsbUsersPage(gsbUsersPage + 1)">
+            <span class="material-symbols-outlined">chevron_right</span>
+          </button>
+        </div>
+        <p class="results-info" *ngIf="gsbUsersTotalCountDisplay > 0">Toplam <strong>{{ gsbUsersTotalCountDisplay }}</strong> kullanıcı.</p>
+      </div>
+    </div>
+
+    <!-- 6. TAB: AYARLAR -->
     <div class="view-container" *ngIf="activeTab === 'settings'">
       <div class="settings-layout">
         <div class="settings-sidebar">
@@ -710,8 +849,10 @@
           {{
             modalType === 'new-announcement'
               ? 'Yeni Duyuru Oluştur'
-              : modalType === 'edit-announcement'
+              : modalType === 'edit-announcement' && canManageAnnouncements
               ? 'Duyuru Güncelle'
+              : modalType === 'edit-announcement'
+              ? 'Duyuru Detayı'
               : modalType === 'new-event'
               ? 'Yeni Etkinlik'
               : modalType === 'event-detail'
@@ -738,10 +879,85 @@
               ? 'Topluluk Onayla'
               : modalType === 'spam-report'
               ? 'Spam Analiz Raporu'
+              : modalType === 'gsb-create-user'
+              ? 'Yeni GSB Kullanıcısı'
+              : modalType === 'gsb-edit-user'
+              ? 'GSB Kullanıcısı Düzenle'
+              : modalType === 'gsb-delete-user'
+              ? 'GSB Kullanıcısını Sil'
               : 'İşlem'
           }}
         </h3>
         <button class="close-btn" (click)="closeModal()">✕</button>
+      </div>
+
+      <!-- GSB: Yeni kullanıcı -->
+      <div class="modal-body" *ngIf="modalType === 'gsb-create-user'">
+        <div class="form-section">
+          <div class="form-group">
+            <label>Ad Soyad <span class="required">*</span></label>
+            <input type="text" [(ngModel)]="newGsbUser.fullName" class="modern-input" placeholder="Ad Soyad" required />
+          </div>
+          <div class="form-group">
+            <label>E-posta (@gsb.gov.tr) <span class="required">*</span></label>
+            <input type="email" [(ngModel)]="newGsbUser.email" class="modern-input" placeholder="ornek@gsb.gov.tr" required />
+          </div>
+          <div class="form-group">
+            <label>Şifre (en az 12 karakter) <span class="required">*</span></label>
+            <input type="password" [(ngModel)]="newGsbUser.password" class="modern-input" placeholder="••••••••••••" minlength="12" required />
+          </div>
+          <div class="form-group">
+            <label>Şehir <span class="required">*</span></label>
+            <select [(ngModel)]="newGsbUser.city" class="modern-input modern-select" required>
+              <option value="">Şehir seçin</option>
+              <option *ngFor="let city of cities" [value]="city">{{ city }}</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" (click)="closeGsbUserModal()">İptal</button>
+          <button type="button" class="btn-primary" (click)="saveCreateGsbUser()">Oluştur</button>
+        </div>
+      </div>
+
+      <!-- GSB: Düzenle -->
+      <div class="modal-body" *ngIf="modalType === 'gsb-edit-user' && editingGsbUser">
+        <div class="form-section">
+          <div class="form-group">
+            <label>E-posta (@gsb.gov.tr)</label>
+            <input type="email" [(ngModel)]="editGsbUserForm.email" class="modern-input" placeholder="ornek@gsb.gov.tr" />
+          </div>
+          <div class="form-group">
+            <label>Ad Soyad</label>
+            <input type="text" [(ngModel)]="editGsbUserForm.fullName" class="modern-input" placeholder="Ad Soyad" />
+          </div>
+          <div class="form-group">
+            <label>Şehir</label>
+            <select [(ngModel)]="editGsbUserForm.city" class="modern-input modern-select">
+              <option value="">Şehir seçin</option>
+              <option *ngFor="let city of cities" [value]="city">{{ city }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="checkbox-inline">
+              <input type="checkbox" [(ngModel)]="editGsbUserForm.isActive" />
+              Aktif
+            </label>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" (click)="closeGsbUserModal()">İptal</button>
+          <button type="button" class="btn-primary" (click)="saveEditGsbUser()">Kaydet</button>
+        </div>
+      </div>
+
+      <!-- GSB: Silme onay -->
+      <div class="modal-body" *ngIf="modalType === 'gsb-delete-user' && deleteGsbUserTarget">
+        <p><strong>{{ deleteGsbUserTarget.fullName }}</strong> ({{ deleteGsbUserTarget.email }}) kullanıcısını silmek istediğinize emin misiniz?</p>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" (click)="closeGsbUserModal()">İptal</button>
+          <button type="button" class="btn-danger" (click)="deleteGsbUser()">Sil</button>
+        </div>
       </div>
 
       <!-- Yeni Duyuru Modal - Geniş iki sütunlu düzen -->
@@ -753,8 +969,10 @@
                 label="Duyuru Görseli"
                 [previewUrl]="newAnnouncement.image || null"
                 [uploadToServer]="true"
+                [maxFileSizeMB]="0"
                 [enableCrop]="true"
-                [cropMaintainAspectRatio]="false"
+                [cropMaintainAspectRatio]="true"
+                [cropAspectRatio]="16/9"
                 (onFileSelected)="onNewAnnouncementFileSelected($event)"
                 (onImageSelected)="onNewAnnouncementImageSelected($event)"
               ></app-image-upload>
@@ -814,23 +1032,33 @@
         </div>
       </div>
 
-      <!-- Duyuru Düzenleme Modal - Geniş iki sütunlu düzen -->
+      <!-- Duyuru Düzenleme Modal - Geniş iki sütunlu düzen (yetkisiz kullanıcı için sadece görüntüleme) -->
       <div
         class="modal-body modal-body-announcement"
         *ngIf="modalType === 'edit-announcement' && editingAnnouncement"
       >
         <div class="announcement-layout">
           <div class="announcement-left">
-            <div class="single-image-upload no-url-input announcement-image-upload">
+            <div class="single-image-upload no-url-input announcement-image-upload" *ngIf="canManageAnnouncements">
               <app-image-upload
                 label="Duyuru Görseli"
                 [previewUrl]="editingAnnouncement.image"
                 [uploadToServer]="true"
+                [maxFileSizeMB]="0"
                 [enableCrop]="true"
-                [cropMaintainAspectRatio]="false"
+                [cropMaintainAspectRatio]="true"
+                [cropAspectRatio]="16/9"
                 (onFileSelected)="onAnnouncementFileSelected($event)"
                 (onImageSelected)="onAnnouncementImageSelected($event)"
               ></app-image-upload>
+            </div>
+            <div class="announcement-image-view-only" *ngIf="!canManageAnnouncements && editingAnnouncement.image">
+              <label>Duyuru Görseli</label>
+              <img [src]="editingAnnouncement.image" [alt]="editingAnnouncement.title" />
+            </div>
+            <div class="announcement-image-view-only placeholder" *ngIf="!canManageAnnouncements && !editingAnnouncement.image">
+              <label>Duyuru Görseli</label>
+              <span class="material-symbols-outlined">campaign</span>
             </div>
           </div>
           <div class="announcement-right">
@@ -842,6 +1070,7 @@
                   type="text"
                   [(ngModel)]="editingAnnouncement.title"
                   class="modern-input"
+                  [readonly]="!canManageAnnouncements"
                   placeholder="Duyuru başlığı..."
                   maxlength="100"
                 />
@@ -851,6 +1080,7 @@
                 <textarea
                   [(ngModel)]="editingAnnouncement.shortDescription"
                   class="modern-input"
+                  [readonly]="!canManageAnnouncements"
                   rows="2"
                   placeholder="Duyurunun kısa özeti..."
                   maxlength="100"
@@ -861,6 +1091,7 @@
                 <textarea
                   [(ngModel)]="editingAnnouncement.content"
                   class="modern-input"
+                  [readonly]="!canManageAnnouncements"
                   rows="5"
                   placeholder="Duyurunun tam metnini buraya yazın..."
                   maxlength="2000"
@@ -872,6 +1103,7 @@
                   type="url"
                   [(ngModel)]="editingAnnouncement.link"
                   class="modern-input"
+                  [readonly]="!canManageAnnouncements"
                   placeholder="https://..."
                 />
               </div>
@@ -904,6 +1136,7 @@
         class="modal-body modal-body-new-community"
         *ngIf="modalType === 'new-community' && newCommunity"
       >
+        <div class="new-community-scroll">
         <div class="new-community-layout">
           <div class="new-community-left">
             <div class="image-uploads-section">
@@ -981,10 +1214,46 @@
                 </div>
                 <div class="form-group">
                   <label>Kategori <span class="required">*</span></label>
-                  <select [(ngModel)]="newCommunity.category" class="modern-input">
-                    <option value="">Kategori Seçin</option>
-                    <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
-                  </select>
+                  <div
+                    class="custom-select-wrapper"
+                    data-dropdown="new-community-category"
+                    [class.open]="isNewCommunityCategoryDropdownOpen"
+                    (click)="toggleNewCommunityCategoryDropdown($event)"
+                  >
+                    <div class="custom-select-trigger">
+                      <span [class.placeholder]="!newCommunity.category">
+                        {{ newCommunity.category || 'Kategori Seçin' }}
+                      </span>
+                      <svg
+                        class="custom-select-arrow"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                    </div>
+                    <div
+                      class="custom-select-dropdown"
+                      *ngIf="isNewCommunityCategoryDropdownOpen"
+                      (click)="$event.stopPropagation()"
+                    >
+                      <div
+                        class="custom-select-option"
+                        *ngFor="let cat of categories"
+                        [class.selected]="newCommunity.category === cat"
+                        (click)="selectNewCommunityCategory(cat, $event)"
+                      >
+                        {{ cat }}
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 <div class="form-group full-width">
                   <label>Topluluk Kısa Açıklama (Max 70 Karakter)</label>
@@ -1008,10 +1277,46 @@
                 </div>
                 <div class="form-group">
                   <label>Şehir</label>
-                  <select [(ngModel)]="newCommunity.city" class="modern-input">
-                    <option value="">Şehir Seçin</option>
-                    <option *ngFor="let city of cities" [value]="city">{{ city }}</option>
-                  </select>
+                  <div
+                    class="custom-select-wrapper"
+                    data-dropdown="new-community-city"
+                    [class.open]="isNewCommunityCityDropdownOpen"
+                    (click)="toggleNewCommunityCityDropdown($event)"
+                  >
+                    <div class="custom-select-trigger">
+                      <span [class.placeholder]="!newCommunity.city">
+                        {{ newCommunity.city || 'Şehir Seçin' }}
+                      </span>
+                      <svg
+                        class="custom-select-arrow"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                    </div>
+                    <div
+                      class="custom-select-dropdown"
+                      *ngIf="isNewCommunityCityDropdownOpen"
+                      (click)="$event.stopPropagation()"
+                    >
+                      <div
+                        class="custom-select-option"
+                        *ngFor="let city of cities"
+                        [class.selected]="newCommunity.city === city"
+                        (click)="selectNewCommunityCity(city, $event)"
+                      >
+                        {{ city }}
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 <div class="form-group">
                   <label>Üniversite (Maks. 40)</label>
@@ -1055,6 +1360,7 @@
               </div>
             </div>
           </div>
+        </div>
         </div>
         <div class="modal-actions">
           <button class="btn-primary" (click)="saveNewCommunity()">

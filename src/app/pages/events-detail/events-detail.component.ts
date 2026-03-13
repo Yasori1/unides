@@ -45,22 +45,16 @@ export class EventsDetailComponent implements OnInit {
 
   fetchEventDetail(id: number) {
     this.isLoading = true;
-    this.eventService.getAll().subscribe({
-        next: (events) => {
-            const found = events.find(e => e.id === id);
-            if (found) {
-                this.event = this.mapToCard(found);
-                this.isLoading = false;
-            } else {
-                // Mock event kaldırıldı
-                this.isLoading = false;
-            }
-        },
-        error: () => {
-             // Mock event kaldırıldı
-            this.isLoading = false;
-        }
-    })
+    this.eventService.getById(id).subscribe({
+      next: (eventItem) => {
+        this.event = this.mapToCard(eventItem);
+        this.isLoading = false;
+      },
+      error: () => {
+        this.isLoading = false;
+        this.router.navigate(['/events']);
+      },
+    });
   }
 
   onHeroMouseMove(event: MouseEvent) {
@@ -118,6 +112,7 @@ export class EventsDetailComponent implements OnInit {
       imageUrl: e.imageUrl || '',
       color: '#2563eb',
       city: '',
+      contactEmail: e.contactEmail,
     } as any;
   }
 

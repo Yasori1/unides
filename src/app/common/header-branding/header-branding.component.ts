@@ -241,16 +241,11 @@ export class HeaderBrandingComponent implements OnInit, OnDestroy {
   }
 
   logout() {
-    // Local storage'ı temizle
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('user_info');
-    localStorage.removeItem('user_type');
-    localStorage.removeItem('community_info'); // Topluluk bilgisini de temizle
+    // Merkezi AuthService.logout ile tüm token, rol ve permission cache'lerini temizle
+    this.authService.logout();
     this.communityLogo = null;
-    // Anasayfaya yönlendir
+    // AuthService.logout zaten anasayfaya yönlendiriyor, ardından login durumunu yenile
     this.router.navigate(['/']).then(() => {
-      // Sayfa yüklendikten sonra login durumunu güncelle
       setTimeout(() => {
         this.checkLoginStatus();
       }, 100);
