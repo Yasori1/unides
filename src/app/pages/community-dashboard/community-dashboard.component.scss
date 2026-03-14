@@ -1573,6 +1573,273 @@
   }
 }
 
+// Ortak: Tüm etkinlik pop-up overlay'leri (detay + oluştur/düzenle)
+.modal-overlay-event-detail,
+.modal-overlay-event-form {
+  padding: 12px;
+  align-items: center;
+  justify-content: center;
+  @media (max-width: 768px) {
+    padding: 0;
+    align-items: stretch;
+    justify-content: flex-start;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow: hidden;
+  }
+}
+
+// Mobilde kart viewport'u aşmasın, içerik body'de scroll olsun
+@media (max-width: 768px) {
+  .modal-overlay-event-detail .modal-card.event-detail-modal,
+  .modal-overlay-event-form .modal-card.event-form-modal {
+    flex: 1 1 0;
+    min-height: 0;
+    height: 0;
+    max-height: 100vh;
+    max-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+}
+
+// Etkinlik Detay/Düzenle pop-up: scroll + sabit footer + responsive
+.event-detail-modal {
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  overflow: hidden;
+  @media (max-width: 768px) {
+    max-height: 100vh;
+    max-height: 100dvh;
+    border-radius: 0;
+  }
+}
+
+.modal-head-event-detail {
+  flex-shrink: 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 0;
+}
+
+.event-detail-modal-body {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 6px;
+  margin-right: -2px;
+  -webkit-overflow-scrolling: touch;
+  overflow-scrolling: touch;
+  @media (max-width: 768px) {
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+    overscroll-behavior-y: contain;
+  }
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  &::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+}
+
+.modal-footer-event-detail {
+  flex-shrink: 0;
+  padding: 16px 0 0;
+  margin-top: 12px;
+  border-top: 1px solid #e2e8f0;
+  background: #fff;
+}
+
+.event-detail-footer-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  @media (min-width: 480px) {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 140px;
+    @media (max-width: 479px) {
+      width: 100%;
+    }
+  }
+  .material-symbols-outlined {
+    font-size: 18px;
+  }
+  .btn-delete {
+    background: #ef4444 !important;
+    border-color: #dc2626;
+  }
+  .btn-cancel {
+    background: #6b7280 !important;
+  }
+}
+
+.event-detail-rejection-btn {
+  margin-top: 16px;
+  margin-bottom: 8px;
+  width: 100%;
+}
+
+.btn-rejection-reason {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 2px solid #dc2626;
+  background: #ef4444;
+  color: #fff;
+  .material-symbols-outlined {
+    font-size: 22px;
+  }
+  &:hover {
+    background: #dc2626;
+    border-color: #b91c1c;
+  }
+}
+
+// Etkinlik detay modalında grid responsive
+// Mobilde: tüm içerik (form + footer) tek scroll alanında
+.event-detail-modal-scroll-wrap {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-height: 0;
+  @media (max-width: 768px) {
+    overflow-y: scroll;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+    overscroll-behavior-y: contain;
+  }
+}
+
+.event-detail-modal .event-detail-layout {
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+.event-detail-modal .event-detail-right {
+  @media (max-width: 768px) {
+    min-width: 0;
+  }
+}
+
+.event-detail-modal .row.two-cols {
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ========== Etkinlik Oluştur / Etkinlik Güncelle pop-up (aynı scroll + sabit footer + responsive) ==========
+.event-form-modal {
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  overflow: hidden;
+  @media (max-width: 768px) {
+    max-height: 100vh;
+    max-height: 100dvh;
+    border-radius: 0;
+  }
+}
+
+.modal-head-event-form {
+  flex-shrink: 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 0;
+}
+
+.event-form-modal-body {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 6px;
+  margin-right: -2px;
+  -webkit-overflow-scrolling: touch;
+  overflow-scrolling: touch;
+  @media (max-width: 768px) {
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+    overscroll-behavior-y: contain;
+  }
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  &::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+}
+
+.modal-footer-event-form {
+  flex-shrink: 0;
+  padding: 16px 0 0;
+  margin-top: 12px;
+  border-top: 1px solid #e2e8f0;
+  background: #fff;
+}
+
+.event-form-modal .event-detail-layout {
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+.event-form-modal .event-detail-right {
+  @media (max-width: 768px) {
+    min-width: 0;
+  }
+}
+
+.event-form-modal .row.two-cols {
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}
+
 // Etkinlik modalı iki sütunlu düzen (foto solda, form sağda)
 .modal-body-event {
   flex: 1;
@@ -1619,6 +1886,21 @@
     flex-direction: column;
     gap: 10px;
     min-width: 0;
+  }
+}
+
+// Masaüstü: body scroll; mobil: scroll-wrap scroll (body overflow visible)
+.event-detail-modal .modal-body-event.event-detail-modal-body {
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  .event-detail-layout {
+    min-height: 0;
+  }
+  @media (max-width: 768px) {
+    overflow: visible;
+    flex: 1 0 auto;
+    min-height: 0;
   }
 }
 

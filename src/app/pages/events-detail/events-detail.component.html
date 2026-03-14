@@ -79,10 +79,19 @@
                 </div>
 
                 <div class="info-section">
+                  <div class="info-label">ŞEHİR</div>
+                  <div class="info-text">
+                    <i class="bx bxs-map-pin"></i>
+                    <ng-container *ngIf="event.city; else noCity">{{ event.city }}</ng-container>
+                    <ng-template #noCity><span class="info-text-muted">Belirtilmemiş</span></ng-template>
+                  </div>
+                </div>
+
+                <div class="info-section">
                   <div class="info-label">KONUM</div>
                   <div class="info-text">
                     <i class="bx bx-map"></i>
-                    {{ event.location }}
+                    {{ event.location || 'Konum belirtilmemiş' }}
                   </div>
                 </div>
 

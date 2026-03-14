@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpContext } from '@angular/common/http';
 import { Observable, tap, catchError, of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, shareReplay, finalize } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
 import { Logger } from '../utils/logger.util';
@@ -103,7 +103,9 @@ export class AuthService {
   // Backend rolü response içinde döner veya token'a gömer.
   private login(email: string, password: string, roleId: number): Observable<LoginResponse> {
     const payload = { email, password, roleId };
-    return this.http.post<LoginResponse>(`${this.apiUrl}/Auth/login`, payload).pipe(
+    return this.http
+      .post<LoginResponse>(`${this.apiUrl}/Auth/login`, payload, { withCredentials: true })
+      .pipe(
       tap((response: any) => {
         const requiresOtp = response?.requiresOtp === true;
         if (requiresOtp) return;
@@ -179,10 +181,11 @@ export class AuthService {
   /** Kurumsal giriş doğrulama kodu ile giriş tamamla. Backend: POST /api/Auth/verify-corporate-login */
   verifyCorporateCode(email: string, code: string): Observable<LoginResponse> {
     return this.http
-      .post<LoginResponse>(`${this.apiUrl}/Auth/verify-corporate-login`, {
-        email: email.trim(),
-        code: code.trim(),
-      })
+      .post<LoginResponse>(
+        `${this.apiUrl}/Auth/verify-corporate-login`,
+        { email: email.trim(), code: code.trim() },
+        { withCredentials: true }
+      )
       .pipe(
         tap((response: any) => {
           const token =
@@ -235,11 +238,11 @@ export class AuthService {
   /** OTP ile giriş tamamla (topluluk ve kurumsal için ortak). Backend: POST /api/Auth/login-otp */
   verifyLoginOtp(otpRequestId: string, code: string): Observable<LoginResponse> {
     return this.http
-      .post<LoginResponse>(`${this.apiUrl}/Auth/login-otp`, {
-        otpRequestId: otpRequestId.trim(),
-        code: code.trim(),
-        rememberDevice: true,
-      })
+      .post<LoginResponse>(
+        `${this.apiUrl}/Auth/login-otp`,
+        { otpRequestId: otpRequestId.trim(), code: code.trim(), rememberDevice: true },
+        { withCredentials: true }
+      )
       .pipe(
         tap((response: any) => {
           const token =
@@ -369,10 +372,11 @@ export class AuthService {
   // setupToken: verify-email cevabından gelen token; community: CreateCommunityDto (bannerUrl/logoUrl upload sonrası eklenir)
   completeCommunitySetup(setupToken: string, community: any): Observable<any> {
     return this.http
-      .post<any>(`${this.apiUrl}/Auth/complete-community-setup`, {
-        setupToken,
-        community,
-      })
+      .post<any>(
+        `${this.apiUrl}/Auth/complete-community-setup`,
+        { setupToken, community },
+        { withCredentials: true },
+      )
       .pipe(
         tap((response: any) => {
           const token = response?.accessToken || response?.AccessToken || response?.token || null;
@@ -426,14 +430,53 @@ export class AuthService {
     return this.http.post<VerifyEmailResponse>(
       `${this.apiUrl}/Auth/verify-email`,
       { token: token.trim() },
-      { context },
+      { context, withCredentials: true },
     );
   }
 
   // --- REFRESH TOKEN (SWAGGER: POST /api/Auth/refresh) ---
+  /** Backend cookie'den refresh_token okur; yeni access_token + refresh_token cookie ve body'de döner. */
   refreshToken(): Observable<any> {
-    // Token yenileme ihtiyacı olursa bu metot kullanılabilir
     return this.http.post(`${this.apiUrl}/Auth/refresh`, {});
+  }
+
+  /**
+   * 401 alındığında interceptor tarafından kullanılır.
+   * Cookie ile POST /auth/refresh çağırır; başarılıysa yeni token'ları localStorage'a yazar.
+   * Eşzamanlı 401'lerde tek refresh tetiklenir, diğerleri aynı refresh'i bekleyip sonra isteklerini tekrarlar.
+   * @returns Observable<boolean> — true = refresh başarılı, false = refresh başarısız (logout gerekir)
+   */
+  private refreshInProgress: Observable<boolean> | null = null;
+
+  refreshTokenAndSave(): Observable<boolean> {
+    if (this.refreshInProgress) {
+      return this.refreshInProgress;
+    }
+    const context = new HttpContext().set(SKIP_AUTH, true);
+    const refresh$ = this.http
+      .post<{ AccessToken?: string; RefreshToken?: string; accessToken?: string; refreshToken?: string }>(
+        `${this.apiUrl}/Auth/refresh`,
+        {},
+        { withCredentials: true, context }
+      )
+      .pipe(
+        tap((res) => {
+          const access =
+            res?.AccessToken ?? res?.accessToken ?? null;
+          const refresh =
+            res?.RefreshToken ?? res?.refreshToken ?? null;
+          if (access) this.saveToken(access);
+          if (refresh) localStorage.setItem('refresh_token', refresh);
+        }),
+        map(() => true),
+        catchError(() => of(false)),
+        finalize(() => {
+          this.refreshInProgress = null;
+        }),
+        shareReplay(1)
+      );
+    this.refreshInProgress = refresh$;
+    return refresh$;
   }
 
   // --- 6. ÇIKIŞ YAP (LOGOUT) ---

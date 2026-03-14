@@ -109,11 +109,11 @@ export class EventsDetailComponent implements OnInit {
       university: e.university || '', // Backend EventDetailDto.University
       club: e.communityName || '',
       communityId,
-      location: e.location || '',
+      location: e.location || '', // eventLocation (mekan / adres)
       quota: e.quota !== undefined && e.quota !== null ? e.quota : 0,
       imageUrl: e.imageUrl || '',
       color: '#2563eb',
-      city: '',
+      city: e.city || '', // eventCity (etkinlik şehri)
       contactEmail: e.contactEmail,
     } as any;
   }

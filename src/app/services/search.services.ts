@@ -81,10 +81,12 @@ export class SearchService {
             eventName: item.EventName || item.eventName || '',
             eventDate: item.EventDate || item.eventDate,
             eventClock: item.EventClock || item.eventClock,
+            eventCity: item.EventCity || item.eventCity,
             eventLocation: item.EventLocation || item.eventLocation,
             eventPictureLink: item.EventPictureLink || item.eventPictureLink,
             communityId: item.CommunityId || item.communityId,
             communityName: item.CommunityName || item.communityName,
+            city: item.EventCity || item.eventCity || '',
           })),
           announcements: (response.Announcements?.Items || response.announcements?.items || []).map(
             (item: any) => ({

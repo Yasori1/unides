@@ -47,7 +47,8 @@ export interface CreateEventDto {
   eventPictureLink?: string;
   eventDate: string; // DateOnly format: "dd.MM.yyyy" (Backend DateOnlyJsonConverter bekliyor)
   eventClock: string; // TimeOnly format: "HH:mm"
-  eventLocation?: string;
+  eventCity?: string; // Etkinlik şehri (manuel)
+  eventLocation?: string; // Mekan / adres detayı
   eventKontenjan?: number;
   eventAbout?: string;
   miniAbout?: string;
@@ -59,7 +60,8 @@ export interface UpdateEventDto {
   eventPictureLink?: string;
   eventDate?: string; // DateOnly format: "dd.MM.yyyy"
   eventClock?: string; // TimeOnly format: "HH:mm"
-  eventLocation?: string;
+  eventCity?: string; // Etkinlik şehri (manuel)
+  eventLocation?: string; // Mekan / adres detayı
   eventKontenjan?: number;
   eventAbout?: string;
   miniAbout?: string;

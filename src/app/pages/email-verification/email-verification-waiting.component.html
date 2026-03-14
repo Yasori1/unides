@@ -4,8 +4,8 @@
 
 <div class="main-container">
   <div class="split-layout">
-    <!-- SOL TARAF: GÖRSEL ALAN -->
-    <div class="visual-side">
+    <!-- SOL TARAF: GÖRSEL ALAN (Topluluk akışında topluluk giriş ekranındaki fotoğraf) -->
+    <div class="visual-side" [class.visual-side-community]="isCommunityFlow">
       <div class="visual-overlay"></div>
       <div class="visual-content">
         <a class="brand-badge" style="cursor: pointer; text-decoration: none;" [routerLink]="['/']">
@@ -16,7 +16,7 @@
         </a>
         <div class="quote-container">
           <h1>E-Posta<br />Doğrulama</h1>
-          <p *ngIf="isCommunityFlow">Topluluk Kaydı — Adım 2 / 3</p>
+          <p *ngIf="isCommunityFlow">Topluluk Kaydı — Adım 2 / 5</p>
           <p *ngIf="!isCommunityFlow">Hesabınızı aktifleştirmek için e-postanızı kontrol edin.</p>
         </div>
       </div>
@@ -40,7 +40,7 @@
           </div>
 
           <div class="header-text">
-            <h3 *ngIf="isCommunityFlow">Topluluk Kaydı — Adım 2: E-Posta Doğrulama</h3>
+            <h3 *ngIf="isCommunityFlow">Topluluk Kaydı — Adım 2 / 5: E-Posta Doğrulama</h3>
             <h3 *ngIf="!isCommunityFlow">E-Posta Adresinizi Doğrulayın</h3>
             <p *ngIf="email" class="email-display">
               <strong>{{ email }}</strong> adresine doğrulama maili gönderildi.

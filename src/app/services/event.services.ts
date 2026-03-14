@@ -22,7 +22,8 @@ export interface EventItem {
   status?: 'Onaylandı' | 'Beklemede' | 'Reddedildi' | 'Revize';
   capacity?: string;
   quota?: number; // Kontenjan (number olarak)
-  city?: string; // Şehir bilgisi
+  /** Şehir (backend'den sadece eventCity alanı okunur, burada city olarak expose edilir) */
+  city?: string;
   rejectionReason?: string; // Red nedeni / Revize nedeni (ConfirmAbout)
   /** İletişim e-postası (Backend EventDetailDto: ComMail — topluluk iletişim maili) */
   contactEmail?: string;
@@ -60,8 +61,9 @@ interface EventListItemDto {
   /** Topluluğun üniversite adı (GetAllEvents, UpcomingHome, CommunityEvents, PendingEvents) */
   university?: string;
   University?: string;
-  city?: string;
-  City?: string;
+  /** Etkinlik şehri (Event.EventCity — tek alan, liste ve detay DTO'da eventCity) */
+  eventCity?: string;
+  EventCity?: string;
   eventConfirm?: number;
   EventConfirm?: number;
   confirmAbout?: string;
@@ -82,7 +84,8 @@ interface CreateEventDto {
   eventPictureLink?: string; // Backend: EventPictureLink (optional)
   eventDate: string; // Backend: EventDate (DateOnly, required) - Format: "dd.MM.yyyy" (örn: "02.01.2026")
   eventClock: string; // Backend: EventClock (TimeOnly, required) - Format: "HH:mm"
-  eventLocation?: string; // Backend: EventLocation (optional)
+  eventCity?: string; // Backend: EventCity (optional) — etkinlik şehri
+  eventLocation?: string; // Backend: EventLocation (optional) — mekan / adres
   eventKontenjan?: number; // Backend: EventKontenjan (optional)
   eventAbout?: string; // Backend: EventAbout (optional)
   miniAbout?: string; // Backend: MiniAbout (optional)
@@ -95,7 +98,8 @@ interface UpdateEventDto {
   EventPictureLink?: string;
   EventDate?: string; // DateOnly format: "dd.MM.yyyy" veya ISO string
   EventClock?: string; // TimeOnly format: "HH:mm"
-  EventLocation?: string;
+  EventCity?: string; // Etkinlik şehri (manuel)
+  EventLocation?: string; // Mekan / adres detayı
   EventKontenjan?: number;
   EventAbout?: string;
   MiniAbout?: string;
@@ -513,7 +517,7 @@ export class EventService {
         const result = numValue >= 0 ? numValue : 0;
         return result;
       })(),
-      city: dto.city || dto.City || '',
+      city: dto.eventCity || dto.EventCity || '',
       contactEmail: (() => {
         const raw = (dto as any).comMail ?? (dto as any).ComMail ?? (dto as any).contactEmail ?? (dto as any).ContactEmail;
         const s = typeof raw === 'string' ? raw.trim() : '';
@@ -617,56 +621,72 @@ export class EventService {
     );
   }
 
-  // Status'e göre etkinlikleri getir (Backend: GET /api/Events/status?status=0&status=1&status=2)
-  // status: 0=Beklemede, 1=Onaylandı, 2=Reddedildi
-  // Auth interceptor automatically adds Authorization header if token exists
-  getByStatus(statuses: number[]): Observable<EventItem[]> {
-    // Query parametrelerini oluştur: ?status=0&status=1&status=2
-    let params = new HttpParams();
+  /** Sayfalı status response tipi (Backend: page, pageSize, pendingTotalCount, acceptedTotalCount, rejectedTotalCount, pending, accepted, rejected) */
+  getByStatusPagedResponse(page: number, pageSize: number, statuses: number[]): Observable<{
+    items: EventItem[];
+    page: number;
+    pageSize: number;
+    pendingTotalCount: number;
+    acceptedTotalCount: number;
+    rejectedTotalCount: number;
+    totalCount: number;
+  }> {
+    let params = new HttpParams()
+      .set('page', String(page))
+      .set('pageSize', String(pageSize));
     statuses.forEach((status) => {
       params = params.append('status', status.toString());
     });
 
-    // Backend EventsByStatusDto döndürüyor: { Pending: [], Accepted: [], Rejected: [] }
-    // Tüm status'leri birleştirip döndürüyoruz
-    return this.http
-      .get<{
-        Pending: EventListItemDto[];
-        Accepted: EventListItemDto[];
-        Rejected: EventListItemDto[];
-      }>(`${this.apiUrl}/status`, { params })
-      .pipe(
-        map((response: any) => {
-          // Backend EventsByStatusDto döndürüyor: { Pending: [], Accepted: [], Rejected: [] }
-          // Response'u kontrol et
-          if (!response) {
-            return [];
-          }
-
-          // Response formatını kontrol et - backend'den gelen response'un yapısını doğru parse et
-          // EventsByStatusDto: { Pending: EventListItemDto[], Accepted: EventListItemDto[], Rejected: EventListItemDto[] }
-          const pending = response.Pending || response.pending || [];
-          const accepted = response.Accepted || response.accepted || [];
-          const rejected = response.Rejected || response.rejected || [];
-
-          // Tüm status'leri birleştir
-          const allEvents: EventListItemDto[] = [...pending, ...accepted, ...rejected];
-
-          // Eğer hiç etkinlik yoksa boş array döndür
-          if (allEvents.length === 0) {
-            return [];
-          }
-
-          // EventListItemDto'ları EventItem'a map et
-          const mappedEvents = allEvents.map((dto) => this.mapToEvent(dto));
-
-          return mappedEvents;
-        }),
-        catchError((error) => {
-          // Hata durumunda boş array döndür
-          return of([]);
+    return this.http.get<any>(`${this.apiUrl}/status`, { params }).pipe(
+      map((response: any) => {
+        if (!response) {
+          return {
+            items: [],
+            page: 1,
+            pageSize: pageSize,
+            pendingTotalCount: 0,
+            acceptedTotalCount: 0,
+            rejectedTotalCount: 0,
+            totalCount: 0,
+          };
+        }
+        const pending = response.Pending || response.pending || [];
+        const accepted = response.Accepted || response.accepted || [];
+        const rejected = response.Rejected || response.rejected || [];
+        const pendingTotalCount = response.pendingTotalCount ?? response.PendingTotalCount ?? 0;
+        const acceptedTotalCount = response.acceptedTotalCount ?? response.AcceptedTotalCount ?? 0;
+        const rejectedTotalCount = response.rejectedTotalCount ?? response.RejectedTotalCount ?? 0;
+        const allDtos: EventListItemDto[] = [...pending, ...accepted, ...rejected];
+        const items = allDtos.map((dto) => this.mapToEvent(dto));
+        const totalCount = Number(pendingTotalCount) + Number(acceptedTotalCount) + Number(rejectedTotalCount);
+        return {
+          items,
+          page: response.page ?? page,
+          pageSize: response.pageSize ?? pageSize,
+          pendingTotalCount: Number(pendingTotalCount),
+          acceptedTotalCount: Number(acceptedTotalCount),
+          rejectedTotalCount: Number(rejectedTotalCount),
+          totalCount,
+        };
+      }),
+      catchError(() =>
+        of({
+          items: [],
+          page: 1,
+          pageSize: pageSize,
+          pendingTotalCount: 0,
+          acceptedTotalCount: 0,
+          rejectedTotalCount: 0,
+          totalCount: 0,
         })
-      );
+      )
+    );
+  }
+
+  // Status'e göre etkinlikleri getir (Backend: GET /api/Events/status?status=0&status=1&status=2) — sayfasız, geriye dönük uyumluluk
+  getByStatus(statuses: number[]): Observable<EventItem[]> {
+    return this.getByStatusPagedResponse(1, 9999, statuses).pipe(map((res) => res.items));
   }
 
   // Topluluk bazlı etkinlikleri getir (Backend: GET /api/Events/community/{communityId}/events?status=0&status=1&status=2)
@@ -712,18 +732,24 @@ export class EventService {
       );
   }
 
-  // Etkinlik detayını getir (Backend: GET /api/Events/{id})
-  // Auth interceptor automatically adds Authorization header if token exists
+  // Etkinlik detayı — Ana sayfa / public: sadece onaylı + aktif (GET /api/Events/{id})
   getById(id: number): Observable<EventItem> {
     return this.http.get<any>(`${this.apiUrl}/${id}`).pipe(
       map((dto) => this.mapToEvent(dto)),
       catchError((error: any) => {
-        // 404 hatalarını sessizce handle et - event bulunamadığında normal bir durum
-        if (error?.status === 404) {
-          // 404 hatası için boş bir EventItem döndür veya hata fırlatma
-          // Component'ler bu durumu handle edebilir
-          return throwError(() => error);
-        }
+        if (error?.status === 404) return throwError(() => error);
+        throw error;
+      })
+    );
+  }
+
+  // Etkinlik detayı — Kurumsal / GSB dashboard: GET /api/Events/admin/{eventId}
+  // Response: EventDetailDto (eventId, eventName, eventPictureLink, eventDate, eventClock, eventCity, eventLocation, eventKontenjan, eventAbout, miniAbout, eventConfirm, confirmAbout, updatedAt, confirmUpdatedAt, communityId, communityName, university, comMail)
+  getByIdAdmin(eventId: number): Observable<EventItem> {
+    return this.http.get<any>(`${this.apiUrl}/admin/${eventId}`).pipe(
+      map((dto) => this.mapToEvent(dto)),
+      catchError((error: any) => {
+        if (error?.status === 404) return throwError(() => error);
         throw error;
       })
     );
@@ -770,7 +796,8 @@ export class EventService {
       EventName: event.title || '',
       EventDate: eventDate,
       EventClock: eventClock,
-      EventLocation: event.location || '',
+      EventCity: event.city?.trim() || null,
+      EventLocation: event.location?.trim() || '',
       EventAbout: event.description || '',
       MiniAbout: event.shortDescription || event.description || '',
       EventPictureLink: event.imageUrl || null,
@@ -841,7 +868,8 @@ export class EventService {
       EventPictureLink: eventPictureLink,
       EventDate: eventDate || undefined, // DateOnly format: "dd.MM.yyyy"
       EventClock: eventClock || undefined, // TimeOnly format: "HH:mm"
-      EventLocation: event.location || undefined,
+      EventCity: event.city?.trim() || undefined, // Etkinlik şehri (manuel)
+      EventLocation: event.location?.trim() || undefined, // Mekan / adres
       EventKontenjan: event.quota ? Number(event.quota) : undefined,
       EventAbout: event.description || undefined, // Detaylı açıklama
       MiniAbout: event.shortDescription || event.description || undefined, // Kısa açıklama

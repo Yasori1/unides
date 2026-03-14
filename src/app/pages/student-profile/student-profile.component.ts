@@ -31,6 +31,8 @@ interface EventCard {
   title: string;
   date: string;
   time: string;
+  /** Etkinlik şehri (backend eventCity öncelikli) */
+  city?: string;
   location: string;
   community: string;
   status: 'upcoming' | 'completed' | 'cancelled';
@@ -302,6 +304,7 @@ export class StudentProfileComponent implements OnInit, OnDestroy {
                   title: event.eventName || event.EventName,
                   date: formattedDate,
                   time: formattedTime,
+                  city: event.eventCity || event.EventCity || community.city || '',
                   location: event.eventLocation || event.EventLocation || 'Konum Belirtilmemiş',
                   community: community.name || 'Topluluk',
                   status: 'upcoming' as const,

@@ -58,6 +58,8 @@ interface DashboardEvent {
   imageUrl: string;
   date: string;
   startDateIso: string;
+  /** Etkinlik şehri (backend eventCity veya topluluk city) */
+  city?: string;
   location: string;
   description: string;
   shortDescription?: string;
@@ -136,6 +138,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     title: false,
     date: false,
     time: false,
+    eventCity: false,
     location: false,
     quota: false,
     shortDescription: false,
@@ -148,7 +151,8 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     shortDescription: '',
     date: '',
     time: '',
-    location: '',
+    eventCity: '', // Etkinlik şehri (backend: eventCity) — zorunlu
+    location: '', // Etkinlik konumu / lokasyon (backend: eventLocation)
     quota: '',
     description: '',
     image: '', // Base64 preview için
@@ -796,6 +800,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
             imageUrl: finalImageUrl,
             date: dateStr,
             startDateIso: startDateIso,
+            city: (e as any).city || undefined,
             location: e.location || 'Konum belirtilmemiş',
             description: e.description || e.shortDescription || '',
             shortDescription: (e as any).shortDescription || undefined,
@@ -1461,6 +1466,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       shortDescription: '',
       date: '',
       time: '',
+      eventCity: '',
       location: '',
       quota: '',
       description: '',
@@ -1469,7 +1475,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     };
     this.eventErrors = {
       image: false, title: false, date: false, time: false,
-      location: false, quota: false, shortDescription: false, description: false,
+      eventCity: false, location: false, quota: false, shortDescription: false, description: false,
     };
     this.newProjectData = { name: '', category: 'Teknoloji', budget: 0, deadline: '' };
   }
@@ -1508,6 +1514,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       title: !this.newEventData.title?.trim(),
       date: !this.newEventData.date?.trim(),
       time: !this.newEventData.time?.trim(),
+      eventCity: !this.newEventData.eventCity?.trim(),
       location: !this.newEventData.location?.trim(),
       quota: !this.newEventData.quota,
       shortDescription: !this.newEventData.shortDescription?.trim(),
@@ -1576,6 +1583,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
           title: this.newEventData.title,
           startDate: startDate.toISOString(),
           endDate: endDate.toISOString(),
+          city: this.newEventData.eventCity?.trim() || undefined,
           location: this.newEventData.location,
           description: this.newEventData.description,
           shortDescription: this.newEventData.shortDescription || this.newEventData.description,
@@ -1669,6 +1677,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
         title: this.newEventData.title,
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString(),
+        city: this.newEventData.eventCity?.trim() || undefined,
         location: this.newEventData.location,
         description: this.newEventData.description,
         shortDescription: this.newEventData.shortDescription || this.newEventData.description,
@@ -1788,7 +1797,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
   }
 
   get isEventFormValid() {
-    const { title, date, time, location, quota, shortDescription, description, imageFile } = this.newEventData;
+    const { title, date, time, eventCity, location, quota, shortDescription, description, imageFile } = this.newEventData;
     const hasValidDate = date && date.trim().length > 0;
     const hasValidTime = time && time.trim().length > 0;
     return (
@@ -1796,6 +1805,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       !!title?.trim() &&
       hasValidDate &&
       hasValidTime &&
+      !!eventCity?.trim() &&
       !!location?.trim() &&
       !!quota &&
       !!shortDescription?.trim() &&
@@ -2069,6 +2079,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       shortDescription: event.description, // using description as short desc for now
       date: dateStr,
       time: timeStr,
+      eventCity: (event as any).city ?? '',
       location: event.location,
       quota: event.quota ? String(event.quota) : '',
       description: event.description,
@@ -2168,6 +2179,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       shortDescription: this.selectedEvent.description?.substring(0, 70) || '',
       date: dateStr,
       time: timeStr,
+      eventCity: this.selectedEvent.city || '',
       location: this.selectedEvent.location || '',
       quota: quotaValue,
       description: this.selectedEvent.description || '',
@@ -2185,6 +2197,8 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       this.editedEventData.title?.trim() && this.editedEventData.title.trim().length > 0;
     const hasValidDate = this.editedEventData.date && this.editedEventData.date.trim().length > 0;
     const hasValidTime = this.editedEventData.time && this.editedEventData.time.trim().length > 0;
+    const hasValidEventCity =
+      this.editedEventData.eventCity?.trim() && this.editedEventData.eventCity.trim().length > 0;
     const hasValidLocation =
       this.editedEventData.location?.trim() && this.editedEventData.location.trim().length > 0;
     const hasValidQuota =
@@ -2197,6 +2211,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       !hasValidTitle ||
       !hasValidDate ||
       !hasValidTime ||
+      !hasValidEventCity ||
       !hasValidLocation ||
       !hasValidQuota ||
       !hasValidDescription
@@ -2206,7 +2221,8 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
       if (!hasValidTitle) missingFields.push('Etkinlik İsmi');
       if (!hasValidDate) missingFields.push('Tarih');
       if (!hasValidTime) missingFields.push('Saat');
-      if (!hasValidLocation) missingFields.push('Konum');
+      if (!hasValidEventCity) missingFields.push('Etkinlik Şehri');
+      if (!hasValidLocation) missingFields.push('Etkinlik Konumu');
       if (!hasValidQuota) missingFields.push('Kontenjan');
       if (!hasValidDescription) missingFields.push('Açıklama');
 
@@ -2263,6 +2279,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
         title: this.editedEventData.title,
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString(),
+        city: this.editedEventData.eventCity?.trim() || undefined,
         location: this.editedEventData.location,
         description: this.editedEventData.description,
         shortDescription: this.editedEventData.shortDescription || this.editedEventData.description,

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -12,6 +12,7 @@ import { Logger } from '../../utils/logger.util';
 import { toTitleCase } from '../../utils/title-case.util';
 import { CreateCommunityDto } from '../../models/community.models';
 import { CITY_NAMES } from '../../data/cities';
+import { TurkishUppercasePipe } from '../../pipes/turkish-uppercase.pipe';
 import { of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 
@@ -25,6 +26,7 @@ import { catchError, map, switchMap } from 'rxjs/operators';
     ToastComponent,
     LumaSpinComponent,
     ImageUploadComponent,
+    TurkishUppercasePipe,
   ],
   templateUrl: './community-register.html',
   styleUrls: ['./community-register.scss'],
@@ -39,6 +41,9 @@ export class CommunityRegisterComponent implements OnInit {
 
   /** Kayıt başarılı olduğunda formu gizleyip başarı ekranını gösterir */
   showRegistrationSuccess = false;
+
+  /** Adım 3 tamamlandıktan sonra önizleme ekranı gösterilir (canlı önizleme) */
+  showPreview = false;
 
   // Adım 1 — Şifre kabul şartları (öğrenci kayıt sayfası ile aynı)
   passwordMinLength = false;
@@ -61,6 +66,8 @@ export class CommunityRegisterComponent implements OnInit {
   miniAbout = '';
   about = '';
   city = '';
+  /** Üniversite adının kısaltması (örn. ODTÜ, İTÜ); her zaman büyük harf gösterilir */
+  universityShort = '';
   university = '';
   comMail = '';
   comLeadMail = '';
@@ -104,6 +111,51 @@ export class CommunityRegisterComponent implements OnInit {
 
   /** Türkiye illeri — tek kaynak: data/cities.json */
   cities: string[] = CITY_NAMES;
+
+  /** Mobil custom dropdown: kategori ve şehir açık/kapalı */
+  categoryDropdownOpen = false;
+  cityDropdownOpen = false;
+
+  @HostListener('document:click') onDocumentClick(): void {
+    this.categoryDropdownOpen = false;
+    this.cityDropdownOpen = false;
+  }
+
+  toggleCategoryDropdown(event: Event): void {
+    event.stopPropagation();
+    this.categoryDropdownOpen = !this.categoryDropdownOpen;
+    if (this.categoryDropdownOpen) this.cityDropdownOpen = false;
+  }
+
+  toggleCityDropdown(event: Event): void {
+    event.stopPropagation();
+    this.cityDropdownOpen = !this.cityDropdownOpen;
+    if (this.cityDropdownOpen) this.categoryDropdownOpen = false;
+  }
+
+  selectCategory(c: string): void {
+    this.comCategory = c;
+    this.comCategoryMissing = false;
+    this.categoryDropdownOpen = false;
+  }
+
+  selectCity(c: string): void {
+    this.city = c;
+    this.cityMissing = false;
+    this.cityDropdownOpen = false;
+  }
+
+  /** Üniversite kısaltması her zaman büyük harf (Türkçe uyumlu) */
+  onUniversityShortInput(val: string): void {
+    this.universityShort = val ? val.toLocaleUpperCase('tr-TR') : '';
+  }
+
+  /** Backend'e gönderilecek topluluk adı: "Topluluk Adı - Üniversite Kısaltması" */
+  getCombinedComName(): string {
+    const name = this.comName?.trim() ?? '';
+    const short = this.universityShort?.trim() ?? '';
+    return short ? `${name} - ${short}` : name;
+  }
 
   constructor(
     private router: Router,
@@ -331,8 +383,30 @@ export class CommunityRegisterComponent implements OnInit {
       });
   }
 
-  submitStep3(event: Event): void {
+  /** Adım 3 formunda "Önizlemeye geç" tıklandığında veya form Enter ile gönderildiğinde */
+  goToPreview(): void {
+    if (!this.isStep3FormValid || this.isLoading) return;
+    this.showPreview = true;
+  }
+
+  /** Adım 3 form submit (Enter vb.) — geçerliyse önizlemeye geç */
+  onStep3FormSubmit(event: Event): void {
     event.preventDefault();
+    if (this.isStep3FormValid) this.goToPreview();
+  }
+
+  /** Önizleme ekranından "Geri Dön" — topluluk bilgilerini düzenlemek için adım 3'e dön */
+  backFromPreview(): void {
+    this.showPreview = false;
+  }
+
+  submitStep3(event: Event): void {
+    event?.preventDefault?.();
+    this.doSubmitStep3();
+  }
+
+  /** Önizleme ekranından "Topluluğu oluştur" veya form submit — kayıt akışını başlatır */
+  doSubmitStep3(): void {
     if (this.isLoading) return;
 
     this.comNameMissing = !this.comName?.trim();
@@ -364,7 +438,7 @@ export class CommunityRegisterComponent implements OnInit {
     this.isLoading = true;
 
     const dto: CreateCommunityDto = {
-      comName: this.comName.trim(),
+      comName: this.getCombinedComName(),
       comCategory: this.comCategory || undefined,
       comAbout: this.about?.trim() || undefined,
       city: this.city.trim(),

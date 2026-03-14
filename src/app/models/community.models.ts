@@ -33,6 +33,8 @@ export interface CommunityEventDto {
   title?: string;
   startDate?: string; // ISO date string
   endDate?: string; // ISO date string
+  /** Etkinlik şehri (Event.EventCity — öncelikli) */
+  eventCity?: string;
   location?: string;
 }
 

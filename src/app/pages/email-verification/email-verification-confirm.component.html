@@ -4,8 +4,8 @@
 
 <div class="main-container">
   <div class="split-layout">
-    <!-- SOL TARAF: GÖRSEL ALAN -->
-    <div class="visual-side">
+    <!-- SOL TARAF: GÖRSEL ALAN (Topluluk akışında topluluk giriş ekranındaki fotoğraf) -->
+    <div class="visual-side" [class.visual-side-community]="isCommunityFlow">
       <div class="visual-overlay"></div>
       <div class="visual-content">
         <a class="brand-badge" style="cursor: pointer; text-decoration: none;" [routerLink]="['/']">
@@ -16,7 +16,7 @@
         </a>
         <div class="quote-container">
           <h1>E-Posta<br />Doğrulanıyor</h1>
-          <p *ngIf="isCommunityFlow">Topluluk Kaydı — Adım 2 / 3</p>
+          <p *ngIf="isCommunityFlow">Topluluk Kaydı — Adım 2 / 5</p>
           <p *ngIf="!isCommunityFlow">Hesabınız aktifleştiriliyor, lütfen bekleyin...</p>
         </div>
       </div>

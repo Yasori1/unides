@@ -2,6 +2,7 @@ import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { ToastService } from '../services/toast.services';
 import { AuthService } from '../services/auth.services';
 
@@ -91,17 +92,40 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
           errorMessage = 'Sunucuya bağlanılamıyor. İnternet bağlantınızı kontrol edin.';
         }
       } else if (error.status === 401) {
-        // Unauthorized - token expired or invalid
-        // Logout endpoint'i için 401 hatası normal olabilir (token zaten geçersiz), bu durumda skip edildi
-        // complete-community-setup 401 döndüğünde (örn. "onay aşamasındadır") logout yapma; component başarı sayfasını gösterecek
+        // Unauthorized - access token expired veya geçersiz. Önce refresh dene; başarısızsa login'e düş.
         errorMessage = 'Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.';
 
+        const isRefreshRequest = req.url.includes('/Auth/refresh');
         const isCompleteCommunitySetupUrl = error.url?.includes('complete-community-setup');
         const isCommunityUploadUrl = error.url?.includes('/Communities/') && (error.url?.includes('/banner') || error.url?.includes('/logo'));
         const isCommunitySetupUploadUrl = error.url?.includes('community-setup') && (error.url?.includes('/banner') || error.url?.includes('/logo'));
-        if (typeof window !== 'undefined' && !error.url?.includes('/api/Auth/logout') && !isCompleteCommunitySetupUrl && !isCommunityUploadUrl && !isCommunitySetupUploadUrl) {
-          authService.logout();
+        const isLogoutUrl = error.url?.includes('/api/Auth/logout');
+        const skip401AndLogout = isLogoutUrl || isCompleteCommunitySetupUrl || isCommunityUploadUrl || isCommunitySetupUploadUrl;
+
+        if (skip401AndLogout) {
+          return throwError(() => error);
         }
+        if (isRefreshRequest) {
+          // Refresh endpoint hata döndü (token geçersiz/süresi dolmuş) — login'e yönlendir, toast göster
+          if (typeof window !== 'undefined') authService.logout();
+          if (typeof window !== 'undefined') toastService.show(errorMessage, 'error');
+          return throwError(() => error);
+        }
+
+        // 401 alan istek refresh değilse: arka planda POST /auth/refresh dene, başarılıysa orijinal isteği tekrarla
+        return authService.refreshTokenAndSave().pipe(
+          switchMap((refreshSuccess) => {
+            if (refreshSuccess) return next(req);
+            if (typeof window !== 'undefined') authService.logout();
+            if (typeof window !== 'undefined') toastService.show(errorMessage, 'error');
+            return throwError(() => error);
+          }),
+          catchError(() => {
+            if (typeof window !== 'undefined') authService.logout();
+            if (typeof window !== 'undefined') toastService.show(errorMessage, 'error');
+            return throwError(() => error);
+          })
+        );
       } else if (error.status === 403) {
         // Forbidden
         errorMessage = error.error?.message || 'Bu işlem için yetkiniz bulunmamaktadır.';

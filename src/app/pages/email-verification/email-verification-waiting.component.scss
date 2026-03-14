@@ -48,6 +48,11 @@
   background-position: center;
   overflow: hidden;
 
+  /* Topluluk Kaydı akışında topluluk giriş ekranındaki fotoğraf */
+  &.visual-side-community {
+    background-image: url('/assets/community-hero.png');
+  }
+
   .visual-overlay {
     position: absolute;
     top: 0;

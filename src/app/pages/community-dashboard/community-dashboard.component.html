@@ -418,9 +418,9 @@
   </main>
   </ng-container>
 
-  <div class="modal-overlay" *ngIf="isModalOpen" (click)="modalType !== 'new-event' && closeModal()">
-    <div class="modal-card" [class.event-modal]="modalType === 'new-event'" (click)="$event.stopPropagation()">
-      <div class="modal-head">
+  <div class="modal-overlay" [class.modal-overlay-event-form]="modalType === 'new-event'" *ngIf="isModalOpen" (click)="modalType !== 'new-event' && closeModal()">
+    <div class="modal-card" [class.event-modal]="modalType === 'new-event'" [class.event-form-modal]="modalType === 'new-event'" (click)="$event.stopPropagation()">
+      <div class="modal-head" [class.modal-head-event-form]="modalType === 'new-event'">
         <h3>
           {{
           modalType === 'new-event'
@@ -436,7 +436,7 @@
           <span class="material-symbols-outlined">close</span>
         </button>
       </div>
-      <div class="modal-body modal-body-event" *ngIf="modalType === 'new-event'">
+      <div class="modal-body modal-body-event event-form-modal-body" *ngIf="modalType === 'new-event'">
         <div class="event-form-scroll">
           <div class="event-detail-layout">
             <div class="event-detail-left">
@@ -490,12 +490,24 @@
                 </label>
               </div>
               <label class="stacked">
-                <span>Konum (Maks. 100) <span class="ev-required-star">*</span></span>
-                <input type="text" placeholder="Konum" [(ngModel)]="newEventData.location"
+                <span>Etkinlik Şehri <span class="ev-required-star">*</span></span>
+                <select class="ev-select" [(ngModel)]="newEventData.eventCity"
+                  (ngModelChange)="eventErrors.eventCity = false"
+                  [class.ev-field-error]="eventErrors.eventCity">
+                  <option value="">Şehir seçin</option>
+                  <option *ngFor="let c of cities" [value]="c">{{ c }}</option>
+                </select>
+                <span class="ev-field-hint" *ngIf="eventErrors.eventCity">
+                  <i class="bx bx-error-circle"></i> Etkinlik şehri zorunludur.
+                </span>
+              </label>
+              <label class="stacked">
+                <span>Etkinlik Konumu / Lokasyon (Maks. 100) <span class="ev-required-star">*</span></span>
+                <input type="text" placeholder="Mekan veya adres (örn. Edirne Cumhuriyet Meydanı)" [(ngModel)]="newEventData.location"
                   (ngModelChange)="eventErrors.location = false"
                   maxlength="100" [class.ev-field-error]="eventErrors.location" />
                 <span class="ev-field-hint" *ngIf="eventErrors.location">
-                  <i class="bx bx-error-circle"></i> Konum zorunludur.
+                  <i class="bx bx-error-circle"></i> Etkinlik konumu zorunludur.
                 </span>
               </label>
               <label class="stacked">
@@ -529,18 +541,18 @@
             </div>
           </div>
         </div>
-        <div class="event-form-footer">
-          <button class="btn-primary full"
-            [disabled]="!isEventFormValid || isSavingEvent"
-            (click)="saveEvent()"
-            type="button">
-            <span *ngIf="!isEventFormValid">Lütfen Tüm Alanları Doldurun</span>
-            <span *ngIf="isEventFormValid && !isSavingEvent && !editingEventId">Etkinlik Oluştur ve Kurumsal Tarafa Yönlendir</span>
-            <span *ngIf="isEventFormValid && isSavingEvent && !editingEventId">Oluşturuluyor...</span>
-            <span *ngIf="isEventFormValid && !isSavingEvent && editingEventId">Etkinliği Güncelle ve Onaya Gönder</span>
-            <span *ngIf="isEventFormValid && isSavingEvent && editingEventId">Güncelleniyor...</span>
-          </button>
-        </div>
+      </div>
+      <div class="modal-footer-event-form" *ngIf="modalType === 'new-event'">
+        <button class="btn-primary full"
+          [disabled]="!isEventFormValid || isSavingEvent"
+          (click)="saveEvent()"
+          type="button">
+          <span *ngIf="!isEventFormValid">Lütfen Tüm Alanları Doldurun</span>
+          <span *ngIf="isEventFormValid && !isSavingEvent && !editingEventId">Etkinlik Oluştur ve Kurumsal Tarafa Yönlendir</span>
+          <span *ngIf="isEventFormValid && isSavingEvent && !editingEventId">Oluşturuluyor...</span>
+          <span *ngIf="isEventFormValid && !isSavingEvent && editingEventId">Etkinliği Güncelle ve Onaya Gönder</span>
+          <span *ngIf="isEventFormValid && isSavingEvent && editingEventId">Güncelleniyor...</span>
+        </button>
       </div>
       <div class="modal-body" *ngIf="modalType === 'new-project'">
         <input type="text" placeholder="Proje Adı" [(ngModel)]="newProjectData.name" />
@@ -568,16 +580,17 @@
   </div>
 </div>
 
-<!-- Event Detail Modal (geniş düzen: etkinlik oluştur ile aynı) -->
-<div class="modal-overlay" *ngIf="selectedEvent" (click)="!isEditingEventDetail && closeEventDetail()">
-  <div class="modal-card event-modal" (click)="$event.stopPropagation()">
-    <div class="modal-head">
+<!-- Event Detail Modal (geniş düzen: scroll + sabit footer, responsive; mobilde tüm içerik tek scroll) -->
+<div class="modal-overlay modal-overlay-event-detail" *ngIf="selectedEvent" (click)="!isEditingEventDetail && closeEventDetail()">
+  <div class="modal-card event-modal event-detail-modal" (click)="$event.stopPropagation()">
+    <div class="modal-head modal-head-event-detail">
       <h3>{{ isEditingEventDetail ? 'Etkinliği Düzenle' : 'Etkinlik Detayları' }}</h3>
       <button class="icon-btn ghost close-modern" (click)="closeEventDetail()">
         <span class="material-symbols-outlined">close</span>
       </button>
     </div>
-    <div class="modal-body modal-body-event">
+    <div class="event-detail-modal-scroll-wrap">
+    <div class="modal-body modal-body-event event-detail-modal-body">
       <div class="event-detail-layout">
         <div class="event-detail-left">
           <div class="single-image-upload no-url-input">
@@ -620,7 +633,16 @@
           </div>
 
           <label class="stacked">
-            <span>Konum (Maks. 100)</span>
+            <span>Etkinlik Şehri</span>
+            <input type="text" [value]="selectedEvent.city || '—'" [readonly]="!isEditingEventDetail"
+              *ngIf="!isEditingEventDetail" />
+            <select class="ev-select" [(ngModel)]="editedEventData.eventCity" *ngIf="isEditingEventDetail">
+              <option value="">Şehir seçin</option>
+              <option *ngFor="let c of cities" [value]="c">{{ c }}</option>
+            </select>
+          </label>
+          <label class="stacked">
+            <span>Etkinlik Konumu / Lokasyon (Maks. 100)</span>
             <input type="text" [value]="selectedEvent.location" [readonly]="!isEditingEventDetail" maxlength="100"
               *ngIf="!isEditingEventDetail" />
             <input type="text" [(ngModel)]="editedEventData.location" maxlength="100" *ngIf="isEditingEventDetail" />
@@ -654,53 +676,52 @@
           </label>
 
           <!-- Rejection Reason Button (only for rejected events) -->
-          <div *ngIf="selectedEvent && selectedEvent.status === 'rejected' && !isEditingEventDetail"
-            style="margin-top: 16px; margin-bottom: 8px; width: 100%; display: block;">
+          <div class="event-detail-rejection-btn" *ngIf="selectedEvent && selectedEvent.status === 'rejected' && !isEditingEventDetail">
             <button type="button"
               (click)="openRejectionModal(selectedEvent.rejectionReason || 'Revize nedeni belirtilmemiş.')"
-              style="background: #ef4444 !important; border: 2px solid #dc2626 !important; color: white !important; padding: 14px 20px !important; border-radius: 8px !important; font-weight: 600 !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 10px !important; cursor: pointer !important; width: 100% !important; font-size: 15px !important; transition: all 0.2s !important;">
-              <span class="material-symbols-outlined" style="font-size: 22px !important; line-height: 1;">info</span>
+              class="btn-rejection-reason">
+              <span class="material-symbols-outlined">info</span>
               <span>Revize Nedeni Görüntüle</span>
-            </button>
-          </div>
-
-          <!-- Buttons for different statuses - Edit Mode OFF -->
-          <div style="display: flex; gap: 12px; margin-top: 8px; flex-direction: column" *ngIf="!isEditingEventDetail">
-            <button class="btn-primary full" *ngIf="selectedEvent.status === 'pending'" (click)="editEventFromDetail()"
-              type="button">
-              <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px">edit</span>
-              <span>Etkinliği Düzenle</span>
-            </button>
-            <button class="btn-primary full" *ngIf="selectedEvent.status === 'approved'"
-              (click)="editApprovedEventFromDetail()" type="button" style="background: #f59e0b">
-              <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px">edit_off</span>
-              <span>Etkinliği Yayından Çek ve Düzenle</span>
-            </button>
-            <button class="btn-primary full" *ngIf="selectedEvent.status === 'rejected'"
-              (click)="editRejectedEventFromDetail()" type="button">
-              <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px">edit</span>
-              <span>Düzenle</span>
-            </button>
-            <button class="btn-primary full" style="background: #ef4444" (click)="openDeleteEventConfirm(selectedEvent.id)"
-              type="button">
-              <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px">delete</span>
-              <span>Etkinliği Sil</span>
-            </button>
-          </div>
-
-          <!-- Buttons for Edit Mode ON -->
-          <div style="display: flex; gap: 12px; margin-top: 8px; flex-direction: column" *ngIf="isEditingEventDetail">
-            <button class="btn-primary full" (click)="saveEventFromDetail()" type="button">
-              <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px">save</span>
-              <span>Kaydet ve Onaya Gönder</span>
-            </button>
-            <button class="btn-primary full" style="background: #6b7280" (click)="cancelEditEventDetail()" type="button">
-              <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px">close</span>
-              <span>İptal</span>
             </button>
           </div>
         </div>
       </div>
+    </div>
+    <div class="modal-footer-event-detail">
+      <!-- Buttons for different statuses - Edit Mode OFF (mobilde scroll-wrap içinde, hep görünür) -->
+      <div class="event-detail-footer-btns" *ngIf="!isEditingEventDetail">
+        <button class="btn-primary full" *ngIf="selectedEvent.status === 'pending'" (click)="editEventFromDetail()"
+          type="button">
+          <span class="material-symbols-outlined">edit</span>
+          <span>Etkinliği Düzenle</span>
+        </button>
+        <button class="btn-primary full" *ngIf="selectedEvent.status === 'approved'"
+          (click)="editApprovedEventFromDetail()" type="button" style="background: #f59e0b">
+          <span class="material-symbols-outlined">edit_off</span>
+          <span>Etkinliği Yayından Çek ve Düzenle</span>
+        </button>
+        <button class="btn-primary full" *ngIf="selectedEvent.status === 'rejected'"
+          (click)="editRejectedEventFromDetail()" type="button">
+          <span class="material-symbols-outlined">edit</span>
+          <span>Düzenle</span>
+        </button>
+        <button class="btn-primary full btn-delete" (click)="openDeleteEventConfirm(selectedEvent.id)" type="button">
+          <span class="material-symbols-outlined">delete</span>
+          <span>Etkinliği Sil</span>
+        </button>
+      </div>
+      <!-- Buttons for Edit Mode ON -->
+      <div class="event-detail-footer-btns" *ngIf="isEditingEventDetail">
+        <button class="btn-primary full" (click)="saveEventFromDetail()" type="button">
+          <span class="material-symbols-outlined">save</span>
+          <span>Kaydet ve Onaya Gönder</span>
+        </button>
+        <button class="btn-primary full btn-cancel" (click)="cancelEditEventDetail()" type="button">
+          <span class="material-symbols-outlined">close</span>
+          <span>İptal</span>
+        </button>
+      </div>
+    </div>
     </div>
   </div>
 </div>

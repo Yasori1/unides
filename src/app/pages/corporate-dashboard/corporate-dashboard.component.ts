@@ -58,6 +58,9 @@ interface EventRequest {
   date: string;
   startDate?: string; // ISO formatında başlangıç tarihi
   endDate?: string; // ISO formatında bitiş tarihi
+  /** Etkinlik şehri (backend eventCity) */
+  eventCity?: string;
+  /** Mekan / adres (backend eventLocation) */
   location: string;
   imageUrl?: string;
   description?: string;
@@ -65,7 +68,7 @@ interface EventRequest {
   status: 'Onaylandı' | 'Beklemede' | 'Reddedildi' | 'Revize';
   capacity?: string;
   rejectionReason?: string;
-  city?: string; // Şehir bilgisi
+  city?: string; // API'den gelen şehir (gösterim)
   category?: string; // Kategori bilgisi
 }
 
@@ -124,10 +127,22 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   searchText = '';
   statusFilter: string = ''; // Aktif/Pasif filtre ('' = Tüm Durumlar sadece Bartın için)
   cityFilter: string = ''; // Şehir filtresi
+  /** Topluluk arama kutusu için debounce (backend'e istek) */
+  private communitySearchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
   announcementSearchText = ''; // Duyuru arama metni
   eventSearchText = ''; // Etkinlik arama metni
   eventStatusFilter: string = ''; // Etkinlik durum filtresi
   filteredEvents: EventRequest[] = []; // Filtrelenmiş etkinlikler
+  /** Etkinlikler sayfalama: mevcut sayfa (1 tabanlı) */
+  eventsCurrentPage = 1;
+  /** Etkinlikler sayfa boyutu (backend ile aynı olmalı) */
+  eventsPageSize = 16;
+  /** Filtreye göre toplam etkinlik sayısı (sayfalama için) */
+  eventsTotalCount = 0;
+  /** Backend'den gelen toplamlar (tab/sayfa bilgisi için) */
+  eventsPendingTotal = 0;
+  eventsAcceptedTotal = 0;
+  eventsRejectedTotal = 0;
   inspectedEvents: Set<number> = new Set();
   checkingSpamEvents: Set<number> = new Set(); // Spam kontrolü yapılan event'ler
 
@@ -179,9 +194,9 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     this.closeConfirmModal();
   }
 
-  // Pagination için değişkenler
+  // Pagination için değişkenler (topluluk listesi sayfa boyutu)
   currentPage = 1;
-  itemsPerPage = 15;
+  itemsPerPage = 16;
   totalPages = 0;
   pages: number[] = [];
   displayedCommunities: Community[] = [];
@@ -273,6 +288,8 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
 
   allEvents: EventRequest[] = [];
   selectedEvent: EventRequest | null = null;
+  /** Etkinlik detayı GET /api/Events/{id} ile yüklenirken true */
+  isEventDetailLoading = false;
   eventToReject: EventRequest | null = null;
   rejectionReason = '';
   newEvent: Partial<EventRequest> | null = null;
@@ -581,8 +598,17 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       });
     };
 
-    const apiParams: { status: typeof backendStatus; city?: string } = { status: backendStatus };
+    // Anasayfa topluluk sayfası ile aynı parametreler: name, city, category, university (backend'de filtreleme)
+    const apiParams: {
+      status: typeof backendStatus;
+      city?: string;
+      name?: string;
+      category?: string;
+      university?: string;
+    } = { status: backendStatus };
     if (backendCity) apiParams.city = backendCity;
+    if (this.cityFilter?.trim()) apiParams.city = this.cityFilter.trim();
+    if (this.searchText?.trim()) apiParams.name = this.searchText.trim();
     const requestedPage = page ?? this.currentPage ?? 1;
 
     this.communityService.getCommunitiesPage(requestedPage, this.itemsPerPage, apiParams).subscribe({
@@ -731,56 +757,15 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       statusNumbers = [0, 1, 2];
     }
 
-    // Backend'den status'e göre etkinlikleri çek
-    this.eventService.getByStatus(statusNumbers).subscribe({
-      next: (data: EventItem[]) => {
-        // Backend'den gelen etkinlikleri map et
-        // EventService zaten EventConfirm (0,1,2) değerlerini 'Beklemede', 'Onaylandı', 'Reddedildi' olarak map ediyor
-        if (!data || data.length === 0) {
-          this.allEvents = [];
-        } else {
-          this.allEvents = data.map((e) => {
-            // Community name'i bulmak için communities listesini kullan
-            const community = this.allCommunities.find(
-              (c) => String(c.id) === String(e.communityId),
-            );
-
-            return {
-              id: e.id,
-              communityId: e.communityId,
-              communityName: community?.name || e.communityName || '',
-              eventName: e.title,
-              date: e.startDate || '',
-              startDate: e.startDate,
-              endDate: e.endDate,
-              location: e.location || '',
-              imageUrl: e.imageUrl || '',
-              description: e.description || '',
-              shortDescription: e.shortDescription || '',
-              // EventService'ten gelen status değeri zaten doğru format: 'Beklemede', 'Onaylandı', 'Reddedildi'
-              status: e.status || 'Beklemede',
-              capacity: e.capacity || '',
-              city: e.city || community?.city || '',
-              category: (e as any).category || community?.category || '',
-            };
-          });
-        }
-
-        // Topluluk isimlerini eşleştir
-        if (this.allCommunities?.length > 0) {
-          this.attachCommunityNamesToEvents();
-        }
-
-        // Etkinlik filtrelerini uygula (metin araması için)
-        // filterEvents() metodu filteredEvents'i güncelliyor
-        this.filterEvents();
-        // Loading state'i bitir
-        this.isLoadingEvents = false;
-      },
-      error: (err) => {
-        // Hata durumunda getAll() metodunu fallback olarak kullan
-        this.eventService.getAll().subscribe({
-          next: (data: EventItem[]) => {
+    // Backend'den sayfalı status ile etkinlikleri çek (pageSize=16)
+    this.eventService
+      .getByStatusPagedResponse(this.eventsCurrentPage, this.eventsPageSize, statusNumbers)
+      .subscribe({
+        next: (res) => {
+          const data = res.items;
+          if (!data || data.length === 0) {
+            this.allEvents = [];
+          } else {
             this.allEvents = data.map((e) => {
               const community = this.allCommunities.find(
                 (c) => String(c.id) === String(e.communityId),
@@ -798,28 +783,42 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
                 description: e.description || '',
                 shortDescription: e.shortDescription || '',
                 status: e.status || 'Beklemede',
-                category: (e as any).category || community?.category || '',
                 capacity: e.capacity || '',
                 city: e.city || community?.city || '',
+                category: (e as any).category || community?.category || '',
               };
             });
+          }
 
-            // Topluluk isimlerini eşleştir
-            if (this.allCommunities?.length > 0) {
-              this.attachCommunityNamesToEvents();
-            }
-            this.filterEvents();
-            this.isLoadingEvents = false;
-          },
-          error: () => {
-            // Hata durumunda boş liste
-            this.allEvents = [];
-            this.filteredEvents = [];
-            this.isLoadingEvents = false;
-          },
-        });
-      },
-    });
+          this.eventsPendingTotal = res.pendingTotalCount;
+          this.eventsAcceptedTotal = res.acceptedTotalCount;
+          this.eventsRejectedTotal = res.rejectedTotalCount;
+          if (this.eventStatusFilter === 'Beklemede') {
+            this.eventsTotalCount = res.pendingTotalCount;
+          } else if (this.eventStatusFilter === 'Onaylandı') {
+            this.eventsTotalCount = res.acceptedTotalCount;
+          } else if (this.eventStatusFilter === 'Reddedildi' || this.eventStatusFilter === 'Revize') {
+            this.eventsTotalCount = res.rejectedTotalCount;
+          } else {
+            this.eventsTotalCount = res.totalCount;
+          }
+
+          if (this.allCommunities?.length > 0) {
+            this.attachCommunityNamesToEvents();
+          }
+          this.filterEvents();
+          this.isLoadingEvents = false;
+        },
+        error: () => {
+          this.allEvents = [];
+          this.filteredEvents = [];
+          this.eventsTotalCount = 0;
+          this.eventsPendingTotal = 0;
+          this.eventsAcceptedTotal = 0;
+          this.eventsRejectedTotal = 0;
+          this.isLoadingEvents = false;
+        },
+      });
   }
 
   attachCommunityNamesToEvents() {
@@ -868,6 +867,18 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   setCommunityStatusFilter(status: string) {
     this.statusFilter = status;
     this.loadCommunitiesFromService(this.statusFilter);
+  }
+
+  /** Topluluk arama kutusu: debounce ile backend'e anasayfa ile aynı parametrelerle (name, city) istek at */
+  onCommunitySearchInput(): void {
+    if (this.communitySearchDebounceTimer != null) {
+      clearTimeout(this.communitySearchDebounceTimer);
+      this.communitySearchDebounceTimer = null;
+    }
+    this.communitySearchDebounceTimer = setTimeout(() => {
+      this.communitySearchDebounceTimer = null;
+      this.loadCommunitiesFromService(this.statusFilter, 1);
+    }, 400);
   }
 
   /** Kart üzerindeki durum rozeti için CSS sınıfı (Aktif, Pasif, Onay Bekleyen, Reddedilen, Silinmiş) */
@@ -1002,11 +1013,39 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     this.filteredEvents = temp;
   }
 
-  // Etkinlik durum filtresi ayarla
+  // Etkinlik durum filtresi ayarla (sayfa 1'e dön)
   setEventStatusFilter(status: string) {
     this.eventStatusFilter = status;
-    // Backend'den filtreye göre etkinlikleri çek
+    this.eventsCurrentPage = 1;
     this.loadEventsFromService();
+  }
+
+  /** Etkinlikler sayfa sayısı (mevcut filtreye göre) */
+  get eventsTotalPages(): number {
+    if (this.eventsPageSize <= 0) return 0;
+    return Math.ceil(this.eventsTotalCount / this.eventsPageSize) || 0;
+  }
+
+  /** Etkinlikler sayfasına git */
+  goToEventsPage(page: number) {
+    const p = Math.max(1, Math.min(page, this.eventsTotalPages));
+    if (p === this.eventsCurrentPage) return;
+    this.eventsCurrentPage = p;
+    this.loadEventsFromService();
+  }
+
+  /** Sayfalama için 1..N sayı dizisi */
+  getEventsPageNumbers(): number[] {
+    const n = this.eventsTotalPages;
+    return n <= 0 ? [] : Array.from({ length: n }, (_, i) => i + 1);
+  }
+
+  /** Gösterilen kayıt aralığı metni (örn. "1 – 16 / 28") */
+  get eventsRangeText(): string {
+    if (this.eventsTotalCount <= 0) return '0 / 0';
+    const start = (this.eventsCurrentPage - 1) * this.eventsPageSize + 1;
+    const end = Math.min(this.eventsCurrentPage * this.eventsPageSize, this.eventsTotalCount);
+    return `${start} – ${end} / ${this.eventsTotalCount}`;
   }
 
   // Topluluklar sayfasına onay bekleyen filtresiyle yönlendir
@@ -1911,6 +1950,12 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     if (window.innerWidth < 768) {
       this.isSidebarCollapsed = false;
     }
+    // URL'i güncelle ki sayfa yenilense bile aynı sekmede kalınsın
+    this.router.navigate([], {
+      queryParams: { tab },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
     // Sekmeye tıklandığında ilgili veriyi yükle (Topluluklar, Etkinlikler, Duyurular)
     if (tab === 'communities') {
       this.loadCommunitiesFromService(this.statusFilter);
@@ -2653,11 +2698,46 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     });
   }
 
+  /** EventItem'ı kurumsal panel EventRequest formatına çevirir */
+  private mapEventItemToRequest(e: EventItem): EventRequest {
+    const community = this.allCommunities.find((c) => String(c.id) === String(e.communityId));
+    return {
+      id: e.id,
+      communityId: e.communityId,
+      communityName: community?.name || e.communityName || '',
+      eventName: e.title || '',
+      date: e.startDate || '',
+      startDate: e.startDate,
+      endDate: e.endDate,
+      location: e.location || '',
+      imageUrl: e.imageUrl || '',
+      description: e.description || '',
+      shortDescription: e.shortDescription || '',
+      status: e.status || 'Beklemede',
+      capacity: e.capacity || '',
+      city: e.city || community?.city || '',
+      category: (e as any).category || community?.category || '',
+      rejectionReason: e.rejectionReason,
+    };
+  }
+
   openEventDetail(ev: EventRequest) {
-    // Mevcut veriyi direkt kullan (backend'den çekmeye gerek yok, zaten listede var)
-    this.selectedEvent = ev;
     this.modalType = 'event-detail';
     this.isModalOpen = true;
+    this.selectedEvent = null;
+    this.isEventDetailLoading = true;
+
+    this.eventService.getByIdAdmin(ev.id).subscribe({
+      next: (e: EventItem) => {
+        this.selectedEvent = this.mapEventItemToRequest(e);
+        this.isEventDetailLoading = false;
+      },
+      error: (err) => {
+        this.isEventDetailLoading = false;
+        this.showToast(err?.status === 404 ? 'Etkinlik bulunamadı.' : 'Etkinlik detayı yüklenemedi.', 'error');
+        this.selectedEvent = ev;
+      },
+    });
   }
 
   formatEventDate(dateString?: string): string {
@@ -2706,10 +2786,14 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     }
   }
 
+  /** Şehir listesi (Etkinlik Şehri dropdown) */
+  readonly eventCities: string[] = CITY_NAMES;
+
   openNewEventModal() {
     this.newEvent = {
       eventName: '',
       date: '',
+      eventCity: '',
       location: '',
       // Community id string (Guid), EventRequest communityId number bekliyor - undefined bırakıyoruz
       // Backend'e gönderilirken uygun formata çevrilecek
@@ -2746,6 +2830,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
 
     const eventData: Partial<EventItem> = {
       title: this.newEvent.eventName,
+      city: this.newEvent.eventCity?.trim() || undefined,
       location: this.newEvent.location || '',
       description: this.newEvent.description || '',
       quota: this.newEvent.capacity ? parseInt(this.newEvent.capacity) : undefined,
@@ -2866,6 +2951,8 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   closeModal() {
     this.isModalOpen = false;
     this.modalType = '';
+    this.selectedEvent = null;
+    this.isEventDetailLoading = false;
     this.spamReportOverlayOpen = false;
     this.isRejectEventSubModalOpen = false;
     this.editingCommunityCurrentLive = null;
