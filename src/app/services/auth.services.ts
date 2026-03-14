@@ -93,7 +93,10 @@ export class AuthService {
   // Backend API URL - environment'tan alınıyor
   private apiUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient, private router: Router) { }
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+  ) {}
 
   // --- MERKEZİ GİRİŞ METODU (SWAGGER: POST /api/Auth/login) ---
   // Tüm kullanıcı tipleri aynı endpoint üzerinden giriş yapar,
@@ -138,7 +141,7 @@ export class AuthService {
           }
           this.savePermissions(this.extractPermissionsFromResponse(response));
         }
-      })
+      }),
     );
   }
 
@@ -151,7 +154,7 @@ export class AuthService {
         // Frontend tarafında 'student' olduğunu garantiye alıyoruz
         // (Backend response.role dönmezse varsayılan olarak set edilebilir)
         this.saveUserType('student');
-      })
+      }),
     );
   }
 
@@ -159,7 +162,7 @@ export class AuthService {
   loginCorporate(email: string, password: string): Observable<LoginResponse> {
     return this.login(email, password, 2).pipe(
       // 2 = Kurumsal (GSB)
-      tap(() => this.saveUserType('corporate'))
+      tap(() => this.saveUserType('corporate')),
     );
   }
 
@@ -218,7 +221,7 @@ export class AuthService {
             this.saveRoleId(numericRoleId);
           }
           this.savePermissions(this.extractPermissionsFromResponse(response));
-        })
+        }),
       );
   }
 
@@ -275,7 +278,7 @@ export class AuthService {
             this.saveRoleId(numericRoleId);
           }
           this.savePermissions(this.extractPermissionsFromResponse(response));
-        })
+        }),
       );
   }
 
@@ -283,7 +286,7 @@ export class AuthService {
   resendLoginOtp(otpRequestId: string): Observable<LoginResponse & { otpRequestId?: string }> {
     return this.http.post<LoginResponse & { otpRequestId?: string }>(
       `${this.apiUrl}/Auth/login-otp/resend`,
-      { otpRequestId: otpRequestId.trim() }
+      { otpRequestId: otpRequestId.trim() },
     );
   }
 
@@ -291,7 +294,7 @@ export class AuthService {
   loginCommunity(email: string, password: string): Observable<LoginResponse> {
     return this.login(email, password, 3).pipe(
       // 3 = Topluluk
-      tap(() => this.saveUserType('community'))
+      tap(() => this.saveUserType('community')),
     );
   }
 
@@ -339,11 +342,10 @@ export class AuthService {
     const headers = new HttpHeaders().set('X-Setup-Token', setupToken.trim());
     const context = new HttpContext().set(SKIP_AUTH, true);
     return this.http
-      .post<{ BannerUrl?: string; bannerUrl?: string }>(
-        `${this.apiUrl}/Auth/community-setup/banner`,
-        formData,
-        { headers, context }
-      )
+      .post<{
+        BannerUrl?: string;
+        bannerUrl?: string;
+      }>(`${this.apiUrl}/Auth/community-setup/banner`, formData, { headers, context })
       .pipe(map((r) => r.BannerUrl ?? r.bannerUrl ?? ''));
   }
 
@@ -353,11 +355,10 @@ export class AuthService {
     const headers = new HttpHeaders().set('X-Setup-Token', setupToken.trim());
     const context = new HttpContext().set(SKIP_AUTH, true);
     return this.http
-      .post<{ LogoUrl?: string; logoUrl?: string }>(
-        `${this.apiUrl}/Auth/community-setup/logo`,
-        formData,
-        { headers, context }
-      )
+      .post<{
+        LogoUrl?: string;
+        logoUrl?: string;
+      }>(`${this.apiUrl}/Auth/community-setup/logo`, formData, { headers, context })
       .pipe(map((r) => r.LogoUrl ?? r.logoUrl ?? ''));
   }
 
@@ -374,15 +375,9 @@ export class AuthService {
       })
       .pipe(
         tap((response: any) => {
-          const token =
-            response?.accessToken ||
-            response?.AccessToken ||
-            response?.token ||
-            null;
-          const refresh =
-            response?.refreshToken || response?.RefreshToken || null;
-          const roleName =
-            response?.roleName || response?.RoleName || 'community';
+          const token = response?.accessToken || response?.AccessToken || response?.token || null;
+          const refresh = response?.refreshToken || response?.RefreshToken || null;
+          const roleName = response?.roleName || response?.RoleName || 'community';
 
           if (token) {
             this.saveToken(token);
@@ -409,7 +404,7 @@ export class AuthService {
           if (numericRoleId !== null) {
             this.saveRoleId(numericRoleId);
           }
-        })
+        }),
       );
   }
 
@@ -428,7 +423,11 @@ export class AuthService {
    */
   verifyEmail(token: string): Observable<VerifyEmailResponse> {
     const context = new HttpContext().set(SKIP_AUTH, true);
-    return this.http.post<VerifyEmailResponse>(`${this.apiUrl}/Auth/verify-email`, { token: token.trim() }, { context });
+    return this.http.post<VerifyEmailResponse>(
+      `${this.apiUrl}/Auth/verify-email`,
+      { token: token.trim() },
+      { context },
+    );
   }
 
   // --- REFRESH TOKEN (SWAGGER: POST /api/Auth/refresh) ---
@@ -445,12 +444,24 @@ export class AuthService {
 
   // --- ORTAK YARDIMCI METOTLAR ---
   /** Backend rol adlarını frontend beklenen değerlere çevirir (roleGuard ve menü 'community' bekler). */
-  private normalizeRoleForFrontend(roleName: string | null | undefined): 'student' | 'corporate' | 'community' {
+  private normalizeRoleForFrontend(
+    roleName: string | null | undefined,
+  ): 'student' | 'corporate' | 'community' {
     if (!roleName || typeof roleName !== 'string') return 'student';
     const r = roleName.trim().toLowerCase();
-    if (r === 'community' || r === 'toplulukbaskani' || r === 'topluluk' || r.includes('topluluk')) return 'community';
-    if (r === 'corporate' || r === 'kurumsal' || r === 'gsb' || r.includes('kurumsal')) return 'corporate';
-    if (r === 'student' || r === 'öğrenci' || r === 'ogrenci' || r === 'üye' || r === 'uye' || r.includes('öğrenci')) return 'student';
+    if (r === 'community' || r === 'toplulukbaskani' || r === 'topluluk' || r.includes('topluluk'))
+      return 'community';
+    if (r === 'corporate' || r === 'kurumsal' || r === 'gsb' || r.includes('kurumsal'))
+      return 'corporate';
+    if (
+      r === 'student' ||
+      r === 'öğrenci' ||
+      r === 'ogrenci' ||
+      r === 'üye' ||
+      r === 'uye' ||
+      r.includes('öğrenci')
+    )
+      return 'student';
     return 'student';
   }
 
@@ -513,7 +524,7 @@ export class AuthService {
 
   /** Belirtilen permission'ın mevcut kullanıcıda olup olmadığını kontrol eder (büyük/küçük harf duyarsız). */
   hasPermission(perm: string): boolean {
-    return this.getPermissions().some(p => p.toUpperCase() === perm.toUpperCase());
+    return this.getPermissions().some((p) => p.toUpperCase() === perm.toUpperCase());
   }
 
   /**
@@ -640,7 +651,7 @@ export class AuthService {
               Logger.warn('Backend logout hatası (önemsiz):', err);
             }
             return of(null); // Hata olsa bile local temizliğe devam et
-          })
+          }),
         )
         .subscribe(() => {
           // İstek tamamlanınca veya hata verince çalışır
@@ -710,7 +721,7 @@ export class AuthService {
             user.name = updatedName;
             this.saveUser(user);
           }
-        })
+        }),
         // No catchError - let error interceptor handle errors
         // If backend endpoint doesn't exist, error interceptor will show error message
       );
@@ -725,7 +736,7 @@ export class AuthService {
     email: string,
     oldPassword: string,
     newPassword: string,
-    confirmNewPassword: string
+    confirmNewPassword: string,
   ): Observable<{ message: string }> {
     // Backend PascalCase format bekliyor
     const payload = {

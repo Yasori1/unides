@@ -462,7 +462,11 @@ export class EventsComponent implements OnInit, AfterViewInit {
   private loadEventsFromBackend(page?: number) {
     const requestedPage = page ?? this.currentPage ?? 1;
     const filters: { search?: string; city?: string; sortBy?: 'name' | 'date'; sortOrder?: 'asc' | 'desc' } = {};
-    if (this.searchQuery?.trim()) filters.search = this.searchQuery.trim();
+    const rawSearch = this.searchQuery?.trim();
+    if (rawSearch) {
+      // Backend ile büyük/küçük harf uyumu: arama terimini Türkçe büyük harfe çevir (fırat → FIRAT, Fırat → FIRAT)
+      filters.search = rawSearch.toLocaleUpperCase('tr-TR');
+    }
     if (this.sortOrder === 'date_asc') {
       filters.sortBy = 'date';
       filters.sortOrder = 'asc';
@@ -540,7 +544,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
       date: formattedDate,
       dateObj: start || new Date(),
       time: formattedTime,
-      university: '',
+      university: e.university || '',
       club: e.communityName || '',
       semester: '',
       location: e.location || '',
@@ -631,14 +635,14 @@ export class EventsComponent implements OnInit, AfterViewInit {
     }
 
     if (this.searchQuery && this.searchQuery.trim() !== '') {
-      const query = this.searchQuery.toLowerCase();
+      const query = this.searchQuery.trim().toLocaleLowerCase('tr-TR');
       filtered = filtered.filter(
         (e) =>
-          e.title.toLowerCase().includes(query) ||
-          e.university.toLowerCase().includes(query) ||
-          e.club.toLowerCase().includes(query) ||
-          (e.location && e.location.toLowerCase().includes(query)) ||
-          (e.city && e.city.toLowerCase().includes(query))
+          (e.title || '').toLocaleLowerCase('tr-TR').includes(query) ||
+          (e.university || '').toLocaleLowerCase('tr-TR').includes(query) ||
+          (e.club || '').toLocaleLowerCase('tr-TR').includes(query) ||
+          (e.location && e.location.toLocaleLowerCase('tr-TR').includes(query)) ||
+          (e.city && e.city.toLocaleLowerCase('tr-TR').includes(query))
       );
     }
 

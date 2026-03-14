@@ -87,10 +87,20 @@
                 </div>
 
                 <div class="info-section">
+                  <div class="info-label">ÜNİVERSİTE</div>
+                  <div class="info-text">
+                    <i class="bx bxs-school"></i>
+                    <ng-container *ngIf="event.university; else noUniversity">{{ event.university }}</ng-container>
+                    <ng-template #noUniversity><span class="info-text-muted">Belirtilmemiş</span></ng-template>
+                  </div>
+                </div>
+
+                <div class="info-section">
                   <div class="info-label">ORGANİZATÖR</div>
                   <div class="info-text">
                     <i class="bx bxs-institution"></i>
-                    {{ event.university }} - {{ event.club }}
+                    <a *ngIf="event.communityId" [routerLink]="['/communities', event.communityId]" class="organizer-link">{{ event.club }}</a>
+                    <span *ngIf="!event.communityId">{{ event.club }}</span>
                   </div>
                 </div>
 

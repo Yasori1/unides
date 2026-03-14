@@ -16,6 +16,8 @@ export interface EventItem {
   communityId: number | string; // Backend'den Guid (string) gelebilir
   communityName?: string;
   communityLogo?: string; // Topluluk logosu
+  /** Topluluğun üniversite adı (EventDetailDto.University) */
+  university?: string;
   imageUrl?: string;
   status?: 'Onaylandı' | 'Beklemede' | 'Reddedildi' | 'Revize';
   capacity?: string;
@@ -55,6 +57,9 @@ interface EventListItemDto {
   MiniAbout?: string;
   communityName?: string;
   CommunityName?: string;
+  /** Topluluğun üniversite adı (GetAllEvents, UpcomingHome, CommunityEvents, PendingEvents) */
+  university?: string;
+  University?: string;
   city?: string;
   City?: string;
   eventConfirm?: number;
@@ -220,7 +225,7 @@ export class EventService {
 
   private mapToEvent(dto: EventListItemDto | any): EventItem {
     // Backend'den gelen DTO'yu EventItem'a çevir
-    // Backend EventListItemDto: EventId, EventName, EventPictureLink, EventDate, EventClock, EventLocation, EventKontenjan, EventAbout, MiniAbout, CommunityName, City, EventConfirm
+    // Backend EventListItemDto: EventId, EventName, ..., CommunityName, University (e.Community?.University), City, EventConfirm
 
     // EventConfirm: 0=pending, 1=accepted, 2=rejected
     // Backend'den gelen EventConfirm değerini kontrol et (camelCase, PascalCase veya farklı field adları)
@@ -386,6 +391,7 @@ export class EventService {
       communityId:
         dto.toplulukId || dto.ToplulukId || dto.comId || dto.ComId || dto.communityId || dto.CommunityId || 0,
       communityName: dto.communityName || dto.CommunityName || '',
+      university: dto.university || dto.University || '',
       communityLogo: (() => {
         // Backend'den gelen logo path'i al - farklı field adlarını kontrol et
         const rawLogoPath = dto.communityLogo || dto.CommunityLogo || dto.logoUrl || dto.LogoUrl || dto.communityLogoUrl || dto.CommunityLogoUrl || '';

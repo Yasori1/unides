@@ -502,6 +502,20 @@
               }
             }
 
+            .organizer-link {
+              color: inherit;
+              font-weight: inherit;
+              text-decoration: none;
+              cursor: pointer;
+              display: inline-flex;
+              align-items: center;
+              gap: 0;
+              &:hover {
+                text-decoration: underline;
+                color: var(--accent-color);
+              }
+            }
+
             .info-text-muted {
               color: var(--secondary-color);
               font-style: italic;

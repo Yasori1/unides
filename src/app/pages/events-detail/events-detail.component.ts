@@ -96,6 +96,9 @@ export class EventsDetailComponent implements OnInit {
       ? start.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
       : '';
 
+    const communityId = e.communityId != null && e.communityId !== '' && e.communityId !== 0
+      ? String(e.communityId)
+      : null;
     return {
       id: e.id,
       title: e.title || '',
@@ -103,8 +106,9 @@ export class EventsDetailComponent implements OnInit {
       date: formattedDate,
       dateObj: start || new Date(),
       time: formattedTime,
-      university: '',
+      university: e.university || '', // Backend EventDetailDto.University
       club: e.communityName || '',
+      communityId,
       location: e.location || '',
       quota: e.quota !== undefined && e.quota !== null ? e.quota : 0,
       imageUrl: e.imageUrl || '',

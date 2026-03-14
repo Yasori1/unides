@@ -32,8 +32,8 @@ export class CorporateLoginComponent implements OnInit, OnDestroy {
     private toastService: ToastService,
     private authService: AuthService,
     private location: Location,
-    @Inject(PLATFORM_ID) private platformId: Object
-  ) { }
+    @Inject(PLATFORM_ID) private platformId: Object,
+  ) {}
 
   ngOnInit(): void {
     // SSR sırasında window kullanma, sadece browser'da çalıştır
@@ -128,7 +128,7 @@ export class CorporateLoginComponent implements OnInit, OnDestroy {
           this.isLoading = false;
           this.toastService.show(
             'Doğrulama kodu e-posta adresinize gönderildi. Lütfen kodu girin.',
-            'success'
+            'success',
           );
           this.router.navigate(['/corporate-verification'], {
             state: { email: responseEmail, otpRequestId },
@@ -145,15 +145,12 @@ export class CorporateLoginComponent implements OnInit, OnDestroy {
           });
           this.toastService.show(
             'Doğrulama kodu e-posta adresinize gönderildi. Lütfen kodu girin.',
-            'success'
+            'success',
           );
           return;
         }
 
-        this.toastService.show(
-          'Giriş başarılı! Ana sayfaya yönlendiriliyorsunuz...',
-          'success'
-        );
+        this.toastService.show('Giriş başarılı! Ana sayfaya yönlendiriliyorsunuz...', 'success');
         setTimeout(() => {
           this.isLoading = false;
           this.router.navigateByUrl('/').catch(() => {
