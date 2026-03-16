@@ -657,9 +657,12 @@ export class EventService {
         const pendingTotalCount = response.pendingTotalCount ?? response.PendingTotalCount ?? 0;
         const acceptedTotalCount = response.acceptedTotalCount ?? response.AcceptedTotalCount ?? 0;
         const rejectedTotalCount = response.rejectedTotalCount ?? response.RejectedTotalCount ?? 0;
+
         const allDtos: EventListItemDto[] = [...pending, ...accepted, ...rejected];
         const items = allDtos.map((dto) => this.mapToEvent(dto));
-        const totalCount = Number(pendingTotalCount) + Number(acceptedTotalCount) + Number(rejectedTotalCount);
+
+        const totalCount =
+          Number(pendingTotalCount) + Number(acceptedTotalCount) + Number(rejectedTotalCount);
         return {
           items,
           page: response.page ?? page,

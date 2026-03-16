@@ -918,6 +918,20 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
       color: $dark-text;
       margin-bottom: 5px;
       line-height: 1.2;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      min-width: 0;
+      width: 100%;
+      max-width: 100%;
+
+      .event-title-inner {
+        display: inline-block;
+        white-space: nowrap;
+        padding-right: 4px;
+        width: max-content;
+        will-change: transform;
+      }
     }
 
     .event-desc-short {
@@ -983,6 +997,16 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
     }
   }
 
+  &.title-overflows {
+    .event-title {
+      text-overflow: clip; // üç nokta gizle
+
+      .event-title-inner {
+        animation: location-marquee 10s ease-in-out infinite;
+      }
+    }
+  }
+
   &.location-overflows .location {
     text-overflow: clip;
 
@@ -1006,6 +1030,11 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
       animation: location-marquee 10s ease-in-out infinite;
     }
   }
+}
+
+// Kart hover edildiğinde uzun başlıklar için marquee animasyonu (masaüstü)
+.event-card-modern:hover .info-box-modern.title-overflows .event-title-inner {
+  /* Location ile aynı davranış; ek play-state kontrolüne gerek yok */
 }
 
 @keyframes location-marquee {

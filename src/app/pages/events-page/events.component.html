@@ -27,11 +27,36 @@
       <div class="filters-bar">
         <div class="search-group">
           <i class="bx bx-search"></i>
-          <input type="text" placeholder="Etkinlik adı, üniversite adı veya kulüp adı ile ara..." (input)="onSearch($event)"
-            [value]="searchQuery" />
+          <input
+            type="text"
+            placeholder="Etkinlik adı, üniversite adı veya kulüp adı ile ara..."
+            (input)="onSearch($event)"
+            [value]="searchQuery"
+          />
         </div>
 
         <div class="filter-groups">
+          <!-- City Filter -->
+          <div class="select-wrapper custom-dropdown city-dropdown" [class.open]="isCityDropdownOpen">
+            <div class="custom-select-trigger" (click)="toggleCityDropdown($event)">
+              <span>{{ getCityLabel(selectedCityFilter) }}</span>
+              <i class="bx bx-map"></i>
+            </div>
+            <div class="custom-options">
+              <div class="option" (click)="selectCity('')" [class.selected]="!selectedCityFilter">
+                Tüm Şehirler
+              </div>
+              <div
+                class="option"
+                *ngFor="let c of cities"
+                (click)="selectCity(c)"
+                [class.selected]="selectedCityFilter === c"
+              >
+                {{ c }}
+              </div>
+            </div>
+          </div>
+
           <!-- Sort Filter -->
           <div class="select-wrapper custom-dropdown" [class.open]="isSortDropdownOpen">
             <div class="custom-select-trigger" (click)="toggleSortDropdown($event)">
@@ -39,14 +64,18 @@
               <i class="bx bx-sort-alt-2"></i>
             </div>
             <div class="custom-options">
-              <div class="option" (click)="selectSort('date_asc')" [class.selected]="sortOrder === 'date_asc'">Tarih
-                (Yakın-Uzak)</div>
-              <div class="option" (click)="selectSort('date_desc')" [class.selected]="sortOrder === 'date_desc'">Tarih
-                (Uzak-Yakın)</div>
-              <div class="option" (click)="selectSort('name_asc')" [class.selected]="sortOrder === 'name_asc'">İsim (A-Z)
+              <div class="option" (click)="selectSort('date_asc')" [class.selected]="sortOrder === 'date_asc'">
+                Tarih (Yakın-Uzak)
               </div>
-              <div class="option" (click)="selectSort('name_desc')" [class.selected]="sortOrder === 'name_desc'">İsim
-                (Z-A)</div>
+              <div class="option" (click)="selectSort('date_desc')" [class.selected]="sortOrder === 'date_desc'">
+                Tarih (Uzak-Yakın)
+              </div>
+              <div class="option" (click)="selectSort('name_asc')" [class.selected]="sortOrder === 'name_asc'">
+                İsim (A-Z)
+              </div>
+              <div class="option" (click)="selectSort('name_desc')" [class.selected]="sortOrder === 'name_desc'">
+                İsim (Z-A)
+              </div>
             </div>
           </div>
         </div>
@@ -103,7 +132,7 @@
             <div class="mini-location"
               style="max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
               <span class="material-symbols-outlined">location_on</span>
-              {{ event.location }}
+              {{ event.city || event.location }}
             </div>
             <span class="read-more">Devamını Oku <span class="material-symbols-outlined">arrow_forward</span></span>
           </div>

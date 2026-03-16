@@ -21,7 +21,9 @@
 </button>
 
 <!-- Chat Widget -->
-<div class="chatbot-widget" *ngIf="isOpen && isVisible" [@slideUpFadeIn]>
+<div class="chatbot-overlay" *ngIf="isOpen && isVisible">
+  <div class="chatbot-overlay-backdrop" (click)="closeChat()"></div>
+  <div class="chatbot-widget" [@slideUpFadeIn]>
   <!-- Header -->
   <div class="chatbot-header">
     <div class="chatbot-header-content">
@@ -123,5 +125,6 @@
         />
       </svg>
     </button>
+  </div>
   </div>
 </div>

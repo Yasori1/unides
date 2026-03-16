@@ -386,6 +386,39 @@ $border-color: #e2e8f0;
   }
 }
 
+@media (max-width: 768px) {
+  .filters-bar {
+    flex-direction: column;
+    align-items: stretch;
+
+    .search-group {
+      flex: 1 0 auto;
+      min-width: 100%;
+    }
+
+    .filter-groups {
+      width: 100%;
+      flex-direction: column;
+
+      .select-wrapper.city-dropdown {
+        order: -1; // mobilde üstte görünsün
+
+        .custom-select-trigger {
+          border-radius: 999px;
+          padding-left: 16px;
+          padding-right: 14px;
+          font-size: 0.9rem;
+          font-weight: 600;
+        }
+
+        .custom-options {
+          border-radius: 16px;
+        }
+      }
+    }
+  }
+}
+
 // Removed old filter styles (.search-container, .events-filter-menu, .filter-bar-container)
 
 .results-count {

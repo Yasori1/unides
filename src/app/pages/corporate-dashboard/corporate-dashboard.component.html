@@ -226,14 +226,14 @@
 
     <!-- 2. TAB: TOPLULUKLAR -->
     <div class="view-container communities-view" *ngIf="activeTab === 'communities'">
-      <!-- Loading State for Communities -->
-      <div class="loading-container" *ngIf="isLoadingCommunities">
+      <!-- Loading State for Communities (sadece ilk yüklemede göster) -->
+      <div class="loading-container" *ngIf="isLoadingCommunities && !hasLoadedCommunitiesOnce">
         <app-luma-spin></app-luma-spin>
         <p>Topluluklar yükleniyor...</p>
       </div>
 
-      <!-- Content when loaded -->
-      <div *ngIf="!isLoadingCommunities">
+      <!-- Content when loaded (ilk yüklemeden sonra her zaman görünür; arama sırasında gizlenmez) -->
+      <div *ngIf="!isLoadingCommunities || hasLoadedCommunitiesOnce">
         <div class="page-header">
           <h2>Bağlı Topluluklar</h2>
           <div class="header-controls">
@@ -307,7 +307,7 @@
         <div class="results-info">
           <p>
             <span *ngIf="statusFilter" class="filter-label">{{ statusFilter === 'Reddedilen' ? 'Revize' : statusFilter }}</span>
-            Toplam <strong>{{ filteredCommunities.length }}</strong> topluluk bulundu.
+            Toplam <strong>{{ communitiesTotalCount || filteredCommunities.length }}</strong> topluluk bulundu.
           </p>
         </div>
 
@@ -523,9 +523,9 @@
           </div>
         </div>
 
-        <div class="events-grid" *ngIf="filteredEvents.length > 0">
+        <div class="events-grid" *ngIf="visibleEvents.length > 0">
           <div
-            *ngFor="let e of filteredEvents"
+            *ngFor="let e of visibleEvents"
             class="event-card-modern"
             [ngClass]="e.status"
             (click)="openEventDetail(e)"
@@ -603,7 +603,7 @@
           </div>
         </div>
 
-        <div class="empty-state" *ngIf="filteredEvents.length === 0 && !isLoadingEvents">
+        <div class="empty-state" *ngIf="visibleEvents.length === 0 && !isLoadingEvents">
           <span class="material-symbols-outlined">event_busy</span>
           <p>Henüz etkinlik bulunmuyor.</p>
         </div>

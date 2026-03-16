@@ -10,7 +10,7 @@ import { SiteFooterComponent } from '../../common/site-footer/site-footer.compon
 import { TurkeySkylineComponent } from '../../components/ui/turkey-skyline/turkey-skyline.component';
 import { QuartzCounterComponent } from '../../components/ui/quartz-counter/quartz-counter.component';
 import { CommunityService } from '../../services/community.services';
-import { EventService } from '../../services/event.services';
+import { EventService, EventItem } from '../../services/event.services';
 import { SearchService } from '../../services/search.services';
 import { ImageErrorHandlerService } from '../../services/image-error-handler.service';
 import { TurkishUppercasePipe } from '../../pipes/turkish-uppercase.pipe';
@@ -362,31 +362,8 @@ export class HomeComponent implements OnInit, OnDestroy {
       },
     });
 
-    // Yaklaşan Etkinlikler — GET /api/Events/upcoming/home (AllowAnonymous, 6 etkinlik)
-    this.eventService.getUpcomingEventsForHome().subscribe({
-      next: (events) => {
-        const selectedEvents: UpcomingEvent[] = events.map((e) => {
-          const eventDate = e.startDate ? new Date(e.startDate) : new Date();
-          return {
-            id: e.id,
-            title: e.title,
-            date: eventDate,
-            location: e.location || 'Konum belirtilmemiş',
-            time: eventDate.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
-            description: e.shortDescription || e.description || 'Açıklama belirtilmemiş',
-            communityName: e.communityName || 'Topluluk',
-            communityLogo: e.communityLogo || 'assets/img/placeholder-avatar.svg',
-            communityId: e.communityId && e.communityId !== 0 ? e.communityId : undefined,
-            imageUrl: e.imageUrl || '',
-            remainingTimeStr: this.getRemainingTime(eventDate),
-          };
-        });
-        this.upcomingEvents = selectedEvents;
-      },
-      error: () => {
-        this.upcomingEvents = [];
-      },
-    });
+    // Yaklaşan Etkinlikler (anasayfa) — varsayılan şehir filtresiz yükle
+    this.loadUpcomingEventsForHome();
 
     // Aramıza Yeni Katılanlar — GET /api/Communities/latest (AllowAnonymous, 24 topluluk)
     this.communityService.getLatestCommunities({ skipAuth: true }).subscribe({
@@ -403,6 +380,36 @@ export class HomeComponent implements OnInit, OnDestroy {
       error: () => {
         this.newestCommunities = [];
         this.isLoading = false;
+      },
+    });
+  }
+
+  private mapEventItemToUpcoming(e: EventItem): UpcomingEvent {
+    const eventDate = e.startDate ? new Date(e.startDate) : new Date();
+    return {
+      id: e.id,
+      title: e.title,
+      date: eventDate,
+      location: e.location || 'Konum belirtilmemiş',
+      time: eventDate.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+      description: e.shortDescription || e.description || 'Açıklama belirtilmemiş',
+      communityName: e.communityName || 'Topluluk',
+      communityLogo: e.communityLogo || 'assets/img/placeholder-avatar.svg',
+      communityId: e.communityId && e.communityId !== 0 ? e.communityId : undefined,
+      imageUrl: e.imageUrl || '',
+      remainingTimeStr: this.getRemainingTime(eventDate),
+    };
+  }
+
+  // Anasayfa için yaklaşan etkinlikleri yükle (şehir filtresiz)
+  loadUpcomingEventsForHome() {
+    this.eventService.getUpcomingEventsForHome().subscribe({
+      next: (events) => {
+        const selectedEvents: UpcomingEvent[] = events.map((e) => this.mapEventItemToUpcoming(e));
+        this.upcomingEvents = selectedEvents;
+      },
+      error: () => {
+        this.upcomingEvents = [];
       },
     });
   }
@@ -476,6 +483,18 @@ export class HomeComponent implements OnInit, OnDestroy {
   onEventCardHover(event: MouseEvent): void {
     const card = event.currentTarget as HTMLElement;
 
+    const titleInner = card.querySelector('.event-title-inner') as HTMLElement | null;
+    if (titleInner) {
+      const parentWidth = titleInner.parentElement?.clientWidth ?? 0;
+      const scrollWidth = titleInner.scrollWidth;
+      const textLength = (titleInner.textContent || '').trim().length;
+
+      // Güvenli taraf: gerçek taşma + uzun metinlerde her ihtimale karşı marquee aç
+      if (scrollWidth > parentWidth || textLength > 35) {
+        card.classList.add('title-overflows');
+      }
+    }
+
     const locationInner = card.querySelector('.location-inner');
     if (locationInner && locationInner.scrollWidth > (locationInner.parentElement?.clientWidth ?? 0)) {
       card.classList.add('location-overflows');
@@ -494,7 +513,13 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   onEventCardLeave(event: MouseEvent): void {
     const card = event.currentTarget as HTMLElement;
-    card.classList.remove('location-overflows', 'community-overflows', 'desc-overflows');
+    card.classList.remove('title-overflows', 'location-overflows', 'community-overflows', 'desc-overflows');
+
+    // Başlık animasyonunu sıfırla (bir sonraki hover'da baştan başlaması için)
+    const titleInner = card.querySelector('.event-title-inner') as HTMLElement | null;
+    if (titleInner) {
+      titleInner.style.transform = 'translateX(0)';
+    }
   }
 
   getRemainingTime(date: Date): string {

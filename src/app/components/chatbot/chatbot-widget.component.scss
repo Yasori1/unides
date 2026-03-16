@@ -57,9 +57,24 @@ $primary-color-lighter: #3b82f6;
   }
 }
 
+// Overlay container (captures background clicks)
+.chatbot-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1001;
+  pointer-events: none; // Only widget/backdrop receive events
+}
+
+.chatbot-overlay-backdrop {
+  position: absolute;
+  inset: 0;
+  background: transparent; // Desktop: şeffaf, sadece mobilde koyulaşacak
+  pointer-events: auto;
+}
+
 // Chat Widget - Viewport-based responsive sizing (Desktop/PC - default)
 .chatbot-widget {
-  position: fixed;
+  position: absolute;
   bottom: clamp(20px, 2vh, 28px);
   right: clamp(20px, 2vw, 28px);
   width: clamp(360px, 28vw, 420px);
@@ -72,7 +87,7 @@ $primary-color-lighter: #3b82f6;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  z-index: 1001;
+  z-index: 1;
   font-family: var(--fontFamily1, 'Open Sans', sans-serif);
   box-sizing: border-box;
   // PC görünümü için açıkça belirtildi - top ve left kullanılmıyor
@@ -616,19 +631,24 @@ $primary-color-lighter: #3b82f6;
 
 // Responsive - Mobile
 @media (max-width: 480px) {
+  .chatbot-overlay-backdrop {
+    background: rgba(15, 23, 42, 0.55);
+  }
+
   .chatbot-widget {
-    // PC görünümünü override et - sadece mobilde geçerli
-    width: calc(100vw - 24px) !important;
-    height: calc(100vh - 80px) !important; // Alt boşluk için yeterli alan: 12px (top) + 68px (bottom - tarayıcı çubuğu için)
-    max-height: calc(100vh - 80px) !important;
-    max-width: calc(100vw - 24px) !important;
-    top: 12px !important; // Üstte boşluk eklendi (çarpı butonu için)
-    bottom: 68px !important; // Mobil tarayıcı navigasyon çubuğunun üstünde kalması için yeterli boşluk
-    left: 12px !important; // Sol ve sağdan eşit boşluk
-    right: 12px !important;
-    border-radius: clamp(16px, 4vw, 20px) !important; // Tüm köşeler yuvarlatıldı (alt boşluk olduğu için)
-    box-shadow: 0 20px 60px rgba(30, 58, 138, 0.2), 0 0 0 1px rgba(30, 58, 138, 0.1);
-    padding-bottom: max(env(safe-area-inset-bottom, 0), 0); // iOS safe area desteği
+    // Mobilde tam ekran kart: giriş alanı ve mesajlar 100dvh içinde kalır
+    position: absolute;
+    top: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    border-radius: 0 !important;
+    box-shadow: none;
+    padding-bottom: max(env(safe-area-inset-bottom, 0), 0);
   }
 
   .chatbot-header {
@@ -750,16 +770,17 @@ $primary-color-lighter: #3b82f6;
 // Responsive - Small Mobile (very small screens)
 @media (max-width: 360px) {
   .chatbot-widget {
-    width: calc(100vw - 16px);
-    height: calc(100vh - 72px); // Üstte boşluk için: 8px (top) + 64px (bottom - tarayıcı çubuğu için)
-    max-width: calc(100vw - 16px);
-    max-height: calc(100vh - 72px);
-    top: 8px; // Üstte boşluk eklendi (çarpı butonu için)
-    bottom: 64px; // Mobil tarayıcı navigasyon çubuğunun üstünde kalması için yeterli boşluk
-    left: 8px; // Sol ve sağdan eşit boşluk
-    right: 8px;
-    border-radius: clamp(12px, 3vw, 16px); // Tüm köşeler yuvarlatıldı (alt boşluk olduğu için)
-    padding-bottom: max(env(safe-area-inset-bottom, 0), 0); // iOS safe area desteği
+    // Küçük ekranlarda da aynı: tam ekran, safe-area ile
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    border-radius: 0 !important;
+    padding-bottom: max(env(safe-area-inset-bottom, 0), 0);
   }
 
   .chatbot-input-container {

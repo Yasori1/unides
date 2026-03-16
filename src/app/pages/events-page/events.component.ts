@@ -18,6 +18,7 @@ import { SiteFooterComponent } from '../../common/site-footer/site-footer.compon
 import { CommunityService } from '../../services/community.services';
 import { EventService, EventItem } from '../../services/event.services';
 import { ImageErrorHandlerService } from '../../services/image-error-handler.service';
+import { CITY_NAMES } from '../../data/cities';
 
 interface EventCard {
   id: number;
@@ -56,8 +57,13 @@ export class EventsComponent implements OnInit, AfterViewInit {
   // Sıralama
   sortOrder: 'date_asc' | 'date_desc' | 'name_asc' | 'name_desc' = 'date_asc';
 
+  // Şehir filtresi
+  cities: string[] = CITY_NAMES;
+  selectedCityFilter: string = '';
+
   // Custom Dropdown States
   isSortDropdownOpen: boolean = false;
+  isCityDropdownOpen: boolean = false;
   // Removed old sort vars
 
   // Lightbox
@@ -467,6 +473,10 @@ export class EventsComponent implements OnInit, AfterViewInit {
       // Backend ile büyük/küçük harf uyumu: arama terimini Türkçe büyük harfe çevir (fırat → FIRAT, Fırat → FIRAT)
       filters.search = rawSearch.toLocaleUpperCase('tr-TR');
     }
+    const city = this.selectedCityFilter?.trim();
+    if (city) {
+      filters.city = city;
+    }
     if (this.sortOrder === 'date_asc') {
       filters.sortBy = 'date';
       filters.sortOrder = 'asc';
@@ -676,6 +686,11 @@ export class EventsComponent implements OnInit, AfterViewInit {
     this.loadEventsFromBackend(1);
   }
 
+  onCityFilterChange(city: string) {
+    this.selectedCityFilter = city;
+    this.applyFiltersAndGoFirstPage();
+  }
+
   initPagination() {
     this.pages = Array.from({ length: this.totalPages }, (_, i) => i + 1);
     if (isPlatformBrowser(this.platformId)) {
@@ -701,9 +716,16 @@ export class EventsComponent implements OnInit, AfterViewInit {
   }
 
   // --- CUSTOM DROPDOWN MANTIĞI ---
+  toggleCityDropdown(event: Event) {
+    event.stopPropagation();
+    this.isCityDropdownOpen = !this.isCityDropdownOpen;
+    if (this.isCityDropdownOpen) this.isSortDropdownOpen = false;
+  }
+
   toggleSortDropdown(event: Event) {
     event.stopPropagation();
     this.isSortDropdownOpen = !this.isSortDropdownOpen;
+    if (this.isSortDropdownOpen) this.isCityDropdownOpen = false;
   }
 
   // Image error handler - Placeholder görsellerin sürekli istek atmasını engeller
@@ -717,6 +739,11 @@ export class EventsComponent implements OnInit, AfterViewInit {
     this.isSortDropdownOpen = false;
   }
 
+  selectCity(city: string) {
+    this.onCityFilterChange(city);
+    this.isCityDropdownOpen = false;
+  }
+
   getSortLabel(order: string): string {
     switch (order) {
       case 'date_asc': return 'Tarih (Yakın-Uzak)';
@@ -727,9 +754,15 @@ export class EventsComponent implements OnInit, AfterViewInit {
     }
   }
 
+  getCityLabel(city: string): string {
+    const value = (city || '').trim();
+    return value ? value : 'Tüm Şehirler';
+  }
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
     this.isSortDropdownOpen = false;
+    this.isCityDropdownOpen = false;
   }
 
   // Old changeSortCriteria removed
