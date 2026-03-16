@@ -269,6 +269,8 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   /** 'all' = tümü (isActive gönderilmez), 'active' = sadece aktifler (isActive=true), 'passive' = sadece pasifler (isActive=false) */
   gsbStatusFilter: 'all' | 'active' | 'passive' = 'all';
   isLoadingGsbUsers = false;
+  /** GSB kullanıcıları en az bir kez yüklendiyse true; arama sırasında büyük spinner'ı gizlemek için kullanılır */
+  hasLoadedGsbUsersOnce = false;
   private gsbSearchDebounce: ReturnType<typeof setTimeout> | null = null;
   newGsbUser: EmirRegisterGsbRequest = { fullName: '', email: '', password: '', city: '' };
   editingGsbUser: EmirGsbUserDto | null = null;
@@ -3466,22 +3468,20 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         this.gsbUsersTotalPages = res.totalPages;
         this.gsbUsersTotalCount = res.totalCount;
         this.gsbUsersPages = Array.from({ length: this.gsbUsersTotalPages }, (_, i) => i + 1);
+        this.hasLoadedGsbUsersOnce = true;
         this.isLoadingGsbUsers = false;
       },
       error: () => {
         this.gsbUsers = [];
+        this.hasLoadedGsbUsersOnce = true;
         this.isLoadingGsbUsers = false;
       },
     });
   }
 
-  /** Arama kutusu değişince debounce ile sayfa 1'den istek at (name/email backend LIKE) */
+  /** Arama kutusu değişince anlık olarak sayfa 1'den istek at (name/email backend LIKE) */
   onGsbSearchChange() {
-    if (this.gsbSearchDebounce) clearTimeout(this.gsbSearchDebounce);
-    this.gsbSearchDebounce = setTimeout(() => {
-      this.gsbSearchDebounce = null;
-      this.loadGsbUsers(1);
-    }, 400);
+    this.loadGsbUsers(1);
   }
 
   /** Durum (Tüm/Aktif/Pasif) veya şehir değişince sayfa 1'den yeniden yükle */

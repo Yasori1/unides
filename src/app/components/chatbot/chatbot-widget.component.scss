@@ -62,7 +62,6 @@ $primary-color-lighter: #3b82f6;
   position: fixed;
   inset: 0;
   z-index: 1001;
-  pointer-events: none; // Only widget/backdrop receive events
 }
 
 .chatbot-overlay-backdrop {

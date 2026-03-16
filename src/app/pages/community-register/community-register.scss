@@ -11,7 +11,8 @@
   overflow-y: auto;
 
   &.form-side-intro {
-    overflow: hidden;
+    /* Intro adımında da özellikle mobilde aşağı/yukarı kaydırılabilsin diye overflow gizlenmiyor */
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
   }

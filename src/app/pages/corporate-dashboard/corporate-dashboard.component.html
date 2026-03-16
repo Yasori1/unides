@@ -718,7 +718,8 @@
           </button>
         </div>
       </div>
-      <div class="gsb-filters" *ngIf="!isLoadingGsbUsers">
+      <!-- Arama ve filtreler her zaman görünür kalsın; yükleme sırasında da input odağı bozulmasın -->
+      <div class="gsb-filters">
         <div class="gsb-filters-title">Filtreleme</div>
         <div class="filter-row">
           <div class="filter-field">
@@ -751,11 +752,11 @@
           </div>
         </div>
       </div>
-      <div class="loading-container" *ngIf="isLoadingGsbUsers">
+      <div class="loading-container" *ngIf="isLoadingGsbUsers && !hasLoadedGsbUsersOnce">
         <app-luma-spin></app-luma-spin>
         <p>Yükleniyor...</p>
       </div>
-      <div *ngIf="!isLoadingGsbUsers">
+      <div *ngIf="!isLoadingGsbUsers || hasLoadedGsbUsersOnce">
         <div class="table-wrapper" *ngIf="filteredGsbUsers.length > 0">
           <table class="data-table">
             <thead>
