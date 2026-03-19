@@ -14,7 +14,7 @@ import { CreateCommunityDto } from '../../models/community.models';
 import { CITY_NAMES } from '../../data/cities';
 import { getUniversitiesByCity } from '../../data/universities';
 import { TurkishUppercasePipe } from '../../pipes/turkish-uppercase.pipe';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 
 @Component({
@@ -473,28 +473,39 @@ export class CommunityRegisterComponent implements OnInit {
       const bannerUrl$ = this.authService.uploadSetupBanner(this.bannerFile!, token).pipe(
         catchError((err) => {
           Logger.error('Banner yüklenirken hata:', err);
-          return of('');
+          return throwError(() => err);
         })
       );
       const logoUrl$ = this.authService.uploadSetupLogo(this.logoFile!, token).pipe(
         catchError((err) => {
           Logger.error('Logo yüklenirken hata:', err);
-          return of('');
+          return throwError(() => err);
         })
       );
 
       bannerUrl$.pipe(
         switchMap((bannerUrl) =>
           logoUrl$.pipe(
-            map((logoUrl) => ({
-              bannerUrl: bannerUrl || undefined,
-              logoUrl: logoUrl || undefined,
-            }))
+            map((logoUrl) => ({ bannerUrl, logoUrl }))
           )
         ),
-        switchMap(({ bannerUrl, logoUrl }) =>
-          this.authService.completeCommunitySetup(token, { ...dto, bannerUrl, logoUrl })
-        )
+        switchMap(({ bannerUrl, logoUrl }) => {
+          const normalizedBanner = (bannerUrl || '').trim();
+          const normalizedLogo = (logoUrl || '').trim();
+
+          // Backend upload başarılı olsa bile boş URL dönüyorsa bunu başarısız kabul ediyoruz.
+          if (!normalizedBanner || !normalizedLogo) {
+            return throwError(
+              () => new Error('Banner veya logo yüklenemedi. Lütfen dosyaları tekrar deneyin.')
+            );
+          }
+
+          return this.authService.completeCommunitySetup(token, {
+            ...dto,
+            bannerUrl: normalizedBanner,
+            logoUrl: normalizedLogo,
+          });
+        })
       ).subscribe({
         next: (response: any) => {
           sessionStorage.removeItem('community_register_email');
@@ -571,25 +582,31 @@ export class CommunityRegisterComponent implements OnInit {
    */
   private uploadBannerAndLogoThenSuccess(communityId: string, setupToken?: string): void {
     if (!communityId) {
-      this.onCommunitySetupSuccess();
+      this.isLoading = false;
+      this.toastService.show('Topluluk oluşturulamadı (ID bulunamadı).', 'error');
       return;
     }
     const opts = setupToken ? { setupToken } : undefined;
     const logo$ = this.communityService.uploadLogo(communityId, this.logoFile!, opts).pipe(
       catchError((err) => {
         Logger.error('Logo yüklenirken hata:', err);
-        return of(null);
+        return throwError(() => err);
       })
     );
     const banner$ = this.communityService.uploadBanner(communityId, this.bannerFile!, opts).pipe(
       catchError((err) => {
         Logger.error('Banner yüklenirken hata:', err);
-        return of(null);
+        return throwError(() => err);
       })
     );
     logo$.pipe(switchMap(() => banner$)).subscribe({
       next: () => this.onCommunitySetupSuccess(),
-      error: () => this.onCommunitySetupSuccess(),
+      error: (err) => {
+        this.isLoading = false;
+        const msg = err?.error?.message || err?.message || '';
+        this.toastService.show(msg || 'Banner veya logo yüklenemedi. Lütfen tekrar deneyin.', 'error');
+        Logger.error('Banner/Logo upload hatası:', err);
+      },
     });
   }
 
