@@ -12,6 +12,7 @@ import { Logger } from '../../utils/logger.util';
 import { toTitleCase } from '../../utils/title-case.util';
 import { CreateCommunityDto } from '../../models/community.models';
 import { CITY_NAMES } from '../../data/cities';
+import { getUniversitiesByCity } from '../../data/universities';
 import { TurkishUppercasePipe } from '../../pipes/turkish-uppercase.pipe';
 import { of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
@@ -141,8 +142,20 @@ export class CommunityRegisterComponent implements OnInit {
 
   selectCity(c: string): void {
     this.city = c;
+    this.onCityChanged();
     this.cityMissing = false;
     this.cityDropdownOpen = false;
+  }
+
+  get universitiesBySelectedCity(): string[] {
+    return getUniversitiesByCity(this.city);
+  }
+
+  onCityChanged(): void {
+    const list = getUniversitiesByCity(this.city);
+    if (!list.includes(this.university)) {
+      this.university = '';
+    }
   }
 
   /** Üniversite kısaltması her zaman büyük harf (Türkçe uyumlu) */

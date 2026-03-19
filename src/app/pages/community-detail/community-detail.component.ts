@@ -223,11 +223,11 @@ export class CommunityDetailComponent implements OnInit, OnDestroy {
    * Sayfa numaralarını döndür (pagination için)
    */
   getPageNumbers(): number[] {
-    const pages: number[] = [];
-    for (let i = 1; i <= this.totalPages; i++) {
-      pages.push(i);
-    }
-    return pages;
+    if (this.totalPages <= 0) return [];
+    const maxVisible = 5;
+    const start = Math.max(1, Math.min(this.currentPage, this.totalPages - maxVisible + 1));
+    const end = Math.min(this.totalPages, start + maxVisible - 1);
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   }
 
   loadCommunityEvents(communityId: string) {

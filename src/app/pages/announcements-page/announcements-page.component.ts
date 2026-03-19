@@ -110,6 +110,14 @@ export class AnnouncementsPageComponent implements OnInit {
     }
   }
 
+  getVisiblePages(): number[] {
+    if (this.totalPages <= 0) return [];
+    const maxVisible = 5;
+    const start = Math.max(1, Math.min(this.currentPage, this.totalPages - maxVisible + 1));
+    const end = Math.min(this.totalPages, start + maxVisible - 1);
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
   // --- CUSTOM DROPDOWN MANTIĞI ---
   toggleSortDropdown(event: Event) {
     event.stopPropagation();

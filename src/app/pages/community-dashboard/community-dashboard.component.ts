@@ -19,6 +19,7 @@ import { Logger } from '../../utils/logger.util';
 import { toTitleCase } from '../../utils/title-case.util';
 import { TurkishUppercasePipe } from '../../pipes/turkish-uppercase.pipe';
 import { CITY_NAMES } from '../../data/cities';
+import { getUniversitiesByCity } from '../../data/universities';
 
 // --- Interfaces ---
 interface Project {
@@ -200,6 +201,8 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
   clubInfo: any = {
     id: '', // Community ID (Guid) - will be loaded from backend
     name: '', // Will be loaded from backend
+    /** ComName içinde geçen üniversite kısaltması (örn. ODTU, ITU). */
+    universityShort: '',
     university: '',
     city: '',
     category: 'Genel',
@@ -341,9 +344,14 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
               comConfirm === 4 && pendingJson
                 ? this.communityService.applyPendingUpdateToCommunity(community, pendingJson)
                 : community;
+
+            const parsedName = this.splitCommunityNameAndUniversityShort(
+              displayCommunity.name || ''
+            );
             this.clubInfo = {
               id: displayCommunity.id,
-              name: displayCommunity.name,
+              name: parsedName.name,
+              universityShort: parsedName.universityShort,
               university: displayCommunity.university || '',
               city: displayCommunity.city || '',
               category: displayCommunity.category || 'Genel',
@@ -535,9 +543,13 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
                   : communityDetail;
 
               // Update clubInfo with backend data (onaya gönderilen veri varsa onu kullan)
+              const parsedName = this.splitCommunityNameAndUniversityShort(
+                displayCommunity.name || ''
+              );
               this.clubInfo = {
                 id: displayCommunity.id,
-                name: displayCommunity.name,
+                name: parsedName.name,
+                universityShort: parsedName.universityShort,
                 university: displayCommunity.university || '',
                 city: displayCommunity.city || '',
                 category: displayCommunity.category || 'Genel',
@@ -997,7 +1009,24 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
   selectCity(city: string, event: MouseEvent) {
     event.stopPropagation();
     this.clubInfo.city = city;
+    this.onProfileCityChanged();
     this.isCityDropdownOpen = false;
+  }
+
+  get profileUniversitiesBySelectedCity(): string[] {
+    const list = getUniversitiesByCity(this.clubInfo?.city);
+    const currentUni = String(this.clubInfo?.university ?? '').trim();
+    if (currentUni && !list.includes(currentUni)) {
+      return [currentUni, ...list];
+    }
+    return list;
+  }
+
+  onProfileCityChanged(): void {
+    const list = getUniversitiesByCity(this.clubInfo?.city);
+    if (!list.includes(this.clubInfo?.university || '')) {
+      this.clubInfo.university = '';
+    }
   }
 
   toggleCategoryDropdown(event: MouseEvent) {
@@ -1205,6 +1234,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
 
     const fields = [
       'name',
+      'universityShort',
       'university',
       'city',
       'category',
@@ -1228,6 +1258,31 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     }
 
     return hasFieldChange;
+  }
+
+  /** backend comName: "Topluluk Adı - ÜnivKısaltma" formatında gelir */
+  private splitCommunityNameAndUniversityShort(value: string): { name: string; universityShort: string } {
+    const trimmed = (value || '').trim();
+    const separator = ' - ';
+    const idx = trimmed.lastIndexOf(separator);
+    if (idx <= 0) return { name: trimmed, universityShort: '' };
+    const name = trimmed.slice(0, idx).trim();
+    const universityShort = trimmed.slice(idx + separator.length).trim();
+    return { name, universityShort };
+  }
+
+  private getCombinedCommunityName(name: string, universityShort?: string): string {
+    const safeName = (name || '').trim();
+    const safeShort = (universityShort || '').trim().toLocaleUpperCase('tr-TR');
+    return safeShort ? `${safeName} - ${safeShort}` : safeName;
+  }
+
+  get clubCombinedName(): string {
+    return this.getCombinedCommunityName(this.clubInfo?.name, this.clubInfo?.universityShort);
+  }
+
+  onUniversityShortInput(val: string): void {
+    this.clubInfo.universityShort = val ? val.toLocaleUpperCase('tr-TR') : '';
   }
 
   // GÜNCELLEME: Kontrol listesi sadeleştirildi (Website, Youtube vs. çıkarıldı)
@@ -1254,7 +1309,7 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
     const existingLogoUrl = this.getServerLogoUrl();
 
     const dto: UpdateCommunityDto = {
-      comName: this.clubInfo.name?.trim() || undefined,
+      comName: this.getCombinedCommunityName(this.clubInfo.name, this.clubInfo.universityShort)?.trim() || undefined,
       comCategory: this.clubInfo.category?.trim() || undefined,
       comAbout: this.clubInfo.description?.trim() || undefined,
       city: this.clubInfo.city?.trim() || undefined,
@@ -1390,9 +1445,11 @@ export class CommunityDashboardComponent implements OnInit, OnDestroy {
               ? this.communityService.applyPendingUpdateToCommunity(community, pendingJson)
               : community;
 
+          const parsedName = this.splitCommunityNameAndUniversityShort(displayCommunity.name || '');
           this.clubInfo = {
             id: displayCommunity.id,
-            name: displayCommunity.name,
+            name: parsedName.name,
+            universityShort: parsedName.universityShort,
             university: displayCommunity.university || '',
             city: displayCommunity.city || '',
             category: displayCommunity.category || 'Genel',

@@ -440,6 +440,13 @@
         <!-- Sayfalama -->
         <div class="pagination-area" *ngIf="totalPages > 1">
           <button
+            class="page-btn first"
+            [disabled]="currentPage === 1"
+            (click)="changePage(1)"
+          >
+            <span class="material-symbols-outlined">first_page</span>
+          </button>
+          <button
             class="page-btn prev"
             [disabled]="currentPage === 1"
             (click)="changePage(currentPage - 1)"
@@ -447,7 +454,7 @@
             <span class="material-symbols-outlined">chevron_left</span>
           </button>
 
-          <ng-container *ngFor="let page of pages">
+          <ng-container *ngFor="let page of getVisibleCommunityPages()">
             <button
               class="page-btn number"
               [class.active]="page === currentPage"
@@ -463,6 +470,13 @@
             (click)="changePage(currentPage + 1)"
           >
             <span class="material-symbols-outlined">chevron_right</span>
+          </button>
+          <button
+            class="page-btn last"
+            [disabled]="currentPage === totalPages"
+            (click)="changePage(totalPages)"
+          >
+            <span class="material-symbols-outlined">last_page</span>
           </button>
         </div>
       </div>
@@ -575,6 +589,15 @@
               type="button"
               class="pagination-btn"
               [disabled]="eventsCurrentPage <= 1"
+              (click)="goToEventsPage(1)"
+              aria-label="İlk sayfa"
+            >
+              <span class="material-symbols-outlined">first_page</span>
+            </button>
+            <button
+              type="button"
+              class="pagination-btn"
+              [disabled]="eventsCurrentPage <= 1"
               (click)="goToEventsPage(eventsCurrentPage - 1)"
               aria-label="Önceki sayfa"
             >
@@ -599,6 +622,15 @@
               aria-label="Sonraki sayfa"
             >
               <span class="material-symbols-outlined">chevron_right</span>
+            </button>
+            <button
+              type="button"
+              class="pagination-btn"
+              [disabled]="eventsCurrentPage >= eventsTotalPages"
+              (click)="goToEventsPage(eventsTotalPages)"
+              aria-label="Son sayfa"
+            >
+              <span class="material-symbols-outlined">last_page</span>
             </button>
           </div>
         </div>
@@ -675,13 +707,20 @@
         <!-- Duyurular sayfalama -->
         <div class="pagination-area" *ngIf="!isLoadingAnnouncements && announcementTotalPages > 1">
           <button
+            class="page-btn first"
+            [disabled]="announcementPage === 1"
+            (click)="changeAnnouncementPage(1)"
+          >
+            <span class="material-symbols-outlined">first_page</span>
+          </button>
+          <button
             class="page-btn prev"
             [disabled]="announcementPage === 1"
             (click)="changeAnnouncementPage(announcementPage - 1)"
           >
             <span class="material-symbols-outlined">chevron_left</span>
           </button>
-          <ng-container *ngFor="let p of announcementPages">
+          <ng-container *ngFor="let p of getVisibleAnnouncementPages()">
             <button
               class="page-btn number"
               [class.active]="p === announcementPage"
@@ -696,6 +735,13 @@
             (click)="changeAnnouncementPage(announcementPage + 1)"
           >
             <span class="material-symbols-outlined">chevron_right</span>
+          </button>
+          <button
+            class="page-btn last"
+            [disabled]="announcementPage === announcementTotalPages"
+            (click)="changeAnnouncementPage(announcementTotalPages)"
+          >
+            <span class="material-symbols-outlined">last_page</span>
           </button>
         </div>
 
@@ -712,6 +758,10 @@
       <div class="page-header">
         <h2>GSB Yetkilileri</h2>
         <div class="header-controls">
+          <button class="btn-secondary" [disabled]="isExportingGsbUsersExcel" (click)="downloadGsbUsersExcel()">
+            <span class="material-symbols-outlined">download</span>
+            {{ isExportingGsbUsersExcel ? 'Hazırlanıyor...' : 'Excel Çıktısı' }}
+          </button>
           <button class="btn-primary" (click)="openCreateGsbUserModal()">
             <span class="material-symbols-outlined">add</span>
             Yeni GSB Kullanıcısı
@@ -796,6 +846,9 @@
           <p *ngIf="!gsbSearchText && !gsbCityFilter && gsbStatusFilter === 'all'">Henüz GSB kullanıcısı yok.</p>
         </div>
         <div class="pagination-area" *ngIf="gsbUsersTotalPagesDisplay > 1">
+          <button class="page-btn first" [disabled]="gsbUsersPage === 1" (click)="changeGsbUsersPage(1)">
+            <span class="material-symbols-outlined">first_page</span>
+          </button>
           <button class="page-btn prev" [disabled]="gsbUsersPage === 1" (click)="changeGsbUsersPage(gsbUsersPage - 1)">
             <span class="material-symbols-outlined">chevron_left</span>
           </button>
@@ -804,6 +857,9 @@
           </ng-container>
           <button class="page-btn next" [disabled]="gsbUsersPage === gsbUsersTotalPagesDisplay" (click)="changeGsbUsersPage(gsbUsersPage + 1)">
             <span class="material-symbols-outlined">chevron_right</span>
+          </button>
+          <button class="page-btn last" [disabled]="gsbUsersPage === gsbUsersTotalPagesDisplay" (click)="changeGsbUsersPage(gsbUsersTotalPagesDisplay)">
+            <span class="material-symbols-outlined">last_page</span>
           </button>
         </div>
         <p class="results-info" *ngIf="gsbUsersTotalCountDisplay > 0">Toplam <strong>{{ gsbUsersTotalCountDisplay }}</strong> kullanıcı.</p>
@@ -1246,55 +1302,68 @@
             <div class="form-section">
               <h5 class="section-title">Temel Bilgiler</h5>
               <div class="form-grid-2col">
-                <div class="form-group">
-                  <label>Topluluk İsmi <span class="required">*</span></label>
-                  <input
-                    type="text"
-                    [(ngModel)]="newCommunity.name"
-                    (blur)="newCommunity.name = toTitleCase(newCommunity.name)"
-                    class="modern-input"
-                    placeholder="Topluluk adı..."
-                  />
-                </div>
-                <div class="form-group">
-                  <label>Kategori <span class="required">*</span></label>
-                  <div
-                    class="custom-select-wrapper"
-                    data-dropdown="new-community-category"
-                    [class.open]="isNewCommunityCategoryDropdownOpen"
-                    (click)="toggleNewCommunityCategoryDropdown($event)"
-                  >
-                    <div class="custom-select-trigger">
-                      <span [class.placeholder]="!newCommunity.category">
-                        {{ newCommunity.category || 'Kategori Seçin' }}
-                      </span>
-                      <svg
-                        class="custom-select-arrow"
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      >
-                        <polyline points="6 9 12 15 18 9"></polyline>
-                      </svg>
-                    </div>
+                <div class="form-grid-identity-row">
+                  <div class="form-group">
+                    <label>Topluluk İsmi <span class="required">*</span></label>
+                    <input
+                      type="text"
+                      [(ngModel)]="newCommunityNameInput"
+                      (blur)="newCommunityNameInput = toTitleCase(newCommunityNameInput)"
+                      class="modern-input"
+                      placeholder="Topluluk adı..."
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label>Üniversite Kısaltması</label>
+                    <input
+                      type="text"
+                      [ngModel]="newCommunityUniversityShortInput"
+                      (ngModelChange)="onNewCommunityUniversityShortInput($event)"
+                      class="modern-input input-uppercase"
+                      placeholder="Örn. ODTÜ, İTÜ"
+                      maxlength="15"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label>Kategori <span class="required">*</span></label>
                     <div
-                      class="custom-select-dropdown"
-                      *ngIf="isNewCommunityCategoryDropdownOpen"
-                      (click)="$event.stopPropagation()"
+                      class="custom-select-wrapper"
+                      data-dropdown="new-community-category"
+                      [class.open]="isNewCommunityCategoryDropdownOpen"
+                      (click)="toggleNewCommunityCategoryDropdown($event)"
                     >
+                      <div class="custom-select-trigger">
+                        <span [class.placeholder]="!newCommunity.category">
+                          {{ newCommunity.category || 'Kategori Seçin' }}
+                        </span>
+                        <svg
+                          class="custom-select-arrow"
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                      </div>
                       <div
-                        class="custom-select-option"
-                        *ngFor="let cat of categories"
-                        [class.selected]="newCommunity.category === cat"
-                        (click)="selectNewCommunityCategory(cat, $event)"
+                        class="custom-select-dropdown"
+                        *ngIf="isNewCommunityCategoryDropdownOpen"
+                        (click)="$event.stopPropagation()"
                       >
-                        {{ cat }}
+                        <div
+                          class="custom-select-option"
+                          *ngFor="let cat of categories"
+                          [class.selected]="newCommunity.category === cat"
+                          (click)="selectNewCommunityCategory(cat, $event)"
+                        >
+                          {{ cat }}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1363,14 +1432,17 @@
                   </div>
                 </div>
                 <div class="form-group">
-                  <label>Üniversite (Maks. 40)</label>
-                  <input
-                    type="text"
+                  <label>Üniversite <span class="required">*</span></label>
+                  <select
                     [(ngModel)]="newCommunity.university"
                     class="modern-input"
-                    placeholder="Üniversite adı..."
-                    maxlength="40"
-                  />
+                    [disabled]="!newCommunity.city"
+                  >
+                    <option value="">{{ newCommunity.city ? 'Üniversite Seçin' : 'Önce Şehir Seçin' }}</option>
+                    <option *ngFor="let u of newCommunityUniversitiesBySelectedCity" [value]="u">
+                      {{ u }}
+                    </option>
+                  </select>
                 </div>
               </div>
             </div>
@@ -1578,13 +1650,24 @@
                 <div class="form-section">
                   <h5 class="section-title">Temel Bilgiler</h5>
                   <div class="form-grid-2col">
-                    <div class="form-group">
-                      <label>Topluluk İsmi</label>
-                      <input type="text" [ngModel]="editingCommunity.name" class="modern-input" readonly />
-                    </div>
-                    <div class="form-group">
-                      <label>Kategori</label>
-                      <input type="text" [ngModel]="editingCommunity.category" class="modern-input" readonly />
+                    <div class="form-grid-identity-row">
+                      <div class="form-group">
+                        <label>Topluluk İsmi</label>
+                        <input type="text" [ngModel]="editingCommunityNameInput" class="modern-input" readonly />
+                      </div>
+                      <div class="form-group">
+                        <label>Üniversite Kısaltması</label>
+                        <input
+                          type="text"
+                          [ngModel]="editingCommunityUniversityShortInput"
+                          class="modern-input input-uppercase"
+                          readonly
+                        />
+                      </div>
+                      <div class="form-group">
+                        <label>Kategori</label>
+                        <input type="text" [ngModel]="editingCommunity.category" class="modern-input" readonly />
+                      </div>
                     </div>
                     <div class="form-group full-width">
                       <label>Kısa Açıklama</label>
@@ -1735,27 +1818,41 @@
               <div class="form-section">
                 <h5 class="section-title">Temel Bilgiler</h5>
                 <div class="form-grid-2col">
-                  <div class="form-group">
-                    <label>Topluluk İsmi <span class="required">*</span></label>
-                    <input
-                      type="text"
-                      [(ngModel)]="editingCommunity.name"
-                      (blur)="editingCommunity.name = toTitleCase(editingCommunity.name)"
-                      class="modern-input"
-                      placeholder="Topluluk adı..."
-                      [readonly]="editingCommunity.status === 'Onay Bekleyen' || editingCommunity.status === 'Reddedilen'"
-                    />
-                  </div>
-                  <div class="form-group">
-                    <label>Kategori <span class="required">*</span></label>
-                    <select
-                      [(ngModel)]="editingCommunity.category"
-                      class="modern-input"
-                      [disabled]="editingCommunity.status === 'Onay Bekleyen' || editingCommunity.status === 'Reddedilen'"
-                    >
-                      <option value="">Kategori Seçin</option>
-                      <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
-                    </select>
+                  <div class="form-grid-identity-row">
+                    <div class="form-group">
+                      <label>Topluluk İsmi <span class="required">*</span></label>
+                      <input
+                        type="text"
+                        [(ngModel)]="editingCommunityNameInput"
+                        (blur)="editingCommunityNameInput = toTitleCase(editingCommunityNameInput)"
+                        class="modern-input"
+                        placeholder="Topluluk adı..."
+                        [readonly]="editingCommunity.status === 'Onay Bekleyen' || editingCommunity.status === 'Reddedilen'"
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label>Üniversite Kısaltması</label>
+                      <input
+                        type="text"
+                        [ngModel]="editingCommunityUniversityShortInput"
+                        (ngModelChange)="onEditingCommunityUniversityShortInput($event)"
+                        class="modern-input input-uppercase"
+                        placeholder="Örn. ODTÜ, İTÜ"
+                        maxlength="15"
+                        [readonly]="editingCommunity.status === 'Onay Bekleyen' || editingCommunity.status === 'Reddedilen'"
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label>Kategori <span class="required">*</span></label>
+                      <select
+                        [(ngModel)]="editingCommunity.category"
+                        class="modern-input"
+                        [disabled]="editingCommunity.status === 'Onay Bekleyen' || editingCommunity.status === 'Reddedilen'"
+                      >
+                        <option value="">Kategori Seçin</option>
+                        <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+                      </select>
+                    </div>
                   </div>
                   <div class="form-group full-width">
                     <label>Topluluk Kısa Açıklama (Max 70 Karakter)</label>
@@ -1783,6 +1880,7 @@
                     <label>Şehir</label>
                     <select
                       [(ngModel)]="editingCommunity.city"
+                      (ngModelChange)="onEditingCommunityCityChanged()"
                       class="modern-input"
                       [disabled]="editingCommunity.status === 'Onay Bekleyen' || editingCommunity.status === 'Reddedilen'"
                     >
@@ -1791,15 +1889,23 @@
                     </select>
                   </div>
                   <div class="form-group">
-                    <label>Üniversite (Maks. 40)</label>
-                    <input
-                      type="text"
+                    <label>Üniversite <span class="required">*</span></label>
+                    <select
                       [(ngModel)]="editingCommunity.university"
                       class="modern-input"
-                      placeholder="Üniversite adı..."
-                      maxlength="40"
-                      [readonly]="editingCommunity.status === 'Onay Bekleyen' || editingCommunity.status === 'Reddedilen'"
-                    />
+                      [disabled]="
+                        editingCommunity.status === 'Onay Bekleyen' ||
+                        editingCommunity.status === 'Reddedilen' ||
+                        !editingCommunity.city
+                      "
+                    >
+                      <option value="">
+                        {{ editingCommunity.city ? 'Üniversite Seçin' : 'Önce Şehir Seçin' }}
+                      </option>
+                      <option *ngFor="let u of editingCommunityUniversitiesBySelectedCity" [value]="u">
+                        {{ u }}
+                      </option>
+                    </select>
                   </div>
                 </div>
               </div>
@@ -1902,7 +2008,7 @@
               <span class="material-symbols-outlined">delete</span>
               Topluluğu Sil
             </button>
-            <button type="button" class="btn-primary" (click)="saveCommunity()">
+            <button type="button" class="btn-primary" (click)="saveCommunity()" [disabled]="isSavingCommunity">
               <span class="material-symbols-outlined">save</span>
               Topluluk Kaydet
             </button>

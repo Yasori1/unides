@@ -321,7 +321,7 @@
             </div>
             <div class="hero-text">
               <p class="eyebrow">Profil</p>
-              <h3>{{ clubInfo.name }}</h3>
+              <h3>{{ clubCombinedName }}</h3>
               <p class="muted">
                 Görsel, iletişim ve sosyal alanlarını güncelleyerek üyelerine tutarlı bir profil göster.
               </p>
@@ -338,13 +338,39 @@
             <p class="profile-hint" *ngIf="communityApproved && !isUpdatePending">Bilgileri güncelledikten sonra "Güncellemeleri Onaya Gönder" ile GSB onayına iletebilirsiniz. Onaylandığında değişiklikler yayına alınır.</p>
             <h3>Kulüp Bilgileri</h3>
             <div class="input-grid">
-              <label>
-                <span>Kulüp Adı</span>
-                <input type="text" [(ngModel)]="clubInfo.name" (blur)="clubInfo.name = toTitleCase(clubInfo.name)" placeholder="Topluluk adı" [readonly]="!communityApproved || isUpdatePending" />
-              </label>
+              <div class="name-universityshort-row">
+                <label>
+                  <span>Topluluk İsmi</span>
+                  <input
+                    type="text"
+                    [(ngModel)]="clubInfo.name"
+                    (blur)="clubInfo.name = toTitleCase(clubInfo.name)"
+                    placeholder="Topluluk adı"
+                    [readonly]="!communityApproved || isUpdatePending"
+                  />
+                </label>
+                <label>
+                  <span>Üniversite Kısaltması</span>
+                  <input
+                    type="text"
+                    [(ngModel)]="clubInfo.universityShort"
+                    (ngModelChange)="onUniversityShortInput($event)"
+                    placeholder="ODTÜ, İTÜ"
+                    maxlength="20"
+                    [readonly]="!communityApproved || isUpdatePending"
+                  />
+                </label>
+              </div>
               <label>
                 <span>Üniversite</span>
-                <input type="text" [(ngModel)]="clubInfo.university" placeholder="Üniversite" [readonly]="!communityApproved || isUpdatePending" />
+                <select
+                  class="profile-select"
+                  [(ngModel)]="clubInfo.university"
+                  [disabled]="!communityApproved || isUpdatePending || !clubInfo.city"
+                >
+                  <option value="">{{ clubInfo.city ? 'Üniversite seçin' : 'Önce şehir seçin' }}</option>
+                  <option *ngFor="let u of profileUniversitiesBySelectedCity" [value]="u">{{ u }}</option>
+                </select>
               </label>
               <label>
                 <span>Şehir</span>

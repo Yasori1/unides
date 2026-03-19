@@ -27,6 +27,7 @@ import { Logger } from '../../utils/logger.util';
 import { toTitleCase } from '../../utils/title-case.util';
 import { TurkishUppercasePipe } from '../../pipes/turkish-uppercase.pipe';
 import { CITY_NAMES } from '../../data/cities';
+import { getUniversitiesByCity } from '../../data/universities';
 
 // ==========================================
 // MAIN DASHBOARD COMPONENT
@@ -210,11 +211,15 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   selectedCommunity: Community | null = null;
   editingCommunity: (Community & { presidentEmail?: string; shortDescription?: string }) | null =
     null;
+  editingCommunityNameInput = '';
+  editingCommunityUniversityShortInput = '';
   /** Güncelleme onayı pop-up'ında "Eskiden / Yeni" karşılaştırması için mevcut (merge öncesi) veri */
   editingCommunityCurrentLive:
     | (Community & { presidentEmail?: string; shortDescription?: string })
     | null = null;
   newCommunity: (Community & { presidentEmail?: string; shortDescription?: string }) | null = null;
+  newCommunityNameInput = '';
+  newCommunityUniversityShortInput = '';
 
   // Duyuru düzenleme için
   selectedAnnouncement: Announcement | null = null;
@@ -269,6 +274,9 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   /** 'all' = tümü (isActive gönderilmez), 'active' = sadece aktifler (isActive=true), 'passive' = sadece pasifler (isActive=false) */
   gsbStatusFilter: 'all' | 'active' | 'passive' = 'all';
   isLoadingGsbUsers = false;
+  isExportingGsbUsersExcel = false;
+  /** Community güncelleme: aynı anda birden fazla istek atılmasını engeller */
+  isSavingCommunity = false;
   /** GSB kullanıcıları en az bir kez yüklendiyse true; arama sırasında büyük spinner'ı gizlemek için kullanılır */
   hasLoadedGsbUsersOnce = false;
   private gsbSearchDebounce: ReturnType<typeof setTimeout> | null = null;
@@ -865,6 +873,17 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     this.updateDisplayedData();
   }
 
+  private getSlidingPageNumbers(currentPage: number, totalPages: number, maxVisible: number = 5): number[] {
+    if (totalPages <= 0) return [];
+    const start = Math.max(1, Math.min(currentPage, totalPages - maxVisible + 1));
+    const end = Math.min(totalPages, start + maxVisible - 1);
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
+  getVisibleCommunityPages(): number[] {
+    return this.getSlidingPageNumbers(this.currentPage, this.totalPages);
+  }
+
   updateDisplayedData() {
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
     const endIndex = startIndex + this.itemsPerPage;
@@ -1088,8 +1107,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
 
   /** Sayfalama için 1..N sayı dizisi */
   getEventsPageNumbers(): number[] {
-    const n = this.eventsTotalPages;
-    return n <= 0 ? [] : Array.from({ length: n }, (_, i) => i + 1);
+    return this.getSlidingPageNumbers(this.eventsCurrentPage, this.eventsTotalPages);
   }
 
   /** Gösterilen kayıt aralığı metni (örn. "1 – 16 / 28") */
@@ -1373,6 +1391,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
           } else {
             this.editingCommunityCurrentLive = null;
           }
+          this.syncEditingCommunityNameFields();
 
           Logger.log('Topluluk detayı başarıyla yüklendi:', {
             id: detailedCommunity.id,
@@ -1393,12 +1412,14 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
           }
           this.editingCommunityCurrentLive = null;
           this.editingCommunity = this.mapListCommunityToEditing(community);
+          this.syncEditingCommunityNameFields();
           this.communityDetailLoading = false;
         },
       });
     } else {
       this.editingCommunityCurrentLive = null;
       this.editingCommunity = this.mapListCommunityToEditing(community);
+      this.syncEditingCommunityNameFields();
       this.communityDetailLoading = false;
     }
   }
@@ -1421,12 +1442,34 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       isActivity: true, // Varsayılan olarak aktif
       presidentEmail: '', // Topluluk başkanının email adresi (zorunlu)
     } as Community & { presidentEmail?: string; shortDescription?: string };
+    this.newCommunityNameInput = '';
+    this.newCommunityUniversityShortInput = '';
     this.modalType = 'new-community';
     this.isModalOpen = true;
   }
 
   saveCommunity() {
     if (this.editingCommunity) {
+      if (this.isSavingCommunity) {
+        return;
+      }
+      this.isSavingCommunity = true;
+
+      const combinedCommunityName = this.getCombinedCommunityName(
+        this.editingCommunityNameInput,
+        this.editingCommunityUniversityShortInput,
+      );
+      if (!combinedCommunityName) {
+        this.showToast('Lütfen topluluk ismini girin.', 'error');
+        this.isSavingCommunity = false;
+        return;
+      }
+      if (!this.isCommunityFormComplete(this.editingCommunity, combinedCommunityName)) {
+        this.showToast('Lütfen tüm zorunlu alanları doldurun.', 'error');
+        this.isSavingCommunity = false;
+        return;
+      }
+
       // ID kontrolü - geçerli bir GUID olmalı
       if (
         !this.editingCommunity.id ||
@@ -1437,6 +1480,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
           "Topluluk ID'si geçersiz. Lütfen sayfayı yenileyip tekrar deneyin.",
           'error',
         );
+        this.isSavingCommunity = false;
         return;
       }
 
@@ -1458,9 +1502,6 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       }
 
       // CommunityService'e kaydet (communities-page'e otomatik eklenir)
-      // DEBUG: editingCommunity'nin değerlerini kontrol et
-      Logger.log('=== saveCommunity DEBUG ===');
-      Logger.log('editingCommunity.status:', this.editingCommunity.status);
       Logger.log('editingCommunity.isActivity:', this.editingCommunity.isActivity);
       Logger.log('editingCommunity.email:', this.editingCommunity.email);
       Logger.log('editingCommunity.presidentEmail:', this.editingCommunity.presidentEmail);
@@ -1471,10 +1512,11 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         'editingCommunity.shortDescription:',
         (this.editingCommunity as any).shortDescription,
       );
-      Logger.log('Full editingCommunity:', JSON.stringify(this.editingCommunity, null, 2));
+      // Note: intentionally not dumping full entity in console (PII/debug noise)
 
       const communityForService = {
         ...this.editingCommunity,
+        name: combinedCommunityName,
         id: this.editingCommunity.id, // ID'yi açıkça ekle
         about: this.editingCommunity.about || this.editingCommunity.description || '', // Detaylı açıklama (backend ComAbout)
         description: this.editingCommunity.about || this.editingCommunity.description || '', // description da about'a eşit
@@ -1608,6 +1650,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
           }
 
           this.showToast(errorMessage, 'error');
+          this.isSavingCommunity = false;
         },
       });
     }
@@ -1616,9 +1659,13 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   // Yeni topluluk kaydetme
   saveNewCommunity() {
     if (this.newCommunity) {
+      const combinedCommunityName = this.getCombinedCommunityName(
+        this.newCommunityNameInput,
+        this.newCommunityUniversityShortInput,
+      );
       // Validasyon
-      if (!this.newCommunity.name || !this.newCommunity.university || !this.newCommunity.city) {
-        this.showToast('Lütfen zorunlu alanları doldurun (İsim, Üniversite, Şehir)', 'error');
+      if (!combinedCommunityName || !this.isCommunityFormComplete(this.newCommunity, combinedCommunityName)) {
+        this.showToast('Lütfen tüm zorunlu alanları doldurun.', 'error');
         return;
       }
 
@@ -1664,6 +1711,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       // CommunityService'e kaydet (communities-page'e otomatik eklenir)
       const communityForService = {
         ...this.newCommunity,
+        name: combinedCommunityName,
         id: '', // Service otomatik ID (Guid) atayacak - string olmalı
         miniAbout: this.newCommunity.miniAbout ?? (this.newCommunity as any).shortDescription ?? '', // Kısa açıklama (form miniAbout'a bağlı, backend MiniAbout)
         about: this.newCommunity.about || '', // Detaylı açıklama about'a (backend ComAbout)
@@ -2132,6 +2180,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     event.stopPropagation();
     if (this.newCommunity) {
       this.newCommunity.city = city;
+      this.onNewCommunityCityChanged();
     }
     this.isNewCommunityCityDropdownOpen = false;
   }
@@ -2969,14 +3018,16 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       'event-detail',
       'new-announcement',
       'edit-announcement',
+      'gsb-create-user',
+      'gsb-edit-user',
     ];
     return preventCloseTypes.includes(this.modalType);
   }
 
   // Backdrop'a tıklanınca çağrılır - belirli modal tipleri için kapanmayı engelle
   handleBackdropClick(event: MouseEvent) {
+    // GSB kullanıcı modalları ve diğer korumalı modaller için backdrop tıklamasıyla kapanmayı engelle
     if (this.shouldPreventAutoClose()) {
-      // Belirli modal tipleri için backdrop click ile kapanmayı engelle
       event.stopPropagation();
       return;
     }
@@ -3013,10 +3064,100 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     this.communityToApprove = null;
     this.communityToReject = null;
     this.editingCommunity = null;
+    this.editingCommunityNameInput = '';
+    this.editingCommunityUniversityShortInput = '';
+    this.newCommunityNameInput = '';
+    this.newCommunityUniversityShortInput = '';
     this.communityDetailLoading = false;
     this.editingGsbUser = null;
     this.editGsbUserForm = {};
     this.deleteGsbUserTarget = null;
+    this.isSavingCommunity = false;
+  }
+
+  onNewCommunityUniversityShortInput(value: string): void {
+    this.newCommunityUniversityShortInput = value ? value.toLocaleUpperCase('tr-TR') : '';
+  }
+
+  onEditingCommunityUniversityShortInput(value: string): void {
+    this.editingCommunityUniversityShortInput = value ? value.toLocaleUpperCase('tr-TR') : '';
+  }
+
+  get newCommunityUniversitiesBySelectedCity(): string[] {
+    return getUniversitiesByCity(this.newCommunity?.city);
+  }
+
+  get editingCommunityUniversitiesBySelectedCity(): string[] {
+    const city = this.editingCommunity?.city;
+    const list = getUniversitiesByCity(city);
+    const currentUni = String(this.editingCommunity?.university ?? '').trim();
+    if (currentUni && !list.includes(currentUni)) {
+      // Backend değeri JSON seçeneklerinde yoksa bile dropdown içinde görünebilmesi için ekliyoruz.
+      return [currentUni, ...list];
+    }
+    return list;
+  }
+
+  onNewCommunityCityChanged(): void {
+    if (!this.newCommunity) return;
+    const list = getUniversitiesByCity(this.newCommunity.city);
+    if (!list.includes(this.newCommunity.university || '')) {
+      this.newCommunity.university = '';
+    }
+  }
+
+  onEditingCommunityCityChanged(): void {
+    if (!this.editingCommunity) return;
+    const list = getUniversitiesByCity(this.editingCommunity.city);
+    if (!list.includes(this.editingCommunity.university || '')) {
+      this.editingCommunity.university = '';
+    }
+  }
+
+  private syncEditingCommunityNameFields(): void {
+    const parsed = this.splitCommunityNameAndUniversityShort(this.editingCommunity?.name || '');
+    this.editingCommunityNameInput = parsed.name;
+    this.editingCommunityUniversityShortInput = parsed.universityShort;
+  }
+
+  private splitCommunityNameAndUniversityShort(value: string): {
+    name: string;
+    universityShort: string;
+  } {
+    const trimmed = (value || '').trim();
+    const separator = ' - ';
+    const idx = trimmed.lastIndexOf(separator);
+    if (idx <= 0) {
+      return { name: trimmed, universityShort: '' };
+    }
+    const name = trimmed.slice(0, idx).trim();
+    const universityShort = trimmed.slice(idx + separator.length).trim();
+    return { name, universityShort };
+  }
+
+  private getCombinedCommunityName(name: string, universityShort?: string): string {
+    const safeName = (name || '').trim();
+    const safeShort = (universityShort || '').trim().toLocaleUpperCase('tr-TR');
+    return safeShort ? `${safeName} - ${safeShort}` : safeName;
+  }
+
+  private isCommunityFormComplete(
+    community: Community & { presidentEmail?: string; shortDescription?: string },
+    combinedName: string,
+  ): boolean {
+    const city = (community.city || '').trim();
+    const university = (community.university || '').trim();
+
+    return !!(
+      combinedName.trim() &&
+      (community.category || '').trim() &&
+      (community.miniAbout || '').trim() &&
+      (community.about || community.description || '').trim() &&
+      city &&
+      university &&
+      (community.email || '').trim() &&
+      ((community.presidentEmail || (community as any).comLeadMail || '') as string).trim()
+    );
   }
 
   // Duyuru detay ve güncelleme
@@ -3167,6 +3308,10 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     if (page >= 1 && page <= this.announcementTotalPages) {
       this.loadAnnouncementsFromService(page);
     }
+  }
+
+  getVisibleAnnouncementPages(): number[] {
+    return this.getSlidingPageNumbers(this.announcementPage, this.announcementTotalPages);
   }
 
   applyAnnouncementFilters() {
@@ -3456,6 +3601,65 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     return { isActive, city, name, email };
   }
 
+  downloadGsbUsersExcel() {
+    if (!isPlatformBrowser(this.platformId)) return;
+    if (this.isExportingGsbUsersExcel) return;
+    this.isExportingGsbUsersExcel = true;
+
+    const filters = this.getGsbUsersFilters();
+    const allUsers: EmirGsbUserDto[] = [];
+    const fetchPage = (page: number) => {
+      this.gsbUsersService.getGsbUsers(page, filters).subscribe({
+        next: (res) => {
+          allUsers.push(...res.items);
+          if (page < (res.totalPages || 1)) {
+            fetchPage(page + 1);
+            return;
+          }
+
+          this.exportGsbUsersWithAutoWidth(allUsers)
+            .then(() => {
+              this.isExportingGsbUsersExcel = false;
+              this.showToast('Excel çıktısı indirildi.', 'success');
+            })
+            .catch(() => {
+              this.isExportingGsbUsersExcel = false;
+              this.showToast('Excel dosyası oluşturulamadı.', 'error');
+            });
+        },
+        error: () => {
+          this.isExportingGsbUsersExcel = false;
+          this.showToast('Excel çıktısı alınamadı.', 'error');
+        },
+      });
+    };
+
+    fetchPage(1);
+  }
+
+  private async exportGsbUsersWithAutoWidth(users: EmirGsbUserDto[]): Promise<void> {
+    const XLSX = await import('xlsx');
+    const headers = ['Id', 'Ad Soyad', 'E-posta', 'Şehir', 'Aktif'];
+    const rows = users.map((u) => [u.id, u.fullName || '', u.email || '', u.city || '', u.isActive ? 'Evet' : 'Hayır']);
+    const sheetData = [headers, ...rows];
+
+    const ws = XLSX.utils.aoa_to_sheet(sheetData);
+    const colCount = headers.length;
+    const colWidths = Array.from({ length: colCount }, (_, colIndex) => {
+      const maxLen = sheetData.reduce((max, row) => {
+        const text = String(row[colIndex] ?? '');
+        return Math.max(max, text.length);
+      }, 0);
+      return { wch: Math.min(Math.max(maxLen + 2, 10), 60) };
+    });
+    ws['!cols'] = colWidths;
+    ws['!autofilter'] = { ref: 'A1:E1' };
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'GSB Yetkilileri');
+    XLSX.writeFile(wb, 'gsb_yetkilileri.xlsx');
+  }
+
   loadGsbUsers(page?: number) {
     if (!isPlatformBrowser(this.platformId)) return;
     const requestedPage = page ?? this.gsbUsersPage ?? 1;
@@ -3511,7 +3715,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   }
 
   get gsbUsersPagesDisplay(): number[] {
-    return this.gsbUsersPages;
+    return this.getSlidingPageNumbers(this.gsbUsersPage, this.gsbUsersTotalPages);
   }
 
   openCreateGsbUserModal() {
@@ -3580,11 +3784,35 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   saveEditGsbUser() {
     if (!this.editingGsbUser) return;
     const form = this.editGsbUserForm;
-    if (form.email !== undefined && form.email.trim() && !form.email.trim().toLowerCase().endsWith('@gsb.gov.tr')) {
+
+    // Formda girilen son değeri doğrudan kullan (input'ların ngModel başlangıçta zaten mevcut değerle dolduruluyor)
+    const finalFullName = (form.fullName || this.editingGsbUser.fullName || '').trim();
+    const finalEmail = (form.email || this.editingGsbUser.email || '').trim();
+    const rawCity =
+      form.city !== undefined
+        ? form.city
+        : this.editingGsbUser.city !== undefined
+        ? this.editingGsbUser.city
+        : undefined;
+    const finalCity = rawCity !== undefined && rawCity !== null ? rawCity.trim() : undefined;
+    const finalIsActive =
+      form.isActive !== undefined ? form.isActive : this.editingGsbUser.isActive;
+
+    // E-posta doğrulaması her zaman son kullanılacak değer üzerinden yapılsın
+    if (finalEmail && !finalEmail.toLowerCase().endsWith('@gsb.gov.tr')) {
       this.showToast('E-posta @gsb.gov.tr ile bitmelidir.', 'error');
       return;
     }
-    this.gsbUsersService.updateGsbUser(this.editingGsbUser.id, form).subscribe({
+
+    // Backend'e her zaman güncel ve tam veriyi gönder (değişmemiş alanlar da dahil)
+    const updatePayload: EmirUpdateGsbRequest = {
+      fullName: finalFullName,
+      email: finalEmail,
+      city: finalCity,
+      isActive: finalIsActive,
+    };
+
+    this.gsbUsersService.updateGsbUser(this.editingGsbUser.id, updatePayload).subscribe({
       next: () => {
         this.showToast('GSB kullanıcısı güncellendi.', 'success');
         this.isModalOpen = false;

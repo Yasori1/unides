@@ -2754,6 +2754,33 @@
   gap: 12px;
 }
 
+.name-universityshort-row {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap; /* Sığmazsa alt satıra geçsin */
+  gap: 10px;
+  width: 100%;
+  margin: 0;
+  align-items: flex-start;
+}
+
+.name-universityshort-row label {
+  margin: 0;
+  flex: 1 1 260px; /* Yeterli alan varsa yan yana, azsa wrap */
+  min-width: 240px;
+}
+
+@media (max-width: 768px) {
+  .name-universityshort-row {
+    flex-direction: column;
+  }
+
+  .name-universityshort-row label {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+}
+
 .input-grid label.input-grid-span-full {
   grid-column: 1 / -1;
 }

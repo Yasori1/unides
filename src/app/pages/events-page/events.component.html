@@ -141,11 +141,14 @@
     </div>
 
     <div class="pagination-area" *ngIf="totalPages > 1 && displayedEvents.length > 0">
+      <button class="page-btn first" [disabled]="currentPage === 1" (click)="changePage(1)">
+        <i class="bx bx-chevrons-left"></i>
+      </button>
       <button class="page-btn prev" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">
         <i class="bx bx-chevron-left"></i>
       </button>
 
-      <ng-container *ngFor="let page of pages">
+      <ng-container *ngFor="let page of getVisiblePages()">
         <button class="page-btn number" [class.active]="page === currentPage" (click)="changePage(page)">
           {{ page }}
         </button>
@@ -153,6 +156,9 @@
 
       <button class="page-btn next" [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)">
         <i class="bx bx-chevron-right"></i>
+      </button>
+      <button class="page-btn last" [disabled]="currentPage === totalPages" (click)="changePage(totalPages)">
+        <i class="bx bx-chevrons-right"></i>
       </button>
     </div>
 

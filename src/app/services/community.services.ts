@@ -95,7 +95,7 @@ export class CommunityService {
    */
   applyPendingUpdateToCommunity(
     community: Community & { presidentEmail?: string },
-    pendingUpdateDataJson: string | null | undefined
+    pendingUpdateDataJson: string | null | undefined,
   ): Community & { presidentEmail?: string } {
     if (!pendingUpdateDataJson || typeof pendingUpdateDataJson !== 'string') return community;
     let raw: Record<string, unknown>;
@@ -123,14 +123,26 @@ export class CommunityService {
       category: getStr('comCategory', community.category) ?? community.category ?? 'Genel',
       email: getStr('comMail', community.email) ?? community.email ?? '',
       comMail: getStr('comMail', community.comMail) ?? community.comMail ?? '',
-      presidentEmail: getStr('comLeadMail', community.presidentEmail ?? community.comLeadMail) ?? community.presidentEmail ?? community.comLeadMail ?? '',
-      comLeadMail: getStr('comLeadMail', community.comLeadMail ?? community.presidentEmail) ?? community.comLeadMail ?? community.presidentEmail ?? '',
+      presidentEmail:
+        getStr('comLeadMail', community.presidentEmail ?? community.comLeadMail) ??
+        community.presidentEmail ??
+        community.comLeadMail ??
+        '',
+      comLeadMail:
+        getStr('comLeadMail', community.comLeadMail ?? community.presidentEmail) ??
+        community.comLeadMail ??
+        community.presidentEmail ??
+        '',
       webSiteUrl: getStr('webSiteUrl', community.webSiteUrl) ?? community.webSiteUrl ?? '',
       instagramUrl: getStr('instagramUrl', community.instagramUrl) ?? community.instagramUrl ?? '',
       miniAbout: getStr('miniAbout', community.miniAbout) ?? community.miniAbout ?? '',
       logo: logoUrl ? this.convertImagePathToFullUrl(logoUrl) || community.logo : community.logo,
-      banner: bannerUrl ? this.convertImagePathToFullUrl(bannerUrl) || community.banner : community.banner ?? '',
-      coverImage: bannerUrl ? this.convertImagePathToFullUrl(bannerUrl) || community.coverImage : community.coverImage ?? '',
+      banner: bannerUrl
+        ? this.convertImagePathToFullUrl(bannerUrl) || community.banner
+        : (community.banner ?? ''),
+      coverImage: bannerUrl
+        ? this.convertImagePathToFullUrl(bannerUrl) || community.coverImage
+        : (community.coverImage ?? ''),
     };
   }
 
@@ -191,25 +203,30 @@ export class CommunityService {
   }
 
   // Featured communities için endpoint. options.skipAuth: true ise token gönderilmez (anasayfa tüm şehirler).
-  getFeaturedCommunities(limit: number = 6, options?: { skipAuth?: boolean }): Observable<Community[]> {
+  getFeaturedCommunities(
+    limit: number = 6,
+    options?: { skipAuth?: boolean },
+  ): Observable<Community[]> {
     const headers = options?.skipAuth ? new HttpHeaders({ 'X-Public-List': '1' }) : undefined;
     const context = options?.skipAuth ? new HttpContext().set(SKIP_AUTH, true) : undefined;
-    return this.http.get<any[]>(`${this.apiUrl}/featured`, {
-      ...(headers && { headers }),
-      ...(context && { context }),
-      ...(options?.skipAuth && { withCredentials: false }),
-    }).pipe(
-      map((list) => {
-        return list.slice(0, limit).map((dto) => {
-          const community = this.mapFeaturedDtoToCommunity(dto);
-          return this.ensureCommunityAssets(community);
-        });
-      }),
-      catchError((error) => {
-        Logger.error('Featured communities yüklenemedi:', error);
-        return of([]);
+    return this.http
+      .get<any[]>(`${this.apiUrl}/featured`, {
+        ...(headers && { headers }),
+        ...(context && { context }),
+        ...(options?.skipAuth && { withCredentials: false }),
       })
-    );
+      .pipe(
+        map((list) => {
+          return list.slice(0, limit).map((dto) => {
+            const community = this.mapFeaturedDtoToCommunity(dto);
+            return this.ensureCommunityAssets(community);
+          });
+        }),
+        catchError((error) => {
+          Logger.error('Featured communities yüklenemedi:', error);
+          return of([]);
+        }),
+      );
   }
 
   // FeaturedCommunityDto'yu Community'ye dönüştür
@@ -218,8 +235,8 @@ export class CommunityService {
       dto.isActivity !== undefined
         ? dto.isActivity
         : dto.IsActivity !== undefined
-        ? dto.IsActivity
-        : true;
+          ? dto.IsActivity
+          : true;
 
     // ID'yi string olarak sakla (Guid olabilir)
     const communityId = dto.communityId || dto.CommunityId;
@@ -262,75 +279,85 @@ export class CommunityService {
    * Response: CommunityLogoDto listesi (comName, logoUrl; backend'de communityId de olabilir).
    */
   getLatestCommunities(options?: { skipAuth?: boolean }): Observable<LatestCommunityItem[]> {
-    const context = (options?.skipAuth !== false) ? new HttpContext().set(SKIP_AUTH, true) : undefined;
-    const headers = (options?.skipAuth !== false) ? new HttpHeaders({ 'X-Public-List': '1' }) : undefined;
-    return this.http.get<any[]>(`${this.apiUrl}/latest`, {
-      ...(headers && { headers }),
-      ...(context && { context }),
-      ...((options?.skipAuth !== false) && { withCredentials: false }),
-    }).pipe(
-      map((list) => {
-        const arr = Array.isArray(list) ? list : [];
-        return arr.map((dto: any) => ({
-          id: dto.communityId ?? dto.CommunityId ?? undefined,
-          comName: dto.comName ?? dto.ComName ?? '',
-          logoUrl: (dto.logoUrl ?? dto.LogoUrl ?? '') && String(dto.logoUrl ?? dto.LogoUrl).trim()
-            ? this.convertImagePathToFullUrl(dto.logoUrl ?? dto.LogoUrl)
-            : this.placeholderLogo,
-        }));
-      }),
-      catchError((err) => {
-        Logger.error('Latest communities yüklenemedi:', err);
-        return of([]);
+    const context =
+      options?.skipAuth !== false ? new HttpContext().set(SKIP_AUTH, true) : undefined;
+    const headers =
+      options?.skipAuth !== false ? new HttpHeaders({ 'X-Public-List': '1' }) : undefined;
+    return this.http
+      .get<any[]>(`${this.apiUrl}/latest`, {
+        ...(headers && { headers }),
+        ...(context && { context }),
+        ...(options?.skipAuth !== false && { withCredentials: false }),
       })
-    );
+      .pipe(
+        map((list) => {
+          const arr = Array.isArray(list) ? list : [];
+          return arr.map((dto: any) => ({
+            id: dto.communityId ?? dto.CommunityId ?? undefined,
+            comName: dto.comName ?? dto.ComName ?? '',
+            logoUrl:
+              (dto.logoUrl ?? dto.LogoUrl ?? '') && String(dto.logoUrl ?? dto.LogoUrl).trim()
+                ? this.convertImagePathToFullUrl(dto.logoUrl ?? dto.LogoUrl)
+                : this.placeholderLogo,
+          }));
+        }),
+        catchError((err) => {
+          Logger.error('Latest communities yüklenemedi:', err);
+          return of([]);
+        }),
+      );
   }
 
   // Yeni katılanlar için - en son eklenen aktif toplulukları getir. options.skipAuth: true ise token gönderilmez (anasayfa tüm şehirler).
-  getNewestCommunities(limit: number = 12, options?: { skipAuth?: boolean }): Observable<Community[]> {
+  getNewestCommunities(
+    limit: number = 12,
+    options?: { skipAuth?: boolean },
+  ): Observable<Community[]> {
     const headers = options?.skipAuth ? new HttpHeaders({ 'X-Public-List': '1' }) : undefined;
     const context = options?.skipAuth ? new HttpContext().set(SKIP_AUTH, true) : undefined;
-    return this.http.get<CommunityMiniDto[]>(`${this.apiUrl}?status=active`, {
-      ...(headers && { headers }),
-      ...(context && { context }),
-      ...(options?.skipAuth && { withCredentials: false }),
-    }).pipe(
-      map((list) => {
-        // Backend'den gelen listeyi ComCreatedAt'e göre sırala (eğer varsa)
-        // Not: Backend'den ComCreatedAt gelmiyorsa, backend'in döndürdüğü sırayı kullanıyoruz
-        const sorted = [...list].sort((a, b) => {
-          // ComCreatedAt varsa ona göre sırala (yeni kurulanlar önce - descending)
-          const dateA = a.comCreatedAt || a.ComCreatedAt;
-          const dateB = b.comCreatedAt || b.ComCreatedAt;
-
-          if (dateA && dateB) {
-            try {
-              const timeA = new Date(dateA).getTime();
-              const timeB = new Date(dateB).getTime();
-              // Yeni tarihli (büyük) önce gelsin (descending - yeni kurulanlar önce)
-              return timeB - timeA;
-            } catch (e) {
-              // Tarih parse edilemezse sıralama yapma
-              return 0;
-            }
-          }
-
-          // ComCreatedAt yoksa, backend'in döndürdüğü sırayı koru
-          // Backend'de zaten sıralama yapılıyorsa, doğru sırada gelecektir
-          return 0;
-        });
-
-        // İlk N tanesini al (en yeni kurulanlar)
-        return sorted.slice(0, limit).map((dto) => {
-          const community = this.mapMiniDtoToCommunity(dto);
-          return this.ensureCommunityAssets(community);
-        });
-      }),
-      catchError((error) => {
-        Logger.error('Newest communities yüklenemedi:', error);
-        return of([]);
+    return this.http
+      .get<CommunityMiniDto[]>(`${this.apiUrl}?status=active`, {
+        ...(headers && { headers }),
+        ...(context && { context }),
+        ...(options?.skipAuth && { withCredentials: false }),
       })
-    );
+      .pipe(
+        map((list) => {
+          // Backend'den gelen listeyi ComCreatedAt'e göre sırala (eğer varsa)
+          // Not: Backend'den ComCreatedAt gelmiyorsa, backend'in döndürdüğü sırayı kullanıyoruz
+          const sorted = [...list].sort((a, b) => {
+            // ComCreatedAt varsa ona göre sırala (yeni kurulanlar önce - descending)
+            const dateA = a.comCreatedAt || a.ComCreatedAt;
+            const dateB = b.comCreatedAt || b.ComCreatedAt;
+
+            if (dateA && dateB) {
+              try {
+                const timeA = new Date(dateA).getTime();
+                const timeB = new Date(dateB).getTime();
+                // Yeni tarihli (büyük) önce gelsin (descending - yeni kurulanlar önce)
+                return timeB - timeA;
+              } catch (e) {
+                // Tarih parse edilemezse sıralama yapma
+                return 0;
+              }
+            }
+
+            // ComCreatedAt yoksa, backend'in döndürdüğü sırayı koru
+            // Backend'de zaten sıralama yapılıyorsa, doğru sırada gelecektir
+            return 0;
+          });
+
+          // İlk N tanesini al (en yeni kurulanlar)
+          return sorted.slice(0, limit).map((dto) => {
+            const community = this.mapMiniDtoToCommunity(dto);
+            return this.ensureCommunityAssets(community);
+          });
+        }),
+        catchError((error) => {
+          Logger.error('Newest communities yüklenemedi:', error);
+          return of([]);
+        }),
+      );
   }
 
   /**
@@ -339,16 +366,23 @@ export class CommunityService {
    */
   getStats(): Observable<{ totalEvents: number; totalCommunities: number }> {
     const context = new HttpContext().set(SKIP_AUTH, true);
-    return this.http.get<{ totalEvents?: number; totalCommunities?: number; TotalEvents?: number; TotalCommunities?: number }>(`${this.apiUrl}/stats`, { context }).pipe(
-      map((res) => ({
-        totalEvents: res.totalEvents ?? res.TotalEvents ?? 0,
-        totalCommunities: res.totalCommunities ?? res.TotalCommunities ?? 0,
-      })),
-      catchError((err) => {
-        Logger.warn('Communities stats yüklenemedi:', err);
-        return of({ totalEvents: 0, totalCommunities: 0 });
-      })
-    );
+    return this.http
+      .get<{
+        totalEvents?: number;
+        totalCommunities?: number;
+        TotalEvents?: number;
+        TotalCommunities?: number;
+      }>(`${this.apiUrl}/stats`, { context })
+      .pipe(
+        map((res) => ({
+          totalEvents: res.totalEvents ?? res.TotalEvents ?? 0,
+          totalCommunities: res.totalCommunities ?? res.TotalCommunities ?? 0,
+        })),
+        catchError((err) => {
+          Logger.warn('Communities stats yüklenemedi:', err);
+          return of({ totalEvents: 0, totalCommunities: 0 });
+        }),
+      );
   }
 
   // CommunityMiniDto'yu Community'ye dönüştür (List için)
@@ -358,8 +392,8 @@ export class CommunityService {
       dto.isActivity !== undefined
         ? dto.isActivity
         : dto.IsActivity !== undefined
-        ? dto.IsActivity
-        : true;
+          ? dto.IsActivity
+          : true;
 
     // comConfirm: 0=yeni kayıt beklemede, 1=onaylandı, 2=reddedildi, 3=silinmiş, 4=güncelleme onayı beklemede. deletedAt varsa da Silinmiş.
     const deletedAt = dto.deletedAt ?? dto.DeletedAt ?? null;
@@ -414,12 +448,16 @@ export class CommunityService {
       email: dto.comMail || dto.ComMail || '',
       comMail: dto.comMail || dto.ComMail || '',
       comLeadMail: dto.comLeadMail || dto.ComLeadMail || '',
-      hasEverBeenApproved: isUpdatePending ? true : (dto.hasEverBeenApproved ?? dto.HasEverBeenApproved ?? undefined),
+      hasEverBeenApproved: isUpdatePending
+        ? true
+        : (dto.hasEverBeenApproved ?? dto.HasEverBeenApproved ?? undefined),
       pendingUpdateData: dto.pendingUpdateData ?? dto.PendingUpdateData ?? undefined,
     };
   }
 
-  private statusFromDetailDto(dto: any): 'Aktif' | 'Pasif' | 'Onay Bekleyen' | 'Reddedilen' | 'Silinmiş' {
+  private statusFromDetailDto(
+    dto: any,
+  ): 'Aktif' | 'Pasif' | 'Onay Bekleyen' | 'Reddedilen' | 'Silinmiş' {
     const comConfirm = dto.comConfirm ?? dto.ComConfirm;
     if (comConfirm === 3) return 'Silinmiş';
     if (comConfirm === 2) return 'Reddedilen';
@@ -481,8 +519,8 @@ export class CommunityService {
         dto.isActivity !== undefined
           ? dto.isActivity
           : dto.IsActivity !== undefined
-          ? dto.IsActivity
-          : true,
+            ? dto.IsActivity
+            : true,
       // comConfirm=4 = güncelleme onayı bekliyor → hasEverBeenApproved true (detay pop-up Güncelleme tasarımı için)
       hasEverBeenApproved:
         dto.hasEverBeenApproved ??
@@ -502,8 +540,21 @@ export class CommunityService {
   getCommunitiesPublicPage(
     page: number,
     pageSize: number,
-    params?: { name?: string; city?: string; category?: string; university?: string; sortBy?: string; sortOrder?: 'asc' | 'desc' }
-  ): Observable<{ page: number; pageSize: number; totalCount: number; totalPages: number; items: Community[] }> {
+    params?: {
+      name?: string;
+      city?: string;
+      category?: string;
+      university?: string;
+      sortBy?: string;
+      sortOrder?: 'asc' | 'desc';
+    },
+  ): Observable<{
+    page: number;
+    pageSize: number;
+    totalCount: number;
+    totalPages: number;
+    items: Community[];
+  }> {
     const searchParams = new URLSearchParams();
     searchParams.set('status', 'active');
     searchParams.set('page', String(page));
@@ -523,7 +574,7 @@ export class CommunityService {
       }).then((r) => {
         if (!r.ok) throw new Error(r.statusText);
         return r.json();
-      })
+      }),
     ).pipe(
       map((response: any) => {
         const rawItems = response.items ?? (Array.isArray(response) ? response : []);
@@ -532,14 +583,16 @@ export class CommunityService {
           page: response.page ?? page,
           pageSize: response.pageSize ?? pageSize,
           totalCount: response.totalCount ?? items.length,
-          totalPages: response.totalPages ?? Math.max(1, Math.ceil((response.totalCount ?? items.length) / pageSize)),
+          totalPages:
+            response.totalPages ??
+            Math.max(1, Math.ceil((response.totalCount ?? items.length) / pageSize)),
           items,
         };
       }),
       catchError((err) => {
         Logger.error('Topluluklar yüklenemedi (public):', err);
         return of({ page: 1, pageSize: pageSize, totalCount: 0, totalPages: 0, items: [] });
-      })
+      }),
     );
   }
 
@@ -547,13 +600,17 @@ export class CommunityService {
    * Public topluluk listesi — tüm sayfayı getirir (sayfa 1, büyük pageSize).
    * Eski davranış; sayfa bazlı için getCommunitiesPublicPage kullanın.
    */
-  getAllCommunitiesPublic(params?: { name?: string; category?: string; university?: string }): Observable<Community[]> {
+  getAllCommunitiesPublic(params?: {
+    name?: string;
+    category?: string;
+    university?: string;
+  }): Observable<Community[]> {
     return this.getCommunitiesPublicPage(1, 9999, params).pipe(
       map((res) => res.items),
       catchError((err) => {
         Logger.error('Topluluklar yüklenemedi (public):', err);
         return of([]);
-      })
+      }),
     );
   }
 
@@ -581,8 +638,14 @@ export class CommunityService {
         | 'tumu'
         | 'tümü';
     },
-    options?: { skipAuth?: boolean }
-  ): Observable<{ page: number; pageSize: number; totalCount: number; totalPages: number; items: Community[] }> {
+    options?: { skipAuth?: boolean },
+  ): Observable<{
+    page: number;
+    pageSize: number;
+    totalCount: number;
+    totalPages: number;
+    items: Community[];
+  }> {
     let httpParams = new HttpParams().set('page', String(page)).set('pageSize', String(pageSize));
     if (params?.city && !options?.skipAuth) httpParams = httpParams.set('city', params.city);
     if (params?.university) httpParams = httpParams.set('university', params.university);
@@ -593,7 +656,13 @@ export class CommunityService {
     const context = options?.skipAuth ? new HttpContext().set(SKIP_AUTH, true) : undefined;
     const headers = options?.skipAuth ? new HttpHeaders({ 'X-Public-List': '1' }) : undefined;
     return this.http
-      .get<{ page?: number; pageSize?: number; totalCount?: number; totalPages?: number; items?: any[] }>(this.apiUrl, {
+      .get<{
+        page?: number;
+        pageSize?: number;
+        totalCount?: number;
+        totalPages?: number;
+        items?: any[];
+      }>(this.apiUrl, {
         params: httpParams,
         ...(context && { context }),
         ...(headers && { headers }),
@@ -607,14 +676,16 @@ export class CommunityService {
             page: response.page ?? page,
             pageSize: response.pageSize ?? pageSize,
             totalCount: response.totalCount ?? items.length,
-            totalPages: response.totalPages ?? Math.max(1, Math.ceil((response.totalCount ?? items.length) / pageSize)),
+            totalPages:
+              response.totalPages ??
+              Math.max(1, Math.ceil((response.totalCount ?? items.length) / pageSize)),
             items,
           };
         }),
         catchError((error) => {
           Logger.error('Topluluklar yüklenemedi:', error);
           return of({ page: 1, pageSize: pageSize, totalCount: 0, totalPages: 0, items: [] });
-        })
+        }),
       );
   }
 
@@ -641,14 +712,14 @@ export class CommunityService {
         | 'tumu'
         | 'tümü';
     },
-    options?: { skipAuth?: boolean }
+    options?: { skipAuth?: boolean },
   ): Observable<Community[]> {
     return this.getCommunitiesPage(1, 9999, params, options).pipe(
       map((res) => res.items),
       catchError((error) => {
         Logger.error('Topluluklar yüklenemedi:', error);
         return of([]);
-      })
+      }),
     );
   }
 
@@ -672,7 +743,7 @@ export class CommunityService {
       catchError((error) => {
         // Hata durumunda boş array döndür
         return of([]);
-      })
+      }),
     );
   }
 
@@ -690,7 +761,7 @@ export class CommunityService {
         }
         // 403: Topluluk başkanı e-postası Kurumsal'da onaylandı, eski başkanın erişimi kaldırıldı
         throw err;
-      })
+      }),
     );
   }
 
@@ -699,7 +770,7 @@ export class CommunityService {
   getCommunityById(id: string, _isActive?: boolean): Observable<Community> {
     // ID validasyonu - GUID formatında olmalı
     if (!id || id === '' || id.includes('mock')) {
-      throw new Error('Geçersiz topluluk ID\'si');
+      throw new Error("Geçersiz topluluk ID'si");
     }
 
     // Backend artık hem aktif hem pasif topluluklar için aynı detay endpoint'ini destekliyor.
@@ -711,7 +782,7 @@ export class CommunityService {
           throw new Error('Topluluk bulunamadı.');
         }
         throw error;
-      })
+      }),
     );
   }
 
@@ -727,7 +798,7 @@ export class CommunityService {
       catchError((error) => {
         // Hata zaten throw ediliyor
         throw error;
-      })
+      }),
     );
   }
 
@@ -737,7 +808,7 @@ export class CommunityService {
   updateCommunity(
     id: string,
     dto: UpdateCommunityDto,
-    options?: { fromGSB?: boolean; submitForApproval?: boolean }
+    options?: { fromGSB?: boolean; submitForApproval?: boolean },
   ): Observable<Community> {
     let headers = new HttpHeaders();
     if (options?.fromGSB === true) headers = headers.set('X-From-GSB', 'true');
@@ -748,93 +819,94 @@ export class CommunityService {
     return this.http
       .put<void>(`${this.apiUrl}/update/${id}`, dto, { ...(hasOpts && { headers }) })
       .pipe(
-      switchMap(() => {
-        // Backend'de pasif topluluklar GET endpoint'inde döndürülmüyor (!com.IsActivity kontrolü var)
-        // Bu yüzden güncellenmiş veriyi direkt oluştur
-        // Önce mevcut topluluğu listeden bul
-        return this.getAllCommunities().pipe(
-          map((communities) => {
-            const existing = communities.find((c) => c.id === id);
-            if (existing) {
-              // Mevcut topluluğu DTO'daki değerlerle güncelle
-              return {
-                ...existing,
-                name: dto.comName !== undefined ? dto.comName : existing.name,
-                about: dto.comAbout !== undefined ? dto.comAbout : existing.about,
-                description: dto.comAbout !== undefined ? dto.comAbout : existing.description,
-                city: dto.city !== undefined ? dto.city : existing.city,
-                university: dto.university !== undefined ? dto.university : existing.university,
-                category: dto.comCategory !== undefined ? dto.comCategory : existing.category,
-                email: dto.comMail !== undefined ? dto.comMail : existing.email,
-                comMail: dto.comMail !== undefined ? dto.comMail : existing.comMail,
-                comLeadMail: dto.comLeadMail !== undefined ? dto.comLeadMail : existing.comLeadMail,
+        switchMap(() => {
+          // Backend'de pasif topluluklar GET endpoint'inde döndürülmüyor (!com.IsActivity kontrolü var)
+          // Bu yüzden güncellenmiş veriyi direkt oluştur
+          // Önce mevcut topluluğu listeden bul
+          return this.getAllCommunities().pipe(
+            map((communities) => {
+              const existing = communities.find((c) => c.id === id);
+              if (existing) {
+                // Mevcut topluluğu DTO'daki değerlerle güncelle
+                return {
+                  ...existing,
+                  name: dto.comName !== undefined ? dto.comName : existing.name,
+                  about: dto.comAbout !== undefined ? dto.comAbout : existing.about,
+                  description: dto.comAbout !== undefined ? dto.comAbout : existing.description,
+                  city: dto.city !== undefined ? dto.city : existing.city,
+                  university: dto.university !== undefined ? dto.university : existing.university,
+                  category: dto.comCategory !== undefined ? dto.comCategory : existing.category,
+                  email: dto.comMail !== undefined ? dto.comMail : existing.email,
+                  comMail: dto.comMail !== undefined ? dto.comMail : existing.comMail,
+                  comLeadMail:
+                    dto.comLeadMail !== undefined ? dto.comLeadMail : existing.comLeadMail,
+                  logo:
+                    dto.logoUrl !== undefined
+                      ? this.convertImagePathToFullUrl(dto.logoUrl) || existing.logo
+                      : existing.logo,
+                  banner:
+                    dto.bannerUrl !== undefined
+                      ? this.convertImagePathToFullUrl(dto.bannerUrl) || existing.banner
+                      : existing.banner,
+                  coverImage:
+                    dto.bannerUrl !== undefined
+                      ? this.convertImagePathToFullUrl(dto.bannerUrl) || existing.coverImage
+                      : existing.coverImage,
+                  miniAbout: dto.miniAbout !== undefined ? dto.miniAbout : existing.miniAbout,
+                  webSiteUrl: dto.webSiteUrl !== undefined ? dto.webSiteUrl : existing.webSiteUrl,
+                  instagramUrl:
+                    dto.instagramUrl !== undefined ? dto.instagramUrl : existing.instagramUrl,
+                  // Status ve isActivity güncellemesi
+                  isActivity: dto.isActivity !== undefined ? dto.isActivity : existing.isActivity,
+                  status:
+                    dto.isActivity !== undefined
+                      ? dto.isActivity
+                        ? 'Aktif'
+                        : 'Pasif'
+                      : existing.status,
+                } as Community;
+              }
+              // Eğer listede yoksa, DTO'dan yeni bir Community oluştur
+              const updatedCommunity: Community = {
+                id: id,
+                name: dto.comName || '',
+                university: dto.university || '',
+                category: dto.comCategory || 'Genel',
+                description: dto.comAbout || '',
+                about: dto.comAbout || '',
+                city: dto.city || '',
+                email: dto.comMail,
                 logo:
-                  dto.logoUrl !== undefined
-                    ? this.convertImagePathToFullUrl(dto.logoUrl) || existing.logo
-                    : existing.logo,
+                  (dto.logoUrl && this.convertImagePathToFullUrl(dto.logoUrl)) ||
+                  this.placeholderLogo,
                 banner:
-                  dto.bannerUrl !== undefined
-                    ? this.convertImagePathToFullUrl(dto.bannerUrl) || existing.banner
-                    : existing.banner,
+                  (dto.bannerUrl && this.convertImagePathToFullUrl(dto.bannerUrl)) ||
+                  this.placeholderCover,
                 coverImage:
-                  dto.bannerUrl !== undefined
-                    ? this.convertImagePathToFullUrl(dto.bannerUrl) || existing.coverImage
-                    : existing.coverImage,
-                miniAbout: dto.miniAbout !== undefined ? dto.miniAbout : existing.miniAbout,
-                webSiteUrl: dto.webSiteUrl !== undefined ? dto.webSiteUrl : existing.webSiteUrl,
-                instagramUrl:
-                  dto.instagramUrl !== undefined ? dto.instagramUrl : existing.instagramUrl,
-                // Status ve isActivity güncellemesi
-                isActivity: dto.isActivity !== undefined ? dto.isActivity : existing.isActivity,
-                status:
-                  dto.isActivity !== undefined
-                    ? dto.isActivity
-                      ? 'Aktif'
-                      : 'Pasif'
-                    : existing.status,
-              } as Community;
-            }
-            // Eğer listede yoksa, DTO'dan yeni bir Community oluştur
-            const updatedCommunity: Community = {
-              id: id,
-              name: dto.comName || '',
-              university: dto.university || '',
-              category: dto.comCategory || 'Genel',
-              description: dto.comAbout || '',
-              about: dto.comAbout || '',
-              city: dto.city || '',
-              email: dto.comMail,
-              logo:
-                (dto.logoUrl && this.convertImagePathToFullUrl(dto.logoUrl)) ||
-                this.placeholderLogo,
-              banner:
-                (dto.bannerUrl && this.convertImagePathToFullUrl(dto.bannerUrl)) ||
-                this.placeholderCover,
-              coverImage:
-                (dto.bannerUrl && this.convertImagePathToFullUrl(dto.bannerUrl)) ||
-                this.placeholderCover,
-              memberCount: 0,
-              status: dto.isActivity === false ? 'Pasif' : 'Aktif',
-              isActivity: dto.isActivity !== undefined ? dto.isActivity : true,
-              miniAbout: dto.miniAbout,
-              comMail: dto.comMail,
-              comLeadMail: dto.comLeadMail,
-              webSiteUrl: dto.webSiteUrl,
-              instagramUrl: dto.instagramUrl,
-            };
-            return updatedCommunity;
-          }),
-          catchError((error) => {
-            // Hata zaten throw ediliyor
-            throw error;
-          })
-        );
-      }),
-      catchError((error) => {
-        // Hata zaten throw ediliyor
-        throw error;
-      })
-    );
+                  (dto.bannerUrl && this.convertImagePathToFullUrl(dto.bannerUrl)) ||
+                  this.placeholderCover,
+                memberCount: 0,
+                status: dto.isActivity === false ? 'Pasif' : 'Aktif',
+                isActivity: dto.isActivity !== undefined ? dto.isActivity : true,
+                miniAbout: dto.miniAbout,
+                comMail: dto.comMail,
+                comLeadMail: dto.comLeadMail,
+                webSiteUrl: dto.webSiteUrl,
+                instagramUrl: dto.instagramUrl,
+              };
+              return updatedCommunity;
+            }),
+            catchError((error) => {
+              // Hata zaten throw ediliyor
+              throw error;
+            }),
+          );
+        }),
+        catchError((error) => {
+          // Hata zaten throw ediliyor
+          throw error;
+        }),
+      );
   }
 
   // Topluluk Sil (Backend: DELETE /api/Communities/{id:guid}, body: { Reason } zorunlu; backend silme nedenini topluluk başkanına e-posta ile gönderir ve topluluğu siler)
@@ -849,7 +921,7 @@ export class CommunityService {
         catchError((error) => {
           Logger.error('DELETE request failed:', error);
           throw error;
-        })
+        }),
       );
   }
 
@@ -861,7 +933,7 @@ export class CommunityService {
     const updateDto: UpdateCommunityDto = { isActivity: false };
     return this.updateCommunity(id, updateDto).pipe(
       catchError(() => of(null as unknown as Community)),
-      switchMap(() => this.deleteCommunity(id, reason))
+      switchMap(() => this.deleteCommunity(id, reason)),
     );
   }
 
@@ -923,7 +995,7 @@ export class CommunityService {
       catchError((error) => {
         // Hata zaten throw ediliyor
         throw error;
-      })
+      }),
     );
   }
 
@@ -952,7 +1024,7 @@ export class CommunityService {
       }),
       catchError(() => {
         return of([]);
-      })
+      }),
     );
   }
 
@@ -1033,7 +1105,7 @@ export class CommunityService {
           roleId: 1,
           isCorporate: false,
         });
-      })
+      }),
     );
   }
 
@@ -1073,7 +1145,7 @@ export class CommunityService {
         })),
         catchError((error) => {
           throw error;
-        })
+        }),
       );
   }
 
@@ -1097,7 +1169,7 @@ export class CommunityService {
       catchError((error) => {
         // Hata zaten throw ediliyor
         throw error;
-      })
+      }),
     );
   }
 
@@ -1136,7 +1208,7 @@ export class CommunityService {
       .pipe(
         catchError((error) => {
           throw error;
-        })
+        }),
       );
   }
 
@@ -1176,7 +1248,7 @@ export class CommunityService {
           events: dto.events || dto.Events || [], // Topluluk etkinlikleri
           joinedDate: dto.joinedDate || dto.JoinedDate, // Üyelik tarihi
         }));
-      })
+      }),
       // catchError kaldırıldı - hataları component'te handle edelim
     );
   }
@@ -1213,11 +1285,11 @@ export class CommunityService {
           // Note: Backend CommunitiesUsers table membership is not directly queryable
           // via current endpoints. This filters only by president role.
           const myCommunities = allCommunities.filter(
-            (c) => c.comLeadMail?.toLowerCase() === userEmail.toLowerCase()
+            (c) => c.comLeadMail?.toLowerCase() === userEmail.toLowerCase(),
           );
 
           return myCommunities;
-        })
+        }),
         // catchError kaldırıldı - hataları component'te handle edelim
       );
     } catch (e) {
@@ -1230,7 +1302,7 @@ export class CommunityService {
   // options.fromGSB: true → GSB panelinden güncelleme; backend onay kuyruğuna almadan anında uygular
   addOrUpdateCommunity(
     community: Community & { presidentEmail?: string },
-    options?: { fromGSB?: boolean }
+    options?: { fromGSB?: boolean },
   ): Observable<Community> {
     if (community.id && community.id !== '') {
       // Status'u isActivity boolean'a çevir
@@ -1344,7 +1416,7 @@ export class CommunityService {
             return this.updateCommunity(createdCommunity.id, updateDto, options);
           }
           return of(createdCommunity);
-        })
+        }),
       );
     }
   }
@@ -1354,7 +1426,7 @@ export class CommunityService {
   uploadBanner(
     communityId: string,
     file: File,
-    options?: { setupToken?: string }
+    options?: { setupToken?: string },
   ): Observable<{ BannerUrl: string }> {
     const formData = new FormData();
     formData.append('File', file, file.name);
@@ -1366,11 +1438,10 @@ export class CommunityService {
       : undefined;
 
     return this.http
-      .post<{ BannerUrl?: string; bannerUrl?: string }>(
-        `${this.apiUrl}/${communityId}/banner`,
-        formData,
-        { ...(ctx && { context: ctx }), ...(headers && { headers }) }
-      )
+      .post<{
+        BannerUrl?: string;
+        bannerUrl?: string;
+      }>(`${this.apiUrl}/${communityId}/banner`, formData, { ...(ctx && { context: ctx }), ...(headers && { headers }) })
       .pipe(
         map((response: any) => {
           const path = response.BannerUrl || response.bannerUrl || '';
@@ -1399,8 +1470,8 @@ export class CommunityService {
               const norm = pathname.startsWith('/images/')
                 ? pathname.replace('/images/', '/ImagesUnides/')
                 : pathname.startsWith('/assets/img/')
-                ? pathname.replace('/assets/img/', '/ImagesUnides/')
-                : pathname;
+                  ? pathname.replace('/assets/img/', '/ImagesUnides/')
+                  : pathname;
               return {
                 BannerUrl: norm.startsWith('/ImagesUnides/')
                   ? norm
@@ -1414,7 +1485,7 @@ export class CommunityService {
         }),
         catchError((error) => {
           throw error;
-        })
+        }),
       );
   }
 
@@ -1423,7 +1494,7 @@ export class CommunityService {
   uploadLogo(
     communityId: string,
     file: File,
-    options?: { setupToken?: string }
+    options?: { setupToken?: string },
   ): Observable<{ LogoUrl: string }> {
     const formData = new FormData();
     formData.append('File', file, file.name);
@@ -1435,11 +1506,10 @@ export class CommunityService {
       : undefined;
 
     return this.http
-      .post<{ LogoUrl?: string; logoUrl?: string }>(
-        `${this.apiUrl}/${communityId}/logo`,
-        formData,
-        { ...(ctx && { context: ctx }), ...(headers && { headers }) }
-      )
+      .post<{
+        LogoUrl?: string;
+        logoUrl?: string;
+      }>(`${this.apiUrl}/${communityId}/logo`, formData, { ...(ctx && { context: ctx }), ...(headers && { headers }) })
       .pipe(
         map((response: any) => {
           const path = response.LogoUrl || response.logoUrl || '';
@@ -1468,8 +1538,8 @@ export class CommunityService {
               const norm = pathname.startsWith('/images/')
                 ? pathname.replace('/images/', '/ImagesUnides/')
                 : pathname.startsWith('/assets/img/')
-                ? pathname.replace('/assets/img/', '/ImagesUnides/')
-                : pathname;
+                  ? pathname.replace('/assets/img/', '/ImagesUnides/')
+                  : pathname;
               return {
                 LogoUrl: norm.startsWith('/ImagesUnides/')
                   ? norm
@@ -1483,7 +1553,7 @@ export class CommunityService {
         }),
         catchError((error) => {
           throw error;
-        })
+        }),
       );
   }
 
@@ -1522,7 +1592,7 @@ export class CommunityService {
             pendingEvents: 0,
             totalEvents: 0,
           });
-        })
+        }),
       );
   }
 }

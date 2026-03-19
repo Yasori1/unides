@@ -4865,6 +4865,23 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
   }
 }
 
+/* Desktop: Topluluk İsmi + Üni Kısaltması + Kategori aynı satır */
+.form-grid-identity-row {
+  display: grid;
+  grid-template-columns: minmax(260px, 1.6fr) minmax(150px, 0.85fr) minmax(220px, 1.15fr);
+  gap: 15px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+/* Outer 2-col grid'de identity row iç grid'inin tüm genişliği kaplaması */
+.form-grid-2col > .form-grid-identity-row {
+  grid-column: 1 / -1;
+}
+
 .modal-actions {
   display: flex;
   justify-content: space-between;

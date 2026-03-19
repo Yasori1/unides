@@ -489,7 +489,7 @@
                 <div class="icon-wrapper"><i class="bx bx-map"></i></div>
                 <select
                   [(ngModel)]="city"
-                  (ngModelChange)="cityMissing = false"
+                  (ngModelChange)="cityMissing = false; onCityChanged()"
                   name="city"
                   class="modern-input"
                   required
@@ -530,16 +530,17 @@
               <label>Üniversite <span class="required">*</span></label>
               <div class="input-group" [class.field-error]="universityMissing">
                 <div class="icon-wrapper"><i class="bx bxs-school"></i></div>
-                <input
-                  type="text"
+                <select
                   [(ngModel)]="university"
                   (ngModelChange)="universityMissing = false"
                   name="university"
                   class="modern-input"
-                  placeholder="Üniversite adı..."
-                  maxlength="40"
+                  [disabled]="!city"
                   required
-                />
+                >
+                  <option value="">{{ city ? 'Üniversite seçin' : 'Önce şehir seçin' }}</option>
+                  <option *ngFor="let u of universitiesBySelectedCity" [value]="u">{{ u }}</option>
+                </select>
               </div>
               <span class="field-required-hint" *ngIf="universityMissing">
                 <i class="bx bx-error-circle"></i> Üniversite adı zorunludur.

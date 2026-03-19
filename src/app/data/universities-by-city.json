@@ -1,0 +1,367 @@
+{
+  "Adana": [
+    "Adana Alparslan Türkeş Bilim ve Teknoloji Üniversitesi",
+    "Çağ Üniversitesi",
+    "Çukurova Üniversitesi"
+  ],
+  "Adıyaman": [
+    "Adıyaman Üniversitesi"
+  ],
+  "Afyonkarahisar": [
+    "Afyon Kocatepe Üniversitesi",
+    "Afyonkarahisar Sağlık Bilimleri Üniversitesi"
+  ],
+  "Aksaray": [
+    "Aksaray Üniversitesi"
+  ],
+  "Amasya": [
+    "Amasya Üniversitesi"
+  ],
+  "Ankara": [
+    "Ankara Bilim Üniversitesi",
+    "Ankara Hacı Bayram Veli Üniversitesi",
+    "Ankara Medipol Üniversitesi",
+    "Ankara Müzik ve Güzel Sanatlar Üniversitesi",
+    "Ankara Sosyal Bilimler Üniversitesi",
+    "Ankara Yıldırım Beyazıt Üniversitesi",
+    "Ankara Üniversitesi",
+    "Atılım Üniversitesi",
+    "Başkent Üniversitesi",
+    "Gazi Üniversitesi",
+    "Hacettepe Üniversitesi",
+    "Lokman Hekim Üniversitesi",
+    "OSTİM Teknik Üniversitesi",
+    "Orta Doğu Teknik Üniversitesi",
+    "TED Üniversitesi",
+    "TOBB Ekonomi ve Teknoloji Üniversitesi",
+    "Türk Hava Kurumu Üniversitesi",
+    "Türk-Japon Bilim ve Teknoloji Üniversitesi",
+    "Ufuk Üniversitesi",
+    "Yüksek İhtisas Üniversitesi",
+    "Çankaya Üniversitesi",
+    "İhsan Doğramacı Bilkent Üniversitesi"
+  ],
+  "Antalya": [
+    "Akdeniz Üniversitesi",
+    "Alanya Alaaddin Keykubat Üniversitesi",
+    "Alanya Üniversitesi",
+    "Antalya Belek Üniversitesi",
+    "Antalya Bilim Üniversitesi"
+  ],
+  "Ardahan": [
+    "Ardahan Üniversitesi"
+  ],
+  "Artvin": [
+    "Artvin Çoruh Üniversitesi"
+  ],
+  "Aydın": [
+    "Aydın Adnan Menderes Üniversitesi"
+  ],
+  "Ağrı": [
+    "Ağrı İbrahim Çeçen Üniversitesi"
+  ],
+  "Balıkesir": [
+    "Balıkesir Üniversitesi",
+    "Bandırma Onyedi Eylül Üniversitesi"
+  ],
+  "Bartın": [
+    "Bartın Üniversitesi"
+  ],
+  "Batman": [
+    "Batman Üniversitesi"
+  ],
+  "Bayburt": [
+    "Bayburt Üniversitesi"
+  ],
+  "Bilecik": [
+    "Bilecik Şeyh Edebali Üniversitesi"
+  ],
+  "Bingöl": [
+    "Bingöl Üniversitesi"
+  ],
+  "Bitlis": [
+    "Bitlis Eren Üniversitesi"
+  ],
+  "Bolu": [
+    "Bolu Abant İzzet Baysal Üniversitesi"
+  ],
+  "Burdur": [
+    "Burdur Mehmet Akif Ersoy Üniversitesi"
+  ],
+  "Bursa": [
+    "Bursa Teknik Üniversitesi",
+    "Bursa Uludağ Üniversitesi",
+    "Mudanya Üniversitesi"
+  ],
+  "Denizli": [
+    "Pamukkale Üniversitesi"
+  ],
+  "Diyarbakır": [
+    "Dicle Üniversitesi"
+  ],
+  "Düzce": [
+    "Düzce Üniversitesi"
+  ],
+  "Edirne": [
+    "Trakya Üniversitesi"
+  ],
+  "Elazığ": [
+    "Fırat Üniversitesi"
+  ],
+  "Erzincan": [
+    "Erzincan Binali Yıldırım Üniversitesi"
+  ],
+  "Erzurum": [
+    "Atatürk Üniversitesi",
+    "Erzurum Teknik Üniversitesi"
+  ],
+  "Eskişehir": [
+    "Anadolu Üniversitesi",
+    "Eskişehir Osmangazi Üniversitesi",
+    "Eskişehir Teknik Üniversitesi"
+  ],
+  "Gaziantep": [
+    "Gaziantep Üniversitesi",
+    "Gaziantep İslam Bilim ve Teknoloji Üniversitesi",
+    "Hasan Kalyoncu Üniversitesi",
+    "Sanko Üniversitesi"
+  ],
+  "Giresun": [
+    "Giresun Üniversitesi"
+  ],
+  "Gümüşhane": [
+    "Gümüşhane Üniversitesi"
+  ],
+  "Hakkari": [
+    "Hakkari Üniversitesi"
+  ],
+  "Hatay": [
+    "Hatay Mustafa Kemal Üniversitesi",
+    "İskenderun Teknik Üniversitesi"
+  ],
+  "Isparta": [
+    "Isparta Uygulamalı Bilimler Üniversitesi",
+    "Süleyman Demirel Üniversitesi"
+  ],
+  "Iğdır": [
+    "Iğdır Üniversitesi"
+  ],
+  "İstanbul": [
+    "Acıbadem Mehmet Ali Aydınlar Üniversitesi",
+    "Altınbaş Üniversitesi",
+    "Arnavutköy Üniversitesi",
+    "Bahçeşehir Üniversitesi",
+    "Beykent Üniversitesi",
+    "Beykoz Üniversitesi",
+    "Bezmialem Vakıf Üniversitesi",
+    "Biruni Üniversitesi",
+    "Boğaziçi Üniversitesi",
+    "Demiroğlu Bilim Üniversitesi",
+    "Doğuş Üniversitesi",
+    "Fatih Sultan Mehmet Vakıf Üniversitesi",
+    "Fenerbahçe Üniversitesi",
+    "Galatasaray Üniversitesi",
+    "Haliç Üniversitesi",
+    "Işık Üniversitesi",
+    "Kadir Has Üniversitesi",
+    "Koç Üniversitesi",
+    "MEF Üniversitesi",
+    "Maltepe Üniversitesi",
+    "Marmara Üniversitesi",
+    "Mimar Sinan Güzel Sanatlar Üniversitesi",
+    "Nişantaşı Üniversitesi",
+    "Piri Reis Üniversitesi",
+    "Sabancı Üniversitesi",
+    "Sağlık Bilimleri Üniversitesi",
+    "Türk-Alman Üniversitesi",
+    "Yeditepe Üniversitesi",
+    "Yıldız Teknik Üniversitesi",
+    "Özyeğin Üniversitesi",
+    "Üsküdar Üniversitesi",
+    "İbn Haldun Üniversitesi",
+    "İstanbul 29 Mayıs Üniversitesi",
+    "İstanbul Arel Üniversitesi",
+    "İstanbul Atlas Üniversitesi",
+    "İstanbul Aydın Üniversitesi",
+    "İstanbul Bilgi Üniversitesi",
+    "İstanbul Esenyurt Üniversitesi",
+    "İstanbul Galata Üniversitesi",
+    "İstanbul Gedik Üniversitesi",
+    "İstanbul Gelişim Üniversitesi",
+    "İstanbul Kent Üniversitesi",
+    "İstanbul Kültür Üniversitesi",
+    "İstanbul Medeniyet Üniversitesi",
+    "İstanbul Medipol Üniversitesi",
+    "İstanbul Okan Üniversitesi",
+    "İstanbul Rumeli Üniversitesi",
+    "İstanbul Sabahattin Zaim Üniversitesi",
+    "İstanbul Sağlık ve Teknoloji Üniversitesi",
+    "İstanbul Teknik Üniversitesi",
+    "İstanbul Ticaret Üniversitesi",
+    "İstanbul Topkapı Üniversitesi",
+    "İstanbul Yeni Yüzyıl Üniversitesi",
+    "İstanbul Üniversitesi",
+    "İstanbul Üniversitesi-Cerrahpaşa",
+    "İstinye Üniversitesi"
+  ],
+  "İzmir": [
+    "Dokuz Eylül Üniversitesi",
+    "Ege Üniversitesi",
+    "Yaşar Üniversitesi",
+    "İzmir Bakırçay Üniversitesi",
+    "İzmir Demokrasi Üniversitesi",
+    "İzmir Ekonomi Üniversitesi",
+    "İzmir Kâtip Çelebi Üniversitesi",
+    "İzmir Tınaztepe Üniversitesi",
+    "İzmir Yüksek Teknoloji Enstitüsü"
+  ],
+  "Kahramanmaraş": [
+    "Kahramanmaraş Sütçü İmam Üniversitesi",
+    "Kahramanmaraş İstiklal Üniversitesi"
+  ],
+  "Karabük": [
+    "Karabük Üniversitesi"
+  ],
+  "Karaman": [
+    "Karamanoğlu Mehmetbey Üniversitesi"
+  ],
+  "Kars": [
+    "Kafkas Üniversitesi"
+  ],
+  "Kastamonu": [
+    "Kastamonu Üniversitesi"
+  ],
+  "Kayseri": [
+    "Abdullah Gül Üniversitesi",
+    "Erciyes Üniversitesi",
+    "Kayseri Üniversitesi",
+    "Nuh Naci Yazgan Üniversitesi"
+  ],
+  "Kilis": [
+    "Kilis 7 Aralık Üniversitesi"
+  ],
+  "Kocaeli": [
+    "Gebze Teknik Üniversitesi",
+    "Kocaeli Sağlık ve Teknoloji Üniversitesi",
+    "Kocaeli Üniversitesi"
+  ],
+  "Konya": [
+    "KTO Karatay Üniversitesi",
+    "Konya Gıda ve Tarım Üniversitesi",
+    "Konya Teknik Üniversitesi",
+    "Necmettin Erbakan Üniversitesi",
+    "Selçuk Üniversitesi"
+  ],
+  "Kütahya": [
+    "Kütahya Dumlupınar Üniversitesi",
+    "Kütahya Sağlık Bilimleri Üniversitesi"
+  ],
+  "Kırklareli": [
+    "Kırklareli Üniversitesi"
+  ],
+  "Kırıkkale": [
+    "Kırıkkale Üniversitesi"
+  ],
+  "Kırşehir": [
+    "Kırşehir Ahi Evran Üniversitesi"
+  ],
+  "Malatya": [
+    "Malatya Turgut Özal Üniversitesi",
+    "İnönü Üniversitesi"
+  ],
+  "Manisa": [
+    "Manisa Celal Bayar Üniversitesi"
+  ],
+  "Mardin": [
+    "Mardin Artuklu Üniversitesi"
+  ],
+  "Mersin": [
+    "Mersin Üniversitesi",
+    "Tarsus Üniversitesi",
+    "Toros Üniversitesi"
+  ],
+  "Muğla": [
+    "Muğla Sıtkı Koçman Üniversitesi"
+  ],
+  "Muş": [
+    "Muş Alparslan Üniversitesi"
+  ],
+  "Nevşehir": [
+    "Kapadokya Üniversitesi",
+    "Nevşehir Hacı Bektaş Veli Üniversitesi"
+  ],
+  "Niğde": [
+    "Niğde Ömer Halisdemir Üniversitesi"
+  ],
+  "Ordu": [
+    "Ordu Üniversitesi"
+  ],
+  "Osmaniye": [
+    "Osmaniye Korkut Ata Üniversitesi"
+  ],
+  "Rize": [
+    "Recep Tayyip Erdoğan Üniversitesi"
+  ],
+  "Sakarya": [
+    "Sakarya Uygulamalı Bilimler Üniversitesi",
+    "Sakarya Üniversitesi"
+  ],
+  "Samsun": [
+    "Ondokuz Mayıs Üniversitesi",
+    "Samsun Üniversitesi"
+  ],
+  "Siirt": [
+    "Siirt Üniversitesi"
+  ],
+  "Sinop": [
+    "Sinop Üniversitesi"
+  ],
+  "Sivas": [
+    "Sivas Bilim ve Teknoloji Üniversitesi",
+    "Sivas Cumhuriyet Üniversitesi"
+  ],
+  "Tekirdağ": [
+    "Tekirdağ Namık Kemal Üniversitesi"
+  ],
+  "Tokat": [
+    "Tokat Gaziosmanpaşa Üniversitesi"
+  ],
+  "Trabzon": [
+    "Avrasya Üniversitesi",
+    "Karadeniz Teknik Üniversitesi",
+    "Trabzon Üniversitesi"
+  ],
+  "Tunceli": [
+    "Munzur Üniversitesi"
+  ],
+  "Uşak": [
+    "Uşak Üniversitesi"
+  ],
+  "Van": [
+    "Van Yüzüncü Yıl Üniversitesi"
+  ],
+  "Yalova": [
+    "Yalova Üniversitesi"
+  ],
+  "Yozgat": [
+    "Yozgat Bozok Üniversitesi"
+  ],
+  "Zonguldak": [
+    "Zonguldak Bülent Ecevit Üniversitesi"
+  ],
+  "Çanakkale": [
+    "Çanakkale Onsekiz Mart Üniversitesi"
+  ],
+  "Çankırı": [
+    "Çankırı Karatekin Üniversitesi"
+  ],
+  "Çorum": [
+    "Hitit Üniversitesi"
+  ],
+  "Şanlıurfa": [
+    "Harran Üniversitesi"
+  ],
+  "Şırnak": [
+    "Şırnak Üniversitesi"
+  ]
+}

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { Observable, catchError, map, of } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Logger } from '../utils/logger.util';
@@ -49,6 +49,7 @@ export interface GsbUsersPageResponse {
 })
 export class GsbUsersService {
   private apiUrl = `${environment.apiUrl}/admin/gsb/users`;
+  private excelUrl = `${environment.apiUrl}/admin/gsb/uyelertoexcel`;
 
   constructor(private http: HttpClient) {}
 
@@ -120,5 +121,32 @@ export class GsbUsersService {
         throw err;
       })
     );
+  }
+
+  /**
+   * GET /api/admin/gsb/uyelertoexcel — GSB kullanıcı listesini Excel (xlsx) olarak indirir.
+   * Filtre parametreleri getGsbUsers ile aynıdır (sayfalama yok, tüm eşleşen kayıtlar döner).
+   */
+  exportGsbUsersToExcel(filters?: {
+    isActive?: boolean | null;
+    city?: string;
+    name?: string;
+    email?: string;
+  }): Observable<HttpResponse<Blob>> {
+    let params = new HttpParams();
+    if (filters?.isActive === true) params = params.set('isActive', 'true');
+    else if (filters?.isActive === false) params = params.set('isActive', 'false');
+    if (filters?.city?.trim()) params = params.set('city', filters.city.trim());
+    if (filters?.name?.trim()) params = params.set('name', filters.name.trim());
+    if (filters?.email?.trim()) params = params.set('email', filters.email.trim());
+
+    return this.http
+      .get(this.excelUrl, { params, responseType: 'blob', observe: 'response' })
+      .pipe(
+        catchError((err) => {
+          Logger.error('GSB Excel çıktısı indirilemedi:', err);
+          throw err;
+        })
+      );
   }
 }

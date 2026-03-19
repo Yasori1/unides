@@ -55,17 +55,25 @@ export class EmailVerificationConfirmComponent implements OnInit, OnDestroy {
 
   /** Token'ı önce fragment (#token=...), sonra query (?token=), sonra route param'dan al */
   private getTokenFromRoute(): string {
-    const fragment = this.route.snapshot.fragment;
-    if (fragment) {
-      const params = new URLSearchParams(fragment);
-      const fromHash = params.get('token');
+    if (typeof window === 'undefined') return '';
+
+    // 1) location.hash: "#token=..." (ve gateway'in ekleyebileceği "#?token=..." varyantı)
+    const rawHash = window.location.hash || '';
+    const hashWithoutSharp = rawHash.startsWith('#') ? rawHash.substring(1) : rawHash;
+    const hashClean = hashWithoutSharp.startsWith('?') ? hashWithoutSharp.substring(1) : hashWithoutSharp;
+    if (hashClean) {
+      const hashParams = new URLSearchParams(hashClean);
+      const fromHash = hashParams.get('token');
       if (fromHash) return fromHash;
     }
-    return (
-      this.route.snapshot.queryParams['token'] ||
-      this.route.snapshot.params['token'] ||
-      ''
-    );
+
+    // 2) location.search: "?token=..."
+    const searchParams = new URLSearchParams(window.location.search || '');
+    const fromSearch = searchParams.get('token');
+    if (fromSearch) return fromSearch;
+
+    // 3) Son çare olarak route query/params
+    return this.route.snapshot.queryParams['token'] || this.route.snapshot.params['token'] || '';
   }
 
   ngOnDestroy(): void {

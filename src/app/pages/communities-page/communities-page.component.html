@@ -101,7 +101,14 @@
               <img [src]="item.logo" [alt]="item.name" class="logo-img" (error)="onImageError($event, 'logo')" />
             </div>
             <div class="title-wrapper">
-              <h3 class="community-name">{{ item.name }}</h3>
+              <h3
+                class="community-name"
+                [class.is-marquee]="isCommunityNameMarquee(item.id)"
+                [style.--marquee-shift.px]="getCommunityNameMarqueeShift(item.id)"
+                [style.--marquee-duration.s]="getCommunityNameMarqueeDuration(item.id)"
+              >
+                <span #communityNameEl [attr.data-community-id]="item.id">{{ item.name }}</span>
+              </h3>
             </div>
           </div>
 
@@ -158,11 +165,14 @@
     </div>
 
     <div class="pagination-area" *ngIf="!isLoading && totalPages > 1">
+      <button class="page-btn first" [disabled]="currentPage === 1" (click)="changePage(1)">
+        <i class="bx bx-chevrons-left"></i>
+      </button>
       <button class="page-btn prev" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">
         <i class="bx bx-chevron-left"></i>
       </button>
 
-      <ng-container *ngFor="let page of pages">
+      <ng-container *ngFor="let page of getVisiblePages()">
         <button class="page-btn number" [class.active]="page === currentPage" (click)="changePage(page)">
           {{ page }}
         </button>
@@ -170,6 +180,9 @@
 
       <button class="page-btn next" [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)">
         <i class="bx bx-chevron-right"></i>
+      </button>
+      <button class="page-btn last" [disabled]="currentPage === totalPages" (click)="changePage(totalPages)">
+        <i class="bx bx-chevrons-right"></i>
       </button>
     </div>
   </div>

@@ -1,7 +1,19 @@
-import { Component, OnInit, Inject, PLATFORM_ID, HostListener } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  AfterViewInit,
+  OnDestroy,
+  Inject,
+  PLATFORM_ID,
+  HostListener,
+  ViewChildren,
+  QueryList,
+  ElementRef,
+} from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
 import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
 import { CommunityService, Community } from '../../services/community.services';
@@ -17,7 +29,7 @@ import { CITY_NAMES } from '../../data/cities';
   templateUrl: './communities-page.component.html',
   styleUrls: ['./communities-page.component.scss'],
 })
-export class CommunitiesPageComponent implements OnInit {
+export class CommunitiesPageComponent implements OnInit, AfterViewInit, OnDestroy {
   // Banner Animasyonu için
   heroMoveX = 0;
   heroMoveY = 0;
@@ -55,6 +67,9 @@ export class CommunitiesPageComponent implements OnInit {
   pages: number[] = [];
 
   isLoading: boolean = true;
+  private marqueeMetaById: Record<string, { shift: number; duration: number }> = {};
+  private marqueeChangesSub?: Subscription;
+  @ViewChildren('communityNameEl') communityNameEls!: QueryList<ElementRef<HTMLElement>>;
 
   constructor(
     private communityService: CommunityService,
@@ -70,6 +85,16 @@ export class CommunitiesPageComponent implements OnInit {
     } else {
       this.isLoading = false;
     }
+  }
+
+  ngAfterViewInit(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    this.marqueeChangesSub = this.communityNameEls.changes.subscribe(() => this.scheduleMarqueeMeasure());
+    this.scheduleMarqueeMeasure();
+  }
+
+  ngOnDestroy(): void {
+    this.marqueeChangesSub?.unsubscribe();
   }
 
   fetchCommunities(page?: number) {
@@ -106,6 +131,7 @@ export class CommunitiesPageComponent implements OnInit {
         this.totalCount = res.totalCount ?? res.items.length;
         this.pages = Array.from({ length: this.totalPages }, (_, i) => i + 1);
         this.isLoading = false;
+        this.scheduleMarqueeMeasure();
       },
       error: (err) => {
         Logger.error('Topluluklar yüklenirken hata oluştu:', err);
@@ -116,8 +142,14 @@ export class CommunitiesPageComponent implements OnInit {
         this.totalCount = 0;
         this.pages = [];
         this.isLoading = false;
+        this.marqueeMetaById = {};
       }
     });
+  }
+
+  @HostListener('window:resize')
+  onWindowResize() {
+    this.scheduleMarqueeMeasure();
   }
 
   /** Filtre/sıralama değişince sayfa 1 ile yeniden istek at (backend tüm filtrelemeyi yapar). */
@@ -139,6 +171,109 @@ export class CommunitiesPageComponent implements OnInit {
     if (page >= 1 && page <= this.totalPages) {
       this.fetchCommunities(page);
     }
+  }
+
+  getVisiblePages(): number[] {
+    if (this.totalPages <= 0) return [];
+    const maxVisible = 5;
+    const start = Math.max(1, Math.min(this.currentPage, this.totalPages - maxVisible + 1));
+    const end = Math.min(this.totalPages, start + maxVisible - 1);
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
+  isCommunityNameMarquee(id: string): boolean {
+    return (this.marqueeMetaById[id]?.shift || 0) > 0;
+  }
+
+  getCommunityNameMarqueeShift(id: string): number {
+    return this.marqueeMetaById[id]?.shift || 0;
+  }
+
+  getCommunityNameMarqueeDuration(id: string): number {
+    return this.marqueeMetaById[id]?.duration || 8;
+  }
+
+  private scheduleMarqueeMeasure(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    setTimeout(() => this.measureCommunityNameOverflow(), 0);
+  }
+
+  private measureCommunityNameOverflow(): void {
+    if (!isPlatformBrowser(this.platformId) || !this.communityNameEls) return;
+
+    const nextMeta: Record<string, { shift: number; duration: number }> = {};
+    this.communityNameEls.forEach((ref) => {
+      const textEl = ref.nativeElement;
+      const id = textEl.dataset['communityId'] || '';
+      if (!id) return;
+
+      const container = textEl.closest('.title-wrapper') as HTMLElement | null;
+      if (!container) return;
+
+      const textWidth = this.measureSingleLineTextWidth(textEl);
+      const visibleWidth = container.clientWidth;
+      const singleLineShift = Math.max(0, textWidth - visibleWidth);
+      const overflowsTwoLines = this.measureOverflowsTwoLines(textEl, visibleWidth);
+      const shift = overflowsTwoLines ? singleLineShift : 0;
+      // Hızı belirgin artır
+      const duration = Math.max(1.1, Math.min(3.2, 1.1 + shift / 180));
+      nextMeta[id] = { shift, duration };
+    });
+
+    this.marqueeMetaById = nextMeta;
+  }
+
+  private measureSingleLineTextWidth(textEl: HTMLElement): number {
+    const text = (textEl.textContent || '').trim();
+    if (!text) return 0;
+
+    const computed = window.getComputedStyle(textEl);
+    const probe = document.createElement('span');
+    probe.textContent = text;
+    probe.style.position = 'fixed';
+    probe.style.visibility = 'hidden';
+    probe.style.whiteSpace = 'nowrap';
+    probe.style.pointerEvents = 'none';
+    probe.style.fontFamily = computed.fontFamily;
+    probe.style.fontSize = computed.fontSize;
+    probe.style.fontWeight = computed.fontWeight;
+    probe.style.letterSpacing = computed.letterSpacing;
+    probe.style.textTransform = computed.textTransform;
+    document.body.appendChild(probe);
+    const width = probe.getBoundingClientRect().width;
+    probe.remove();
+    return width;
+  }
+
+  private measureOverflowsTwoLines(textEl: HTMLElement, widthPx: number): boolean {
+    const text = (textEl.textContent || '').trim();
+    if (!text || widthPx <= 0) return false;
+
+    const computed = window.getComputedStyle(textEl);
+    const probe = document.createElement('span');
+    probe.textContent = text;
+    probe.style.position = 'fixed';
+    probe.style.visibility = 'hidden';
+    probe.style.pointerEvents = 'none';
+    probe.style.whiteSpace = 'normal';
+    probe.style.width = `${widthPx}px`;
+    probe.style.fontFamily = computed.fontFamily;
+    probe.style.fontSize = computed.fontSize;
+    probe.style.fontWeight = computed.fontWeight;
+    probe.style.letterSpacing = computed.letterSpacing;
+    probe.style.lineHeight = computed.lineHeight;
+    probe.style.textTransform = computed.textTransform;
+    probe.style.wordBreak = 'break-word';
+    probe.style.overflowWrap = 'break-word';
+    document.body.appendChild(probe);
+
+    const probeHeight = probe.getBoundingClientRect().height;
+    probe.remove();
+
+    const parsedLineHeight = parseFloat(computed.lineHeight);
+    const lineHeight = Number.isFinite(parsedLineHeight) ? parsedLineHeight : parseFloat(computed.fontSize) * 1.3;
+    const twoLineHeight = lineHeight * 2;
+    return probeHeight > twoLineHeight + 1;
   }
 
   navigateToDetail(id: string) {
