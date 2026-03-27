@@ -1007,7 +1007,7 @@
             </select>
           </div>
         </div>
-        <div class="modal-actions">
+        <div class="modal-actions modal-actions--gsb">
           <button type="button" class="btn-secondary" (click)="closeGsbUserModal()">İptal</button>
           <button type="button" class="btn-primary" (click)="saveCreateGsbUser()">Oluştur</button>
         </div>
@@ -1038,7 +1038,7 @@
             </label>
           </div>
         </div>
-        <div class="modal-actions">
+        <div class="modal-actions modal-actions--gsb">
           <button type="button" class="btn-secondary" (click)="closeGsbUserModal()">İptal</button>
           <button type="button" class="btn-primary" (click)="saveEditGsbUser()">Kaydet</button>
         </div>
@@ -1047,7 +1047,7 @@
       <!-- GSB: Silme onay -->
       <div class="modal-body" *ngIf="modalType === 'gsb-delete-user' && deleteGsbUserTarget">
         <p><strong>{{ deleteGsbUserTarget.fullName }}</strong> ({{ deleteGsbUserTarget.email }}) kullanıcısını silmek istediğinize emin misiniz?</p>
-        <div class="modal-actions">
+        <div class="modal-actions modal-actions--gsb">
           <button type="button" class="btn-secondary" (click)="closeGsbUserModal()">İptal</button>
           <button type="button" class="btn-danger" (click)="deleteGsbUser()">Sil</button>
         </div>
@@ -1950,11 +1950,19 @@
             class="update-approval-actions"
             *ngIf="editingCommunity.status === 'Onay Bekleyen' && editingCommunity.hasEverBeenApproved === true"
           >
-            <button type="button" class="btn-danger" (click)="openRejectCommunityModal(editingCommunity)">
+            <button
+              type="button"
+              class="btn-primary update-approval-btn update-approval-btn--reject"
+              (click)="openRejectCommunityModal(editingCommunity)"
+            >
               <span class="material-symbols-outlined">cancel</span>
               Güncellemeyi Reddet
             </button>
-            <button type="button" class="btn-primary" (click)="openApproveCommunityModal(editingCommunity)">
+            <button
+              type="button"
+              class="btn-primary update-approval-btn update-approval-btn--approve"
+              (click)="openApproveCommunityModal(editingCommunity)"
+            >
               <span class="material-symbols-outlined">check_circle</span>
               Güncellemeyi Kabul Et
             </button>

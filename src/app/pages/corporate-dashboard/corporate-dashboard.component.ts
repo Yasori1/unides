@@ -1149,6 +1149,23 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
 
   openApproveCommunityModal(community: Community): void {
     this.communityToApprove = community;
+    // Detay pop-up (edit-community) açıksa onayı üst katmanda aç, ana pop-up'ı kapatma
+    if (
+      this.isModalOpen &&
+      this.modalType === 'edit-community'
+    ) {
+      const isUpdate = community.hasEverBeenApproved === true;
+      const name = (community.name || '').trim();
+      this.openConfirmModal(
+        isUpdate
+          ? `"${name}" topluluğunun profil güncellemesini onaylamak istediğinize emin misiniz? Onaylandıktan sonra talep edilen değişiklikler yayına alınacaktır.`
+          : `"${name}" topluluğunu onaylamak istediğinize emin misiniz? Onaylandıktan sonra topluluk listede görünecek ve topluluk başkanı panele erişebilecektir.`,
+        () => this.confirmApproveCommunity(),
+      );
+      return;
+    }
+
+    // Liste veya farklı akış: tek modal olarak aç
     this.modalType = 'approveCommunity';
     this.isModalOpen = true;
   }
@@ -3020,6 +3037,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       'edit-announcement',
       'gsb-create-user',
       'gsb-edit-user',
+      'gsb-delete-user',
     ];
     return preventCloseTypes.includes(this.modalType);
   }
@@ -3074,6 +3092,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     this.deleteGsbUserTarget = null;
     this.isSavingCommunity = false;
   }
+
 
   onNewCommunityUniversityShortInput(value: string): void {
     this.newCommunityUniversityShortInput = value ? value.toLocaleUpperCase('tr-TR') : '';

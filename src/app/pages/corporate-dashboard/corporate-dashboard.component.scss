@@ -2425,6 +2425,27 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
   }
 }
 
+/* Güncelleme Onayı (Onay Bekleyen - Güncelleme) alt butonlar: her ekranda sağ altta yan yana */
+.modal-content .community-detail-actions .update-approval-actions {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  gap: 16px !important;
+  width: auto !important;
+}
+
+.modal-content .community-detail-actions .update-approval-actions .update-approval-btn {
+  width: auto !important;
+  min-width: 180px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  white-space: nowrap;
+}
+
+
 // ================= SETTINGS =================
 .settings-layout {
   display: grid;
@@ -2829,6 +2850,9 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
     border-top: 1px solid #e5e7eb;
     background: #fff;
     box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.06);
+    display: flex;
+    justify-content: flex-end; /* sağ alt köşe */
+    align-items: center;
 
     & > .modal-actions,
     & > .update-approval-actions {
@@ -3708,85 +3732,69 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
 
   .update-approval-actions {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 16px;
     justify-content: flex-end;
     align-items: center;
+    width: fit-content; /* sağ altta butonlar kadar yer kaplasın */
+    max-width: 100%;
+    margin-left: auto; /* pop-up içinde sağa yasla */
     margin-top: 24px;
     padding-top: 24px;
     border-top: 1px solid #e2e8f0;
 
-    .btn-danger,
-    .btn-primary {
+    .update-approval-btn {
+      flex: 0 0 auto;
       min-width: 180px;
-      padding: 14px 24px;
-      border-radius: 12px;
-      font-size: 0.95rem;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 14px;
       font-weight: 600;
-      letter-spacing: 0.02em;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
-      transition: all 0.2s ease;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+      box-shadow: none;
 
       .material-symbols-outlined {
-        font-size: 1.35rem;
+        font-size: 20px;
       }
     }
 
-    .btn-danger {
-      background: linear-gradient(180deg, #fef2f2 0%, #fee2e2 100%);
-      color: #b91c1c;
-      border: 1px solid #fecaca;
-
-      &:hover {
-        background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
-        color: white;
-        border-color: #dc2626;
-        box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
-        transform: translateY(-2px);
-      }
-
-      &:active {
-        transform: translateY(0);
-      }
-    }
-
-    .btn-primary {
-      background: linear-gradient(180deg, #0d9488 0%, #0f766e 100%);
+    .update-approval-btn {
+      background: $primary;
       color: white;
       border: none;
 
       &:hover {
-        background: linear-gradient(180deg, #0f766e 0%, #115e59 100%);
-        box-shadow: 0 4px 14px rgba(15, 118, 110, 0.4);
-        transform: translateY(-2px);
-      }
-
-      &:active {
-        transform: translateY(0);
+        background: $primary-hover;
       }
     }
   }
 
-  @media (max-width: 480px) {
-    .update-approval-actions {
-      flex-direction: column;
-      width: 100%;
-      gap: 12px;
-      margin-top: 20px;
-      padding-top: 20px;
+  /* Güncelleme Onayı aksiyonları: her çözünürlükte sağ altta yan yana */
+  .community-detail-actions > .update-approval-actions {
+    margin-left: 0 !important;
+    width: auto !important;
+    max-width: none !important;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: flex-end !important;
+    flex-wrap: nowrap !important;
+    gap: 16px !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    border-top: none !important;
 
-      .btn-danger,
-      .btn-primary {
-        width: 100%;
-        min-width: unset;
-        padding: 13px 20px;
-      }
+    .update-approval-btn {
+      width: auto !important; /* mobilde 100% gelip alt alta düşmesin */
+      flex: 0 0 auto !important;
+      white-space: nowrap;
     }
+  }
 
+  @media (max-width: 480px) {
     .change-values {
       flex-direction: column;
     }
@@ -4897,6 +4905,22 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
     flex-direction: column;
     gap: 10px;
     padding-top: 15px;
+  }
+
+  &.modal-actions--gsb {
+    @media (max-width: 768px) {
+      .btn-secondary {
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+      }
+
+      .btn-danger {
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+      }
+    }
   }
 
   .btn-danger {
