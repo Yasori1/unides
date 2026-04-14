@@ -405,7 +405,10 @@ export class HomeComponent implements OnInit, OnDestroy {
   loadUpcomingEventsForHome() {
     this.eventService.getUpcomingEventsForHome().subscribe({
       next: (events) => {
-        const selectedEvents: UpcomingEvent[] = events.map((e) => this.mapEventItemToUpcoming(e));
+        // Tasarım: Anasayfada en fazla 6 yaklaşan etkinlik göster
+        const selectedEvents: UpcomingEvent[] = (events || [])
+          .slice(0, 6)
+          .map((e) => this.mapEventItemToUpcoming(e));
         this.upcomingEvents = selectedEvents;
       },
       error: () => {
