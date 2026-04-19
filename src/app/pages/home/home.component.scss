@@ -609,6 +609,12 @@ $card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
     rgba(255, 255, 255, 0) 100%
   );
 
+  /* Mobil: banner/hero ile "Son Duyurular" arasında nefes alanı */
+  @media (max-width: 767px) {
+    margin-top: 0;
+    padding-top: 28px;
+  }
+
   @media (min-width: 768px) {
     margin-top: -48px;
     padding-bottom: 52px;
