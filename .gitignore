@@ -138,5 +138,4 @@ dist
 .angular/**/*
 src/app/app.routes.ts
 
-# Yerel geliştirme proxy - her geliştirici kendi portunu ayarlar, repoya gitmez
-proxy.conf.local.js
+

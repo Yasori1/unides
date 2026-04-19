@@ -4028,6 +4028,17 @@ $shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0
       box-sizing: border-box;
     }
 
+    .announcement-link-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      align-items: start;
+
+      @media (max-width: 640px) {
+        grid-template-columns: 1fr;
+      }
+    }
+
     .announcement-stats {
       display: flex;
       flex-wrap: wrap;

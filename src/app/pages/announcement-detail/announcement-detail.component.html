@@ -71,9 +71,24 @@
             <p class="short-desc">{{ announcement.shortDescription }}</p>
             <div class="full-content" [innerHTML]="formatContent(announcement.content)"></div>
 
-            <!-- External Link Button (Optional) -->
-            <div class="action-buttons" *ngIf="announcement.link">
-              <a [href]="announcement.link" target="_blank" class="external-link-btn">
+            <!-- Dış bağlantılar: başvuru + kaynak -->
+            <div class="action-buttons" *ngIf="announcement.applicationLink || announcement.link">
+              <a
+                *ngIf="announcement.applicationLink"
+                [href]="announcement.applicationLink"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="apply-link-btn"
+              >
+                Başvuru Yap <i class="bx bx-link-external"></i>
+              </a>
+              <a
+                *ngIf="announcement.link"
+                [href]="announcement.link"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="external-link-btn"
+              >
                 Kaynak/Detay <i class="bx bx-link-external"></i>
               </a>
             </div>

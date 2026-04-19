@@ -50,6 +50,7 @@ interface Announcement {
   date: string;
   image: string;
   link: string;
+  applicationLink?: string;
 }
 interface EventRequest {
   id: number;
@@ -291,6 +292,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     content: '',
     image: '',
     link: '',
+    applicationLink: '',
   };
 
   // Bekleyen görsel dosyaları - duyuru ID alındıktan sonra yüklenecek
@@ -3226,6 +3228,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         content: this.newAnnouncement.content?.trim(),
         image: '', // Görsel daha sonra yüklenecek
         link: this.newAnnouncement.link?.trim(),
+        applicationLink: this.newAnnouncement.applicationLink?.trim(),
         date: new Date().toISOString(), // ISO 8601 formatında tam tarih-saat
       })
       .subscribe({
@@ -3290,6 +3293,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       content: '',
       image: '',
       link: '',
+      applicationLink: '',
     };
     this.pendingNewAnnouncementImage = null;
   }
@@ -3401,6 +3405,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         content: this.editingAnnouncement.content,
         image: this.pendingEditAnnouncementImage ? '' : this.editingAnnouncement.image, // Yeni görsel yüklenecekse boş bırak
         link: this.editingAnnouncement.link,
+        applicationLink: this.editingAnnouncement.applicationLink,
         date: dateValue, // ISO formatında veya undefined
       })
       .subscribe({

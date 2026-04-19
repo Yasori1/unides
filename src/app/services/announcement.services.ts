@@ -13,6 +13,8 @@ export interface Announcement {
   date: string;
   image: string;
   link: string;
+  /** Başvuru / harici başvuru sayfası URL’si (opsiyonel) */
+  applicationLink?: string;
 }
 
 // Backend'den gelen format (camelCase - API response)
@@ -51,6 +53,7 @@ interface CreateAnnouncementRequest {
   annDate?: string;
   description?: string;
   link?: string;
+  applicationLink?: string;
   imagePath?: string;
 }
 
@@ -61,6 +64,7 @@ interface UpdateAnnouncementRequest {
   annDate?: string;
   description?: string;
   link?: string;
+  applicationLink?: string;
   imagePath?: string;
 }
 
@@ -133,6 +137,12 @@ export class AnnouncementService {
     // Image ve Link alanları
     let imagePath = dto.imagePath || dto.ImagePath || '';
     let link = dto.link || dto.Link || '';
+    let applicationLink =
+      dto.applicationLink ||
+      dto.ApplicationLink ||
+      dto.basvuruLink ||
+      dto.BasvuruLink ||
+      '';
 
     // "string" placeholder değerlerini filtrele
     if (imagePath.toLowerCase().trim() === 'string') {
@@ -140,6 +150,9 @@ export class AnnouncementService {
     }
     if (link.toLowerCase().trim() === 'string') {
       link = '';
+    }
+    if (typeof applicationLink === 'string' && applicationLink.toLowerCase().trim() === 'string') {
+      applicationLink = '';
     }
 
     // Görsel path'i /ImagesUnides/ formatına çevir — link bağlamada sadece path kullanılıyor
@@ -175,6 +188,7 @@ export class AnnouncementService {
       date: dateValue,
       image: imagePath,
       link: link,
+      applicationLink: applicationLink || undefined,
     };
   }
 
@@ -256,6 +270,7 @@ export class AnnouncementService {
     date?: string;
     image?: string;
     link?: string;
+    applicationLink?: string;
   }): Observable<number> {
     // Swagger'a göre camelCase formatında gönderilmeli
     const request: CreateAnnouncementRequest = {
@@ -269,6 +284,9 @@ export class AnnouncementService {
         ? new Date(announcement.date).toISOString()
         : new Date().toISOString(), // Eğer tarih verilmemişse şu anki tarihi kullan
     };
+    if (announcement.applicationLink?.trim()) {
+      request.applicationLink = announcement.applicationLink.trim();
+    }
 
     // Backend ActionResult<int> dönüyor, JSON olarak number gelir
     // Swagger'a göre camelCase formatında gönderilmeli
@@ -292,6 +310,7 @@ export class AnnouncementService {
       date?: string;
       image?: string;
       link?: string;
+      applicationLink?: string;
     }
   ): Observable<void> {
     // DEBUG: Gelen veriyi kontrol et
@@ -327,6 +346,9 @@ export class AnnouncementService {
     }
     if (announcement.link?.trim()) {
       request.link = announcement.link.trim();
+    }
+    if (announcement.applicationLink !== undefined) {
+      request.applicationLink = announcement.applicationLink.trim();
     }
     if (announcement.image?.trim()) {
       request.imagePath = announcement.image.trim();

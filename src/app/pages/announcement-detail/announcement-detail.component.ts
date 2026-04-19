@@ -10,6 +10,7 @@ import { Logger } from '../../utils/logger.util';
 interface ExtendedAnnouncement extends Omit<Announcement, 'link'> {
   category?: 'Genel' | 'Bakanlık';
   link?: string;
+  applicationLink?: string;
 }
 
 @Component({
@@ -120,7 +121,8 @@ export class AnnouncementDetailComponent implements OnInit {
           this.announcement = {
             ...data,
             category: 'Genel', // Servisten gelenlere varsayılan kategori
-            link: data.link || ''
+            link: data.link || '',
+            applicationLink: data.applicationLink || '',
           };
           this.loadRecentAnnouncements(id);
           this.isLoading = false;

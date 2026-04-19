@@ -421,6 +421,29 @@ $ministry-color: #1e3a8a;
 
     .action-buttons {
       margin-top: 40px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+
+      .apply-link-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: #0d9488;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s;
+
+        &:hover {
+          background: color.adjust(#0d9488, $lightness: -5%);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(13, 148, 136, 0.35);
+        }
+      }
 
       .external-link-btn {
         display: inline-flex;

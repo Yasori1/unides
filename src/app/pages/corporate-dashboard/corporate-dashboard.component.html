@@ -1096,23 +1096,34 @@
                 ></textarea>
               </div>
               <div class="form-group">
-                <label>Detaylı İçerik (Maks. 2000)</label>
+                <label>Detaylı İçerik (Maks. 5000)</label>
                 <textarea
                   [(ngModel)]="newAnnouncement.content"
                   class="modern-input"
                   rows="5"
                   placeholder="Duyurunun tam metnini buraya yazın..."
-                  maxlength="2000"
+                  maxlength="5000"
                 ></textarea>
               </div>
-              <div class="form-group">
-                <label>Duyuru Linki (Opsiyonel)</label>
-                <input
-                  type="url"
-                  [(ngModel)]="newAnnouncement.link"
-                  class="modern-input"
-                  placeholder="https://..."
-                />
+              <div class="announcement-link-row">
+                <div class="form-group">
+                  <label>Duyuru Linki (Opsiyonel)</label>
+                  <input
+                    type="url"
+                    [(ngModel)]="newAnnouncement.link"
+                    class="modern-input"
+                    placeholder="https://..."
+                  />
+                </div>
+                <div class="form-group">
+                  <label>Başvuru Linki (Opsiyonel)</label>
+                  <input
+                    type="url"
+                    [(ngModel)]="newAnnouncement.applicationLink"
+                    class="modern-input"
+                    placeholder="Başvuru sayfası URL’si..."
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -1183,25 +1194,37 @@
                 ></textarea>
               </div>
               <div class="form-group">
-                <label>Detaylı İçerik (Maks. 2000)</label>
+                <label>Detaylı İçerik (Maks. 5000)</label>
                 <textarea
                   [(ngModel)]="editingAnnouncement.content"
                   class="modern-input"
                   [readonly]="!canManageAnnouncements"
                   rows="5"
                   placeholder="Duyurunun tam metnini buraya yazın..."
-                  maxlength="2000"
+                  maxlength="5000"
                 ></textarea>
               </div>
-              <div class="form-group">
-                <label>Duyuru Linki (Opsiyonel)</label>
-                <input
-                  type="url"
-                  [(ngModel)]="editingAnnouncement.link"
-                  class="modern-input"
-                  [readonly]="!canManageAnnouncements"
-                  placeholder="https://..."
-                />
+              <div class="announcement-link-row">
+                <div class="form-group">
+                  <label>Duyuru Linki (Opsiyonel)</label>
+                  <input
+                    type="url"
+                    [(ngModel)]="editingAnnouncement.link"
+                    class="modern-input"
+                    [readonly]="!canManageAnnouncements"
+                    placeholder="https://..."
+                  />
+                </div>
+                <div class="form-group">
+                  <label>Başvuru Linki (Opsiyonel)</label>
+                  <input
+                    type="url"
+                    [(ngModel)]="editingAnnouncement.applicationLink"
+                    class="modern-input"
+                    [readonly]="!canManageAnnouncements"
+                    placeholder="Başvuru sayfası URL’si..."
+                  />
+                </div>
               </div>
             </div>
             <div class="form-section">
