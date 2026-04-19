@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, HostListener, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { NgxEditorModule, Editor, Toolbar } from 'ngx-editor';
 import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ImageUploadComponent } from '../../components/ui/image-upload/image-upload';
@@ -26,6 +27,7 @@ import {
 import { Logger } from '../../utils/logger.util';
 import { toTitleCase } from '../../utils/title-case.util';
 import { TurkishUppercasePipe } from '../../pipes/turkish-uppercase.pipe';
+import { ReminderPopupAdminComponent } from '../../components/reminder-popup-admin/reminder-popup-admin.component';
 import { CITY_NAMES } from '../../data/cities';
 import { getUniversitiesByCity } from '../../data/universities';
 
@@ -91,10 +93,13 @@ interface Notification {
   imports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule,
+    NgxEditorModule,
     ToastComponent,
     ImageUploadComponent,
     LumaSpinComponent,
     TurkishUppercasePipe,
+    ReminderPopupAdminComponent,
   ],
   templateUrl: './corporate-dashboard.component.html',
   styleUrls: ['./corporate-dashboard.component.scss'],
@@ -261,6 +266,8 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   announcementPage = 1;
   announcementPageSize = 12;
   announcementTotalPages = 0;
+  /** Backend toplam kayıt (tüm sayfalar); liste başlığında kullanılır */
+  announcementTotalCount = 0;
   announcementPages: number[] = [];
 
   // GSB Yetkilileri (sadece GODMODE)
@@ -276,6 +283,8 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   gsbStatusFilter: 'all' | 'active' | 'passive' = 'all';
   isLoadingGsbUsers = false;
   isExportingGsbUsersExcel = false;
+  isExportingCommunitiesExcel = false;
+  isExportingEventsExcel = false;
   /** Community güncelleme: aynı anda birden fazla istek atılmasını engeller */
   isSavingCommunity = false;
   /** GSB kullanıcıları en az bir kez yüklendiyse true; arama sırasında büyük spinner'ı gizlemek için kullanılır */
@@ -298,6 +307,22 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   // Bekleyen görsel dosyaları - duyuru ID alındıktan sonra yüklenecek
   pendingNewAnnouncementImage: File | null = null;
   pendingEditAnnouncementImage: File | null = null;
+
+  /** Detaylı içerik — ngx-editor (Duyuru Ekle / Güncelle) */
+  announcementContentEditorNew: Editor | null = null;
+  announcementContentEditorEdit: Editor | null = null;
+  announcementToolbar: Toolbar = [
+    ['bold', 'italic'],
+    ['underline', 'strike'],
+    ['code', 'blockquote'],
+    ['ordered_list', 'bullet_list'],
+    [{ heading: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] }],
+    ['link'],
+    ['text_color', 'background_color'],
+    ['align_left', 'align_center', 'align_right', 'align_justify'],
+  ];
+  announcementContentNewFc = new FormControl<string>('', { nonNullable: true });
+  announcementContentEditFc = new FormControl<string>('', { nonNullable: true });
 
   // Bekleyen görsel dosyaları - etkinlik ID alındıktan sonra yüklenecek
   pendingNewEventImage: File | null = null;
@@ -353,6 +378,9 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     // AFK Detection'ı başlat
     this.afkDetectionService.start();
 
+    this.announcementContentEditorNew = new Editor();
+    this.announcementContentEditorEdit = new Editor();
+
     // Query parametrelerini kontrol et
     const urlParams = new URLSearchParams(window.location.search);
     const tabParam = urlParams.get('tab');
@@ -364,7 +392,13 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       this.statusFilter = '';
     }
 
-    if (tabParam) {
+    if (tabParam === 'reminder-popup' && !this.authService.isGodMode()) {
+      this.router.navigate([], {
+        queryParams: { tab: 'overview' },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
+    } else if (tabParam) {
       this.switchTab(tabParam);
     }
     // Overview için loading state (sekmelere tıklandıkça ilgili veri yüklenecek)
@@ -544,6 +578,88 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     return n(communityCity.trim()) === n(userCity.trim());
   }
 
+  /**
+   * Topluluk listesi API parametreleri (GET /api/Communities) — ekrandaki filtrelerle aynı.
+   */
+  private buildCommunitiesListApiParams(statusFilter?: string) {
+    const sf = statusFilter !== undefined ? statusFilter : this.statusFilter;
+    let backendStatus: 'all' | 'active' | 'passive' | 'pending' | 'rejected' | 'deleted' = 'all';
+    let backendCity: string | undefined = this.getUserCity();
+
+    if (sf === 'Aktif') {
+      backendStatus = 'active';
+    } else if (sf === 'Onay Bekleyen') {
+      backendStatus = 'pending';
+    } else if (sf === 'Pasif') {
+      backendStatus = 'passive';
+    } else if (sf === 'Reddedilen') {
+      backendStatus = 'rejected';
+    } else if (sf === 'Silinmiş') {
+      backendStatus = 'deleted';
+    } else if (!sf || sf === '') {
+      backendStatus = 'all';
+      if (this.isBartinUser()) backendCity = 'Bartın';
+    }
+
+    const apiParams: {
+      status: typeof backendStatus;
+      city?: string;
+      name?: string;
+      category?: string;
+      university?: string;
+    } = { status: backendStatus };
+    if (backendCity) apiParams.city = backendCity;
+    if (this.cityFilter?.trim()) apiParams.city = this.cityFilter.trim();
+    if (this.searchText?.trim()) apiParams.name = this.searchText.trim();
+    return apiParams;
+  }
+
+  /** Ham API satırlarını Community modeline map eder (liste + Excel). */
+  private mapRawCommunitiesFromApi(data: any[]): Community[] {
+    return (data || []).map((c) => {
+      const { website, webSiteUrl, instagram, instagramUrl, socialMedia, ...rest } = c;
+      const isActivity = c.isActivity !== undefined ? c.isActivity : true;
+      const deletedAt = c.deletedAt ?? (c as any).DeletedAt ?? rest.deletedAt ?? null;
+      const isDeleted = deletedAt != null && String(deletedAt).trim() !== '';
+      const coverUrl =
+        (c.coverImage && String(c.coverImage).trim()) || (c.banner && String(c.banner).trim())
+          ? c.coverImage || c.banner
+          : '';
+      const logoUrl = c.logo && String(c.logo).trim() ? c.logo : '';
+      const status: Community['status'] = isDeleted
+        ? 'Silinmiş'
+        : (c.status ?? (isActivity ? 'Aktif' : 'Pasif'));
+      const placeholders = {
+        cover: 'assets/img/placeholder-cover.svg',
+        logo: 'assets/img/placeholder-logo.svg',
+      };
+      return {
+        ...rest,
+        about: c.description || c.about || '',
+        banner: coverUrl || placeholders.cover,
+        coverImage: coverUrl || placeholders.cover,
+        logo: logoUrl || placeholders.logo,
+        description: c.description || c.about || '',
+        city: c.city || '',
+        category: c.category || 'Genel',
+        email: c.email || c.comMail || '',
+        comMail: c.comMail || c.email || '',
+        miniAbout: c.miniAbout || '',
+        shortDescription: c.miniAbout || (c as any).shortDescription || '',
+        status,
+        deletedAt: isDeleted ? deletedAt : undefined,
+        isActivity: isActivity,
+        website: undefined,
+        webSiteUrl: undefined,
+        instagram: undefined,
+        instagramUrl: undefined,
+        socialMedia: undefined,
+        hasEverBeenApproved: (c as any).hasEverBeenApproved ?? rest.hasEverBeenApproved,
+        pendingUpdateData: (c as any).pendingUpdateData ?? rest.pendingUpdateData,
+      } as Community;
+    });
+  }
+
   loadCommunitiesFromService(statusFilter?: string, page?: number) {
     if (!isPlatformBrowser(this.platformId)) {
       return;
@@ -559,87 +675,12 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     this.totalPages = 0;
     this.communitiesTotalCount = 0;
 
-    // Backend GET /api/Communities: status = active | passive | pending | rejected | deleted | all
-    let backendStatus: 'all' | 'active' | 'passive' | 'pending' | 'rejected' | 'deleted' = 'all';
-    let backendCity: string | undefined = this.getUserCity();
-
-    if (statusFilter === 'Aktif') {
-      backendStatus = 'active';
-    } else if (statusFilter === 'Onay Bekleyen') {
-      backendStatus = 'pending';
-    } else if (statusFilter === 'Pasif') {
-      backendStatus = 'passive';
-    } else if (statusFilter === 'Reddedilen') {
-      backendStatus = 'rejected';
-    } else if (statusFilter === 'Silinmiş') {
-      backendStatus = 'deleted';
-    } else if (!statusFilter || statusFilter === '') {
-      backendStatus = 'all';
-      if (this.isBartinUser()) backendCity = 'Bartın';
-    }
-
-    const mapApiDataToCommunities = (data: any[]) => {
-      return (data || []).map((c) => {
-        const { website, webSiteUrl, instagram, instagramUrl, socialMedia, ...rest } = c;
-        const isActivity = c.isActivity !== undefined ? c.isActivity : true;
-        const deletedAt = c.deletedAt ?? (c as any).DeletedAt ?? rest.deletedAt ?? null;
-        const isDeleted = deletedAt != null && String(deletedAt).trim() !== '';
-        const coverUrl =
-          (c.coverImage && String(c.coverImage).trim()) || (c.banner && String(c.banner).trim())
-            ? c.coverImage || c.banner
-            : '';
-        const logoUrl = c.logo && String(c.logo).trim() ? c.logo : '';
-        const status: Community['status'] = isDeleted
-          ? 'Silinmiş'
-          : (c.status ?? (isActivity ? 'Aktif' : 'Pasif'));
-        const placeholders = {
-          cover: 'assets/img/placeholder-cover.svg',
-          logo: 'assets/img/placeholder-logo.svg',
-        };
-        return {
-          ...rest,
-          about: c.description || c.about || '',
-          banner: coverUrl || placeholders.cover,
-          coverImage: coverUrl || placeholders.cover,
-          logo: logoUrl || placeholders.logo,
-          description: c.description || c.about || '',
-          city: c.city || '',
-          category: c.category || 'Genel',
-          email: c.email || c.comMail || '',
-          comMail: c.comMail || c.email || '',
-          miniAbout: c.miniAbout || '',
-          shortDescription: c.miniAbout || (c as any).shortDescription || '',
-          status,
-          deletedAt: isDeleted ? deletedAt : undefined,
-          isActivity: isActivity,
-          website: undefined,
-          webSiteUrl: undefined,
-          instagram: undefined,
-          instagramUrl: undefined,
-          socialMedia: undefined,
-          // Onay Bekleyen (Güncelleme) kartında "güncellenecek" verilerin gösterilmesi için zorunlu
-          hasEverBeenApproved: (c as any).hasEverBeenApproved ?? rest.hasEverBeenApproved,
-          pendingUpdateData: (c as any).pendingUpdateData ?? rest.pendingUpdateData,
-        } as Community;
-      });
-    };
-
-    // Anasayfa topluluk sayfası ile aynı parametreler: name, city, category, university (backend'de filtreleme)
-    const apiParams: {
-      status: typeof backendStatus;
-      city?: string;
-      name?: string;
-      category?: string;
-      university?: string;
-    } = { status: backendStatus };
-    if (backendCity) apiParams.city = backendCity;
-    if (this.cityFilter?.trim()) apiParams.city = this.cityFilter.trim();
-    if (this.searchText?.trim()) apiParams.name = this.searchText.trim();
+    const apiParams = this.buildCommunitiesListApiParams(statusFilter);
     const requestedPage = page ?? this.currentPage ?? 1;
 
     this.communityService.getCommunitiesPage(requestedPage, this.itemsPerPage, apiParams).subscribe({
       next: (res) => {
-        const mapped = mapApiDataToCommunities(res.items || []);
+        const mapped = this.mapRawCommunitiesFromApi(res.items || []);
         const updatePending = mapped.filter((c) => (c as any).comConfirm === 4);
         const pagination = { totalPages: res.totalPages, page: res.page };
         this.communitiesTotalCount = res.totalCount ?? mapped.length;
@@ -2065,6 +2106,9 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     this.isSidebarCollapsed = !this.isSidebarCollapsed;
   }
   switchTab(tab: string) {
+    if (tab === 'reminder-popup' && !this.isGodMode) {
+      tab = 'overview';
+    }
     this.activeTab = tab;
     if (window.innerWidth < 768) {
       this.isSidebarCollapsed = false;
@@ -2084,6 +2128,8 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       this.loadAnnouncementsFromService();
     } else if (tab === 'gsb-users') {
       this.loadGsbUsers();
+    } else if (tab === 'reminder-popup') {
+      /* Liste app-reminder-popup-admin içinde yüklenir */
     }
   }
   toggleNotifications(event?: MouseEvent) {
@@ -3026,6 +3072,9 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   openModal(type: string) {
     this.modalType = type;
     this.isModalOpen = true;
+    if (type === 'new-announcement') {
+      this.syncNewAnnouncementContentEditor();
+    }
   }
 
   // Belirli modal tipleri için backdrop click ve ESC tuşu ile kapanmayı engelle
@@ -3072,6 +3121,12 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   }
 
   closeModal() {
+    if (this.modalType === 'new-announcement') {
+      this.newAnnouncement.content = (this.announcementContentNewFc.value || '').trim();
+    } else if (this.modalType === 'edit-announcement' && this.editingAnnouncement) {
+      this.editingAnnouncement.content = (this.announcementContentEditFc.value || '').trim();
+    }
+
     this.isModalOpen = false;
     this.modalType = '';
     this.selectedEvent = null;
@@ -3181,6 +3236,55 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     );
   }
 
+  /** Düz metni veya HTML'i ngx-editor ile uyumlu HTML'e çevirir (duyuru detay sayfasıyla aynı mantık). */
+  private toAnnouncementEditorHtml(content: string | undefined | null): string {
+    const c = (content ?? '').trim();
+    if (!c) return '';
+    if (c.includes('<') && c.includes('>')) {
+      return c;
+    }
+    const escaped = c
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+    const paragraphs = escaped.split(/\n\n+/);
+    const formatted = paragraphs
+      .map((para) => {
+        const withBreaks = para.replace(/\n/g, '<br>');
+        if (withBreaks.trim() === '') return '';
+        return `<p>${withBreaks.trim()}</p>`;
+      })
+      .filter((p) => p !== '')
+      .join('');
+    return formatted || `<p>${escaped}</p>`;
+  }
+
+  private syncNewAnnouncementContentEditor(): void {
+    if (!isPlatformBrowser(this.platformId) || !this.announcementContentEditorNew) {
+      return;
+    }
+    this.announcementContentNewFc.setValue(this.toAnnouncementEditorHtml(this.newAnnouncement.content), {
+      emitEvent: false,
+    });
+  }
+
+  private syncEditAnnouncementContentEditor(): void {
+    if (!isPlatformBrowser(this.platformId) || !this.announcementContentEditorEdit || !this.editingAnnouncement) {
+      return;
+    }
+    this.announcementContentEditFc.setValue(this.toAnnouncementEditorHtml(this.editingAnnouncement.content), {
+      emitEvent: false,
+    });
+  }
+
+  private applyAnnouncementEditContentReadonly(): void {
+    if (this.canManageAnnouncements) {
+      this.announcementContentEditFc.enable();
+    } else {
+      this.announcementContentEditFc.disable();
+    }
+  }
+
   // Duyuru detay ve güncelleme
   openAnnouncementDetail(announcement: Announcement) {
     this.selectedAnnouncement = announcement;
@@ -3188,6 +3292,8 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     this.editingAnnouncement = { ...announcement };
     this.modalType = 'edit-announcement';
     this.isModalOpen = true;
+    this.applyAnnouncementEditContentReadonly();
+    this.syncEditAnnouncementContentEditor();
 
     // Backend'den detay bilgisini çek (link bilgisi dahil tüm detaylar için)
     if (announcement.id) {
@@ -3196,6 +3302,8 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
           if (detailedAnnouncement) {
             // Backend'den gelen detaylı bilgileri kullan
             this.editingAnnouncement = { ...detailedAnnouncement };
+            this.syncEditAnnouncementContentEditor();
+            this.applyAnnouncementEditContentReadonly();
           }
         },
         error: (err) => {
@@ -3207,6 +3315,13 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   }
 
   saveAnnouncement() {
+    const detailContent = (this.announcementContentNewFc.value || '').trim();
+    if (detailContent.length > 5000) {
+      this.showToast('Detaylı içerik en fazla 5000 karakter olabilir.', 'error');
+      return;
+    }
+    this.newAnnouncement.content = detailContent;
+
     // Validasyon
     if (!this.newAnnouncement.title || !this.newAnnouncement.title.trim()) {
       this.showToast('Lütfen duyuru başlığını giriniz', 'error');
@@ -3296,6 +3411,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       applicationLink: '',
     };
     this.pendingNewAnnouncementImage = null;
+    this.announcementContentNewFc.setValue('', { emitEvent: false });
   }
 
   // Duyuruları API'den sayfa bazlı yükle
@@ -3311,6 +3427,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         this.announcements = res.items;
         this.filteredAnnouncements = [...res.items];
         this.applyAnnouncementFilters();
+        this.announcementTotalCount = res.totalCount ?? res.items?.length ?? 0;
         this.announcementTotalPages = res.totalPages;
         this.announcementPage = res.page;
         this.announcementPages = Array.from({ length: this.announcementTotalPages }, (_, i) => i + 1);
@@ -3319,6 +3436,7 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       error: () => {
         this.announcements = [];
         this.filteredAnnouncements = [];
+        this.announcementTotalCount = 0;
         this.announcementTotalPages = 0;
         this.announcementPage = 1;
         this.announcementPages = [];
@@ -3359,6 +3477,13 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
       this.showToast('Duyuru bilgisi bulunamadı', 'error');
       return;
     }
+
+    const detailContent = (this.announcementContentEditFc.value || '').trim();
+    if (detailContent.length > 5000) {
+      this.showToast('Detaylı içerik en fazla 5000 karakter olabilir.', 'error');
+      return;
+    }
+    this.editingAnnouncement.content = detailContent;
 
     // Validasyon
     if (!this.editingAnnouncement.title || !this.editingAnnouncement.title.trim()) {
@@ -3609,6 +3734,8 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
         return 'Profilim';
       case 'gsb-users':
         return 'GSB Yetkilileri';
+      case 'reminder-popup':
+        return 'Hatırlatıcı Pop-Up';
       default:
         return '';
     }
@@ -3682,6 +3809,217 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'GSB Yetkilileri');
     XLSX.writeFile(wb, 'gsb_yetkilileri.xlsx');
+  }
+
+  downloadCommunitiesExcel() {
+    if (!isPlatformBrowser(this.platformId) || !this.isGodMode) return;
+    if (this.isExportingCommunitiesExcel) return;
+    this.isExportingCommunitiesExcel = true;
+
+    const apiParams = this.buildCommunitiesListApiParams();
+
+    // Tek istek: GET /Communities?page=1&pageSize=9999&… (sayfa sayfa döngü yok)
+    this.communityService.getAllCommunities(apiParams).subscribe({
+      next: (items) => {
+        const allRows = this.mapRawCommunitiesFromApi(items || []);
+        this.exportCommunitiesWithAutoWidth(allRows)
+          .then(() => {
+            this.isExportingCommunitiesExcel = false;
+            this.showToast('Excel çıktısı indirildi.', 'success');
+          })
+          .catch(() => {
+            this.isExportingCommunitiesExcel = false;
+            this.showToast('Excel dosyası oluşturulamadı.', 'error');
+          });
+      },
+      error: () => {
+        this.isExportingCommunitiesExcel = false;
+        this.showToast('Excel çıktısı alınamadı.', 'error');
+      },
+    });
+  }
+
+  private async exportCommunitiesWithAutoWidth(communities: Community[]): Promise<void> {
+    const XLSX = await import('xlsx');
+    const statusLabel = (s: Community['status'] | undefined) =>
+      s === 'Reddedilen' ? 'Revize' : (s ?? '');
+    const headers = [
+      'Sıra',
+      'Topluluk Adı',
+      'Şehir',
+      'Üniversite',
+      'Kategori',
+      'Durum',
+      'E-posta',
+      'Başkan E-posta',
+      'Kısa Açıklama',
+    ];
+    const rows = communities.map((c, index) => [
+      index + 1,
+      c.name || '',
+      c.city || '',
+      c.university || '',
+      c.category || '',
+      statusLabel(c.status),
+      c.email || c.comMail || '',
+      c.presidentEmail || c.comLeadMail || '',
+      (c.miniAbout || (c as Community & { shortDescription?: string }).shortDescription || '')
+        .toString()
+        .slice(0, 500),
+    ]);
+    const sheetData = [headers, ...rows];
+
+    const ws = XLSX.utils.aoa_to_sheet(sheetData);
+    const colCount = headers.length;
+    const colWidths = Array.from({ length: colCount }, (_, colIndex) => {
+      const maxLen = sheetData.reduce((max, row) => {
+        const text = String(row[colIndex] ?? '');
+        return Math.max(max, text.length);
+      }, 0);
+      return { wch: Math.min(Math.max(maxLen + 2, 10), 60) };
+    });
+    ws['!cols'] = colWidths;
+    ws['!autofilter'] = { ref: `A1:${String.fromCharCode(64 + colCount)}1` };
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Topluluklar');
+    XLSX.writeFile(wb, 'topluluklar.xlsx');
+  }
+
+  /** loadEventsFromService ile aynı eşleme (Excel dışa aktarma). */
+  private mapEventItemsToDashboardRows(items: EventItem[]): EventRequest[] {
+    return items.map((e) => {
+      const community = this.allCommunities.find((c) => String(c.id) === String(e.communityId));
+      return {
+        id: e.id,
+        communityId: e.communityId,
+        communityName: community?.name || e.communityName || '',
+        eventName: e.title,
+        date: e.startDate || '',
+        startDate: e.startDate,
+        endDate: e.endDate,
+        location: e.location || '',
+        imageUrl: e.imageUrl || '',
+        description: e.description || '',
+        shortDescription: e.shortDescription || '',
+        status: (e.status || 'Beklemede') as EventRequest['status'],
+        capacity: e.capacity || '',
+        city: e.city || community?.city || '',
+        category: (e as { category?: string }).category || community?.category || '',
+        rejectionReason: e.rejectionReason,
+      };
+    });
+  }
+
+  /** filterEvents ile aynı kurallar (yalnızca dışa aktarma). */
+  private filterEventRowsForExport(rows: EventRequest[]): EventRequest[] {
+    let temp = [...rows];
+    if (this.eventStatusFilter === 'Revize') {
+      temp = temp.filter((e) => e.status === 'Reddedildi' || e.status === 'Revize');
+    } else if (this.eventStatusFilter) {
+      temp = temp.filter((e) => e.status === this.eventStatusFilter);
+    }
+    if (this.eventSearchText.trim()) {
+      const term = this.eventSearchText.toLowerCase();
+      temp = temp.filter(
+        (e) =>
+          (e.eventName && e.eventName.toLowerCase().includes(term)) ||
+          (e.communityName && e.communityName.toLowerCase().includes(term)) ||
+          (e.description && e.description.toLowerCase().includes(term)) ||
+          (e.location && e.location.toLowerCase().includes(term)) ||
+          (e.shortDescription && e.shortDescription.toLowerCase().includes(term)),
+      );
+    }
+    if (!this.eventStatusFilter) {
+      const statusOrder = (status: string) => {
+        if (status === 'Beklemede') return 0;
+        if (status === 'Reddedildi' || status === 'Revize') return 1;
+        if (status === 'Onaylandı') return 2;
+        return 0;
+      };
+      temp.sort((a, b) => statusOrder(a.status) - statusOrder(b.status));
+    }
+    return temp;
+  }
+
+  downloadEventsExcel() {
+    if (!isPlatformBrowser(this.platformId) || !this.isGodMode) return;
+    if (this.isExportingEventsExcel) return;
+    this.isExportingEventsExcel = true;
+
+    let statusNumbers: number[] = [];
+    if (this.eventStatusFilter === 'Onaylandı') {
+      statusNumbers = [1];
+    } else if (this.eventStatusFilter === 'Beklemede') {
+      statusNumbers = [0];
+    } else if (this.eventStatusFilter === 'Reddedildi' || this.eventStatusFilter === 'Revize') {
+      statusNumbers = [2];
+    } else {
+      statusNumbers = [0, 1, 2];
+    }
+
+    this.eventService.getByStatus(statusNumbers).subscribe({
+      next: (items) => {
+        let rows = this.mapEventItemsToDashboardRows(items);
+        rows = this.filterEventRowsForExport(rows);
+        this.exportEventsWithAutoWidth(rows)
+          .then(() => {
+            this.isExportingEventsExcel = false;
+            this.showToast('Excel çıktısı indirildi.', 'success');
+          })
+          .catch(() => {
+            this.isExportingEventsExcel = false;
+            this.showToast('Excel dosyası oluşturulamadı.', 'error');
+          });
+      },
+      error: () => {
+        this.isExportingEventsExcel = false;
+        this.showToast('Excel çıktısı alınamadı.', 'error');
+      },
+    });
+  }
+
+  private async exportEventsWithAutoWidth(events: EventRequest[]): Promise<void> {
+    const XLSX = await import('xlsx');
+    const headers = [
+      'Id',
+      'Etkinlik',
+      'Topluluk',
+      'Durum',
+      'Başlangıç',
+      'Şehir',
+      'Mekan',
+      'Kontenjan',
+      'Kısa Açıklama',
+    ];
+    const rows = events.map((e, i) => [
+      i + 1,
+      e.eventName || '',
+      e.communityName || '',
+      e.status || '',
+      e.startDate || e.date || '',
+      e.city || '',
+      e.location || '',
+      e.capacity ?? '',
+      (e.shortDescription || '').toString().slice(0, 500),
+    ]);
+    const sheetData = [headers, ...rows];
+
+    const ws = XLSX.utils.aoa_to_sheet(sheetData);
+    const colCount = headers.length;
+    const colWidths = Array.from({ length: colCount }, (_, colIndex) => {
+      const maxLen = sheetData.reduce((max, row) => {
+        const text = String(row[colIndex] ?? '');
+        return Math.max(max, text.length);
+      }, 0);
+      return { wch: Math.min(Math.max(maxLen + 2, 10), 60) };
+    });
+    ws['!cols'] = colWidths;
+    ws['!autofilter'] = { ref: `A1:${String.fromCharCode(64 + colCount)}1` };
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Etkinlikler');
+    XLSX.writeFile(wb, 'etkinlikler.xlsx');
   }
 
   loadGsbUsers(page?: number) {
@@ -3888,5 +4226,9 @@ export class CorporateDashboardComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     // AFK Detection'ı durdur
     this.afkDetectionService.stop();
+    if (isPlatformBrowser(this.platformId)) {
+      this.announcementContentEditorNew?.destroy();
+      this.announcementContentEditorEdit?.destroy();
+    }
   }
 }

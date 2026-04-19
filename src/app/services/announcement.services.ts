@@ -13,7 +13,7 @@ export interface Announcement {
   date: string;
   image: string;
   link: string;
-  /** Başvuru / harici başvuru sayfası URL’si (opsiyonel) */
+  /** Başvuru / harici başvuru sayfası URL’si (opsiyonel; API null dönerse undefined olarak normalize edilir) */
   applicationLink?: string;
 }
 
@@ -42,6 +42,9 @@ interface AnnouncementDetailDto {
   Description?: string; // PascalCase fallback
   link?: string;
   Link?: string; // PascalCase fallback
+  /** Başvuru linki (nullable) */
+  applicationLink?: string | null;
+  ApplicationLink?: string | null;
   imagePath?: string;
   ImagePath?: string; // PascalCase fallback
 }
@@ -81,7 +84,8 @@ export interface AnnouncementsPageResponse {
   providedIn: 'root',
 })
 export class AnnouncementService {
-  private apiUrl = `${environment.apiUrl}/Announcements`;
+  /** Backend: GET/POST … /api/announcements/… (küçük harf segment; proxy/nginx uyumu) */
+  private apiUrl = `${environment.apiUrl}/announcements`;
 
 
 
@@ -137,12 +141,13 @@ export class AnnouncementService {
     // Image ve Link alanları
     let imagePath = dto.imagePath || dto.ImagePath || '';
     let link = dto.link || dto.Link || '';
+    const rawApplicationLink =
+      dto.applicationLink ??
+      dto.ApplicationLink ??
+      dto.basvuruLink ??
+      dto.BasvuruLink;
     let applicationLink =
-      dto.applicationLink ||
-      dto.ApplicationLink ||
-      dto.basvuruLink ||
-      dto.BasvuruLink ||
-      '';
+      typeof rawApplicationLink === 'string' ? rawApplicationLink : '';
 
     // "string" placeholder değerlerini filtrele
     if (imagePath.toLowerCase().trim() === 'string') {
@@ -188,13 +193,16 @@ export class AnnouncementService {
       date: dateValue,
       image: imagePath,
       link: link,
-      applicationLink: applicationLink || undefined,
+      applicationLink:
+        applicationLink && String(applicationLink).trim() !== ''
+          ? String(applicationLink).trim()
+          : undefined,
     };
   }
 
   /**
    * Sayfa bazlı duyuru listesi (backend pagination).
-   * GET /api/Announcements/list?page=1&pageSize=12&search=&sortOrder=
+   * GET /api/announcements/list?page=1&pageSize=12&search=&sortOrder=
    * Arama/sıralama değişince page=1 ile, sayfa değişince sadece page ile yeniden istek atın.
    */
   getAnnouncementsPage(
@@ -228,13 +236,27 @@ export class AnnouncementService {
 
   /**
    * Son duyurular (mini liste, sayfalama yok).
-   * GET /api/Announcements/latest — backend sabit 4 adet döndürür.
+   * GET /api/announcements/latest — backend en fazla 4 kayıt (ör. ana sayfa / küçük widget).
    */
   getLatestAnnouncements(): Observable<Announcement[]> {
     return this.http.get<any[]>(`${this.apiUrl}/latest`).pipe(
       map((list) => (Array.isArray(list) ? list : []).map((dto) => this.mapToAnnouncement(dto))),
       catchError((error) => {
         Logger.error('Son duyurular yüklenemedi:', error);
+        return of([]);
+      })
+    );
+  }
+
+  /**
+   * En yeni 6 duyuru (AllowAnonymous).
+   * GET /api/announcements/latest6 — liste öğesi alanları latest ile aynı şekil (annId, title, shortDescription, annDate, imagePath).
+   */
+  getLatest6Announcements(): Observable<Announcement[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/latest6`).pipe(
+      map((list) => (Array.isArray(list) ? list : []).map((dto) => this.mapToAnnouncement(dto))),
+      catchError((error) => {
+        Logger.error('Son 6 duyuru yüklenemedi:', error);
         return of([]);
       })
     );
@@ -364,7 +386,7 @@ export class AnnouncementService {
     Logger.log('title value:', request.title, '(length:', request.title.length, ')');
     Logger.log('Content-Type will be: application/json');
 
-    // PUT /api/Announcements/update/{id} - NoContent döner
+    // PUT /api/announcements/update/{id} - NoContent döner
     // Content-Type: application/json header'ını açıkça belirt (backend [FromBody] ile JSON bekliyor)
     const headers = new HttpHeaders({
       'Content-Type': 'application/json'
@@ -384,7 +406,7 @@ export class AnnouncementService {
   }
 
   deleteAnnouncement(id: number): Observable<void> {
-    // DELETE /api/Announcements/delete/{id} - NoContent döner
+    // DELETE /api/announcements/delete/{id} - NoContent döner
     // Auth interceptor automatically adds Authorization header if token exists
     return this.http.delete<void>(`${this.apiUrl}/delete/${id}`).pipe(
       catchError((error) => {

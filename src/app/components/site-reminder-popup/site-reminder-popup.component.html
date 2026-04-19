@@ -1,0 +1,36 @@
+<div
+  class="srp-backdrop"
+  *ngIf="visible && item"
+  role="dialog"
+  aria-modal="true"
+  [attr.aria-labelledby]="'srp-title'"
+>
+  <div class="srp-modal" (click)="$event.stopPropagation()">
+    <button type="button" class="srp-close" (click)="dismiss()" aria-label="Kapat">✕</button>
+    <div class="srp-image" *ngIf="imageSrc()">
+      <img [src]="imageSrc()" [alt]="item.title" loading="lazy" />
+    </div>
+    <div class="srp-body">
+      <h2 id="srp-title">{{ item.title }}</h2>
+      <p class="srp-desc" *ngIf="item.shortDescription">{{ item.shortDescription }}</p>
+      <div class="srp-actions">
+        <button
+          type="button"
+          class="srp-btn primary"
+          *ngIf="item.announcementLink"
+          (click)="openLink(item.announcementLink)"
+        >
+          Duyuruya git
+        </button>
+        <button
+          type="button"
+          class="srp-btn secondary"
+          *ngIf="item.applicationLink"
+          (click)="openLink(item.applicationLink)"
+        >
+          Başvuru
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,776 @@
+// Kurumsal panel / Duyurular sekmesi ile aynı tasarım değişkenleri
+$primary: #14d2cc;
+$primary-hover: #0fb9b4;
+$surface: #ffffff;
+$border: #e2e8f0;
+$text-main: #0f172a;
+$text-muted: #64748b;
+$danger: #ef4444;
+
+:host {
+  display: block;
+  font-family:
+    'Inter',
+    system-ui,
+    sans-serif;
+  color: $text-main;
+  font-size: 14px;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ========== Loading (duyurular ile aynı) ==========
+.loading-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  min-height: 100vh;
+
+  p {
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 500;
+    margin: 0;
+  }
+
+  app-luma-spin {
+    transform: scale(2);
+
+    ::ng-deep .spin-shape {
+      box-shadow: inset 0 0 0 2px #1e3a8a !important;
+    }
+  }
+}
+
+// ========== Sayfa başlığı + Yeni Hatırlatıcı butonu ==========
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  gap: 20px;
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .header-controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+
+    .btn-primary {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: $primary;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      flex-shrink: 0;
+      font-family: inherit;
+      font-size: inherit;
+
+      &:hover {
+        background: $primary-hover;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba($primary, 0.3);
+      }
+
+      .material-symbols-outlined {
+        font-size: 1.2rem;
+      }
+    }
+  }
+}
+
+.results-info {
+  margin-bottom: 20px;
+  color: $text-muted;
+  font-size: 0.9rem;
+
+  strong {
+    color: $text-main;
+  }
+}
+
+// ========== Kart grid (duyurular grid) ==========
+.announcements-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 25px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.announcement-card-enhanced {
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: 20px;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+    border-color: $primary;
+
+    .announcement-image img {
+      transform: scale(1.05);
+    }
+  }
+
+  .announcement-image {
+    height: 180px;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+
+    &.placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, rgba($primary, 0.1), rgba($primary, 0.05));
+      pointer-events: none;
+
+      > .material-symbols-outlined {
+        font-size: 4rem;
+        color: rgba($primary, 0.3);
+      }
+    }
+
+    .category-badge {
+      position: absolute;
+      bottom: 15px;
+      left: 15px;
+      background: #dc2626;
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  }
+
+  .announcement-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+
+    .announcement-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: $text-main;
+      margin: 0 0 10px;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .announcement-description {
+      font-size: 0.9rem;
+      color: $text-muted;
+      line-height: 1.6;
+      margin: 0 0 15px;
+      flex: 1;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .announcement-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 15px;
+
+      .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.85rem;
+        color: $text-muted;
+
+        .material-symbols-outlined {
+          font-size: 1rem;
+          color: $primary;
+        }
+      }
+    }
+
+    .announcement-footer {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      padding-top: 15px;
+      border-top: 1px solid $border;
+
+      &.announcement-footer--reminder {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+
+        .reminder-status-badge {
+          align-self: flex-start;
+          font-size: 0.75rem;
+          font-weight: 700;
+          padding: 6px 12px;
+          border-radius: 999px;
+          background: #dcfce7;
+          color: #166534;
+
+          &.is-off {
+            background: #f1f5f9;
+            color: $text-muted;
+          }
+        }
+
+        .announcement-footer-buttons {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: flex-end;
+          gap: 10px;
+          width: 100%;
+        }
+
+        .btn-detail {
+          flex: 1 1 auto;
+          min-width: 0;
+        }
+
+        .btn-reminder-delete {
+          flex: 0 0 auto;
+        }
+      }
+
+      .btn-detail {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 10px 20px;
+        background: $primary;
+        border: none;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: white;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-family: inherit;
+
+        .material-symbols-outlined {
+          font-size: 1.1rem;
+          transition: transform 0.2s;
+        }
+
+        &:hover {
+          background: $primary-hover;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba($primary, 0.3);
+
+          .material-symbols-outlined {
+            transform: translateX(3px);
+          }
+        }
+      }
+    }
+  }
+}
+
+.reminder-empty-state {
+  text-align: center;
+  padding: 48px 20px;
+  color: $text-muted;
+
+  .material-symbols-outlined {
+    font-size: 48px;
+    opacity: 0.45;
+    display: block;
+    margin-bottom: 12px;
+    color: $primary;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+}
+
+// ========== Form elemanları (duyuru modal) ==========
+.modern-input {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid $border;
+  border-radius: 10px;
+  background: #fcfcfc;
+  font-family: inherit;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+  max-width: 100%;
+  color: $text-main;
+
+  &:focus {
+    outline: none;
+    border-color: $primary;
+    background: white;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.form-group {
+  margin-bottom: 15px;
+
+  label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: $text-main;
+  }
+}
+
+.form-section {
+  margin-bottom: 25px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid $border;
+  width: 100%;
+  box-sizing: border-box;
+
+  &:last-of-type {
+    border-bottom: none;
+    margin-bottom: 15px;
+  }
+}
+
+.section-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: $text-muted;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 15px;
+}
+
+.checkbox-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  user-select: none;
+
+  input[type='checkbox'] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+  }
+}
+
+.reminder-datetime-offset {
+  margin-top: 8px;
+}
+
+// ========== Butonlar (panel) ==========
+.btn-primary {
+  background: $primary;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: 0.2s;
+  font-family: inherit;
+
+  &:hover:not(:disabled) {
+    background: $primary-hover;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.btn-secondary {
+  background: white;
+  border: 1px solid $border;
+  color: $text-main;
+  padding: 10px 15px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: inherit;
+  transition: 0.2s;
+
+  &:hover:not(:disabled) {
+    background: #f1f5f9;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.btn-danger {
+  background: #fff1f2;
+  color: $danger;
+  border: 1px solid #fecaca;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: 0.2s;
+  font-family: inherit;
+
+  &:hover {
+    background: $danger;
+    color: white;
+    border-color: $danger;
+  }
+}
+
+// ========== Modal (duyuru modalı ile aynı animasyon ve yapı) ==========
+.reminder-modal-layer.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 5000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-x: hidden;
+  padding: 16px;
+
+  @media (max-width: 768px) {
+    padding: 0;
+    align-items: flex-end;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+.reminder-modal-layer .modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  width: 500px;
+  max-width: 95vw;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: slideUp 0.3s;
+  overflow-x: hidden;
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    max-width: 100vw;
+    border-radius: 20px 20px 0 0;
+    padding: 20px;
+    max-height: 90vh;
+  }
+
+  @media (max-width: 480px) {
+    padding: 16px;
+    border-radius: 16px 16px 0 0;
+  }
+}
+
+.reminder-modal-layer .modal-content.wide {
+  width: 700px;
+  max-width: 95vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    max-width: 100vw;
+    max-height: 100vh;
+    border-radius: 0;
+    margin: 0;
+  }
+}
+
+.reminder-modal-layer .modal-content.community-add-wide {
+  width: 98vw !important;
+  max-width: none !important;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  padding: 32px 48px 28px;
+
+  @media (max-width: 768px) {
+    width: 100% !important;
+    max-width: 100vw !important;
+    max-height: 92vh;
+    border-radius: 20px 20px 0 0;
+    margin: 0;
+    padding: 20px 16px;
+  }
+
+  @media (max-width: 480px) {
+    max-height: 95vh;
+    border-radius: 16px 16px 0 0;
+    padding: 16px 12px;
+  }
+}
+
+.reminder-modal-layer .modal-content.announcement-modal {
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  @media (max-width: 768px) {
+    max-height: 92vh;
+  }
+
+  @media (max-width: 480px) {
+    max-height: 95vh;
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  width: 100%;
+  box-sizing: border-box;
+  flex-shrink: 0;
+
+  h3 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin: 0;
+    flex: 1;
+    min-width: 0;
+    word-wrap: break-word;
+    color: $text-main;
+  }
+
+  .close-btn {
+    background: #f1f5f9;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-left: 10px;
+    font-size: 1rem;
+    line-height: 1;
+    color: $text-muted;
+
+    &:hover {
+      background: #e2e8f0;
+      color: $text-main;
+    }
+  }
+}
+
+.modal-body {
+  .reminder-delete-text {
+    margin: 0;
+    color: $text-muted;
+    line-height: 1.6;
+    font-size: 0.95rem;
+
+    strong {
+      color: $text-main;
+    }
+  }
+}
+
+.reminder-delete-modal {
+  max-width: 480px !important;
+  width: 100% !important;
+}
+
+// ========== Duyuru modal gövdesi (iki sütun + görsel) ==========
+.modal-body-announcement {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 4px 0 0;
+
+  .announcement-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: stretch;
+
+    @media (max-width: 900px) {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+  }
+
+  .announcement-left {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+
+    .announcement-image-upload {
+      ::ng-deep .image-upload-container .drop-zone {
+        min-height: 320px;
+      }
+
+      ::ng-deep .image-upload-container .preview-zone .image-wrapper {
+        min-height: 320px;
+      }
+
+      @media (max-width: 768px) {
+        ::ng-deep .image-upload-container .drop-zone {
+          min-height: 240px;
+        }
+
+        ::ng-deep .image-upload-container .preview-zone .image-wrapper {
+          min-height: 240px;
+        }
+      }
+    }
+  }
+
+  .announcement-right {
+    min-width: 0;
+
+    .announcement-link-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      align-items: start;
+
+      @media (max-width: 640px) {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .announcement-content-char-hint {
+      font-size: 0.8rem;
+      color: #6b7280;
+      margin-top: 6px;
+      text-align: right;
+    }
+  }
+}
+
+.single-image-upload {
+  margin-bottom: 25px;
+
+  &.no-url-input {
+    ::ng-deep .url-input-wrapper {
+      display: none !important;
+    }
+  }
+
+  ::ng-deep {
+    .image-upload-container .drop-zone {
+      min-height: 160px;
+    }
+
+    .image-upload-container .preview-zone .image-wrapper {
+      height: 200px;
+    }
+  }
+}
+
+// Modal alt aksiyonlar (İptal / Kaydet) — duyuru ile aynı
+.reminder-modal-layer .modal-content > .modal-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  padding-top: 20px;
+  border-top: 1px solid $border;
+  margin-top: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  flex-shrink: 0;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 15px;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    padding: 12px 24px;
+    min-width: 140px;
+    justify-content: center;
+  }
+
+  @media (max-width: 480px) {
+    .btn-primary,
+    .btn-secondary {
+      width: 100%;
+      min-width: 0;
+    }
+  }
+}

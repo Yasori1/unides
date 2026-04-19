@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpContext, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable, catchError, map, of, switchMap, throwError } from 'rxjs';
+import { Observable, catchError, map, of, throwError } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Logger } from '../utils/logger.util';
 import { SKIP_AUTH } from '../core/http-context-tokens';
@@ -687,9 +687,11 @@ export class EventService {
     );
   }
 
-  // Status'e göre etkinlikleri getir (Backend: GET /api/Events/status?status=0&status=1&status=2) — sayfasız, geriye dönük uyumluluk
   getByStatus(statuses: number[]): Observable<EventItem[]> {
-    return this.getByStatusPagedResponse(1, 9999, statuses).pipe(map((res) => res.items));
+    return this.getByStatusPagedResponse(1, 10000, statuses).pipe(
+      map((res) => res.items),
+      catchError(() => of([])),
+    );
   }
 
   // Topluluk bazlı etkinlikleri getir (Backend: GET /api/Events/community/{communityId}/events?status=0&status=1&status=2)

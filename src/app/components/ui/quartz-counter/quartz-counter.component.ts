@@ -12,7 +12,7 @@ import {
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 
 export interface QuartzSlot {
-  type: 'digit' | 'separator';
+  type: 'digit';
   current?: string;
   next?: string;
 }
@@ -115,9 +115,6 @@ export class QuartzCounterComponent implements OnInit, OnChanges, OnDestroy {
 
     this.slots = [];
     for (let i = 0; i < len; i++) {
-      if (i > 0 && (len - i) % 3 === 0) {
-        this.slots.push({ type: 'separator' });
-      }
       const newDigit = newDigits[i] || '0';
       const oldDigit = oldDigits[i] || '0';
       const isChange = oldValue >= 0 && oldDigit !== newDigit;

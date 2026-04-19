@@ -78,6 +78,83 @@
   </div>
 </div>
 
+<section class="section-home-announcements" aria-label="Son duyurular">
+  <div class="container">
+    <div class="section-header-center fade-in-up home-announcements-header">
+      <h6 class="sub-title">GÜNCEL</h6>
+      <h2 class="section-title">Son Duyurular</h2>
+      <p class="section-desc">
+        Üniversite ve kampüs yaşamına dair en güncel haberler ve duyurular.
+      </p>
+      <div class="blue-divider"></div>
+    </div>
+
+    <div *ngIf="isLoadingHomeAnnouncements" class="home-announcements-loading" aria-busy="true">
+      <div class="home-announcements-skeleton-row">
+        <div class="home-announcement-skeleton" *ngFor="let _ of [1, 2, 3, 4]">
+          <div class="home-announcement-skeleton__media shimmer"></div>
+          <div class="home-announcement-skeleton__lines">
+            <div class="shimmer line short"></div>
+            <div class="shimmer line"></div>
+            <div class="shimmer line"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <ng-container *ngIf="!isLoadingHomeAnnouncements">
+      <div *ngIf="homeAnnouncements.length === 0" class="home-announcements-empty fade-in-up">
+        <div class="home-announcements-empty__icon" aria-hidden="true">
+          <i class="bx bx-news"></i>
+        </div>
+        <p class="home-announcements-empty__text">
+          Şu an listelenecek duyuru bulunmuyor. Tüm duyurular sayfasından güncel içeriklere göz atabilirsiniz.
+        </p>
+        <a class="btn-outline-custom" routerLink="/announcements">Duyurulara git</a>
+      </div>
+
+      <div class="home-announcements-surface fade-in-up" *ngIf="homeAnnouncements.length > 0">
+        <div class="home-announcements-carousel-wrap">
+          <div class="home-announcements-carousel-desktop-scrim">
+            <owl-carousel-o class="home-announcements-owl" [options]="announcementCarouselOptions">
+            <ng-template carouselSlide *ngFor="let a of homeAnnouncements">
+              <a class="home-announcement-card" [routerLink]="['/announcements', a.id]" lang="tr">
+                <div class="home-announcement-card__media">
+                  <img
+                    [src]="a.image || 'assets/img/placeholder-announcement.jpg'"
+                    [alt]="a.title"
+                    loading="lazy"
+                    (error)="onImageError($event, 'announcement')"
+                  />
+                  <div class="home-announcement-card__media-shade" aria-hidden="true"></div>
+                  <time
+                    class="home-announcement-card__date"
+                    *ngIf="a.date"
+                    [attr.datetime]="a.date"
+                  >{{ formatAnnouncementDate(a.date) }}</time>
+                </div>
+                <div class="home-announcement-card__body">
+                  <h3 class="home-announcement-card__title">{{ a.title }}</h3>
+                  <p class="home-announcement-card__excerpt">{{ a.shortDescription }}</p>
+                  <span class="home-announcement-card__cta">
+                    <span class="home-announcement-card__cta-text">Detay</span>
+                    <i class="bx bx-chevron-right home-announcement-card__cta-icon" aria-hidden="true"></i>
+                  </span>
+                </div>
+              </a>
+            </ng-template>
+          </owl-carousel-o>
+          </div>
+        </div>
+      </div>
+
+      <div class="view-all-wrapper home-announcements-view-all" *ngIf="homeAnnouncements.length > 0">
+        <a class="btn-outline-custom" routerLink="/announcements">Tüm duyurular</a>
+      </div>
+    </ng-container>
+  </div>
+</section>
+
 <section class="section-communities">
   <div class="container">
     <div class="section-header-center fade-in-up">

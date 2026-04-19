@@ -59,7 +59,20 @@ export class EventsComponent implements OnInit, AfterViewInit {
 
   // Şehir filtresi
   cities: string[] = CITY_NAMES;
+  /** Açılır listede şehir arama (Türkçe karakter uyumlu) */
+  cityFilterSearch: string = '';
   selectedCityFilter: string = '';
+
+  get filteredCities(): string[] {
+    const q = this.cityFilterSearch.trim().toLocaleLowerCase('tr-TR');
+    if (!q) {
+      return this.cities;
+    }
+    return this.cities.filter((city) => city.toLocaleLowerCase('tr-TR').includes(q));
+  }
+
+  /** Kapalıyken yalnızca şu andan sonraki etkinlikler (Türkiye saatiyle anlık başlangıç). Açıkken geçmişler de listelenir. */
+  showPastEvents: boolean = false;
 
   // Custom Dropdown States
   isSortDropdownOpen: boolean = false;
@@ -85,6 +98,16 @@ export class EventsComponent implements OnInit, AfterViewInit {
   pages: number[] = [];
   allCommunities: any[] = [];
   filteredEventsCount: number = 0; // Added for result count display
+
+  /**
+   * Tarih sıralamasında (ve isim sıralamasında geçmiş gizliyken) API sayfa başına kronolojik
+   * sıra verdiği için tüm kayıtlar çekilip İstanbul (UTC+3) mantığıyla sıralanıp sayfalanır.
+   */
+  private dateSortedEventsCache: EventCard[] | null = null;
+  private readonly maxEventsFetchForClientDateSort = 5000;
+
+  /** Backend yorumu: tarih sırası “bugüne göre”; gerçekte yalnızca takvim sırası. İstemci tarafında TR (UTC+3) ile hizalanır. */
+  private readonly istanbulTz = 'Europe/Istanbul';
 
   @ViewChildren('animItem') animItems!: QueryList<ElementRef>;
 
@@ -465,25 +488,164 @@ export class EventsComponent implements OnInit, AfterViewInit {
     });
   }
 
+  private isClientSideDateSort(): boolean {
+    return this.sortOrder === 'date_asc' || this.sortOrder === 'date_desc';
+  }
+
+  /** Tarih sıralaması veya isim sıralamasında geçmişleri gizlerken tam liste + istemci sayfalama gerekir. */
+  private useClientSideListForCurrentSort(): boolean {
+    if (this.isClientSideDateSort()) return true;
+    if (!this.showPastEvents && (this.sortOrder === 'name_asc' || this.sortOrder === 'name_desc')) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * İstanbul takvim gününün başlangıcı (TR sabit UTC+3, yaz saati yok).
+   * Yakın/Uzak bölünmesi backend’deki “bugüne göre” ifadesiyle uyum için kullanılır.
+   */
+  private startOfTodayIstanbulMs(ref: Date = new Date()): number {
+    const ymd = ref.toLocaleDateString('en-CA', { timeZone: this.istanbulTz });
+    const [y, m, d] = ymd.split('-').map((x) => parseInt(x, 10));
+    return Date.UTC(y, m - 1, d, 0, 0, 0) - 3 * 60 * 60 * 1000;
+  }
+
+  private filterByPastVisibility(cards: EventCard[]): EventCard[] {
+    if (this.showPastEvents) return cards;
+    const now = Date.now();
+    return cards.filter((e) => e.dateObj.getTime() >= now);
+  }
+
+  /**
+   * Geçmiş kapalıyken liste zaten yalnızca gelecek içerir; sadece tarih sıralanır.
+   * Geçmiş açıkken: Yakın–Uzak — önce İstanbul’daki bugün ve sonrası (artan), sonra geçmiş (en yakın geçmiş üstte).
+   * Uzak–Yakın — tümü takvimde yeniden eskiye.
+   */
+  private sortEventsForDateMode(cards: EventCard[]): EventCard[] {
+    const copy = [...cards];
+
+    if (!this.showPastEvents) {
+      if (this.sortOrder === 'date_asc') {
+        return copy.sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime());
+      }
+      if (this.sortOrder === 'date_desc') {
+        return copy.sort((a, b) => b.dateObj.getTime() - a.dateObj.getTime());
+      }
+      return copy;
+    }
+
+    const t0 = this.startOfTodayIstanbulMs();
+
+    if (this.sortOrder === 'date_asc') {
+      const future = copy
+        .filter((e) => e.dateObj.getTime() >= t0)
+        .sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime());
+      const past = copy
+        .filter((e) => e.dateObj.getTime() < t0)
+        .sort((a, b) => b.dateObj.getTime() - a.dateObj.getTime());
+      return [...future, ...past];
+    }
+    if (this.sortOrder === 'date_desc') {
+      return copy.sort((a, b) => b.dateObj.getTime() - a.dateObj.getTime());
+    }
+    return copy;
+  }
+
+  private applyCommunityNamesToEvents(list: EventCard[]): EventCard[] {
+    if (!this.allCommunities?.length || !list?.length) return list;
+    return list.map((ev) => {
+      if (!ev.club && (ev as any).communityId) {
+        const found = this.allCommunities.find((c) => c.id === (ev as any).communityId);
+        return {
+          ...ev,
+          club: found?.name || ev.club,
+          university: found?.university || ev.university,
+          city: found?.city || ev.city,
+          location: ev.location || this.getVenueByCity(found?.city || ''),
+        };
+      }
+      return ev;
+    });
+  }
+
   private loadEventsFromBackend(page?: number) {
     const requestedPage = page ?? this.currentPage ?? 1;
+
+    if (this.useClientSideListForCurrentSort()) {
+      this.isLoading = true;
+      const filters: { search?: string; city?: string; sortBy?: 'name' | 'date'; sortOrder?: 'asc' | 'desc' } = {};
+      const rawSearch = this.searchQuery?.trim();
+      if (rawSearch) {
+        filters.search = rawSearch.toLocaleUpperCase('tr-TR');
+      }
+      const city = this.selectedCityFilter?.trim();
+      if (city) {
+        filters.city = city;
+      }
+      if (this.isClientSideDateSort()) {
+        filters.sortBy = 'name';
+        filters.sortOrder = 'asc';
+      } else if (this.sortOrder === 'name_asc') {
+        filters.sortBy = 'name';
+        filters.sortOrder = 'asc';
+      } else {
+        filters.sortBy = 'name';
+        filters.sortOrder = 'desc';
+      }
+
+      this.eventService.getEventsPage(1, this.maxEventsFetchForClientDateSort, filters).subscribe({
+        next: (res) => {
+          const data = res.items || [];
+          let cards = data.map((e) => this.mapToCard(e));
+          cards = cards.filter((e) => {
+            const eventItem = data.find((item) => item.id === e.id);
+            return eventItem?.status === 'Onaylandı';
+          });
+          cards = this.applyCommunityNamesToEvents(cards);
+          cards = this.filterByPastVisibility(cards);
+          if (this.isClientSideDateSort()) {
+            cards = this.sortEventsForDateMode(cards);
+          }
+          this.dateSortedEventsCache = cards;
+
+          const total = cards.length;
+          this.filteredEventsCount = total;
+          this.totalPages = Math.max(1, Math.ceil(total / this.itemsPerPage) || 1);
+          const safePage = Math.min(Math.max(1, requestedPage), this.totalPages);
+          this.currentPage = safePage;
+          this.pages = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+
+          const start = (safePage - 1) * this.itemsPerPage;
+          this.baseEvents = cards.slice(start, start + this.itemsPerPage);
+          this.displayedEvents = [...this.baseEvents];
+          this.isLoading = false;
+        },
+        error: () => {
+          this.baseEvents = [];
+          this.displayedEvents = [];
+          this.dateSortedEventsCache = null;
+          this.currentPage = 1;
+          this.totalPages = 0;
+          this.pages = [];
+          this.filteredEventsCount = 0;
+          this.isLoading = false;
+        },
+      });
+      return;
+    }
+
+    this.dateSortedEventsCache = null;
     const filters: { search?: string; city?: string; sortBy?: 'name' | 'date'; sortOrder?: 'asc' | 'desc' } = {};
     const rawSearch = this.searchQuery?.trim();
     if (rawSearch) {
-      // Backend ile büyük/küçük harf uyumu: arama terimini Türkçe büyük harfe çevir (fırat → FIRAT, Fırat → FIRAT)
       filters.search = rawSearch.toLocaleUpperCase('tr-TR');
     }
     const city = this.selectedCityFilter?.trim();
     if (city) {
       filters.city = city;
     }
-    if (this.sortOrder === 'date_asc') {
-      filters.sortBy = 'date';
-      filters.sortOrder = 'asc';
-    } else if (this.sortOrder === 'date_desc') {
-      filters.sortBy = 'date';
-      filters.sortOrder = 'desc';
-    } else if (this.sortOrder === 'name_asc') {
+    if (this.sortOrder === 'name_asc') {
       filters.sortBy = 'name';
       filters.sortOrder = 'asc';
     } else if (this.sortOrder === 'name_desc') {
@@ -500,7 +662,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
           return eventItem?.status === 'Onaylandı';
         });
         this.baseEvents = approvedEventsList;
-        this.attachCommunityNames();
+        this.baseEvents = this.applyCommunityNamesToEvents(this.baseEvents);
         this.displayedEvents = [...this.baseEvents];
         this.currentPage = res.page;
         this.totalPages = res.totalPages;
@@ -517,24 +679,6 @@ export class EventsComponent implements OnInit, AfterViewInit {
         this.filteredEventsCount = 0;
         this.isLoading = false;
       },
-    });
-  }
-
-  private attachCommunityNames() {
-    if (!this.allCommunities?.length || !this.baseEvents?.length) return;
-    this.baseEvents = this.baseEvents.map((ev) => {
-      // Sadece ID'si olanlar için isim eşleştir (Mock dataların ID'si communityId ile çakışmaz)
-      if (!ev.club && (ev as any).communityId) {
-        const found = this.allCommunities.find((c) => c.id === (ev as any).communityId);
-        return {
-          ...ev,
-          club: found?.name || ev.club,
-          university: found?.university || ev.university,
-          city: found?.city || ev.city,
-          location: ev.location || this.getVenueByCity(found?.city || ''),
-        };
-      }
-      return ev;
     });
   }
 
@@ -656,21 +800,16 @@ export class EventsComponent implements OnInit, AfterViewInit {
       );
     }
 
-    // Bugünün tarihini al (sadece tarih, saat olmadan)
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const todayTime = today.getTime();
+    const anchor = this.startOfTodayIstanbulMs();
 
     return filtered.sort((a, b) => {
       if (this.sortOrder === 'date_asc') {
-        // Yakın-Uzak: Bugüne en yakın tarihten en uzağa
-        const diffA = Math.abs(a.dateObj.getTime() - todayTime);
-        const diffB = Math.abs(b.dateObj.getTime() - todayTime);
+        const diffA = Math.abs(a.dateObj.getTime() - anchor);
+        const diffB = Math.abs(b.dateObj.getTime() - anchor);
         return diffA - diffB;
       } else if (this.sortOrder === 'date_desc') {
-        // Uzak-Yakın: Bugünden en uzak tarihten en yakına
-        const diffA = Math.abs(a.dateObj.getTime() - todayTime);
-        const diffB = Math.abs(b.dateObj.getTime() - todayTime);
+        const diffA = Math.abs(a.dateObj.getTime() - anchor);
+        const diffB = Math.abs(b.dateObj.getTime() - anchor);
         return diffB - diffA;
       } else if (this.sortOrder === 'name_asc') {
         return a.title.localeCompare(b.title, 'tr');
@@ -699,9 +838,21 @@ export class EventsComponent implements OnInit, AfterViewInit {
   }
 
   changePage(page: number) {
-    if (page >= 1 && page <= this.totalPages) {
-      this.loadEventsFromBackend(page);
+    if (page < 1 || page > this.totalPages) return;
+
+    if (this.useClientSideListForCurrentSort() && this.dateSortedEventsCache?.length) {
+      this.currentPage = page;
+      const start = (page - 1) * this.itemsPerPage;
+      const cards = this.dateSortedEventsCache;
+      this.baseEvents = cards.slice(start, start + this.itemsPerPage);
+      this.displayedEvents = [...this.baseEvents];
+      if (isPlatformBrowser(this.platformId)) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      return;
     }
+
+    this.loadEventsFromBackend(page);
   }
 
   getVisiblePages(): number[] {
@@ -748,6 +899,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
   }
 
   selectCity(city: string) {
+    this.cityFilterSearch = '';
     this.onCityFilterChange(city);
     this.isCityDropdownOpen = false;
   }

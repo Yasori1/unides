@@ -42,17 +42,34 @@
               <span>{{ getCityLabel(selectedCityFilter) }}</span>
               <i class="bx bx-map"></i>
             </div>
-            <div class="custom-options">
+            <div class="custom-options" (click)="$event.stopPropagation()">
+              <div class="city-filter-search">
+                <i class="bx bx-search" aria-hidden="true"></i>
+                <input
+                  type="text"
+                  [(ngModel)]="cityFilterSearch"
+                  (click)="$event.stopPropagation()"
+                  placeholder="Şehir ara..."
+                  autocomplete="off"
+                  aria-label="Şehir listesinde ara"
+                />
+              </div>
               <div class="option" (click)="selectCity('')" [class.selected]="!selectedCityFilter">
                 Tüm Şehirler
               </div>
               <div
                 class="option"
-                *ngFor="let c of cities"
+                *ngFor="let c of filteredCities"
                 (click)="selectCity(c)"
                 [class.selected]="selectedCityFilter === c"
               >
                 {{ c }}
+              </div>
+              <div
+                class="city-filter-empty"
+                *ngIf="cityFilterSearch.trim() && filteredCities.length === 0"
+              >
+                Eşleşen şehir yok
               </div>
             </div>
           </div>
@@ -78,6 +95,15 @@
               </div>
             </div>
           </div>
+
+          <label class="past-events-toggle">
+            <input
+              type="checkbox"
+              [(ngModel)]="showPastEvents"
+              (ngModelChange)="applyFiltersAndGoFirstPage()"
+            />
+            <span>Geçmiş etkinlikleri göster</span>
+          </label>
         </div>
       </div>
     </div>

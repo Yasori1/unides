@@ -2,11 +2,12 @@ import { Component } from '@angular/core';
 import { ViewportScroller } from '@angular/common';
 import { RouterOutlet, Router, Event, NavigationEnd } from '@angular/router';
 import { ChatbotWidgetComponent } from './components/chatbot/chatbot-widget.component';
+import { SiteReminderPopupComponent } from './components/site-reminder-popup/site-reminder-popup.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, ChatbotWidgetComponent],
+  imports: [RouterOutlet, ChatbotWidgetComponent, SiteReminderPopupComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

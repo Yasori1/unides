@@ -245,6 +245,33 @@ $border-color: #e2e8f0;
     display: flex;
     gap: 15px;
     flex-wrap: wrap;
+    align-items: center;
+
+    .past-events-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 15px;
+      border: 1px solid $border-color;
+      border-radius: 12px;
+      background: $white;
+      font-size: 0.95rem;
+      color: $text-dark;
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+
+      input[type='checkbox'] {
+        width: 1.05rem;
+        height: 1.05rem;
+        accent-color: $primary-blue;
+        cursor: pointer;
+      }
+
+      &:hover {
+        border-color: $primary-blue;
+      }
+    }
 
     .select-wrapper {
       flex: 1;
@@ -351,6 +378,54 @@ $border-color: #e2e8f0;
             &:not(:last-child) {
               border-bottom: 1px solid #f4f4f5;
             }
+          }
+        }
+
+        &.city-dropdown .custom-options {
+          max-height: 300px;
+
+          .city-filter-search {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            background: white;
+            border-bottom: 1px solid #f4f4f5;
+
+            i {
+              flex-shrink: 0;
+              font-size: 1.1rem;
+              color: $text-gray;
+            }
+
+            input {
+              flex: 1;
+              min-width: 0;
+              padding: 8px 10px;
+              border: 1px solid $border-color;
+              border-radius: 8px;
+              font-size: 0.9rem;
+              outline: none;
+              font-family: inherit;
+              color: $text-dark;
+              background: #fff;
+
+              &:focus {
+                border-color: $primary-blue;
+                box-shadow: 0 0 0 2px rgba($primary-blue, 0.12);
+              }
+            }
+          }
+
+          .city-filter-empty {
+            padding: 12px 14px;
+            font-size: 0.85rem;
+            color: $text-gray;
+            text-align: center;
+            border-top: 1px solid #f4f4f5;
           }
         }
       }

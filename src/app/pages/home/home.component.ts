@@ -4,15 +4,17 @@ import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { forkJoin, of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { map, catchError, switchMap } from 'rxjs/operators';
 import { SiteNavbarComponent } from '../../common/site-navbar/site-navbar.component';
 import { SiteFooterComponent } from '../../common/site-footer/site-footer.component';
 import { TurkeySkylineComponent } from '../../components/ui/turkey-skyline/turkey-skyline.component';
 import { QuartzCounterComponent } from '../../components/ui/quartz-counter/quartz-counter.component';
+import { CarouselModule, OwlOptions } from 'ngx-owl-carousel-o';
 import { CommunityService } from '../../services/community.services';
 import { EventService, EventItem } from '../../services/event.services';
 import { SearchService } from '../../services/search.services';
 import { ImageErrorHandlerService } from '../../services/image-error-handler.service';
+import { AnnouncementService, Announcement } from '../../services/announcement.services';
 import { TurkishUppercasePipe } from '../../pipes/turkish-uppercase.pipe';
 
 // --- Veri Tipleri (Interfaces) ---
@@ -49,11 +51,6 @@ interface NewCommunity {
   email: string;
 }
 
-interface Announcement {
-  title: string;
-  content: string;
-}
-
 @Component({
   selector: 'app-home', // DÜZELTİLDİ
   standalone: true,
@@ -66,12 +63,29 @@ interface Announcement {
     TurkeySkylineComponent,
     QuartzCounterComponent,
     TurkishUppercasePipe,
+    CarouselModule,
   ],
   templateUrl: './home.component.html', // DÜZELTİLDİ
   styleUrls: ['./home.component.scss'], // DÜZELTİLDİ
 })
 export class HomeComponent implements OnInit, OnDestroy {
   // DÜZELTİLDİ (Home3Component -> HomeComponent)
+
+  /** CSS uppercase Türkçe İ/ı dönüşümünü bozduğu için tarih metninde elle kullanılır */
+  private static readonly TR_MONTH_NAMES = [
+    'Ocak',
+    'Şubat',
+    'Mart',
+    'Nisan',
+    'Mayıs',
+    'Haziran',
+    'Temmuz',
+    'Ağustos',
+    'Eylül',
+    'Ekim',
+    'Kasım',
+    'Aralık',
+  ] as const;
 
   // --- Animasyon Değişkenleri ---
   typingText: string = 'Toplulukları';
@@ -95,6 +109,71 @@ export class HomeComponent implements OnInit, OnDestroy {
   featuredCommunities: Community[] = [];
   upcomingEvents: UpcomingEvent[] = [];
   newestCommunities: NewCommunity[] = [];
+
+  /** GET /api/announcements/latest6 — kayar duyuru şeridi */
+  homeAnnouncements: Announcement[] = [];
+  isLoadingHomeAnnouncements = true;
+
+  /** Owl: son duyurular; `applyAnnouncementCarouselOptions()` ile yükleme sonrası güncellenir */
+  announcementCarouselOptions: OwlOptions = {
+    loop: true,
+    margin: 8,
+    nav: false,
+    navText: ['\u2039', '\u203a'],
+    navSpeed: 450,
+    dots: true,
+    autoplay: true,
+    autoplayTimeout: 5200,
+    autoplayHoverPause: true,
+    smartSpeed: 600,
+    autoHeight: false,
+    center: false,
+    stagePadding: 0,
+    /* Owl, items > slayt sayısı iken varsayılan olarak items'ı düşürür; 4 sütun düzenini korumak için */
+    skip_validateItems: true,
+    responsive: {
+      0: { items: 1, nav: false, dots: true },
+      640: { items: 2, nav: false, dots: true },
+      /* 900px+ masaüstü: 4 kart (640–899 arası 2 karttı → ~2.5 görünüm) */
+      900: { items: 4, nav: true, dots: false, stagePadding: 0 },
+    },
+  };
+
+  private applyAnnouncementCarouselOptions(): void {
+    const n = this.homeAnnouncements.length;
+    const loop = n > 4;
+    const showDesktopNav = n > 1;
+    this.announcementCarouselOptions = {
+      loop,
+      margin: 8,
+      nav: false,
+      navText: ['\u2039', '\u203a'],
+      navSpeed: 450,
+      dots: true,
+      autoplay: n > 0,
+      autoplayTimeout: 5200,
+      autoplayHoverPause: true,
+      smartSpeed: 600,
+      autoHeight: false,
+      center: false,
+      stagePadding: 0,
+      skip_validateItems: true,
+      responsive: {
+        0: { items: 1, nav: false, dots: true },
+        640: {
+          items: n >= 2 ? 2 : 1,
+          nav: false,
+          dots: true,
+        },
+        900: {
+          items: 4,
+          nav: showDesktopNav,
+          dots: false,
+          stagePadding: 0,
+        },
+      },
+    };
+  }
 
   // --- Anasayfa sayaç (GET /api/Communities/stats) ---
   homeStats: { totalEvents: number; totalCommunities: number } = { totalEvents: 0, totalCommunities: 0 };
@@ -128,7 +207,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     private communityService: CommunityService,
     private eventService: EventService,
     private searchService: SearchService,
-    private imageErrorHandler: ImageErrorHandlerService
+    private imageErrorHandler: ImageErrorHandlerService,
+    private announcementService: AnnouncementService,
   ) {
     this.safeVideoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
       'https://www.youtube.com/embed/f-c3iY-Mq3Y?autoplay=1'
@@ -328,6 +408,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   loadData() {
     if (!isPlatformBrowser(this.platformId)) {
+      this.isLoadingHomeAnnouncements = false;
       return;
     }
 
@@ -336,6 +417,34 @@ export class HomeComponent implements OnInit, OnDestroy {
     // Anasayfa sayaç: toplam etkinlik ve topluluk (GET /api/Communities/stats) + periyodik güncelleme
     this.loadHomeStats();
     this.statsRefreshInterval = setInterval(() => this.loadHomeStats(), this.STATS_REFRESH_MS);
+
+    this.isLoadingHomeAnnouncements = true;
+    this.announcementService
+      .getLatest6Announcements()
+      .pipe(
+        switchMap((items) => {
+          const list = items || [];
+          if (list.length > 0) return of(list);
+          return this.announcementService.getAnnouncementsPage(1, 6).pipe(
+            map((res) => res.items || [])
+          );
+        }),
+        switchMap((items) => {
+          if (items.length > 0) return of(items);
+          return this.announcementService.getLatestAnnouncements();
+        }),
+        map((items) => (items || []).slice(0, 6)),
+        catchError(() => of([] as Announcement[]))
+      )
+      .subscribe({
+        next: (items) => {
+          this.homeAnnouncements = items;
+          this.applyAnnouncementCarouselOptions();
+        },
+        complete: () => {
+          this.isLoadingHomeAnnouncements = false;
+        },
+      });
 
     // Öne Çıkan Topluluklar
     this.communityService.getFeaturedCommunities(6, { skipAuth: true }).subscribe({
@@ -537,5 +646,20 @@ export class HomeComponent implements OnInit, OnDestroy {
   // Image error handler - Placeholder görsellerin sürekli istek atmasını engeller
   onImageError(event: Event, type: 'announcement' | 'event' | 'logo' | 'cover' | 'avatar' = 'avatar'): void {
     this.imageErrorHandler.handleImageError(event, type);
+  }
+
+  /** Duyuru kartı tarih etiketi (annDate / liste tarihi) — Türkçe ay adları, CSS uppercase kullanılmaz */
+  formatAnnouncementDate(dateStr: string | undefined): string {
+    if (!dateStr) return '';
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      const day = d.getDate();
+      const month = HomeComponent.TR_MONTH_NAMES[d.getMonth()];
+      const year = d.getFullYear();
+      return `${day} ${month} ${year}`;
+    } catch {
+      return dateStr;
+    }
   }
 }

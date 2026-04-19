@@ -311,6 +311,54 @@
             }
           }
         }
+
+        &.city-dropdown .custom-options {
+          max-height: 300px;
+
+          .city-filter-search {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            background: white;
+            border-bottom: 1px solid #f4f4f5;
+
+            i {
+              flex-shrink: 0;
+              font-size: 1.1rem;
+              color: var(--secondary-color);
+            }
+
+            input {
+              flex: 1;
+              min-width: 0;
+              padding: 8px 10px;
+              border: 1px solid var(--border-color);
+              border-radius: 8px;
+              font-size: 0.9rem;
+              outline: none;
+              font-family: inherit;
+              color: var(--primary-color);
+              background: #fff;
+
+              &:focus {
+                border-color: var(--accent-color);
+                box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+              }
+            }
+          }
+
+          .city-filter-empty {
+            padding: 12px 14px;
+            font-size: 0.85rem;
+            color: var(--secondary-color);
+            text-align: center;
+            border-top: 1px solid #f4f4f5;
+          }
+        }
       }
 
       i {

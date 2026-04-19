@@ -2,8 +2,10 @@
 // Backend API'yi kendi bilgisayarında çalıştırırken kullan: npm run start:local
 //
 // ⚠️  DEĞİŞTİRMEN GEREKEN YER:
-//     LOCAL_API_PORT → .NET API'nin çalıştığı port numarasını yaz
-//     (Backend ekibinden öğren, genellikle 5000, 5001, 7000 veya 7001)
+//     LOCAL_API_PORT → .NET API'nin dinlediği port ile aynı olmalı.
+//     Bu repoda: Unides.API.New/Unides.WebAPI/Properties/launchSettings.json
+//     → "http" profili: applicationUrl "http://localhost:5199" → port 5199.
+//     API'yi farklı profille (ör. sadece 7069) çalıştırıyorsan bu portu ona göre güncelle.
 //
 // Bu dosya .gitignore'da olduğu için her geliştirici kendi portunu ayarlayabilir.
 

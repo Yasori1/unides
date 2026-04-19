@@ -2,7 +2,6 @@
   <div class="counter-label">{{ label }}</div>
   <div class="quartz-container">
     <ng-container *ngFor="let slot of slots">
-      <div *ngIf="slot.type === 'separator'" class="separator">,</div>
       <div
         *ngIf="slot.type === 'digit'"
         class="leaf-slot"

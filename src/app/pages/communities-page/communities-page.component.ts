@@ -41,6 +41,16 @@ export class CommunitiesPageComponent implements OnInit, AfterViewInit, OnDestro
 
   /** Türkiye illeri — tek kaynak: data/cities.json */
   cities: string[] = CITY_NAMES;
+  /** Şehir açılır listesinde arama (Türkçe karakter uyumlu) */
+  cityFilterSearch: string = '';
+
+  get filteredCities(): string[] {
+    const q = this.cityFilterSearch.trim().toLocaleLowerCase('tr-TR');
+    if (!q) {
+      return this.cities;
+    }
+    return this.cities.filter((city) => city.toLocaleLowerCase('tr-TR').includes(q));
+  }
 
   categories: string[] = [];
 
@@ -159,6 +169,7 @@ export class CommunitiesPageComponent implements OnInit, AfterViewInit, OnDestro
 
   resetFilters() {
     this.searchText = '';
+    this.cityFilterSearch = '';
     this.selectedCity = '';
     this.selectedCategory = '';
     this.selectedTag = '';
@@ -303,6 +314,7 @@ export class CommunitiesPageComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   selectCity(city: string) {
+    this.cityFilterSearch = '';
     this.selectedCity = city;
     this.onFiltersOrSortChange();
     this.isCityDropdownOpen = false;

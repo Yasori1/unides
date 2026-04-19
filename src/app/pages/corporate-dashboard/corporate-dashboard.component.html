@@ -84,6 +84,16 @@
         <span class="material-symbols-outlined">admin_panel_settings</span>
         <span class="menu-text">GSB Yetkilileri</span>
       </button>
+      <button
+        *ngIf="isGodMode"
+        class="menu-item"
+        [class.active]="activeTab === 'reminder-popup'"
+        (click)="switchTab('reminder-popup')"
+        title="Hatırlatıcı Pop-Up"
+      >
+        <span class="material-symbols-outlined">notifications_active</span>
+        <span class="menu-text">Hatırlatıcı Pop-Up</span>
+      </button>
 
       <div class="menu-divider">SİSTEM</div>
 
@@ -296,6 +306,16 @@
                 Silinmiş
               </button>
             </div>
+            <button
+              *ngIf="isGodMode"
+              type="button"
+              class="btn-secondary"
+              [disabled]="isExportingCommunitiesExcel || isLoadingCommunities"
+              (click)="downloadCommunitiesExcel()"
+            >
+              <span class="material-symbols-outlined">download</span>
+              {{ isExportingCommunitiesExcel ? 'Hazırlanıyor...' : 'Excel Çıktısı' }}
+            </button>
             <button class="btn-primary" (click)="openNewCommunityModal()">
               <span class="material-symbols-outlined">add</span>
               Yeni Topluluk Ekle
@@ -534,7 +554,26 @@
                 <span class="dot rejected"></span>Revize
               </button>
             </div>
+            <button
+              *ngIf="isGodMode"
+              type="button"
+              class="btn-secondary"
+              [disabled]="isExportingEventsExcel || isLoadingEvents"
+              (click)="downloadEventsExcel()"
+            >
+              <span class="material-symbols-outlined">download</span>
+              {{ isExportingEventsExcel ? 'Hazırlanıyor...' : 'Excel Çıktısı' }}
+            </button>
           </div>
+        </div>
+
+        <div class="results-info">
+          <p>
+            <span *ngIf="eventStatusFilter" class="filter-label">{{
+              eventStatusFilter === 'Revize' ? 'Revize' : eventStatusFilter
+            }}</span>
+            Toplam <strong>{{ eventsTotalCount }}</strong> etkinlik bulundu.
+          </p>
         </div>
 
         <div class="events-grid" *ngIf="visibleEvents.length > 0">
@@ -668,6 +707,19 @@
               <span class="material-symbols-outlined">add</span> Yeni Duyuru
             </button>
           </div>
+        </div>
+
+        <div class="results-info">
+          <p>
+            <span *ngIf="announcementSearchText.trim()" class="filter-label">Arama</span>
+            Toplam
+            <strong>{{
+              announcementSearchText.trim()
+                ? filteredAnnouncements.length
+                : announcementTotalCount || filteredAnnouncements.length
+            }}</strong>
+            duyuru bulundu.
+          </p>
         </div>
 
         <div class="announcements-grid" *ngIf="filteredAnnouncements.length > 0">
@@ -864,6 +916,11 @@
         </div>
         <p class="results-info" *ngIf="gsbUsersTotalCountDisplay > 0">Toplam <strong>{{ gsbUsersTotalCountDisplay }}</strong> kullanıcı.</p>
       </div>
+    </div>
+
+    <!-- Hatırlatıcı Pop-Up (sadece GODMODE) -->
+    <div class="view-container" *ngIf="activeTab === 'reminder-popup' && isGodMode">
+      <app-reminder-popup-admin />
     </div>
 
     <!-- 6. TAB: AYARLAR -->
@@ -1095,15 +1152,21 @@
                   maxlength="100"
                 ></textarea>
               </div>
-              <div class="form-group">
+              <div class="form-group announcement-rich-content">
                 <label>Detaylı İçerik (Maks. 5000)</label>
-                <textarea
-                  [(ngModel)]="newAnnouncement.content"
-                  class="modern-input"
-                  rows="5"
-                  placeholder="Duyurunun tam metnini buraya yazın..."
-                  maxlength="5000"
-                ></textarea>
+                <div class="NgxEditor__Wrapper announcement-ngx-editor" *ngIf="announcementContentEditorNew">
+                  <ngx-editor-menu [editor]="announcementContentEditorNew" [toolbar]="announcementToolbar">
+                  </ngx-editor-menu>
+                  <ngx-editor
+                    [editor]="announcementContentEditorNew"
+                    [formControl]="announcementContentNewFc"
+                    outputFormat="html"
+                    placeholder="Duyurunun tam metnini buraya yazın..."
+                  ></ngx-editor>
+                </div>
+                <div class="announcement-content-char-hint">
+                  {{ (announcementContentNewFc.value || '').length }} / 5000
+                </div>
               </div>
               <div class="announcement-link-row">
                 <div class="form-group">
@@ -1193,16 +1256,25 @@
                   maxlength="100"
                 ></textarea>
               </div>
-              <div class="form-group">
+              <div class="form-group announcement-rich-content">
                 <label>Detaylı İçerik (Maks. 5000)</label>
-                <textarea
-                  [(ngModel)]="editingAnnouncement.content"
-                  class="modern-input"
-                  [readonly]="!canManageAnnouncements"
-                  rows="5"
-                  placeholder="Duyurunun tam metnini buraya yazın..."
-                  maxlength="5000"
-                ></textarea>
+                <div class="NgxEditor__Wrapper announcement-ngx-editor" *ngIf="announcementContentEditorEdit">
+                  <ngx-editor-menu
+                    [editor]="announcementContentEditorEdit"
+                    [toolbar]="announcementToolbar"
+                    [disabled]="!canManageAnnouncements"
+                  >
+                  </ngx-editor-menu>
+                  <ngx-editor
+                    [editor]="announcementContentEditorEdit"
+                    [formControl]="announcementContentEditFc"
+                    outputFormat="html"
+                    placeholder="Duyurunun tam metnini buraya yazın..."
+                  ></ngx-editor>
+                </div>
+                <div class="announcement-content-char-hint">
+                  {{ (announcementContentEditFc.value || '').length }} / 5000
+                </div>
               </div>
               <div class="announcement-link-row">
                 <div class="form-group">

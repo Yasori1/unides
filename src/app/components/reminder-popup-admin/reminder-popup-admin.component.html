@@ -1,0 +1,212 @@
+<!-- Duyurular sekmesi ile aynı yapı ve sınıflar -->
+<div *ngIf="loading" class="loading-container">
+  <app-luma-spin></app-luma-spin>
+  <p>Hatırlatıcılar yükleniyor...</p>
+</div>
+
+<div *ngIf="!loading">
+  <div class="page-header">
+    <h2>Hatırlatıcı Merkezi</h2>
+    <div class="header-controls">
+      <button type="button" class="btn-primary" (click)="openCreate()">
+        <span class="material-symbols-outlined">add</span>
+        Yeni Hatırlatıcı
+      </button>
+    </div>
+  </div>
+
+  <div class="results-info">
+    <p>
+      Toplam <strong>{{ items.length }}</strong> hatırlatıcı.
+    </p>
+  </div>
+
+  <div class="announcements-grid" *ngIf="items.length > 0">
+    <div class="announcement-card-enhanced" *ngFor="let row of items">
+      <div class="announcement-image" *ngIf="row.imageUrl">
+        <img [src]="reminderService.resolveImageUrl(row.imageUrl)" [alt]="row.title" />
+        <span class="category-badge">HATIRLATICI</span>
+      </div>
+      <div class="announcement-image placeholder" *ngIf="!row.imageUrl">
+        <span class="material-symbols-outlined">notifications_active</span>
+        <span class="category-badge">HATIRLATICI</span>
+      </div>
+
+      <div class="announcement-body">
+        <h4 class="announcement-title">{{ row.title }}</h4>
+        <p class="announcement-description">{{ row.shortDescription || '—' }}</p>
+
+        <div class="announcement-meta">
+          <span class="meta-item">
+            <span class="material-symbols-outlined">event</span>
+            Başlangıç: {{ formatDisplayDate(row.startDate) }}
+          </span>
+          <span class="meta-item" *ngIf="row.endDate">
+            <span class="material-symbols-outlined">event_available</span>
+            Bitiş: {{ formatDisplayDate(row.endDate) }}
+          </span>
+          <span class="meta-item" *ngIf="!row.endDate">
+            <span class="material-symbols-outlined">all_inclusive</span>
+            Süresiz
+          </span>
+        </div>
+
+        <div class="announcement-footer announcement-footer--reminder">
+          <span class="reminder-status-badge" [class.is-off]="!row.isActive">{{ row.isActive ? 'Aktif' : 'Pasif' }}</span>
+          <div class="announcement-footer-buttons">
+            <button type="button" class="btn-detail" (click)="openEdit(row)">
+              Düzenle
+              <span class="material-symbols-outlined">arrow_forward</span>
+            </button>
+            <button type="button" class="btn-secondary btn-reminder-delete" (click)="confirmDelete(row)">
+              <span class="material-symbols-outlined">delete</span>
+              Sil
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="reminder-empty-state" *ngIf="items.length === 0">
+    <span class="material-symbols-outlined">notifications_off</span>
+    <p>Henüz hatırlatıcı yok. Yeni oluşturmak için yukarıdaki butonu kullanın.</p>
+  </div>
+</div>
+
+<!-- Yeni / Düzenle — duyuru modalı ile aynı iskelet (backdrop tıklanınca kapanmaz) -->
+<div class="modal-backdrop reminder-modal-layer" *ngIf="formOpen">
+  <div
+    class="modal-content wide community-add-wide announcement-modal"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="modal-header">
+      <h3>{{ editingId == null ? 'Yeni Hatırlatıcı Oluştur' : 'Hatırlatıcıyı Güncelle' }}</h3>
+      <button type="button" class="close-btn" (click)="closeForm()" aria-label="Kapat">✕</button>
+    </div>
+
+    <div class="modal-body modal-body-announcement">
+      <div class="announcement-layout">
+        <div class="announcement-left">
+          <div class="single-image-upload no-url-input announcement-image-upload">
+            <app-image-upload
+              label="Hatırlatıcı Görseli"
+              [previewUrl]="imagePreview"
+              [uploadToServer]="true"
+              [maxFileSizeMB]="1"
+              [enableCrop]="true"
+              [cropMaintainAspectRatio]="true"
+              [cropAspectRatio]="16 / 9"
+              [allowUrl]="false"
+              (onFileSelected)="onReminderImageFile($event)"
+              (onImageSelected)="onReminderImagePreview($event)"
+            />
+          </div>
+        </div>
+
+        <div class="announcement-right">
+          <div class="form-section">
+            <h5 class="section-title">Hatırlatıcı Bilgileri</h5>
+            <div class="form-group">
+              <label>Başlık</label>
+              <input
+                type="text"
+                [(ngModel)]="form.title"
+                class="modern-input"
+                maxlength="255"
+                placeholder="Başlık"
+              />
+            </div>
+            <div class="form-group">
+              <label>Kısa açıklama (en fazla {{ maxWords }} kelime / {{ maxChars }} karakter)</label>
+              <textarea
+                [(ngModel)]="form.shortDescription"
+                class="modern-input"
+                rows="4"
+                [maxlength]="maxChars"
+                placeholder="Kısa açıklama..."
+              ></textarea>
+              <div class="announcement-content-char-hint">
+                {{ wordCount(form.shortDescription) }} kelime · {{ charCount(form.shortDescription) }} karakter
+              </div>
+            </div>
+
+            <div class="announcement-link-row">
+              <div class="form-group">
+                <label>Başlangıç</label>
+                <input type="datetime-local" [(ngModel)]="form.startDate" class="modern-input" />
+              </div>
+              <div class="form-group">
+                <label class="checkbox-inline">
+                  <input type="checkbox" [(ngModel)]="form.noEndDate" />
+                  Bitiş tarihi yok
+                </label>
+                <input
+                  type="datetime-local"
+                  [(ngModel)]="form.endDate"
+                  class="modern-input reminder-datetime-offset"
+                  [disabled]="form.noEndDate"
+                />
+              </div>
+            </div>
+
+            <div class="announcement-link-row">
+              <div class="form-group">
+                <label>Duyuru Linki (Opsiyonel)</label>
+                <input
+                  type="url"
+                  [(ngModel)]="form.announcementLink"
+                  class="modern-input"
+                  placeholder="https://..."
+                />
+              </div>
+              <div class="form-group">
+                <label>Başvuru Linki (Opsiyonel)</label>
+                <input
+                  type="url"
+                  [(ngModel)]="form.applicationLink"
+                  class="modern-input"
+                  placeholder="Başvuru sayfası URL'si..."
+                />
+              </div>
+            </div>
+
+            <div class="form-group" *ngIf="editingId != null">
+              <label class="checkbox-inline">
+                <input type="checkbox" [(ngModel)]="form.isActive" />
+                Yayında (aktif)
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="btn-secondary" (click)="closeForm()" [disabled]="saving">İptal</button>
+      <button type="button" class="btn-primary" (click)="save()" [disabled]="saving">
+        <span class="material-symbols-outlined">publish</span>
+        {{ saving ? 'Kaydediliyor...' : 'Kaydet' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Silme onayı -->
+<div class="modal-backdrop reminder-modal-layer" *ngIf="deleteTarget" (click)="cancelDelete()">
+  <div class="modal-content reminder-delete-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Hatırlatıcıyı Sil</h3>
+      <button type="button" class="close-btn" (click)="cancelDelete()" aria-label="Kapat">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="reminder-delete-text">
+        <strong>{{ deleteTarget.title }}</strong> kaydını silmek istediğinize emin misiniz?
+      </p>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn-secondary" (click)="cancelDelete()">Vazgeç</button>
+      <button type="button" class="btn-danger" (click)="doDelete()">Sil</button>
+    </div>
+  </div>
+</div>

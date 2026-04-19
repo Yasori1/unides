@@ -118,11 +118,12 @@ export class AnnouncementDetailComponent implements OnInit {
     this.announcementService.getAnnouncementById(id).subscribe({
       next: (data) => {
         if (data) {
+          const appLink = data.applicationLink?.trim();
           this.announcement = {
             ...data,
             category: 'Genel', // Servisten gelenlere varsayılan kategori
             link: data.link || '',
-            applicationLink: data.applicationLink || '',
+            applicationLink: appLink ? appLink : undefined,
           };
           this.loadRecentAnnouncements(id);
           this.isLoading = false;
@@ -140,14 +141,14 @@ export class AnnouncementDetailComponent implements OnInit {
   }
 
   loadRecentAnnouncements(currentId: number) {
-    // GET /api/Announcements/latest — backend 4 adet döndürür; mevcut duyuruyu hariç tutup göster
+    // GET /api/announcements/latest — en fazla 4 kayıt; mevcut duyuruyu hariç tutup yan panelde göster
     this.announcementService.getLatestAnnouncements().subscribe({
       next: (announcements) => {
-        const filtered = announcements.filter(a => a.id !== currentId);
-        this.recentAnnouncements = filtered.slice(0, 4).map(a => ({
+        const filtered = announcements.filter((a) => a.id !== currentId);
+        this.recentAnnouncements = filtered.slice(0, 4).map((a) => ({
           ...a,
           category: 'Genel',
-          link: a.link || ''
+          link: a.link || '',
         }));
       },
       error: (err) => {
