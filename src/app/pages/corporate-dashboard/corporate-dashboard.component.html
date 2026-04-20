@@ -201,7 +201,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let req of pendingEvents.slice(0, 4)">
+              <tr *ngFor="let req of overviewPendingEvents">
                 <td>
                   <span class="p-name">{{ req.communityName }}</span>
                 </td>
@@ -521,7 +521,7 @@
                 type="text"
                 placeholder="Etkinlik Ara..."
                 [(ngModel)]="eventSearchText"
-                (input)="filterEvents()"
+                (input)="onEventSearchInput()"
               />
             </div>
             <div class="events-filters">

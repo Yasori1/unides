@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpContext, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable, catchError, map, of, throwError } from 'rxjs';
+import { EMPTY, Observable, catchError, expand, map, of, reduce, throwError } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Logger } from '../utils/logger.util';
 import { SKIP_AUTH } from '../core/http-context-tokens';
@@ -621,77 +621,214 @@ export class EventService {
     );
   }
 
-  /** Sayfalı status response tipi (Backend: page, pageSize, pendingTotalCount, acceptedTotalCount, rejectedTotalCount, pending, accepted, rejected) */
-  getByStatusPagedResponse(page: number, pageSize: number, statuses: number[]): Observable<{
+  /**
+   * GSB paneli: GET /api/Events/status (legacy) — yanıt pending / accepted / rejected dizileri.
+   * Sunucu sayfa başına her dilimde en fazla 12 kayıt döner; totalPages tek sekme veya üç dilimin max sayfasıdır.
+   */
+  getGsbEventsStatusPage(
+    page: number,
+    _pageSizeIgnored: number,
+    statuses: number[],
+    _searchIgnored?: string | null,
+  ): Observable<{
     items: EventItem[];
     page: number;
     pageSize: number;
+    totalCount: number;
+    totalPages: number;
     pendingTotalCount: number;
     acceptedTotalCount: number;
     rejectedTotalCount: number;
-    totalCount: number;
   }> {
-    let params = new HttpParams()
-      .set('page', String(page))
-      .set('pageSize', String(pageSize));
-    statuses.forEach((status) => {
-      params = params.append('status', status.toString());
+    let params = new HttpParams().set('page', String(page));
+    statuses.forEach((s) => {
+      params = params.append('status', String(s));
     });
 
     return this.http.get<any>(`${this.apiUrl}/status`, { params }).pipe(
-      map((response: any) => {
-        if (!response) {
-          return {
-            items: [],
-            page: 1,
-            pageSize: pageSize,
-            pendingTotalCount: 0,
-            acceptedTotalCount: 0,
-            rejectedTotalCount: 0,
-            totalCount: 0,
-          };
-        }
-        const pending = response.Pending || response.pending || [];
-        const accepted = response.Accepted || response.accepted || [];
-        const rejected = response.Rejected || response.rejected || [];
-        const pendingTotalCount = response.pendingTotalCount ?? response.PendingTotalCount ?? 0;
-        const acceptedTotalCount = response.acceptedTotalCount ?? response.AcceptedTotalCount ?? 0;
-        const rejectedTotalCount = response.rejectedTotalCount ?? response.RejectedTotalCount ?? 0;
-
-        const allDtos: EventListItemDto[] = [...pending, ...accepted, ...rejected];
-        const items = allDtos.map((dto) => this.mapToEvent(dto));
-
-        const totalCount =
-          Number(pendingTotalCount) + Number(acceptedTotalCount) + Number(rejectedTotalCount);
-        return {
-          items,
-          page: response.page ?? page,
-          pageSize: response.pageSize ?? pageSize,
-          pendingTotalCount: Number(pendingTotalCount),
-          acceptedTotalCount: Number(acceptedTotalCount),
-          rejectedTotalCount: Number(rejectedTotalCount),
-          totalCount,
-        };
-      }),
+      map((response: any) => this.normalizeGsbLegacyStatusPage(response, page, statuses)),
       catchError(() =>
         of({
           items: [],
           page: 1,
-          pageSize: pageSize,
+          pageSize: 12,
+          totalCount: 0,
+          totalPages: 0,
           pendingTotalCount: 0,
           acceptedTotalCount: 0,
           rejectedTotalCount: 0,
-          totalCount: 0,
-        })
-      )
+        }),
+      ),
+    );
+  }
+
+  private normalizeGsbLegacyStatusPage(
+    response: any,
+    page: number,
+    statuses: number[],
+  ): {
+    items: EventItem[];
+    page: number;
+    pageSize: number;
+    totalCount: number;
+    totalPages: number;
+    pendingTotalCount: number;
+    acceptedTotalCount: number;
+    rejectedTotalCount: number;
+  } {
+    const backendPageSize = 12;
+    if (!response) {
+      return {
+        items: [],
+        page: 1,
+        pageSize: backendPageSize,
+        totalCount: 0,
+        totalPages: 0,
+        pendingTotalCount: 0,
+        acceptedTotalCount: 0,
+        rejectedTotalCount: 0,
+      };
+    }
+
+    const pendingDtos: EventListItemDto[] = response.pending ?? response.Pending ?? [];
+    const acceptedDtos: EventListItemDto[] = response.accepted ?? response.Accepted ?? [];
+    const rejectedDtos: EventListItemDto[] = response.rejected ?? response.Rejected ?? [];
+    const pendingTotalCount = Number(response.pendingTotalCount ?? response.PendingTotalCount ?? 0);
+    const acceptedTotalCount = Number(response.acceptedTotalCount ?? response.AcceptedTotalCount ?? 0);
+    const rejectedTotalCount = Number(response.rejectedTotalCount ?? response.RejectedTotalCount ?? 0);
+    const resPage = Number(response.page ?? response.Page ?? page);
+
+    const mapArr = (arr: EventListItemDto[]) => arr.map((dto) => this.mapToEvent(dto));
+
+    const single = statuses.length === 1 ? statuses[0] : null;
+
+    let items: EventItem[];
+    if (single === 0) items = mapArr(pendingDtos);
+    else if (single === 1) items = mapArr(acceptedDtos);
+    else if (single === 2) items = mapArr(rejectedDtos);
+    else items = [...mapArr(pendingDtos), ...mapArr(rejectedDtos), ...mapArr(acceptedDtos)];
+
+    let totalCount: number;
+    let totalPages: number;
+    if (single === 0) {
+      totalCount = pendingTotalCount;
+      totalPages = Math.ceil(pendingTotalCount / backendPageSize) || 0;
+    } else if (single === 1) {
+      totalCount = acceptedTotalCount;
+      totalPages = Math.ceil(acceptedTotalCount / backendPageSize) || 0;
+    } else if (single === 2) {
+      totalCount = rejectedTotalCount;
+      totalPages = Math.ceil(rejectedTotalCount / backendPageSize) || 0;
+    } else {
+      totalCount = pendingTotalCount + acceptedTotalCount + rejectedTotalCount;
+      totalPages = Math.max(
+        Math.ceil(pendingTotalCount / backendPageSize),
+        Math.ceil(acceptedTotalCount / backendPageSize),
+        Math.ceil(rejectedTotalCount / backendPageSize),
+      );
+    }
+
+    return {
+      items,
+      page: resPage,
+      pageSize: backendPageSize,
+      totalCount,
+      totalPages,
+      pendingTotalCount,
+      acceptedTotalCount,
+      rejectedTotalCount,
+    };
+  }
+
+  /**
+   * GSB paneli "Tümü": GET /api/Events/gsb/all — tek birleşik sayfalı liste.
+   * Yanıt: page, pageSize, totalCount, totalPages, pendingCount, revisedCount, acceptedCount, items.
+   */
+  getGsbEventsAllPage(
+    page: number,
+    pageSize: number,
+  ): Observable<{
+    items: EventItem[];
+    page: number;
+    pageSize: number;
+    totalCount: number;
+    totalPages: number;
+    pendingTotalCount: number;
+    acceptedTotalCount: number;
+    rejectedTotalCount: number;
+  }> {
+    const empty = {
+      items: [] as EventItem[],
+      page: Math.max(1, page),
+      pageSize,
+      totalCount: 0,
+      totalPages: 0,
+      pendingTotalCount: 0,
+      acceptedTotalCount: 0,
+      rejectedTotalCount: 0,
+    };
+    const params = new HttpParams().set('page', String(page)).set('pageSize', String(pageSize));
+    return this.http.get<any>(`${this.apiUrl}/gsb/all`, { params }).pipe(
+      map((r: any) => {
+        if (!r) return empty;
+        const rawItems: EventListItemDto[] = r.items ?? r.Items ?? [];
+        const items = rawItems.map((dto) => this.mapToEvent(dto));
+        return {
+          items,
+          page: Number(r.page ?? r.Page ?? page),
+          pageSize: Number(r.pageSize ?? r.PageSize ?? pageSize),
+          totalCount: Number(r.totalCount ?? r.TotalCount ?? 0),
+          totalPages: Number(r.totalPages ?? r.TotalPages ?? 0),
+          pendingTotalCount: Number(r.pendingCount ?? r.PendingCount ?? 0),
+          rejectedTotalCount: Number(r.revisedCount ?? r.RevisedCount ?? 0),
+          acceptedTotalCount: Number(r.acceptedCount ?? r.AcceptedCount ?? 0),
+        };
+      }),
+      catchError(() => of(empty)),
+    );
+  }
+
+  /** Excel vb.: Tümü → GET /gsb/all sayfaları; diğer durumlar → /status. */
+  getByStatusAll(statuses: number[], search?: string | null): Observable<EventItem[]> {
+    const set = new Set(statuses);
+    const isTumu = set.size === 3 && set.has(0) && set.has(1) && set.has(2);
+    const exportBatchSize = 100;
+
+    const pipeline: Observable<EventItem[]> = isTumu
+      ? this.getGsbEventsAllPage(1, exportBatchSize).pipe(
+          expand((res) => {
+            if (res.totalPages <= 0 || res.page >= res.totalPages) return EMPTY;
+            return this.getGsbEventsAllPage(res.page + 1, exportBatchSize);
+          }),
+          reduce((acc: EventItem[], res) => [...acc, ...res.items], [] as EventItem[]),
+        )
+      : this.getGsbEventsStatusPage(1, 12, statuses).pipe(
+          expand((res) => {
+            if (res.totalPages <= 0 || res.page >= res.totalPages) return EMPTY;
+            return this.getGsbEventsStatusPage(res.page + 1, 12, statuses);
+          }),
+          reduce((acc: EventItem[], res) => [...acc, ...res.items], [] as EventItem[]),
+        );
+
+    return pipeline.pipe(
+      map((items) => {
+        const q = search?.trim().toLowerCase();
+        if (!q) return items;
+        return items.filter(
+          (e) =>
+            (e.title && e.title.toLowerCase().includes(q)) ||
+            (e.communityName && e.communityName.toLowerCase().includes(q)) ||
+            (e.description && e.description.toLowerCase().includes(q)) ||
+            (e.location && e.location.toLowerCase().includes(q)) ||
+            (e.shortDescription && e.shortDescription.toLowerCase().includes(q)),
+        );
+      }),
+      catchError(() => of([])),
     );
   }
 
   getByStatus(statuses: number[]): Observable<EventItem[]> {
-    return this.getByStatusPagedResponse(1, 10000, statuses).pipe(
-      map((res) => res.items),
-      catchError(() => of([])),
-    );
+    return this.getByStatusAll(statuses);
   }
 
   // Topluluk bazlı etkinlikleri getir (Backend: GET /api/Events/community/{communityId}/events?status=0&status=1&status=2)
